@@ -271,6 +271,34 @@ public abstract class BaseServiceTest {
         return procDTO;
     }
 
+    /**
+     * Construct dummy mailbox DTO for testing.
+     *
+     * @param uniqueValue
+     * @return
+     * @throws IOException
+     */
+    public AddProcessorToMailboxRequestDTO constructHttpProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) throws IOException {
+
+        AddProcessorToMailboxRequestDTO procRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorDTO procDTO = setHttpProcessorDTO(mailboxGuid, mbxDTO);
+        constructHttpProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
+    private ProcessorDTO setHttpProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) {
+
+        ProcessorDTO procDTO = new ProcessorDTO();
+        procDTO.setMailboxName(mbxDTO.getName());
+        procDTO.setLinkedMailboxId(mailboxGuid);
+        procDTO.setName("testProcessor" + System.currentTimeMillis());
+        procDTO.setStatus("ACTIVE");
+        procDTO.setType("HTTPASYNCPROCESSOR");
+        procDTO.setProtocol("HTTP");
+        return procDTO;
+    }
+
     private void constructProcessorProperties(ProcessorDTO procDTO) throws IOException {
 
         ProcessorPropertyUITemplateDTO propDTO = new ProcessorPropertyUITemplateDTO();
@@ -287,6 +315,43 @@ public abstract class BaseServiceTest {
         propDTO.setFolderProperties(folderProperties);
         propDTO.setCredentialProperties(procCredentialPropDTO);
         procDTO.setProcessorPropertiesInTemplateJson(propDTO);
+    }
+
+    private void constructHttpProcessorProperties(ProcessorDTO procDTO) throws IOException {
+
+        ProcessorPropertyUITemplateDTO propDTO = new ProcessorPropertyUITemplateDTO();
+        List<ProcessorPropertyDTO> staticProperties = new ArrayList<ProcessorPropertyDTO>();
+        List<ProcessorFolderPropertyDTO> folderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
+        List<ProcessorCredentialPropertyDTO> procCredentialPropDTO = new ArrayList<ProcessorCredentialPropertyDTO>();
+        setValidationRules();
+        ProcessorPropertyDTO procURLPropDTO = setProcessorHttpURLPropertyDTO();
+        ProcessorFolderPropertyDTO procFolderPropDTO = setProcessorFolderPropertyDTO();
+        setProcessorCredentialPropertyDTO();
+        folderProperties.add(procFolderPropDTO);
+        staticProperties.add(procURLPropDTO);
+        propDTO.setStaticProperties(staticProperties);
+        propDTO.setFolderProperties(folderProperties);
+        propDTO.setCredentialProperties(procCredentialPropDTO);
+        procDTO.setProcessorPropertiesInTemplateJson(propDTO);
+    }
+
+    private ProcessorPropertyDTO setProcessorHttpURLPropertyDTO() {
+
+        List<String> options = new ArrayList<String>();
+        options.add("false");
+        options.add("true");
+        ProcessorPropertyDTO procPropDTO = new ProcessorPropertyDTO();
+        procPropDTO.setName("lensVisibility");
+        procPropDTO.setDisplayName("LENS Visibility");
+        procPropDTO.setType("select");
+        procPropDTO.setValue("Invisible");
+        procPropDTO.setMandatory(true);
+        procPropDTO.setDynamic(false);
+        procPropDTO.setValueProvided(false);
+        procPropDTO.setDefaultValue("Invisible");
+        procPropDTO.setValidationRules(null);
+        procPropDTO.setOptions(options);
+        return procPropDTO;
     }
 
     private ProcessorPropertyDTO setProcessorURLPropertyDTO(ValidationRulesDTO validationRules) {
