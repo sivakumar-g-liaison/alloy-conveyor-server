@@ -20,6 +20,7 @@ apply plugin: 'flyway'
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
 apply plugin: 'rebel'
 apply plugin: 'license'
+apply plugin: 'jacoco'
 
 
 // set base name (impacts war name and context path)
@@ -632,6 +633,21 @@ task pingTest {
 	dependsOn 'test'
 }
 
+test {
+	jacoco {
+		append = false
+		destinationFile = file("${buildDir}/jacoco/jacocoTest.exec")
+		classDumpFile = file("${buildDir}/jacoco/classpathdumps")
+	}
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled false
+		csv.enabled false
+		html.destination "${buildDir}/jacocoHtml"
+	}
+}
 
 
 // override flywayClean
