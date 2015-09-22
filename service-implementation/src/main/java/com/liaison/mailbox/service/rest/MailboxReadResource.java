@@ -47,8 +47,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  */
 @AppConfigurationResource
-@Path("config/mailbox/{type}/{pguid}")
-@Api(value = "config/mailbox/{type}/{pguid}", description = "Gateway for the entity read service.")
+@Path("config/mailbox/read/{type}/{pguid}")
+@Api(value = "config/mailbox/read/{type}/{pguid}", description = "Gateway for the entity read service.")
 public class MailboxReadResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxReadResource.class);
