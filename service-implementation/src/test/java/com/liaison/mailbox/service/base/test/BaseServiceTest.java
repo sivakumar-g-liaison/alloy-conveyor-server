@@ -417,18 +417,18 @@ public abstract class BaseServiceTest {
         validationRules.setMinLength("");
         return validationRules;
     }
-
+    
     /**
      * Construct dummy profile DTO for testing.
-     *
+     * 
      * @param uniqueValue
      * @return profileDTO
      */
     public ProfileDTO constructDummyProfileDTO(Long uniqueValue) {
-
-       ProfileDTO profileDTO = new ProfileDTO();
-       profileDTO.setName("PROFILE_TEST" + uniqueValue);
-       return profileDTO;
+    	
+    	ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setName("PROFILE_TEST" + uniqueValue);
+		return profileDTO;
     }
 
 }

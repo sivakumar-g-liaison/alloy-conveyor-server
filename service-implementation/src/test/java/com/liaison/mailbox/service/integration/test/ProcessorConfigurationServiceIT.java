@@ -52,6 +52,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @BeforeMethod
     public void setUp() throws Exception {
+    	System.setProperty("com.liaison.secure.properties.path", "invalid");
         System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
         System.setProperty("archaius.deployment.environment", "test");
         InitInitialDualDBContext.init();
@@ -59,6 +60,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with valid data.
+     * @throws MailBoxConfigurationServicesException
      *
      * @throws LiaisonException
      * @throws JSONException
@@ -73,10 +75,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateandReadProcessor()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+	public void testCreateandReadProcessorUsingPguid()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1461,5 +1462,34 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         // Assertion
         Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
         Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+
+    /**
+     * Method constructs Processor with valid data.
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+	public void testCreateandReadProcessorUsingInvalidPguid()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
+
     }
 }

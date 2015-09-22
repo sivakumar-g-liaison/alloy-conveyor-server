@@ -208,4 +208,84 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 
 	}
 
+	/**
+	 * Retrieve the profile based on the name.
+	 * 
+	 * @param name
+	 * @return The GetProfileResponseDTO.
+	 */
+	public GetProfileResponseDTO getProfileByName(String name) {
+
+		LOG.debug("Entering into get profile by name.");
+		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
+		ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+
+		try {
+
+			ScheduleProfilesRef profile = configDao.findProfileByName(name);
+			if (null != profile) {
+
+				ProfileDTO profileDTO = new ProfileDTO();
+				profileDTO.copyFromEntity(profile);
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfile(profileDTO);
+			} else {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE,
+						Response.Status.BAD_REQUEST);
+			}
+
+			LOG.debug("Exiting from get profile by name operation.");
+
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
+
+			return serviceResponse;
+		}
+	}
+
+	/**
+	 * Retrieve the profile based on the guid.
+	 * 
+	 * @param guid
+	 * @return The GetProfileResponseDTO.
+	 */
+	public GetProfileResponseDTO getProfileByGuid(String guid) {
+
+		LOG.debug("Entering into get profile by guid.");
+		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
+		ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+
+		try {
+
+			ScheduleProfilesRef profile = configDao.find(ScheduleProfilesRef.class, guid);
+			if (null != profile) {
+
+				ProfileDTO profileDTO = new ProfileDTO();
+				profileDTO.copyFromEntity(profile);
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfile(profileDTO);
+			} else {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE,
+						Response.Status.BAD_REQUEST);
+			}
+
+			LOG.debug("Exiting from get profile by guid operation.");
+
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
+
+			return serviceResponse;
+		}
+	}
+
 }

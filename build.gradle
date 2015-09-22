@@ -73,6 +73,14 @@ allprojects {
              resolutionStrategy {
                 force 'com.netflix.eureka:eureka-client:1.1.159'
             }
+
+            // force the version of transient dependencies for the entire project
+         	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+	             //javassist:javassist:3.12.1.GA to org.javassist:javassist:3.18.1-GA
+	             if(details.requested.group == 'javassist'){
+	                 details.useTarget 'org.javassist:javassist:3.18.1-GA'
+	             }
+         	}
         }
     }    
 }
