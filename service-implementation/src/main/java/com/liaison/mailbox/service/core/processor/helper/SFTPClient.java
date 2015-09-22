@@ -11,21 +11,13 @@ package com.liaison.mailbox.service.core.processor.helper;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jettison.json.JSONException;
 
-import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
@@ -139,9 +131,7 @@ public class SFTPClient {
 
 			return sftpRequest;
 		} catch (JAXBException | IOException | LiaisonException | MailBoxServicesException
-				| SymmetricAlgorithmException | CertificateEncodingException | UnrecoverableKeyException
-				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException | JSONException
-				| CMSException | BootstrapingFailedException | IllegalAccessException | NoSuchFieldException e) {
+				| SymmetricAlgorithmException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

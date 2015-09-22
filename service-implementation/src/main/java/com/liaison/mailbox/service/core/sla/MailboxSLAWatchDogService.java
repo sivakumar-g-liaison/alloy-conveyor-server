@@ -39,12 +39,12 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -316,7 +316,7 @@ public class MailboxSLAWatchDogService {
 			emailSubject = (isCustomerSLA)
 					? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					: String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
-            EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
+					EmailNotifier.sendEmail(processor, emailSubject, emailSubject, true);
 			log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 			return;
 		}
@@ -332,7 +332,7 @@ public class MailboxSLAWatchDogService {
 					emailSubject = (isCustomerSLA)
 					        ? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					        : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
-	                EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
+					        EmailNotifier.sendEmail(processor, emailSubject, emailSubject, true);
 					log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 				}
 			}
@@ -394,7 +394,7 @@ public class MailboxSLAWatchDogService {
 				.append("\n\n")
 				.append("Files : ")
 				.append(StringUtils.join(files.toArray(), ","));
-			EmailUtil.sendEmail(processor, emailSubject, body.toString(), true);
+			EmailNotifier.sendEmail(processor, emailSubject, body.toString(), true);
 		}
 
 	}
@@ -472,7 +472,7 @@ public class MailboxSLAWatchDogService {
             // and the mailbox corresponding to this processor will not be considered for sla validation
             String emailSubject = null;
    			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
-   			EmailUtil.sendEmail(processor, emailSubject, e);
+   			EmailNotifier.sendEmail(processor, emailSubject, e);
         }
         return null;
 

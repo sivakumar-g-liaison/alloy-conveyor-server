@@ -14,19 +14,14 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
-import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
@@ -134,9 +129,8 @@ public class FTPSClient {
 
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException | CertificateException
-				| UnrecoverableKeyException | OperatorCreationException | KeyStoreException
-				| NoSuchAlgorithmException | JsonParseException | CMSException
-				| BootstrapingFailedException | JSONException | IllegalAccessException | NoSuchFieldException e) {
+				| KeyStoreException | NoSuchAlgorithmException | JsonParseException
+				| IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

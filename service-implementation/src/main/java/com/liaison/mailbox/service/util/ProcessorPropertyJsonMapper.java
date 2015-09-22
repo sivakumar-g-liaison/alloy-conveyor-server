@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -182,13 +183,10 @@ public class ProcessorPropertyJsonMapper {
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		try {
 			staticProcessorProperties = getProcessorBasedStaticProps(propertyJson);
+		} catch (JsonMappingException | JsonParseException | JAXBException e) {
 
-		} catch (JsonMappingException | JsonParseException e) {
-
-			RemoteProcessorPropertiesDTO leagcyProps = MailBoxUtil.unmarshalFromJSON(propertyJson,
-					RemoteProcessorPropertiesDTO.class);
-			staticProcessorProperties = getProcessorBasedStaticPropsFrmLegacyProps(processor.getProcessorType(),
-					protocol);
+			RemoteProcessorPropertiesDTO leagcyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
+			staticProcessorProperties = getProcessorBasedStaticPropsFrmLegacyProps(processor.getProcessorType(), protocol);
 			mapLegacyProps(leagcyProps, staticProcessorProperties);
 			handleDynamicProperties(staticProcessorProperties, processor);
 		}
@@ -201,14 +199,12 @@ public class ProcessorPropertyJsonMapper {
 	 *
 	 * @param propertyJson
 	 * @return The propertyJson is string of procsrProperties retrieved from db.
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
 
-	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson) throws IOException {
-		return JSONUtil.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
+	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson) throws JAXBException, IOException {
+		return JAXBUtility.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
 	}
 
 

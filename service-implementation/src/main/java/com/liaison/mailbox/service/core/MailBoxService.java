@@ -42,6 +42,7 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FileWriter;
@@ -53,7 +54,6 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.ProcessorQueue;
-import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -296,8 +296,8 @@ public class MailBoxService {
 			}
 
 			// send email to the configured mail id in case of failure
-			String emailSubject = EmailUtil.constructSubject(processor, false);
-			EmailUtil.sendEmail(processor, emailSubject, e);
+			String emailSubject = EmailNotifier.constructSubject(processor, false);
+			EmailNotifier.sendEmail(processor, emailSubject, e);
 
 		} catch (Exception e) {
 
@@ -320,7 +320,7 @@ public class MailBoxService {
 			}
 
 			// send email to the configured mail id in case of failure
-			EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
+			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 		}
 	}
 
@@ -448,7 +448,7 @@ public class MailBoxService {
             // send notification for successful file staging
             String emailSubject = workTicket.getFileName() + "' is available for pick up";
             String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
-            EmailUtil.sendEmail(processor, emailSubject, emailBody, true);
+            EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
             LOG.info("#################################################################");
 
         } catch (Exception e) {
@@ -481,7 +481,7 @@ public class MailBoxService {
             }
 
             // send email to the configured mail id in case of failure
-            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
+            EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
         }
 
