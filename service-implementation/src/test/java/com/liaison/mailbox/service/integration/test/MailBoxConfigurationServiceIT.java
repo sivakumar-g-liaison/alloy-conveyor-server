@@ -10,8 +10,13 @@
 
 package com.liaison.mailbox.service.integration.test;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonParseException;
@@ -24,16 +29,22 @@ import org.testng.annotations.Test;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -404,6 +415,44 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
         // Get the mailbox
         GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+    }
+
+    /**
+     * Method Get MailBox with valid data.
+     *
+     * @throws IOException
+     * @throws JAXBException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @throws MailBoxConfigurationServicesException
+     * @throws SymmetricAlgorithmException
+     *
+     */
+    @Test
+    public void testGetMailBoxWithAddConstraint()
+            throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+            IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), true, serviceInstanceId, aclManifest);
 
         // Assertion
         Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
@@ -842,17 +891,18 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
     /**
      * Method Deactivate MailBox with dummy guid Should fail.
      *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
      * @throws IOException
+     * @throws JAXBException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @throws MailBoxConfigurationServicesException
      * @throws SymmetricAlgorithmException
+     *
      */
     @Test
-    public void testDeactivateMailBoxwithDummyGuid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException, SymmetricAlgorithmException {
+    public void testDeactivateMailBoxwithDummyGuid()
+            throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+            IOException, SymmetricAlgorithmException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -879,4 +929,94 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
 
     }
+
+    /**
+     * Method Search MailBox with Valid scenario.
+     *
+     * @throws IOException
+     * @throws JAXBException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     *
+     */
+    @Test
+    public void testSearchMailBox()
+            throws JsonParseException, JsonMappingException, JAXBException, IOException {
+
+        // search the mailbox from the given details
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST");
+
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+    }
+
+    /**
+     * Method Search MailBox with Valid Profile name.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testSearchMailBoxWithProfile()
+            throws JsonParseException, JsonMappingException, JAXBException, IOException {
+
+        // search the mailbox from the given details
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setProfileName("test");
+
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+    }
+
+    /**
+     * Method read property file.
+     *
+     */
+    @Test
+    public void testReadPropertyFile() {
+
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+        GetPropertiesValueResponseDTO getPropResponseDTO = mailbox.readPropertiesFile();
+
+        Assert.assertEquals(SUCCESS, getPropResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(getPropResponseDTO.getResponse().getMessage(), Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY.value().replaceAll("%s", "Mailbox"));
+    }
+
+    /**
+     * Method Get file detail using mail box.
+     *
+     * @throws IOException
+     *
+     */
+    @Test
+    public void testgetFileDetail()
+            throws IOException {
+
+        String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString("processor.javascript.root.directory");
+        File file = new File(jsFileLocation);
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+        FileInfoDTO info = mailbox.getFileDetail(file);
+        List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
+        infos.add(info);
+
+        String response = MailBoxUtil.marshalToJSON(infos);
+        Response resp = Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
+        Assert.assertEquals(200, resp.getStatus());
+    }
+
 }
