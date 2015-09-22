@@ -689,6 +689,7 @@ task pingTest {
 
 test {
 	jacoco {
+		toolVersion = "0.7.5.201505241946"
 		append = false
 		destinationFile = file("${buildDir}/jacoco/jacocoTest.exec")
 		classDumpFile = file("${buildDir}/jacoco/classpathdumps")
