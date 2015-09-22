@@ -85,7 +85,7 @@ public abstract class BaseServiceTest {
 			setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
 			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
             System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
-            System.setProperty("com.liaison.secure.properties.path", prop.getProperty("SECURE_URL"));
+            //System.setProperty("com.liaison.secure.properties.path", prop.getProperty("SECURE_URL"));
 			// close the stream
 			is.close();
 		}
