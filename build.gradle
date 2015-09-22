@@ -36,6 +36,12 @@ allprojects {
         }
     }
 
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = "0.7.5.201505241946"
+        reportsDir = file("${buildDir}/reports/jacoco")
+    }
+
     group = 'com.liaison.commons.mailbox'
 		
 	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
