@@ -29,8 +29,8 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
+import com.liaison.dto.enums.EntityStatus;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -85,6 +85,7 @@ public abstract class BaseServiceTest {
 			setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
 			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
             System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
+            //System.setProperty("com.liaison.secure.properties.path", prop.getProperty("SECURE_URL"));
 			// close the stream
 			is.close();
 		}
@@ -417,15 +418,15 @@ public abstract class BaseServiceTest {
         validationRules.setMinLength("");
         return validationRules;
     }
-    
+
     /**
      * Construct dummy profile DTO for testing.
-     * 
+     *
      * @param uniqueValue
      * @return profileDTO
      */
     public ProfileDTO constructDummyProfileDTO(Long uniqueValue) {
-    	
+
     	ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setName("PROFILE_TEST" + uniqueValue);
 		return profileDTO;

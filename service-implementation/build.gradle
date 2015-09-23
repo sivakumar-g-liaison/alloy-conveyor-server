@@ -487,7 +487,61 @@ task jettyRunSetProperties {
  }
  }*/
 
+//Soap UI test and integration tests
+test.doFirst {
+    logger.info 'Unit Tests'
+    description = 'Just unit tests, out of container'
 
+    useTestNG () {
+        if (testIncludeGroups) {
+            includeGroups "$testIncludeGroups".split()
+        }
+
+        if (testExcludeGroups) {
+            excludeGroups "$testExcludeGroups".split()
+        }
+    }
+    exclude '**/JavascriptExecutorTest.class'
+    exclude '**/DropboxIntegrationServiceTest.class'
+    exclude '**/KeyManagerIntegrationServiceTest.class'
+    exclude '**/MailBoxConfigurationServiceTest.class'
+    exclude '**/MailBoxProcessorServiceTest.class'
+    exclude '**/StorageUtilitiesTest.class'
+    exclude '**/JavaScriptEngineUtilTest.class'
+    exclude '**/MailBoxSLAWatchDogServiceTest.class'
+    exclude '**/MailBoxServiceTest.class'
+    exclude '**/MailBoxProfileServiceTest.class'
+    exclude '**/MailBoxAdminServiceTest.class'
+    exclude '**/RemoteProcessorTest.class'
+    include '**/*Test.class'
+}
+
+task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], group:'Verification') {
+    description = 'Integration tests, out of container (with database dependency)'
+    logger.info 'Integration Tests'
+    useTestNG()
+    include '**/*IT.class'
+
+    // workaround for Java7 and Cobutura/Emma instrumentation problem
+    jvmArgs += "-XX:-UseSplitVerifier"
+
+    jvmArgs += "-Darchaius.deployment.applicationId=${project.war.baseName}"
+    jvmArgs += "-Darchaius.deployment.environment=${deployEnvironment}"
+
+    // if containerDebug, append tomcat debug args to jvm args
+    if(project.hasProperty('containerDebug')) {
+        jvmArgs += '-Xdebug'
+        if (project.hasProperty('debugSuspend')) {
+            jvmArgs += "-Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=y"
+        } else {
+            jvmArgs += "-Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=n"
+        }
+    }
+
+    sourceSets.test.runtimeClasspath += files("${projectDir}/src/main/resources")
+
+    ignoreFailures true
+}
 
 /*// JPA (datanucleus) bytecode enhancement
 task enhance()  << {
