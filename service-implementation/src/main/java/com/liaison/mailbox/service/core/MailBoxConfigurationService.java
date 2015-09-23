@@ -130,6 +130,18 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(mailBox);
 			mailBox.setPguid(MailBoxUtil.getGUID());
 
+			//Mailbox properties
+            MailBoxProperty property = null;
+            Set<MailBoxProperty> properties = new HashSet<>();
+            for (PropertyDTO propertyDTO : mailboxDTO.getProperties()) {
+
+                property = new MailBoxProperty();
+                property.setMailbox(mailBox);
+                propertyDTO.copyToEntity(property, true);
+                properties.add(property);
+            }
+            mailBox.getMailboxProperties().addAll(properties);
+
 			// retrieve the tenancy key from acl manifest
 			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
