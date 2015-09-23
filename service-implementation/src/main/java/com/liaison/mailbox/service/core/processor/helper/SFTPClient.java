@@ -9,7 +9,6 @@
  */
 package com.liaison.mailbox.service.core.processor.helper;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.ws.rs.core.Response;
@@ -35,7 +34,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Helper class to construct SFTP request
- * 
+ *
  * @author OFS
  */
 public class SFTPClient {
@@ -117,15 +116,7 @@ public class SFTPClient {
 				if (privateKeyStream == null) {
 					throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
 				}
-
-				String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString(
-						"ssh.private.key.temp.location")
-						+ sshKeyPairCredential.getCredsIdpUri() + ".txt";
-				// write to a file
-				try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
-					out.write(privateKeyStream);
-				}
-				sftpRequest.setPrivateKeyPath(privateKeyPath);
+				sftpRequest.setPrivateKey(privateKeyStream);
 
 			}
 
