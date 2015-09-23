@@ -1,6 +1,6 @@
 2.4.0-SNAPSHOT
 -------------------------------
-
+* GMB-617 - Properties are not saved during mailbox creation
 2.3.4
 -------------------------------
 * GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter

@@ -361,6 +361,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method to check to fail creation of MailBox with Existing Mailbox Should fail.
+     * @throws MailBoxConfigurationServicesException 
      *
      * @throws LiaisonException
      * @throws JSONException
@@ -371,18 +372,25 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
      * @throws SymmetricAlgorithmException
      */
 	@Test
-	public void testCreateMailBoxWithExistingMailbox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException, IOException, SymmetricAlgorithmException {
+	public void testCreateMailBoxWithExistingMailbox() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		// Adding the mailbox
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-		mbxDTO.setName("MBX_TEST1441230467303");
-		mbxDTO.setTenancyKey("G2_DEV_INT_MONIKER");
 		requestDTO.setMailBox(mbxDTO);
 
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
-		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, null);
+		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+		// Adding the mailbox
+		requestDTO = new AddMailboxRequestDTO();
+		MailBoxDTO addMbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		addMbxDTO.setName(mbxDTO.getName());
+		requestDTO.setMailBox(addMbxDTO);
+
+		response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
 
 		Assert.assertEquals(FAILURE, response.getResponse().getStatus());
 
@@ -729,24 +737,17 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
-        // Get the mailbox
-        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+        // Adding the mailbox number 2
+        MailBoxDTO secondMailbox = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(secondMailbox);
+
+        AddMailBoxResponseDTO secondResponse = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        Assert.assertEquals(SUCCESS, secondResponse.getResponse().getStatus());
 
         ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
-        mbxDTO.setName("MBX_TEST1441230467303");
-        mbxDTO.setDescription("RevisedMailBox Desc");
-        mbxDTO.setStatus("INACTIVE");
-        mbxDTO.setShardKey("RevisedShard");
-        mbxDTO.setTenancyKey("G2_DEV_INT_MONIKER");
-        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        mbxDTO.setName(secondMailbox.getName());
+        mbxDTO.setGuid(response.getMailBox().getGuid());
         reviseRequestDTO.setMailBox(mbxDTO);
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-        Assert.assertNotEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
-        Assert.assertNotEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
-        Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
-        Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
 
         ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
 
