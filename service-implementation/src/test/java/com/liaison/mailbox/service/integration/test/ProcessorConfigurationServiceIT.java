@@ -33,6 +33,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
@@ -1345,14 +1346,19 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search MailBox by name
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
      *
      */
     @Test
-    public void testgetMailBoxNames() {
-
+    public void testGetMailBoxNames() {
+    	
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-        searchFilter.setMbxName("MBX_TEST1442825541687");
+        searchFilter.setMbxName("MBX_TEST");
         SearchProcessorResponseDTO serviceResponse = processor.getMailBoxNames(searchFilter);
 
         // Assertion
@@ -1384,9 +1390,19 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
     @Test
     public void testgetProfileNames() {
 
+    	//Adding a profile
+		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
+		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+		requestDTO.setProfile(profileDTO);
+
+		ProfileConfigurationService service = new ProfileConfigurationService();
+		AddProfileResponseDTO response = service.createProfile(requestDTO);
+
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-        searchFilter.setProfileName("testinng");
+        searchFilter.setProfileName(profileDTO.getName());
         SearchProcessorResponseDTO serviceResponse = processor.getProfileNames(searchFilter);
 
         // Assertion
