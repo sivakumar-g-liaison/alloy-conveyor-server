@@ -1,6 +1,9 @@
 2.4.0-SNAPSHOT
 -------------------------------
 * GMB-617 - Properties are not saved during mailbox creation
+* GCL-57 :Add a provision in the G2SFTP client to use private key string which is retrieved from KMS instead of filepath
+* GMB-598 : Mailbox name should be case insensitive and disable filter button should show up while loading mailboxes
+* Mailbox refinements for Email Util and JSON marshaling done using JAXBUtility
 2.3.4
 -------------------------------
 * GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter

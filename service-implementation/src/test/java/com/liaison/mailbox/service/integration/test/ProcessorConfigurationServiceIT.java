@@ -3,6 +3,7 @@ package com.liaison.mailbox.service.integration.test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -17,11 +18,13 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
@@ -34,6 +37,8 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcesso
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -55,7 +60,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with valid data.
-     * @throws MailBoxConfigurationServicesException 
+     * @throws MailBoxConfigurationServicesException
      *
      * @throws LiaisonException
      * @throws JSONException
@@ -70,7 +75,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      * @throws IllegalArgumentException
      */
     @Test
-	public void testCreateandReadProcessor()
+	public void testCreateandReadProcessorUsingPguid()
 			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
 			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
@@ -98,6 +103,35 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+
+    }
+
+    /**
+     * Method constructs Processor with valid data.
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+    public void testCreateandReadProcessorUsingInvalidPguid()
+            throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+            IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
 
     }
 
@@ -1044,7 +1078,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      *
      */
     @Test
-    public void testInterruptRunningProcessor() {
+    public void testInterruptRunningProcessorWithProcessorNull() {
 
         ProcessorConfigurationService procConfigurationService = new ProcessorConfigurationService();
         InterruptExecutionEventResponseDTO interruptExecutionEventResponseDTO = procConfigurationService.interruptRunningProcessor(null);
@@ -1055,25 +1089,233 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
     }
 
     /**
-     * Method constructs Processor with valid data.
-     * @throws MailBoxConfigurationServicesException 
+     * Method Get Executing Processors With No Processor Available
      *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testCreateandReadProcessorUsingPguid()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testGetExecutingProcessorsWithNoProcessorAvail() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("READY", "2015-09-14 12:48:32", "2015-09-15 12:48:32");
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_PROCESSORS_AVAIL.value()));
+    }
+
+    /**
+     * Method Get Executing Processors With Invalid Status
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithInvalidStatus() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("ACTIVE", "2015-09-14 12:48:32", "2015-09-15 12:48:32");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.INVALID_PROCESSOR_STATUS.value()));
+    }
+
+    /**
+     * Method Get Executing Processors With Empty Status
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyStatus() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("", "2020-09-14 12:48:32", "2015-09-14 12:48:32");
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Executing Processors With Empty Date
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyDate() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("READY", "", "");
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Executing Processors With Empty From Date
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyFromDate() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("READY", "", "2016-08-04 12:48:32");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Executing Processors With Empty To Date
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyToDate() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("READY", "2016-08-04 12:48:32", "");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Executing Processors With Empty Date And Status
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyFromDateToDateAndStatus() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("", "", "");
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Executing Processors With Empty From Date And Status
+     *
+     */
+    @Test
+    public void testGetExecutingProcessorsWithEmptyFromDateAndStatus() {
+
+        GetExecutingProcessorResponseDTO serviceResponse = null;
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        serviceResponse = new GetExecutingProcessorResponseDTO();
+
+        // get the list processors latest state yyyy-mm-dd hh:mm:ss
+        serviceResponse = processor.getExecutingProcessors("", "", "2016-08-04 12:48:32");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+    }
+
+    /**
+     * Method Get Http Listener Properties
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws MailBoxConfigurationServicesException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     *
+     */
+    @Test
+    public void testGetHttpListenerProperties() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
+                mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+
+        // Assertion
+        Assert.assertEquals("false", httpListenerProperties.get("lensVisibility"));
+        Assert.assertEquals("false", httpListenerProperties.get("securedPayload"));
+        Assert.assertEquals("false", httpListenerProperties.get("httpListenerAuthCheckRequired"));
+        Assert.assertEquals("5D9C3B487184426E9F9629EFEE7C5913", httpListenerProperties.get("SERVICE_INSTANCE_ID"));
+    }
+
+    /**
+     * Method Get Http Listener Properties With Empty From Date And Status
+     * @throws IOException
+     * @throws JAXBException
+     * @throws MailBoxConfigurationServicesException
+     *
+     */
+    @Test
+    public void testGetHttpListenerPropertiesWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        try {
+            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+        } catch (Exception e) {
+            Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Method Get Http Listener Properties With Other than HttpProcessor
+     * @throws IOException
+     * @throws JAXBException
+     * @throws MailBoxConfigurationServicesException
+     *
+     */
+    @Test
+    public void testGetHttpListenerPropertiesWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1090,45 +1332,129 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
 
-        // Get the processor
-        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procResponseDTO.getProcessor().getGuId());
-
         // Assertion
-        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
-        Assert.assertEquals(procRequestDTO.getProcessor().getName(), procGetResponseDTO.getProcessor().getName());
-        Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
-        Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
-        Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        try {
+            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+        } catch (Exception e) {
+            Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
+        }
     }
 
     /**
-     * Method constructs Processor with valid data.
-     * @throws MailBoxConfigurationServicesException 
+     * Method Search MailBox by name
      *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testCreateandReadProcessorUsingInvalidPguid()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testgetMailBoxNames() {
 
-        // Get the processor
-        GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid");
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST1442825541687");
+        SearchProcessorResponseDTO serviceResponse = processor.getMailBoxNames(searchFilter);
 
         // Assertion
-        Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX)));
+    }
 
+    /**
+     * Method Search MailBox by unavailable name
+     *
+     */
+    @Test
+    public void testgetMailBoxNamesWithUnavailableName()  {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST1442825541687test");
+        SearchProcessorResponseDTO serviceResponse = processor.getMailBoxNames(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX)));
+    }
+
+    /**
+     * Method Search Profile by name
+     *
+     */
+    @Test
+    public void testgetProfileNames() {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setProfileName("testinng");
+        SearchProcessorResponseDTO serviceResponse = processor.getProfileNames(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.PROFILE)));
+    }
+
+    /**
+     * Method Search Profile by unavailable name
+     *
+     */
+    @Test
+    public void testgetProfileNamesWithUnavailableName() {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setProfileName("MBX_TEST");
+        SearchProcessorResponseDTO serviceResponse = processor.getProfileNames(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.PROFILE)));
+    }
+
+    /**
+     * Method Search Processor by name
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     *
+     */
+    @Test
+    public void testSearchProcessor() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST");
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+
+    /**
+     * Method Search Processor by unavailable name
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     *
+     */
+    @Test
+    public void testSearchProcessorWithUnavailableMbxName() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setProfileName("MBX_TEST");
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
     }
 
 }

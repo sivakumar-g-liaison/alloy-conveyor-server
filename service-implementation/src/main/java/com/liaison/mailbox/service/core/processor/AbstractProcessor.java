@@ -743,8 +743,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		emailInfoDTO.setType(type);
 		emailInfoDTO.setToEmailAddrList(toEmailAddrList);
 
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(emailInfoDTO);
+		EmailNotifier.sendEmail(emailInfoDTO);
 	}
 
 	/**

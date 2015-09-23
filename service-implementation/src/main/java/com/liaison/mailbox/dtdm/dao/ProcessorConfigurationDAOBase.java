@@ -756,7 +756,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		boolean isFolderAvailable = false;
 		
 		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {			
-			predicateList.add(" processor.mailbox.mbxName like :" + MBX_NAME);
+			predicateList.add(" LOWER(processor.mailbox.mbxName) like :" + MBX_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
 			query.append(" inner join processor.folders folder ");
@@ -789,7 +789,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	public Query setParamsForProcessorSearchQuery(GenericSearchFilterDTO searchDTO, Query query) {
 		
         if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
-            query.setParameter(MBX_NAME, "%" + searchDTO.getMbxName() + "%");
+            query.setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%");
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
             query.setParameter(FOLDER_URI, "%" + searchDTO.getFolderPath() + "%");
