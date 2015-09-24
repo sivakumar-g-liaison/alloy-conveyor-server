@@ -5,6 +5,7 @@
 * GMB-598   - Mailbox name should be case insensitive and disable filter button should show up while loading mailboxes
 * GMB-616   - Mailbox Swagger is not working
 * Mailbox refinements for Email Util and JSON marshaling done using JAXBUtility
+
 2.3.4
 -------------------------------
 * GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter
