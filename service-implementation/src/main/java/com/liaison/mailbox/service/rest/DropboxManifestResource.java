@@ -205,9 +205,7 @@ public class DropboxManifestResource extends AuditedResource {
 	 */
 	@GET
 	@ApiOperation(value = "Get manifest", notes = "This function is used to get manifest from gem", position = 3, response = com.liaison.gem.service.dto.response.GetManifestResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "getManifest", required = true, paramType = "body") })
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
 	public Response getManifest(@Context final HttpServletRequest request) {
