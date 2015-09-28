@@ -487,7 +487,6 @@ task jettyRunSetProperties {
  }
  }*/
 
-//Soap UI test and integration tests
 test.doFirst {
     logger.info 'Unit Tests'
     description = 'Just unit tests, out of container'
@@ -513,7 +512,36 @@ test.doFirst {
     exclude '**/MailBoxProfileServiceTest.class'
     exclude '**/MailBoxAdminServiceTest.class'
     exclude '**/RemoteProcessorTest.class'
+	exclude '**/FS2ResourceTest.class'
+	exclude '**/HelloWorldResourceTest.class'
     include '**/*Test.class'
+}
+
+test {
+	jacoco {
+		append = false
+		destinationFile = file("${buildDir}/jacoco/jacocoTest.exec")
+		classDumpFile = file("${buildDir}/jacoco/classpathdumps")
+	}
+}
+
+task pingTest {
+	dependsOn 'clean'
+	dependsOn 'jettyRunWar'
+	dependsOn 'test'
+}
+
+jacoco {
+	toolVersion = "0.7.4.201502262128"
+	reportsDir = file("${buildDir}/reports/jacoco")
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled false
+		csv.enabled false
+		html.destination "${buildDir}/jacocoHtml"
+	}
 }
 
 task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], group:'Verification') {
@@ -674,35 +702,6 @@ import org.gradle.api.plugins.jetty.internal.Monitor
 		monitor.start();
 	}
 }
-
-test {
-	// TODO temp exclusion of j2ep
-	exclude '**/FS2ResourceTest.class'
-	exclude '**/HelloWorldResourceTest.class'}
-
-
-task pingTest {
-	dependsOn 'clean'
-	dependsOn 'jettyRunWar'
-	dependsOn 'test'
-}
-
-test {
-	jacoco {
-		append = false
-		destinationFile = file("${buildDir}/jacoco/jacocoTest.exec")
-		classDumpFile = file("${buildDir}/jacoco/classpathdumps")
-	}
-}
-
-jacocoTestReport {
-	reports {
-		xml.enabled false
-		csv.enabled false
-		html.destination "${buildDir}/jacocoHtml"
-	}
-}
-
 
 // override flywayClean
 flywayClean.doFirst() {
