@@ -5,6 +5,8 @@
 * GMB-598   - Mailbox name should be case insensitive and disable filter button should show up while loading mailboxes
 * GMB-616   - Mailbox Swagger is not working
 * Mailbox refinements for Email Util and JSON marshaling done using JAXBUtility
+* GMB-581 - updated lib_message_bus to 4.+
+* GMB-620 - Rename watchdog request in the Log to consumed from queue
 
 2.3.4
 -------------------------------
