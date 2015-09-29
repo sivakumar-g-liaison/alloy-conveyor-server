@@ -62,7 +62,7 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		state.copyToEntity(entity);
 		persist(entity);
 
-		LOGGER.info("The STATE of "+ executionId+" is "+ state.getExecutionState());
+		LOGGER.debug("The STATE of " + executionId + " is " + state.getExecutionState());
 	}
 
 	/**

@@ -62,14 +62,14 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
         try {
 
-            LOG.info("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
+            LOG.debug("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.COMPLETED);
             glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started");
 
             LOG.info(constructMessage("Start Run"));
-            LOG.info(constructMessage("JSON received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
+            LOG.info(constructMessage("Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
             long startTime = System.currentTimeMillis();
 
             // check if file Name is available in the payloadTicketRequest if so save the file with the
@@ -161,7 +161,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
             glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
-            LOG.info("#################################################################");
+            LOG.debug("#################################################################");
 
             long endTime = System.currentTimeMillis();
             LOG.info(constructMessage("Number of files processed 1"));

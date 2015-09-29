@@ -197,7 +197,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
             			String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
-            			LOGGER.info(constructMessage("JSON POSTED TO SB.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+            			LOGGER.info(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
 
             			// For glass logging

@@ -38,11 +38,11 @@ public class WatchDogInvoker implements Runnable {
 	@Override
 	public void run() {
 
-		logger.info("watchdog request:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
+		logger.info("Consumed workticket :" + request + " handed over to thread name:" + Thread.currentThread().getName() + " id:" + Thread.currentThread().getId());
 
 		getService().executeFileWriter(request);
 
-		logger.info("watchdog request:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
+		logger.info("Processed workticket :" + request + " and it is processed by thread name:" + Thread.currentThread().getName() + " id:" + Thread.currentThread().getId());
 		  try {
 			   ServiceBrokerToMailboxWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance().printExecutorDiagonostics();
 		  } catch(Exception e) {
