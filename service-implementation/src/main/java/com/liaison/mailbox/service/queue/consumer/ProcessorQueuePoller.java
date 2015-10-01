@@ -15,12 +15,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.liaison.commons.messagebus.client.ReceiveClient;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.mailbox.service.queue.ProcessorReceiveQueue;
+import com.liaison.mailbox.service.queue.ProcessorSendQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.queue.ProcessorQueue;
 
 /**
  *
@@ -61,7 +64,7 @@ public class ProcessorQueuePoller  {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = ProcessorQueue.getInstance().receiveMessage();
+                String message = ProcessorReceiveQueue.getInstance().receiveMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);                    
                     try {

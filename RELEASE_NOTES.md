@@ -1,3 +1,7 @@
+2.3.5
+-------------------------------
+* GQ-15 - patch for queue reconnect
+
 2.3.4
 -------------------------------
 * GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter
