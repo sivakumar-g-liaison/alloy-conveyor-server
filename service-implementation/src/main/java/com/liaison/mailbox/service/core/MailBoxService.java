@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.ProcessorQueue;
+import com.liaison.mailbox.service.queue.ProcessorSendQueue;
 import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -135,8 +135,8 @@ public class MailBoxService {
 
 			}
 
-			LOG.debug("ABOUT TO get ProcessorQueue Instance {}", (Object)messages.toArray(new String[messages.size()]));
-			ProcessorQueue.getInstance().sendMessages(messages.toArray(new String[messages.size()]));
+			LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object)messages.toArray(new String[messages.size()]));
+			ProcessorSendQueue.getInstance().sendMessages(messages.toArray(new String[messages.size()]));
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
 			return serviceResponse;
