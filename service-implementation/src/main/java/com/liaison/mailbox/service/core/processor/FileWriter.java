@@ -96,8 +96,23 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
                 }
 
-                //get local payload location from uploader/filewriter
-                processorPayloadLocation = getFileWriteLocation();
+                //TargetDirectory - From SB, Payload Location - Mailbox Filewriter
+                //Filewriter supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
+                //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
+                String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
+                if (MailBoxUtil.isEmpty(targetDirectory)) {
+                	processorPayloadLocation = getFileWriteLocation();
+                } else {
+
+                	String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
+                	if (!MailBoxUtil.isEmpty(mode)
+                			&& MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
+                		processorPayloadLocation = targetDirectory;
+                	} else {
+                		processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
+                	}
+                }
+
                 if (null == processorPayloadLocation) {
                     LOG.error(constructMessage("Global PID",
                             seperator,
