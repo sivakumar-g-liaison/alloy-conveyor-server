@@ -129,6 +129,10 @@ public interface MailBoxConstants {
 	public final static String KEY_FILE_PATH = "path";
 	public final static String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
 	public final static String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
+	public final static String KEY_TARGET_DIRECTORY = "targetDirectory";
+	public final static String KEY_TARGET_DIRECTORY_MODE = "targetDirectoryMode";
+
+	public final static String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
 	//GITURI
 	public static final String PROPERTY_GITLAB_ACTIVITY_PROJECT_ID = "com.liaison.gitlab.mailbox.script.project.id";

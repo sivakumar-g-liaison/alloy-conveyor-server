@@ -1,3 +1,7 @@
+2.3.6
+-------------------------------
+* GMB-633 - Modify the filewriter to support "targetDirectory" from the SB task script
+
 2.3.5
 -------------------------------
 * GQ-15 - patch for queue reconnect
