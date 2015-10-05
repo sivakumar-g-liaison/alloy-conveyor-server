@@ -9,6 +9,12 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+/**
+ * Data Transfer Object used to send the Mailbox Component verification Response.
+ *
+ * @author OFS
+ */
+
 public class ComponentVerificationDTO {
 
 	private String status;

@@ -89,8 +89,9 @@ public class ComponentVerificationService  {
 
 		// To verify the EDM Configuration
 		startTime = System.currentTimeMillis();
+		
 		try {
-
+			
 			ProcessorConfigurationDAOBase procConfigDAOBase = new ProcessorConfigurationDAOBase();
 			procConfigDAOBase.findAllActiveProcessors();
         	endTime = System.currentTimeMillis();
@@ -106,8 +107,9 @@ public class ComponentVerificationService  {
 
 		// To verify RTDM Configuration
 		startTime = System.currentTimeMillis();
+		
 		try {
-
+			
 			ProcessorExecutionStateDAOBase procExecDAOBase = new ProcessorExecutionStateDAOBase();
 			procExecDAOBase.findNonExecutingProcessors();
 			endTime = System.currentTimeMillis();
@@ -130,6 +132,7 @@ public class ComponentVerificationService  {
 	public void verifyFs2Configuration() throws Exception {
 
 		startTime = System.currentTimeMillis();
+		
 		try {
 
 			System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
@@ -150,6 +153,7 @@ public class ComponentVerificationService  {
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
 
 			PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+			
 			try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
 				String paylaod = new String(StreamUtil.streamToBytes(is));
@@ -173,14 +177,17 @@ public class ComponentVerificationService  {
 	public void verifyAclConfiguration() {
 
 		startTime = System.currentTimeMillis();
+		
 		try { 
+			
 			GEMACLClient aclclient = new GEMACLClient();
 			aclclient.getACLManifest();	
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_ACL, SUCCESS, "", elapsedTime);
 			logger.debug("Component: " + COMPONENT_NAME_ACL + ", Status : " + SUCCESS + ", ElapsedTime in milli seconds : " + elapsedTime );
-		} catch(Throwable t ) {
+		} catch (Throwable t ) {
+			
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_ACL, FAILURE, t.getMessage(), elapsedTime);
@@ -194,8 +201,9 @@ public class ComponentVerificationService  {
 	public void verifyBootStrapConfiguration() {
 
 		startTime = System.currentTimeMillis();
+		
 		try {
-
+			
              // read keystore from Bootstrap
              BootstrapRemoteKeystore.getDecryptedRemoteKeypairPassphrase().toCharArray();
              logger.debug("Loading keystore from Bootstrap");
@@ -204,7 +212,8 @@ public class ComponentVerificationService  {
          	 elapsedTime = calculateElapsedTime(startTime, endTime);
              constructComponentVerificationDTO(COMPONENT_NAME_BOOTSTRAP, SUCCESS,"", elapsedTime);
              logger.debug("Component: " + COMPONENT_NAME_BOOTSTRAP + ", Status : " + SUCCESS + ", ElapsedTime in milli seconds : " + elapsedTime );
-		} catch(Throwable t) {
+		} catch (Throwable t) {
+			
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_BOOTSTRAP, FAILURE, t.getMessage(), elapsedTime);
@@ -218,6 +227,7 @@ public class ComponentVerificationService  {
 	public void verifyEnvironmentConfiguration() {
 
 		startTime = System.currentTimeMillis();
+		
 		try {
 
 			//get the required deployment configurations
@@ -236,7 +246,8 @@ public class ComponentVerificationService  {
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_ENVIRONMENT, SUCCESS, sb.toString(), elapsedTime);
 			logger.debug("Component: " + COMPONENT_NAME_ENVIRONMENT + ", Status : " + SUCCESS + ", ElapsedTime in milli seconds : " + elapsedTime );
-		} catch(Throwable t) {
+		} catch (Throwable t) {
+			
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_ENVIRONMENT, FAILURE, t.getMessage(), elapsedTime);	
@@ -251,6 +262,7 @@ public class ComponentVerificationService  {
 	public void verifyVersionConfiguration() {
 
 		startTime = System.currentTimeMillis();
+		
 		try {
 
 			Version version = new Version();
@@ -259,6 +271,7 @@ public class ComponentVerificationService  {
 			constructComponentVerificationDTO(COMPONENT_NAME_VERSION, SUCCESS, version.getBuildId() + "::" + version.getVersionId(), elapsedTime );
 			logger.debug("Component: " + COMPONENT_NAME_VERSION + ", Status : " + SUCCESS + ", ElapsedTime in milli seconds : " + elapsedTime );
 		} catch (Throwable t) {
+			
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_VERSION, FAILURE, t.getMessage(), elapsedTime );
@@ -310,7 +323,7 @@ public class ComponentVerificationService  {
 	/**
 	 * This method is used to verify the thread status.
 	 */
-	public void verifyThreadStatus(){
+	public void verifyThreadStatus() {
 		  
 		  ThreadMXBean threadMXBean=ManagementFactory.getThreadMXBean();
 		  long threadIds[]=threadMXBean.getAllThreadIds();

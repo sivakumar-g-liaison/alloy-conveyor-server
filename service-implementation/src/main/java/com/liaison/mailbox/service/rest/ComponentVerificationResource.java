@@ -39,8 +39,8 @@ import com.netflix.servo.monitor.Stopwatch;
 import com.netflix.servo.stats.StatsConfig;
 
 /**
- * End point for verifying following components in SB : DB, FS2, ACL, Bootstrap,
- * Environment, Version, Queue
+ * Verifying following components in Mailbox : DB, FS2, ACL, Bootstrap,
+ * Environment and Version
  * 
  */
 @Path("/verifycomponent")
@@ -57,10 +57,12 @@ public class ComponentVerificationResource extends AuditedResource  {
             new StatsConfig.Builder().build());
 
     static {
+    	
         DefaultMonitorRegistry.getInstance().register(statsTimer);
     }
 
     public ComponentVerificationResource() {
+    	
         DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
     }
 
@@ -80,16 +82,13 @@ public class ComponentVerificationResource extends AuditedResource  {
 		};
 		worker.actionLabel = "ComponentVerificationResource.verifyComponents()";
 
-		// hand the delegate to the framework for calling
+		// handle the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
 		} catch (LiaisonAuditableRuntimeException e) {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-
-	// abstract method implementations
-	// =====================================================================
 
 	/**
 	 * Initial audit statement common to exports service requests.
@@ -99,6 +98,7 @@ public class ComponentVerificationResource extends AuditedResource  {
 	 */
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
 				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
@@ -107,16 +107,17 @@ public class ComponentVerificationResource extends AuditedResource  {
 
 	@Override
 	protected void beginMetricsCollection() {
+		
 		stopwatch = statsTimer.start();
 		int globalCount = globalServiceCallCounter.addAndGet(1);
 		logKPIMetric(globalCount, "Global_serviceCallCounter");
 		int serviceCount = serviceCallCounter.addAndGet(1);
 		logKPIMetric(serviceCount, "ComponentVerificationResource_serviceCallCounter");
-
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
+		
 		stopwatch.stop();
 		long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
 		globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
