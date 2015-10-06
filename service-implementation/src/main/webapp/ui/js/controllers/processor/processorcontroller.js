@@ -1227,7 +1227,8 @@ var rest = myApp.controller(
 			
 			$scope.sortProcessorFolders = function () {
 				 var reverse = ($scope.processorFoldersSortInfo.directions[0] === 'asc') ? false : true; 
-				 $scope.folderAddedToProcessor = $filter('orderBy')($scope.folderAddedToProcessor, $scope.processorFoldersSortInfo.fields[0], reverse);
+				 var fieldToBeSorted = ($scope.processorFoldersSortInfo.fields[0] === 'folderType') ? 'folderDisplayType' : $scope.processorFoldersSortInfo.fields[0];
+				 $scope.folderAddedToProcessor = $filter('orderBy')($scope.folderAddedToProcessor, fieldToBeSorted, reverse);
 			};
 			// Sort listener for Scripts grid
 			$scope.$watch('processorFoldersSortInfo.directions + processorFoldersSortInfo.fields', function (newVal, oldVal) {
