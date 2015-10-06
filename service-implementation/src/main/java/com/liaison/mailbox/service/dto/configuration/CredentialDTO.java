@@ -109,7 +109,7 @@ public class CredentialDTO {
 	 * @throws MailBoxConfigurationServicesException
 	 */
 
-	public void copyToEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
+	public void copyToEntity(Object entity) throws MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;
 		credential.setCredsIdpUri(this.getIdpURI());
@@ -139,14 +139,13 @@ public class CredentialDTO {
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public void copyFromEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
+	public void copyFromEntity(Object entity) throws MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;
 
 		this.setIdpURI(credential.getCredsIdpUri());
 
 		if (!MailBoxUtil.isEmpty(credential.getCredsPassword())) {
-
 			this.setPassword(credential.getCredsPassword());
 		}
 
