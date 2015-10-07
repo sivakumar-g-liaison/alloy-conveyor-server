@@ -145,7 +145,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			}
 
 			if (!folders.isEmpty()) {
-				processor.setFolders(folders);
+				processor.getFolders().addAll(folders);
 			}
 
 			// Setting the credentials
@@ -161,7 +161,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			}
 
 			if (!credentialList.isEmpty()) {
-				processor.setCredentials(credentialList);
+				processor.getCredentials().addAll(credentialList);
 			}
 
 			// Setting the property

@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorLegacyDTO;
 
 /**
  * Data Transfer Object that contains the fields required for processor revision.
@@ -23,11 +24,17 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 public class ReviseProcessorRequestDTO {
 
 	private ProcessorDTO processor;
+	private ProcessorLegacyDTO processorLegacy;
 
 	/**
 	 * @return the processor
 	 */
 	public ProcessorDTO getProcessor() {
+		
+		if (null == processor) {
+			return processorLegacy;
+		}
+			
 		return processor;
 	}
 
@@ -38,5 +45,22 @@ public class ReviseProcessorRequestDTO {
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
 	}
+
+	/**
+	 * @return processor
+	 */
+	public ProcessorLegacyDTO getProcessorLegacy() {
+		return processorLegacy;
+	}
+
+	/**
+	 * @param processorLegacy 
+	 * 				the processor to set
+	 */
+	public void setProcessorLegacy(ProcessorLegacyDTO processorLegacy) {
+		this.processorLegacy = processorLegacy;
+	}
+	
+	
     
 }
