@@ -61,9 +61,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
 
 	private String serviceInstanceId = "5D9C3B487184426E9F9629EFEE7C5913";
     private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
-    private String ftpURL = "10.146.16.11:21";
-    private String ftpsURL = "10.146.16.12:21";
-    private String sftpURL = "10.146.16.13:22";
+    private String ftpURL = "ftp://10.146.18.10:21";
+    private String ftpsURL = "ftps://10.146.18.15:21";
+    private String sftpURL = "sftp://10.146.18.20:22";
     private String password = "5E701F715FDE4162938F413FECF53910";
     private String ftpUserId = "ftp_user_dev-int";
     private String ftpsUserId = "ftps_user_dev-int";
@@ -152,9 +152,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	processorLegacy.setGuid(processorResponse.getProcessor().getGuId());
     	processorLegacy.setDescription("description modified");
     	processorLegacy.setName("Processor Modified" + System.currentTimeMillis());
-    	processorLegacy.setStatus(EntityStatus.INACTIVE.value());
+    	//processorLegacy.setStatus(EntityStatus.INACTIVE.value());
     	
-    	processorLegacy.getRemoteProcessorProperties().setConnectionTimeout(600000);
+    	processorLegacy.getRemoteProcessorProperties().setConnectionTimeout(60000);
     	processorLegacy.getRemoteProcessorProperties().setRetryAttempts(3);
     	processorReviseRequestDTO.setProcessorLegacy(processorLegacy);
     	ReviseProcessorResponseDTO processorReviseResponse =  processorService.reviseProcessor(processorReviseRequestDTO, response.getMailBox().getGuid(), processorResponse.getProcessor().getGuId());
@@ -176,9 +176,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	processorLegacyDTO.setProtocol(protocol);
     	processorLegacyDTO.setStatus(status);
     	processorLegacyDTO.setDescription("test description");
-    	processorLegacyDTO.setFolders(setFolderDetails(protocol));
+    	processorLegacyDTO.setFolders(setFolderDetails(protocol, type));
     	processorLegacyDTO.setCredentials(setCredentialDetails(protocol));
-    	processorLegacyDTO.setProfiles(setProfileDetails());
+    	processorLegacyDTO.setLinkedProfiles(setLinkedProfileDetails());
     	processorLegacyDTO.setRemoteProcessorProperties(constructLegacyProperties(type, protocol));
     	return processorLegacyDTO;
     	
@@ -191,13 +191,16 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	
     	case "ftp":
         	legacyProperties.setUrl(ftpURL);
+        	legacyProperties.setPort(21);
     		break;
     	case "ftps":
-    		legacyProperties.setUrl(ftpsURL);;
+    		legacyProperties.setUrl(ftpsURL);
+    		legacyProperties.setPort(22);
     		legacyProperties.setPassive(true);
     		break;
     	case "sftp":
     		legacyProperties.setUrl(sftpURL);
+    		legacyProperties.setPort(22);
     		break;
     	case "sweeper":
     		legacyProperties.setDeleteFileAfterSweep(true);
@@ -214,22 +217,46 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	return folderDTO;
     }
     
-    private Set<FolderDTO> setFolderDetails(String protocol) {
+    private Set<FolderDTO> setFolderDetails(String protocol, String type) {
     	
     	Set<FolderDTO> folders = new HashSet<>();
     	switch(protocol.toLowerCase()) {
     		
     		case "ftp":
-    			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/ftp/ftp_user_dev-int/inbox"));
-    			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/ftp/ftp_user_dev-int/outbox"));
+    			
+    			if (type.equals(ProcessorType.REMOTEDOWNLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/inbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/ftp/ftp_user_dev-int/outbox" ));
+    			} else if (type.equals(ProcessorType.REMOTEUPLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/ftp/ftp_user_dev-int/outbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/inbox" ));
+    			}  			
     			break;
     		case "ftps":
-    			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/ftps/ftps_user_dev-int/inbox"));
-    			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/ftps/ftps_user_dev-int/outbox"));
+    			
+    			if (type.equals(ProcessorType.REMOTEDOWNLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/inbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/ftps/ftps_user_dev-int/outbox" ));
+    			} else if (type.equals(ProcessorType.REMOTEUPLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/ftps/ftps_user_dev-int/outbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/inbox" ));
+    			}  			
     			break;
-    		case "sftp":	
-    			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/sftp/sftp_user_dev-int/inbox"));
-    			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/sftp/sftp_user_dev-int/outbox"));
+    		case "sftp":
+    			
+    			if (type.equals(ProcessorType.REMOTEDOWNLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/inbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/data/sftp/sftp_user_dev-int/outbox" ));
+    			} else if (type.equals(ProcessorType.REMOTEUPLOADER.getCode())) {
+    				
+        			folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/sftp/sftp_user_dev-int/outbox"));
+        			folders.add(constructDummyFolderDTO("RESPONSE_LOCATION", "/inbox" ));
+    			}  			
     			break;
     		case "sweeper":
         		folders.add(constructDummyFolderDTO("PAYLOAD_LOCATION", "/data/ftp/ftp_user_dev-int/inbox"));
@@ -271,9 +298,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	
     }
     
-    private List<ProfileDTO> setProfileDetails() {
+    private List<String> setLinkedProfileDetails() {
     	
-    	List<ProfileDTO> profiles = new ArrayList<>();
+    	List<String> profiles = new ArrayList<>();
     	
     	// create a profile
     	AddProfileRequestDTO profileRequest = new AddProfileRequestDTO();
@@ -284,7 +311,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	
-    	profiles.add(profile);
+    	profiles.add(profile.getName());
     	return profiles;
     	
     }
