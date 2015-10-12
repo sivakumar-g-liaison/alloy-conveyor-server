@@ -420,7 +420,7 @@ public class MailBoxService {
             fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
             //Initiate FSM Ends
 
-            MailBoxProcessorI processorService = new FileWriter(processor);
+            FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
                     processor.getProcessorType().name(),
