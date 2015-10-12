@@ -165,6 +165,8 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.N);
 		} else if (ExecutionState.STAGED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.G);
+		} else if (ExecutionState.DUPLICATE.value().equals(message.getStatus().value())) {
+			visibilityAPI.setStatus(StatusCode.U);
 		}
 
 		visibilityAPI.setId(message.getGlobalPId());
