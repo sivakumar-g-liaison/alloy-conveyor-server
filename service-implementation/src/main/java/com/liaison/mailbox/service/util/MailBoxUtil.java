@@ -10,11 +10,7 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -27,7 +23,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -234,39 +229,6 @@ public class MailBoxUtil {
 		}
 
 		return tenancyKeyDisplayName;
-	}
-
-	/**
-	 * method to write the given inputstream to given location
-	 *
-	 * @param response payload
-	 * @param targetLocation location to write the payload
-	 * @param filename file name 
-	 * @param isOverwrite whether to overwrite or not
-	 * @return true if it is successfully written the file to the location, otherwise false
-	 * @throws IOException
-	 */
-	public static boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, Boolean isOverwrite) throws IOException {
-
-		LOGGER.debug("Started writing given inputstream to given location {}", targetLocation);
-		File directory = new File(targetLocation);
-		if (!directory.exists()) {
-		    Path dirPath = directory.toPath();
-			Files.createDirectories(dirPath);
-		}
-
-		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-		// if the file already exists create a file and write the contents.
-		if (file.exists() && !isOverwrite) {
-			LOGGER.debug("File {} already exists and should not be overwritten", file.getName());
-			return false;
-		} else {
-			try (FileOutputStream outputStream = new FileOutputStream(file)) {
-				IOUtils.copy(response, outputStream);
-			}
-			LOGGER.debug("The given inputstream is successfully written to location {}", file.getAbsolutePath());
-			return true;
-		}
 	}
 
 	/**
