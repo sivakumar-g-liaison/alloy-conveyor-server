@@ -74,7 +74,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             // check if file Name is available in the payloadTicketRequest if so save the file with the
             // provided file Name if not save with processor Name with Timestamp
-            String fileName = (workTicket.getFileName() == null)
+            String fileName = MailBoxUtil.isEmpty(workTicket.getFileName())
                     ? (configurationInstance.getProcsrName() + System.nanoTime())
                     : workTicket.getFileName();
 
