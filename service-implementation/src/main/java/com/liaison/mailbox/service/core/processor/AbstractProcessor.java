@@ -863,24 +863,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		}
 
 		createFoldersAndAssingProperPermissions(filePathToCreate);
-		/*Files.createDirectories(filePathToCreate);
-		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
-		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
-		String group = getGroupFor(filePathToCreate.getName(1).toString());
-		LOGGER.debug("group  name - {}", group);
-		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
-
-		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox")
-		        || filePathToCreate.getFileName().toString().equals("outbox"))){
-
-			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
-			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
-			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
-			filePathToCreate = filePathToCreate.getParent();
-		 }
-
-		LOGGER.debug("Done setting group");*/
 	}
 
 	private String getGroupFor(String protocol) {

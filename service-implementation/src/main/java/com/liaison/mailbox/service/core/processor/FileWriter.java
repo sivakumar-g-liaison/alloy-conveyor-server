@@ -1,6 +1,7 @@
 package com.liaison.mailbox.service.core.processor;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
@@ -96,20 +98,23 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
                 }
 
-                //TargetDirectory - From SB, Payload Location - Mailbox Filewriter
-                //Filewriter supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
+                //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
                 //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
+                //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
                 String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
                 if (MailBoxUtil.isEmpty(targetDirectory)) {
                 	processorPayloadLocation = getFileWriteLocation();
+                	createPathIfNotAvailable(processorPayloadLocation);
                 } else {
 
                 	String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
                 	if (!MailBoxUtil.isEmpty(mode)
                 			&& MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
                 		processorPayloadLocation = targetDirectory;
+                		createPathIfNotAvailable(processorPayloadLocation);
                 	} else {
                 		processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
+                		createPathIfNotAvailable(processorPayloadLocation);
                 	}
                 }
 
@@ -122,7 +127,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
                 }
 
-                boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE) ? true : false;
+                String isOverwrite = String.valueOf(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE));
                 LOG.info(constructMessage("Global PID",
                         seperator,
                         workTicket.getGlobalProcessId(),
@@ -133,33 +138,34 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         fileName));
 
                 // write the payload retrieved from spectrum to the configured location of processor
-                writeStatus = MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-                if (!writeStatus) {
+                writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
+                if (writeStatus) {
 
                 	LOG.info(constructMessage("Global PID",
-                            seperator,
-                            workTicket.getGlobalProcessId(),
-                            seperator,
-                            "File {} already exists at {} and should not be overwritten "),
+                			seperator,
+                			workTicket.getGlobalProcessId(),
+                			seperator,
+                			"Payload is successfully written to ",
+                			processorPayloadLocation,
+                			seperator,
+                			fileName));
+
+                	//To add more details in staged file for filewriter
+                	if (ProcessorType.FILEWRITER.equals(processorType)) {
+                		workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
+                	}
+                } else {
+
+                	LOG.info(constructMessage("Global PID",
+                			seperator,
+                			workTicket.getGlobalProcessId(),
+                			seperator,
+                			"File {} already exists at {} and should not be overwritten"),
                 			fileName,
-                            processorPayloadLocation);
+                			processorPayloadLocation);
 
                 	//To aviod staged file entry
                 	workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
-                } else {
-	                LOG.info(constructMessage("Global PID",
-	                        seperator,
-	                        workTicket.getGlobalProcessId(),
-	                        seperator,
-	                        "Payload is successfully written to ",
-	                        processorPayloadLocation,
-	                        seperator,
-	                        fileName));
-
-	                //To add more details in staged file for filewriter
-	                if (ProcessorType.FILEWRITER.equals(processorType)) {
-	                	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
-	                }
                 }
             }
 
@@ -308,5 +314,44 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     @Override
     public void cleanup() {
     }
+
+    /**
+	 * method to write the given inputstream to given location
+	 *
+	 * @param response payload
+	 * @param targetLocation location to write the payload
+	 * @param filename file name 
+	 * @param isOverwrite whether to overwrite or not
+	 * @return true if it is successfully written the file to the location, otherwise false
+	 * @throws IOException
+	 */
+	public boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, String isOverwrite) throws IOException {
+
+		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
+
+		File file = new File(targetLocation + File.separatorChar + filename);
+
+		if (file.exists()) {
+			if (MailBoxConstants.OVERWRITE_FALSE.equalsIgnoreCase(isOverwrite)) {
+				return false;
+			} else if (MailBoxConstants.OVERWRITE_TRUE.equalsIgnoreCase(isOverwrite)) {
+				try (FileOutputStream outputStream = new FileOutputStream(file)) {
+					IOUtils.copy(response, outputStream);
+				}
+				return true;
+			} else {
+
+				StringBuilder message = new StringBuilder();
+				message.append("The file(").append(filename).append(") exists at the location - ").append(targetLocation);
+				throw new MailBoxServicesException(message.toString(), Response.Status.BAD_REQUEST);
+			}
+		} else {
+			try (FileOutputStream outputStream = new FileOutputStream(file)) {
+				IOUtils.copy(response, outputStream);
+			}
+			return true;
+		}
+
+	}
 
 }
