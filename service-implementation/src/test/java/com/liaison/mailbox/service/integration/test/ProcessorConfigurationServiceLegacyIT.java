@@ -86,7 +86,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test(enabled=false)
 	public void testCreateandReadProcessorUsingPguid() throws Exception {
 
         // Adding the mailbox
@@ -138,7 +138,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
      * @throws JAXBException
      * @throws IOException
      */
-    @Test
+    @Test(enabled=false)
     public void testCreateAndReviseProcessor() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
     	
     	// Adding Mailbox
