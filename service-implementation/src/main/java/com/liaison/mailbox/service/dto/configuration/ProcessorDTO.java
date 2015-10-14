@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -317,7 +316,7 @@ public class ProcessorDTO {
     		processor.setProcsrStatus(foundStatusType.value());
 
     		} catch (NoSuchFieldException | SecurityException
-    				| IllegalArgumentException | IllegalAccessException | JAXBException | IOException | SymmetricAlgorithmException e) {
+    				| IllegalArgumentException | IllegalAccessException | JAXBException | IOException e) {
     			LOGGER.error(e);
     			throw new MailBoxConfigurationServicesException("Revise Operation failed:" + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 
