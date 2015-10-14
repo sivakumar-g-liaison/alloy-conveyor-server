@@ -98,10 +98,24 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        //Adding Profile
+  		AddProfileRequestDTO profileRequestDTO = new AddProfileRequestDTO();
+  		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+  		profileRequestDTO.setProfile(profileDTO);
+  		
+  		ProfileConfigurationService profileService = new ProfileConfigurationService();
+  		AddProfileResponseDTO profileResponse = profileService.createProfile(profileRequestDTO);
+  		
+  		Assert.assertEquals(SUCCESS, profileResponse.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = MailBoxUtil.unmarshalFromJSON(ServiceUtils.readFileFromClassPath("requests/processor/create_processor_legacy.json"), AddProcessorToMailboxRequestDTO.class);
         procRequestDTO.getProcessorLegacy().setLinkedMailboxId(response.getMailBox().getGuid());
+        
+        List<String> profiles = new ArrayList<String>();
+        profiles.add(profileDTO.getName());
+        procRequestDTO.getProcessorLegacy().setLinkedProfiles(profiles);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
 
