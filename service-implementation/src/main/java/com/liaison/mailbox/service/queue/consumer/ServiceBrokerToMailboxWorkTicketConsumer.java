@@ -10,7 +10,8 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.core.sla.WatchDogInvoker;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
 
 /**
 *
@@ -34,8 +36,7 @@ public class ServiceBrokerToMailboxWorkTicketConsumer {
 		// defeat instantiation.
 	}
 
-	private  LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
-	private  MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(threadCount, threadCount,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
+	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ServiceBrokerToMailboxQueueExecutorPool", threadCount);
 
 	public void invokeWatchDog(String requestJSON) throws InterruptedException {
 		execSrvc.execute(new WatchDogInvoker(requestJSON));
@@ -43,11 +44,14 @@ public class ServiceBrokerToMailboxWorkTicketConsumer {
 	}
 
 	public void printExecutorDiagonostics(){
+
+		ThreadPoolExecutor executor = (ThreadPoolExecutor) execSrvc;
+
 		logger.info("************************************************************************************************");
-		logger.info("Number of tasks currently queued up and waiting for invocation {}",linkedBlockingQueue.size() );
-		logger.info("Number of threads in Executor that are active {}",execSrvc.getActiveCount() );
-		logger.info("Number of tasks  queued in total - from the time beginning {} ",execSrvc.getTaskCount() );
-		logger.info("Number of tasks  completed in total - from the time beginning {} ",execSrvc.getCompletedTaskCount() );
+		logger.info("Number of tasks currently queued up and waiting for invocation {}", executor.getQueue().size() );
+		logger.info("Number of threads in Executor that are active {}", executor.getActiveCount() );
+		logger.info("Number of tasks  queued in total - from the time beginning {} ", executor.getTaskCount() );
+		logger.info("Number of tasks  completed in total - from the time beginning {} ", executor.getCompletedTaskCount() );
 		logger.info("************************************************************************************************");
 	}
 

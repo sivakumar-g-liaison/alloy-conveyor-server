@@ -1,3 +1,7 @@
+2.4.0
+-------------------------------
+* GMB-641 - Updated executor service to use LiaisonExecutorServiceBuilder to create thread pool.
+
 2.3.6
 -------------------------------
 * GMB-633 - Modify the filewriter to support "targetDirectory" from the SB task script

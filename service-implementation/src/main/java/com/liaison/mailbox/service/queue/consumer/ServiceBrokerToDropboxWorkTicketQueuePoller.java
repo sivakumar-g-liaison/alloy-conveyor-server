@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
 
 /**
 *
@@ -33,9 +33,7 @@ public class ServiceBrokerToDropboxWorkTicketQueuePoller {
 
     private static final int POOL_SIZE = 1;
 
-    private static final ScheduledExecutorService pool = Executors.newScheduledThreadPool(POOL_SIZE);
-
-
+    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ServiceBrokerToDropboxPollerPool", POOL_SIZE);
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_DROPBOX_QUEUE_POLLER_INITIALDELAY = "com.liaison.dropboxQueue.queue.poller.initialdelay";
