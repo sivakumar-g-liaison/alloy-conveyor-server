@@ -34,6 +34,7 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -42,6 +43,7 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
@@ -418,7 +420,7 @@ public class MailBoxService {
             fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
             //Initiate FSM Ends
 
-            MailBoxProcessorI processorService = new FileWriter(processor);
+            FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
                     processor.getProcessorType().name(),
@@ -428,8 +430,17 @@ public class MailBoxService {
                     workTicket.getGlobalProcessId());
 
             processorService.runProcessor(workTicket, fsm);
-            transactionVisibilityClient.logToGlass(glassMessage);
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
+
+            //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
+            if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
+            	transactionVisibilityClient.logToGlass(glassMessage);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
+            } else {
+
+            	glassMessage.setStatus(ExecutionState.DUPLICATE);
+            	transactionVisibilityClient.logToGlass(glassMessage);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location");
+            }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
                     processor.getProcessorType().name(),
@@ -438,10 +449,21 @@ public class MailBoxService {
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
 
-            //check if the file already exists and not overwritten
+            //STAGED FILE TABLE UPDATE ONLY ON SUCCESSFULL FILE WRITE
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
-            	//persist staged file to get the gpid during uploader
+
             	StagedFileDAOBase dao = new StagedFileDAOBase();
+
+            	//THIS IS OVERWRITE TRUE CASE AND OLD FILE WILL BE OVERWRITTEN
+            	StagedFile stagedFile = dao.findStagedFilesOfUploadersBasedOnMeta(processor.getPguid(), workTicket.getFileName());
+            	//persist staged file to get the gpid during uploader
+            	if (null != stagedFile) {
+
+            		//Inactivate the old entity
+            		stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
+            		dao.merge(stagedFile);
+            		logDuplicateStatus(processor, stagedFile, workTicket.getGlobalProcessId());
+            	}
             	dao.persistStagedFile(workTicket, processor.getPguid());
             }
 
@@ -485,6 +507,36 @@ public class MailBoxService {
 
         }
 
+	}
+
+	/**
+	 * Logs duplicate status in lens for the overwrite true case
+	 * 
+	 * @param processor The filewriter processor entity
+	 * @param glassMessage Glass
+	 * @param stagedFile
+	 */
+	private void logDuplicateStatus(Processor processor, StagedFile stagedFile, String gpid) {
+
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+		GlassMessage glassMessage = new GlassMessage();
+		glassMessage.setGlobalPId(stagedFile.getPguid());
+		glassMessage.setCategory(processor.getProcessorType());
+		glassMessage.setProtocol(processor.getProcsrProtocol());
+
+		glassMessage.setStatus(ExecutionState.DUPLICATE);
+		glassMessage.setOutAgent(processor.getProcsrProtocol());
+		glassMessage.setOutboundFileName(stagedFile.getFileName());
+
+		StringBuilder message = new StringBuilder()
+							.append("File ")
+							.append(stagedFile.getFileName())
+							.append(" is overwritten by another process - ")
+							.append(gpid);
+		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+
+		//TVAPI
+		transactionVisibilityClient.logToGlass(glassMessage);
 	}
 
 }

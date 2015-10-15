@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorLegacyDTO;
 
 /**
  * Data Transfer Object that implements fields required for mailbox
@@ -25,13 +26,25 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 public class AddProcessorToMailboxRequestDTO {
 
 	private ProcessorDTO processor;
+	private ProcessorLegacyDTO processorLegacy;
 
 	public ProcessorDTO getProcessor() {
+		if (null == processor) {
+			return processorLegacy;
+		}
 		return processor;
 	}
 
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
+	}
+
+	public ProcessorLegacyDTO getProcessorLegacy() {
+		return processorLegacy;
+	}
+
+	public void setProcessorLegacy(ProcessorLegacyDTO processorLegacy) {
+		this.processorLegacy = processorLegacy;
 	}
 	
 }

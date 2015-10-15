@@ -146,7 +146,7 @@ dependencies {
 
 
 	//common gitlab service
-	compile group: 'com.liaison', name: 'lib_gitlab', version: '1.0.0-SNAPSHOT', changing: true
+	compile group: 'com.liaison', name: 'lib_gitlab', version: '1.0.2-SNAPSHOT', changing: true
 
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true

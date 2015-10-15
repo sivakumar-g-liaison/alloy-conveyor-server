@@ -1,0 +1,59 @@
+{
+    "addProcessorToMailBoxRequest": {
+        "processorLegacy": {
+            "guid": "",
+            "name": "sftp test remote downloader",
+            "type": "REMOTEDOWNLOADER",
+            "remoteProcessorProperties": {
+		        "httpVersion": null,
+		        "httpVerb": null,
+		        "retryAttempts": 0,
+		        "socketTimeout": 0,
+		        "connectionTimeout": 0,
+		        "url": "sftp://10.147.18.252:22",
+		        "port": 22,
+		        "chunkedEncoding": false,
+		        "contentType": null,
+		        "encodingFormat": null,
+		        "passive": false,
+		        "binary": false,
+		        "retryInterval": 0,
+		        "pipeLineID": null,
+		        "httpListenerPipeLineId": null,
+		        "otherRequestHeader": [],
+		        "securedPayload": false,
+		        "handOverExecutionToJavaScript": false
+    		},
+            "javaScriptURI": null,
+            "description": "test",
+            "status": "ACTIVE",
+            "protocol": "SFTP",
+            "linkedMailboxId": "C6F3204FC0A800B00B43A413D78EF8E6",
+            "linkedProfiles": [
+                "PROFILE_TEST1444075283615"
+            ],
+            "folders": [
+                {
+        
+                    "folderURI": "/inbox",
+                    "folderType": "PAYLOAD_LOCATION",
+                    "folderDesc": "test"
+                },
+                {
+                   
+                    "folderURI": "/opt/apps/QAOffshoretestdata/SLA/SFTP Downloader",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "tttt"
+                }
+            ],
+            "credentials": [
+                {
+                  
+                    "credentialType": "LOGIN_CREDENTIAL",
+                    "userId": "sftptest"
+                }
+ 
+            ]
+        }
+    }
+}
