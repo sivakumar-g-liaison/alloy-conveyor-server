@@ -11,19 +11,16 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.liaison.commons.messagebus.client.ReceiveClient;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.mailbox.service.queue.ProcessorReceiveQueue;
-import com.liaison.mailbox.service.queue.ProcessorSendQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.mailbox.service.queue.ProcessorReceiveQueue;
+import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
 
 /**
  *
@@ -39,7 +36,7 @@ public class ProcessorQueuePoller  {
 
     private static final int POOL_SIZE = 1;
 
-    private static final ScheduledExecutorService pool = Executors.newScheduledThreadPool(POOL_SIZE);
+    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("g2-pool-processor-queue-poller", POOL_SIZE);
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_PROCESSOR_QUEUE_POLLER_INITIALDELAY = "com.liaison.processor.queue.poller.initialdelay";
