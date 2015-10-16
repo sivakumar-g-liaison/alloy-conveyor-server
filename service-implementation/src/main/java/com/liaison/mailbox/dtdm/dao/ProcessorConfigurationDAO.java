@@ -141,6 +141,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
+	 * Retrieve the processor names  
+	 * @return list of processors
+	 */
+	public List<Processor>getProcessorNames(GenericSearchFilterDTO searchDTO);
+	
+	/**
 	 * Retrieve the profile names  
 	 * @return list of profiles
 	 */
