@@ -216,7 +216,10 @@
 	                            <label>
 	                                Truststore Group ID
 	                            </label>
-	                            <input id="mbx-procsr-truststoregroupid" type="text" ng-model="truststoreModal.trustStoreGroupId" ng-blur="trustoreAdditonEnabler()" class="form-control">
+	                            <input id="mbx-procsr-truststoregroupid" name="trustStoreGroupId" type="text" ng-pattern="trustStore_SshKeypair_Pattern" ng-model="truststoreModal.trustStoreGroupId" ng-blur="trustoreAdditonEnabler()" class="form-control">
+	                            	<div ng-show="formAddPrcsr.trustStoreGroupId.$dirty && formAddPrcsr.trustStoreGroupId.$invalid">
+										<span class = "help-block-custom" ng-show="formAddPrcsr.trustStoreGroupId.$error.pattern">Invalid TrustStore Group Id</span>
+									</div>
 	                    </div>
 	                    <div class="col-sm-2 col-md-2">
 	                            <button id="mbx-procsr-truststoreadd" ng-disabled="disableTrustoreAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addTruststoreDetails()">Add Truststore</button>
@@ -227,7 +230,10 @@
 	                            <label>
 	                                SSH KeyPair Group ID 
 	                            </label>
-	                            <input id="mbx-procsr-sshkeypairgroupid" type="text" ng-model="sshkeyModal.sshKeyPairGroupId" ng-blur="sshKeysAdditonEnabler()" class="form-control">
+	                            <input id="mbx-procsr-sshkeypairgroupid" name="sshKeyPairGroupId" type="text" ng-pattern="trustStore_SshKeypair_Pattern" ng-model="sshkeyModal.sshKeyPairGroupId" ng-blur="sshKeysAdditonEnabler()" class="form-control">
+	                            <div ng-show="formAddPrcsr.sshKeyPairGroupId.$dirty && formAddPrcsr.sshKeyPairGroupId.$invalid">
+									<span class = "help-block-custom" ng-show="formAddPrcsr.sshKeyPairGroupId.$error.pattern">Invalid SSH Keypair Group Id</span>
+								</div>
 	                    </div>
 	                    <div class="col-sm-2 col-md-2">
 	                            <button id="mbx-procsr-sshkeypairadd" ng-disabled="disableSSHKeysAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addSSHKeyDetails()">Add SSH KeyPair</button>

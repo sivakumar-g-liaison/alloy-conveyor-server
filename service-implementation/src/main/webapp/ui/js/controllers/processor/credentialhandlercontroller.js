@@ -199,17 +199,37 @@ myApp.controller(
             }
             $scope.$on("resetCredentialSection", function(event){ $scope.credentialCleanup()});
             
-            // enable or disable turststore addition button
+         // enable or disable turststore addition button
             $scope.trustoreAdditonEnabler = function() {
-            	$scope.disableTrustoreAddition = ($scope.truststoreModal.trustStoreGroupId !== '' && 
+				$scope.disableTrustoreAddition = ($scope.truststoreModal.trustStoreGroupId !== '' && 
             									typeof $scope.truststoreModal.trustStoreGroupId !== 'undefined') ? false : true;
+            	$scope.trustStoreUrl = $scope.fetchTrustStore + $scope.truststoreModal.trustStoreGroupId;
+				if (!$scope.disableTrustoreAddition) {
+					$scope.restService.get($scope.trustStoreUrl,
+						function (data, status) {
+							if (status != 200) {
+								$scope.disableTrustoreAddition = true;
+								showSaveMessage("The given trustStore group id does not exist in the Keymanagement system", 'error');
+							}
+					});
+				}
             }
 
             // enable or disable ssh keys addition button
             $scope.sshKeysAdditonEnabler = function() {
-            	$scope.disableSSHKeysAddition = ($scope.sshkeyModal.sshKeyPairGroupId !== '' && 
+				$scope.disableSSHKeysAddition = ($scope.sshkeyModal.sshKeyPairGroupId !== '' && 
             									typeof $scope.sshkeyModal.sshKeyPairGroupId !== 'undefined') ? false : true;
-            }
+            	$scope.fetchSshKeypairUrl = $scope.fetchSshKeyPair + $scope.sshkeyModal.sshKeyPairGroupId;
+    			if (!$scope.disableSSHKeysAddition) {
+    				$scope.restService.get($scope.fetchSshKeypairUrl,
+    					function (data, status) {
+    						if (status != 200) {
+								$scope.disableSSHKeysAddition = true;
+    							showSaveMessage("The given SSH keypair group id does not exist in the Keymanagement system", 'error');
+    						}
+    				});		
+				}
+			}
             
             // helper function to determine is sshkey pair present in credentials of processorCredProperties
             $scope.isSSHKeysAvailable = function() {
