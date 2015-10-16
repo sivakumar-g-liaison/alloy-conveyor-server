@@ -360,7 +360,7 @@ public class GlassMessage {
 		return timeStampAPI;
 	}
 
-	public void logProcessingStatus(StatusType statusType, String message) {
+	public void logProcessingStatus(StatusType statusType, String message, String Processor_Type , String Processor_protocol) {
 
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
@@ -372,7 +372,7 @@ public class GlassMessage {
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
 		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 		if (message != null && !message.equals("")) {
-			status.setDescription(MAILBOX_ASA_IDENTIFIER + ": " + message);
+				status.setDescription(MAILBOX_ASA_IDENTIFIER.concat(" ").concat(Processor_protocol).concat(" ").concat(Processor_Type) + ": " + message);
 		} else {
 			status.setDescription(MAILBOX_ASA_IDENTIFIER);
 		}

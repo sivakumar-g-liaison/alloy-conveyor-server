@@ -323,7 +323,13 @@ public interface MailBoxConstants {
 
     //constants for staged file entry
     public static final String FILE_EXISTS = "fileExists";
-
+    
+    //Constants for LENS Logging
+    public static final String HTTPASYNCPROCESSOR = "HTTPASYNCPROCESSOR";
+    public static final String HTTPSYNCPROCESSOR = "HTTPSYNCPROCESSOR";
+    public static final String FILEWRITER = "FILEWRITER";
+    public static final String DROPBOXPROCESSOR = "DROPBOXPROCESSOR";
+    
     /**
      * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
      */

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
@@ -23,7 +24,7 @@ public class HTTPAsyncProcessor extends HTTPAbstractProcessor {
 
         try {
             WorkTicketUtil.postWrkTcktToQ(workTicket);
-            glassMessage.logProcessingStatus(StatusType.QUEUED, "Http Async - Work Ticket queued.");
+            glassMessage.logProcessingStatus(StatusType.QUEUED, "Http Async - Work Ticket queued.", null, MailBoxConstants.HTTPASYNCPROCESSOR);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

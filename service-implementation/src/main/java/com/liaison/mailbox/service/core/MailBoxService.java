@@ -359,7 +359,7 @@ public class MailBoxService {
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
             glassMessage.setOutSize(workTicket.getPayloadSize());
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", null, null);
 
             // validates mandatory value.
             mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -434,12 +434,12 @@ public class MailBoxService {
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", null, MailBoxConstants.FILEWRITER);
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location");
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", null, MailBoxConstants.FILEWRITER);
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
@@ -491,7 +491,7 @@ public class MailBoxService {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), null, MailBoxConstants.FILEWRITER);
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
@@ -533,7 +533,7 @@ public class MailBoxService {
 							.append(stagedFile.getFileName())
 							.append(" is overwritten by another process - ")
 							.append(gpid);
-		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), null, MailBoxConstants.FILEWRITER);
 
 		//TVAPI
 		transactionVisibilityClient.logToGlass(glassMessage);
