@@ -560,6 +560,13 @@ public class ProcessorPropertyJsonMapper {
 			Field fieldInOldJson;
 			try {
 				fieldInOldJson = source.getClass().getDeclaredField(field.getName());
+				
+				// GMB-645:Handling of Synthetic Fields while converting from legacy processor properties json template to latest json template
+				// The synthetic fields are compiler generated fields and they need not to be considered for processing
+				if (fieldInOldJson.isSynthetic()) {
+					continue;
+				}
+				
 			} catch (NoSuchFieldException e) {
 				if ((propertyMapper.values().contains(field.getName()))) {
 					LOGGER.debug("Dynamic Property is handled in another method ignore this exception", field.getName());
