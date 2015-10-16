@@ -10,7 +10,6 @@
 package com.liaison.mailbox.service.queue.consumer;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +34,7 @@ public class MailboxProcessorQueueConsumer {
 		// defeat instantiation.
 	}
 
-	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newExecutorService("MailboxProcessorQueueExecutorPool", threadCount, threadCount, 60, TimeUnit.MILLISECONDS);
+	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newExecutorService("g2-pool-mailbox-processor-consumer", threadCount, threadCount, 60, TimeUnit.MILLISECONDS);
 
 	public void invokeProcessor(String requestJSON) throws InterruptedException {
 		execSrvc.execute(new ProcessorInvoker(requestJSON));
@@ -43,6 +42,10 @@ public class MailboxProcessorQueueConsumer {
 	}
 
 	public void printExecutorDiagonostics(){
+
+		if (execSrvc == null) {
+			return;
+		}
 
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) execSrvc;
 

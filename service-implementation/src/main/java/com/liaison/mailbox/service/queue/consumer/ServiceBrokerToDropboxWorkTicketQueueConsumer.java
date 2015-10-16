@@ -30,13 +30,17 @@ public class ServiceBrokerToDropboxWorkTicketQueueConsumer {
 		// defeat instantiation.
 	}
 
-	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newExecutorService("ServiceBrokerToDropboxQueueExecutorPool", threadCount, threadCount, 60, TimeUnit.MILLISECONDS);
+	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newExecutorService("g2-pool-servicebroker-to-dropbox-consumer", threadCount, threadCount, 60, TimeUnit.MILLISECONDS);
 	public void invokeDropboxQueue(String requestJSON) throws InterruptedException {
 		execSrvc.execute(new DropboxQueueInvoker(requestJSON));
 
 	}
 
 	public void printExecutorDiagonostics(){
+
+		if (execSrvc == null) {
+			return;
+		}
 
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) execSrvc;
 

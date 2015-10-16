@@ -36,7 +36,7 @@ public class ProcessorQueuePoller  {
 
     private static final int POOL_SIZE = 1;
 
-    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ProcessorQueuePollerPool", POOL_SIZE);
+    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("g2-pool-processor-queue-poller", POOL_SIZE);
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_PROCESSOR_QUEUE_POLLER_INITIALDELAY = "com.liaison.processor.queue.poller.initialdelay";

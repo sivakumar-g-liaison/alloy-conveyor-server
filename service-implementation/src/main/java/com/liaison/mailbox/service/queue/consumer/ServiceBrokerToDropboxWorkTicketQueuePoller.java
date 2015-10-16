@@ -33,7 +33,7 @@ public class ServiceBrokerToDropboxWorkTicketQueuePoller {
 
     private static final int POOL_SIZE = 1;
 
-    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ServiceBrokerToDropboxPollerPool", POOL_SIZE);
+    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("g2-pool-servicebroker-to-dropbox-poller", POOL_SIZE);
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_DROPBOX_QUEUE_POLLER_INITIALDELAY = "com.liaison.dropboxQueue.queue.poller.initialdelay";

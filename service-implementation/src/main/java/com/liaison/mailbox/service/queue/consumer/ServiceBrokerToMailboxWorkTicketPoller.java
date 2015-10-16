@@ -33,7 +33,7 @@ public class ServiceBrokerToMailboxWorkTicketPoller {
 
     private static final int POOL_SIZE = 1;
 
-    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ServiceBrokerToMailboxPollerPool", POOL_SIZE);
+    private static ScheduledExecutorService pool = LiaisonExecutorServiceBuilder.newScheduledExecutorService("g2-pool-servicebroker-to-mailbox-poller", POOL_SIZE);
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY = "com.liaison.processedPayload.queue.poller.initialdelay";

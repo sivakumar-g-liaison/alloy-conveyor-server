@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.queue.consumer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +35,7 @@ public class ServiceBrokerToMailboxWorkTicketConsumer {
 		// defeat instantiation.
 	}
 
-	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newScheduledExecutorService("ServiceBrokerToMailboxQueueExecutorPool", threadCount);
+	private ExecutorService execSrvc = LiaisonExecutorServiceBuilder.newScheduledExecutorService("g2-pool-servicebroker-to-mailbox-consumer", threadCount);
 
 	public void invokeWatchDog(String requestJSON) throws InterruptedException {
 		execSrvc.execute(new WatchDogInvoker(requestJSON));
@@ -44,6 +43,10 @@ public class ServiceBrokerToMailboxWorkTicketConsumer {
 	}
 
 	public void printExecutorDiagonostics(){
+
+		if (execSrvc == null) {
+			return;
+		}
 
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) execSrvc;
 
