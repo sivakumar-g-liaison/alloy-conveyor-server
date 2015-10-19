@@ -201,8 +201,6 @@ acl_signer_public_key_guid = CD5990860A9270E0142300DCB508D8CD
 #SLA Properties
 mailbox.sla.time.configuration.unit=MINUTES
 
-#Thread Count for processor
-mailbox.processor.queue.consumer.thread.count=5
 #Thread Count for watchdog
 mailbox.processedPayload.queue.consumer.thread.count=5
 #Thread Count for Dropbox Queue
