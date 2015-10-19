@@ -1,3 +1,8 @@
+2.4.1
+-------------------------------
+* ACL Skip list changes
+* Updated poller and consumers to use QueueProcessor from lib_message_bus. 
+
 2.4.0
 -------------------------------
 * GMB-641 - Updated executor service to use LiaisonExecutorServiceBuilder to create thread pool.
