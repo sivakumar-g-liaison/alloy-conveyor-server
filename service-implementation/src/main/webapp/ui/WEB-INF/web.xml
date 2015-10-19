@@ -40,25 +40,6 @@
         <url-pattern>/init</url-pattern>
     </servlet-mapping>
 
-	<!-- Added by senthilvel for AsyncServlet Injection -->
-	<servlet>
-        <servlet-name>AsyncServlet</servlet-name>
-        <servlet-class>com.liaison.framework.async.AsyncServlet</servlet-class>
-	<init-param>
-		<param-name>threadpoolsize</param-name>
-		<param-value>100</param-value>
-	</init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>AsyncServlet</servlet-name>
-        <url-pattern>/async</url-pattern>
-    </servlet-mapping>
-
-
-
-
 	<!-- Framework-defined dynamic services support, please do not modify -->
 
     <servlet>
