@@ -327,9 +327,8 @@ public interface MailBoxConstants {
     //Constants for LENS Logging
     public static final String HTTPASYNCPROCESSOR = "HTTPASYNCPROCESSOR";
     public static final String HTTPSYNCPROCESSOR = "HTTPSYNCPROCESSOR";
-    public static final String FILEWRITER = "FILEWRITER";
     public static final String DROPBOXPROCESSOR = "DROPBOXPROCESSOR";
-    
+    public static final String FILEWRITER = "FILEWRITER";
     /**
      * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
      */

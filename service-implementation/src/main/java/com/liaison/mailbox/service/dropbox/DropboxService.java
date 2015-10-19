@@ -65,7 +65,7 @@ public class DropboxService {
 	    glassMessage.setStatus(ExecutionState.READY);
 
         // log activity status
-        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": " + MailBoxConstants.DROPBOX_WORKTICKET_CONSUMED, null, MailBoxConstants.DROPBOXPROCESSOR);
+        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": " + MailBoxConstants.DROPBOX_WORKTICKET_CONSUMED, MailBoxConstants.DROPBOXPROCESSOR);
         // log timestamp
         glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 

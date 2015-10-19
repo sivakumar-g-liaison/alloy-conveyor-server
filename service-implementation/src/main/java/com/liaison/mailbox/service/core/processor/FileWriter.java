@@ -68,7 +68,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.COMPLETED);
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started", null, MailBoxConstants.FILEWRITER);
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started", configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
 
             LOG.info(constructMessage("Start Run"));
             LOG.info(constructMessage("Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
@@ -179,7 +179,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     .append(File.separatorChar)
                     .append(fileName);
 
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), null, MailBoxConstants.FILEWRITER);
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
             glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
             LOG.debug("#################################################################");
@@ -284,7 +284,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             					.append("File ")
             					.append(stagedFile.getFileName())
             					.append(" is picked up by the customer");
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), null, MailBoxConstants.FILEWRITER);
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
 
             //Fourth corner timestamp
             glassMessage.logFourthCornerTimestamp();
