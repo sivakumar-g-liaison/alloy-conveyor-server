@@ -43,8 +43,7 @@
 					<label for="name"> Folder Path </label> 
 					<input id="folderpath" type="text" ng-model="folderPath" ng-pattern="folderPathPattern"                                       
                                        class="form-control textPattern_width_1"
-                                       name="folderpath"
-									   style="width:190px">
+                                       name="folderpath">
 					<div ng-show="formSearchPrcsr.folderpath.$dirty && formSearchPrcsr.folderpath.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.folderpath.$error.pattern}" ng-show="formSearchPrcsr.folderpath.$error.pattern">Invalid folder path.</span>
 					</div>
