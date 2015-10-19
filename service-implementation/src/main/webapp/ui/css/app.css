@@ -596,3 +596,21 @@ input::-moz-focus-inner {
 .proc_id_margin{
 	margin-top: -8px!important;
 }
+
+/*--- searchProcessor.html---*/
+.button_style {
+	width: 165px;
+}
+
+/*--- searchProcessor.html---*/
+.button_width {
+	width: 165px;
+}
+
+.textPattern_width_1 {
+	width: 190px;
+}
+
+.textPattern_width_2 {
+	width: 385px;
+}
