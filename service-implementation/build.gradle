@@ -145,8 +145,8 @@ war.dependsOn('configureTomcat')
 dependencies {
 
 
-	// GitLab Client
-	compile "org.gitlab.api:java-gitlab-api:1.1.3a"
+	//common gitlab service
+	compile 'com.liaison:lib_gitlab:1.0.+'
 
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
