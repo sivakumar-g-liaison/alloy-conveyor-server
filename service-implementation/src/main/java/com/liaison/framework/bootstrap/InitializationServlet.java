@@ -58,20 +58,24 @@ public class InitializationServlet extends HttpServlet {
 	public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
 	private final int DEFAULT_THREAD_COUNT = configuration.getInt("com.liaison.queue.processor.default.thread.count", 10);
 
+	private static final String DROPBOX_QUEUE = "dropboxQueue";
+	private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
+	private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
+
     public void init(ServletConfig config) throws ServletException {
 
     	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
 
     	    logger.debug("dropbox queue starts to poll");
 
-    	    QueueProcessorManager.register("dropboxQueue", ServiceBrokerToDropboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToDropboxQueueProcessor.class);
+    	    QueueProcessorManager.register(DROPBOX_QUEUE, ServiceBrokerToDropboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToDropboxQueueProcessor.class);
 
         } else {
 
             logger.debug("processor and sweeper queues starts to poll");
 
-            QueueProcessorManager.register("processor", ProcessorReceiveQueue.getInstance(), DEFAULT_THREAD_COUNT, MailboxProcessorQueueProcessor.class);
-            QueueProcessorManager.register("processedPayload", ServiceBrokerToMailboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToMailboxQueueProcessor.class);
+            QueueProcessorManager.register(MAILBOX_PROCESSOR_QUEUE, ProcessorReceiveQueue.getInstance(), DEFAULT_THREAD_COUNT, MailboxProcessorQueueProcessor.class);
+            QueueProcessorManager.register(MAILBOX_PROCESSED_PAYLOAD_QUEUE, ServiceBrokerToMailboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToMailboxQueueProcessor.class);
         }
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
