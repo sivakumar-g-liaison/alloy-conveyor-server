@@ -39,22 +39,22 @@
 						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
 					</div>
 				</div>				
-				<div class="col-md-2">
+				<div class="col-md-3">
 					<label for="name"> Folder Path </label> 
 					<input id="folderpath" type="text" ng-model="folderPath" ng-pattern="folderPathPattern"                                       
-                                       class="form-control textPattern_width_1"
+                                       class="form-control textPattern_width_2"
                                        name="folderpath">
 					<div ng-show="formSearchPrcsr.folderpath.$dirty && formSearchPrcsr.folderpath.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.folderpath.$error.pattern}" ng-show="formSearchPrcsr.folderpath.$error.pattern">Invalid folder path.</span>
 					</div>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<label for="name"> Pipeline ID </label>
 					<input id="pipeLine" type="text" ng-model="PrcsrPipelineId"                                                                                                                    
                                        class="form-control textPattern_width_2"
                                        name="pipeline">	
 				</div>				
-				<div class="col-md-1">
+				<div class="col-md-2">
 					<label for="name">&nbsp;</label>
 					<br />			
 					<button id="filterSearch" class="btn btn-primary button_width" data-toggle="modal" ng-click="readAllProcessors()">
@@ -86,19 +86,19 @@
                     <option value="">-- select--</option>
 					</select>
 				</div>
-				<div class="col-md-2">
+				<div class="col-md-3">
 					<label for="name"> Protocol </label>
-					<select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control textPattern_width_1">
+					<select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control textPattern_width_2">
 					<option value="">-- select--</option>
 					</select>
 				</div>
-				<div class="col-md-4">
-					<label for="name"> Processor GUID </label>
+				<div class="col-md-3">
+					<label for="name"> Processor ID </label>
 					<input id="prcsrguid" type="text" ng-model="prcsrGuid"                                                                                                                    
                                        class="form-control textPattern_width_2"
                                        name="prcsrguid">	
 				</div>
-				<div class="col-md-1">					
+				<div class="col-md-2">					
 					<label for="name">&nbsp;</label>
 					<br />
 					<button id="filterReset" class="btn btn-primary button_width" data-toggle="modal" ng-click="clearAllFilters(); readAllProcessors()">
