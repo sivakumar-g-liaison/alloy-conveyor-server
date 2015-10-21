@@ -36,6 +36,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -104,7 +105,8 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 					LOG.debug("Entering into Mailbox SLA Validation");
 					// validate the sla rules of all mailboxes
 					MailboxSLAWatchDogService service = new MailboxSLAWatchDogService();
-
+					service.setUniqueId(MailBoxUtil.getGUID());
+					
 					return service.validateSLARules();
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);

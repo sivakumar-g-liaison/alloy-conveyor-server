@@ -64,14 +64,15 @@ public class MailboxSLAWatchDogService {
 	private static final String CUSTOMER_SLA = "customer_sla";
 	protected static final String seperator = ": ";
 	protected StringBuilder logPrefix;
+	String uniqueId;
 
 	/**
 	 * Internal logger for watch dog services
 	 *
 	 * @param message
 	 */
-	private void log(String message, Object... params) {
-	    LOG.info("WatchDog : " + message, params);
+	private void log(String uniqueId, String message, Object... params) {
+	    LOG.info("WatchDog-"+ uniqueId +": " + message, params);
 	}
 
 	/**
@@ -82,7 +83,7 @@ public class MailboxSLAWatchDogService {
 	 */
 	public MailboxSLAResponseDTO validateSLARules() throws Exception {
 
-		MailboxSLAResponseDTO serviceResponse = new MailboxSLAResponseDTO();
+		MailboxSLAResponseDTO serviceResponse = new MailboxSLAResponseDTO();		
 		LOG.debug("Entering into validateSLARules.");
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 
@@ -140,7 +141,7 @@ public class MailboxSLAWatchDogService {
 
 			// if the sla configuration is not available in mailbox continue to next mailbox
 			if (timeToPickUpFilePostedToMailbox == null)  {
-			    log("the mailbox sla configuration is not available in mailbox - {}. So proceed to next mailbox.", mailbox.getMbxName());
+			    log(uniqueId, "the mailbox sla configuration is not available in mailbox - {}. So proceed to next mailbox.", mailbox.getMbxName());
 				continue;
 			}
 
@@ -148,7 +149,7 @@ public class MailboxSLAWatchDogService {
 			checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, timeToPickUpFilePostedToMailbox, slaViolatedMailboxes, false);
 		}
 		if (null != slaViolatedMailboxes && slaViolatedMailboxes.size() > 0) {
-		    log("SLA Validation completed and the identified violations are notified to the user");
+		    log(uniqueId, "SLA Validation completed and the identified violations are notified to the user");
 			slaViolatedMailboxesList.addAll(slaViolatedMailboxes);
 		}
 
@@ -266,7 +267,7 @@ public class MailboxSLAWatchDogService {
 
 			// if the sla configuration is not available in mailbox continue to next mailbox
 			if (timeToPickUpFilePostedByMailbox == null) {
-			    log("the customer sla configuration is not available in mailbox - {}", mailbox.getMbxName());
+			    log(uniqueId, "the customer sla configuration is not available in mailbox - {}", mailbox.getMbxName());
 				continue;
 			}
 
@@ -304,20 +305,20 @@ public class MailboxSLAWatchDogService {
 
 		List<FSMStateValue> listfsmStateVal = null;
 
-		log("checking whether the processor {} is executed with in the specified SLA configuration time", processor.getProcsrName());
+		log(uniqueId, "checking whether the processor {} is executed with in the specified SLA configuration time", processor.getProcsrName());
 		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(slaConfigurationTime));
 
 		String emailSubject = null;
 		// If the list is empty then the processor is not executed at all during the specified sla time.
 		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
 
-		    log("The processor {} was not executed with in the specified SLA configuration time", processor.getProcsrName());
+		    log(uniqueId, "The processor {} was not executed with in the specified SLA configuration time", processor.getProcsrName());
 			slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
 			emailSubject = (isCustomerSLA)
 					? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					: String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 					EmailNotifier.sendEmail(processor, emailSubject, emailSubject, true);
-			log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
+			log(uniqueId, "The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 			return;
 		}
 
@@ -327,13 +328,13 @@ public class MailboxSLAWatchDogService {
 
 				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
 
-				    log("The processor {} was executed but got failed with in the specified SLA configuration time", processor.getProcsrName());
+				    log(uniqueId, "The processor {} was executed but got failed with in the specified SLA configuration time", processor.getProcsrName());
 					slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
 					emailSubject = (isCustomerSLA)
 					        ? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					        : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 					        EmailNotifier.sendEmail(processor, emailSubject, emailSubject, true);
-					log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
+					log(uniqueId, "The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 				}
 			}
 
@@ -346,25 +347,25 @@ public class MailboxSLAWatchDogService {
 		FSMStateDAO procDAO = new FSMStateDAOBase();
 		List<String> files = null;
 
-		log("Finding the most recent successful execution of processor {}", processor.getProcsrName());
+		log(uniqueId, "Finding the most recent successful execution of processor {}", processor.getProcsrName());
 		List<FSMStateValue> jobsExecuted = procDAO.findMostRecentSuccessfulExecutionOfProcessor(processor.getPguid(), processor.getProcessorType());
 
 		// if no jobs were successfully executed for this processor continue to next one
 		if (null == jobsExecuted || jobsExecuted.isEmpty()) {
-			log("There are no succesful executions for this processor {} in recent time", processor.getProcsrName());
+			log(uniqueId, "There are no succesful executions for this processor {} in recent time", processor.getProcsrName());
 			return;
 		}
 
 		FSMStateValue mostRecentExecution = jobsExecuted.get(0) ;
 		Timestamp processorLastExecutionTime = mostRecentExecution.getCreatedDate();
-		log("The most recent successful execution of processor {} is on {}", processor.getProcsrName(), processorLastExecutionTime);
+		log(uniqueId, "The most recent successful execution of processor {} is on {}", processor.getProcsrName(), processorLastExecutionTime);
 
-		log("Finding non sla verified file staged events");
+		log(uniqueId, "Finding non sla verified file staged events");
 		List<FSMState> nonSLAVerifiedFileStagedEvents = procDAO.findNonSLAVerifiedFileStagedEvents(processor.getPguid(), processorLastExecutionTime, processor.getProcessorType());
 
 		// There are no non sla verified file staged events.
 		if (null != nonSLAVerifiedFileStagedEvents && nonSLAVerifiedFileStagedEvents.isEmpty()) {
-		    log("There are no non sla verified file staged events for the processor {}", processor.getProcsrName());
+		    log(uniqueId, "There are no non sla verified file staged events for the processor {}", processor.getProcsrName());
 		}
 		for (FSMState fileStagedEvent : nonSLAVerifiedFileStagedEvents) {
 
@@ -512,5 +513,9 @@ public class MailboxSLAWatchDogService {
 
         return msgBuf.toString();
     }
+    
+    public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
 
 }
