@@ -598,11 +598,6 @@ input::-moz-focus-inner {
 }
 
 /*--- searchProcessor.html---*/
-.button_style {
-	width: 165px;
-}
-
-/*--- searchProcessor.html---*/
 .button_width {
 	width: 165px;
 }
@@ -612,5 +607,9 @@ input::-moz-focus-inner {
 }
 
 .textPattern_width_2 {
-	width: 285px;
+	width: 385px;
+}
+
+.button_width_2 {
+	width: 176px;
 }
