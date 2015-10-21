@@ -24,43 +24,6 @@
 					</div>
 				</div>
 				<div class="col-md-2">
-					<label for="name"> Processor Name </label>
-					<input id="procname" type="text" ng-model="procName"
-									   placeholder="Processor Name"
-									   typeahead="proc.name for proc in getProcessorNames($viewValue) | filter:$viewValue"
-                                       class="form-control textPattern_width_1"
-                                       name="procname"
-									   typeahead-min-length="typeaheadMinLength">
-					<div ng-show="formSearchPrcsr.procname.$dirty && formSearchPrcsr.procname.$invalid">
-						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.procname.$error.pattern}" ng-show="formSearchPrcsr.procname.$error.pattern">Invalid Processor Name.</span>
-						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.minlength}" ng-show="formSearchPrcsr.procname.$error.minlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
-						<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.maxlength}" ng-show="formSearchPrcsr.procname.$error.maxlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
-					</div>	
-				</div>
-				<div class="col-md-4">
-					<label for="name"> Processor Id </label>
-					<input id="prcsrguid" type="text" ng-model="prcsrGuid"
-                                       class="form-control textPattern_width_2"
-                                       name="prcsrguid">	
-				</div>
-				<div class="col-md-2">
-					<label for="name"> Processor Type </label>
-					<select id="processortype" ng-model="processorType" ng-change="resetProcessorType(processorType)" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control textPattern_width_1">
-                    <option value="">-- select--</option>
-					</select>
-				</div>
-				<div class="col-md-2">
-					<label for="name"> Protocol </label>
-					<select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control button_width">
-					<option value="">-- select--</option>
-					</select>
-				</div>				
-			</div>			
-			<br />
-			<div class="row">
-				<div class="col-md-2">
 					<label for="name"> Profile </label>					
 				<input id="profilename" type="text" ng-model="profileName"
                                        placeholder="Profile"
@@ -85,6 +48,43 @@
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.folderpath.$error.pattern}" ng-show="formSearchPrcsr.folderpath.$error.pattern">Invalid folder path.</span>
 					</div>
 				</div>
+				<div class="col-md-2">
+					<label for="name"> Processor Name </label>
+					<input id="procname" type="text" ng-model="procName"
+									   placeholder="Processor Name"
+									   typeahead="proc.name for proc in getProcessorNames($viewValue) | filter:$viewValue"
+                                       class="form-control textPattern_width_1"
+                                       name="procname"
+									   typeahead-min-length="typeaheadMinLength">
+					<div ng-show="formSearchPrcsr.procname.$dirty && formSearchPrcsr.procname.$invalid">
+						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.procname.$error.pattern}" ng-show="formSearchPrcsr.procname.$error.pattern">Invalid Processor Name.</span>
+						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.minlength}" ng-show="formSearchPrcsr.procname.$error.minlength">
+						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
+						<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.maxlength}" ng-show="formSearchPrcsr.procname.$error.maxlength">
+						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
+					</div>	
+				</div>				
+				<div class="col-md-2">
+					<label for="name"> Processor Type </label>
+					<select id="processortype" ng-model="processorType" ng-change="resetProcessorType(processorType)" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control textPattern_width_1">
+                    <option value="">-- select--</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label for="name"> Protocol </label>
+					<select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control button_width">
+					<option value="">-- select--</option>
+					</select>
+				</div>				
+			</div>			
+			<br />
+			<div class="row">
+				<div class="col-md-4">
+					<label for="name"> Processor Id </label>
+					<input id="prcsrguid" type="text" ng-model="prcsrGuid"
+                                       class="form-control textPattern_width_2"
+                                       name="prcsrguid">	
+				</div>				
 				<div class="col-md-4">
 					<label for="name"> Pipeline Id </label>
 					<input id="pipeLine" type="text" ng-model="PrcsrPipelineId"
