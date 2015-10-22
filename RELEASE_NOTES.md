@@ -1,3 +1,7 @@
+2.4.2
+-------------------------------
+* Modified storage utilities initialization because thread model changes
+
 2.4.1
 -------------------------------
 * ACL Skip list changes
