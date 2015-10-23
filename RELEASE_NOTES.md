@@ -1,3 +1,8 @@
+2.4.4
+-------------------------------
+* GMB-651 - add graceful shutdown pool bleed configuration
+* Modified commons-scripting to use 3.3.3 - scripting pool renamed
+
 2.4.3
 -------------------------------
 * Removed debug settings from UAT environment for mailbox and dropbox
