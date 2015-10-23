@@ -1,3 +1,10 @@
+2.4.3
+-------------------------------
+* Removed debug settings from UAT environment for mailbox and dropbox
+* Modified commons-scripting to use 3.3.2
+* GGT-254 - Invalid HeapDumpPath causing servers to fail to create dump when OOM
+* Removed old thread counts from all environment properties file
+
 2.4.2
 -------------------------------
 * Modified storage utilities initialization because thread model changes

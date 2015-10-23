@@ -73,9 +73,6 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 #Disable runtime class verification( Java 7 )
 export JAVA_OPTS="$JAVA_OPTS -XX:-UseSplitVerifier"
 
-# Dump heap when out of memory to /var/log/tomcat
-export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/tomcat"
-
 # discourage address map swapping by setting Xms and Xmx to the same value
 # http://confluence.atlassian.com/display/DOC/Garbage+Collector+Performance+Issues
 export CATALINA_OPTS="$CATALINA_OPTS -Xms6g"
