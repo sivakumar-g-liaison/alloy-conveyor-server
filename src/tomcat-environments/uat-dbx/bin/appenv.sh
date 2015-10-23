@@ -86,9 +86,6 @@ export JAVA_OPTS="$JAVA_OPTS -XX:-UseSplitVerifier"
 # enable remote debugging
 export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
-# Dump heap when out of memory to /var/log/tomcat
-export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/tomcat"
-
 # discourage address map swapping by setting Xms and Xmx to the same value
 # http://confluence.atlassian.com/display/DOC/Garbage+Collector+Performance+Issues
 export CATALINA_OPTS="$CATALINA_OPTS -Xms6g"
