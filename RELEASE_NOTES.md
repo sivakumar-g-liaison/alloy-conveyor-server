@@ -1,3 +1,7 @@
+2.4.6-SNAPSHOT
+-------------------------------
+* Integrated JMS lib message bus
+
 2.4.5-SNAPSHOT
 -------------------------------
 * GMB-617   - Properties are not saved during mailbox creation

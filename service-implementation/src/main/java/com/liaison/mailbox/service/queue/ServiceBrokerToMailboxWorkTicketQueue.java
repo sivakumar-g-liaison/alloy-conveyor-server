@@ -10,14 +10,14 @@
 
 package com.liaison.mailbox.service.queue;
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
+import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinReceiveClient;
 
 /**
 * Class that enqueues the workticket from service broker to mailbox.
 *
 * @author OFS
 */
-public class ServiceBrokerToMailboxWorkTicketQueue extends HornetQRecoveringCoreReceiveClient {
+public class ServiceBrokerToMailboxWorkTicketQueue extends HornetQJMSRoundRobinReceiveClient {
 
 	 public static final String QUEUE_NAME = "processedPayload";
      private static ServiceBrokerToMailboxWorkTicketQueue ourInstance = new ServiceBrokerToMailboxWorkTicketQueue();
