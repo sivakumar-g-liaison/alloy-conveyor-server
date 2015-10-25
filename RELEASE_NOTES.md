@@ -1,4 +1,4 @@
-2.4.0-SNAPSHOT
+2.4.5-SNAPSHOT
 -------------------------------
 * GMB-617   - Properties are not saved during mailbox creation
 * GCL-57    - Add a provision in the G2SFTP client to use private key string which is retrieved from KMS instead of filepath
@@ -7,6 +7,39 @@
 * Mailbox refinements for Email Util and JSON marshaling done using JAXBUtility
 * GMB-581 - updated lib_message_bus to 4.+
 * GMB-620 - Rename watchdog request in the Log to consumed from queue
+
+2.4.4
+-------------------------------
+* GMB-651 - add graceful shutdown pool bleed configuration
+* Modified commons-scripting to use 3.3.3 - scripting pool renamed
+
+2.4.3
+-------------------------------
+* Removed debug settings from UAT environment for mailbox and dropbox
+* Modified commons-scripting to use 3.3.2
+* GGT-254 - Invalid HeapDumpPath causing servers to fail to create dump when OOM
+* Removed old thread counts from all environment properties file
+
+2.4.2
+-------------------------------
+* Modified storage utilities initialization because thread model changes
+
+2.4.1
+-------------------------------
+* ACL Skip list changes
+* Updated poller and consumers to use QueueProcessor from lib_message_bus. 
+
+2.4.0
+-------------------------------
+* GMB-641 - Updated executor service to use LiaisonExecutorServiceBuilder to create thread pool.
+
+2.3.6
+-------------------------------
+* GMB-633 - Modify the filewriter to support "targetDirectory" from the SB task script
+
+2.3.5
+-------------------------------
+* GQ-15 - patch for queue reconnect
 
 2.3.4
 -------------------------------

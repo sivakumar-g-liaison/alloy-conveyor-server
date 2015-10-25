@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue.consumer;
+package com.liaison.mailbox.service.queue;
 
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
 

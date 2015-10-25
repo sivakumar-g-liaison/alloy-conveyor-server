@@ -178,7 +178,7 @@ dependencies {
 	//    compile "jboss:jnp-client:4.0.2"
 
 	// for G2Javascript engine
-	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '3.2.+'
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '4.+'
 
 	//Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
 	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true

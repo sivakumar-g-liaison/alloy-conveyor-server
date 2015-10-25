@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue.consumer;
+package com.liaison.mailbox.service.queue;
 
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
 
@@ -17,16 +17,16 @@ import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient
 *
 * @author OFS
 */
-public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreReceiveClient {
+public class ServiceBrokerToMailboxWorkTicketQueue extends HornetQRecoveringCoreReceiveClient {
 
 	 public static final String QUEUE_NAME = "processedPayload";
-     private static ServiceBrokerToMailboxWorkTicket ourInstance = new ServiceBrokerToMailboxWorkTicket();
+     private static ServiceBrokerToMailboxWorkTicketQueue ourInstance = new ServiceBrokerToMailboxWorkTicketQueue();
 
-     public static ServiceBrokerToMailboxWorkTicket getInstance() {
+     public static ServiceBrokerToMailboxWorkTicketQueue getInstance() {
          return ourInstance;
      }
 
-     private ServiceBrokerToMailboxWorkTicket() {
+     private ServiceBrokerToMailboxWorkTicketQueue() {
         super(QUEUE_NAME);
      }
 }
