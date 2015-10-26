@@ -10,14 +10,14 @@
 
 package com.liaison.mailbox.service.queue;
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
+import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinSendClient;
 
 /**
  *
  * @author OFS
  *
  */
-public class DummyJMSClientQueue extends HornetQRecoveringCoreSendClient {
+public class DummyJMSClientQueue extends HornetQJMSRoundRobinSendClient {
 
 	 public static final String QUEUE_NAME = "processedPayload";
      private static DummyJMSClientQueue ourInstance = new DummyJMSClientQueue();

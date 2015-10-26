@@ -11,12 +11,12 @@
 package com.liaison.mailbox.service.queue;
 
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
+import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinReceiveClient;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class ProcessorReceiveQueue extends HornetQRecoveringCoreReceiveClient {
+public class ProcessorReceiveQueue extends HornetQJMSRoundRobinReceiveClient {
 
     public static final String QUEUE_NAME = "processor";
     private static ProcessorReceiveQueue ourInstance = new ProcessorReceiveQueue();
