@@ -42,6 +42,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
@@ -384,7 +385,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 */
 	private void postToSweeperQueue(String input)   {
 
-        SweeperQueue.getInstance().sendMessages(input);
+        try {
+			SweeperQueue.getInstance().sendMessages(input);
+		} catch (ClientUnavailableException e) {
+			throw new RuntimeException(e);
+		}
         LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);
 	}
 
