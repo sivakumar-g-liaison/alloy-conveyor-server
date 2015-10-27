@@ -1,3 +1,7 @@
+2.4.5
+-------------------------------
+* Integrated JMS lib message bus
+
 2.4.4
 -------------------------------
 * GMB-651 - add graceful shutdown pool bleed configuration

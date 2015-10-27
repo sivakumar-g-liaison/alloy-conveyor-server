@@ -10,12 +10,12 @@
 package com.liaison.mailbox.service.queue.sender;
 
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
+import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinSendClient;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class SweeperQueue extends HornetQRecoveringCoreSendClient {
+public class SweeperQueue extends HornetQJMSRoundRobinSendClient {
 
     public static final String QUEUE_NAME = "sweeper";
     private static SweeperQueue ourInstance = new SweeperQueue();
