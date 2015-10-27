@@ -1,3 +1,7 @@
+2.4.6
+-------------------------------
+* Fix list of queue servers for discovery.
+
 2.4.5
 -------------------------------
 * Integrated JMS lib message bus
