@@ -596,3 +596,6 @@ input::-moz-focus-inner {
 .proc_id_margin{
 	margin-top: -8px!important;
 }
+.error_msg_color {
+	color: #FF0000;
+}
