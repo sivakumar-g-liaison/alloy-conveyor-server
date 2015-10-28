@@ -64,8 +64,11 @@ public class MailboxSLAWatchDogService {
 	private static final String CUSTOMER_SLA = "customer_sla";
 	protected static final String seperator = ": ";
 	protected StringBuilder logPrefix;
-	String uniqueId;
-
+	private String uniqueId;
+	
+	public MailboxSLAWatchDogService(){
+		setUniqueId(MailBoxUtil.getGUID());
+	}
 	/**
 	 * Internal logger for watch dog services
 	 *

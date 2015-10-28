@@ -105,8 +105,6 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 					LOG.debug("Entering into Mailbox SLA Validation");
 					// validate the sla rules of all mailboxes
 					MailboxSLAWatchDogService service = new MailboxSLAWatchDogService();
-					service.setUniqueId(MailBoxUtil.getGUID());
-					
 					return service.validateSLARules();
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
