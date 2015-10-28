@@ -71,7 +71,6 @@ var rest = myApp.controller(
 				$scope.sorting = 'name';
                 $scope.isFileSelected = false;
         		$scope.isEdit = false;
-				$scope.oldSecret = '';
                 $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;				
 				//GIT URL
@@ -148,6 +147,12 @@ var rest = myApp.controller(
                 // Profile Related Stuff.
                 $scope.allProfiles = [];
                 $scope.selectedProfiles = [];
+                
+                $scope.oldLoginDetails = {
+                		userId:"",
+                		password:"",
+                		passwordPguidInKMS:""
+                }
             };
             $scope.loadOrigin();
 			
@@ -415,9 +420,6 @@ var rest = myApp.controller(
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 };
-				if ($scope.creationFailed) {
-				    $scope.clearCredentialProps();
-				}
 			}
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
@@ -425,7 +427,7 @@ var rest = myApp.controller(
 					function (secretData, status) {
 						if(status === 200) {
 							var decPwd = $.base64.decode($.base64.decode(secretData));
-							$scope.oldSecret = decPwd;
+							$scope.oldLoginDetails.password = decPwd;
 							data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = decPwd;
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
@@ -438,7 +440,14 @@ var rest = myApp.controller(
 				);
 			}
 			
-			$scope.oldSecret = '';
+			$scope.clearOldLoginDetails = function() {				
+                $scope.oldLoginDetails = {
+                		userId:"",
+                		password:"",
+                		passwordPguidInKMS:""
+                }
+			}
+			
             $scope.editProcessor = function (processorId, blockuiFlag) {
                 
 				if (blockuiFlag === true) {
@@ -481,6 +490,8 @@ var rest = myApp.controller(
 										// for sftp processor with keys, password will not be available and hence 
 										// read secret call to KMS is not applicable for this case
 										if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
+											$scope.oldLoginDetails.userId = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
+											$scope.oldLoginDetails.passwordPguidInKMS = $scope.secret;											
 											readSecretFromKM($scope.url_secret_service + $scope.secret, i, data, profData, processorId, blockuiFlag);
 											editProcessor = true;
 											break;
@@ -567,7 +578,7 @@ var rest = myApp.controller(
             
             $scope.save = function () {
                 //To notify passwordDirective to clear the password and error message
-                $scope.doSend();
+                //$scope.doSend();
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
                 $scope.showAddNewComponent.value=false;
@@ -641,22 +652,27 @@ var rest = myApp.controller(
 							$scope.credType = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
 							$scope.procName = editRequest.reviseProcessorRequest.processor.name;
 							$scope.credUsrName = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
-							$scope.secret = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
-							if ($scope.oldSecret && ($scope.oldSecret !== $scope.secret)) {					   
-							      $scope.clearSecret = true;
-							}							
+							$scope.secret = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;					
 							$scope.secretName = '';
 							
 							// revise secret should be called only if password is available in the login credential
 							// for sftp processor with keys, password will not be available and hence 
 							// revise secret call to KMS is not applicable for this case
 							if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
-								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
-								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
-								$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
-								reviseSecret($scope.secretUrl, base64EncodedSecret, i);
-								reviseProcessor = true;
-								break;
+								
+								// if the existing userName and password remains same then no need to go for a KMS call
+								if ($scope.oldLoginDetails.password === $scope.secret && $scope.oldLoginDetails.userId === $scope.credUsrName) {
+									editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password = $scope.oldLoginDetails.passwordPguidInKMS;
+									break;
+								} else {
+									$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
+									base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
+									$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
+									reviseSecret($scope.secretUrl, base64EncodedSecret, i);
+									reviseProcessor = true;
+									break;
+								}
+
 							}					
 						}
 					
@@ -687,15 +703,22 @@ var rest = myApp.controller(
 							// for sftp processor with keys, password will not be available and hence 
 							// store secret call to KMS is not applicable for this case
 							if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
-							
-								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
-								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
-								$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
 								
-								storeSecret($scope.secretUrl, base64EncodedSecret, i);
+								// if the existing userName and password remains same then no need to got for a KMS call
+								if ($scope.oldLoginDetails.password === $scope.secret && $scope.oldLoginDetails.userId === $scope.credUsrName) {
+									addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password = $scope.oldLoginDetails.passwordPguidInKMS;
+									break;
+								} else {
+									$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
+									base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
+									$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
+									
+									storeSecret($scope.secretUrl, base64EncodedSecret, i);
+									
+									saveProcessor = true;
+									break;
+								}
 								
-								saveProcessor = true;
-								break;
 							}
 						}
 					
@@ -704,8 +727,7 @@ var rest = myApp.controller(
 						}
                 }
             };
-			
-			$scope.clearSecret = false;		
+	
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
@@ -721,6 +743,7 @@ var rest = myApp.controller(
 										$scope.processorReviseAfterKM();
 									} else {
 									    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+										$scope.clearCredentialProps();	
 										$scope.block.unblockUI();										
 										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
@@ -729,6 +752,7 @@ var rest = myApp.controller(
 							);
 						} else {
 						    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+							$scope.clearCredentialProps();	
 							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
@@ -748,6 +772,7 @@ var rest = myApp.controller(
 							handleConflictInKMSDuringStoredSecretAddition($scope.secretUrl, base64EncodedSecret, a);
 						}else {
 						    $scope.setTypeDuringProtocolEdit(addRequest.addProcessorToMailBoxRequest.processor.protocol);
+							$scope.clearCredentialProps();	
 							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to add stored secret", 'error');
 							return;
@@ -772,6 +797,7 @@ var rest = myApp.controller(
 									}
 									else {
 									    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+										$scope.clearCredentialProps();	
 										$scope.block.unblockUI();										
 										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
@@ -780,6 +806,7 @@ var rest = myApp.controller(
 							);
 						} else {
 						    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+							$scope.clearCredentialProps();	
 							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
@@ -788,29 +815,29 @@ var rest = myApp.controller(
 				);
 			}
 			
-			$scope.creationFailed = false;
 			$scope.processorReviseAfterKM = function() {
 				//$log.info($filter('json')(editRequest));
 				$scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
 					function (data, status) {
 						if (status === 200 || status === 400) {
-							$scope.editProcessor($scope.processor.guid, false);
 							if (data.reviseProcessorResponse.response.status === 'success') {
+								$scope.editProcessor($scope.processor.guid, false);
 								if($scope.isFileSelected)  $scope.isFileSelected = false;
 								$scope.isPrivateKeySelected = false;
 								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
 							} else {	
-                                $scope.creationFailed = true;						    
-								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');								
+								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');	
+								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
+							    $scope.clearCredentialProps();														
+								
 							}
 							//$scope.readOnlyProcessors = true;
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
-							$scope.editProcessor($scope.processor.guid, false);
 							$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
-                            $scope.creationFailed = true;
+						    $scope.clearCredentialProps();								
 							showSaveMessage("Error while saving processor", 'error');
 						}
 						$scope.block.unblockUI();
@@ -831,7 +858,7 @@ var rest = myApp.controller(
 							$scope.isEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
-								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
+							showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
 							} else {
 							    $scope.clearCredentialProps();								
 								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
@@ -848,17 +875,24 @@ var rest = myApp.controller(
 				);
 			};
 			//clear Credential properties if processor creation failed.
-			$scope.clearCredentialProps = function () {	              			 					   
-				   if ($scope.clearSecret || !$scope.isEdit) {
-					   for (var i = 0; i < $scope.processorCredProperties.length; i++) {
-						   if ($scope.processorCredProperties[i].credentialType === "LOGIN_CREDENTIAL"){
-							  $scope.processorCredProperties[i].password = ''; 
-							  $scope.clearSecret = false;
-                              $scope.creationFailed	= false;						  
-						   }                    				   
-                       }		   
-					   
-					}					   	   		
+			$scope.clearCredentialProps = function () {	
+				
+				for (var i = 0; i < $scope.processorCredProperties.length; i++) {
+					if ($scope.processorCredProperties[i].credentialType === "LOGIN_CREDENTIAL" && $scope.processorCredProperties[i].valueProvided == true) {
+						
+						// if both old login details and current login details remains same, 
+						// then there will not be any call to KMS so just retain the password details 
+						// without clearing it
+						if  ($scope.oldLoginDetails.password === $scope.secret && $scope.oldLoginDetails.userId === $scope.processorCredProperties[i].userId) {
+							// the password is set again otherwise KMS guid will be displayed
+							$scope.processorCredProperties[i].password = $scope.secret;
+						} else { // if not there will be a call to KMS for secret creation/revision so clear the password
+							$scope.processorCredProperties[i].password = ''; 
+							$scope.$broadcast('mandatePassword');
+						}
+
+					}                    				   
+                }		   
 			}
             $scope.clearProps = function () {
                 $scope.processor.processorPropertiesInTemplateJson.credentialProperties = [];
@@ -880,9 +914,6 @@ var rest = myApp.controller(
                     $scope.showSSHKeysSection = false;
                     $scope.showTruststoreSection = false;
                     $scope.isEdit = false;
-					$scope.oldSecret = '';
-					$scope.creationFailed = false;
-					$scope.clearSecret = false;
                     $scope.isProcessorTypeHTTPListener = false;
 					//GIT URL
 				    $scope.script = '';
@@ -1001,6 +1032,9 @@ var rest = myApp.controller(
 			$scope.resetProcessorType = function(proceesorType) {
 			    $scope.selectedProcessorType = proceesorType.value;
 			    $scope.initialSetUp();
+			    $scope.clearOldLoginDetails();
+			    //To notify passwordDirective to clear the password and error message
+                $scope.doSend();
                 switch ($scope.selectedProcessorType) {
                   case "SWEEPER":
 					$scope.isProcessorTypeSweeper = true;
@@ -1063,6 +1097,9 @@ var rest = myApp.controller(
 				 $scope.isProcessorTypeDropbox = false;
 				 var protocalName = potocolType.value;
 				 $scope.initialSetUp();
+				 $scope.clearOldLoginDetails();
+				 //To notify passwordDirective to clear the password and error message
+	             $scope.doSend();
 				 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocalName)];
 				 if (!$scope.processor.protocol) {
 					 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];

@@ -613,3 +613,8 @@ input::-moz-focus-inner {
 .button_width_2 {
 	width: 176px;
 }
+
+.error_msg_color {
+	color: #FF0000;
+
+}

@@ -121,6 +121,9 @@ subprojects {
 
         //Dependency for ACL integration 
         compile 'com.liaison.commons.acl:acl-commons-lib:6.+'
+
+        compile ([group: 'com.liaison', name: 'lib_thread_management', version: '1.+', classifier: 'core'],
+                 [group: 'com.liaison', name: 'lib_thread_management', version: '1.+', classifier: 'rest'])
      }
 
 }
