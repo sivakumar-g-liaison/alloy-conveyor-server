@@ -13,11 +13,9 @@ package com.liaison.mailbox.services.unit.test;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import com.liaison.mailbox.service.queue.ProcessorSendQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.liaison.mailbox.service.queue.ProcessorQueue;
-
 
 
 /**
@@ -39,7 +37,7 @@ public class HornetQMessageListnerTest {
 	 public void postToQueue() throws NamingException, JMSException,Exception{
 
 		for(int i=0;i<2;i++){
-            ProcessorQueue.getInstance().sendMessages("mynewID"+i);
+            ProcessorSendQueue.getInstance().sendMessages("mynewID"+i);
 		}
 		logger.debug("Done posting");		 
 	 }	

@@ -193,7 +193,7 @@
          },
 		 {
 			"name": "errorFileLocation",
-			"displayName": "Error File Location",
+			"displayName": "Error Archive Directory",
 			"type": "textarea",
 			"value": "",
 			"readOnly": false,
@@ -209,7 +209,7 @@
           },
 		  {
 			"name": "processedFileLocation",
-			"displayName": "Processed File Location",
+			"displayName": "Archive Directory",
 			"type": "textarea",
 			"value": "",
 			"readOnly": false,
