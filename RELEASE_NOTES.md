@@ -1,3 +1,7 @@
+2.4.7
+-------------------------------
+* Updated queue host names for uat and prod for discovery
+
 2.4.6
 -------------------------------
 * Fix list of queue servers for discovery.
