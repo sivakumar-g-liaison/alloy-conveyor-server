@@ -1,3 +1,7 @@
+2.4.7-SNAPSHOT
+-------------------------------
+* GMB-578	- Logging Improvement in MailboxSLA Service
+
 2.4.6-SNAPSHOT
 -------------------------------
 * Integrated JMS lib message bus
