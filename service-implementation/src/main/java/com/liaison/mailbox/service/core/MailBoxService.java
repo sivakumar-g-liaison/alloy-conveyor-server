@@ -38,6 +38,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
@@ -408,11 +409,12 @@ public class MailBoxService {
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
             ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-            processorStaged.setValues(MailBoxUtil.getGUID(),
-                    processor,
-                    workTicket.getFileName(),
-                    ExecutionState.STAGED,
-                    slaVerificationStatus);
+            
+            if (ProcessorType.FILEWRITER.equals(processor.getProcessorType().name())) {
+            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, "NONE", ExecutionState.STAGED, slaVerificationStatus);
+            } else {
+            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, workTicket.getFileName(), ExecutionState.STAGED, slaVerificationStatus);
+            }
             fsm.addState(processorStaged);
 
             processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
