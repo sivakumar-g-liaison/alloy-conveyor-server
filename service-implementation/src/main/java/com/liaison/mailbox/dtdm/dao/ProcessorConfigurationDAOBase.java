@@ -805,4 +805,31 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }	
 		return query;		
 	}
+
+	@Override
+	public List<Processor> findProcessorsByName(String processorName) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        List<Processor> processors = new ArrayList<Processor>();
+        Processor processor = null;
+
+		try {
+			
+            List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME)
+            		.setParameter(PRCSR_NAME, processorName)
+            		.getResultList();
+			Iterator<?> iter = proc.iterator();
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return processors;		
+	}
 }
