@@ -32,6 +32,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
 	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
 	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
+	public static final String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -157,4 +158,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	* @return  processor
  	*/
  	public Processor findActiveProcessorById(String id);
+ 	
+	/**
+	 * Retrieves all processors by given Name
+	 * 
+	 * @param processorName
+	 * @return List of Processors
+	 */
+	public List<Processor> findProcessorsByName(String processorName);
 }

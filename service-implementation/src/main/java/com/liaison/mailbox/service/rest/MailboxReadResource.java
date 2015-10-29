@@ -25,6 +25,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -88,16 +89,18 @@ public class MailboxReadResource extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
-
 				LOG.info("The requested type is {}", type);
-				if (MailBoxConstants.PROFILE.equalsIgnoreCase(type)) {
-					return new ProfileConfigurationService().getProfileByGuid(guid);
-				} else if (MailBoxConstants.PROCESSOR.equalsIgnoreCase(type)) {
-					return new ProcessorConfigurationService().getProcessor(guid);
-				} else {
-					return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Unsupported entity type");
+				switch (type.toLowerCase()) {
+				
+					case MailBoxConstants.TYPE_PROFILE :
+						 return new ProfileConfigurationService().getProfileByGuid(guid);
+					case MailBoxConstants.TYPE_PROCESSOR :
+						 return new ProcessorConfigurationService().getProcessor(guid);
+					case MailBoxConstants.TYPE_MAILBOX :
+						 return new MailBoxConfigurationService().readMailbox(guid);
+					default:
+						 return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Unsupported entity type");
 				}
-
 			}
 		};
 		worker.actionLabel = "MailboxReadResource.readEntity()";

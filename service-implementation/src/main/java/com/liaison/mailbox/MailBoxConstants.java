@@ -90,8 +90,7 @@ public interface MailBoxConstants {
 	public final static String PLATFORM_NAME = "SERVICE_BROKER";
 	public final static String SERVICE_NAME = "KEYMANAGER";
 	public final static String ROLE_NAME = "MailboxAdmin";
-
-
+	
 	public static final String MAILBOX_ID = "mailboxId";
 
 	// properties used to configure sla rules of an mailbox
@@ -338,5 +337,9 @@ public interface MailBoxConstants {
 
     public static int ENCRYPT_MODE = 1;
     public static int DECRYPT_MODE = 2;
-
+    
+	// Added for read resource for migrator services 
+    public static String TYPE_MAILBOX = "mailbox";
+    public static String TYPE_PROCESSOR = "processor";
+    public static String TYPE_PROFILE = "profile";
 }

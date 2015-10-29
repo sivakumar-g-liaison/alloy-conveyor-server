@@ -77,7 +77,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
                             query = "select processor from Processor processor"
                                     + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID)
+                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID),
+    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
+    				query = "select processor from Processor processor"
+    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
