@@ -67,7 +67,7 @@ public class MailboxSLAWatchDogService {
 	private String uniqueId;
 	
 	public MailboxSLAWatchDogService(){
-		setUniqueId(MailBoxUtil.getGUID());
+		uniqueId = MailBoxUtil.getGUID();
 	}
 	/**
 	 * Internal logger for watch dog services
@@ -516,9 +516,5 @@ public class MailboxSLAWatchDogService {
 
         return msgBuf.toString();
     }
-    
-    public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
-	}
 
 }
