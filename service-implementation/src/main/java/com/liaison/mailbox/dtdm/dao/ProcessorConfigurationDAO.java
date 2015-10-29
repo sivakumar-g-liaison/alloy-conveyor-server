@@ -114,7 +114,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieves list of all processors  
 	 * @return list of processors
 	 */
-	public List <Processor> findAllActiveProcessors(); 
+	public List<Processor> findAllActiveProcessors(); 
 	
 	/**
  	* Retrieves processors by mailbox guid and processor name
@@ -132,25 +132,25 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieves list of all processors  
 	 * @return list of processors
 	 */
-	public List <Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
+	public List<Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
 	
 	/**
 	 * Retrieve the mailbox names  
 	 * @return list of mailboxes
 	 */
-	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
+	public List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
 	 * Retrieve the processor names  
 	 * @return list of processors
 	 */
-	public List<Processor>getProcessorNames(GenericSearchFilterDTO searchDTO);
+	public List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
 	 * Retrieve the profile names  
 	 * @return list of profiles
 	 */
-	public List<ScheduleProfilesRef>getProfileNames(GenericSearchFilterDTO searchDTO);
+	public List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
 	 * Retrieves count of filtered processors  

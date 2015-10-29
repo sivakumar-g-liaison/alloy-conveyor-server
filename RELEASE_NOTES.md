@@ -1,10 +1,7 @@
-2.4.7-SNAPSHOT
--------------------------------
-* GMB-632	- Rename the menu from "Executing Processors" to "Running Processors" and Add 'processor name and Processor Id' filter in Search Processor screen.
-
 2.4.6-SNAPSHOT
 -------------------------------
 * Integrated JMS lib message bus
+* GMB-632	- Rename the menu from "Executing Processors" to "Running Processors" and Add 'processor name and Processor Id' filter in Search Processor screen.
 
 2.4.5-SNAPSHOT
 -------------------------------
