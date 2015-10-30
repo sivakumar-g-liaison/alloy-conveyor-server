@@ -100,8 +100,13 @@ public class TypeaheadResource extends AuditedResource {
 					LOG.debug("Get Mailbox Names");
 					searchFilter.setMbxName(name);
 					return processor.getMailBoxNames(searchFilter);
-				} else {
+				} else if (type.equals("processor")) {
 
+					LOG.debug("Get processor Names");
+					searchFilter.setProcessorName(name);
+					return processor.getProcessorNames(searchFilter);
+				} else {
+					
 					LOG.debug("Get profile Names");
 					searchFilter.setProfileName(name);
 					return processor.getProfileNames(searchFilter);
