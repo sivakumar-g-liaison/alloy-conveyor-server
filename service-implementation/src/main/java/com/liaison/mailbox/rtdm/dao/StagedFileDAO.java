@@ -45,8 +45,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	public void persistStagedFile(WorkTicket workticket, String processorId);
-	public StagedFile findStagedFilesOfUploadersBasedOnMeta(String processorId, String fileName);
-	public List <StagedFile> findStagedFilesOfProcessorsBasedOnMeta(String processorId);
+	public void persistStagedFile(WorkTicket workticket, String processorId, String processorType);
+	public StagedFile findStagedFilesByProcessorId(String processorId, String fileName);
+	public List <StagedFile> findStagedFilesByProcessorId(String processorId);
 
 }

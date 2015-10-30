@@ -256,7 +256,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
 
-		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 

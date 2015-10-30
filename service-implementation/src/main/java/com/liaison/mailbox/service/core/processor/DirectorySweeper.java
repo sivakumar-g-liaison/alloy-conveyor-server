@@ -18,7 +18,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
@@ -27,20 +26,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.script.ScriptException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.ISO8601Util;
@@ -48,11 +47,14 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -60,7 +62,6 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
-import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -80,25 +81,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 
-	private String pipeLineID;
+	private static final String AS2_TTL_DAYS = "com.liaison.mailbox.as2.mount.ttl.days";
+	private String pipelineId;
 	private List<Path> activeFiles = new ArrayList<>();
-	private String fileRenameFormat = null;
-    private static final String AS2_TTL_DAYS = "com.liaison.mailbox.as2.mount.ttl.days";
     protected int totalNumberOfDeletedFiles;
 
     public void setPipeLineID(String pipeLineID) {
-		this.pipeLineID = pipeLineID;
+		this.pipelineId = pipeLineID;
 	}
-
-    public String setFileRenameFormat(SweeperPropertiesDTO staticProp) {
-        if (MailBoxUtil.isEmpty(fileRenameFormat)) {
-            fileRenameFormat = (MailBoxUtil.isEmpty(staticProp.getFileRenameFormat()))
-                    ? MailBoxConstants.SWEEPED_FILE_EXTN
-                    : "." + staticProp.getFileRenameFormat();
-        }
-        return fileRenameFormat;
-    }
-
 
 	@SuppressWarnings("unused")
 	private DirectorySweeper() {
@@ -123,7 +113,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			 } else {
 				run(getReqDTO().getExecutionId());
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -137,7 +127,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             // retrieve required properties
             SweeperPropertiesDTO staticProp = (SweeperPropertiesDTO) getProperties();
-            setFileRenameFormat(staticProp);
 
             // Validation of the necessary properties
             if (MailBoxUtil.isEmpty(inputLocation)) {
@@ -151,10 +140,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             if (staticProp.isAs2MountCleanup()) {
 
             	LOGGER.info(constructMessage("AS2 Mount clean up starts"));
-				int ttlValue = (MailBoxUtil.isEmpty(staticProp.getAs2TtlDays()))
-							   ? MailBoxUtil.getEnvironmentProperties().getInt(AS2_TTL_DAYS)
-							   : Integer.parseInt(staticProp.getAs2TtlDays());
-            	deleteExpiredFilesInAS2MFTMount(inputLocation, ttlValue);
+
+            	deleteExpiredFilesInAS2MFTMount(inputLocation, staticProp);
+
             	long endTime = System.currentTimeMillis();
                 LOGGER.info(constructMessage("Number of files deleted {}"), totalNumberOfDeletedFiles);
                 LOGGER.info(constructMessage("Total time taken to delete files {}"), endTime - startTime);
@@ -162,7 +150,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	return;
             }
 
-            LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
+            LOGGER.debug("Is in-progress file list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
             								? sweepDirectory(inputLocation , false, staticProp)
             								: retryGenWrkTktForActiveFiles(activeFiles);
@@ -170,39 +158,29 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             if (workTickets.isEmpty()) {
             	LOGGER.info("There are no files to process.");
             } else {
+
                 LOGGER.debug("There are {} files to process", workTickets.size());
             	// Read from mailbox property - grouping js location
-            	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
+            	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
 
-            	String sweepedFileLocation = replaceTokensInFolderPath(staticProp.getSweepedFileLocation());
-            	if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
-                    LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
-
-            		// If the given sweeped file location is not available then system will create that.
-            		Path path = Paths.get(sweepedFileLocation);
-            		if (!Files.isDirectory(path)) {
-                        LOGGER.info("Creating Directories {}", path);
-                        Files.createDirectories(path);
-            		} else {
-                        LOGGER.info("Not creating, {} Is Directory", path);
-                    }
-            	}
-
-            	// Renaming the file
                 LOGGER.debug("ABOUT TO MARK AS SWEEPED");
-            	markAsSweeped(workTickets, fileRenameFormat, sweepedFileLocation);
+                persistPaylaodAndWorkticket(workTickets, staticProp);
 
             	if (workTicketGroups.isEmpty()) {
             		LOGGER.info("The file group is empty, so NOP");
             	} else {
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
-            			String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
+            			String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
             			LOGGER.info(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
 
             			// For glass logging
             			for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
+
+            	            //Fish tag global process id
+            	            ThreadContext.clearMap(); //set new context after clearing
+            	            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
             			    logToLens(inputLocation, wrkTicket);
             				LOGGER.info(constructMessage("Global PID",
@@ -211,6 +189,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        " submitted for file ",
             				        wrkTicket.getFileName()));
 
+            				//Delete the file
+            				delete(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
+            				LOGGER.info(constructMessage("Global PID",
+            				        seperator,
+            				        wrkTicket.getGlobalProcessId(),
+            				        " deleted the file ",
+            				        wrkTicket.getFileName()));
             			}
             		}
             	}
@@ -225,11 +210,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             LOGGER.info(constructMessage("Number of files processed {}"), workTickets.size());
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
-        } catch (MailBoxServicesException | IOException | URISyntaxException
-        		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
-        		| JSONException | IllegalAccessException | NoSuchFieldException e) {
+        } catch (MailBoxServicesException | IOException | JAXBException | JSONException | IllegalAccessException | NoSuchFieldException e) {
             LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
         	throw new RuntimeException(e);
+        } finally {
+        	//clear the context
+        	ThreadContext.clearMap();
         }
 	}
 
@@ -252,8 +238,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws NoSuchFieldException
 	 */
 
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws IOException, URISyntaxException,
-			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, IOException {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), root);
 		Path rootPath = Paths.get(root);
@@ -267,25 +252,22 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 				String fileName = file.getFileName().toString();
 				// Check if the file to be uploaded is included or not excluded
-                if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+				if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
                         fileName,
                         staticProp.getExcludedFiles())) {
                     continue;
                 }
 
                 LOGGER.debug("Sweeping file {}", file.toString());
-				if (!fileName.endsWith(fileRenameFormat)) {
-
-					if (MailBoxUtil.validateLastModifiedTolerance(file)) {
-						LOGGER.info(constructMessage("The file {} is in progress. So added in the in-progress list."), file.toString());
-                        activeFiles.add(file);
-						continue;
-					}
-					result.add(file);
+				if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+					LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
+					activeFiles.add(file);
+					continue;
 				}
+				result.add(file);
 			}
 		} catch (IOException e) {
-			throw e;
+			throw new RuntimeException(e);
 		}
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
@@ -305,42 +287,32 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	private String getPipeLineID() throws JAXBException, JsonParseException, JsonMappingException,
-							IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private String getPipeLineID() throws IllegalArgumentException, IllegalAccessException, IOException {
 
-		if (MailBoxUtil.isEmpty(this.pipeLineID)) {
-			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+		if (MailBoxUtil.isEmpty(this.pipelineId)) {
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
 			this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
 		}
 
-		return this.pipeLineID;
+		return this.pipelineId;
 	}
 
 	/**
 	 * Grouping the files based on the payload threshold and no of files threshold.
 	 *
-	 * @param workTickets
-	 *            Group of all workTickets in a WorkTicketGroup.
-	 * @return List of WorkTicketGroup
-	 * @throws ScriptException
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws NoSuchMethodException
-	 * @throws MailBoxServicesException
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
+	 * @param workTickets Group of all workTickets in a WorkTicketGroup.
+	 * @param staticProp sweeper properties
+	 * @return workticket group
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets) throws ScriptException,
-	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
-
 			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 		} else {
 
@@ -353,9 +325,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
 			for (WorkTicket workTicket : workTickets) {
 
-				if (canAddToGroup(workTicketGroup, workTicket)) {
+				if (canAddToGroup(workTicketGroup, workTicket, staticProp)) {
 					workTicketGroup.getWorkTicketGroup().add(workTicket);
 				} else {
+
 					if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
 						workTicketGroups.add(workTicketGroup);
 					}
@@ -375,8 +348,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 
-
-
     /**
 	 * Method to post meta data to rest service/ queue.
 	 *
@@ -394,79 +365,46 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	/**
-	 * Method is used to rename the processed files using given file rename
-	 * format. If sweepedFileLocation is available in the mailbox files will be moved to the given
-	 * location.
+	 * Method to persist the payload and workticket details in spectrum
 	 *
-	 * @param workTickets
-	 *            WorkTickets list.
-	 * @param fileRenameFormat
-	 *            The file rename format
-	 * @throws IOException
-	 * @throws JSONException
-	 * @throws FS2Exception
-	 * @throws URISyntaxException
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws IllegalAccessException
+	 * @param workTickets WorkTickets list.
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-	public void markAsSweeped(List<WorkTicket> workTickets, String fileRenameFormat, String sweepedFileLocation)
-			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public void persistPaylaodAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
 
-		Path target = null;
-		Path oldPath = null;
-		Path newPath = null;
-		PayloadDetail payloadDetail = null;
-
-
-		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
-			target = Paths.get(sweepedFileLocation);
-		}
-
-		LOGGER.info("Renaming the processed files");
+		LOGGER.info(constructMessage("Persisting paylaod and workticket in spectrum starts"));
+		StagedFileDAO stageDao = new StagedFileDAOBase();
 		for (WorkTicket workTicket : workTickets) {
 
 			File payloadFile = new File(workTicket.getPayloadURI());
-			oldPath = payloadFile.toPath();
-			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
-						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 
 			Map <String, String> properties = new HashMap <String, String>();
 			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-			if(!ttlMap.isEmpty())
-			{
-			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			if (!ttlMap.isEmpty()) {
+				Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+				workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
 			}
-            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
-			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
-			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperStaticProperties.isLensVisibility()));
-			properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperStaticProperties.getPipeLineID());
+
+			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+			properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
 
 			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
+
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+				FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+				workTicket.setPayloadURI(metaSnapshot.getURI().toString());
 			}
-
-            if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
-                LOGGER.debug("Deleting file after sweep");
-                delete(oldPath);
-            } else {
-                LOGGER.debug("Moving file after sweep");
-                move(oldPath, newPath);
-            }
-
-			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
-
+			
+			// persist the workticket
+			StorageUtilities.persistWorkTicket(workTicket, properties);
+			stageDao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
 		}
 
-		LOGGER.info("Renaming the processed files - done");
-
-
+		LOGGER.info(constructMessage("Payload and workticket are persisted successfully"));
 	}
 
 	/**
@@ -478,62 +416,20 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 *            The target location
 	 * @throws IOException
 	 */
-	private void move(Path file, Path target) throws IOException {
-		Files.move(file, target, StandardCopyOption.REPLACE_EXISTING);
+	private void delete(String file) throws IOException {
+		Files.deleteIfExists(Paths.get(file));
 	}
 
 	/**
-	 * Method is used to move the file to the sweeped folder.
+	 * Returns List of WorkTickets from java.io.File
 	 *
-	 * @param file
-	 *            The source location
-	 * @param target
-	 *            The target location
-	 * @throws IOException
-	 */
-	private void delete(Path file) throws IOException {
-		Files.deleteIfExists(file);
-	}
-
-	/**
-	 * Method is used to construct the MetaData JSON from the workticketgroup dto.
-	 *
-	 * @param workTicketGroup
-	 *            The workticketGroup object
-	 * @return String MetaData JSON string
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 * @throws JAXBException
-	 */
-
-	private String constructMetaDataJson(WorkTicketGroup workTicketGroup) throws JsonGenerationException,
-	JsonMappingException, IOException, JAXBException {
-
-        LOGGER.debug("Construct MetaData for workTicketGroup of size :{}, {}", workTicketGroup.getWorkTicketGroup().size(), workTicketGroup.getWorkTicketGroup().toArray());
-        String jsonResponse = JAXBUtility.marshalToJSON(workTicketGroup);
-        LOGGER.debug("Constructed MetaData: {} ", jsonResponse);
-
-        return jsonResponse;
-    }
-
-	/**
-	 * Returns List of WorkTickets from  java.io.File
-	 *
-	 * @param result
-	 *            workTickets
-	 * @return list of workTickets
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 * @throws IllegalAccessException
+	 * @param result workTickets
+	 * @return list of worktickets
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-	private List<WorkTicket> generateWorkTickets(List<Path> result) throws JAXBException, IOException,
-								NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private List<WorkTicket> generateWorkTickets(List<Path> result) throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		List<WorkTicket> workTickets = new ArrayList<>();
 		WorkTicket workTicket = null;
@@ -553,6 +449,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			workTicket = new WorkTicket();
             LOGGER.debug("Payload URI {}", path.toAbsolutePath().toString());
 			workTicket.setPayloadURI(path.toAbsolutePath().toString());
+			additionalContext.put(MailBoxConstants.KEY_FILE_PATH, path.toAbsolutePath().toString());
 
             LOGGER.debug("Pipeline ID {}", getPipeLineID());
 			workTicket.setPipelineId(getPipeLineID());
@@ -598,18 +495,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 *
 	 * @param activeFilesList
 	 *            list of recently update files
-	 * @param timelimit
-	 *            period of the recent modifications
-	 * @return list of file attribute dto
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws IllegalAccessException
+	 * @return list of worktickets
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList)
-			throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList) throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		List<Path> files = new ArrayList<>();
 		for (Path file : activeFilesList) {
@@ -619,31 +510,25 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 				files.add(file);
 				continue;
 			}
-			LOGGER.info("The file {} is still in progress. So it is removed from the in-progress list.", file.getFileName());
+			LOGGER.info("The file {} is still modified within the tolerance. So it is removed from the current sweep list.", file.getFileName());
 		}
 
 		activeFilesList.clear();//Clearing the recently updated files after the second call.
 		return generateWorkTickets(files);
 	}
 
-
 	/**
 	 * Use to validate the given file can be added in the given group.
 	 *
-	 * @param fileGroup
-	 *            The file attributes group
-	 * @param fileAttribute
-	 *            The file attribute to be added in the group
-	 * @return true if it can be added false otherwise
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
+	 * @param workTicketGroup workticket group
+	 * @param workTicket workticket
+	 * @param staticProp sweeper properties
+	 * @return true or false based on the size and number of files check
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, IOException {
+	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
@@ -651,9 +536,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		try {
 
 			// retrieve required properties
-            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
-			String payloadSize = sweeperStaticProperties.getPayloadSizeThreshold();
-			String maxFile = sweeperStaticProperties.getNumOfFilesThreshold();
+			String payloadSize = staticProp.getPayloadSizeThreshold();
+			String maxFile = staticProp.getNumOfFilesThreshold();
 
 			if (!MailBoxUtil.isEmpty(payloadSize)) {
 				maxPayloadSize = Long.parseLong(payloadSize);
@@ -726,7 +610,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
-			//e.printStackTrace();
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
 					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
 		}
@@ -770,12 +653,16 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Method to delete expired files on AS2 Mount
 	 *
 	 * @param payloadLocation location to check and delete expired files
-	 * @param ttlValue time to live for each file since created time
-	 * @throws IOException
+	 * @param staticProp SweeperPropertiesDTO to retrieve the TTL
+	 * @throws IOException 
 	 */
-	private void deleteExpiredFilesInAS2MFTMount(String payloadLocation, int ttlValue) throws IOException {
+	private void deleteExpiredFilesInAS2MFTMount(String payloadLocation, SweeperPropertiesDTO staticProp) throws IOException {
 
-		LOGGER.debug("going to delete files in AS2 Mount location {} based on the ttl value {}", payloadLocation, ttlValue);
+		int ttlValue = (MailBoxUtil.isEmpty(staticProp.getAs2TtlDays()))
+				   ? MailBoxUtil.getEnvironmentProperties().getInt(AS2_TTL_DAYS)
+				   : Integer.parseInt(staticProp.getAs2TtlDays());
+	    LOGGER.info(constructMessage("Delete files in AS2 Mount location {} and the TTL value is {}"), payloadLocation, ttlValue);
+
 		Path rootPath = Paths.get(payloadLocation);
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(true))) {
 
@@ -783,9 +670,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 				if (isFileExpired(path, ttlValue)) {
 					File directory = path.toFile();
-					LOGGER.debug("The file {} has expired, so deleting it in As2 Mount location", path.getFileName());
+					LOGGER.info(constructMessage("The file {} has expired, so deleting it in As2 Mount location"), path.getFileName());
 					FileUtils.deleteDirectory(directory);
-					LOGGER.debug("The expired file {} was deleted successfully", path.getFileName());
+					LOGGER.info(constructMessage("The expired file {} was deleted successfully"), path.getFileName());
 					totalNumberOfDeletedFiles++;
 				}
 			}

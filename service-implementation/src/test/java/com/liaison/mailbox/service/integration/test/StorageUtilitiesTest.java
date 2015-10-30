@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2ObjectHeaders;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 /**
@@ -61,9 +61,8 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
 
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
-
-		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
+		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);
@@ -115,8 +114,8 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
 
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
-		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
+		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);
@@ -144,8 +143,8 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
 
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
-		System.out.println(detail.getMetaSnapshot().getURI());
+		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+		System.out.println(metaSnapshot.getURI());
 
 	}
 

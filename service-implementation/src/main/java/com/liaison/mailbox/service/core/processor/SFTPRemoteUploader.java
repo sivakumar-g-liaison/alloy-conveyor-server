@@ -327,7 +327,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	 }

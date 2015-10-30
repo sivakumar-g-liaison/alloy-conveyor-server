@@ -259,7 +259,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	protected void logGlassMessage(List<String> files) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        List <StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfProcessorsBasedOnMeta(configurationInstance.getPguid());
+        List <StagedFile> stagedFiles = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid());
 
         for (StagedFile stagedFile : stagedFiles) {
 

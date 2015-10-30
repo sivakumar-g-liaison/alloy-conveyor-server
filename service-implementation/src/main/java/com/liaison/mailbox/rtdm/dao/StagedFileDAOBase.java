@@ -207,7 +207,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	}
 
     @Override
-    public void persistStagedFile(WorkTicket workticket, String processorId) {
+    public void persistStagedFile(WorkTicket workticket, String processorId, String processorType) {
 
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
         StagedFile stagedFileEntity = null;
@@ -218,7 +218,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
             stagedFileDto.setExpirationTime("0");
-            stagedFileDto.setMeta(processorId);
+            stagedFileDto.setProcessorId(processorId);
+            stagedFileDto.setProcessorType(processorType);
 
             if (stagedFileEntity != null) {
                 stagedFileEntity.copyFromDto(stagedFileDto, false);
@@ -241,27 +242,27 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 	@SuppressWarnings("unchecked")
     @Override
-	public StagedFile findStagedFilesOfUploadersBasedOnMeta(String processorId, String fileName) {
+	public StagedFile findStagedFilesByProcessorId(String processorId, String fileName) {
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 
 		try {
 
 			// query
-			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.fileMetaData =:")
+			StringBuilder query = new StringBuilder()
+					.append("select sf from StagedFile sf")
+					.append(" where sf.processorId =:")
 					.append(PROCESSOR_ID)
 					.append(" and sf.stagedFileStatus =:")
 					.append(STATUS)
-			        .append(" and sf.fileName =:")
-			        .append(FILE_NAME);
+					.append(" and sf.fileName =:")
+					.append(FILE_NAME);
 
-			List<StagedFile> stagedFiles = em
-								.createQuery(query.toString())
-								.setParameter(PROCESSOR_ID, processorId)
-								.setParameter(STATUS, EntityStatus.ACTIVE.value())
-								.setParameter(FILE_NAME, fileName)
-								.getResultList();
+			List<StagedFile> stagedFiles = em.createQuery(query.toString())
+					.setParameter(PROCESSOR_ID, processorId)
+					.setParameter(STATUS, EntityStatus.ACTIVE.value())
+					.setParameter(FILE_NAME, fileName)
+					.getResultList();
 
 			return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
 		} finally {
@@ -274,7 +275,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List <StagedFile> findStagedFilesOfProcessorsBasedOnMeta(String processorId) {
+	public List<StagedFile> findStagedFilesByProcessorId(String processorId) {
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 
@@ -282,16 +283,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			// query
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.fileMetaData =:")
+					.append(" where sf.processorId =:")
 					.append(PROCESSOR_ID)
 					.append(" and sf.stagedFileStatus =:")
 					.append(STATUS);
 
-			List<StagedFile> stagedFiles = em
-								.createQuery(query.toString())
-								.setParameter(PROCESSOR_ID, processorId)
-								.setParameter(STATUS, EntityStatus.ACTIVE.value())
-								.getResultList();
+			List<StagedFile> stagedFiles = em.createQuery(query.toString())
+					.setParameter(PROCESSOR_ID, processorId)
+					.setParameter(STATUS, EntityStatus.ACTIVE.value()).getResultList();
 
 			return stagedFiles;
 		} finally {

@@ -278,7 +278,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				executeSFTPRequest();
 			}
 
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 

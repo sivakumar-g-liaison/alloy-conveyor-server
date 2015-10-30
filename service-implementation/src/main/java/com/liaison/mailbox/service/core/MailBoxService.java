@@ -19,10 +19,12 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -338,6 +340,7 @@ public class MailBoxService {
 	    String mailboxId = null;
 	    String processorId = null;
 	    String payloadURI = null;
+	    String processorType = null;
 
 	    WorkTicket workTicket = null;
 	    Processor processor = null;
@@ -355,6 +358,10 @@ public class MailBoxService {
             LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
+            //Fish tag global process id
+            ThreadContext.clearMap(); //set new context after clearing
+            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
 
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
@@ -400,6 +407,7 @@ public class MailBoxService {
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }
 
+            processorType = processor.getProcessorType().name();
             glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcsrProtocol(), processor.getProcessorType().name());
 			
             // determine SLA status
@@ -427,7 +435,7 @@ public class MailBoxService {
             FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
-                    processor.getProcessorType().name(),
+            		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid(),
@@ -447,7 +455,7 @@ public class MailBoxService {
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
-                    processor.getProcessorType().name(),
+            		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid(),
@@ -459,7 +467,7 @@ public class MailBoxService {
             	StagedFileDAOBase dao = new StagedFileDAOBase();
 
             	//THIS IS OVERWRITE TRUE CASE AND OLD FILE WILL BE OVERWRITTEN
-            	StagedFile stagedFile = dao.findStagedFilesOfUploadersBasedOnMeta(processor.getPguid(), workTicket.getFileName());
+            	StagedFile stagedFile = dao.findStagedFilesByProcessorId(processor.getPguid(), workTicket.getFileName());
             	//persist staged file to get the gpid during uploader
             	if (null != stagedFile) {
 
@@ -468,7 +476,7 @@ public class MailBoxService {
             		dao.merge(stagedFile);
             		logDuplicateStatus(processor, stagedFile, workTicket.getGlobalProcessId());
             	}
-            	dao.persistStagedFile(workTicket, processor.getPguid());
+            	dao.persistStagedFile(workTicket, processor.getPguid(), processorType);
             }
 
             // send notification for successful file staging
@@ -483,7 +491,7 @@ public class MailBoxService {
                 LOG.error("File Staging failed", e);
             } else {
                 LOG.error("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : File Staging failed : {}",
-                        processor.getProcessorType().name(),
+                		processorType,
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),
                         processor.getMailbox().getPguid(),
@@ -509,6 +517,9 @@ public class MailBoxService {
             // send email to the configured mail id in case of failure
             EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
+        } finally {
+        	//Clearing thread context map
+        	ThreadContext.clearMap();
         }
 
 	}

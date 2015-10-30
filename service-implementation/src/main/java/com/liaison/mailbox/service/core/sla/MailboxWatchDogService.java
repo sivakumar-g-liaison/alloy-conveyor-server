@@ -27,6 +27,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.model.StagedFile;
@@ -83,7 +84,9 @@ public class MailboxWatchDogService {
 
 			// query
 			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.filePath is not null and sf.stagedFileStatus =:")
+					.append(" where sf.processorType != '")
+					.append(ProcessorType.FILEWRITER.name())
+					.append("' and sf.stagedFileStatus =:")
 					.append(StagedFileDAO.STATUS);
 
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())

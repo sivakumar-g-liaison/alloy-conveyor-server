@@ -170,7 +170,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public ProcessorPropertyUITemplateDTO getPropertiesInTemplateJsonFormat() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public ProcessorPropertyUITemplateDTO getPropertiesInTemplateJsonFormat() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
 
 		if (null == processorPropertiesTemplate) {
 			processorPropertiesTemplate = ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(configurationInstance.getProcsrProperties(), configurationInstance);
@@ -190,7 +190,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public StaticProcessorPropertiesDTO getProperties() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public StaticProcessorPropertiesDTO getProperties() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		if (null == staticProcessorProperties) {
 			staticProcessorProperties = ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(configurationInstance.getProcsrProperties(), configurationInstance);
@@ -917,7 +917,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     protected void logGlassMessage(String message, File file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getName());
 
         if (null != stagedFile) {
 
