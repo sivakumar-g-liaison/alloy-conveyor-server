@@ -263,6 +263,11 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		try {
 
 			ScheduleProfilesRef profile = configDao.find(ScheduleProfilesRef.class, guid);
+			
+			// if profile is null then try to retrieve profile by Name.
+			if (null == profile) {
+				profile = configDao.findProfileByName(guid);
+			}
 			if (null != profile) {
 
 				ProfileDTO profileDTO = new ProfileDTO();
@@ -275,7 +280,6 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			}
 
 			LOG.debug("Exiting from get profile by guid operation.");
-
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {

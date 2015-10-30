@@ -31,6 +31,7 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String SCHD_PROF_NAME = "schd_name";
 	public static final String TENANCY_KEYS = "tenancy_keys";
 	public static final String FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
+	public static final String GET_MBX_BY_NAME = "MailBox.getMailboxByName";
 
 	public int getMailboxCountByProfile(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys);
 	public List<MailBox> find(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
@@ -45,4 +46,12 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	 * @return List of Mailbox Ids linked to given tenancykeys
 	 */
 	public List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys);
+	
+	/**
+	 * retrieve mailbox based on given name
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public MailBox getMailboxByName(String name);
 }

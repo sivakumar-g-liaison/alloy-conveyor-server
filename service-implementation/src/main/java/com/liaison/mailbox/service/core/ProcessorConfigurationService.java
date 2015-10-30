@@ -1045,20 +1045,41 @@ public class ProcessorConfigurationService {
 
 			LOGGER.debug("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
+			List <Processor> processors = null;
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
-
-			if (processor == null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
+			
+			// if read by guid fails try to read processor by given name
+			if (null == processor) {
+				processors = config.findProcessorsByName(processorGuid);
 			}
 
-			ProcessorDTO dto = new ProcessorDTO();
-			dto.copyFromEntity(processor, true);
-
-			serviceResponse.setProcessor(dto);
+			if (processor == null && processors.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
+			}
+			
+			// if processor is available then it is for read processor by guid 
+			if (null != processor) {
+				
+				ProcessorDTO dto = new ProcessorDTO();
+				dto.copyFromEntity(processor, true);
+				serviceResponse.setProcessor(dto);
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+				LOGGER.debug("Exit from get processor by guid.");
+				return serviceResponse;
+			}
+			
+			// This is for retrieving list of processors by Name
+			List<ProcessorDTO> processorDtos = new ArrayList<>();
+			for (Processor procsr : processors) {
+				ProcessorDTO dto = new ProcessorDTO();
+				dto.copyFromEntity(procsr, true);
+				processorDtos.add(dto);
+			}
+			serviceResponse.setProcessors(processorDtos);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
-			LOGGER.debug("Exit from get processor.");
+			LOGGER.debug("Exit from get processor by name.");
 			return serviceResponse;
 
 		} catch (Exception e) {
