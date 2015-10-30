@@ -680,16 +680,21 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			
+			if (null == guid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
 
 			// while retrieving mailbox first preference will be given to guid.
 			// if mailbox is null then we will try to retrieve mailbox by name
 			MailBox mailBox = configDao.find(MailBox.class, guid);
 			if (null == mailBox) {
 				mailBox = configDao.getMailboxByName(guid);
-			}
-			if (mailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid,
-						Response.Status.BAD_REQUEST);
+				if (null == mailBox) {
+					throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MAILBOX,
+							Response.Status.BAD_REQUEST);
+				}
 			}
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();

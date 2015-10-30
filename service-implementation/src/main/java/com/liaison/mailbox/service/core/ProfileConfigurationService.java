@@ -261,6 +261,11 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
 		try {
+			
+			if (null == guid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
 
 			ScheduleProfilesRef profile = configDao.find(ScheduleProfilesRef.class, guid);
 			

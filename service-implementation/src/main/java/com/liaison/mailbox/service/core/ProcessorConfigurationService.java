@@ -102,6 +102,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
+	private static final String PROCESSOR = "Processor";
 
 
 	/**
@@ -1047,6 +1048,11 @@ public class ProcessorConfigurationService {
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
 			List <Processor> processors = null;
 
+			if (null == processorGuid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
+
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
 			
@@ -1056,7 +1062,8 @@ public class ProcessorConfigurationService {
 			}
 
 			if (processor == null && processors.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROCESSOR,
+						Response.Status.BAD_REQUEST);
 			}
 			
 			// if processor is available then it is for read processor by guid 
