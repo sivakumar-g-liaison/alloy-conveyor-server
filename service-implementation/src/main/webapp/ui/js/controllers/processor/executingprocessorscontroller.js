@@ -79,7 +79,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
 			{
                 field: 'executionStatus',
                 width: '45%',
-                displayName: 'Executing Status'
+                displayName: 'Status'
             },
             { 
                 displayName: 'Action',

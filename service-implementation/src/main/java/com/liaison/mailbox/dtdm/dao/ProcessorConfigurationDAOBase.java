@@ -720,6 +720,37 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	@Override
+	public List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO) {
+			 
+	        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+	        List<Processor> processorNames = new ArrayList<Processor>();
+
+	        try {
+
+	            StringBuilder query = new StringBuilder().append("SELECT proc FROM Processor proc")
+	                    .append(" where LOWER(proc.procsrName) like :")
+	                    .append(PRCSR_NAME);
+	            List <?> proc = entityManager.createQuery(query.toString())
+	                    .setParameter(PRCSR_NAME, "%" + searchDTO.getProcessorName().toLowerCase() + "%")
+	                    .getResultList();	
+
+	            Iterator<?> iter = proc.iterator();
+	            Processor processor;
+	 			while (iter.hasNext()) {
+
+	 				processor = (Processor) iter.next();
+	 				processorNames.add(processor);	 				
+	 			}
+	 
+	        } finally {
+	            if (entityManager != null) {
+	                entityManager.close();
+	            }
+	        }
+		return processorNames;
+	}
+	
+	@Override
 	public List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO) {
 			 
 	        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
@@ -780,6 +811,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		    list.add(getProcessorClass(searchDTO.getProcessorType()).getCanonicalName());
 			predicateList.add(QueryBuilderUtil.constructSqlStringForTypeOperator(list));
 		}
+		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
+			predicateList.add(" LOWER(processor.procsrName) = :" + PRCSR_NAME);
+		}
+		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
+			predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
+		}
 
 		for (int i = 0; i < predicateList.size(); i++) {			
             query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
@@ -802,7 +839,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
             query.setParameter(PROTOCOL, searchDTO.getProtocol().toLowerCase());
-        }	
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
+            query.setParameter(PRCSR_NAME, searchDTO.getProcessorName().toLowerCase());
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
+            query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
+        }
 		return query;		
 	}
 }

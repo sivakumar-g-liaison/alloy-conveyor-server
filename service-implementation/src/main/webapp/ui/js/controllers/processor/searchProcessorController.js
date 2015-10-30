@@ -19,6 +19,8 @@ var rest = myApp.controller(
 			};
 			
 		$scope.mailBoxName = null;
+		$scope.procName = null;
+		$scope.prcsrGuid = null;
 		
 		// Profiles loads initially
         $scope.profiles = [];
@@ -68,7 +70,7 @@ var rest = myApp.controller(
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
                     },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-					   mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal}				
+					   mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid}				
                 );				
             };
 			$scope.readAllProcessors();
@@ -80,6 +82,8 @@ var rest = myApp.controller(
 		$scope.profileName = null;
 		$scope.protocolName = null;
 		$scope.processorType = null;
+		$scope.procName = null;
+		$scope.prcsrGuid = null;
 	}
 			
 	// Get Mailbox names for Typeahead display		
@@ -93,6 +97,21 @@ var rest = myApp.controller(
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
             return data.mailbox;
+        });   
+		}
+    }
+	
+	// Get Processor names for Typeahead display		
+	$scope.getProcessorNames = function(choice) {
+        var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
+        var type = "processor";
+		var procName = choice;
+		//check lists processorNames.
+        if ((typeof procName !== 'undefined' && procName !== null && procName.length >= $rootScope.typeaheadMinLength)  || procName === null || procName === "" || (typeof procName !== 'undefined' && procName !== null && procName.length === 0)) {
+            restUrl += '?name=' + procName + '&type=' + type;
+        return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
+            var data = res.data.searchProcessorResponse;
+            return data.processor;
         });   
 		}
     }

@@ -25,6 +25,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
@@ -41,10 +42,12 @@ public class SearchProcessorResponseDTO extends CommonResponseDTO {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String mailBoxName;	
+	private String mailBoxName;
+	private String processorName;
 	private String pipeLineId;
 	private List<ProfileDTO> profiles;
 	private List<MailBoxDTO> mailbox;
+	private List<ProcessorDTO> processor;
 	
 	public SearchProcessorResponseDTO() {
 		super();
@@ -57,6 +60,14 @@ public class SearchProcessorResponseDTO extends CommonResponseDTO {
 	public void setMailBoxName(String mailBoxName) {
 		this.mailBoxName = mailBoxName;
 	}	
+
+	public String getProcessorName() {
+		return processorName;
+	}
+
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
+	}
 
 	public String getPipeLineId() {
 		return pipeLineId;
@@ -86,6 +97,14 @@ public class SearchProcessorResponseDTO extends CommonResponseDTO {
 		this.mailbox = mailbox;
 	}
 	
+	public List<ProcessorDTO> getProcessor() {
+		return processor;
+	}
+
+	public void setProcessor(List<ProcessorDTO> processor) {
+		this.processor = processor;
+	}
+
 	/**
 	 * Copies the values from Entity to DTO.
 	 *
