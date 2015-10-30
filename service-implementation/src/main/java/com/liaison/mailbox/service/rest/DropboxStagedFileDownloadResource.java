@@ -213,14 +213,14 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// getting the file stream from spectrum for the given file id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
 
 					transactionVisibilityClient.logToGlass(glassMessage);
 
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// response message construction
 					ResponseBuilder builder = Response
@@ -235,7 +235,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					// Log Failed status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} finally {

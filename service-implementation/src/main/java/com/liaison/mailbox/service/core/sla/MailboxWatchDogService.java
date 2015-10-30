@@ -117,7 +117,7 @@ public class MailboxWatchDogService {
 				glassMessage.setStatus(ExecutionState.COMPLETED);
 				glassMessage.setOutAgent(stagedFile.getFilePath());
 				glassMessage.setOutboundFileName(stagedFile.getFileName());
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, "File is picked up by the customer or other process");
+				glassMessage.logProcessingStatus(StatusType.SUCCESS, "File is picked up by the customer or other process", null, null);
 
 				//TVAPI
 				transactionVisibilityClient.logToGlass(glassMessage);

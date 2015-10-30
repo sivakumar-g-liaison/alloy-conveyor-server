@@ -690,7 +690,6 @@ public class MailBoxConfigurationService {
 			// if mailbox is null then we will try to retrieve mailbox by name
 			MailBox mailBox = configDao.find(MailBox.class, guid);
 			if (null == mailBox) {
-				
 				mailBox = configDao.getMailboxByName(guid);
 				if (null == mailBox) {
 					throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MAILBOX,

@@ -758,7 +758,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
         //Log running status
         glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files", configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
         glassMessage.setStatus(ExecutionState.PROCESSING);
         glassMessage.setInAgent(inputLocation);
         glassMessage.setInboundFileName(wrkTicket.getFileName());
@@ -771,7 +771,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         glassMessage.logFirstCornerTimestamp();
         transactionVisibilityClient.logToGlass(glassMessage);
         // Log running status
-        glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
+        glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
     }
 
 	/**

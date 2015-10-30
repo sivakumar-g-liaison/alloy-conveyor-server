@@ -919,6 +919,49 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
+	
+	/**
+	 * Get the Processor names for the search processor typeahead
+	 *
+	 * @param searchFilter
+	 * @return list of names
+	 */
+	public SearchProcessorResponseDTO getProcessorNames(GenericSearchFilterDTO searchFilter) {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get processor names.");
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+
+			List<Processor> processorList = config.getProcessorNames(searchFilter);
+
+			List<ProcessorDTO> processorDTO = new ArrayList<ProcessorDTO>();
+			if (null == processorList || processorList.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_PROC_NAMES_EXIST, Response.Status.NOT_FOUND);
+			}
+			ProcessorDTO procDTO = null;
+			for (Processor processor : processorList) {
+				procDTO = new ProcessorDTO();
+				procDTO.setName(processor.getProcsrName());
+				processorDTO.add(procDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessor(processorDTO);
+
+			LOGGER.debug("Exit from get processor names.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.PROCESSOR, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
 
 	/**
 	 * Get the Profile names.
@@ -1004,6 +1047,7 @@ public class ProcessorConfigurationService {
 			LOGGER.debug("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
 			List <Processor> processors = null;
+
 			if (null == processorGuid) {
 				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id or Name",
 						Response.Status.BAD_REQUEST);
