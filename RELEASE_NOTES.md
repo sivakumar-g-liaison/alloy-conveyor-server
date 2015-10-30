@@ -1,3 +1,7 @@
+2.4.8
+-------------------------------
+* disable queue ssl
+
 2.4.7
 -------------------------------
 * Updated queue host names for uat and prod for discovery
