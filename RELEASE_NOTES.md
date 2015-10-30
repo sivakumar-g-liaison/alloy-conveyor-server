@@ -1,11 +1,8 @@
 2.4.6-SNAPSHOT
 -------------------------------
 * Integrated JMS lib message bus
-<<<<<<< HEAD
 * GMB-578	- Logging Improvement in MailboxSLA Service
-=======
 * GMB-632	- Rename the menu from "Executing Processors" to "Running Processors" and Add 'processor name and Processor Id' filter in Search Processor screen.
->>>>>>> origin/develop
 
 2.4.5-SNAPSHOT
 -------------------------------
