@@ -132,6 +132,7 @@ public interface MailBoxConstants {
 	public final static String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	public final static String KEY_TARGET_DIRECTORY = "targetDirectory";
 	public final static String KEY_TARGET_DIRECTORY_MODE = "targetDirectoryMode";
+
 	public final static String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
 	//Overwrite

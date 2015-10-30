@@ -29,6 +29,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ScriptServiceRespo
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+import com.liaison.util.gitlab.GitLabService;
 
 /**
  * Handles all script related operations

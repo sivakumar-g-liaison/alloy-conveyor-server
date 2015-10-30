@@ -15,7 +15,7 @@ com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicketQueue
 com.liaison.jms.hostname.sweeper=10.146.16.148
 com.liaison.jms.port.sweeper=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.sweeper=-1
+com.liaison.jms.receive.attempts.sweeper=1
 #-1 is infinite
 com.liaison.jms.send.attempts.sweeper=-1
 
@@ -23,7 +23,7 @@ com.liaison.jms.queuename.processor=DEVINTMailboxToMailboxProcessorQueue
 com.liaison.jms.hostname.processor=10.146.16.148
 com.liaison.jms.port.processor=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.processor=-1
+com.liaison.jms.receive.attempts.processor=1
 
 #-1 is infinite
 com.liaison.jms.send.attempts.processor=-1
@@ -39,7 +39,7 @@ com.liaison.jms.ssl.truststore.password.processedPayload=changeit
 com.liaison.jms.hostname.processedPayload=10.146.16.148
 com.liaison.jms.port.processedPayload=5046
 #-1 is infinite
-com.liaison.jms.receive.attempts.processedPayload=-1
+com.liaison.jms.receive.attempts.processedPayload=1
 #-1 is infinite
 com.liaison.jms.send.attempts.processedPayload=-1
 
@@ -107,6 +107,7 @@ com.liaison.gitlab.script.server.host=lsvlGITRPT01d.liaison.dev
 com.liaison.gitlab.script.server.port=80
 com.liaison.gitlab.script.project.name=g2/mailbox-scripts
 com.liaison.gitlab.script.branch.name=master
+com.liaison.gitlab.script.service.name=MailBox
 
 # Activity GitLab properties
 com.liaison.gitlab.mailbox.script.server.host=http://lsvlgitrpt01d.liaison.dev
@@ -200,13 +201,6 @@ acl_signer_public_key_guid = CD5990860A9270E0142300DCB508D8CD
 
 #SLA Properties
 mailbox.sla.time.configuration.unit=MINUTES
-
-#Thread Count for processor
-mailbox.processor.queue.consumer.thread.count=5
-#Thread Count for watchdog
-mailbox.processedPayload.queue.consumer.thread.count=5
-#Thread Count for Dropbox Queue
-mailbox.dropboxQueue.queue.consumer.thread.count=5
 
 # fs2 client properties for payloads
 fs2.storage.spectrum.ip=10.146.16.118

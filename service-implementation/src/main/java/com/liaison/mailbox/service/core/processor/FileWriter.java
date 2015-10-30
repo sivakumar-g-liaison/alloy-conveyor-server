@@ -110,8 +110,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 	String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
                 	if (!MailBoxUtil.isEmpty(mode)
                 			&& MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
+                		createPathIfNotAvailable(targetDirectory);
                 		processorPayloadLocation = targetDirectory;
-                		createPathIfNotAvailable(processorPayloadLocation);
                 	} else {
                 		processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
                 		createPathIfNotAvailable(processorPayloadLocation);

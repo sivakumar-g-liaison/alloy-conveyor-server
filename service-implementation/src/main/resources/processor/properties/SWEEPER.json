@@ -125,7 +125,7 @@
          },
          {
             "name":"sweepedFileLocation",
-            "displayName":"Sweeped File Location",
+            "displayName":"Archive Directory",
             "value":"",
             "type":"textarea",
             "mandatory":false,
