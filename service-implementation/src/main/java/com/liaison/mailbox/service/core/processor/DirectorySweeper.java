@@ -708,14 +708,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-	}
-
-	@Override
 	public void cleanup() {
 	}
 

@@ -802,33 +802,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	}
 
 	/**
-	 * Method used to remove the privatekey downloaded from keymanager once
-	 * successfully authenticated using key
-	 *
-	 * @param fileLocation
-	 * @throws IOException
-	 * @throws SymmetricAlgorithmException
-	 * @throws MailBoxServicesException
-	 */
-	public void removePrivateKeyFromTemp() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
-
-		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
-		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsIdpUri() != null) {
-			String fileLocation = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsIdpUri()
-					+ ".txt";
-			File privateKeyFile = new File(fileLocation);
-			if (privateKeyFile.exists())
-				privateKeyFile.delete();
-			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
-			return;
-		}
-
-		LOGGER.info("Trigerring - The private key file path not configured.");
-	}
-
-
-	/**
 	 * This Method create local folders if not available.
 	 *
 	 * * @param processorDTO it have details of processor

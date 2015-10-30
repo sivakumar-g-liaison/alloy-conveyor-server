@@ -140,8 +140,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 			}
-			// remove the private key once connection established successfully
-			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
 			long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
@@ -149,7 +147,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | MailBoxServicesException | IOException
-				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
+				| SftpException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
@@ -364,31 +362,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void downloadDirectory(Object client, String localTargetLocation, String remotePayloadLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-
-		G2SFTPClient sftpRequest = (G2SFTPClient)client;
-		try {
-			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException
-				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-
-	}
-
-	@Override
 	public void cleanup() {
-		// To remove the private key retrieved from key manager
-		try {
-			removePrivateKeyFromTemp();
-		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
-
 	}
 
 	/**

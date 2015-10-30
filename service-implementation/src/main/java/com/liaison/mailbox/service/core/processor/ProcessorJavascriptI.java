@@ -18,8 +18,6 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
-import com.jcraft.jsch.SftpException;
-import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -149,41 +147,6 @@ public interface ProcessorJavascriptI {
 	 * @throws MailBoxServicesException
 	 */
 	public String getPayloadURI() throws MailBoxServicesException, IOException;
-
-	/**
-	 * Method to download the file or folder for FTP/SFTP processor
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws SftpException
-	 *
-	 */
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
-
-
-	/**
-	 * Method to upload the file or folder for FTP/SFTP processor
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws SftpException
-	 *
-	 */
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException,
-						SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
-
 
 	/**
 	 * Method to do clean up activities once JS completes the execution of a processor

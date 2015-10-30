@@ -304,14 +304,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     }
 
     @Override
-    public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-    }
-
-    @Override
-    public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-    }
-
-    @Override
     public void cleanup() {
     }
 

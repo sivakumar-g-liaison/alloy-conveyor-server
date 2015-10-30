@@ -410,21 +410,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		return FTPSClient.getClient(this);
 	}
 
-    	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, SecurityException,
-				IllegalArgumentException, IllegalAccessException, JAXBException {
-		G2FTPSClient ftpRequest = (G2FTPSClient)client;
-		try {
-			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException   e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	@Override
 	public void cleanup() {
 	}

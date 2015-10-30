@@ -347,32 +347,27 @@ public class ComponentVerificationService  {
 		    if (threadInfo == null) {    
 		    	continue;
 		    }
+
 		    Thread.State state = threadInfo.getThreadState();
-		    
-		    if (state == State.NEW) {
-		      threadsNew++;
-		      newThread.add(threadInfo.getThreadName());
-		    }
-		    else if (state == state.RUNNABLE) {
-		      threadsRunnable++;
-		      runnable.add(threadInfo.getThreadName());
-		    }
-		    else if (state ==  state.BLOCKED) {
-		      threadsBlocked++;
-		      blockedThread.add(threadInfo.getThreadName());
-		    }
-		    else if (state == state.WAITING) {
-		      threadsWaiting++;
-		      waitingThread.add(threadInfo.getThreadName());
-		    }
-		    else if (state ==  state.TIMED_WAITING) {
-		      threadsTimedWaiting++;
-		      timedWaitingThread.add(threadInfo.getThreadName());
-		    }
-		    else if (state ==  state.TERMINATED) {
-		      threadsTerminated++;
-		      terminatedThread.add(threadInfo.getThreadName());
-		    }
+			if (state == State.NEW) {
+				threadsNew++;
+				newThread.add(threadInfo.getThreadName());
+			} else if (state == State.RUNNABLE) {
+				threadsRunnable++;
+				runnable.add(threadInfo.getThreadName());
+			} else if (state == State.BLOCKED) {
+				threadsBlocked++;
+				blockedThread.add(threadInfo.getThreadName());
+			} else if (state == State.WAITING) {
+				threadsWaiting++;
+				waitingThread.add(threadInfo.getThreadName());
+			} else if (state == State.TIMED_WAITING) {
+				threadsTimedWaiting++;
+				timedWaitingThread.add(threadInfo.getThreadName());
+			} else if (state == State.TERMINATED) {
+				threadsTerminated++;
+				terminatedThread.add(threadInfo.getThreadName());
+			}
 		  }
 		  
 		  String lineSeparator = ",";
@@ -411,6 +406,7 @@ public class ComponentVerificationService  {
 		  for (String name : terminatedThread) {
 			  threadStatusInfo.append(name).append(lineSeparator);
 		  }
+
 		  ComponentVerificationDTO entityResponse = new ComponentVerificationDTO();
 		  entityResponse.setName(COMPONENT_NAME_THREADS);
 		  entityResponse.setStatus(SUCCESS);

@@ -259,21 +259,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-
-		G2FTPSClient ftpClient = (G2FTPSClient)client;
-		try {
-			downloadDirectory(ftpClient, remotePayloadLocation, localTargetLocation);
-		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargeLocation) {
-	}
-
-	@Override
 	public void cleanup() {
 	}
 

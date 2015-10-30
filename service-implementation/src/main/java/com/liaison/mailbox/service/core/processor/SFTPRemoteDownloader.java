@@ -119,8 +119,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, localPath);
 				downloadDirectory(sftpRequest, remotePath, localPath);
 			}
-			// remove the private key once connection established successfully
-			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
 
 			// to calculate the elapsed time for processing files
@@ -130,7 +128,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
-				| SftpException | SymmetricAlgorithmException | NoSuchFieldException | SecurityException
+				| SftpException | NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
 		    LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
@@ -292,28 +290,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-
-		G2SFTPClient sftpClient = (G2SFTPClient)client;
-	    try {
-			downloadDirectory(sftpClient, remotePayloadLocation, localTargetLocation);
-		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException | SftpException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-	}
-
-	@Override
 	public void cleanup() {
-		// To remove the private key retrieved from key manager
-		try {
-			removePrivateKeyFromTemp();
-		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	/**
