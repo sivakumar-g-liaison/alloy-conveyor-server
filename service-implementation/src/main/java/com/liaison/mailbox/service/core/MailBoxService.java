@@ -360,7 +360,6 @@ public class MailBoxService {
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
             glassMessage.setOutSize(workTicket.getPayloadSize());
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
             // validates mandatory value.
             mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -384,6 +383,7 @@ public class MailBoxService {
                 processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
             }
 
+            
             //Check the processor is null or not
             if (null == processor) {
 
@@ -400,7 +400,9 @@ public class MailBoxService {
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }
 
-			// determine SLA status
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcsrProtocol(), processor.getProcessorType().name());
+			
+            // determine SLA status
 			String slaVerificationStatus = (processor instanceof RemoteUploader)
 					   ? SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode()
 					   : SLAVerificationStatus.SLA_NOT_VERIFIED.getCode();
@@ -436,12 +438,12 @@ public class MailBoxService {
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location");
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER);
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
@@ -493,7 +495,7 @@ public class MailBoxService {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER);
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
@@ -535,7 +537,7 @@ public class MailBoxService {
 							.append(stagedFile.getFileName())
 							.append(" is overwritten by another process - ")
 							.append(gpid);
-		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
 
 		//TVAPI
 		transactionVisibilityClient.logToGlass(glassMessage);

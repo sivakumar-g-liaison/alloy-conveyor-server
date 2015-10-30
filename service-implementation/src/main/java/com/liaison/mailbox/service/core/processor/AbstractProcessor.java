@@ -961,11 +961,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
-                glassMessage.logProcessingStatus(StatusType.SUCCESS, message);
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
                 //Fourth corner timestamp
                 glassMessage.logFourthCornerTimestamp();
             } else {
-                glassMessage.logProcessingStatus(StatusType.ERROR, message);
+                glassMessage.logProcessingStatus(StatusType.ERROR, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
             }
             //TVAPI
             transactionVisibilityClient.logToGlass(glassMessage);
