@@ -476,6 +476,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 			folderName = path.toFile().getParent();
 		    LOGGER.debug("Foldername {}", folderName);
+		    additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
 		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 		    workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 

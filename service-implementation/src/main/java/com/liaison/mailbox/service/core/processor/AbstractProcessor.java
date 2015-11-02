@@ -923,7 +923,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
             GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 
@@ -934,7 +934,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
+
                 glassMessage.logProcessingStatus(StatusType.SUCCESS, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
+                // Inactivate the stagedFile
+                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                stagedFileDAO.merge(stagedFile);
                 //Fourth corner timestamp
                 glassMessage.logFourthCornerTimestamp();
             } else {
@@ -943,9 +947,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             //TVAPI
             transactionVisibilityClient.logToGlass(glassMessage);
 
-            // Inactivate the stagedFile
-            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-            stagedFileDAO.merge(stagedFile);
         }
     }
 

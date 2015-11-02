@@ -24,6 +24,7 @@ public class StagedFileDTO {
 	private String id;
 	private String path;
 	private String fileSize;
+	private String globalProcessId;
 	private String mailboxGuid;
 	private String processorId;
 	private String processorType;
@@ -152,6 +153,14 @@ public class StagedFileDTO {
 
 	public void setModifiedDate(String modifiedDate) {
 		this.modifiedDate = modifiedDate;
+	}
+
+	public String getGlobalProcessId() {
+		return globalProcessId;
+	}
+
+	public void setGlobalProcessId(String globalProcessId) {
+		this.globalProcessId = globalProcessId;
 	}
 
 }

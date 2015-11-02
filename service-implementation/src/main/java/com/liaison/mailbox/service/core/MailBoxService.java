@@ -355,7 +355,7 @@ public class MailBoxService {
 
         try {
 
-            LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
+            LOG.debug("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
@@ -483,10 +483,11 @@ public class MailBoxService {
             String emailSubject = workTicket.getFileName() + "' is available for pick up";
             String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
-            LOG.info("#################################################################");
+            LOG.debug("#################################################################");
 
         } catch (Exception e) {
 
+        	LOG.error(e);
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {
@@ -535,7 +536,7 @@ public class MailBoxService {
 
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getPguid());
+		glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
 		glassMessage.setCategory(processor.getProcessorType());
 		glassMessage.setProtocol(processor.getProcsrProtocol());
 

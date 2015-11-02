@@ -84,13 +84,14 @@ public class MailboxWatchDogService {
 
 			// query
 			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.processorType != '")
-					.append(ProcessorType.FILEWRITER.name())
-					.append("' and sf.stagedFileStatus =:")
+					.append(" where sf.processorType =:")
+					.append(StagedFileDAO.TYPE)
+					.append(" and sf.stagedFileStatus =:")
 					.append(StagedFileDAO.STATUS);
 
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
+					.setParameter(StagedFileDAO.TYPE, ProcessorType.FILEWRITER.name())
 					.getResultList();
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
 				LOGGER.info(constructMessage(uniqueId, "No active files found"));
@@ -115,7 +116,7 @@ public class MailboxWatchDogService {
 
 				transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage = new GlassMessage();
-				glassMessage.setGlobalPId(stagedFile.getPguid());
+				glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
 
 				glassMessage.setStatus(ExecutionState.COMPLETED);
 				glassMessage.setOutAgent(stagedFile.getFilePath());
@@ -128,6 +129,7 @@ public class MailboxWatchDogService {
 
 				// Inactivate the stagedFile
 				stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+				stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
 				updatedStatusList.add(stagedFile);
 			}
 

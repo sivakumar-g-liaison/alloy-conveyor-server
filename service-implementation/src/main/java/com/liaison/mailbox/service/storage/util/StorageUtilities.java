@@ -203,6 +203,8 @@ public class StorageUtilities {
 			long endTime = 0;
 
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, properties);
+			fs2Header.addHeader(MailBoxConstants.KEY_MESSAGE_NAME, "MAILBOX_WORKTICKET");
+			fs2Header.addHeader(MailBoxConstants.KEY_PAYLOAD_DESCRIPTION, "Workticket created by mailbox sweeper");
 
 			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId + "_WORKTICKET";
 

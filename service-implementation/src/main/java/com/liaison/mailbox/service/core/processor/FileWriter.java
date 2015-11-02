@@ -271,7 +271,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         	}
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
             GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 

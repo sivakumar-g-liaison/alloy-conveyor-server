@@ -114,6 +114,8 @@ public interface MailBoxConstants {
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
 	public final static String KEY_LENS_VISIBILITY = "LENS_VISIBILITY";
+	public final static String KEY_MESSAGE_NAME = "MESSAGE_NAME";
+	
 
 	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";

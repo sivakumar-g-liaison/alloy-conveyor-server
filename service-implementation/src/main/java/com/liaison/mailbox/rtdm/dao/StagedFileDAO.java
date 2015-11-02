@@ -33,6 +33,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	public static final String CURRENT_TIME = "current_time";
 
 	public static final String STATUS = "status";
+	public static final String TYPE = "type";
 
 	public static final String PROCESSOR_ID = "processor_id";
 

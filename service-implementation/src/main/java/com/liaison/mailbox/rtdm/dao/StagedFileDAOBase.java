@@ -214,22 +214,20 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
         try {
 
-            stagedFileEntity = find(StagedFile.class, workticket.getGlobalProcessId());
+        	StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
+        	stagedFileDto.setExpirationTime("0");
+        	stagedFileDto.setProcessorId(processorId);
+        	stagedFileDto.setProcessorType(processorType);
+        	stagedFileDto.setGlobalProcessId(workticket.getGlobalProcessId());
 
-            StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
-            stagedFileDto.setExpirationTime("0");
-            stagedFileDto.setProcessorId(processorId);
-            stagedFileDto.setProcessorType(processorType);
+            stagedFileEntity = new StagedFile();
+            stagedFileEntity.copyFromDto(stagedFileDto, true);
 
-            if (stagedFileEntity != null) {
-                stagedFileEntity.copyFromDto(stagedFileDto, false);
-                merge(stagedFileEntity);
-            } else {
-                stagedFileEntity = new StagedFile();
-                stagedFileEntity.copyFromDto(stagedFileDto, true);
-                stagedFileEntity.setPguid(workticket.getGlobalProcessId());
-                persist(stagedFileEntity);
-            }
+            Timestamp timestamp = MailBoxUtil.getTimestamp();
+            stagedFileEntity.setCreatedDate(timestamp);
+            stagedFileEntity.setModifiedDate(timestamp);
+
+            persist(stagedFileEntity);
 
         } finally {
 
