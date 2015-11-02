@@ -3,6 +3,7 @@
 * Integrated JMS lib message bus
 * GMB-578	- Logging Improvement in MailboxSLA Service
 * GMB-632	- Rename the menu from "Executing Processors" to "Running Processors" and Add 'processor name and Processor Id' filter in Search Processor screen.
+* GMB-657 	- Mailbox GET service should not expect content-type header
 
 2.4.5-SNAPSHOT
 -------------------------------

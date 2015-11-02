@@ -205,7 +205,6 @@ public class MailBoxProfileResource extends AuditedResource {
 	 */
 	@GET
 	@ApiOperation(value = "List Profiles", notes = "returns detail information of all the profiles", position = 3, response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readProfiles(
