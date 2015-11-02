@@ -209,7 +209,6 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	 */
 	@GET
 	@ApiOperation(value = "Mailbox Details", notes = "returns details of a valid mailbox", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readMailBox(

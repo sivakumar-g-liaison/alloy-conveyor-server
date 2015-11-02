@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -86,7 +85,6 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 	 */
 	@GET
 	@ApiOperation(value = "fetch the script file by url", notes = "The script file are loaded from GitLab repository", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "fetch script file", required = true, dataType = "com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO", paramType = "body") })
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
