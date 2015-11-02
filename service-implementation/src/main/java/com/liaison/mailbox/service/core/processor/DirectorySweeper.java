@@ -190,7 +190,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getFileName()));
 
             				//Delete the file
-            				delete(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
+            				delete(String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH)));
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
