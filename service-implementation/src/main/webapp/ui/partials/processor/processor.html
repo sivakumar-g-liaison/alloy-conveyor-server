@@ -306,7 +306,7 @@
             <button id="mbx-procsr-backtoMailbox" class="btn btn-primary" data-toggle="modal" data-target="#backToMailboxAction">
                 Back to Mailbox
             </button>
-            <button id="mbx-procsr-save" class="btn btn-primary" ng-click="save()" ng-disabled="formAddPrcsr.$invalid">
+            <button id="mbx-procsr-save" class="btn btn-primary" ng-click="save()" ng-disabled="formAddPrcsr.$invalid || showCredentialInvalid">
                 Save
             </button>
             <button id="mbx-procsr-cancel" class="btn btn-primary" data-toggle="modal" data-target="#cancelAction">

@@ -4,7 +4,8 @@ var rest = myApp.controller(
         function ($rootScope, $modal, $scope, $timeout, $filter,
             $location, $log, $blockUI) {
 		
-            $scope.disableHTTPListenerPipeLineId = false;
+    		$scope.showCredentialInvalid = false;    
+    		$scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
             //check JavaScriptExecutor
             $scope.onChangeJavaScriptExecutor = function () {            	
