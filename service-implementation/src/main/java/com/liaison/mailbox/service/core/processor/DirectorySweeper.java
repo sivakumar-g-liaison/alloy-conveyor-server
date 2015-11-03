@@ -433,7 +433,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 		List<WorkTicket> workTickets = new ArrayList<>();
 		WorkTicket workTicket = null;
-		Map<String, Object> additionalContext = new HashMap<String, Object>();
+		Map<String, Object> additionalContext = null;
 		BasicFileAttributes attr = null;
 		ISO8601Util dateUtil = new ISO8601Util();
 
@@ -445,6 +445,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		for (Path path : result) {
 
             LOGGER.debug("Obtaining file Attributes for path {}", path);
+            additionalContext = new HashMap<String, Object>();
 
 			workTicket = new WorkTicket();
             LOGGER.debug("Payload URI {}", path.toAbsolutePath().toString());
