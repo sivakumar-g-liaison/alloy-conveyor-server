@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +32,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -46,15 +43,12 @@ import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -163,11 +157,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	// Read from mailbox property - grouping js location
             	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
 
-                LOGGER.debug("ABOUT TO MARK AS SWEEPED");
+                LOGGER.debug("Persist workticket to spectrum");
                 persistPaylaodAndWorkticket(workTickets, staticProp);
 
             	if (workTicketGroups.isEmpty()) {
-            		LOGGER.info("The file group is empty, so NOP");
+            		LOGGER.info("The file group is empty");
             	} else {
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
@@ -210,7 +204,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             LOGGER.info(constructMessage("Number of files processed {}"), workTickets.size());
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
-        } catch (MailBoxServicesException | IOException | JAXBException | JSONException | IllegalAccessException | NoSuchFieldException e) {
+        } catch (MailBoxServicesException | IOException | JAXBException | JSONException | IllegalAccessException e) {
             LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
         	throw new RuntimeException(e);
         } finally {
@@ -222,23 +216,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Method is used to retrieve all the WorkTickets from the given mailbox.
 	 *
-	 * @param root
-	 *            The mailbox root directory
-	 * @param includeSubDir
-	 * @param listDirectoryOnly
-	 * @return List of WorkTicket
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws MailBoxServicesException
-	 * @throws FS2Exception
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
+	 * @param root The mailbox root directory
+	 * @param listDirectoryOnly Sweep file only
+	 * @param staticProp sweeper properties
+	 * @return list of worktickets
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
-
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, IOException {
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), root);
 		Path rootPath = Paths.get(root);
@@ -277,15 +263,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Method to get the pipe line id from the remote processor properties.
 	 *
-	 * @return
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 * @throws IllegalAccessException
+	 * @return pipelineId
 	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
 	private String getPipeLineID() throws IllegalArgumentException, IllegalAccessException, IOException {
 
@@ -368,14 +349,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Method to persist the payload and workticket details in spectrum
 	 *
 	 * @param workTickets WorkTickets list.
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
+	 * @param staticProp sweeper properties
 	 * @throws IOException
 	 */
 	public void persistPaylaodAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
 
 		LOGGER.info(constructMessage("Persisting paylaod and workticket in spectrum starts"));
-		StagedFileDAO stageDao = new StagedFileDAOBase();
 		for (WorkTicket workTicket : workTickets) {
 
 			File payloadFile = new File(workTicket.getPayloadURI());
@@ -401,7 +380,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			
 			// persist the workticket
 			StorageUtilities.persistWorkTicket(workTicket, properties);
-			stageDao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
 		}
 
 		LOGGER.info(constructMessage("Payload and workticket are persisted successfully"));
@@ -526,11 +504,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param workTicket workticket
 	 * @param staticProp sweeper properties
 	 * @return true or false based on the size and number of files check
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws IOException
 	 */
-	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
+	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO staticProp) {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
@@ -576,7 +551,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param fileGroup
 	 * @return
 	 */
-
 	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
 
 		long size = 0;
