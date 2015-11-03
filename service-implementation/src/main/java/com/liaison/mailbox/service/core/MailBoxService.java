@@ -442,8 +442,14 @@ public class MailBoxService {
 
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
+
             	transactionVisibilityClient.logToGlass(glassMessage);
             	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
+
+            	// send notification for successful file staging
+            	String emailSubject = workTicket.getFileName() + "' is available for pick up";
+            	String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
+            	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
@@ -458,10 +464,6 @@ public class MailBoxService {
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
 
-            // send notification for successful file staging
-            String emailSubject = workTicket.getFileName() + "' is available for pick up";
-            String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
-            EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
             LOG.debug("#################################################################");
 
         } catch (Exception e) {
