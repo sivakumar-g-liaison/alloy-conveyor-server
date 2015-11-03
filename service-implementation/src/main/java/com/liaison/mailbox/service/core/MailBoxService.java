@@ -36,7 +36,6 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -44,9 +43,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
@@ -461,24 +458,6 @@ public class MailBoxService {
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
 
-            //STAGED FILE TABLE UPDATE ONLY ON SUCCESSFULL FILE WRITE
-            if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
-
-            	StagedFileDAOBase dao = new StagedFileDAOBase();
-
-            	//THIS IS OVERWRITE TRUE CASE AND OLD FILE WILL BE OVERWRITTEN
-            	StagedFile stagedFile = dao.findStagedFilesByProcessorId(processor.getPguid(), workTicket.getFileName());
-            	//persist staged file to get the gpid during uploader
-            	if (null != stagedFile) {
-
-            		//Inactivate the old entity
-            		stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
-            		dao.merge(stagedFile);
-            		logDuplicateStatus(processor, stagedFile, workTicket.getGlobalProcessId());
-            	}
-            	dao.persistStagedFile(workTicket, processor.getPguid(), processorType);
-            }
-
             // send notification for successful file staging
             String emailSubject = workTicket.getFileName() + "' is available for pick up";
             String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
@@ -523,36 +502,6 @@ public class MailBoxService {
         	ThreadContext.clearMap();
         }
 
-	}
-
-	/**
-	 * Logs duplicate status in lens for the overwrite true case
-	 * 
-	 * @param processor The filewriter processor entity
-	 * @param glassMessage Glass
-	 * @param stagedFile
-	 */
-	private void logDuplicateStatus(Processor processor, StagedFile stagedFile, String gpid) {
-
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
-		glassMessage.setCategory(processor.getProcessorType());
-		glassMessage.setProtocol(processor.getProcsrProtocol());
-
-		glassMessage.setStatus(ExecutionState.DUPLICATE);
-		glassMessage.setOutAgent(processor.getProcsrProtocol());
-		glassMessage.setOutboundFileName(stagedFile.getFileName());
-
-		StringBuilder message = new StringBuilder()
-							.append("File ")
-							.append(stagedFile.getFileName())
-							.append(" is overwritten by another process - ")
-							.append(gpid);
-		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
-
-		//TVAPI
-		transactionVisibilityClient.logToGlass(glassMessage);
 	}
 
 }

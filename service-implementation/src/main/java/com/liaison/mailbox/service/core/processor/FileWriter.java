@@ -127,7 +127,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
                 }
 
-                String isOverwrite = String.valueOf(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE));
                 LOG.info(constructMessage("Global PID",
                         seperator,
                         workTicket.getGlobalProcessId(),
@@ -138,7 +137,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         fileName));
 
                 // write the payload retrieved from spectrum to the configured location of processor
-                writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
+                writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
                 if (writeStatus) {
 
                 	LOG.info(constructMessage("Global PID",
@@ -150,10 +149,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 			seperator,
                 			fileName));
 
-                	//To add more details in staged file for filewriter
-                	if (ProcessorType.FILEWRITER.equals(processorType)) {
-                		workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
-                	}
+                	//To add more details in staged file
+                	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
                 } else {
 
                 	LOG.info(constructMessage("Global PID",
@@ -167,6 +164,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 	//To aviod staged file entry
                 	workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
+
             }
 
             //GLASS LOGGING BEGINS//
@@ -317,19 +315,37 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @return true if it is successfully written the file to the location, otherwise false
 	 * @throws IOException
 	 */
-	public boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, String isOverwrite) throws IOException {
+	public boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException {
 
 		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
+		StagedFileDAOBase dao = new StagedFileDAOBase();
+		String isOverwrite = String.valueOf(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE)).toLowerCase();
 
 		File file = new File(targetLocation + File.separatorChar + filename);
 
 		if (file.exists()) {
-			if (MailBoxConstants.OVERWRITE_FALSE.equalsIgnoreCase(isOverwrite)) {
+
+			if (MailBoxConstants.OVERWRITE_FALSE.equals(isOverwrite)) {
 				return false;
-			} else if (MailBoxConstants.OVERWRITE_TRUE.equalsIgnoreCase(isOverwrite)) {
+			} else if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
+
+				StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), filename);
+				if (null != stagedFile) {
+
+					//In-activate the old entity
+					stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
+	        		dao.merge(stagedFile);
+					logDuplicateStatus(stagedFile, workTicket.getGlobalProcessId());
+				}
+
+				//write the file
 				try (FileOutputStream outputStream = new FileOutputStream(file)) {
 					IOUtils.copy(response, outputStream);
 				}
+				
+				//Persist the new file deatils
+				dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+
 				return true;
 			} else {
 
@@ -338,9 +354,14 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 				throw new MailBoxServicesException(message.toString(), Response.Status.BAD_REQUEST);
 			}
 		} else {
+
+			logGlassMessage(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
 			try (FileOutputStream outputStream = new FileOutputStream(file)) {
 				IOUtils.copy(response, outputStream);
 			}
+
+			//Persist if no file exists
+			dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
 			return true;
 		}
 

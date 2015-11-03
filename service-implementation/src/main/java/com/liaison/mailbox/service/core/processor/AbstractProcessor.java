@@ -934,6 +934,36 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         }
     }
 
+    /**
+	 * Logs duplicate status in lens for the overwrite true case
+	 * 
+	 * @param processor The filewriter processor entity
+	 * @param glassMessage Glass
+	 * @param stagedFile
+	 */
+	protected void logDuplicateStatus(StagedFile stagedFile, String gpid) {
+
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+		GlassMessage glassMessage = new GlassMessage();
+		glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
+		glassMessage.setCategory(configurationInstance.getProcessorType());
+		glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+
+		glassMessage.setStatus(ExecutionState.DUPLICATE);
+		glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
+		glassMessage.setOutboundFileName(stagedFile.getFileName());
+
+		StringBuilder message = new StringBuilder()
+							.append("File ")
+							.append(stagedFile.getFileName())
+							.append(" is overwritten by another process - ")
+							.append(gpid);
+		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
+
+		//TVAPI
+		transactionVisibilityClient.logToGlass(glassMessage);
+	}
+
     @Override
     public void logToLens(String msg, File file, ExecutionState status) {
         throw new RuntimeException("Not Implemented");
