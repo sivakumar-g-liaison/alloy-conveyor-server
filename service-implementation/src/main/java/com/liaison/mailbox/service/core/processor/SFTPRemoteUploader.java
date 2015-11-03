@@ -274,10 +274,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
-
-						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
-						        staticProp.getProcessedFileLocation(), 
-						        item);
+						
+						// delete files once successfully uploaded
+						deleteFilesAfterSuccessfulUpload(item);
 						StringBuilder message = new StringBuilder()
 													.append("File ")
 													.append(currentFileName)
@@ -288,7 +287,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
 						
-						archiveFiles(staticProp.getErrorFileLocation(), item);
 						StringBuilder message = new StringBuilder()
 													.append("Failed to upload file ")
 													.append(currentFileName)
@@ -301,6 +299,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 				}
 			}
+			// To delete the folder after uploading of all files inside this folder is done
+			deleteFilesAfterSuccessfulUpload(localDir);
 		}
 		else {
 			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));

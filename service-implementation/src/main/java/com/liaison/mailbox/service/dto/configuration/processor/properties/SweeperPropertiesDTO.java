@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
@@ -22,10 +23,12 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 
 	private String pipeLineID;
 	private boolean securedPayload;
+	@JsonIgnore
 	private boolean deleteFileAfterSweep;
 	private String fileRenameFormat;
 	private String numOfFilesThreshold;
 	private String payloadSizeThreshold;
+	@JsonIgnore
 	private String sweepedFileLocation;
 	private String includeFiles;
 	private String excludeFiles;

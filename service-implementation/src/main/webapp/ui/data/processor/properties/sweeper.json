@@ -64,21 +64,6 @@
             ]
          },
          {
-            "name":"deleteFileAfterSweep",
-            "displayName":"Delete File After Sweep",
-            "value":"true",
-            "type":"select",
-            "mandatory":true,
-            "dynamic":false,
-            "valueProvided":false,
-            "defaultValue":"",
-            "validationRules":null,
-            "options":[
-               "false",
-               "true"
-            ]
-         },
-         {
             "name":"fileRenameFormat",
             "displayName":"File Rename Format",
             "value":"",
@@ -121,21 +106,6 @@
                "pattern":"\/^\\d+$\/",
                "minLength":"",
                "maxLength":"512"
-            }
-         },
-         {
-            "name":"sweepedFileLocation",
-            "displayName":"Archive Directory",
-            "value":"",
-            "type":"textarea",
-            "mandatory":false,
-            "dynamic":false,
-            "valueProvided":false,
-            "defaultValue":"",
-            "validationRules":{
-               "pattern":"",
-               "minLength":"",
-               "maxLength":""
             }
          },
          {

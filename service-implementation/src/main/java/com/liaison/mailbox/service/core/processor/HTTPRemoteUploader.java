@@ -171,7 +171,6 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 								LOGGER.warn(constructMessage("Execution failure for "), entry.getAbsolutePath());
 
 								failedStatus = true;
-								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
 
 								String msg = "Failed to upload a file " + entry.getName();
 								logToLens(msg, entry, ExecutionState.FAILED);
@@ -180,7 +179,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 							} else {
 								totalNumberOfProcessedFiles++;
 								if (null != entry) {
-									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
+									deleteFilesAfterSuccessfulUpload(entry);
 									StringBuilder msg = new StringBuilder()
 									        .append("File ")
 									        .append(entry.getName())
@@ -205,39 +204,11 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
-		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | LiaisonException | IllegalAccessException e) {
 		    LOGGER.error(constructMessage("Error occurred during http(s) upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 
-	}
-
-	/**
-	 * Delegate method to archive the file.
-	 *
-	 * @param file
-	 * @param locationName
-	 * @param isError
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-
-		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
-		String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION)) ? httpUploaderStaticProperties
-				.getErrorFileLocation() : httpUploaderStaticProperties.getProcessedFileLocation();
-		String fileLocation = replaceTokensInFolderPath(filePath);
-
-		if (MailBoxUtil.isEmpty(fileLocation)) {
-			archiveFile(file.getAbsolutePath(), isError);
-		} else {
-			archiveFile(file, fileLocation);
-		}
 	}
 
 	@Override

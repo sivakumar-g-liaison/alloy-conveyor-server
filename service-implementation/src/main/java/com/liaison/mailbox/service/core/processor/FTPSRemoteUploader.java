@@ -288,10 +288,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 							}
 						}
 
-						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
-						        staticProp.getProcessedFileLocation(),
-                                item);
-
+						deleteFilesAfterSuccessfulUpload(item);
 						StringBuilder message = new StringBuilder()
                             .append("File ")
                             .append(currentFileName)
@@ -302,7 +299,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                         // Glass Logging 
                         logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
-					    archiveFiles(staticProp.getErrorFileLocation(), item);
 
 					    StringBuilder message = new StringBuilder()
                             .append("Failed to upload file ")
@@ -337,6 +333,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					replyCode = MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK;
 				}
 			}
+			// To delete the folder after uploading of all files inside this folder is done
+			deleteFilesAfterSuccessfulUpload(localDir);
 		} else {
 			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
 		}

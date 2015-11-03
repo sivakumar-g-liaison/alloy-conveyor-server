@@ -134,50 +134,6 @@
             "validationRules": null,
             "options":["false","true"]
 		 },
-         {
-			"name": "errorFileLocation",
-			"displayName": "Error Archive Directory",
-			"type": "textarea",
-			"value": "",
-			"readOnly": false,
-			"mandatory": false,
-			"dynamic": false,
-            "valueProvided":false,
-            "defaultValue":"",			
-			"validationRules": {
-			  "pattern": "",
-			  "minLength": "",
-			  "maxLength": "2048"
-			}
-         },
-         {
-			"name": "processedFileLocation",
-			"displayName": "Archive Directory",
-			"type": "textarea",
-			"value": "",
-			"readOnly": false,
-			"mandatory": false,
-			"dynamic": false,
-            "valueProvided":false,
-            "defaultValue":"",			
-			"validationRules": {
-			  "pattern": "",
-			  "minLength": "",
-			  "maxLength": "2048"
-			}
-         },
-         {
-			"name":"deleteFiles",
-			"displayName":"Delete Files",	
-		    "value":"false",
-            "type":"select",            
-			"mandatory": false,
-			"dynamic": false,
-            "valueProvided":false,
-            "defaultValue":"false",
-            "validationRules": null,
-            "options":["false","true"]
-		 },
 		  {
 		    "name": "includeFiles",
 		    "displayName": "IncludeFiles",

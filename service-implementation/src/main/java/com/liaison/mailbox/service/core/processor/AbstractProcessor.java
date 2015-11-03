@@ -633,57 +633,41 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			archiveFile(file, processedFileLcoation);
 		}
 	}
-
+	 
 	/**
-	 * Method deletes or archives the files based on the configuration
-	 *
-	 * @param deleteFiles
-	 * @param processedFileLocation
-	 * @param item
-	 * @param curFileName
+	 * Method to delete files or folders upon successful upload
+	 * 
+	 * @param item - File or Folder which is uploaded successfully
 	 * @throws IOException
 	 */
-	protected void deleteOrArchiveTheFiles(boolean deleteFiles, String processedFileLocation, File item) throws IOException {
+	protected void deleteFilesAfterSuccessfulUpload(File item) throws IOException {
+		
+		LOGGER.debug(constructMessage("Going to delete file/folder {} in the local payload location"), item.getName());
+		if (item.isDirectory()) {
+			
+			// if it is a directory then it will be deleted only if did not contain any files.
+			// if the directory is not empty then uploading of files has failed and will not be deleted
+			String [] subFiles = item.list();
+			if (null != subFiles && subFiles.length == 0) {
+				
+				// The directory should not be the actual payload location configured
+				String payloadLocation = new File (getPayloadURI()).getPath();
+				if (!payloadLocation.equals(item.getPath())) {
+					
+					item.delete();
+					LOGGER.info(constructMessage("Folder {} deleted successfully in the local payload location"), item.getName());
+				} else {
+					LOGGER.debug(constructMessage("Not deleting folder {} as it is the actual payload location"), item.getName());
 
-        // Delete the local files after successful upload if user opt for it
-        if (deleteFiles) {
-            item.delete();
-            LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
-        } else {
-            // File is not opted to be deleted. Hence moved to processed folder
-            processedFileLocation = replaceTokensInFolderPath(processedFileLocation);
-            if (MailBoxUtil.isEmpty(processedFileLocation)) {
-                LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
-                archiveFile(item.getAbsolutePath(), false);
-                LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
-            } else {
-                LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
-                archiveFile(item, processedFileLocation);
-                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
-            }
-        }
-    }
+				}
+			}
+		} else {
+			
+	        // Delete the local files after successful upload if user opt for it
+	        item.delete();
+	        LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
 
-	/**
-	 * Method archives the files based on the configuration
-	 *
-	 * @param errorFileLocation
-	 * @param item
-	 * @throws IOException
-	 */
-	protected void archiveFiles(String errorFileLocation, File item) throws IOException {
-
-        // File Uploading failed so move the file to error folder
-        errorFileLocation = replaceTokensInFolderPath(errorFileLocation);
-        if (MailBoxUtil.isEmpty(errorFileLocation)) {
-            LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
-            archiveFile(item.getAbsolutePath(), true);
-            LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
-        } else {
-            LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
-            archiveFile(item, errorFileLocation);
-            LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
-        }
+		}
     }
 
 	/**
