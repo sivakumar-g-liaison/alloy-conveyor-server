@@ -349,4 +349,9 @@ public interface MailBoxConstants {
     public static String TYPE_MAILBOX = "mailbox";
     public static String TYPE_PROCESSOR = "processor";
     public static String TYPE_PROFILE = "profile";
+    
+    // configurations for sla validation
+    public static String DEFAULT_CUSTOMER_SLA = "com.liaison.mailbox.default.customer.sla";
+    public static String DEFAULT_MAILBOX_SLA = "com.liaison.mailbox.default.mailbox.sla";
+    public static String  MBX_SLA_CONFIG_UNIT = "mailbox.sla.time.configuration.unit";
 }

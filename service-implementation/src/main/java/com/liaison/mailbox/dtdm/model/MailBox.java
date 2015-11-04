@@ -10,7 +10,10 @@
 
 package com.liaison.mailbox.dtdm.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -175,6 +178,32 @@ public class MailBox implements Identifiable {
 
 	public void setTenancyKey(String tenancyKey) {
 		this.tenancyKey = tenancyKey;
+	}
+	
+	/**
+	 * Method to retrieve the given properties form Mailbox
+	 * 
+	 * @param propertiesToBeRetrieved - list of property Names to be retrieved
+	 * 		possible propertyNames are 'timetopickupfilepostedtomailbox', 'timetopickupfilepostedbymailbox'
+	 * 		'emailnotificationids', 'ttl' and 'ttlunit'
+	 * @return a Map containing values of given properties having the property Names as keys
+	 */
+	@Transient
+	public Map<String, String> retrieveMailboxProperties(List<String> propertiesToBeRetrieved) {
+		
+		Set<MailBoxProperty> properties = getMailboxProperties();
+		Map <String, String> MailboxProps = new HashMap<String, String>();
+		if (null != properties) {
+			
+			for (MailBoxProperty property : properties) {
+				
+				String propertyName = property.getMbxPropName();
+				if ( propertiesToBeRetrieved.contains(propertyName)) {
+					MailboxProps.put(propertyName, property.getMbxPropValue());
+				}
+			}
+		}
+		return MailboxProps;
 	}
 
 	@Override
