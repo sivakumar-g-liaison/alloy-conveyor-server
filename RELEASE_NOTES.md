@@ -1,3 +1,7 @@
+2.4.9-SNAPSHOT
+-------------------------------
+* After merging with RC branch
+
 2.4.6-SNAPSHOT
 -------------------------------
 * Integrated JMS lib message bus
@@ -14,6 +18,22 @@
 * Mailbox refinements for Email Util and JSON marshaling done using JAXBUtility
 * GMB-581 - updated lib_message_bus to 4.+
 * GMB-620 - Rename watchdog request in the Log to consumed from queue
+
+2.4.8
+-------------------------------
+* disable queue ssl
+
+2.4.7
+-------------------------------
+* Updated queue host names for uat and prod for discovery
+
+2.4.6
+-------------------------------
+* Fix list of queue servers for discovery.
+
+2.4.5
+-------------------------------
+* Integrated JMS lib message bus
 
 2.4.4
 -------------------------------
