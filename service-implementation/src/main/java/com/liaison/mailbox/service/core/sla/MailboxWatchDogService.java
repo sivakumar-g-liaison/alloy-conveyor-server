@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -51,7 +52,6 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.QueryBuilderUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
@@ -83,7 +83,7 @@ public class MailboxWatchDogService {
         return msgBuf.toString();
 	}
 	
-	public MailboxWatchDogService(){
+	public MailboxWatchDogService() {
 		uniqueId = MailBoxUtil.getGUID();
 	}
 
@@ -111,19 +111,20 @@ public class MailboxWatchDogService {
 			em = DAOUtil.getEntityManager(MailboxRTDMDAO.PERSISTENCE_UNIT_NAME);
 			tx = em.getTransaction();
 			tx.begin();
-			
-			List <String> processorTypes = getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA);
+
 			// query
 			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where sf.stagedFileStatus =:")
 					.append(StagedFileDAO.STATUS)
-					.append(" and ( ")
-					.append(QueryBuilderUtil.constructSqlStringForTypeOperator(processorTypes))
+					.append(" and TYPE(processor) in (: ")
+					.append(StagedFileDAO.TYPE)
 					.append(")");;
 
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
+					.setParameter(StagedFileDAO.TYPE, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA))
 					.getResultList();
+
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
 				LOGGER.info(constructMessage(uniqueId, "No active files found"));
 				return;
@@ -146,7 +147,7 @@ public class MailboxWatchDogService {
 				}
 				LOGGER.info(constructMessage(uniqueId, "File {} is not exist at the location {}"), fileName, filePath);
 				
-				// if the processor type is uploader then lens updation should not happen 
+				// if the processor type is uploader then update the status in LENS
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 					continue;
@@ -159,7 +160,7 @@ public class MailboxWatchDogService {
 				glassMessage.setStatus(ExecutionState.COMPLETED);
 				glassMessage.setOutAgent(stagedFile.getFilePath());
 				glassMessage.setOutboundFileName(stagedFile.getFileName());
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, "File is picked up by the customer or other process", null, null);
+				glassMessage.logProcessingStatus(StatusType.SUCCESS, "File is picked up by the customer or other process", stagedFile.getProcessorType(), null);
 
 				//TVAPI
 				transactionVisibilityClient.logToGlass(glassMessage);
@@ -314,7 +315,7 @@ public class MailboxWatchDogService {
 	private int getSLATimeConfigurationUnit() throws IOException {
 
 		// get sla time configuration unit from properties file
-		String slaTimeConfigurationUnit = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MBX_SLA_CONFIG_UNIT);
+		String slaTimeConfigurationUnit = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MBX_SLA_CONFIG_UNIT, TimeUnit.MINUTES.name());
 		int timeConfigurationUnit = 0;
 		switch(slaTimeConfigurationUnit.toUpperCase()) {
 

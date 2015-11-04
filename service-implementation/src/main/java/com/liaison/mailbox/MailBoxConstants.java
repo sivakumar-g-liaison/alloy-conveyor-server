@@ -353,5 +353,5 @@ public interface MailBoxConstants {
     // configurations for sla validation
     public static String DEFAULT_CUSTOMER_SLA = "com.liaison.mailbox.default.customer.sla";
     public static String DEFAULT_MAILBOX_SLA = "com.liaison.mailbox.default.mailbox.sla";
-    public static String  MBX_SLA_CONFIG_UNIT = "mailbox.sla.time.configuration.unit";
+    public static String  MBX_SLA_CONFIG_UNIT = "com.liaison.mailbox.default.sla.time.unit";
 }
