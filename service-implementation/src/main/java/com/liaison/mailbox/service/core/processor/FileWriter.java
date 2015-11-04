@@ -148,9 +148,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 			processorPayloadLocation,
                 			seperator,
                 			fileName));
-
-                	//To add more details in staged file
-                	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
                 } else {
 
                 	LOG.info(constructMessage("Global PID",
@@ -343,6 +340,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 					IOUtils.copy(response, outputStream);
 				}
 				
+				//To add more details in staged file
+            	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, targetLocation);
+
 				//Persist the new file deatils
 				dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
 
@@ -359,6 +359,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 			try (FileOutputStream outputStream = new FileOutputStream(file)) {
 				IOUtils.copy(response, outputStream);
 			}
+
+			//To add more details in staged file
+        	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, targetLocation);
 
 			//Persist if no file exists
 			dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
