@@ -175,9 +175,7 @@ public class MailboxWatchDogService {
 			for (StagedFile updatedFile : updatedStatusList) {
 	            em.merge(updatedFile);
 	        }
-			
-			// To validate Mailbox sla for all mailboxes
-			validateMailboxSLARule();
+
 			tx.commit();
 
 		} catch (Exception e) {
