@@ -116,13 +116,18 @@ public class MailboxWatchDogService {
 			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where sf.stagedFileStatus =:")
 					.append(StagedFileDAO.STATUS)
-					.append(" and TYPE(processor) in (: ")
+					.append(" and sf.processorType in (:")
 					.append(StagedFileDAO.TYPE)
-					.append(")");;
+					.append(")");
+
+			//Processor Types
+			List<String> processorTypes = new ArrayList<>();
+			processorTypes.add(ProcessorType.FILEWRITER.name());
+			processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
 
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
-					.setParameter(StagedFileDAO.TYPE, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA))
+					.setParameter(StagedFileDAO.TYPE, processorTypes)
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
@@ -146,9 +151,8 @@ public class MailboxWatchDogService {
 					continue;
 				}
 				LOGGER.info(constructMessage(uniqueId, "File {} is not exist at the location {}"), fileName, filePath);
-				
-				// if the processor type is uploader then update the status in LENS
-				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
+
+				// if the processor type is uploader then LENS status update taken care by the uplaoder
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 					continue;
 				}

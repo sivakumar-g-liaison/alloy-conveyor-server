@@ -110,10 +110,10 @@ public class MailboxWatchDogResource extends AuditedResource {
 
 					if (!MailBoxUtil.isEmpty(type) && "sweeper".equals(type.toLowerCase())) {
 						// validate the sla rules of all mailboxes
-						new MailboxWatchDogService().pollAndUpdateStatus();
+						new MailboxWatchDogService().validateMailboxSLARule();
 					} else {
 						// To validate Mailbox sla for all mailboxes
-						new MailboxWatchDogService().validateMailboxSLARule();
+						new MailboxWatchDogService().pollAndUpdateStatus();
 					}
 					return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 				} catch (Exception e) {
