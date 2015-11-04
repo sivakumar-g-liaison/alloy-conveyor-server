@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core.email;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,7 @@ public class EmailInfoDTO {
 	private String processorName;
 	private String subject;
 	private String type;
-	private List<String> toEmailAddrList;
+	private List<String> toEmailAddrList = new ArrayList<>();
 	private boolean isSuccess;
 	
 	public EmailInfoDTO () {

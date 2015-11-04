@@ -34,10 +34,8 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -68,14 +66,14 @@ public class MailboxWatchDogService {
 	private static String SLA_VIOLATION_SUBJECT = "Files are not picked up by the customer within configured SLA of %s minutes";
 	private static String SLA_UPLOADER_VIOLATION_SUBJECT = "Files are not uploaded to the customer within configured SLA of %s minutes";
 	private static String SLA_MBX_VIOLATION_SUBJECT = "Files are not picked up by the Alloy Mailbox within configured SLA of %s minutes";
-	private static final String MAILBOX_SLA = "mailbox_sla";
-	private static final String CUSTOMER_SLA = "customer_sla";
 	private String uniqueId;
 
 	private String constructMessage(String... messages) {
 
 		StringBuilder msgBuf = new StringBuilder()
 				.append(logPrefix)
+				.append(seperator)
+				.append(uniqueId)
 				.append(seperator);
         for (String str : messages) {
             msgBuf.append(str).append(seperator);
@@ -95,7 +93,6 @@ public class MailboxWatchDogService {
 	@SuppressWarnings("unchecked")
 	public void pollAndUpdateStatus() throws Exception {
 
-		String uniqueId = MailBoxUtil.getGUID();
 		String filePath = null;
 		String fileName = null;
 
@@ -124,14 +121,14 @@ public class MailboxWatchDogService {
 			List<String> processorTypes = new ArrayList<>();
 			processorTypes.add(ProcessorType.FILEWRITER.name());
 			processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
-
+			
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
 					.setParameter(StagedFileDAO.TYPE, processorTypes)
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
-				LOGGER.info(constructMessage(uniqueId, "No active files found"));
+				LOGGER.info(constructMessage("No active files found"));
 				return;
 			}
 
@@ -146,13 +143,14 @@ public class MailboxWatchDogService {
 				}
 
 				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
-					LOGGER.info(constructMessage(uniqueId, "File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
+					LOGGER.info(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
 					validateCustomerSLA(stagedFile);
 					continue;
 				}
-				LOGGER.info(constructMessage(uniqueId, "File {} is not exist at the location {}"), fileName, filePath);
-
-				// if the processor type is uploader then LENS status update taken care by the uplaoder
+				LOGGER.info(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
+				
+				// if the processor type is uploader then L
+				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 					continue;
 				}
@@ -168,7 +166,7 @@ public class MailboxWatchDogService {
 
 				//TVAPI
 				transactionVisibilityClient.logToGlass(glassMessage);
-				LOGGER.info(constructMessage(uniqueId, "Updated LENS status for the file {} and location is {}"), fileName, filePath);
+				LOGGER.info(constructMessage("Updated LENS status for the file {} and location is {}"), fileName, filePath);
 
 				// Inactivate the stagedFile
 				stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
@@ -183,7 +181,7 @@ public class MailboxWatchDogService {
 			tx.commit();
 
 		} catch (Exception e) {
-			LOGGER.error(constructMessage(uniqueId, "Error occured in watchdog service" , e.getMessage()));
+			LOGGER.error(constructMessage("Error occured in watchdog service" , e.getMessage()));
 			if (tx.isActive()) {
                 tx.rollback();
             }
@@ -208,8 +206,7 @@ public class MailboxWatchDogService {
 		// get the mailbox from mailbox Id
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		Processor processor = config.find(Processor.class, stagedFile.getProcessorId());
-		
-		LOGGER.debug("Retrieving mailbox properties");
+
 		List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
@@ -217,11 +214,12 @@ public class MailboxWatchDogService {
 		Map <String, String> mailboxProperties = processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 		String customerSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
+
 		LOGGER.debug("Mailbox Properties retrieved. customer sla - {}, emailAddress - {}", customerSLAConfiguration, emailAddress);
 		
 		if (MailBoxUtil.isEmpty(customerSLAConfiguration)) {
-			
-			log(uniqueId, "customer sla is not configured in mailbox, using the default customer sla configuration");
+
+			LOGGER.info(constructMessage("customer sla is not configured in mailbox, using the default customer sla configuration"));
 			customerSLAConfiguration = (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType()))
 										? MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_CUSTOMER_SLA)
 										: MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
@@ -233,7 +231,7 @@ public class MailboxWatchDogService {
 			String emailSubject = null;
 			String emailBody = null;
 			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
-				
+
 				emailSubject = String.format(SLA_VIOLATION_SUBJECT, customerSLAConfiguration);
 				StringBuilder body = new StringBuilder(emailSubject)
 				.append("\n\n")
@@ -347,7 +345,8 @@ public class MailboxWatchDogService {
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		
 		LOGGER.debug("Retrieving all sweepers");
-		List <String> processorTypes = getCannonicalNamesofSpecificProcessors(MAILBOX_SLA);
+		List <String> processorTypes = new ArrayList<>();
+		processorTypes.add(Sweeper.class.getCanonicalName());
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes);
 		
 		for (Processor procsr : sweepers) {
@@ -364,7 +363,7 @@ public class MailboxWatchDogService {
 			
 			if (MailBoxUtil.isEmpty(mailboxSLAConfiguration)) {
 				
-				log(uniqueId, "mailbox sla is not configured in mailbox, using the default mailbox sla configuration");
+				LOGGER.info(constructMessage("mailbox sla is not configured in mailbox, using the default mailbox sla configuration"));
 				mailboxSLAConfiguration = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
 			}
 			// check whether sweeper got executed with in the configured sla time
@@ -386,17 +385,17 @@ public class MailboxWatchDogService {
 
 		List<FSMStateValue> listfsmStateVal = null;
 
-		log(uniqueId, "checking whether the processor {} is executed with in the specified SLA configuration time", processor.getProcsrName());
+		LOGGER.info(constructMessage("checking whether the processor {} is executed with in the specified SLA configuration time"), processor.getProcsrName());
 		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(slaConfigurationTime));
 
 		String emailSubject = null;
 		// If the list is empty then the processor is not executed at all during the specified sla time.
 		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
 
-		    log(uniqueId, "The processor {} was not executed with in the specified SLA configuration time", processor.getProcsrName());
+		    LOGGER.info(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
 			emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 			sendEmail(processor, emailAddress, emailSubject, emailSubject);
-			log(uniqueId, "The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
+			LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
 			return;
 		}
 
@@ -407,22 +406,13 @@ public class MailboxWatchDogService {
 
 				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
 
-				    log(uniqueId, "The processor {} was executed but got failed with in the specified SLA configuration time", processor.getProcsrName());
+				    LOGGER.info(constructMessage("The processor {} was executed but got failed with in the specified SLA configuration time"), processor.getProcsrName());
 					emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 					sendEmail(processor, emailAddress, emailSubject, emailSubject);
-					log(uniqueId, "The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
+					LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Internal logger for watch dog services
-	 *
-	 * @param message
-	 */
-	private void log(String uniqueId, String message, Object... params) {
-	    LOGGER.info("WatchDog-"+ uniqueId +": " + message, params);
 	}
 	
 	/**
@@ -442,26 +432,4 @@ public class MailboxWatchDogService {
 		EmailNotifier.sendEmail(emailInfo);
 	}
 	
-	/**
-	 * Method to return a list of canonical names of specific processors
-	 *
-	 * @param type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
-	 * @return list of canonical names of processors of based on the type provided
-	 */
-	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
-
-		List <String> specificProcessors = new ArrayList<String>();
-		switch(type) {
-			case MAILBOX_SLA:
-				specificProcessors.add(Sweeper.class.getCanonicalName());
-				break;
-			case CUSTOMER_SLA:
-				specificProcessors.add(RemoteUploader.class.getCanonicalName());
-				specificProcessors.add(FileWriter.class.getCanonicalName());
-				break;
-
-		}
-		return specificProcessors;
-	}
-
 }
