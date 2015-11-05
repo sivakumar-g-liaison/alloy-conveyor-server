@@ -53,8 +53,6 @@ public class DropboxService {
 	 */
 	public void invokeDropboxQueue(String request) throws JAXBException, IOException, JSONException {
 
-		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-
 		LOG.info(MailBoxUtil.constructMessage(null, null, "JSON received from SB {}"), new JSONObject(request).toString(2));
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);

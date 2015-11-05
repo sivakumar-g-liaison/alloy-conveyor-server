@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -103,8 +104,10 @@ public class MailboxWatchDogService {
 		EntityTransaction tx = null;
 		EntityManager em = null;
 		List<StagedFile> updatedStatusList = new ArrayList<>();
+		Map<String, Processor> processors = new HashMap<>();
 		TransactionVisibilityClient transactionVisibilityClient = null;
 		GlassMessage glassMessage = null;
+		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 
 		try {
 
@@ -119,10 +122,7 @@ public class MailboxWatchDogService {
 					.append(StagedFileDAO.STATUS)
 					.append(" and sf.processorType in (:")
 					.append(StagedFileDAO.TYPE)
-					.append(")")
-					.append(" and sf.processorId in (")
-					.append(" select stgfile.processorId from StagedFile stgfile")
-					.append(" group by stgfile.processorId)");
+					.append(")");
 
 			//Processor Types
 			List<String> processorTypes = new ArrayList<>();
@@ -151,27 +151,26 @@ public class MailboxWatchDogService {
 				}
 
 				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
-					
+
 					LOGGER.info(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
-					
+
 					// get the processor from processor Id
-					ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+					processor = processors.get(stagedFile.getProcessorId());
 					if (null == processor) {
 						processor = config.find(Processor.class, stagedFile.getProcessorId());
-					} else if (!processor.getPguid().equals(stagedFile.getProcessorId())) {
-						processor = config.find(Processor.class, stagedFile.getProcessorId());
+						processors.put(stagedFile.getProcessorId(), processor);
 					}
 					validateCustomerSLA(stagedFile, processor);
 					continue;
 				}
 				LOGGER.info(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
-				
+
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 					continue;
 				}
- 
+
 				transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage = new GlassMessage();
 				glassMessage.setGlobalPId(stagedFile.getPguid());
@@ -240,24 +239,21 @@ public class MailboxWatchDogService {
 		
 		Timestamp customerSLATimeLimit = getCustomerSLAConfigurationAsTimeStamp(customerSLAConfiguration, stagedFile.getCreatedDate());
 		if (isCustomerSLAViolated(customerSLATimeLimit)) {
-			
-			String emailSubject = null;
-			String emailBody = null;
-			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
 
+			String emailSubject = null;
+			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
 				emailSubject = String.format(SLA_VIOLATION_SUBJECT, customerSLAConfiguration);
-				StringBuilder body = new StringBuilder(emailSubject)
-				.append("\n\n")
-				.append("File : ")
-				.append(stagedFile.getFileName());
-				emailBody = body.toString();				
 			} else {
-				emailSubject = emailBody = String.format(SLA_UPLOADER_VIOLATION_SUBJECT, customerSLAConfiguration);
+				emailSubject = String.format(SLA_UPLOADER_VIOLATION_SUBJECT, customerSLAConfiguration);
 			}
+			StringBuilder body = new StringBuilder(emailSubject)
+					.append("\n\n")
+					.append("File : ")
+					.append(stagedFile.getFileName());
 			// send email notifications for sla violations
-			sendEmail(processor, emailAddress, emailSubject, emailBody);
+			sendEmail(processor, emailAddress, emailSubject, body.toString());
 		}
-		
+
 	}
 	
 	

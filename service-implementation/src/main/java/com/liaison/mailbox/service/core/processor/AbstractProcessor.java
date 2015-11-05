@@ -326,8 +326,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return JSON String containing URL, Verb..etc of the processor
 	 */
 	public String getPropertiesJson() {
-
-		LOGGER.info("Returns HTTP/S configurations to HTTPClient");
 		return configurationInstance.getProcsrProperties();
 	}
 
