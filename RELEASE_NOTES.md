@@ -23,6 +23,10 @@
 * GMB-581 - updated lib_message_bus to 4.+
 * GMB-620 - Rename watchdog request in the Log to consumed from queue
 
+2.4.9
+-------------------------------
+* updated queue processor interval from 10 seconds to 1 seconds
+
 2.4.8
 -------------------------------
 * disable queue ssl
