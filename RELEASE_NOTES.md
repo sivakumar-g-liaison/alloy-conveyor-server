@@ -1,3 +1,7 @@
+2.5.0-SNAPSHOT
+-------------------------------
+* After merging with RC branch
+
 2.4.9-SNAPSHOT
 -------------------------------
 * After merging with RC branch
