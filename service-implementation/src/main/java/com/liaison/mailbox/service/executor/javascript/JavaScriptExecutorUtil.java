@@ -116,7 +116,7 @@ public final class JavaScriptExecutorUtil {
 				scriptUri = new URI(scriptPath);
 			}
 
-		    com.liaison.mailbox.service.executor.javascript.JavascriptExecutorService exec = new com.liaison.mailbox.service.executor.javascript.JavascriptExecutorService(scriptUri.toString(), processorService);
+		    JavascriptExecutorService exec = new JavascriptExecutorService(scriptUri.toString(), processorService);
 		    scriptContext = exec.call();
 
 		    // did my function call throw?
@@ -149,7 +149,7 @@ public final class JavaScriptExecutorUtil {
 
 		try {
 
-		    com.liaison.mailbox.service.executor.javascript.JavascriptExecutorService exec = new com.liaison.mailbox.service.executor.javascript.JavascriptExecutorService(scriptUri.toString(), processorService);
+		    JavascriptExecutorService exec = new JavascriptExecutorService(scriptUri.toString(), processorService);
 		    scriptContext = exec.call();
 
 		    // did my function call throw?
