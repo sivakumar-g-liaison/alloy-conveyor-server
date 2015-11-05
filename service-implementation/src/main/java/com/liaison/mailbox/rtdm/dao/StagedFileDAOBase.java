@@ -223,10 +223,6 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             stagedFileEntity.copyFromDto(stagedFileDto, true);
             stagedFileEntity.setPguid(workticket.getGlobalProcessId());
 
-            Timestamp timestamp = MailBoxUtil.getTimestamp();
-            stagedFileEntity.setCreatedDate(timestamp);
-            stagedFileEntity.setModifiedDate(timestamp);
-
             persist(stagedFileEntity);
 
         } finally {

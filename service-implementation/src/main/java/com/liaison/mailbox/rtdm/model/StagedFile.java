@@ -227,8 +227,10 @@ public class StagedFile implements Identifiable {
 	 */
 	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
 
+		Timestamp timestamp = MailBoxUtil.getTimestamp();
 		if (isCreate) {
 			this.setPguid(MailBoxUtil.getGUID());
+			this.setCreatedDate(timestamp);
 		}
 		this.setFileName(stagedFileDto.getName());
 		this.setFilePath(stagedFileDto.getPath());
@@ -243,5 +245,6 @@ public class StagedFile implements Identifiable {
 		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
 		this.setProcessorId(stagedFileDto.getProcessorId());
 		this.setProcessorType(stagedFileDto.getProcessorType());
+		this.setModifiedDate(timestamp);
 	}
 }
