@@ -230,9 +230,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 						fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
-						LOGGER.info("##########################################################################");
-						LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
-						LOGGER.info("#############################################################################");
+						LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
 						return;
 					}
 					lastCheckTime = new Date();

@@ -64,8 +64,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
         try {
 
-            LOG.debug("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.COMPLETED);
             glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started", configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
@@ -177,7 +175,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
             glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
-            LOG.debug("#################################################################");
 
             long endTime = System.currentTimeMillis();
             LOG.info(constructMessage("Number of files processed 1"));

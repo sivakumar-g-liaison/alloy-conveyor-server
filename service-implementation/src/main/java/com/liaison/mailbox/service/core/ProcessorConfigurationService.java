@@ -698,9 +698,7 @@ public class ProcessorConfigurationService {
 
 
 			MailboxFSM fsm = new MailboxFSM();
-			LOGGER.info("############################################################################");
-			LOGGER.info("Interrupt signal received for   " + executionID);
-			LOGGER.info("#############################################################################");
+			LOGGER.info("Interrupt signal received for - " + executionID);
 
 			// persisting the FSMEvent entity
 			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, executionID);

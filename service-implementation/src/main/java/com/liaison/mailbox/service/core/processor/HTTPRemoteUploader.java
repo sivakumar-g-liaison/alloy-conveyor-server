@@ -142,10 +142,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 										.parseLong(constantInterval)) {
 							lastCheckTime = new Date();
 							if (eventDAO.isThereAInterruptSignal(executionId)) {
-								LOGGER.info("##########################################################################");
-								LOGGER.info("The executor with execution id  " + executionId
-										+ " is gracefully interrupted");
-								LOGGER.info("#############################################################################");
+								LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
 								fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 								fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
 								return;

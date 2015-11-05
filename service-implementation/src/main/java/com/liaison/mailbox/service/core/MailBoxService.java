@@ -50,7 +50,6 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
-import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
 import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -200,8 +199,6 @@ public class MailBoxService {
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		try {
 
-			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-
 			dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.
@@ -276,7 +273,6 @@ public class MailBoxService {
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid());
-			LOG.info("#################################################################");
 
 		} catch (MailBoxServicesException e) {
 
@@ -352,8 +348,6 @@ public class MailBoxService {
         GlassMessage glassMessage = null;
 
         try {
-
-            LOG.debug("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
@@ -464,8 +458,6 @@ public class MailBoxService {
                     mbx.getMbxName(),
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
-
-            LOG.debug("#################################################################");
 
         } catch (Exception e) {
 
