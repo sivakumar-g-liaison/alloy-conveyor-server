@@ -51,6 +51,7 @@ import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
+import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -384,7 +385,7 @@ public class MailBoxService {
             if (!MailBoxUtil.isEmpty(processorId)) {
                 processor = processorDAO.findActiveProcessorById(processorId);
             } else {
-                processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+                processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
             }
 
             

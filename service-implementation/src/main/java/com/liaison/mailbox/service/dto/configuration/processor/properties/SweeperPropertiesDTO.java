@@ -25,6 +25,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean securedPayload;
 	@JsonIgnore
 	private boolean deleteFileAfterSweep;
+	@JsonIgnore
 	private String fileRenameFormat;
 	private String numOfFilesThreshold;
 	private String payloadSizeThreshold;
