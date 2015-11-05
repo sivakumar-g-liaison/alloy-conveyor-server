@@ -326,13 +326,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(STATUS)
 						.append(" and mbx.mbxStatus = :")
 						.append(STATUS)
-						.append(" and TYPE(processor) in (:")
-						.append(PROCESSOR_TYPE)
+						.append(" and ( ")
+						.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
 						.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(STATUS, EntityStatus.ACTIVE.name())
-					.setParameter(PROCESSOR_TYPE, specificProcessorTypes)
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();

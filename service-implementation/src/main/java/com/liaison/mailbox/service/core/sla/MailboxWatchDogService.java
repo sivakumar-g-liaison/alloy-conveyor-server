@@ -34,8 +34,10 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -66,6 +68,8 @@ public class MailboxWatchDogService {
 	private static String SLA_VIOLATION_SUBJECT = "Files are not picked up by the customer within configured SLA of %s minutes";
 	private static String SLA_UPLOADER_VIOLATION_SUBJECT = "Files are not uploaded to the customer within configured SLA of %s minutes";
 	private static String SLA_MBX_VIOLATION_SUBJECT = "Files are not picked up by the Alloy Mailbox within configured SLA of %s minutes";
+	private static final String MAILBOX_SLA = "mailbox_sla";
+	private static final String CUSTOMER_SLA = "customer_sla";
 	private String uniqueId;
 
 	private String constructMessage(String... messages) {
@@ -115,7 +119,10 @@ public class MailboxWatchDogService {
 					.append(StagedFileDAO.STATUS)
 					.append(" and sf.processorType in (:")
 					.append(StagedFileDAO.TYPE)
-					.append(")");
+					.append(")")
+					.append(" and sf.processorId in (")
+					.append(" select stgfile.processorId from StagedFile stgfile")
+					.append(" group by stgfile.processorId)");
 
 			//Processor Types
 			List<String> processorTypes = new ArrayList<>();
@@ -131,7 +138,8 @@ public class MailboxWatchDogService {
 				LOGGER.info(constructMessage("No active files found"));
 				return;
 			}
-
+			
+			Processor processor = null;
 			for (StagedFile stagedFile : stagedFiles) {
 
 				filePath = stagedFile.getFilePath();
@@ -143,13 +151,22 @@ public class MailboxWatchDogService {
 				}
 
 				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
+					
 					LOGGER.info(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
-					validateCustomerSLA(stagedFile);
+					
+					// get the processor from processor Id
+					ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+					if (null == processor) {
+						processor = config.find(Processor.class, stagedFile.getProcessorId());
+					} else if (!processor.getPguid().equals(stagedFile.getProcessorId())) {
+						processor = config.find(Processor.class, stagedFile.getProcessorId());
+					}
+					validateCustomerSLA(stagedFile, processor);
 					continue;
 				}
 				LOGGER.info(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
 				
-				// if the processor type is uploader then L
+				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 					continue;
@@ -201,12 +218,8 @@ public class MailboxWatchDogService {
 	 * 					   and the related processor and mailbox details 
 	 * @throws IOException 
 	 */
-	private void validateCustomerSLA(StagedFile stagedFile) throws IOException {
+	private void validateCustomerSLA(StagedFile stagedFile, Processor processor) throws IOException {
 		
-		// get the mailbox from mailbox Id
-		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		Processor processor = config.find(Processor.class, stagedFile.getProcessorId());
-
 		List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
@@ -414,6 +427,50 @@ public class MailboxWatchDogService {
 			}
 		}
 	}
+	
+	/**
+	 * Method to return a list of canonical names of specific processors
+	 *
+	 * @param type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
+	 * @return list of canonical names of processors of based on the type provided
+	 */
+	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
+
+		List <String> specificProcessors = new ArrayList<String>();
+		switch(type) {
+			case MAILBOX_SLA:
+				specificProcessors.add(Sweeper.class.getCanonicalName());
+				break;
+			case CUSTOMER_SLA:
+				specificProcessors.add(RemoteUploader.class.getCanonicalName());
+				specificProcessors.add(FileWriter.class.getCanonicalName());
+				break;
+
+		}
+
+		return specificProcessors;
+	}
+
+	/**
+	 * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
+	 * associated with given mailbox
+	 *
+	 * @param mailboxId
+	 * @return Processor
+	 */
+	public Processor getSpecificProcessorofMailbox(String mailboxId) {
+
+		LOGGER.info("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
+		// get processor of type remote uploader of given mailbox id
+		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+		List <Processor> processors = processorDAO.findSpecificProcessorTypesOfMbx(mailboxId, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
+		// always get the first available processor because there
+		// will be either one uploader or file writer available for each mailbox
+		Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
+		return processor;
+
+	}
+
 	
 	/**
 	 * Method to send email to user for all sla violations
