@@ -170,7 +170,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public ProcessorPropertyUITemplateDTO getPropertiesInTemplateJsonFormat() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public ProcessorPropertyUITemplateDTO getPropertiesInTemplateJsonFormat() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
 
 		if (null == processorPropertiesTemplate) {
 			processorPropertiesTemplate = ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(configurationInstance.getProcsrProperties(), configurationInstance);
@@ -190,7 +190,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public StaticProcessorPropertiesDTO getProperties() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public StaticProcessorPropertiesDTO getProperties() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		if (null == staticProcessorProperties) {
 			staticProcessorProperties = ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(configurationInstance.getProcsrProperties(), configurationInstance);
@@ -633,57 +633,41 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			archiveFile(file, processedFileLcoation);
 		}
 	}
-
+	 
 	/**
-	 * Method deletes or archives the files based on the configuration
-	 *
-	 * @param deleteFiles
-	 * @param processedFileLocation
-	 * @param item
-	 * @param curFileName
+	 * Method to delete files or folders upon successful upload
+	 * 
+	 * @param item - File or Folder which is uploaded successfully
 	 * @throws IOException
 	 */
-	protected void deleteOrArchiveTheFiles(boolean deleteFiles, String processedFileLocation, File item) throws IOException {
+	protected void deleteFilesAfterSuccessfulUpload(File item) throws IOException {
+		
+		LOGGER.debug(constructMessage("Going to delete file/folder {} in the local payload location"), item.getName());
+		if (item.isDirectory()) {
+			
+			// if it is a directory then it will be deleted only if did not contain any files.
+			// if the directory is not empty then uploading of files has failed and will not be deleted
+			String [] subFiles = item.list();
+			if (null != subFiles && subFiles.length == 0) {
+				
+				// The directory should not be the actual payload location configured
+				String payloadLocation = new File (getPayloadURI()).getPath();
+				if (!payloadLocation.equals(item.getPath())) {
+					
+					item.delete();
+					LOGGER.info(constructMessage("Folder {} deleted successfully in the local payload location"), item.getName());
+				} else {
+					LOGGER.debug(constructMessage("Not deleting folder {} as it is the actual payload location"), item.getName());
 
-        // Delete the local files after successful upload if user opt for it
-        if (deleteFiles) {
-            item.delete();
-            LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
-        } else {
-            // File is not opted to be deleted. Hence moved to processed folder
-            processedFileLocation = replaceTokensInFolderPath(processedFileLocation);
-            if (MailBoxUtil.isEmpty(processedFileLocation)) {
-                LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
-                archiveFile(item.getAbsolutePath(), false);
-                LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
-            } else {
-                LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
-                archiveFile(item, processedFileLocation);
-                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
-            }
-        }
-    }
+				}
+			}
+		} else {
+			
+	        // Delete the local files after successful upload if user opt for it
+	        item.delete();
+	        LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
 
-	/**
-	 * Method archives the files based on the configuration
-	 *
-	 * @param errorFileLocation
-	 * @param item
-	 * @throws IOException
-	 */
-	protected void archiveFiles(String errorFileLocation, File item) throws IOException {
-
-        // File Uploading failed so move the file to error folder
-        errorFileLocation = replaceTokensInFolderPath(errorFileLocation);
-        if (MailBoxUtil.isEmpty(errorFileLocation)) {
-            LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
-            archiveFile(item.getAbsolutePath(), true);
-            LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
-        } else {
-            LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
-            archiveFile(item, errorFileLocation);
-            LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
-        }
+		}
     }
 
 	/**
@@ -802,33 +786,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	}
 
 	/**
-	 * Method used to remove the privatekey downloaded from keymanager once
-	 * successfully authenticated using key
-	 *
-	 * @param fileLocation
-	 * @throws IOException
-	 * @throws SymmetricAlgorithmException
-	 * @throws MailBoxServicesException
-	 */
-	public void removePrivateKeyFromTemp() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
-
-		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
-		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsIdpUri() != null) {
-			String fileLocation = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsIdpUri()
-					+ ".txt";
-			File privateKeyFile = new File(fileLocation);
-			if (privateKeyFile.exists())
-				privateKeyFile.delete();
-			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
-			return;
-		}
-
-		LOGGER.info("Trigerring - The private key file path not configured.");
-	}
-
-
-	/**
 	 * This Method create local folders if not available.
 	 *
 	 * * @param processorDTO it have details of processor
@@ -944,7 +901,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     protected void logGlassMessage(String message, File file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getName());
 
         if (null != stagedFile) {
 
@@ -961,7 +918,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
+
                 glassMessage.logProcessingStatus(StatusType.SUCCESS, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
+                // Inactivate the stagedFile
+                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                stagedFileDAO.merge(stagedFile);
                 //Fourth corner timestamp
                 glassMessage.logFourthCornerTimestamp();
             } else {
@@ -970,11 +931,38 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             //TVAPI
             transactionVisibilityClient.logToGlass(glassMessage);
 
-            // Inactivate the stagedFile
-            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-            stagedFileDAO.merge(stagedFile);
         }
     }
+
+    /**
+	 * Logs duplicate status in lens for the overwrite true case
+	 * 
+	 * @param processor The filewriter processor entity
+	 * @param glassMessage Glass
+	 * @param stagedFile
+	 */
+	protected void logDuplicateStatus(StagedFile stagedFile, String gpid) {
+
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+		GlassMessage glassMessage = new GlassMessage();
+		glassMessage.setGlobalPId(stagedFile.getPguid());
+		glassMessage.setCategory(configurationInstance.getProcessorType());
+		glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+
+		glassMessage.setStatus(ExecutionState.DUPLICATE);
+		glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
+		glassMessage.setOutboundFileName(stagedFile.getFileName());
+
+		StringBuilder message = new StringBuilder()
+							.append("File ")
+							.append(stagedFile.getFileName())
+							.append(" is overwritten by another process - ")
+							.append(gpid);
+		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
+
+		//TVAPI
+		transactionVisibilityClient.logToGlass(glassMessage);
+	}
 
     @Override
     public void logToLens(String msg, File file, ExecutionState status) {

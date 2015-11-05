@@ -76,7 +76,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				executeRequest();
 			}
 
-		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -192,14 +192,6 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		} else {
 			archiveFile(file, fileLocation);
 		}
-	}
-
-	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
 	}
 
 	@Override

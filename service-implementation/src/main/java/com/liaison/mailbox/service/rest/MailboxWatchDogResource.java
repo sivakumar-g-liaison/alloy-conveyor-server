@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,6 +36,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -45,6 +47,7 @@ import com.netflix.servo.monitor.Stopwatch;
 import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -93,7 +96,8 @@ public class MailboxWatchDogResource extends AuditedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
-	public Response updateStatus(@Context final HttpServletRequest request) {
+	public Response updateStatus(@Context final HttpServletRequest request, 
+			@QueryParam(value = "type") @ApiParam(name = "type", required = false, value = "Type of the SLA to be checked.") final String type) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -102,9 +106,15 @@ public class MailboxWatchDogResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 				try {
-					LOG.debug("Entering into update status");
-					// validate the sla rules of all mailboxes
-					new MailboxWatchDogService().pollAndUpdateStatus();
+					LOG.debug("Entering into mailbox watchdog resource");
+
+					if (!MailBoxUtil.isEmpty(type) && "sweeper".equals(type.toLowerCase())) {
+						// validate the sla rules of all mailboxes
+						new MailboxWatchDogService().validateMailboxSLARule();
+					} else {
+						// To validate Mailbox sla for all mailboxes
+						new MailboxWatchDogService().pollAndUpdateStatus();
+					}
 					return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);

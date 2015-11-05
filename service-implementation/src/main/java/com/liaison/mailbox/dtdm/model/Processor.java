@@ -409,6 +409,19 @@ public class Processor implements Identifiable {
 		}
 		return map;
 	}
+	
+	/**
+	 * Method to retrieve the given properties form Mailbox
+	 * 
+	 * @param propertiesToBeRetrieved - list of property Names to be retrieved
+	 * 		possible propertyNames are 'timetopickupfilepostedtomailbox', 'timetopickupfilepostedbymailbox'
+	 * 		'emailnotificationids', 'ttl' and 'ttlunit'
+	 * @return a Map containing values of given properties having the property Names as keys
+	 */
+	@Transient
+	public Map<String, String> retrieveMailboxProperties(List<String> propertiesToBeRetrieved) {
+		return getMailbox().retrieveMailboxProperties(propertiesToBeRetrieved);
+	}
 
 
 	@Override

@@ -167,8 +167,9 @@ public enum Messages {
 	//referred in ProcessorAdminDetailsResource
 	PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
 	PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
-	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING(
-		"The status for the given processor id %s is not updated since the execution is not in 'Processing' state.");
+	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING("The status for the given processor id %s is not updated since the execution is not in 'Processing' state."),
+
+	FILE_WRITER_SUCCESS_MESSAGE("File is picked up by the customer or other process");
 
 	private String value;
 

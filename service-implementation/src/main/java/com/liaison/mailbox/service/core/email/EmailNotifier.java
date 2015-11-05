@@ -68,11 +68,13 @@ public class EmailNotifier {
 					.append(NEW_LINE)
 					.append(NOTE);
 
-			MailSend.Send(StringUtils.join(emailInfo.getToEmailAddrList(), ','),
-					PROPS.getString("mail.from"),
-					emailInfo.getSubject(),
-					emailContentBuilder.toString(),
-					PROPS.getString("mail.host"));
+			if (!emailInfo.getToEmailAddrList().isEmpty()) {
+				MailSend.Send(StringUtils.join(emailInfo.getToEmailAddrList(), ','),
+						PROPS.getString("mail.from"),
+						emailInfo.getSubject(),
+						emailContentBuilder.toString(),
+						PROPS.getString("mail.host"));
+			}
 
 		} catch (Exception e) {
 			//hanlde gracefully

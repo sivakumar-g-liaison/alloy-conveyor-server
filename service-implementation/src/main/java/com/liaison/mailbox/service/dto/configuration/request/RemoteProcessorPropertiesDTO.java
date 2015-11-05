@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
@@ -39,6 +40,7 @@ public class RemoteProcessorPropertiesDTO {
 	private List<HTTPOtherRequestHeaderDTO> otherRequestHeader;
 	private boolean securedPayload;
 	private boolean handOverExecutionToJavaScript;
+	@JsonIgnore
 	private boolean deleteFileAfterSweep;
 
 	public boolean isDeleteFileAfterSweep() {

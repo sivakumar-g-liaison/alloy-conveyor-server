@@ -288,10 +288,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 							}
 						}
 
-						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
-						        staticProp.getProcessedFileLocation(),
-                                item);
-
+						deleteFilesAfterSuccessfulUpload(item);
 						StringBuilder message = new StringBuilder()
                             .append("File ")
                             .append(currentFileName)
@@ -302,7 +299,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                         // Glass Logging 
                         logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
-					    archiveFiles(staticProp.getErrorFileLocation(), item);
 
 					    StringBuilder message = new StringBuilder()
                             .append("Failed to upload file ")
@@ -337,6 +333,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					replyCode = MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK;
 				}
 			}
+			// To delete the folder after uploading of all files inside this folder is done
+			deleteFilesAfterSuccessfulUpload(localDir);
 		} else {
 			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
 		}
@@ -408,21 +406,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	@Override
 	public Object getClient() {
 		return FTPSClient.getClient(this);
-	}
-
-    	@Override
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, SecurityException,
-				IllegalArgumentException, IllegalAccessException, JAXBException {
-		G2FTPSClient ftpRequest = (G2FTPSClient)client;
-		try {
-			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException   e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override

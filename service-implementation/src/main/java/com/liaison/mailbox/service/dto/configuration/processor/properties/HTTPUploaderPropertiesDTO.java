@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
@@ -30,7 +31,9 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean chunkedEncoding;
 	private String contentType;
 	private String otherRequestHeader;
+	@JsonIgnore
 	private String errorFileLocation;
+	@JsonIgnore
 	private String processedFileLocation;
 
 	public String getHttpVersion() {

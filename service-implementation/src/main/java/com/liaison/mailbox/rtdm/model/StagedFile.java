@@ -44,13 +44,16 @@ public class StagedFile implements Identifiable {
 	private String pguid;
 	private String fileSize;
 	private String mailboxId;
+	private String processorId;
+	private String processorType;
 	private String fileName;
 	private String filePath;
 	private String spectrumUri;
 	private String fileMetaData;
 	private String stagedFileStatus;
 	private Timestamp expirationTime;
-	
+	private Timestamp createdDate;
+	private Timestamp modifiedDate;
 	
 	public StagedFile() {
 	}
@@ -81,6 +84,24 @@ public class StagedFile implements Identifiable {
 
 	public void setMailboxId(String mailboxId) {
 		this.mailboxId = mailboxId;
+	}
+
+	@Column(name = "PROCESSOR_GUID", length = 32)
+	public String getProcessorId() {
+		return processorId;
+	}
+
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
+
+	@Column(name = "PROCESSOR_TYPE", length = 128)
+	public String getProcessorType() {
+		return processorType;
+	}
+
+	public void setProcessorType(String processorType) {
+		this.processorType = processorType;
 	}
 
 	@Column(name = "FILE_NAME", length = 512)
@@ -136,8 +157,24 @@ public class StagedFile implements Identifiable {
 	public void setExpirationTime(Timestamp timeToLive) {
 		this.expirationTime = timeToLive;
 	}
-	
-	
+
+	@Column(name = "CREATED_DATE")
+	public Timestamp getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Timestamp createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	@Column(name = "MODIFIED_DATE")
+	public Timestamp getModifiedDate() {
+		return modifiedDate;
+	}
+
+	public void setModifiedDate(Timestamp modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
 
 	@Override
 	@Transient
@@ -199,8 +236,12 @@ public class StagedFile implements Identifiable {
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
 		this.setFileMetaData(stagedFileDto.getMeta());
-		EntityStatus status = MailBoxUtil.isEmpty(stagedFileDto.getStatus())?EntityStatus.ACTIVE: EntityStatus.findByCode(stagedFileDto.getStatus());
+		EntityStatus status = MailBoxUtil.isEmpty(stagedFileDto.getStatus())
+									? EntityStatus.ACTIVE
+									: EntityStatus.findByCode(stagedFileDto.getStatus());
 		this.setStagedFileStatus(status.name());
 		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
+		this.setProcessorId(stagedFileDto.getProcessorId());
+		this.setProcessorType(stagedFileDto.getProcessorType());
 	}
 }

@@ -122,7 +122,7 @@ public class SFTPClient {
 
 			return sftpRequest;
 		} catch (JAXBException | IOException | LiaisonException | MailBoxServicesException
-				| SymmetricAlgorithmException | IllegalAccessException | NoSuchFieldException e) {
+				| SymmetricAlgorithmException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 

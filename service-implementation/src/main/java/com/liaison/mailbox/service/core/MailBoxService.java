@@ -19,10 +19,12 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -34,7 +36,6 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -42,9 +43,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
@@ -338,6 +337,7 @@ public class MailBoxService {
 	    String mailboxId = null;
 	    String processorId = null;
 	    String payloadURI = null;
+	    String processorType = null;
 
 	    WorkTicket workTicket = null;
 	    Processor processor = null;
@@ -352,9 +352,13 @@ public class MailBoxService {
 
         try {
 
-            LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
+            LOG.debug("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
+            //Fish tag global process id
+            ThreadContext.clearMap(); //set new context after clearing
+            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
 
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
@@ -400,6 +404,7 @@ public class MailBoxService {
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }
 
+            processorType = processor.getProcessorType().name();
             glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcsrProtocol(), processor.getProcessorType().name());
 			
             // determine SLA status
@@ -427,7 +432,7 @@ public class MailBoxService {
             FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
-                    processor.getProcessorType().name(),
+            		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid(),
@@ -437,8 +442,14 @@ public class MailBoxService {
 
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
+
             	transactionVisibilityClient.logToGlass(glassMessage);
             	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
+
+            	// send notification for successful file staging
+            	String emailSubject = workTicket.getFileName() + "' is available for pick up";
+            	String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
+            	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
@@ -447,43 +458,22 @@ public class MailBoxService {
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
-                    processor.getProcessorType().name(),
+            		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
 
-            //STAGED FILE TABLE UPDATE ONLY ON SUCCESSFULL FILE WRITE
-            if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
-
-            	StagedFileDAOBase dao = new StagedFileDAOBase();
-
-            	//THIS IS OVERWRITE TRUE CASE AND OLD FILE WILL BE OVERWRITTEN
-            	StagedFile stagedFile = dao.findStagedFilesOfUploadersBasedOnMeta(processor.getPguid(), workTicket.getFileName());
-            	//persist staged file to get the gpid during uploader
-            	if (null != stagedFile) {
-
-            		//Inactivate the old entity
-            		stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
-            		dao.merge(stagedFile);
-            		logDuplicateStatus(processor, stagedFile, workTicket.getGlobalProcessId());
-            	}
-            	dao.persistStagedFile(workTicket, processor.getPguid());
-            }
-
-            // send notification for successful file staging
-            String emailSubject = workTicket.getFileName() + "' is available for pick up";
-            String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
-            EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
-            LOG.info("#################################################################");
+            LOG.debug("#################################################################");
 
         } catch (Exception e) {
 
+        	LOG.error(e);
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {
                 LOG.error("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : File Staging failed : {}",
-                        processor.getProcessorType().name(),
+                		processorType,
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),
                         processor.getMailbox().getPguid(),
@@ -509,38 +499,11 @@ public class MailBoxService {
             // send email to the configured mail id in case of failure
             EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
+        } finally {
+        	//Clearing thread context map
+        	ThreadContext.clearMap();
         }
 
-	}
-
-	/**
-	 * Logs duplicate status in lens for the overwrite true case
-	 * 
-	 * @param processor The filewriter processor entity
-	 * @param glassMessage Glass
-	 * @param stagedFile
-	 */
-	private void logDuplicateStatus(Processor processor, StagedFile stagedFile, String gpid) {
-
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getPguid());
-		glassMessage.setCategory(processor.getProcessorType());
-		glassMessage.setProtocol(processor.getProcsrProtocol());
-
-		glassMessage.setStatus(ExecutionState.DUPLICATE);
-		glassMessage.setOutAgent(processor.getProcsrProtocol());
-		glassMessage.setOutboundFileName(stagedFile.getFileName());
-
-		StringBuilder message = new StringBuilder()
-							.append("File ")
-							.append(stagedFile.getFileName())
-							.append(" is overwritten by another process - ")
-							.append(gpid);
-		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
-
-		//TVAPI
-		transactionVisibilityClient.logToGlass(glassMessage);
 	}
 
 }
