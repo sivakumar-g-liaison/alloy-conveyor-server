@@ -907,7 +907,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
             GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
+            glassMessage.setGlobalPId(stagedFile.getPguid());
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 
@@ -945,7 +945,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getGlobalProcessId());
+		glassMessage.setGlobalPId(stagedFile.getPguid());
 		glassMessage.setCategory(configurationInstance.getProcessorType());
 		glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 

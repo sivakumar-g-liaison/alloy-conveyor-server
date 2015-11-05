@@ -218,10 +218,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         	stagedFileDto.setExpirationTime("0");
         	stagedFileDto.setProcessorId(processorId);
         	stagedFileDto.setProcessorType(processorType);
-        	stagedFileDto.setGlobalProcessId(workticket.getGlobalProcessId());
 
             stagedFileEntity = new StagedFile();
             stagedFileEntity.copyFromDto(stagedFileDto, true);
+            stagedFileEntity.setPguid(workticket.getGlobalProcessId());
 
             Timestamp timestamp = MailBoxUtil.getTimestamp();
             stagedFileEntity.setCreatedDate(timestamp);

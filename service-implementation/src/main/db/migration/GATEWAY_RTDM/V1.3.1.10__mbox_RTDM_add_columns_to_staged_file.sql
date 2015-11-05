@@ -14,27 +14,12 @@ DECLARE
 BEGIN
   Select count(*) into v_column_exists
     from all_tab_cols
-    where column_name = 'GLOBAL_PROCESS_ID'
-      and table_name = 'STAGED_FILE'
-      and owner = 'GATEWAY_OWNR';
-
-  if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD GLOBAL_PROCESS_ID CHAR(32) DEFAULT ''NOT AVAILABLE'' CONSTRAINT NN04_STAGED_FILE NOT NULL';
-  end if;
-end;
-/
-
-DECLARE
-  v_column_exists number := 0;  
-BEGIN
-  Select count(*) into v_column_exists
-    from all_tab_cols
     where column_name = 'PROCESSOR_GUID'
       and table_name = 'STAGED_FILE'
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD PROCESSOR_GUID CHAR(32) DEFAULT ''NOT AVAILABLE'' CONSTRAINT NN05_STAGED_FILE NOT NULL';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD PROCESSOR_GUID CHAR(32)';
   end if;
 end;
 /
@@ -49,7 +34,7 @@ BEGIN
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD PROCESSOR_TYPE VARCHAR2(128) DEFAULT ''NOT AVAILABLE'' CONSTRAINT NN06_STAGED_FILE NOT NULL';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD PROCESSOR_TYPE VARCHAR2(128)';
   end if;
 end;
 /
