@@ -28,6 +28,7 @@ import com.liaison.commons.message.glass.dom.Metric;
 import com.liaison.commons.message.glass.dom.MetricAPI;
 import com.liaison.commons.message.glass.dom.MetricTag;
 import com.liaison.commons.scripting.ScriptExecutorBase;
+import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
@@ -50,16 +51,16 @@ import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
  * @author joshuaw
  * @author vnagarajan on 11/14
  */
-public class JavascriptExecutor extends ScriptExecutorBase {
+public class JavascriptExecutorService extends ScriptExecutorBase {
 
 	protected JavascriptScriptContext scriptContext = null;
 	protected String script = null;
 	protected ProcessorJavascriptI processor = null;
 	protected MetricAPI metricAPI = new MetricAPI();
 
-	private static final Logger logger = LogManager.getLogger(JavascriptExecutor.class);
+	private static final Logger logger = LogManager.getLogger(JavascriptExecutorService.class);
 
-	public JavascriptExecutor(String script, ProcessorJavascriptI processorService) {
+	public JavascriptExecutorService(String script, ProcessorJavascriptI processorService) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("mailbox - JavascriptExecutor.JavascriptExecutor(): called(): script: " + script);
@@ -68,7 +69,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 		this.processor = processorService;
 	}
 
-	public JavascriptExecutor(URI script, ProcessorJavascriptI processorService) {
+	public JavascriptExecutorService(URI script, ProcessorJavascriptI processorService) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("mailbox - JavascriptExecutor.JavascriptExecutor(): called(): script: " + script);
@@ -109,7 +110,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 		ContextCreator cr = new ContextCreator(script);
 		JavascriptScriptContext scriptContext = cr.getJavascriptContext();
-		com.liaison.commons.scripting.javascript.JavascriptExecutor je = new com.liaison.commons.scripting.javascript.JavascriptExecutor();
+		JavascriptExecutor je = new JavascriptExecutor();
 
 		URI scriptUri = null;
 
@@ -230,7 +231,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 		}
 	}
 
-	protected void handleRequires(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
+	protected void handleRequires(JavascriptExecutor je,
 			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 
@@ -262,7 +263,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	protected void handleRequiredScript(String scriptUri,
-			com.liaison.commons.scripting.javascript.JavascriptExecutor je, JavascriptScriptContext scriptContext) throws ScriptException
+			JavascriptExecutor je, JavascriptScriptContext scriptContext) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
 		{
@@ -284,7 +285,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 		}
 	}
 
-	protected void callProcess(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
+	protected void callProcess(JavascriptExecutor je,
 			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
@@ -305,7 +306,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 		}
 	}
 
-	protected void callCleanup(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
+	protected void callCleanup(JavascriptExecutor je,
 			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
@@ -324,7 +325,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected ArrayList<String> callScriptFunctionReturningListOfStrings(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
+	protected ArrayList<String> callScriptFunctionReturningListOfStrings(JavascriptExecutor je,
 			JavascriptScriptContext scriptContext, URI scriptUri, String functionName) throws ScriptException
 	{
 
