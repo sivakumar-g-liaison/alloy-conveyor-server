@@ -1,3 +1,7 @@
+2.4.9
+-------------------------------
+* updated queue processor interval from 10 seconds to 1 seconds
+
 2.4.8
 -------------------------------
 * disable queue ssl
