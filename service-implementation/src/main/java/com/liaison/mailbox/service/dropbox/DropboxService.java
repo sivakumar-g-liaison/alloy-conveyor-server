@@ -9,18 +9,13 @@
  */
 package com.liaison.mailbox.service.dropbox;
 
-import java.io.IOException;
-
-import javax.xml.bind.JAXBException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONException;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -44,35 +39,42 @@ public class DropboxService {
 	/**
 	 * Method which will consume request from dropbox queue and log a staged event in StagedFiles Table in DB
 	 *
-	 * @param request
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws JSONException
+	 * @param request workticket json
 	 */
-	public void invokeDropboxQueue(String request) throws JAXBException, IOException, JSONException {
+	public void invokeDropboxQueue(String request) {
 
-		LOG.info(MailBoxUtil.constructMessage(null, null, "JSON received from SB {}"), new JSONObject(request).toString(2));
+		try {
 
-		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+			LOG.info(MailBoxUtil.constructMessage(null, null, "JSON received from SB {}"), new JSONObject(request).toString(2));
 
-	    GlassMessage glassMessage = new GlassMessage(workTicket);
-	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-	    glassMessage.setStatus(ExecutionState.READY);
+			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
-        // log activity status
-        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": " + MailBoxConstants.DROPBOX_WORKTICKET_CONSUMED, MailBoxConstants.DROPBOXPROCESSOR);
-        // log timestamp
-        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+			//Fish tag global process id
+			ThreadContext.clearMap(); //set new context after clearing
+			ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
 
-        DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+		    GlassMessage glassMessage = new GlassMessage(workTicket);
+		    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+		    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+		    glassMessage.setStatus(ExecutionState.READY);
 
-		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
-		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
-		dtoReq.setStagedFile(stageFileReqDTO);
-		stageFileService.addStagedFile(dtoReq, glassMessage);
+	        // log activity status
+	        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": " + MailBoxConstants.DROPBOX_WORKTICKET_CONSUMED, MailBoxConstants.DROPBOXPROCESSOR);
+	        // log timestamp
+	        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+	        DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+
+			StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
+			StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
+			dtoReq.setStagedFile(stageFileReqDTO);
+			stageFileService.addStagedFile(dtoReq, glassMessage);
+
+		} catch(Exception e) {
+			LOG.error(MailBoxUtil.constructMessage(null, null, "Stage file failed"), e);
+		} finally {
+			ThreadContext.clearMap(); //set new context after clearing
+		}
 
 	}
 }

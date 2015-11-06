@@ -21,7 +21,9 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
@@ -134,15 +136,23 @@ public class DropboxFileTransferService {
 
 				//Constrcuts new workticket for each processor
 				WorkTicket ticket = null;
+				String gpid = null;
 				for (Processor processor : processors) {
+
+					gpid = MailBoxUtil.getGUID();
+					//Fish tag global process id
+					ThreadContext.clearMap(); //set new context after clearing
+					ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, gpid);
+
 				    ticket = new WorkTicket();
 				    ticket.getAdditionalContext().putAll(workTicket.getAdditionalContext());
 				    ticket.getHeaders().putAll(workTicket.getHeaders());
 				    ticket.setCreatedTime(new Date());
-				    ticket.setGlobalProcessId(MailBoxUtil.getGUID());
+				    ticket.setGlobalProcessId(gpid);
 					transferPayloadAndPostWorkticket(processor, ticket, fileTransferDTO);
 				}
 			}
+
 			if (dropboxProcessors.isEmpty()) {
 				LOG.error(MailBoxUtil.constructMessage(null, null, "There are no dropbox processors available"));
 				throw new MailBoxServicesException("There are no Dropbox Processor available",
@@ -155,8 +165,10 @@ public class DropboxFileTransferService {
 			return transferContentResponse;
 		} finally {
 			// close stream once we are done
-			if (null != fileTransferDTO.getFileContent())
+			if (null != fileTransferDTO.getFileContent()) {
 				fileTransferDTO.getFileContent().close();
+			}
+			ThreadContext.clearMap(); //set new context after clearing
 		}
 	}
 
