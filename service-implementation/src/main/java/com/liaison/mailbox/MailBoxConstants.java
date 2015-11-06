@@ -161,7 +161,7 @@ public interface MailBoxConstants {
 	public static String MAILBOX = "MailBox";
 	public static final String PROCESSOR_STATUS = "Processor Status";
 	public static String INTERRUPT_SIGNAL = "Interrupt Signal";
-	public static String EXECUTING_PROCESSORS = "Executing Processors";
+	public static String EXECUTING_PROCESSORS = "Running Processors";
 	public static String PROFILE = "Profile";
 
 	//added for generic error message if any location is missing

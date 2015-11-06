@@ -60,7 +60,7 @@ public enum Messages {
 	INVALID_DATE_RANGE("Both From and To dates are required."),
 	INVALID_PROCESSOR_STATUS("Processor status is invalid."),
 	NO_PROCESSORS_AVAIL("No Processors available matching the given criteria."),
-	PROCESSORS_LIST("The list of executing processors are "),
+	PROCESSORS_LIST("The list of running processors are "),
 	NO_EXECUTING_PROCESSORS_AVAIL("No %s available"),
 
 	// TRIGGER PROFILE USECASE
