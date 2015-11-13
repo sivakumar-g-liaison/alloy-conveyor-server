@@ -149,9 +149,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             								? sweepDirectory(inputLocation , false, staticProp)
             								: retryGenWrkTktForActiveFiles(activeFiles);
 
-            if (workTickets.isEmpty()) {
-            	LOGGER.info("There are no files to process.");
-            } else {
+            if (!workTickets.isEmpty()) {
 
                 LOGGER.debug("There are {} files to process", workTickets.size());
             	// Read from mailbox property - grouping js location
@@ -193,6 +191,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             			}
             		}
             	}
+            
             }
 
             // retry when in-progress file list is not empty

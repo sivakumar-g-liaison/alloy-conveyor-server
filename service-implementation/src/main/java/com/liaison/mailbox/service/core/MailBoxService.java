@@ -216,7 +216,6 @@ public class MailBoxService {
 
 			LOG.info("The given processor id is {}", processorId);
 			LOG.info("The triggered profile name is {}", dto.getProfileName());
-			LOG.info("The execution id is {}", executionId);
 
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
@@ -241,7 +240,6 @@ public class MailBoxService {
 				return;
 			}
 
-			LOG.info("Verified if {} is already running and it is not", processorId);
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 
 			if (processorService == null) {
