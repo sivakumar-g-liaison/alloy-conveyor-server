@@ -107,12 +107,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 			return processors;
@@ -258,12 +254,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -337,12 +329,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -383,12 +371,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -432,12 +416,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -475,12 +455,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {
@@ -505,12 +481,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {
@@ -572,12 +544,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .getResultList();
 			Iterator<?> iter = proc.iterator();
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {

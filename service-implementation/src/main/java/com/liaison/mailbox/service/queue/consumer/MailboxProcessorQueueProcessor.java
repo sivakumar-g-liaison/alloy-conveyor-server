@@ -26,10 +26,10 @@ public class MailboxProcessorQueueProcessor implements QueueProcessor {
 	@Override
 	public void processMessage(String message) {
 
-		logger.info("Consumed Trigger profile request [" + message + "]");
+		logger.debug("Consumed Trigger profile request [" + message + "]");
 		
 		new MailBoxService().executeProcessor(message);
 		
-		logger.info("Processor processed Trigger profile request [" + message + "]");
+		logger.debug("Processor processed Trigger profile request [" + message + "]");
 	}
 }
