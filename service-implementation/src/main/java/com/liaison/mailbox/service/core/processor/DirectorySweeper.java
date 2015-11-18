@@ -28,7 +28,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -75,7 +74,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 
-	private static final String AS2_TTL_DAYS = "com.liaison.mailbox.as2.mount.ttl.days";
 	private String pipelineId;
 	private List<Path> activeFiles = new ArrayList<>();
     protected int totalNumberOfDeletedFiles;
@@ -128,21 +126,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             }
 
             long startTime = System.currentTimeMillis();
-            LOGGER.info(constructMessage("Start run"));
-
-            // GAC-135- AS2 Mount Cleanup
-            if (staticProp.isAs2MountCleanup()) {
-
-            	LOGGER.info(constructMessage("AS2 Mount clean up starts"));
-
-            	deleteExpiredFilesInAS2MFTMount(inputLocation, staticProp);
-
-            	long endTime = System.currentTimeMillis();
-                LOGGER.info(constructMessage("Number of files deleted {}"), totalNumberOfDeletedFiles);
-                LOGGER.info(constructMessage("Total time taken to delete files {}"), endTime - startTime);
-            	LOGGER.info(constructMessage("AS2 Mount clean up ends"));
-            	return;
-            }
+            LOGGER.info(constructMessage("Start run"));           
 
             LOGGER.debug("Is in-progress file list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
@@ -622,54 +606,5 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         transactionVisibilityClient.logToGlass(glassMessage);
         // Log running status
         glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
-    }
-
-	/**
-	 * Method to delete expired files on AS2 Mount
-	 *
-	 * @param payloadLocation location to check and delete expired files
-	 * @param staticProp SweeperPropertiesDTO to retrieve the TTL
-	 * @throws IOException 
-	 */
-	private void deleteExpiredFilesInAS2MFTMount(String payloadLocation, SweeperPropertiesDTO staticProp) throws IOException {
-
-		int ttlValue = (MailBoxUtil.isEmpty(staticProp.getAs2TtlDays()))
-				   ? MailBoxUtil.getEnvironmentProperties().getInt(AS2_TTL_DAYS)
-				   : Integer.parseInt(staticProp.getAs2TtlDays());
-	    LOGGER.info(constructMessage("Delete files in AS2 Mount location {} and the TTL value is {}"), payloadLocation, ttlValue);
-
-		Path rootPath = Paths.get(payloadLocation);
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(true))) {
-
-			for (Path path : stream) {
-
-				if (isFileExpired(path, ttlValue)) {
-					File directory = path.toFile();
-					LOGGER.info(constructMessage("The file {} has expired, so deleting it in As2 Mount location"), path.getFileName());
-					FileUtils.deleteDirectory(directory);
-					LOGGER.info(constructMessage("The expired file {} was deleted successfully"), path.getFileName());
-					totalNumberOfDeletedFiles++;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Method to check is the file exists in given path has expired or not
-	 * based on the ttl value and the created time of the file
-	 *
-	 * @param path path of the file for which expiration needs to be checked
-	 * @param ttlValue time to live for each file since created time
-	 * @return true if file has expired otherwise false
-	 * @throws IOException
-	 */
-	private boolean isFileExpired(Path path, int ttlValue) throws IOException {
-
-		LOGGER.debug("checking if the file {} has expired", path.getFileName());
-		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
-		Date fileCreatedDate = new Date(attributes.creationTime().toMillis());
-		Date fileExpiredDate = MailBoxUtil.getExpirationDate(fileCreatedDate, ttlValue);
-		return fileExpiredDate.before(new Date());
-	}
-
+    }	
 }

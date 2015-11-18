@@ -114,32 +114,6 @@
             "dynamic":false,
             "valueProvided":false,
             "validationRules":null
-         },
-         {
-            "name":"as2MountCleanup",
-            "displayName":"AS2 MFT Mount Cleanup",
-            "value":"false",
-            "type":"select",
-            "mandatory":false,
-            "dynamic":false,
-            "valueProvided":false,
-            "defaultValue":"",
-            "validationRules":null,
-            "options":[
-               "false",
-               "true"
-            ]
-         },
-         {
-            "name":"as2TtlDays",
-            "displayName":"AS2 TTL Days",
-            "type":"textarea",
-            "value":"",
-            "readOnly":false,
-            "mandatory":false,
-            "dynamic":false,
-            "valueProvided":false,
-            "validationRules":null
          }
       ],
       "folderProperties":[

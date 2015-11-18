@@ -34,7 +34,9 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String includeFiles;
 	private String excludeFiles;
 	private boolean lensVisibility;
+	@JsonIgnore
 	private boolean as2MountCleanup;
+	@JsonIgnore
 	private String as2TtlDays;
 
 
