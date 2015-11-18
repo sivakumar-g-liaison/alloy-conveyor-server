@@ -48,9 +48,9 @@
         {
             "name":"httpListenerAuthCheckRequired",
             "displayName" : "HTTP Listener Auth Check Required",
-            "value":"false",
+            "value":"true",
             "type":"select",
-            "mandatory":false,
+            "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
             "defaultValue":"false",

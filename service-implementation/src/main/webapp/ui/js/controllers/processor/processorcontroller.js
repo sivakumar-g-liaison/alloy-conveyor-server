@@ -379,7 +379,9 @@ var rest = myApp.controller(
                         $scope.availableProperties.push(property);
                     }
 				}
-                if ($scope.processor.protocol.value !== 'FILEWRITER') {
+                if ($scope.processor.protocol.value !== 'FILEWRITER'
+				    && $scope.processor.protocol.value !== 'HTTPSYNCPROCESSOR'
+				    && $scope.processor.protocol.value !== 'HTTPASYNCPROCESSOR') {
                 	$scope.propertiesAddedToProcessor.push({
                     	
                         "name":"",
@@ -1198,18 +1200,20 @@ var rest = myApp.controller(
                 }
                 
                 // push empty object to enable additional
-             $scope.propertiesAddedToProcessor.push({
-            	
-                    "name":"",
-                    "displayName" : "",
-                    "value":"",
-                    "type":"textarea",
-                    "readOnly":"",
-                    "mandatory":false,
-                    "dynamic":false,
-                    "valueProvided":false,
-                    "validationRules": {}
-                 });              
+				 if ($scope.selectedProcessorType != 'HTTPSYNCPROCESSOR' && $scope.selectedProcessorType != 'HTTPASYNCPROCESSOR') {
+					$scope.propertiesAddedToProcessor.push({
+					
+						"name":"",
+						"displayName" : "",
+						"value":"",
+						"type":"textarea",
+						"readOnly":"",
+						"mandatory":false,
+						"dynamic":false,
+						"valueProvided":false,
+						"validationRules": {}
+					});  
+				 }			             
             };
             $scope.separateFolderProperties = function(jsonProperties) {
 			  
