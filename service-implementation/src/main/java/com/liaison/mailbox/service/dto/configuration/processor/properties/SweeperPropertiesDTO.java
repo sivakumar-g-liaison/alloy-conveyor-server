@@ -34,12 +34,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String includeFiles;
 	private String excludeFiles;
 	private boolean lensVisibility;
-	@JsonIgnore
-	private boolean as2MountCleanup;
-	@JsonIgnore
-	private String as2TtlDays;
-
-
+	
 	public String getPipeLineID() {
 		return pipeLineID;
 	}
@@ -100,22 +95,6 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
-	}
-
-	public boolean isAs2MountCleanup() {
-		return as2MountCleanup;
-	}
-
-	public void setAs2MountCleanup(boolean as2MountCleanup) {
-		this.as2MountCleanup = as2MountCleanup;
-	}
-
-	public String getAs2TtlDays() {
-		return as2TtlDays;
-	}
-
-	public void setAs2TtlDays(String as2TtlDays) {
-		this.as2TtlDays = as2TtlDays;
 	}
 
 }
