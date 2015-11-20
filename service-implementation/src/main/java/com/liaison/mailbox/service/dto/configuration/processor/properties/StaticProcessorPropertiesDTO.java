@@ -9,6 +9,7 @@
  */
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
@@ -17,6 +18,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
  * 
  * @author OFS
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "staticProperties")
 @JsonSubTypes({ @JsonSubTypes.Type(value = FTPUploaderPropertiesDTO.class),
 		@JsonSubTypes.Type(value = FTPDownloaderPropertiesDTO.class),
