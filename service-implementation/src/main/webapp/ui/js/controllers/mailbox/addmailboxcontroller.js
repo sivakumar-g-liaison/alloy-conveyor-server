@@ -15,7 +15,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		{"name":"ENABLED","id":"true"},
 		{"name":"DISABLED","id":"false"},
 		];
-		$scope.notificationRequired = $scope.enumNotification[0];     
+		$scope.notificationRequired = $scope.enumNotification[0];
+		$scope.notificationRequiredValue = $scope.notificationRequired.id;    
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -124,7 +125,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             $scope.notificationRequired = notificationType;
 			$scope.notificationRequiredValue = notificationType.id;
         };	
-		$scope.notificationRequiredValue = '';
 		function setNotificationValue(selectedNotificationValue) {
 		   if (selectedNotificationValue === "true") {
 		   $scope.notificationRequired = $scope.enumNotification[0];

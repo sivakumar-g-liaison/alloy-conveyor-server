@@ -47,6 +47,7 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -71,6 +72,7 @@ public class MailboxWatchDogService {
 	private static String SLA_MBX_VIOLATION_SUBJECT = "Files are not picked up by the Alloy Mailbox within configured SLA of %s minutes";
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
+	private static final String EMAIL_NOTIFICATION_COUNT_PATTERN= "^[0-9]*$";
 	private String uniqueId;
 
 	private String constructMessage(String... messages) {
@@ -222,10 +224,14 @@ public class MailboxWatchDogService {
 		List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
 		
 		Map <String, String> mailboxProperties = processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 		String customerSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
+		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+		String maxNumOfNotification = mailboxProperties.get(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
 
 		LOGGER.debug("Mailbox Properties retrieved. customer sla - {}, emailAddress - {}", customerSLAConfiguration, emailAddress);
 		
@@ -238,8 +244,8 @@ public class MailboxWatchDogService {
 		}
 		
 		Timestamp customerSLATimeLimit = getCustomerSLAConfigurationAsTimeStamp(customerSLAConfiguration, stagedFile.getCreatedDate());
-		if (isCustomerSLAViolated(customerSLATimeLimit)) {
-
+		if (isCustomerSLAViolated(customerSLATimeLimit) && Boolean.valueOf(enableEmailNotification)
+				&& !countEmailNotification(stagedFile, maxNumOfNotification)) {
 			String emailSubject = null;
 			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
 				emailSubject = String.format(SLA_VIOLATION_SUBJECT, customerSLAConfiguration);
@@ -252,10 +258,44 @@ public class MailboxWatchDogService {
 					.append(stagedFile.getFileName());
 			// send email notifications for sla violations
 			sendEmail(processor, emailAddress, emailSubject, body.toString());
+			StagedFileDAO dropboxDao = new StagedFileDAOBase();
+			dropboxDao.merge(stagedFile);			
+		} else {
+			LOGGER.info("Email Notification to the User reached Maximum So unable to sending the email to user");
 		}
 
 	}
 	
+	/**
+	 * This method used to check the max Number Of Notification send to client.
+	 * 
+	 * @param metaData
+	 * @param maxNumOfNotification
+	 * @return isReachedMaxNumOfNotification;
+	 */
+	private boolean countEmailNotification(StagedFile stagedFile, String maxNumOfNotification) {
+
+		boolean isReachedMaxNumOfNotification = false;
+		int notificationCount = 1;
+		String metaData = stagedFile.getFileMetaData();
+		
+		if (!MailBoxUtil.isEmpty(metaData) && metaData.matches(EMAIL_NOTIFICATION_COUNT_PATTERN)) {
+			notificationCount = Integer.parseInt(metaData);
+			if (Integer.parseInt(maxNumOfNotification) > notificationCount) {
+				notificationCount = notificationCount + 1 ;
+				isReachedMaxNumOfNotification = false;
+				metaData = String.valueOf(notificationCount);
+			} else {
+				isReachedMaxNumOfNotification = true;
+			}     
+		} else {
+			metaData = String.valueOf(notificationCount);
+			isReachedMaxNumOfNotification = false;
+		}
+		stagedFile.setFileMetaData(metaData);
+
+		return isReachedMaxNumOfNotification;
+	}
 	
 	/**
 	 * Method which checks whether the SLAConfigured Time Limit exceeds or not
