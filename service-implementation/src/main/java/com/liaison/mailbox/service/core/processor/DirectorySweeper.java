@@ -164,9 +164,16 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getGlobalProcessId(),
             				        " submitted for file ",
             				        wrkTicket.getFileName()));
-
-            				//Delete the file
-            				delete(String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH)));
+            				
+            				String payloadURI = wrkTicket.getPayloadURI();
+        					String filePath = String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
+            				// Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
+            				if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
+            					LOGGER.info("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
+                				delete(filePath);
+            				} else {
+            					LOGGER.info("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
+            				}
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
