@@ -106,6 +106,7 @@ public class MailboxWatchDogService {
 		EntityTransaction tx = null;
 		EntityManager em = null;
 		List<StagedFile> updatedStatusList = new ArrayList<>();
+		List<StagedFile> updatedNotificationCountList = new ArrayList<>();
 		Map<String, Processor> processors = new HashMap<>();
 		TransactionVisibilityClient transactionVisibilityClient = null;
 		GlassMessage glassMessage = null;
@@ -163,6 +164,7 @@ public class MailboxWatchDogService {
 						processors.put(stagedFile.getProcessorId(), processor);
 					}
 					validateCustomerSLA(stagedFile, processor);
+					updatedNotificationCountList.add(stagedFile);
 					continue;
 				}
 				LOGGER.info(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
@@ -191,7 +193,11 @@ public class MailboxWatchDogService {
 				stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
 				updatedStatusList.add(stagedFile);
 			}
-
+            //updated the stagedFile with latest notification count.
+			for (StagedFile updatedNotificationCount : updatedNotificationCountList) {
+	            em.merge(updatedNotificationCount);
+	        }
+			
 			for (StagedFile updatedFile : updatedStatusList) {
 	            em.merge(updatedFile);
 	        }
@@ -232,6 +238,12 @@ public class MailboxWatchDogService {
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
 		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 		String maxNumOfNotification = mailboxProperties.get(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
+		if (MailBoxUtil.isEmpty(enableEmailNotification)) {
+			enableEmailNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_EMAIL_NOTIFICATION);					
+		}		
+		if (MailBoxUtil.isEmpty(maxNumOfNotification)) {
+			maxNumOfNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_MAX_NOTIFICATION_COUNT);
+		}			
 
 		LOGGER.debug("Mailbox Properties retrieved. customer sla - {}, emailAddress - {}", customerSLAConfiguration, emailAddress);
 		
@@ -258,8 +270,6 @@ public class MailboxWatchDogService {
 					.append(stagedFile.getFileName());
 			// send email notifications for sla violations
 			sendEmail(processor, emailAddress, emailSubject, body.toString());
-			StagedFileDAO dropboxDao = new StagedFileDAOBase();
-			dropboxDao.merge(stagedFile);			
 		} else {
 			LOGGER.info("Email Notification to the User reached Maximum So unable to sending the email to user");
 		}
@@ -423,15 +433,19 @@ public class MailboxWatchDogService {
 	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, Map<String, String> mailboxProperties) throws IOException {
 		
 		String mailboxSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
-		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
-		boolean isEmailNotificationEnabled =  Boolean.valueOf(mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION));
-		LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}, emailNotificationEnabled - {}", mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
+		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);		
+		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+		LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}, emailNotificationEnabled - {}", mailboxSLAConfiguration, emailAddress, enableEmailNotification);
 		
 		if (MailBoxUtil.isEmpty(mailboxSLAConfiguration)) {
 			LOGGER.info(constructMessage("mailbox sla is not configured in mailbox, using the default mailbox sla configuration"));
 			mailboxSLAConfiguration = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
 		}
-
+		if (MailBoxUtil.isEmpty(enableEmailNotification)) {
+			enableEmailNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_EMAIL_NOTIFICATION);					
+		}
+		
+		boolean isEmailNotificationEnabled = Boolean.valueOf(enableEmailNotification);
 		FSMStateDAO procDAO = new FSMStateDAOBase();
 
 		List<FSMStateValue> listfsmStateVal = null;

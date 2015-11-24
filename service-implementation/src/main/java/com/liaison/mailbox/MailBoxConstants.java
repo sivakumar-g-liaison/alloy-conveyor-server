@@ -357,4 +357,7 @@ public interface MailBoxConstants {
     public static String DEFAULT_CUSTOMER_SLA = "com.liaison.mailbox.default.customer.sla";
     public static String DEFAULT_MAILBOX_SLA = "com.liaison.mailbox.default.mailbox.sla";
     public static String  MBX_SLA_CONFIG_UNIT = "com.liaison.mailbox.default.sla.time.unit";
+    public static String DEFAULT_SLA_EMAIL_NOTIFICATION = "com.liaison.mailbox.default.sla.notification";
+    public static String DEFAULT_SLA_MAX_NOTIFICATION_COUNT = "com.liaison.mailbox.default.sla.max.notification.count";
+    
 }
