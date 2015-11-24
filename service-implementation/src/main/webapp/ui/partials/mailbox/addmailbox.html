@@ -84,10 +84,18 @@
               </div>
           </div>
 			<div>
-			<label ng-show = "isMailBoxEdit">
+			<label for="mailboxId">
 				MailboxId
 			</label>
-			<textarea class="form-control" readonly="readonly" ng-model="mailboxGuid" ng-show = "isMailBoxEdit" id="mailbox_pguid" rows="1" name="mailboxpguid"/>
+			<textarea class="form-control" ng-disabled="isMailBoxEdit" ng-model="mailBox.guid" id="mailbox_pguid" rows="1" name="mailboxpguid" ng-pattern="mailBoxIdPattern" 
+             ng-minLength=32 ng-maxLength=32 />
+			<div ng-show="formAddMbx.mailboxpguid.$dirty && formAddMbx.mailboxpguid.$invalid">
+                  <span id="mbx-id-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.mailboxpguid.$error.pattern}" ng-show="formAddMbx.mailboxpguid.$error.pattern">Invalid MailboxId.</span>
+				  <span id="mbx-id-descInvalid-minlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.mailboxpguid.$error.minlength }" ng-show="formAddMbx.mailboxpguid.$error.minlength">
+          		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>MailboxId cannot be shorter than {{mailBoxIdMaxLength}} characters.</span>
+          		  <span id="mbx-id-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.mailboxpguid.$error.maxlength}" ng-show="formAddMbx.mailboxpguid.$error.maxlength">
+          		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>MailboxId cannot be longer than {{mailBoxIdMaxLength}} characters.</span>
+              </div>
 		  </div>
           </div>
        </div>
