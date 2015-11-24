@@ -404,19 +404,11 @@ public class MailboxWatchDogService {
 			List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 			mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 			mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
+			mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 			
 			Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
-			String mailboxSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
-			String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
-			LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}", mailboxSLAConfiguration, emailAddress);
-			
-			if (MailBoxUtil.isEmpty(mailboxSLAConfiguration)) {
-				
-				LOGGER.info(constructMessage("mailbox sla is not configured in mailbox, using the default mailbox sla configuration"));
-				mailboxSLAConfiguration = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
-			}
 			// check whether sweeper got executed with in the configured sla time
-			checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxSLAConfiguration, emailAddress);
+			checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
 		}
 	}
 	
@@ -428,37 +420,40 @@ public class MailboxWatchDogService {
 	 * @param emailAddress - email Address to which SLA has to be notified
 	 * @throws IOException
 	 */
-	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, String slaConfigurationTime, String emailAddress) throws IOException {
+	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, Map<String, String> mailboxProperties) throws IOException {
+		
+		String mailboxSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
+		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
+		boolean isEmailNotificationEnabled =  Boolean.valueOf(mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION));
+		LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}, emailNotificationEnabled - {}", mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
+		
+		if (MailBoxUtil.isEmpty(mailboxSLAConfiguration)) {
+			LOGGER.info(constructMessage("mailbox sla is not configured in mailbox, using the default mailbox sla configuration"));
+			mailboxSLAConfiguration = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
+		}
 
 		FSMStateDAO procDAO = new FSMStateDAOBase();
 
 		List<FSMStateValue> listfsmStateVal = null;
 
 		LOGGER.info(constructMessage("checking whether the processor {} is executed with in the specified SLA configuration time"), processor.getProcsrName());
-		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(slaConfigurationTime));
+		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration));
 
-		String emailSubject = null;
 		// If the list is empty then the processor is not executed at all during the specified sla time.
 		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
-
 		    LOGGER.info(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
-			emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
-			sendEmail(processor, emailAddress, emailSubject, emailSubject);
-			LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
+		    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 			return;
-		}
+		}  
 
-		// If the processor is executed during the speicified sla time but got failed.
+		// If the processor is executed during the specified sla time but got failed.
 		if (null != listfsmStateVal && !listfsmStateVal.isEmpty()) {
 			
 			for (FSMStateValue fsmStateVal : listfsmStateVal) {
 
 				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
-
 				    LOGGER.info(constructMessage("The processor {} was executed but got failed with in the specified SLA configuration time"), processor.getProcsrName());
-					emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
-					sendEmail(processor, emailAddress, emailSubject, emailSubject);
-					LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
+				    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 				}
 			}
 		}
@@ -525,4 +520,23 @@ public class MailboxWatchDogService {
 		EmailNotifier.sendEmail(emailInfo);
 	}
 	
+	/**
+	 * Method to notify SLA violations to User
+	 * 
+	 * @param processor - processor for which sla violated
+	 * @param mailboxSLAConfiguration - sla configuration
+	 * @param emailAddress - email address to which the notification to be sent
+	 * @param isEmailNotificationEnabled - if true notification will be sent.
+	 */
+	private void notifySLAViolationToUser(Processor processor, String mailboxSLAConfiguration, String emailAddress, boolean isEmailNotificationEnabled) {
+		
+	    if (isEmailNotificationEnabled) {
+	    	
+			String emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, mailboxSLAConfiguration);
+			sendEmail(processor, emailAddress, emailSubject, emailSubject);
+			LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
+	    } else {
+	    	LOGGER.info(constructMessage("The SLA violations are not notified to the user for the prcocessor {} since the email notification for SLA is disabled"), processor.getProcsrName());
+	    }
+	}
 }
