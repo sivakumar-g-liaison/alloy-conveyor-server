@@ -20,7 +20,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		
 		$scope.isProcessorsAvailable = false;
 		$scope.isMailBoxSaved = false;
-		$scope.mailboxGuid = '';
 		
 		 $scope.enumTenancyKey = [];
 	     $scope.tenancyKey = {guid:'', name:''};
@@ -133,7 +132,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 $scope.mailBox.guid = $scope.mailBoxId;
                                 $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                                 $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-								$scope.mailboxGuid = $scope.mailBoxId ;
+								$scope.mailBox.guid = $scope.mailBoxId ;
         						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
         							
         							$scope.addProcessorBtnValue = 'List Processors';
@@ -264,7 +263,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                         	if (data.addMailBoxResponse.response.status === 'success') {
                         		$scope.isMailBoxSaved = true;
-								$scope.mailboxGuid = $scope.mailBoxId;
+								$scope.mailBox.guid = $scope.mailBoxId;
 								if (fromAddProcsr) {
 									$location.$$search = {};
 									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);

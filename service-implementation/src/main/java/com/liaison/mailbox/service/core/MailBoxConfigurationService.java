@@ -128,7 +128,12 @@ public class MailBoxConfigurationService {
 
 			MailBox mailBox = new MailBox();
 			mailboxDTO.copyToEntity(mailBox);
-			mailBox.setPguid(MailBoxUtil.getGUID());
+			// validating the mailbox guid
+			if (MailBoxUtil.isEmpty(mailboxDTO.getGuid())) {
+				mailBox.setPguid(MailBoxUtil.getGUID());
+			} else {
+				mailBox.setPguid(mailboxDTO.getGuid());
+			}			
 
 			//Mailbox properties
             MailBoxProperty property = null;

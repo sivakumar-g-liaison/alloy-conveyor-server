@@ -113,6 +113,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.inputPatternForPort = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
 	$rootScope.folderPathPattern = /^\/data\/(sftp|ftp|ftps)\/(.*?)\/(inbox|outbox)(\/(.*?))?$/;
 	$rootScope.trustStore_SshKeypair_Pattern = /^[A-Z0-9]*$/;
+	$rootScope.mailBoxIdPattern = /^[a-zA-Z0-9]*$/;
 
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
@@ -126,6 +127,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
     $rootScope.typeaheadMinLength = 3;
 	$rootScope.typeaheadMaxLength = 80;
+	$rootScope.mailBoxIdMaxLength = 32;
 
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
