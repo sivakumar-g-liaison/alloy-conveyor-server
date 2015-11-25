@@ -47,7 +47,6 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -107,7 +106,7 @@ public class MailboxWatchDogService {
 		EntityManager em = null;
 		List<StagedFile> updatedStatusList = new ArrayList<>();
 		List<StagedFile> updatedNotificationCountList = new ArrayList<>();
-		Map<String, Processor> processors = new HashMap<>();
+		Map<String, Processor> processors = new HashMap<>();		
 		TransactionVisibilityClient transactionVisibilityClient = null;
 		GlassMessage glassMessage = null;
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
@@ -163,7 +162,15 @@ public class MailboxWatchDogService {
 						processor = config.find(Processor.class, stagedFile.getProcessorId());
 						processors.put(stagedFile.getProcessorId(), processor);
 					}
-					validateCustomerSLA(stagedFile, processor);
+					//get the mailbox properties
+					Map<String, String> mailboxProperties = getMailboxProperties(processor);
+					//file is not picked up beyond the configured TTL it should deleted immediately and 
+					//No need to call the validateCustomerSLA
+					if (validateTTLUnit(stagedFile, mailboxProperties)) {
+						Files.delete(Paths.get(filePath + File.separatorChar + fileName));
+						continue;
+					}
+					validateCustomerSLA(stagedFile, processor, mailboxProperties);
 					updatedNotificationCountList.add(stagedFile);
 					continue;
 				}
@@ -219,21 +226,74 @@ public class MailboxWatchDogService {
 	}
 	
 	/**
+	 * This method used to retrieve the mailboxProperties from processor
+	 * 
+	 * @param processor
+	 * @return map 
+	 */
+	private Map<String, String> getMailboxProperties(Processor processor) {
+		
+		List <String> mailboxPropsToBeRetrieved = new ArrayList<>();		
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL);
+		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL_UNIT);
+		return processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
+	}
+	
+	/**
+	 *  Method to validate the expire time.
+	 *  
+	 * @param stagedFile
+	 * @param processor
+	 * @param mailboxPropsToBeRetrieved
+	 * @return boolean
+	 * @throws IOException
+	 */
+	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) throws IOException {
+
+		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
+		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
+		if (MailBoxUtil.isEmpty(ttl)) {
+			LOGGER.info(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
+			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS);
+			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
+		}	
+		
+		Timestamp expireTimestamp = getTTLAsTimestamp(MailBoxUtil.convertTTLIntoDays(ttlUnit, Integer.parseInt(ttl)), stagedFile.getCreatedDate());
+		return isTimeLimitExceeded(expireTimestamp);
+	}
+	
+	/**
+	 * Method to convert ttl into TimeStamp value
+	 *
+	 * @param ttlDay
+	 * @param stagedFileTime
+	 * @return Timestamp
+	 * @throws IOException
+	 */
+	private Timestamp getTTLAsTimestamp(int ttlDay, Timestamp stagedFileTime) throws IOException {
+
+		Timestamp timeStmp = new Timestamp(stagedFileTime.getTime());
+		// get the sla time configuration unit
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(timeStmp);
+		cal.add(Calendar.DATE, + ttlDay);
+		timeStmp.setTime(cal.getTime().getTime());
+		return timeStmp;
+	}
+	
+	/**
 	 * Method to validate customer sla
 	 * 
 	 * @param stagedFile - staged file entity which contains details of when staging occurs 
 	 * 					   and the related processor and mailbox details 
 	 * @throws IOException 
 	 */
-	private void validateCustomerSLA(StagedFile stagedFile, Processor processor) throws IOException {
+	private void validateCustomerSLA(StagedFile stagedFile, Processor processor, Map<String, String> mailboxProperties) throws IOException {		
 		
-		List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
-		
-		Map <String, String> mailboxProperties = processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 		String customerSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
 		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
@@ -256,7 +316,7 @@ public class MailboxWatchDogService {
 		}
 		
 		Timestamp customerSLATimeLimit = getCustomerSLAConfigurationAsTimeStamp(customerSLAConfiguration, stagedFile.getCreatedDate());
-		if (isCustomerSLAViolated(customerSLATimeLimit) && Boolean.valueOf(enableEmailNotification)
+		if (isTimeLimitExceeded(customerSLATimeLimit) && Boolean.valueOf(enableEmailNotification)
 				&& !countEmailNotification(stagedFile, maxNumOfNotification)) {
 			String emailSubject = null;
 			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
@@ -314,7 +374,7 @@ public class MailboxWatchDogService {
 	 * @param slaConfiguredTime
 	 * @return true if sla time exceeds otherwise false
 	 */
-	private boolean isCustomerSLAViolated(Timestamp slaConfiguredTime) {
+	private boolean isTimeLimitExceeded(Timestamp slaConfiguredTime) {
 		// check if the sla configured time is before current time
 		Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
 		return slaConfiguredTime.before(currentTimeStamp);
