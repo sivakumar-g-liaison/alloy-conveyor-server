@@ -462,5 +462,22 @@ public class StorageUtilities {
 			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
-
+	
+	/**
+	 * Method to check whether the payload exists at given path
+	 * 
+	 * @param path - path of payload 
+	 * @return true if payload exists otherwise false
+	 * @throws FS2Exception
+	 * @throws URISyntaxException
+	 */
+	public static boolean isPayloadExists(String path) {
+		
+		try {
+			return FS2.exists(new URI(path));
+		} catch (URISyntaxException | FS2Exception e) {
+			LOGGER.error(Messages.PAYLOAD_DOES_NOT_EXIST, e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_DOES_NOT_EXIST, Response.Status.BAD_REQUEST);
+		}
+	}
 }

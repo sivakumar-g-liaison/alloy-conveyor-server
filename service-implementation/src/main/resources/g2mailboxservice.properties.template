@@ -261,3 +261,5 @@ com.liaison.mailbox.error.receiver = vnagarajan@liaison.com,gnattarshah@liaison.
 # default sla configuration in minutes
 com.liaison.mailbox.default.customer.sla=120 
 com.liaison.mailbox.default.mailbox.sla=30
+com.liaison.mailbox.default.sla.notification=true
+com.liaison.mailbox.default.sla.max.notification.count=3

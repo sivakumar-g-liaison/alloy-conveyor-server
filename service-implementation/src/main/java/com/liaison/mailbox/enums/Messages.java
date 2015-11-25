@@ -163,6 +163,7 @@ public enum Messages {
 	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
 	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error"),
 	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error"),
+	PAYLOAD_DOES_NOT_EXIST("Payload is not available in spectrum."),
 
 	//referred in ProcessorAdminDetailsResource
 	PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),

@@ -11,6 +11,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		];
 		
 		$scope.ttlUnit = $scope.ttlDropdownValues[0];
+		$scope.enumNotification = [
+		{"name":"ENABLED","id":"true"},
+		{"name":"DISABLED","id":"false"},
+		];
+		$scope.notificationRequired = $scope.enumNotification[0];
+		$scope.notificationRequiredValue = $scope.notificationRequired.id;    
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -65,9 +71,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, {"name":"TTL", "id":"ttl"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
+			{"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max number of notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
 
-        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, {"name":"TTL", "id":"ttl"}];
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
+		   {"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max number of notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
 		//Data from server
         $scope.mailBoxProperties = [{
             name: '',
@@ -112,6 +120,19 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 				}
 			}
 		}
+		$scope.onNotificationChange = function (notificationType) {
+            $scope.notificationRequired = notificationType;
+			$scope.notificationRequiredValue = notificationType.id;
+        };	
+		function setNotificationValue(selectedNotificationValue) {
+		   if (selectedNotificationValue === "true") {
+		   $scope.notificationRequired = $scope.enumNotification[0];
+		   $scope.notificationRequiredValue = $scope.enumNotification[0].id;
+		   } else {
+		   $scope.notificationRequired = $scope.enumNotification[1];
+		   $scope.notificationRequiredValue = $scope.enumNotification[1].id;
+		   }
+		}
         
         // Loads the details initially if edit
         $scope.load = function () {
@@ -155,6 +176,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 										selectTTLUnit(data.getMailBoxResponse.mailBox.properties[i].value);
 										continue;
 									}
+									
+									if(data.getMailBoxResponse.mailBox.properties[i].name === "emailnotificationforslaviolation") {
+										setNotificationValue(data.getMailBoxResponse.mailBox.properties[i].value);										
+									}			
                                 					                          
                                     var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
                                         data.getMailBoxResponse.mailBox.properties[i].name);
@@ -217,7 +242,16 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 					name: "ttlunit",
 					value: $scope.ttlUnit.name
 				  });
-			}			
+			}
+			//adding the value for emailnotificationforslaviolation;
+			if (getIndex($scope.mailBox.properties, "emailnotificationforslaviolation") != -1) {			
+			   for (var i = 0; i < $scope.mailBox.properties.length; i++) {
+			     if ($scope.mailBox.properties[i].name === "emailnotificationforslaviolation") {
+				     $scope.mailBox.properties[i].value = $scope.notificationRequiredValue;
+					 break;
+				 }			   
+			   }		    
+			};			
 			
             if ($scope.isMailBoxEdit) {
 
@@ -378,6 +412,18 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                             <div ng-switch-when="emailnotificationids">\n\
            										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
+											<div ng-switch-when="emailnotificationforslaviolation">\n\
+												<div class="input-group-btn">\n\
+														<select ng-model="notificationRequired" id="notificationRequired" ng-change="onNotificationChange(notificationRequired)" ng-options="property.name for property in enumNotification"></select>\n\
+													</div>\n\
+											</div>\n\
+										   <div ng-switch-when="maxnumberofnotificationforslaviolation">\n\
+											 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="maxnumberofnotificationforslaviolation" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+												<div ng-show="formAddMbx.maxnumberofnotificationforslaviolation.$dirty && formAddMbx.maxnumberofnotificationforslaviolation.$invalid">\n\
+													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.required}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.required><strong>Email Notification for SLA violation is mandatory</strong></span>\n\
+													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern><strong>Enter Valid Number</strong></span>\n\
+												</div>\n\
+											</div>\n\
 											<div ng-switch-when="ttl">\n\
 												<div class="input-group col-md-5">\n\
 													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
@@ -391,7 +437,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\
-                                   <div ng-switch-when="emailnotificationids">\n\
+								   <div ng-switch-when="emailnotificationids">\n\
            								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
           								     <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.required}" ng-show=formAddMbx.emailnotificationids.$error.required><strong>Email is mandatory</strong></span>\n\
@@ -412,7 +458,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
      								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
      								 	</div>\n\
 									</div>\n\
-									<div ng-switch-when="ttl">\n\
+										<div ng-switch-when="emailnotificationforslaviolation">\n\
+											<div class="input-group-btn">\n\
+													<select ng-model="notificationRequired" id="notificationRequired" ng-change="onNotificationChange(notificationRequired)" ng-options="property.name for property in enumNotification"></select>\n\
+												</div>\n\
+										</div>\n\
+										<div ng-switch-when="ttl">\n\
 										<div class="input-group col-md-5">\n\
 											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required ng-pattern="' + $scope.numberPattern + '" />\n\
 											<div class="input-group-btn">\n\
@@ -464,7 +515,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             } else if (addedProperty.value !== '') {
                 attrName = addedProperty.value;
             }
-
+			if (attrName === 'Email Notification for SLA violation') {
+			  row.entity.value = $scope.notificationRequiredValue;
+			}			
             if (!attrName || !row.getProperty('value')) {
                 showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                 return;
