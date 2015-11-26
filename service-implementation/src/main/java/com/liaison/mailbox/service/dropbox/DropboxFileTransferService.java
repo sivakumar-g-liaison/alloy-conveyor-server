@@ -112,6 +112,10 @@ public class DropboxFileTransferService {
 			String profileId = fileTransferDTO.getTransferProfileId();
 			ProfileConfigurationDAO profileDao = new ProfileConfigurationDAOBase();
 			ScheduleProfilesRef profile = profileDao.find(ScheduleProfilesRef.class, profileId);
+			if (null == profile) {
+				throw new MailBoxServicesException(Messages.PROFILE_DOES_NOT_EXIST, profileId,
+						Response.Status.NOT_FOUND);
+			}
 			fileTransferDTO.setTransferProfileName(profile.getSchProfName());
 
 			// end time to calculate elapsed time for getting manifest

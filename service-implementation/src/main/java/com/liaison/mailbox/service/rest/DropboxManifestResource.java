@@ -155,7 +155,7 @@ public class DropboxManifestResource extends AuditedResource {
 				}
 
 				// getting manifest
-				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest);
+				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest, getRequestHeaderValues(request));
 				if (manifestResponse == null) {
 					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
 					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
@@ -175,10 +175,16 @@ public class DropboxManifestResource extends AuditedResource {
 						.header("Content-Type", MediaType.APPLICATION_JSON)
 						.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 						.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-						.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-								manifestResponse.getPublicKeyGuid());
-
+						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature());
+						
+				// set public signer guid in response header based on gem manifest response
+				if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
+					builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
+							manifestResponse.getPublicKeyGroupGuid());
+				} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
+					builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
+				}
+						
 				LOG.debug("Exit from authenticate and get manifest service.");
 
 				return builder.build();

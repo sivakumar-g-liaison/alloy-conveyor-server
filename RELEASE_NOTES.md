@@ -1,3 +1,7 @@
+2.5.2
+-------------------------------
+* GGEM-124 - refinements in dropbox API
+
 2.5.1-SNAPSHOT
 -------------------------------
 * GGT-330 - INFO loggers - Ghazni

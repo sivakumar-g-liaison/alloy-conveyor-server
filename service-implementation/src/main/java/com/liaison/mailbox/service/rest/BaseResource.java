@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.rest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -320,6 +321,21 @@ public class BaseResource {
 		headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER,
 				request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
 
+		return headers;
+	}
+	
+	/**
+	 * Method to get all request headers and put it in a Map
+	 * 
+	 * @param request
+	 * @return Map containing header Names and values as key value pair
+	 */
+	protected Map<String, String> getRequestHeaderValues(HttpServletRequest request) {
+		
+		Map<String, String> headers = new HashMap<>();
+		for (String headerName : Collections.list(request.getHeaderNames())) {
+			headers.put(headerName, request.getHeader(headerName));
+		}
 		return headers;
 	}
 }
