@@ -590,7 +590,7 @@ public class MailboxWatchDogService {
 		MailBox mailbox = processor.getMailbox();
 		List <String> emailAddressList = new ArrayList<>();
 		emailAddressList.add(emailAddress);
-		EmailInfoDTO emailInfo = new EmailInfoDTO(mailbox.getMbxName(), mailbox.getPguid(), processor.getProcsrName(), emailAddressList, emailSubject, emailSubject, true);
+		EmailInfoDTO emailInfo = new EmailInfoDTO(mailbox.getMbxName(), mailbox.getPguid(), processor.getProcsrName(), emailAddressList, emailSubject, emailSubject, true, false);
 		EmailNotifier.sendEmail(emailInfo);
 	}
 	

@@ -31,6 +31,8 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.core.email.EmailInfoDTO;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropBoxUnStagedFileResponseDTO;
@@ -57,6 +59,10 @@ public class DropboxStagedFilesService {
 
 	public static final String STAGED_FILES = "Staged Files";
 	public static final String STAGED_FILE = "Staged File";
+	private static String NEW_LINE = "\n\n";
+	private static final String CONVEYOR = "Liaison Conveyor URL";
+	private static String SEPARATOR = ": ";
+	private static String PROPERTY_CONVEYOR_URL = "com.liaison.dropbox.conveyorUrl";
 
 	/**
 	 * Method to retrieve all staged files of the mailboxes linked to tenancy keys available in the manifest
@@ -212,6 +218,11 @@ public class DropboxStagedFilesService {
 			}
 			LOG.info(MailBoxUtil.constructMessage(null, null, "File {} staged successfully for mailbox {} with stagedFileId {}"),
 					stagedFileDTO.getName(), stagedFileDTO.getMailboxGuid(), stagedFile.getPrimaryKey());
+			// send email on successful staging of file
+			String fileName = stagedFile.getFileName();
+			String emailSubject = (!MailBoxUtil.isEmpty(fileName)) ? "'" + fileName + "' is available for pick up" : "File is available for pickup";
+	        String emailBody = constructEmailBody(fileName);
+			sendEmail(mailbox, emailSubject, emailBody);
 			LOG.debug("Exit from add staged file.");
 
 		     // log TVA status
@@ -287,5 +298,34 @@ public class DropboxStagedFilesService {
 		LOG.debug("Exit from drop staged files service.");
 
 		return dropBoxUnStagedResponse;
+	}
+	
+	/**
+	 * Method to send email once file is staged successfully
+	 * 
+	 * @param mailbox - mailbox
+	 * @param emailSubject - email subject
+	 * @param emailBody - email Body
+	 */
+	private void sendEmail(MailBox mailbox, String emailSubject, String emailBody) {
+		
+		List <String> emailAddressList = mailbox.getEmailAddress();
+		EmailInfoDTO emailInfo = new EmailInfoDTO(mailbox.getMbxName(), null, null, emailAddressList, emailSubject, emailBody, true, true);
+		EmailNotifier.sendEmail(emailInfo);
+	}
+	
+	private String constructEmailBody(String fileName) {
+		
+		StringBuilder emailContentBuilder = new StringBuilder()	
+												.append("Please login to Liaison Conveyor to download your file");
+		if (!MailBoxUtil.isEmpty(fileName)) {
+			emailContentBuilder.append(" '").append(fileName).append("'");
+		}
+		emailContentBuilder.append(NEW_LINE)
+						   .append(CONVEYOR)
+						   .append(SEPARATOR)
+						   .append(MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_CONVEYOR_URL));
+        return emailContentBuilder.toString();
+		
 	}
 }

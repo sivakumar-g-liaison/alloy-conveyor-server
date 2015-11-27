@@ -35,12 +35,13 @@ public class EmailInfoDTO {
 	private String type;
 	private List<String> toEmailAddrList = new ArrayList<>();
 	private boolean isSuccess;
+	private boolean isDropbox;
 	
 	public EmailInfoDTO () {
 		
 	}
 	
-	public EmailInfoDTO (String mailboxName, String mailboxId, String processorName, List<String> emailAddress, String emailSubject, String emailBody, boolean isSuccess) {
+	public EmailInfoDTO (String mailboxName, String mailboxId, String processorName, List<String> emailAddress, String emailSubject, String emailBody, boolean isSuccess, boolean isDropbox) {
 
 	    LOGGER.debug("Ready to construct Email Helper DTO for the mail to be sent");
         this.setMailboxName(mailboxName);
@@ -50,6 +51,7 @@ public class EmailInfoDTO {
         this.setToEmailAddrList(emailAddress);
         this.setSubject(emailSubject);
         this.setSuccess(isSuccess);
+        this.setDropbox(isDropbox);
         LOGGER.debug("Email Helper DTO Constructed for the mail to be sent");
 	}
 
@@ -101,6 +103,15 @@ public class EmailInfoDTO {
 	public void setSuccess(boolean isSuccess) {
 		this.isSuccess = isSuccess;
 	}
+	
+	public boolean isDropbox() {
+		return isDropbox;
+	}
+
+	public void setDropbox(boolean isDropbox) {
+		this.isDropbox = isDropbox;
+	}
+
 	public void copyToDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason, boolean isSuccess) {
 
 	    LOGGER.debug("Ready to construct Email Helper DTO for the mail to be sent for processor execution failure");
@@ -112,6 +123,6 @@ public class EmailInfoDTO {
         this.setToEmailAddrList(emailAddress);
         this.setSubject(emailSubject);
         this.setSuccess(isSuccess);
-        LOGGER.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
+       LOGGER.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
 	}
 }

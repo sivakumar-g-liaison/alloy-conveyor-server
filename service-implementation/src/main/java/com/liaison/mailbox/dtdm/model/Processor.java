@@ -370,23 +370,7 @@ public class Processor implements Identifiable {
 	 */
 	@Transient
 	public List<String> getEmailAddress() {
-
-		MailBox mailBox = getMailbox();
-		Set<MailBoxProperty> properties = mailBox.getMailboxProperties();
-
-		if (null != properties) {
-
-			for (MailBoxProperty property : properties) {
-
-				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
-					String address = property.getMbxPropValue();
-					return Arrays.asList(address.split(","));
-				}
-			}
-		}
-
-		return null;
-
+		return getMailbox().getEmailAddress();
 	}
 	
 	/**

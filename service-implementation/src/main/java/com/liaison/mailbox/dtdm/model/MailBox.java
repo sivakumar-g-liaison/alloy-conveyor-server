@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.dtdm.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 
 /**
@@ -204,6 +206,26 @@ public class MailBox implements Identifiable {
 			}
 		}
 		return MailboxProps;
+	}
+	
+	@Transient
+	public List<String> getEmailAddress() {
+
+		Set<MailBoxProperty> properties = this.getMailboxProperties();
+
+		if (null != properties) {
+
+			for (MailBoxProperty property : properties) {
+
+				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
+					String address = property.getMbxPropValue();
+					return Arrays.asList(address.split(","));
+				}
+			}
+		}
+
+		return null;
+
 	}
 
 	@Override
