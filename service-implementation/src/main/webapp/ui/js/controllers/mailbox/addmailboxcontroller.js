@@ -425,12 +425,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 												</div>\n\
 											</div>\n\
 											<div ng-switch-when="ttl">\n\
-												<div class="input-group col-md-5">\n\
-													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
-													<div class="input-group-btn">\n\
-														<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
-													</div>\n\
-												</div>\n\
+												<div class="input-group">\n\
+													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:20%"/>\n\
+												&nbsp;<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+											</div>\n\
 											</div>\n\
                                             <div ng-switch-default>\n\
                                                 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
@@ -464,11 +462,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 												</div>\n\
 										</div>\n\
 										<div ng-switch-when="ttl">\n\
-										<div class="input-group col-md-5">\n\
-											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required ng-pattern="' + $scope.numberPattern + '" />\n\
-											<div class="input-group-btn">\n\
-												<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
-											</div>\n\
+											<div class="input-group">\n\
+											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:20%" ng-pattern="' + $scope.numberPattern + '" />\n\
+											&nbsp;<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+										</div>\n\
 										</div>\n\
 										<div class = clearfix></div>\n\
 										<div class="col-md-5" ng-show="formAddMbx.ttl.$dirty && formAddMbx.ttl.$invalid">\n\
