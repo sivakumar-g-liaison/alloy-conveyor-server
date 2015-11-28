@@ -69,6 +69,7 @@ import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 public class MailBoxService {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
+	private static final String DEFAULT_FILE_NAME = "NONE";
 
 	/**
 	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes the processor.
@@ -409,11 +410,13 @@ public class MailBoxService {
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
             ProcessorStateDTO processorStaged = new ProcessorStateDTO();
+            //For FileWriter and uploader alone to persist the file name as profile name in fsm state table.
+            String fileName = MailBoxUtil.isEmpty(workTicket.getFileName())? DEFAULT_FILE_NAME : workTicket.getFileName();
             
-            if (ProcessorType.FILEWRITER.equals(processor.getProcessorType().name())) {
-            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, "NONE", ExecutionState.STAGED, slaVerificationStatus);
+            if (ProcessorType.FILEWRITER.name().equals(processor.getProcessorType().name())) {
+            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, fileName, ExecutionState.STAGED, slaVerificationStatus);
             } else {
-            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, workTicket.getFileName(), ExecutionState.STAGED, slaVerificationStatus);
+            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, fileName, ExecutionState.STAGED, slaVerificationStatus);
             }
             fsm.addState(processorStaged);
 
@@ -421,7 +424,11 @@ public class MailBoxService {
             processorExecutionStateDAO.merge(processorExecutionState);
             fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
             //Initiate FSM Ends
-
+            
+            // check if file Name is available in the payloadTicketRequest if so save the file with the
+            // provided file Name if not save with processor Name with Timestamp
+            String stagedFileName = MailBoxUtil.isEmpty(workTicket.getFileName()) ? (processor.getProcsrName() + System.nanoTime()) : workTicket.getFileName();
+            workTicket.setFileName(stagedFileName);
             FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
@@ -468,7 +475,7 @@ public class MailBoxService {
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),
                         processor.getMailbox().getPguid(),
-                        (workTicket == null ? "NONE" : workTicket.getGlobalProcessId()),
+                        (workTicket == null ? DEFAULT_FILE_NAME : workTicket.getGlobalProcessId()),
                         e.getMessage(), e);
             }
 

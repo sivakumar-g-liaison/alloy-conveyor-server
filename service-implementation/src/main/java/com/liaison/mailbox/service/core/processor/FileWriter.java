@@ -70,14 +70,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             LOG.info(constructMessage("Start Run"));
             LOG.info(constructMessage("Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
-            long startTime = System.currentTimeMillis();
-
-            // check if file Name is available in the payloadTicketRequest if so save the file with the
-            // provided file Name if not save with processor Name with Timestamp
-            String fileName = MailBoxUtil.isEmpty(workTicket.getFileName())
-                    ? (configurationInstance.getProcsrName() + System.nanoTime())
-                    : workTicket.getFileName();
-
+            long startTime = System.currentTimeMillis();           
+            String fileName = workTicket.getFileName();
             LOG.info(constructMessage("Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
             processorType = configurationInstance.getProcessorType();
             glassMessage.setCategory(processorType);
