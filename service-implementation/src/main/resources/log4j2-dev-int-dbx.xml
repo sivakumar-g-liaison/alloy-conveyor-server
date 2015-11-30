@@ -393,7 +393,7 @@
 	</appenders>
 
 	<loggers>
-        <root level="DEBUG">
+        <root level="INFO">
 			<appender-ref ref="AsyncLogStashSocketWithFailoverFailover" />
 			<appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
 			<appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
