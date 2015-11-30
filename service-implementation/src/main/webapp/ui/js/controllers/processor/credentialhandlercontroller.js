@@ -1,7 +1,7 @@
 myApp.controller(
     'CredentialHanlderCntrlr', ['$rootScope', '$scope', '$blockUI', '$timeout',
         function ($rootScope, $scope, $blockUI, $timeout) {
-        
+		
             $scope.processCredentialDetails = function() {
                   for (var i = 0; i <  $scope.$parent.processorCredProperties.length; i++) {
                     var credObj =  $scope.$parent.processorCredProperties[i];
@@ -199,17 +199,41 @@ myApp.controller(
             }
             $scope.$on("resetCredentialSection", function(event){ $scope.credentialCleanup()});
             
-            // enable or disable turststore addition button
+         // enable or disable turststore addition button
             $scope.trustoreAdditonEnabler = function() {
-            	$scope.disableTrustoreAddition = ($scope.truststoreModal.trustStoreGroupId !== '' && 
+				$scope.$parent.showCredentialInvalid = false;
+				$scope.disableTrustoreAddition = ($scope.truststoreModal.trustStoreGroupId !== '' && 
             									typeof $scope.truststoreModal.trustStoreGroupId !== 'undefined') ? false : true;
+            	$scope.trustStoreUrl = $scope.fetchTrustStore + $scope.truststoreModal.trustStoreGroupId;
+				if (!$scope.disableTrustoreAddition) {
+					$scope.restService.get($scope.trustStoreUrl,
+						function (data, status) {
+							if (status != 200) {
+								$scope.disableTrustoreAddition = true;
+								$scope.$parent.showCredentialInvalid = true;
+								showSaveMessage("The given trustStore group id does not exist in the Keymanagement system", 'error');
+							}
+					});
+				}
             }
 
             // enable or disable ssh keys addition button
             $scope.sshKeysAdditonEnabler = function() {
-            	$scope.disableSSHKeysAddition = ($scope.sshkeyModal.sshKeyPairGroupId !== '' && 
+				$scope.$parent.showCredentialInvalid = false;
+				$scope.disableSSHKeysAddition = ($scope.sshkeyModal.sshKeyPairGroupId !== '' && 
             									typeof $scope.sshkeyModal.sshKeyPairGroupId !== 'undefined') ? false : true;
-            }
+            	$scope.fetchSshKeypairUrl = $scope.fetchSshKeyPair + $scope.sshkeyModal.sshKeyPairGroupId;
+    			if (!$scope.disableSSHKeysAddition) {
+    				$scope.restService.get($scope.fetchSshKeypairUrl,
+    					function (data, status) {
+    						if (status != 200) {
+								$scope.disableSSHKeysAddition = true;
+								$scope.$parent.showCredentialInvalid = true;
+    							showSaveMessage("The given SSH keypair group id does not exist in the Keymanagement system", 'error');
+    						}
+    				});		
+				}
+			}
             
             // helper function to determine is sshkey pair present in credentials of processorCredProperties
             $scope.isSSHKeysAvailable = function() {

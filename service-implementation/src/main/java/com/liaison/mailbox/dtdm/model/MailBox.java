@@ -10,7 +10,11 @@
 
 package com.liaison.mailbox.dtdm.model;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -28,6 +32,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 
 /**
@@ -46,9 +51,12 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 					+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
 					+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 					+ " order by mbx.mbxName"),
-  @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME, query = "SELECT mbx from MailBox mbx "
+    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME, query = "SELECT mbx from MailBox mbx "
 			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME + " and mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
-	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
+	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
+	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 
+			query = "select mbx from MailBox mbx"
+					+ " where mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME)
 })
 
 public class MailBox implements Identifiable {
@@ -172,6 +180,52 @@ public class MailBox implements Identifiable {
 
 	public void setTenancyKey(String tenancyKey) {
 		this.tenancyKey = tenancyKey;
+	}
+	
+	/**
+	 * Method to retrieve the given properties form Mailbox
+	 * 
+	 * @param propertiesToBeRetrieved - list of property Names to be retrieved
+	 * 		possible propertyNames are 'timetopickupfilepostedtomailbox', 'timetopickupfilepostedbymailbox'
+	 * 		'emailnotificationids', 'ttl' and 'ttlunit'
+	 * @return a Map containing values of given properties having the property Names as keys
+	 */
+	@Transient
+	public Map<String, String> retrieveMailboxProperties(List<String> propertiesToBeRetrieved) {
+		
+		Set<MailBoxProperty> properties = getMailboxProperties();
+		Map <String, String> MailboxProps = new HashMap<String, String>();
+		if (null != properties) {
+			
+			for (MailBoxProperty property : properties) {
+				
+				String propertyName = property.getMbxPropName();
+				if ( propertiesToBeRetrieved.contains(propertyName)) {
+					MailboxProps.put(propertyName, property.getMbxPropValue());
+				}
+			}
+		}
+		return MailboxProps;
+	}
+	
+	@Transient
+	public List<String> getEmailAddress() {
+
+		Set<MailBoxProperty> properties = this.getMailboxProperties();
+
+		if (null != properties) {
+
+			for (MailBoxProperty property : properties) {
+
+				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
+					String address = property.getMbxPropValue();
+					return Arrays.asList(address.split(","));
+				}
+			}
+		}
+
+		return null;
+
 	}
 
 	@Override

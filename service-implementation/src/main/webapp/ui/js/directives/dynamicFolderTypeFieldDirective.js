@@ -35,6 +35,8 @@ angular.module(
                  scope.constructProperty = function(property) {
                  
                     if (property === null || typeof property === 'undefined') {
+						scope.currentRowObject.folderType = "";
+						scope.currentRowObject.folderDisplayType = "";
                         return;
                     }
                     property.folderURI = scope.currentRowObject.folderURI;

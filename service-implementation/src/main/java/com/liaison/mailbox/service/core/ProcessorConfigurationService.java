@@ -102,6 +102,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
+	private static final String PROCESSOR = "Processor";
 
 
 	/**
@@ -697,9 +698,7 @@ public class ProcessorConfigurationService {
 
 
 			MailboxFSM fsm = new MailboxFSM();
-			LOGGER.info("############################################################################");
-			LOGGER.info("Interrupt signal received for   " + executionID);
-			LOGGER.info("#############################################################################");
+			LOGGER.info("Interrupt signal received for - " + executionID);
 
 			// persisting the FSMEvent entity
 			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, executionID);
@@ -918,6 +917,49 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
+	
+	/**
+	 * Get the Processor names for the search processor typeahead
+	 *
+	 * @param searchFilter
+	 * @return list of names
+	 */
+	public SearchProcessorResponseDTO getProcessorNames(GenericSearchFilterDTO searchFilter) {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get processor names.");
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+
+			List<Processor> processorList = config.getProcessorNames(searchFilter);
+
+			List<ProcessorDTO> processorDTO = new ArrayList<ProcessorDTO>();
+			if (null == processorList || processorList.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_PROC_NAMES_EXIST, Response.Status.NOT_FOUND);
+			}
+			ProcessorDTO procDTO = null;
+			for (Processor processor : processorList) {
+				procDTO = new ProcessorDTO();
+				procDTO.setName(processor.getProcsrName());
+				processorDTO.add(procDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessor(processorDTO);
+
+			LOGGER.debug("Exit from get processor names.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.PROCESSOR, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
 
 	/**
 	 * Get the Profile names.
@@ -1002,20 +1044,47 @@ public class ProcessorConfigurationService {
 
 			LOGGER.debug("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
+			List <Processor> processors = null;
+
+			if (null == processorGuid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
-
-			if (processor == null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
+			
+			// if read by guid fails try to read processor by given name
+			if (null == processor) {
+				processors = config.findProcessorsByName(processorGuid);
 			}
 
-			ProcessorDTO dto = new ProcessorDTO();
-			dto.copyFromEntity(processor, true);
-
-			serviceResponse.setProcessor(dto);
+			if (processor == null && processors.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROCESSOR,
+						Response.Status.BAD_REQUEST);
+			}
+			
+			// if processor is available then it is for read processor by guid 
+			if (null != processor) {
+				
+				ProcessorDTO dto = new ProcessorDTO();
+				dto.copyFromEntity(processor, true);
+				serviceResponse.setProcessor(dto);
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+				LOGGER.debug("Exit from get processor by guid.");
+				return serviceResponse;
+			}
+			
+			// This is for retrieving list of processors by Name
+			List<ProcessorDTO> processorDtos = new ArrayList<>();
+			for (Processor procsr : processors) {
+				ProcessorDTO dto = new ProcessorDTO();
+				dto.copyFromEntity(procsr, true);
+				processorDtos.add(dto);
+			}
+			serviceResponse.setProcessors(processorDtos);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
-			LOGGER.debug("Exit from get processor.");
+			LOGGER.debug("Exit from get processor by name.");
 			return serviceResponse;
 
 		} catch (Exception e) {

@@ -15,7 +15,7 @@ com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicketQueue
 com.liaison.jms.hostname.sweeper=10.146.16.148
 com.liaison.jms.port.sweeper=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.sweeper=-1
+com.liaison.jms.receive.attempts.sweeper=1
 #-1 is infinite
 com.liaison.jms.send.attempts.sweeper=-1
 
@@ -23,7 +23,7 @@ com.liaison.jms.queuename.processor=DEVINTMailboxToMailboxProcessorQueue
 com.liaison.jms.hostname.processor=10.146.16.148
 com.liaison.jms.port.processor=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.processor=-1
+com.liaison.jms.receive.attempts.processor=1
 
 #-1 is infinite
 com.liaison.jms.send.attempts.processor=-1
@@ -39,7 +39,7 @@ com.liaison.jms.ssl.truststore.password.processedPayload=changeit
 com.liaison.jms.hostname.processedPayload=10.146.16.148
 com.liaison.jms.port.processedPayload=5046
 #-1 is infinite
-com.liaison.jms.receive.attempts.processedPayload=-1
+com.liaison.jms.receive.attempts.processedPayload=1
 #-1 is infinite
 com.liaison.jms.send.attempts.processedPayload=-1
 
@@ -107,6 +107,7 @@ com.liaison.gitlab.script.server.host=lsvlGITRPT01d.liaison.dev
 com.liaison.gitlab.script.server.port=80
 com.liaison.gitlab.script.project.name=g2/mailbox-scripts
 com.liaison.gitlab.script.branch.name=master
+com.liaison.gitlab.script.service.name=MailBox
 
 # Activity GitLab properties
 com.liaison.gitlab.mailbox.script.server.host=http://lsvlgitrpt01d.liaison.dev
@@ -129,9 +130,6 @@ g2.queueing.server.url=jnp://10.146.20.40:5446
 directory.sweeper.queue.name=/queue/G2Queue
 # Directory sweeper configuration to check files are modified with in the given time limit in SECONDS
 last.modified.tolerance = 3
-
-#ssh key implementation - temp privatekey file path that will be used while running a processor. The file downloaded will be deleted after  processor execution.
-ssh.private.key.temp.location =/app/mailbox/tempprivatekey/
 
 # MAIL SERVER CONFIGURATIONS
 mail.host=smtpout.liaison.com
@@ -197,16 +195,10 @@ com.liaison.acl.request.runtime.created.by=Mailbox
 
 #ACL Integration
 acl_signer_public_key_guid = CD5990860A9270E0142300DCB508D8CD
+#com.liaison.acl.signer.public.key.group.guid=57B07C1651134F4AAED8527FF0C7922C
 
 #SLA Properties
 mailbox.sla.time.configuration.unit=MINUTES
-
-#Thread Count for processor
-mailbox.processor.queue.consumer.thread.count=5
-#Thread Count for watchdog
-mailbox.processedPayload.queue.consumer.thread.count=5
-#Thread Count for Dropbox Queue
-mailbox.dropboxQueue.queue.consumer.thread.count=5
 
 # fs2 client properties for payloads
 fs2.storage.spectrum.ip=10.146.16.118
@@ -266,5 +258,10 @@ ftps.group.name=ext_ftps_users
 #internal engineering DL to notify any failure cases 
 com.liaison.mailbox.error.receiver = vnagarajan@liaison.com,gnattarshah@liaison.com
 
-#ttl days for as2 mount
-com.liaison.mailbox.as2.mount.ttl.days=30
+# default sla configuration in minutes
+com.liaison.mailbox.default.customer.sla=120 
+com.liaison.mailbox.default.mailbox.sla=30
+com.liaison.mailbox.default.sla.notification=true
+com.liaison.mailbox.default.sla.max.notification.count=3
+
+com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html

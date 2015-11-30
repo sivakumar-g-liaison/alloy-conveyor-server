@@ -187,7 +187,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO, getRequestHeaderValues(serviceRequest));
 					if (manifestResponse == null) {
 						LOG.error(MailBoxUtil.constructMessage(null, null, "user authenticated but manifest retrieval failed for login id - {}"), loginId);
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
@@ -237,10 +237,16 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// response message construction
 					ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER,
 							manifestResponse.getManifest()).header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER,
-							manifestResponse.getSignature()).header(
-							GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid()).header(
-							MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken).type(MediaType.APPLICATION_JSON).entity(
+							manifestResponse.getSignature()).header(MailBoxConstants.DROPBOX_AUTH_TOKEN, 
+							encryptedMbxToken).type(MediaType.APPLICATION_JSON).entity(
 							responseBody).status(Response.Status.OK);
+					
+					// set signer public key guid in response headers based on the response from gem
+					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, manifestResponse.getPublicKeyGroupGuid());
+					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
+					}
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();

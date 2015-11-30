@@ -140,8 +140,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 			}
-			// remove the private key once connection established successfully
-			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
 			long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
@@ -149,7 +147,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | MailBoxServicesException | IOException
-				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
+				| SftpException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
@@ -195,9 +193,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
-						LOGGER.info("##########################################################################");
-						LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
-						LOGGER.info("#############################################################################");
+						LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 						fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
 						return;
@@ -276,10 +272,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
-
-						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
-						        staticProp.getProcessedFileLocation(), 
-						        item);
+						
+						// delete files once successfully uploaded
+						deleteFilesAfterSuccessfulUpload(item);
 						StringBuilder message = new StringBuilder()
 													.append("File ")
 													.append(currentFileName)
@@ -290,7 +285,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
 						
-						archiveFiles(staticProp.getErrorFileLocation(), item);
 						StringBuilder message = new StringBuilder()
 													.append("Failed to upload file ")
 													.append(currentFileName)
@@ -303,6 +297,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 				}
 			}
+			// To delete the folder after uploading of all files inside this folder is done
+			deleteFilesAfterSuccessfulUpload(localDir);
 		}
 		else {
 			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
@@ -329,7 +325,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (IOException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	 }
@@ -364,31 +360,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void downloadDirectory(Object client, String localTargetLocation, String remotePayloadLocation) {
-	}
-
-	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-
-		G2SFTPClient sftpRequest = (G2SFTPClient)client;
-		try {
-			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException
-				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-
-	}
-
-	@Override
 	public void cleanup() {
-		// To remove the private key retrieved from key manager
-		try {
-			removePrivateKeyFromTemp();
-		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
-
 	}
 
 	/**

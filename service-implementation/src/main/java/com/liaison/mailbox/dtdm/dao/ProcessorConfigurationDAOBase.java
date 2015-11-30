@@ -107,12 +107,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 			return processors;
@@ -140,9 +136,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
         try {
 
-            LOG.info("Fetching the processor count starts.");
+            LOG.debug("Fetching the processor count starts.");
             long lStartTime = new Date().getTime(); // start time
-            LOG.info("Start Time of Query Execution : " + lStartTime);
+            LOG.debug("Start Time of Query Execution : " + lStartTime);
             StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
                     .append(" inner join processor.mailbox mbx")
                     .append(" where mbx.pguid = :")
@@ -155,7 +151,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(SERV_INST_ID, siid)
                     .getSingleResult();
             long lEndTime = new Date().getTime(); // end time
-            LOG.info("End Time of Query Execution : " + lEndTime);
+            LOG.debug("End Time of Query Execution : " + lEndTime);
             if (count > 0) {
                 status = true;
             }
@@ -166,7 +162,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
 
-        LOG.info("Fetching the processor count ends.");
+        LOG.debug("Fetching the processor count ends.");
         return status;
     }
 
@@ -185,7 +181,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("find processor by mbx and service instacne starts.");
+			LOG.debug("find processor by mbx and service instacne starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
@@ -216,7 +212,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 
-		LOG.info("find processor by mbx and service instacne ends.");
+		LOG.debug("find processor by mbx and service instacne ends.");
 		return processors;
 	}
 
@@ -235,7 +231,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processor count starts.");
+			LOG.debug("Fetching the processor count starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
@@ -258,12 +254,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -291,7 +283,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("find processor by mbx and processor name starts.");
+			LOG.debug("find processor by mbx and processor name starts.");
 			
 			List<Processor> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME_AND_MBX)
 					.setParameter(PGUID,  (MailBoxUtil.isEmpty(mbxGuid) ? "''" : mbxGuid))
@@ -308,7 +300,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 
-		LOG.info("find processor by mbx and processor name ends.");
+		LOG.debug("find processor by mbx and processor name ends.");
 		return processor;
 	}
 	
@@ -319,7 +311,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processor starts.");
+			LOG.debug("Fetching the processor starts.");
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
 						.append(" where processor.procsrStatus = :")
@@ -337,12 +329,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -362,7 +350,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processor starts.");
+			LOG.debug("Fetching the processor starts.");
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
 						.append(" where mbx.pguid = :")
@@ -383,12 +371,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -406,7 +390,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		List<Processor> processors = new ArrayList<Processor>();
 
 		try {
-			LOG.info("Fetching the processor by specific type, profile Id and tenancyKey starts.");
+			LOG.debug("Fetching the processor by specific type, profile Id and tenancyKey starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
@@ -432,12 +416,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -455,7 +435,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processor count starts.");
+			LOG.debug("Fetching the processor count starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
@@ -475,12 +455,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {
@@ -505,12 +481,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {
@@ -572,12 +544,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .getResultList();
 			Iterator<?> iter = proc.iterator();
 			while (iter.hasNext()) {
-
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
 
 		} finally {
@@ -668,7 +636,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processors by filters starts.");
+			LOG.debug("Fetching the processors by filters starts.");
 
 			StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor");
 			genearteQueryBySearchFilters(searchDTO, query);
@@ -717,6 +685,37 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	            }
 	        }
 		return mailboxNames;
+	}
+	
+	@Override
+	public List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO) {
+			 
+	        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+	        List<Processor> processorNames = new ArrayList<Processor>();
+
+	        try {
+
+	            StringBuilder query = new StringBuilder().append("SELECT proc FROM Processor proc")
+	                    .append(" where LOWER(proc.procsrName) like :")
+	                    .append(PRCSR_NAME);
+	            List <?> proc = entityManager.createQuery(query.toString())
+	                    .setParameter(PRCSR_NAME, "%" + searchDTO.getProcessorName().toLowerCase() + "%")
+	                    .getResultList();	
+
+	            Iterator<?> iter = proc.iterator();
+	            Processor processor;
+	 			while (iter.hasNext()) {
+
+	 				processor = (Processor) iter.next();
+	 				processorNames.add(processor);	 				
+	 			}
+	 
+	        } finally {
+	            if (entityManager != null) {
+	                entityManager.close();
+	            }
+	        }
+		return processorNames;
 	}
 	
 	@Override
@@ -780,6 +779,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		    list.add(getProcessorClass(searchDTO.getProcessorType()).getCanonicalName());
 			predicateList.add(QueryBuilderUtil.constructSqlStringForTypeOperator(list));
 		}
+		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
+			predicateList.add(" LOWER(processor.procsrName) = :" + PRCSR_NAME);
+		}
+		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
+			predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
+		}
 
 		for (int i = 0; i < predicateList.size(); i++) {			
             query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
@@ -802,7 +807,40 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
             query.setParameter(PROTOCOL, searchDTO.getProtocol().toLowerCase());
-        }	
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
+            query.setParameter(PRCSR_NAME, searchDTO.getProcessorName().toLowerCase());
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
+            query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
+        }
 		return query;		
+	}
+
+	@Override
+	public List<Processor> findProcessorsByName(String processorName) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        List<Processor> processors = new ArrayList<Processor>();
+        Processor processor = null;
+
+		try {
+			
+            List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME)
+            		.setParameter(PRCSR_NAME, processorName)
+            		.getResultList();
+			Iterator<?> iter = proc.iterator();
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return processors;		
 	}
 }

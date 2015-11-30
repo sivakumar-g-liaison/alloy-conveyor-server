@@ -146,7 +146,6 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 	 */
 	@GET
 	@ApiOperation(value = "Processor Details", notes = "returns detail information of a valid processor", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getProcessor(

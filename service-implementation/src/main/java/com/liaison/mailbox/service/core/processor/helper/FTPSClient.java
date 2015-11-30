@@ -130,7 +130,7 @@ public class FTPSClient {
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException | CertificateException
 				| KeyStoreException | NoSuchAlgorithmException | JsonParseException
-				| IllegalAccessException | NoSuchFieldException e) {
+				| IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 

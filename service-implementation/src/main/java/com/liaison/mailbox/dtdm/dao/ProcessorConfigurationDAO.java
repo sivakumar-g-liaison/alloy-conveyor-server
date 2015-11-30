@@ -32,6 +32,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
 	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
 	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
+	public static final String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -114,7 +115,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieves list of all processors  
 	 * @return list of processors
 	 */
-	public List <Processor> findAllActiveProcessors(); 
+	public List<Processor> findAllActiveProcessors(); 
 	
 	/**
  	* Retrieves processors by mailbox guid and processor name
@@ -132,19 +133,25 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieves list of all processors  
 	 * @return list of processors
 	 */
-	public List <Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
+	public List<Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
 	
 	/**
 	 * Retrieve the mailbox names  
 	 * @return list of mailboxes
 	 */
-	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
+	public List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO);
+	
+	/**
+	 * Retrieve the processor names  
+	 * @return list of processors
+	 */
+	public List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
 	 * Retrieve the profile names  
 	 * @return list of profiles
 	 */
-	public List<ScheduleProfilesRef>getProfileNames(GenericSearchFilterDTO searchDTO);
+	public List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO);
 	
 	/**
 	 * Retrieves count of filtered processors  
@@ -157,4 +164,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	* @return  processor
  	*/
  	public Processor findActiveProcessorById(String id);
+ 	
+	/**
+	 * Retrieves all processors by given Name
+	 * 
+	 * @param processorName
+	 * @return List of Processors
+	 */
+	public List<Processor> findProcessorsByName(String processorName);
 }

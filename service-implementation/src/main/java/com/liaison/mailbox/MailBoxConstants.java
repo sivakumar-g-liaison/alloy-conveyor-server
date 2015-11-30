@@ -90,13 +90,15 @@ public interface MailBoxConstants {
 	public final static String PLATFORM_NAME = "SERVICE_BROKER";
 	public final static String SERVICE_NAME = "KEYMANAGER";
 	public final static String ROLE_NAME = "MailboxAdmin";
-
-
+	
 	public static final String MAILBOX_ID = "mailboxId";
 
 	// properties used to configure sla rules of an mailbox
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX = "timetopickupfilepostedbymailbox";
+	public final static String EMAIL_NOTIFICATION_FOR_SLA_VIOLATION = "emailnotificationforslaviolation";
+	public final static String MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION = "maxnumberofnotificationforslaviolation";	
+	
 
 	// sla validation
 	public final static String PROCESSOR_NOT_AVAILABLE = "-NA-";
@@ -115,6 +117,8 @@ public interface MailBoxConstants {
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
 	public final static String KEY_LENS_VISIBILITY = "LENS_VISIBILITY";
+	public final static String KEY_MESSAGE_NAME = "MESSAGE_NAME";
+	
 
 	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
@@ -132,6 +136,7 @@ public interface MailBoxConstants {
 	public final static String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	public final static String KEY_TARGET_DIRECTORY = "targetDirectory";
 	public final static String KEY_TARGET_DIRECTORY_MODE = "targetDirectoryMode";
+
 	public final static String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
 	//Overwrite
@@ -159,7 +164,7 @@ public interface MailBoxConstants {
 	public static String MAILBOX = "MailBox";
 	public static final String PROCESSOR_STATUS = "Processor Status";
 	public static String INTERRUPT_SIGNAL = "Interrupt Signal";
-	public static String EXECUTING_PROCESSORS = "Executing Processors";
+	public static String EXECUTING_PROCESSORS = "Running Processors";
 	public static String PROFILE = "Profile";
 
 	//added for generic error message if any location is missing
@@ -323,7 +328,12 @@ public interface MailBoxConstants {
 
     //constants for staged file entry
     public static final String FILE_EXISTS = "fileExists";
-
+    
+    //Constants for LENS Logging
+    public static final String HTTPASYNCPROCESSOR = "HTTPASYNCPROCESSOR";
+    public static final String HTTPSYNCPROCESSOR = "HTTPSYNCPROCESSOR";
+    public static final String DROPBOXPROCESSOR = "DROPBOXPROCESSOR";
+    public static final String FILEWRITER = "FILEWRITER";
     /**
      * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
      */
@@ -337,5 +347,17 @@ public interface MailBoxConstants {
 
     public static int ENCRYPT_MODE = 1;
     public static int DECRYPT_MODE = 2;
-
+    
+	// Added for read resource for migrator services 
+    public static String TYPE_MAILBOX = "mailbox";
+    public static String TYPE_PROCESSOR = "processor";
+    public static String TYPE_PROFILE = "profile";
+    
+    // configurations for sla validation
+    public static String DEFAULT_CUSTOMER_SLA = "com.liaison.mailbox.default.customer.sla";
+    public static String DEFAULT_MAILBOX_SLA = "com.liaison.mailbox.default.mailbox.sla";
+    public static String  MBX_SLA_CONFIG_UNIT = "com.liaison.mailbox.default.sla.time.unit";
+    public static String DEFAULT_SLA_EMAIL_NOTIFICATION = "com.liaison.mailbox.default.sla.notification";
+    public static String DEFAULT_SLA_MAX_NOTIFICATION_COUNT = "com.liaison.mailbox.default.sla.max.notification.count";
+    
 }

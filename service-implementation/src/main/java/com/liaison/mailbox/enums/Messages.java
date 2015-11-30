@@ -60,7 +60,7 @@ public enum Messages {
 	INVALID_DATE_RANGE("Both From and To dates are required."),
 	INVALID_PROCESSOR_STATUS("Processor status is invalid."),
 	NO_PROCESSORS_AVAIL("No Processors available matching the given criteria."),
-	PROCESSORS_LIST("The list of executing processors are "),
+	PROCESSORS_LIST("The list of running processors are "),
 	NO_EXECUTING_PROCESSORS_AVAIL("No %s available"),
 
 	// TRIGGER PROFILE USECASE
@@ -155,6 +155,7 @@ public enum Messages {
 
 	NO_PROCESSORS_EXIST("No Processors available."),
 	NO_MBX_NAMES_EXIST("No Mailbox names available."),
+	NO_PROC_NAMES_EXIST("No Processor names available."),
 
 	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details."),
 
@@ -162,12 +163,14 @@ public enum Messages {
 	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
 	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error"),
 	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error"),
+	PAYLOAD_DOES_NOT_EXIST("Payload is not available in spectrum."),
 
 	//referred in ProcessorAdminDetailsResource
 	PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
 	PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
-	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING(
-		"The status for the given processor id %s is not updated since the execution is not in 'Processing' state.");
+	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING("The status for the given processor id %s is not updated since the execution is not in 'Processing' state."),
+
+	FILE_WRITER_SUCCESS_MESSAGE("File is picked up by the customer or other process");
 
 	private String value;
 

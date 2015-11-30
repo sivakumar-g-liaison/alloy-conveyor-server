@@ -71,7 +71,7 @@
 
         <!-- destination of failover when logstash socket fails -->
         <RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
-                     filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}.log.gz"
+                     filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}-%i.log"
                      ignoreExceptions="false">
             <!-- exclude redundant log element -->
             <LogStashJSONLayout excludeLog="true">

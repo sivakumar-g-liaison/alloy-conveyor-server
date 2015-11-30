@@ -352,4 +352,33 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		
 		return linkedMailboxIds;		
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public MailBox getMailboxByName(String mbxName) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<MailBox> mailboxList = null;
+		MailBox appEntity = null;
+
+		try {
+
+			mailboxList = entityManager.createNamedQuery(GET_MBX_BY_NAME)
+					.setParameter(MBOX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
+					.getResultList();
+
+			if ((mailboxList == null) || (mailboxList.size() == 0)) {
+                return null;
+            }
+
+            appEntity = mailboxList.get(0);
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return appEntity;
+	}
 }

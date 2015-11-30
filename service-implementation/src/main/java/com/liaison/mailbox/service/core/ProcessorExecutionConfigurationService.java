@@ -43,7 +43,7 @@ public class ProcessorExecutionConfigurationService {
 	
 	private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
 	private static final String PROCESSORS = "Processors";
-	private static final String EXECUTING_PROCESSORS = "executing processors";
+	private static final String EXECUTING_PROCESSORS = "running processors";
 	
 	/**
 	 * Method to get the executing processors

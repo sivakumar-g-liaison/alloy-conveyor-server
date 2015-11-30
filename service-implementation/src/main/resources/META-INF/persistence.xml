@@ -36,7 +36,7 @@
 		<class>com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor</class>
 	<properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.connection.autocommit" value="false"/>
 			<property name="hibernate.cache.use_second_level_cache" value="false"/>
 		</properties>
@@ -53,7 +53,7 @@
 		<class>com.liaison.mailbox.rtdm.model.StagedFile</class>
 		<properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
-			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.connection.autocommit" value="false"/>
 			<property name="hibernate.cache.use_second_level_cache" value="false"/>
 		</properties>

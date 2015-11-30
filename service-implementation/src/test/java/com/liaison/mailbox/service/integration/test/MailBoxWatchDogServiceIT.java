@@ -37,10 +37,11 @@ public class MailBoxWatchDogServiceIT extends BaseServiceTest {
 
 	/**
 	 * This is just to check the flow and DB operations. Not intened to test full functionality
+	 * @throws Exception 
 	 * 
 	 */
 	@Test(enabled=false)
-	public void testCreateMailBox() {
+	public void testMailBoxWatchDog() throws Exception {
 		MailboxWatchDogService service = new MailboxWatchDogService();
 		service.pollAndUpdateStatus();
 	}

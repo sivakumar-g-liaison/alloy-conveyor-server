@@ -21,20 +21,20 @@
 		<!-- ######### Logstash, General Application Logs ############ -->
 		<!-- ############################################################## -->
 
-        <!--
+		<!--
             LogStashSocket is a tcp socket dumping logstash spec 1.0 messages
          -->
-        <Socket name="LogStashSocket" host="${env:LOGSTASHMACHINE}" port="${env:LOGSTASHPORT}"
-                connectTimeoutMillis="500"
-                reconnectionDelayMillis="500"
-                immediateFail="true"
-                protocol="tcp"
-			ignoreExceptions="false">
+		<Socket name="LogStashSocket" host="${env:LOGSTASHMACHINE}" port="${env:LOGSTASHPORT}"
+				connectTimeoutMillis="500"
+				reconnectionDelayMillis="500"
+				immediateFail="true"
+				protocol="tcp"
+				ignoreExceptions="false">
 			<!-- exclude redundant log element -->
 			<LogStashJSONLayout excludeLog="true">
 
-                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
-                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
+				<!-- Provide ANY type of layout to expose the message, being mindful that if -->
+				<!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
 				<!-- produce a valid and escaped json element -->
 				<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg" />
 
@@ -43,9 +43,9 @@
 
 
 				<!-- Archaius Properties -->
-                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
-                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
-                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
+				<KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
+				<KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
+				<KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
 				<KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}" />
 				<KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}" />
 				<KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}" />
@@ -62,22 +62,22 @@
 			</LogStashJSONLayout>
 			<filters>
 				<!-- remove some noise -->
-                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
-                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+				<MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
 			</filters>
 
 		</Socket>
 
 
 		<!-- destination of failover when logstash socket fails -->
-        <RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
-			filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}.log.gz"
-			ignoreExceptions="false">
+		<RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
+					 filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}-%i.log"
+					 ignoreExceptions="false">
 			<!-- exclude redundant log element -->
 			<LogStashJSONLayout excludeLog="true">
 
-                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
-                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
+				<!-- Provide ANY type of layout to expose the message, being mindful that if -->
+				<!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
 				<!-- produce a valid and escaped json element -->
 				<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg" />
 
@@ -86,9 +86,9 @@
 
 
 				<!-- Archaius Properties -->
-                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
-                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
-                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
+				<KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
+				<KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
+				<KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
 				<KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}" />
 				<KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}" />
 				<KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}" />
@@ -105,8 +105,8 @@
 			</LogStashJSONLayout>
 			<filters>
 				<!-- remove some noise -->
-                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
-                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+				<MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
 			</filters>
 
 			<Policies>
@@ -115,24 +115,22 @@
 			</Policies>
 		</RollingFile>
 
-        <!-- Failover when either logstash socket appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncLogStashSocketWithFailover"
-               blocking="false"
-               bufferSize="${env:LOGSTASH_RING_BUFFER_SIZE}"
-               errorRef="LogStashFailoverFile"
-               ignoreExceptions="false"
-                >
+		<!-- Failover when either logstash socket appender fails or we run out of slots in buffer (overrun) -->
+		<Async name="AsyncLogStashSocketWithFailover"
+			   blocking="false"
+			   bufferSize="${env:LOGSTASH_RING_BUFFER_SIZE}"
+			   errorRef="LogStashFailoverFile"
+			   ignoreExceptions="false"
+		>
 			<AppenderRef ref="LogStashSocket" />
 		</Async>
 
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncLogStashSocketWithFailoverFailover" primary="AsyncLogStashSocketWithFailover">
+		<!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+		<Failover name="AsyncLogStashSocketWithFailoverFailover" primary="AsyncLogStashSocketWithFailover">
 			<Failovers>
 				<AppenderRef ref="Console" />
 			</Failovers>
 		</Failover>
-
-
 
 		<!-- ############################################################## -->
 		<!-- ######### Organization GSA APPENDER ############ -->

@@ -9,6 +9,7 @@
 
 package com.liaison.mailbox.service.storage.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -16,11 +17,13 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
@@ -95,17 +98,14 @@ public class StorageUtilities {
 	/**
 	 * Initialize FS2
 	 */
-	private static void initializeFS2() {
+	static {
 
-		if (FS2 == null) {
-
-			LOGGER.info("Initializing FS2");
-			configureSpectrum();
-			configureFilesystem();
-			FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
-			LOGGER.info("Initialized Successfully ");
-		}
-	}
+		LOGGER.info("Initializing FS2");
+		configureSpectrum();
+		configureFilesystem();
+		FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
+		LOGGER.info("FS2 Initialized Successfully ");
+    }
 
 	/**
 	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
@@ -118,7 +118,6 @@ public class StorageUtilities {
 			throws MailBoxServicesException {
 
 		try {
-			initializeFS2();
 			URI spectrumURI = new URI(payloadURL);
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
@@ -137,7 +136,7 @@ public class StorageUtilities {
 	 * @param isSecure
 	 * @return
 	 */
-	public static PayloadDetail persistPayload(InputStream payload, WorkTicket workTicket,
+	public static FS2MetaSnapshot persistPayload(InputStream payload, WorkTicket workTicket,
 			Map<String, String> httpListenerProperties, boolean isDropbox) {
 
 		try {
@@ -161,29 +160,73 @@ public class StorageUtilities {
 						+ messageName;
 			}
 
-			initializeFS2();
 			// persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(uri, isSecure);
-			PayloadDetail detail = null;
 
 			// fetch the metdata includes payload size
+			FS2MetaSnapshot metaSnapshot = null;
 			try (InputStream is = payload) {
-				FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
-				detail = new PayloadDetail();
-				detail.setMetaSnapshot(metaSnapshot);
-				detail.setPayloadSize(metaSnapshot.getPayloadSize());
+				metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, is);
 				LOGGER.debug("Time spent on uploading file {} of size {} to spectrum only is {} ms",
-						workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
+						workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
 			}
 
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
-			return detail;
+			return metaSnapshot;
 
 		} catch (FS2ObjectAlreadyExistsException e) {
 			LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
 			throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
 		} catch (FS2Exception | IOException e) {
+			LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
+	 * 
+	 * @param payload
+	 * @param globalProcessId
+	 * @param fs2Headers
+	 * @param isSecure
+	 * @return
+	 */
+	public static FS2MetaSnapshot persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
+
+		try {
+
+			String globalProcessorId = workTicket.getGlobalProcessId();
+
+			long startTime = 0;
+			long endTime = 0;
+
+			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, properties);
+			fs2Header.addHeader(MailBoxConstants.KEY_MESSAGE_NAME, "MAILBOX_WORKTICKET");
+			fs2Header.addHeader(MailBoxConstants.KEY_PAYLOAD_DESCRIPTION, "Workticket created by mailbox sweeper");
+
+			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId + "_WORKTICKET";
+
+			// persists the message in spectrum.
+			LOGGER.debug("Persist the workticket **");
+			URI requestUri = createSpectrumURI(uri, false);
+
+			// fetch the metdata includes payload size
+			FS2MetaSnapshot metaSnapshot = null;
+			try (InputStream is = new ByteArrayInputStream(JAXBUtility.marshalToJSON(workTicket).getBytes())) {
+				metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, is);
+				LOGGER.debug("Time spent on uploading workticket {} of size {} to spectrum only is {} ms",
+						workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
+			}
+
+			LOGGER.debug("Successfully persisted the workticket in spectrum to url {} ", requestUri);
+			return metaSnapshot;
+
+		} catch (FS2ObjectAlreadyExistsException e) {
+			LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+		} catch (FS2Exception | IOException | JAXBException e) {
 			LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
 			throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -362,13 +405,13 @@ public class StorageUtilities {
 
 		try (InputStream payloadToPersist = stream) {
 
-			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist, workTicket,
+			FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket,
 					httpListenerProperties, isDropbox);
 			LOGGER.info("Spectrum URL for the file {} is {}. File size in bytes {} ", workTicket.getFileName(),
-					detail.getMetaSnapshot().getURI().toString(), detail.getPayloadSize());
+					metaSnapshot.getURI().toString(), metaSnapshot.getPayloadSize());
 
-			workTicket.setPayloadSize(detail.getPayloadSize());
-			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
+			workTicket.setPayloadSize(metaSnapshot.getPayloadSize());
+			workTicket.setPayloadURI(metaSnapshot.getURI().toString());
 		}
 	}
 
@@ -390,9 +433,10 @@ public class StorageUtilities {
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 		fs2Header.addHeader(MailBoxConstants.KEY_LENS_VISIBILITY, httpListenerProperties.get(MailBoxConstants.PROPERTY_LENS_VISIBILITY));
-		if(workTicket.getTtlDays() != -1) {
-		Integer ttlValue = MailBoxUtil.convertTTLIntoSeconds(MailBoxConstants.TTL_UNIT_DAYS, workTicket.getTtlDays());
-		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue.toString());
+		if (workTicket.getTtlDays() != -1) {
+			Integer ttlValue = MailBoxUtil.convertTTLIntoSeconds(MailBoxConstants.TTL_UNIT_DAYS,
+					workTicket.getTtlDays());
+			fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, ttlValue.toString());
 		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
@@ -410,7 +454,6 @@ public class StorageUtilities {
 			throws MailBoxServicesException {
 
 		try {
-			initializeFS2();
 			URI spectrumURI = new URI(payloadURL);
 			LOGGER.info("Retrieving payload headers from spectrum");
 			return FS2.getHeaders(spectrumURI);
@@ -419,5 +462,22 @@ public class StorageUtilities {
 			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
-
+	
+	/**
+	 * Method to check whether the payload exists at given path
+	 * 
+	 * @param path - path of payload 
+	 * @return true if payload exists otherwise false
+	 * @throws FS2Exception
+	 * @throws URISyntaxException
+	 */
+	public static boolean isPayloadExists(String path) {
+		
+		try {
+			return FS2.exists(new URI(path));
+		} catch (URISyntaxException | FS2Exception e) {
+			LOGGER.error(Messages.PAYLOAD_DOES_NOT_EXIST, e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_DOES_NOT_EXIST, Response.Status.BAD_REQUEST);
+		}
+	}
 }

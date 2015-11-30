@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,6 +24,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -74,7 +74,6 @@ public class MailboxReadResource extends AuditedResource {
 
 	@GET
 	@ApiOperation(value = "read an entity", notes = "returns details of an entity", position = 3, response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readEntity(
@@ -88,16 +87,18 @@ public class MailboxReadResource extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
-
 				LOG.info("The requested type is {}", type);
-				if (MailBoxConstants.PROFILE.equalsIgnoreCase(type)) {
-					return new ProfileConfigurationService().getProfileByGuid(guid);
-				} else if (MailBoxConstants.PROCESSOR.equalsIgnoreCase(type)) {
-					return new ProcessorConfigurationService().getProcessor(guid);
-				} else {
-					return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Unsupported entity type");
+				switch (type.toLowerCase()) {
+				
+					case MailBoxConstants.TYPE_PROFILE :
+						 return new ProfileConfigurationService().getProfileByGuid(guid);
+					case MailBoxConstants.TYPE_PROCESSOR :
+						 return new ProcessorConfigurationService().getProcessor(guid);
+					case MailBoxConstants.TYPE_MAILBOX :
+						 return new MailBoxConfigurationService().readMailbox(guid);
+					default:
+						 return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Unsupported entity type");
 				}
-
 			}
 		};
 		worker.actionLabel = "MailboxReadResource.readEntity()";

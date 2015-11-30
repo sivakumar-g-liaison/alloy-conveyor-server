@@ -68,11 +68,13 @@ public class EmailNotifier {
 					.append(NEW_LINE)
 					.append(NOTE);
 
-			MailSend.Send(StringUtils.join(emailInfo.getToEmailAddrList(), ','),
-					PROPS.getString("mail.from"),
-					emailInfo.getSubject(),
-					emailContentBuilder.toString(),
-					PROPS.getString("mail.host"));
+			if (!emailInfo.getToEmailAddrList().isEmpty()) {
+				MailSend.Send(StringUtils.join(emailInfo.getToEmailAddrList(), ','),
+						PROPS.getString("mail.from"),
+						emailInfo.getSubject(),
+						emailContentBuilder.toString(),
+						PROPS.getString("mail.host"));
+			}
 
 		} catch (Exception e) {
 			//hanlde gracefully
@@ -114,8 +116,10 @@ public class EmailNotifier {
 		}
 
 		// append environment details
-		builder.append(ENVIRONMENT).append(SEPARATOR).append(
-				ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()).append(NEW_LINE);
+		if (!emailInfo.isDropbox()) {
+			builder.append(ENVIRONMENT).append(SEPARATOR).append(
+					ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()).append(NEW_LINE);
+		}
 
 		// set host name in email body if host name is available
 		if (!MailBoxUtil.isEmpty(hostName) && !emailInfo.isSuccess()) {

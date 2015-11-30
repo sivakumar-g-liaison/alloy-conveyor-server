@@ -24,11 +24,16 @@ public class StagedFileDTO {
 	private String id;
 	private String path;
 	private String fileSize;
+	private String globalProcessId;
 	private String mailboxGuid;
+	private String processorId;
+	private String processorType;
 	private String spectrumUri;
 	private String meta;
 	private String status;
 	private String expirationTime;
+	private String createdDate;
+	private String modifiedDate;
 
 	public StagedFileDTO() {
 	}
@@ -117,4 +122,45 @@ public class StagedFileDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public String getProcessorId() {
+		return processorId;
+	}
+
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
+
+	public String getProcessorType() {
+		return processorType;
+	}
+
+	public void setProcessorType(String processorType) {
+		this.processorType = processorType;
+	}
+
+	public String getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public String getModifiedDate() {
+		return modifiedDate;
+	}
+
+	public void setModifiedDate(String modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+
+	public String getGlobalProcessId() {
+		return globalProcessId;
+	}
+
+	public void setGlobalProcessId(String globalProcessId) {
+		this.globalProcessId = globalProcessId;
+	}
+
 }

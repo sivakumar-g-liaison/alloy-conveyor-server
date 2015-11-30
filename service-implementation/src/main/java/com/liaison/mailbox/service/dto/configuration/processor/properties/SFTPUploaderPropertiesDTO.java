@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
@@ -28,9 +29,12 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private boolean chunkedEncoding;
 	private String contentType;
 	private int retryInterval;
+	@JsonIgnore
 	private String errorFileLocation;
+	@JsonIgnore
 	private String processedFileLocation;
 	private String fileTransferStatusIndicator;
+	@JsonIgnore
 	private boolean deleteFiles;
 	private String includeFiles;
 	private String excludeFiles;

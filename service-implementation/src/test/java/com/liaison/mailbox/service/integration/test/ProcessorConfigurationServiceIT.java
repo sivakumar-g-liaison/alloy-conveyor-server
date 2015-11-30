@@ -26,6 +26,7 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
@@ -1472,5 +1473,160 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
         Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
     }
+    
+    /**
+     * Method to test read processor by valid Pguid
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+	public void testReadProcessorByPguid()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        // Get the processor by guid
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getName(), procGetResponseDTO.getProcessor().getName());
+        Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
+        Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+
+    }
+    
+    /**
+     * Method to test read processor by valid Pguid
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+	public void testReadProcessorByName()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        // Get the processor by Name
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procRequestDTO.getProcessor().getName());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+        List<ProcessorDTO> retrievedProcessors = procGetResponseDTO.getProcessors();
+        for (ProcessorDTO proc : retrievedProcessors) {
+        	Assert.assertEquals(procRequestDTO.getProcessor().getName(), proc.getName());
+        }
+
+    }
+    
+    /**
+     * Method to test read processor by invalid Pguid/Name
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+	public void testReadProcessorByInvalidPguidOrName()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        // Get the processor by Name
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor("invalid");
+        // Assertion
+        Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
+    }
+
+    /**
+     * Method to test read processor by invalid Pguid/Name
+     * @throws MailBoxConfigurationServicesException
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+	public void testReadProcessorByPguidOrNameAsNull()
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        // Get the processor by Name
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(null);
+        // Assertion
+        Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
+    }
 }

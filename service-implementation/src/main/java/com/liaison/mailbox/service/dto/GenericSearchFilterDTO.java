@@ -21,6 +21,8 @@ public class GenericSearchFilterDTO {
 	private String folderPath;
 	private String protocol;
 	private String processorType;
+	private String processorName;
+	private String processorGuid;
 	private boolean isDisableFilters;
 
 	public String getMbxName() {
@@ -133,6 +135,22 @@ public class GenericSearchFilterDTO {
 
 	public void setDisableFilters(boolean isDisableFilters) {
 		this.isDisableFilters = isDisableFilters;
+	}
+
+	public String getProcessorName() {
+		return processorName;
+	}
+
+	public void setProcessorName(String processorName) {
+		this.processorName = processorName;
+	}
+
+	public String getProcessorGuid() {
+		return processorGuid;
+	}
+
+	public void setProcessorGuid(String processorGuid) {
+		this.processorGuid = processorGuid;
 	}
 
 }

@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
@@ -22,18 +23,18 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 
 	private String pipeLineID;
 	private boolean securedPayload;
+	@JsonIgnore
 	private boolean deleteFileAfterSweep;
+	@JsonIgnore
 	private String fileRenameFormat;
 	private String numOfFilesThreshold;
 	private String payloadSizeThreshold;
+	@JsonIgnore
 	private String sweepedFileLocation;
 	private String includeFiles;
 	private String excludeFiles;
 	private boolean lensVisibility;
-	private boolean as2MountCleanup;
-	private String as2TtlDays;
-
-
+	
 	public String getPipeLineID() {
 		return pipeLineID;
 	}
@@ -94,22 +95,6 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
-	}
-
-	public boolean isAs2MountCleanup() {
-		return as2MountCleanup;
-	}
-
-	public void setAs2MountCleanup(boolean as2MountCleanup) {
-		this.as2MountCleanup = as2MountCleanup;
-	}
-
-	public String getAs2TtlDays() {
-		return as2TtlDays;
-	}
-
-	public void setAs2TtlDays(String as2TtlDays) {
-		this.as2TtlDays = as2TtlDays;
 	}
 
 }

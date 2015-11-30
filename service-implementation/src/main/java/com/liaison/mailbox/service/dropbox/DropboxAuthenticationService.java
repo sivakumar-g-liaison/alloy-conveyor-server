@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -32,6 +33,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
@@ -50,6 +52,7 @@ import com.liaison.gem.util.GEMConstants;
 import com.liaison.gem.util.GEMUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
 import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
@@ -145,12 +148,19 @@ public class DropboxAuthenticationService {
 			mm.setContent(multiPartResponse);
 			mm.writeTo(rawMimeBAOS);
 			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
-
-			response = Response
+			
+			ResponseBuilder builder = Response
 					.ok(mimeStreamResponse)
-					.header("Content-Type", MediaType.MULTIPART_FORM_DATA)
-					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-							gemManifestFromGEM.getPublicKeyGuid()).build();
+					.header("Content-Type", MediaType.MULTIPART_FORM_DATA);
+			
+			// set signer public key guid in response header based on response from GEM
+			if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
+				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, gemManifestFromGEM.getPublicKeyGroupGuid());
+			} else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
+				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+						gemManifestFromGEM.getPublicKeyGuid());
+			}
+			response = builder.build();
 
 			rawMimeBAOS.close();
 			mimeStreamResponse.close();
@@ -173,11 +183,18 @@ public class DropboxAuthenticationService {
 			mm.writeTo(rawMimeBAOS);
 			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
 
-			response = Response
+			ResponseBuilder builder =  Response
 					.ok(mimeStreamResponse)
-					.header("Content-Type", MediaType.MULTIPART_FORM_DATA)
-					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-							gemManifestFromGEM.getPublicKeyGuid()).build();
+					.header("Content-Type", MediaType.MULTIPART_FORM_DATA);
+			
+			// set signer public key guid in response header based on response from GEM
+			if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
+				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, 
+						gemManifestFromGEM.getPublicKeyGroupGuid());
+			} else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
+				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+						gemManifestFromGEM.getPublicKeyGuid());
+			}			response = builder.build();
 
 			rawMimeBAOS.close();
 			mimeStreamResponse.close();
@@ -192,7 +209,7 @@ public class DropboxAuthenticationService {
 	 * @param serviceRequest
 	 * @return AuthenticateUserAccountResponseDTO
 	 */
-	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
+	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest, Map<String, String> requestHeaders) {
 
 		GEMManifestResponse manifestFromGEM = null;
 
@@ -205,10 +222,25 @@ public class DropboxAuthenticationService {
 			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId());
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
 			String signedDocument = gemClient.signRequestData(unsignedDocument);
-			String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid,
-					unsignedDocument);
-
+            String publicKeyGroupGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
+            String publicKeyGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
+            
+            // if both guids are not present in header get the signer guid from the properties file
+            // in order to support backward compatibility for web ui dropbox we are getting public key guid from properties file
+            // once web ui dropbox is upgraded to use public key group guid, then it should be modified to use public key group guid
+            // from properties file.
+            if (GEMUtil.isEmpty(publicKeyGroupGuid) && GEMUtil.isEmpty(publicKeyGuid)) {
+            	publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
+            }
+            		
+            // if public key group id is not configured then try to use public key id
+            if (!GEMUtil.isEmpty(publicKeyGroupGuid)) {
+            	manifestFromGEM = gemClient.getACLManifestUsingGroupId(unsignedDocument, signedDocument, publicKeyGroupGuid,
+    					unsignedDocument);
+            } else if (!GEMUtil.isEmpty(publicKeyGuid)) {
+    			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid,
+    					unsignedDocument);
+            }
 		} catch (Exception e) {
 			LOG.error("Dropbox - getting manifest after authentication failed.", e);
 			e.printStackTrace();

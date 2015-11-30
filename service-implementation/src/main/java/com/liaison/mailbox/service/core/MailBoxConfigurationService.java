@@ -128,7 +128,12 @@ public class MailBoxConfigurationService {
 
 			MailBox mailBox = new MailBox();
 			mailboxDTO.copyToEntity(mailBox);
-			mailBox.setPguid(MailBoxUtil.getGUID());
+			// validating the mailbox guid
+			if (MailBoxUtil.isEmpty(mailboxDTO.getGuid())) {
+				mailBox.setPguid(MailBoxUtil.getGUID());
+			} else {
+				mailBox.setPguid(mailboxDTO.getGuid());
+			}			
 
 			//Mailbox properties
             MailBoxProperty property = null;
@@ -658,4 +663,65 @@ public class MailBoxConfigurationService {
 		}
 
 	}
+	
+	
+	/**
+	 * Method to read Mailbox details based on given mailbox guid or name
+	 * 
+	 * @param guid
+	 * @return Mailbox
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws SymmetricAlgorithmException
+	 */
+	public GetMailBoxResponseDTO readMailbox(String guid) throws IOException, JAXBException, SymmetricAlgorithmException {
+
+		LOG.debug("Entering into read mailbox.");
+		LOG.info("The retrieve guid or name  is {} ", guid);
+
+		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
+
+		try {
+
+			// Getting mailbox
+			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			
+			if (null == guid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
+
+			// while retrieving mailbox first preference will be given to guid.
+			// if mailbox is null then we will try to retrieve mailbox by name
+			MailBox mailBox = configDao.find(MailBox.class, guid);
+			if (null == mailBox) {
+				mailBox = configDao.getMailboxByName(guid);
+				if (null == mailBox) {
+					throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MAILBOX,
+							Response.Status.BAD_REQUEST);
+				}
+			}
+
+			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
+			Set<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
+			mailBox.setMailboxProcessors(processors);
+
+			MailBoxDTO dto = new MailBoxDTO();
+			dto.copyFromEntity(mailBox);
+
+			serviceResponse.setMailBox(dto);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
+			LOG.debug("Exit from read mailbox.");
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+
+	}
+
 }

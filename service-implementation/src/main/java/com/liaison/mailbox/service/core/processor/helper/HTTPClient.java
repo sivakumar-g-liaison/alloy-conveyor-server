@@ -164,7 +164,7 @@ public class HTTPClient {
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException
 				| KeyStoreException | NoSuchAlgorithmException | JsonParseException
-				| CertificateException | IllegalAccessException | NoSuchFieldException e) {
+				| CertificateException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}

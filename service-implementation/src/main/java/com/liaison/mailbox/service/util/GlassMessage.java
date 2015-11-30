@@ -360,7 +360,7 @@ public class GlassMessage {
 		return timeStampAPI;
 	}
 
-	public void logProcessingStatus(StatusType statusType, String message) {
+	public void logProcessingStatus(StatusType statusType, String message, String processorType , String processorProtocol) {
 
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
@@ -371,8 +371,51 @@ public class GlassMessage {
 
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
 		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+		
+		StringBuilder lensMessage = new StringBuilder().append(MAILBOX_ASA_IDENTIFIER);
+		if (!MailBoxUtil.isEmpty(processorProtocol)) {
+			lensMessage.append(" ");
+			lensMessage.append(processorProtocol);
+		}
+		if (!MailBoxUtil.isEmpty(processorType)) {
+			lensMessage.append(" ");
+			lensMessage.append(processorType);
+		}
+		
 		if (message != null && !message.equals("")) {
-			status.setDescription(MAILBOX_ASA_IDENTIFIER + ": " + message);
+				status.setDescription(lensMessage.toString() + ": " + message);
+		} else {
+			status.setDescription(MAILBOX_ASA_IDENTIFIER);
+		}
+		status.setStatusId(IdentifierUtil.getUuid());
+		status.setType(statusType);
+
+		activityStatusAPI.getStatuses().add(status);
+
+		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
+	}
+	
+	public void logProcessingStatus(StatusType statusType, String message, String processorType) {
+
+		// Log ActivityStatusAPI
+		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+		activityStatusAPI.setPipelineId(getPipelineId());
+		activityStatusAPI.setProcessId(getProcessId());
+		activityStatusAPI.setGlobalId(getGlobalPId());
+		activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
+
+		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
+		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+		
+		StringBuilder lensMessage = new StringBuilder().append(MAILBOX_ASA_IDENTIFIER);
+		
+		if (!MailBoxUtil.isEmpty(processorType)) {
+			lensMessage.append(" ");
+			lensMessage.append(processorType);
+		}
+		
+		if (message != null && !message.equals("")) {
+				status.setDescription(lensMessage.toString() + ": " + message);
 		} else {
 			status.setDescription(MAILBOX_ASA_IDENTIFIER);
 		}

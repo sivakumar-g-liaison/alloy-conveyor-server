@@ -170,7 +170,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					}
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO, getRequestHeaderValues(serviceRequest));
 					if (manifestResponse == null) {
 						LOG.error(MailBoxUtil.constructMessage(null, null, "user authenticated but manifest retrieval failed for login id - {}"), loginId);
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
@@ -213,29 +213,36 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// getting the file stream from spectrum for the given file id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
 
 					transactionVisibilityClient.logToGlass(glassMessage);
 
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// response message construction
 					ResponseBuilder builder = Response
 							.ok()
 							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
 							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
+					
+					// set public signer guid in response header based on gem manifest response
+					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
+								manifestResponse.getPublicKeyGroupGuid());
+					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
+					}
+							
 					LOG.debug("Exit from download staged file service.");
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					// Log Failed status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} finally {
@@ -307,7 +314,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					}
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO, getRequestHeaderValues(serviceRequest));
 					if (manifestResponse == null) {
 						LOG.error("Dropbox - authenticated but failed to retrieve manifest");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
@@ -326,10 +333,16 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							.ok()
 							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
 							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+					
+					// set public signer guid in response header based on gem manifest response
+					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
+								manifestResponse.getPublicKeyGroupGuid());
+					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
+						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
+					}
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {

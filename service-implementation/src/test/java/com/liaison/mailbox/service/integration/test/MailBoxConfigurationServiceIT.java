@@ -1019,5 +1019,114 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Response resp = Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
         Assert.assertEquals(200, resp.getStatus());
     }
+    
+    /**
+     * Method to test read Mailbox by  Guid.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws SymmetricAlgorithmException 
+     * 
+     */
+    @Test
+    public void testReadMailboxByGuid() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
 
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox by Guid
+        GetMailBoxResponseDTO getResponseDTO = service.readMailbox(response.getMailBox().getGuid());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+    	
+    }
+    
+    /**
+     * Method to test read Mailbox by  Name.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws SymmetricAlgorithmException 
+     * 
+     */
+    @Test
+    public void testReadMailboxByName() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox by Name
+        GetMailBoxResponseDTO getResponseDTO = service.readMailbox(mbxDTO.getName());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+    }
+    
+    /**
+     * Method to test read Mailbox by  invalid guid or name.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws SymmetricAlgorithmException 
+     * 
+     */
+    @Test
+    public void testReadMailboxByInvalidGuidOrName() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+    	
+        // Get the mailbox by Guid
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        GetMailBoxResponseDTO getResponseDTO = service.readMailbox("invalid");
+
+        // Assertion
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+    }
+    
+    /**
+     * Method to test read Mailbox by  Name.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws SymmetricAlgorithmException 
+     * 
+     */
+    @Test
+    public void testReadMailboxByGuidOrNameAsNull() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+    	
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        // Get the mailbox by Name
+        GetMailBoxResponseDTO getResponseDTO = service.readMailbox(null);
+        // Assertion
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+    }
 }

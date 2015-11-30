@@ -261,8 +261,18 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
 		try {
+			
+			if (null == guid) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Id or Name",
+						Response.Status.BAD_REQUEST);
+			}
 
 			ScheduleProfilesRef profile = configDao.find(ScheduleProfilesRef.class, guid);
+			
+			// if profile is null then try to retrieve profile by Name.
+			if (null == profile) {
+				profile = configDao.findProfileByName(guid);
+			}
 			if (null != profile) {
 
 				ProfileDTO profileDTO = new ProfileDTO();
@@ -275,7 +285,6 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			}
 
 			LOG.debug("Exiting from get profile by guid operation.");
-
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {

@@ -330,7 +330,7 @@ public class ProfileConfigurationServiceIT extends BaseServiceTest {
 	}
 	
 	/**
-	 * Method to create and retrieve the profile.
+	 * Method to create and retrieve the profile by Pguid.
 	 */
 	@Test
 	public void testReadProfileByGuid() {
@@ -355,14 +355,48 @@ public class ProfileConfigurationServiceIT extends BaseServiceTest {
 	}
 
 	/**
-	 * Method to create and retrieve the profile.
+	 * Method to retrieve the profile by Invalid Name or GUID.
 	 */
 	@Test
-	public void testReadProfileByInvalidGuid() {
+	public void testReadProfileByInvalidGuidOrName() {
 
-		//Adding a profile
+		//test retrieval of  a profile by invalid guid or Name
 		Assert.assertEquals(FAILURE, new ProfileConfigurationService().getProfileByGuid("Invalid").getResponse().getStatus());
 		
 	}
+	
+	/**
+	 * Method to create and retrieve the profile.
+	 */
+	@Test
+	public void testReadProfileByName() {
+
+		//Adding a profile
+		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
+		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+		requestDTO.setProfile(profileDTO);
+
+		ProfileConfigurationService service = new ProfileConfigurationService();
+		AddProfileResponseDTO response = service.createProfile(requestDTO);
+
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+		//Retrieving a profile by Name
+		GetProfileResponseDTO getResponseDTO = service.getProfileByGuid(profileDTO.getName());
+
+		// Assertion checking
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(requestDTO.getProfile().getName(), getResponseDTO.getProfile().getName());
+		
+	}
+	
+	@Test
+	public void testReadProfileByGuidOrNameAsNull() {
+
+		//Adding a profile
+		Assert.assertEquals(FAILURE, new ProfileConfigurationService().getProfileByGuid(null).getResponse().getStatus());
+		
+	}
+
 	
 }

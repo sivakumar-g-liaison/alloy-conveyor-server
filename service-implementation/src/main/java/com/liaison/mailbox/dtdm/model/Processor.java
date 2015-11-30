@@ -77,7 +77,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
                             query = "select processor from Processor processor"
                                     + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID)
+                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID),
+    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
+    				query = "select processor from Processor processor"
+    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
@@ -367,23 +370,7 @@ public class Processor implements Identifiable {
 	 */
 	@Transient
 	public List<String> getEmailAddress() {
-
-		MailBox mailBox = getMailbox();
-		Set<MailBoxProperty> properties = mailBox.getMailboxProperties();
-
-		if (null != properties) {
-
-			for (MailBoxProperty property : properties) {
-
-				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
-					String address = property.getMbxPropValue();
-					return Arrays.asList(address.split(","));
-				}
-			}
-		}
-
-		return null;
-
+		return getMailbox().getEmailAddress();
 	}
 	
 	/**
@@ -405,6 +392,19 @@ public class Processor implements Identifiable {
 			}
 		}
 		return map;
+	}
+	
+	/**
+	 * Method to retrieve the given properties form Mailbox
+	 * 
+	 * @param propertiesToBeRetrieved - list of property Names to be retrieved
+	 * 		possible propertyNames are 'timetopickupfilepostedtomailbox', 'timetopickupfilepostedbymailbox'
+	 * 		'emailnotificationids', 'ttl' and 'ttlunit'
+	 * @return a Map containing values of given properties having the property Names as keys
+	 */
+	@Transient
+	public Map<String, String> retrieveMailboxProperties(List<String> propertiesToBeRetrieved) {
+		return getMailbox().retrieveMailboxProperties(propertiesToBeRetrieved);
 	}
 
 
