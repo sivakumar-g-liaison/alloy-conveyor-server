@@ -616,5 +616,9 @@ input::-moz-focus-inner {
 
 .error_msg_color {
 	color: #FF0000;
+	
+}
 
+.ttl_alignment{
+    margin-left: -13px !important;
 }

@@ -72,10 +72,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
             {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
-			{"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max number of notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
+			{"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
 
         $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
-		   {"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max number of notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
+		   {"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
 		//Data from server
         $scope.mailBoxProperties = [{
             name: '',
@@ -396,12 +396,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             rowHeight: 80,
             columnDefs: [{
                 field: "name",
-                width: 550,
+                width: 568,
                 displayName: "Property Name",
                 cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" />'
             }, {
                 field: "value",
-                width: 500,
+                width: 495,
                 displayName: "Property Value",
                 enableCellEdit: false,
                 enableCellSelection: true,
@@ -425,10 +425,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 												</div>\n\
 											</div>\n\
 											<div ng-switch-when="ttl">\n\
-												<div class="input-group">\n\
-													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:20%"/>\n\
-												&nbsp;<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
-											</div>\n\
+												<div class="input-group col-md-5 ttl_alignment">\n\
+													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
+													<div class="input-group-btn">\n\
+														<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+													</div>\n\
+												</div>\n\
 											</div>\n\
                                             <div ng-switch-default>\n\
                                                 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
@@ -462,9 +464,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 												</div>\n\
 										</div>\n\
 										<div ng-switch-when="ttl">\n\
-											<div class="input-group">\n\
-											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:20%" ng-pattern="' + $scope.numberPattern + '" />\n\
-											&nbsp;<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+										<div class="input-group col-md-5 ttl_alignment">\n\
+											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required ng-pattern="' + $scope.numberPattern + '" />\n\
+											<div class="input-group-btn">\n\
+												<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+											</div>\n\
 										</div>\n\
 										<div class = clearfix></div>\n\
 										<div class="col-md-5" ng-show="formAddMbx.ttl.$dirty && formAddMbx.ttl.$invalid">\n\
@@ -479,7 +483,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
             }, {
                 field: "allowAdd",
-                width: 88,
+                width: 75,
                 displayName: "Action",
                 sortable: false,
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
