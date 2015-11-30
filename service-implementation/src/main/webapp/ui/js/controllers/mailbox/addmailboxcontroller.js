@@ -466,7 +466,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:20%" ng-pattern="' + $scope.numberPattern + '" />\n\
 											&nbsp;<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
 										</div>\n\
-										</div>\n\
 										<div class = clearfix></div>\n\
 										<div class="col-md-5" ng-show="formAddMbx.ttl.$dirty && formAddMbx.ttl.$invalid">\n\
 										     <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.ttl.$error.required}" ng-show=formAddMbx.ttl.$error.required><strong>TTL is mandatory</strong></span>\n\
