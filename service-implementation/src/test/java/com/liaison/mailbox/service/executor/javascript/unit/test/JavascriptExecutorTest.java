@@ -33,46 +33,44 @@ public class JavascriptExecutorTest {
 
 	@BeforeClass
 	public void createProcessor() {
-		processorService = new HTTPRemoteDownloader(new Processor());
-	}
-
-	@Test
-	public void testExecutor() throws URISyntaxException {
 
 		System.setProperty("com.liaison.secure.properties.path", "invalid");
 		System.setProperty("archaius.deployment.applicationId", "scripting");
 		System.setProperty("archaius.deployment.environment", "test");
 
+		processorService = new HTTPRemoteDownloader(new Processor());
+	}
+
+	@Test
+	public void testExecutorWithNashorn() throws URISyntaxException {
+
+		String scriptRelativePath = "processor-scripts/veera/sample_script.ns";
+		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+	}
+	
+	@Test
+	public void testExecutor() throws URISyntaxException {
+
 		String scriptRelativePath = "processor-scripts/httpdownloader.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
-
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 	}
 
-	//java.lang.RuntimeException: Script 'gitlab:/processor-scripts/veera/invalidfunction.js' is invalid: Script 'gitlab:/processor-scripts/veera/invalidfunction.js' is missing required function 'process'.
-	//@Test(expectedExceptions = java.lang.RuntimeException.class)
+	@Test(expectedExceptions = java.lang.RuntimeException.class)
 	public void testExecutor_MissingRequiredFunction_FailureWithJavaRuntimeException() throws URISyntaxException {
-
-		System.setProperty("archaius.deployment.applicationId", "scripting");
-		System.setProperty("archaius.deployment.environment", "test");
 
 		String scriptRelativePath = "processor-scripts/veera/invalidfunction.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
-
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 
 	}
 
-	//java.lang.RuntimeException: After evaluating script 'gitlab:/processor-scripts/veera/invalid.js', script engine is null. There must have been an error evaluating the script.
-	//@Test(expectedExceptions = java.lang.RuntimeException.class)
+	@Test(expectedExceptions = java.lang.RuntimeException.class)
 	public void testExecutor_InvalidScriptURI_FailureWithJavaRuntimeException() throws URISyntaxException {
 
-		System.setProperty("archaius.deployment.applicationId", "scripting");
-		System.setProperty("archaius.deployment.environment", "test");
-
-		String scriptRelativePath = "processor-scripts/veera/invalid.js";
+		String scriptRelativePath = "processor-scripts/veeras/invalidfunction.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
-
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 
 	}

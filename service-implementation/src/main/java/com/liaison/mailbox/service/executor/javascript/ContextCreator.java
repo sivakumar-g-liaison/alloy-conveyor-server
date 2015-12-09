@@ -9,6 +9,7 @@
 package com.liaison.mailbox.service.executor.javascript;
 
 
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -55,7 +56,9 @@ public class ContextCreator implements Serializable {
 		Reader inputReader = new StringReader(""); // Empty input.
 		Writer outputWriter = new StringWriter();
 		Writer errorWriter = new StringWriter();
-		JavascriptScriptContext scriptContext = new JavascriptScriptContext(inputReader, outputWriter, errorWriter);
+		PrintWriter outputPrintWriter = new PrintWriter(outputWriter);
+		PrintWriter errorPrintWriter = new PrintWriter(errorWriter);
+		JavascriptScriptContext scriptContext = new JavascriptScriptContext(inputReader, outputPrintWriter, errorPrintWriter);
 
 		scriptContext.setAttribute(SCRIPT, script);
 		if (logger.isDebugEnabled()) {
