@@ -33,6 +33,8 @@ import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+
 /**
  * This actually executes a javascript in a thread. Siblings to this could include a JavaExecutor or any other
  * server-side scripting the JVM supports.
@@ -138,7 +140,7 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
     
     		scriptEngine.setContext(scriptContext);
     
-    		validateScript(scriptEngine);
+    		validateScript(scriptContext);
     		handleRequires(je, scriptContext, scriptUri);
     		callProcess(je, scriptContext, scriptUri);
     		callCleanup(je, scriptContext, scriptUri);
@@ -209,14 +211,14 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
 		}
 	}
 
-	protected void validateScript(ScriptEngine scriptEngine) {
+	protected void validateScript(JavascriptScriptContext javascriptScriptContext) {
 
 		if (logger.isDebugEnabled())
 		{
 			logger.debug(String.format("Validating script '%s'", script));
 		}
 
-		JavascriptValidator scriptValidator = new JavascriptValidator(script, scriptEngine);
+		JavascriptValidator scriptValidator = new JavascriptValidator(script, javascriptScriptContext);
 
 		if (!scriptValidator.isValidScript())
 		{
@@ -337,18 +339,21 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
 			return null;
 		}
 
-		if (!(listObject instanceof List))
-		{
+		ArrayList<String> listOfStrings = new ArrayList<>();
+		Object[] arr;
+		if (listObject instanceof List) {
+			List list = (List) listObject;
+			arr = list.toArray();
+		} else if (listObject instanceof ScriptObjectMirror) {
+			ScriptObjectMirror mirror = (ScriptObjectMirror) listObject;
+			arr = mirror.to(Object[].class);
+		} else {
 			throw new RuntimeException(String.format("Script '%s' %s function did not return a list.", script, functionName));
 		}
 
-		List list = (List) listObject;
-		ArrayList<String> listOfStrings = new ArrayList<String>();
+		for (int i = 0; i < arr.length; i++) {
 
-		int size = list.size();
-		for (int i = 0; i < size; i++)
-		{
-			Object itemObject = list.get(i);
+			Object itemObject = arr[i];
 
 			if (!(itemObject instanceof String))
 			{

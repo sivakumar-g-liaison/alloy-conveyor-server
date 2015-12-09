@@ -8,7 +8,7 @@
  */
 package com.liaison.mailbox.service.executor.javascript;
 
-import javax.script.ScriptEngine;
+import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 
 
 /**
@@ -23,15 +23,15 @@ public class JavascriptValidator
 	public static final String CLEANUP_FUNCTION_NAME = "cleanup";
 
 	protected String script = null;
-	protected ScriptEngine scriptEngine = null;
+	protected JavascriptScriptContext javascriptScriptContext = null;
 	protected boolean valid = true;
 	protected StringBuilder message = null;
 
 
-	public JavascriptValidator (String script, ScriptEngine scriptEngine)
+	public JavascriptValidator (String script, JavascriptScriptContext javascriptScriptContext)
 	{
 		this.script = script;
-		this.scriptEngine = scriptEngine;
+		this.javascriptScriptContext = javascriptScriptContext;
 
 		message = new StringBuilder();
 
@@ -57,7 +57,7 @@ public class JavascriptValidator
 
 	protected boolean hasRequiredValue (String name)
 	{
-		if (scriptEngine.get(name) == null)
+		if (javascriptScriptContext.getAttribute(name) == null)
 		{
 			message.append(String.format("Script '%s' is missing required function '%s'.  ", script, name));
 			return false;
