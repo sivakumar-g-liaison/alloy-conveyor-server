@@ -1,3 +1,7 @@
+3.0.3
+-------------------------------
+* GMB-679 - Add indexes for queries with more than one unindexed column
+
 3.0.2
 -------------------------------
 * Glass Log Shipper and FileBeat configuration changes
