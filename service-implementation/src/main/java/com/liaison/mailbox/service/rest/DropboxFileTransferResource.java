@@ -40,11 +40,9 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
@@ -120,7 +118,8 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 				LOG.debug("Entering into uploadContentAsyncToSpectrum service.");
 
-				DropboxAuthAndGetManifestResponseDTO responseEntity;
+				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+				DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
 				// to calculate elapsed times of each individual task in this rest call
@@ -142,18 +141,17 @@ public class DropboxFileTransferResource extends AuditedResource {
 					}
 
 					// get login id and auth token from mailbox token
-					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
-							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+					if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)
+							|| StringUtil.isNullOrEmptyAfterTrim(loginId)) {
 
 						LOG.error(MailBoxUtil.constructMessage(null, null, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value()));
 						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
 								Response.Status.BAD_REQUEST);
 					}
-					loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
-					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
-							MailBoxConstants.UM_AUTH_TOKEN);
 
 					// end time to calculate elapsed time for retrieving necessary details from headers
 					endTime = System.currentTimeMillis();
@@ -161,8 +159,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
-							loginId, null, authenticationToken);
+					dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
 
 					// to calculate elapsed time for authentication
 					startTime = System.currentTimeMillis();
@@ -235,18 +232,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 
 					// response message construction
-					ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER,
-							manifestResponse.getManifest()).header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER,
-							manifestResponse.getSignature()).header(MailBoxConstants.DROPBOX_AUTH_TOKEN, 
-							encryptedMbxToken).type(MediaType.APPLICATION_JSON).entity(
-							responseBody).status(Response.Status.OK);
-					
-					// set signer public key guid in response headers based on the response from gem
-					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, manifestResponse.getPublicKeyGroupGuid());
-					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
-					}
+					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();

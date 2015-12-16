@@ -33,11 +33,8 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
@@ -45,7 +42,6 @@ import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -106,67 +102,42 @@ public class DropboxTransferProfileResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				DropboxAuthAndGetManifestResponseDTO responseEntity;
+				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+				DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
 
 				try {
 
 					// get login id and auth token from mailbox token
-					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
-							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
-						LOG.error("ACL manifest or mailbox token missing.");
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
-								Response.Status.BAD_REQUEST);
-					}
-					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
-					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
-							MailBoxConstants.UM_AUTH_TOKEN);
+					dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
-							loginId, null, authenticationToken);
+					dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
 
-					// authenticating
+					// authentication
 					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
 						LOG.error("Dropbox - user authentication failed");
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
-								Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-								responseEntity).build();
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 					}
 
 					// getting manifest
 					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO, getRequestHeaderValues(serviceRequest));
 					if (manifestResponse == null) {
-						LOG.error("Dropbox - authenticated but failed to retrieve manifest");
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
-								Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-								responseEntity).build();
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 					}
 
 					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(manifestResponse.getManifest());
 					String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 
 					// response message construction
-					ResponseBuilder builder = Response
-							.ok()
-							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
-					
-					// set public signer guid in response header based on gem manifest response
-					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
-								manifestResponse.getPublicKeyGroupGuid());
-					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
-					}
+					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {
@@ -177,6 +148,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
+
 		};
 		worker.actionLabel = "DropboxFileTransferResource.getTransferProfiles()";
 		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);

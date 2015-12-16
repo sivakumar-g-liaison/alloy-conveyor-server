@@ -108,8 +108,7 @@ public class DropboxAuthenticationResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
 			@Override
-			public Object call()
-					throws Exception {
+			public Object call() throws Exception {
 
 				serviceCallCounter.addAndGet(1);
 				DropboxAuthAndGetManifestRequestDTO serviceRequest;
@@ -118,8 +117,7 @@ public class DropboxAuthenticationResource extends AuditedResource {
 
 					String requestString = getRequestBody(request);
 
-					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
-							DropboxAuthAndGetManifestRequestDTO.class);
+					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);
 
 					DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 					return dropboxService.authenticateAccount(serviceRequest);

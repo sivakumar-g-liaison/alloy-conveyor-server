@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,7 +55,6 @@ import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
@@ -599,29 +597,6 @@ public class MailBoxConfigurationService {
 			return serviceResponse;
 		}
 
-	}
-
-	/**
-	 * Service to list the directory structure for browse component.
-	 *
-	 * @param file The root directory location
-	 * @return The FileInfoDTO
-	 */
-	public FileInfoDTO getFileDetail(File file) {
-
-		FileInfoDTO info = new FileInfoDTO();
-		info.setRoleName(file.getAbsolutePath());
-		info.setRoleId(file.getName());
-		info.setChildren(new ArrayList<FileInfoDTO>());
-
-		if (file.isDirectory() && file.list().length > 0) {
-
-			for (File f : file.listFiles()) {
-				info.getChildren().add(getFileDetail(f));
-			}
-		}
-
-		return info;
 	}
 
 	/**
