@@ -158,8 +158,12 @@ public class EmailNotifier {
         if (isSuccess) {
            emailAddress = processor.getEmailAddress();
         } else {
-            String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
-            emailAddress = Arrays.asList(internalEmail);
+        	String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
+            if(null != internalEmail[0]) {
+            	if(internalEmail[0].length() > 0){            	 
+            		emailAddress = Arrays.asList(internalEmail);
+            	}
+            }
         }
 
         if (null == emailAddress || emailAddress.isEmpty()) {
