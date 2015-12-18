@@ -182,6 +182,7 @@ public interface MailBoxConstants {
 	public static final String UPLOAD_META = "meta-data";
 
 	public static final String DROPBOX_AUTH_TOKEN = "token";
+	public static final String DROPBOX_LOGIN_ID = "loginId";
 	public static final String ACL_SIGNED_MANIFEST_HEADER = "acl-signature";
 	public static final String ACL_MANIFEST_FAILURE_MESSAGE = "Get manifest failed.";
 

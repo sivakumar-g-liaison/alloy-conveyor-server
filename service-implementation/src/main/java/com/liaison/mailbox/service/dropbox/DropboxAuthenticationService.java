@@ -14,16 +14,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -35,11 +29,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.security.EncryptionUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
@@ -111,8 +103,7 @@ public class DropboxAuthenticationService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	public Response getManifest()
-			throws MessagingException, IOException {
+	public Response getManifest() throws MessagingException, IOException {
 
 		LOG.debug("Entering into get manifest service.");
 
@@ -224,26 +215,26 @@ public class DropboxAuthenticationService {
 			String signedDocument = gemClient.signRequestData(unsignedDocument);
             String publicKeyGroupGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
             String publicKeyGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-            
+
             // if both guids are not present in header get the signer guid from the properties file
             // in order to support backward compatibility for web ui dropbox we are getting public key guid from properties file
             // once web ui dropbox is upgraded to use public key group guid, then it should be modified to use public key group guid
             // from properties file.
             if (GEMUtil.isEmpty(publicKeyGroupGuid) && GEMUtil.isEmpty(publicKeyGuid)) {
             	publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
+            	publicKeyGroupGuid = configuration.getString(GEMConstants.PROPERTY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
             }
-            		
+
             // if public key group id is not configured then try to use public key id
             if (!GEMUtil.isEmpty(publicKeyGroupGuid)) {
-            	manifestFromGEM = gemClient.getACLManifestUsingGroupId(unsignedDocument, signedDocument, publicKeyGroupGuid,
-    					unsignedDocument);
+            	manifestFromGEM = gemClient.getACLManifestUsingGroupId(unsignedDocument, signedDocument, publicKeyGroupGuid, unsignedDocument);
             } else if (!GEMUtil.isEmpty(publicKeyGuid)) {
-    			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid,
-    					unsignedDocument);
+    			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
             }
+
 		} catch (Exception e) {
 			LOG.error("Dropbox - getting manifest after authentication failed.", e);
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		LOG.debug("Exit from retrieve manifest service using GEM client");
@@ -251,6 +242,7 @@ public class DropboxAuthenticationService {
 		return manifestFromGEM;
 	}
 
+	//TODO this method should be moved to the GEMACLClient
 	private ManifestRequestDTO constructACLManifestRequest(String loginID) {
 
 		LOG.debug("Constructing the gem manifest request with default values");
@@ -274,9 +266,7 @@ public class DropboxAuthenticationService {
 		return manifestRequest;
 	}
 
-	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest)
-			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
+	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
 
 		LOG.debug("Entering into user authentication using UM client.");
 
@@ -288,10 +278,7 @@ public class DropboxAuthenticationService {
 		LOG.debug("Exit from user authentication using UM client.");
 
 		if (UMClient.isSuccessful()) {
-			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::")
-					.append(serviceRequest.getLoginId()).toString();
-			String encryptedEncodedToken = new String(Base64.encodeBase64String(EncryptionUtil.encrypt(mailboxTokenWithLoginId.getBytes(), MailBoxConstants.STATIC_KEY, MailBoxConstants.IV_BYTES, MailBoxConstants.ENCRYPT_MODE)));
-			return encryptedEncodedToken;
+			return UMClient.getAuthenticationToken();
 		}
 
 		return null;

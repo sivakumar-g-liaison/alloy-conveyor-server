@@ -22,6 +22,17 @@ public class DropboxAuthAndGetManifestRequestDTO {
 	private String password;
 	private String token;
 
+	public DropboxAuthAndGetManifestRequestDTO(String loginId, String password, String token) {
+		super();
+		this.loginId = loginId;
+		this.password = password;
+		this.token = token;
+	}
+	
+	public DropboxAuthAndGetManifestRequestDTO() {
+		super();
+	}
+
 	public String getLoginId() {
 		return loginId;
 	}

@@ -10,13 +10,8 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonParseException;
@@ -36,7 +31,6 @@ import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
@@ -997,29 +991,6 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(getPropResponseDTO.getResponse().getMessage(), Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY.value().replaceAll("%s", "Mailbox"));
     }
 
-    /**
-     * Method Get file detail using mail box.
-     *
-     * @throws IOException
-     *
-     */
-    @Test
-    public void testgetFileDetail()
-            throws IOException {
-
-        String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString("processor.javascript.root.directory");
-        File file = new File(jsFileLocation);
-        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-
-        FileInfoDTO info = mailbox.getFileDetail(file);
-        List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
-        infos.add(info);
-
-        String response = MailBoxUtil.marshalToJSON(infos);
-        Response resp = Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
-        Assert.assertEquals(200, resp.getStatus());
-    }
-    
     /**
      * Method to test read Mailbox by  Guid.
      * @throws IOException 
