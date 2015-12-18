@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.core.email;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -159,11 +160,12 @@ public class EmailNotifier {
            emailAddress = processor.getEmailAddress();
         } else {
         	String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
-            if(null != internalEmail[0]) {
-            	if(internalEmail[0].length() > 0){            	 
-            		emailAddress = Arrays.asList(internalEmail);
-            	}
-            }
+        	emailAddress = new ArrayList<String>(Arrays.asList(internalEmail));
+        	for(int i = 0; i < emailAddress.size(); i++) {
+        		if(null == emailAddress.get(i) || emailAddress.get(i).isEmpty()) {
+        			emailAddress.remove(i);
+        		}        		
+        	}        	            
         }
 
         if (null == emailAddress || emailAddress.isEmpty()) {
