@@ -155,17 +155,17 @@ public class EmailNotifier {
             return;
         }
 
-        List<String> emailAddress = null;
+        List<String> emailAddress = new ArrayList<>();
         if (isSuccess) {
            emailAddress = processor.getEmailAddress();
         } else {
         	String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
-        	emailAddress = new ArrayList<String>(Arrays.asList(internalEmail));
-        	for(int i = 0; i < emailAddress.size(); i++) {
-        		if(null == emailAddress.get(i) || emailAddress.get(i).isEmpty()) {
-        			emailAddress.remove(i);
+        	// Validate the email address configuration from Property file
+        	for (String tempEmail : internalEmail) {
+        		if (!MailBoxUtil.isEmpty(tempEmail)) {
+        			emailAddress.add(tempEmail);
         		}        		
-        	}        	            
+        	}        	
         }
 
         if (null == emailAddress || emailAddress.isEmpty()) {
