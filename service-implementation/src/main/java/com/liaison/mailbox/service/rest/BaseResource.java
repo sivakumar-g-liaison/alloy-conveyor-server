@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,9 +39,13 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.gem.service.client.GEMManifestResponse;
+import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.spectrum.client.model.KeyValuePair;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
@@ -337,5 +342,85 @@ public class BaseResource {
 			headers.put(headerName, request.getHeader(headerName));
 		}
 		return headers;
+	}
+
+	/**
+	 * Constructs the response for all the dropbox use case
+	 * 
+	 * @param loginId the login id of the user
+	 * @param authenticationToken GUM authentication token
+	 * @param manifestResponse GEM Manifest response
+	 * @param responseBody The response body
+	 * @return ResponseBuilder
+	 */
+	protected ResponseBuilder constructResponse(String loginId,
+			String authenticationToken,
+			GEMManifestResponse manifestResponse,
+			String responseBody) {
+
+		// response message construction
+		ResponseBuilder builder = Response.ok()
+				.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
+				.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
+				.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, authenticationToken)
+				.header(MailBoxConstants.DROPBOX_LOGIN_ID, loginId)
+				.type(MediaType.APPLICATION_JSON)
+				.entity(responseBody).status(Response.Status.OK);
+
+		// set signer public key/key-group guid in response header based on response from gem
+		builder = MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())
+					? builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
+					: builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, manifestResponse.getPublicKeyGroupGuid());
+		return builder;
+
+	}
+
+	/**
+	 * Constructs the response for all the dropbox use case
+	 * 
+	 * @param loginId the login id of the user
+	 * @param authenticationToken GUM authentication token
+	 * @param manifestResponse GEM Manifest response
+	 * @param responseBody The response body
+	 * @return ResponseBuilder
+	 */
+	protected ResponseBuilder constructResponse(String loginId,
+			String authenticationToken,
+			GEMManifestResponse manifestResponse,
+			InputStream payload) {
+
+		// response message construction
+		ResponseBuilder builder = Response.ok()
+				.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
+				.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
+				.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, authenticationToken)
+				.header(MailBoxConstants.DROPBOX_LOGIN_ID, loginId)
+				.type(MediaType.APPLICATION_JSON)
+				.entity(payload).status(Response.Status.OK);
+
+		// set signer public key/key-group guid in response header based on response from gem
+		builder = MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())
+				? builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
+				: builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, manifestResponse.getPublicKeyGroupGuid());
+
+		return builder;
+
+	}
+
+	/**
+	 * Mandatory Validation for the dropbox header fields
+	 * @param loginId
+	 * @param authenticationToken
+	 * @param aclManifest
+	 */
+	protected void dropboxMandatoryValidation(String loginId, String authenticationToken, String aclManifest) {
+
+		if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
+				|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)
+				|| StringUtil.isNullOrEmptyAfterTrim(loginId)) {
+			logger.error("ACL manifest or mailbox token or loginId is missing.");
+			throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+		}
+
 	}
 }

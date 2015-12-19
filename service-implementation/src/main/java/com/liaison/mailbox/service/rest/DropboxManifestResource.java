@@ -11,15 +11,9 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -31,13 +25,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
@@ -49,8 +40,6 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.util.GEMConstants;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
@@ -118,25 +107,21 @@ public class DropboxManifestResource extends AuditedResource {
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
 	public Response authenticateAndGetManifest(@Context final HttpServletRequest request) {
-
+		
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException,
-					JsonGenerationException, JsonMappingException, JAXBException, IOException {
+			public Object call() throws IOException {
 
 				LOG.debug("Entering into authenticate and get manifest service");
-
 				serviceCallCounter.addAndGet(1);
-				DropboxAuthAndGetManifestRequestDTO serviceRequest;
-				DropboxAuthAndGetManifestResponseDTO responseEntity;
+				DropboxAuthAndGetManifestRequestDTO serviceRequest = null;
+				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
 
 				try {
+
 					String requestString = getRequestBody(request);
-					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
-							DropboxAuthAndGetManifestRequestDTO.class);					
+					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);					
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -145,46 +130,25 @@ public class DropboxManifestResource extends AuditedResource {
 				DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 
 				// authenticating
+				String loginId = serviceRequest.getLoginId();
 				String encryptedMbxToken = dropboxService.isAccountAuthenticatedSuccessfully(serviceRequest);
 				if (encryptedMbxToken == null) {
 					LOG.error("Dropbox - user authentication failed");
-					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
-							Messages.FAILURE);
-					return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-							responseEntity).build();
+					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+					return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 				}
 
 				// getting manifest
 				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest, getRequestHeaderValues(request));
 				if (manifestResponse == null) {
 					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
-					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
-							Messages.FAILURE);
-					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-							responseEntity).build();
+					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
+					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 				}
 
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(
-						Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL, Messages.SUCCESS);
+				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL, Messages.SUCCESS);
+				ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, MailBoxUtil.marshalToJSON(responseEntity));
 
-
-				ResponseBuilder builder = Response
-						.ok()
-						.entity(MailBoxUtil.marshalToJSON(responseEntity))
-						.status(Response.Status.OK)
-						.header("Content-Type", MediaType.APPLICATION_JSON)
-						.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-						.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature());
-						
-				// set public signer guid in response header based on gem manifest response
-				if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
-					builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
-							manifestResponse.getPublicKeyGroupGuid());
-				} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
-					builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
-				}
-						
 				LOG.debug("Exit from authenticate and get manifest service.");
 
 				return builder.build();

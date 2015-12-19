@@ -43,7 +43,6 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.fs2.api.FS2ObjectHeaders;
@@ -131,9 +130,10 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 				LOG.debug("Entering into download staged file service");
 
-				DropboxAuthAndGetManifestResponseDTO responseEntity;
+				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
+				DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
 
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
@@ -142,22 +142,20 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 				try {
 
 					// get login id and auth token from mailbox token
-					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
-							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+					if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)
+							|| StringUtil.isNullOrEmptyAfterTrim(loginId)) {
 
 						LOG.error(MailBoxUtil.constructMessage(null, null, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value()));
 						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
 								Response.Status.BAD_REQUEST);
 					}
-					loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
-					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
-							MailBoxConstants.UM_AUTH_TOKEN);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
-							loginId, null, authenticationToken);
+					dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
 
 					// authenticating
 					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
@@ -223,12 +221,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// response message construction
-					ResponseBuilder builder = Response
-							.ok()
-							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
+					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, payload);
 					
 					// set public signer guid in response header based on gem manifest response
 					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
@@ -280,47 +273,35 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
+				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+				DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
 
 				try {
 
 					// get login id and auth token from mailbox token
-					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
-							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
-						LOG.error("ACL manifest or mailbox token missing.");
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
-								Response.Status.BAD_REQUEST);
-					}
-					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
-					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
-							MailBoxConstants.UM_AUTH_TOKEN);
+					dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
-							loginId, null, authenticationToken);
+					dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
 
-					// authenticating
+					// authentication
 					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
 						LOG.error("Dropbox - user authentication failed");
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
-								Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-								responseEntity).build();
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 					}
 
 					// getting manifest
 					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO, getRequestHeaderValues(serviceRequest));
 					if (manifestResponse == null) {
-						LOG.error("Dropbox - authenticated but failed to retrieve manifest");
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
-								Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-								responseEntity).build();
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 					}
 
 					DropBoxUnStagedFileResponseDTO dropBoxUnStagedFileResponseDTO = stagedFileService.getDroppedStagedFileResponse(
@@ -329,20 +310,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					String responseBody = MailBoxUtil.marshalToJSON(dropBoxUnStagedFileResponseDTO);
 
 					// response message construction
-					ResponseBuilder builder = Response
-							.ok()
-							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
-					
-					// set public signer guid in response header based on gem manifest response
-					if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGroupGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
-								manifestResponse.getPublicKeyGroupGuid());
-					} else if (!MailBoxUtil.isEmpty(manifestResponse.getPublicKeyGuid())) {
-						builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid());
-					}
+					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {
