@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue;
+package com.liaison.mailbox.services.unit.test;
 
 import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinSendClient;
 

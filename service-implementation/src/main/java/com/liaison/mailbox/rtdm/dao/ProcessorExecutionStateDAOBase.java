@@ -17,8 +17,8 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -34,7 +34,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExecutionState> implements ProcessorExecutionStateDAO, MailboxRTDMDAO {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorExecutionStateDAOBase.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProcessorExecutionStateDAOBase.class);
 
 	public ProcessorExecutionStateDAOBase () {
 		super(PERSISTENCE_UNIT_NAME);
