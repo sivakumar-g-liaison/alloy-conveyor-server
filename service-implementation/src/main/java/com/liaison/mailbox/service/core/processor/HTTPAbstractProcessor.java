@@ -13,24 +13,23 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 
 /**
  * Base class that provides implementation common to both sync and async processors.
- * 
+ *
  * @author OFS
  */
 public abstract class HTTPAbstractProcessor {
-	
+
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
 	private static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
-	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
+	public static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
 
 	/**
 	 * This method will validate the size of the request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 */
@@ -44,43 +43,42 @@ public abstract class HTTPAbstractProcessor {
 		}
 	}
 
-	public  void authenticateRequestor(String basicAuthenticationHeader) {
+	public void authenticateRequestor(String[] authenticationCredentials) {
 
-		if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
+        if (authenticationCredentials.length == 2) {
 
-			// trim the prefix basic and get the username:password part
-			basicAuthenticationHeader = basicAuthenticationHeader.replaceFirst(AUTHENTICATION_HEADER_PREFIX, "");
-			// decode the string to get username and password
-			String authenticationDetails = new String(Base64.decodeBase64(basicAuthenticationHeader));
-			String[] authenticationCredentials = authenticationDetails.split(":");
-
-			if (authenticationCredentials.length == 2) {
-
-				String loginId = authenticationCredentials[0];
-				// encode the password using base64 bcoz UM will expect a base64
-				// encoded token
-				String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
-				// if both username and password is present call UM client to
-				// authenticate
-				UserManagementClient UMClient = new UserManagementClient();
-				UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
-				UMClient.authenticate();
-				if (!UMClient.isSuccessful()) {
-					throw new RuntimeException(UMClient.getMessage());
-				}
-			} else {
-				throw new RuntimeException("Authorization Header does not contain UserName and Password");
-			}
-		} else {
-			throw new RuntimeException("Authorization Header not available in the Request");
-		}
+        	String loginId = authenticationCredentials[0];
+        	// encode the password using base64 bcoz UM will expect a base64
+            // encoded token
+            String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
+            // if both username and password is present call UM client to
+            // authenticate
+        	UserManagementClient UMClient = new UserManagementClient();
+        	UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
+        	UMClient.authenticate();
+        	if (!UMClient.isSuccessful()) {
+        		throw new RuntimeException(UMClient.getMessage());
+        	}
+        } else {
+        	throw new RuntimeException("Authorization Header does not contain UserName and Password");
+        }
 
 	}
+
+    public static String[] getAuthenticationCredentials(String basicAuthenticationHeader) {
+
+        // trim the prefix basic and get the username:password part
+        basicAuthenticationHeader = basicAuthenticationHeader.replaceFirst(AUTHENTICATION_HEADER_PREFIX, "");
+        // decode the string to get username and password
+        String authenticationDetails = new String(Base64.decodeBase64(basicAuthenticationHeader));
+        String[] authenticationCredentials = authenticationDetails.split(":");
+        return authenticationCredentials;
+    }
 
 	/**
 	 * Method to retrieve http listener properties of processor of specific type
 	 * by given mailboxGuid
-	 * 
+	 *
 	 * @param mailboxGuid
 	 *            mailbox Pguid
 	 * @param isSync
@@ -105,7 +103,7 @@ public abstract class HTTPAbstractProcessor {
 	/**
 	 * Method to retrieve the mailbox from the pguid and return the value of
 	 * HTTPListener propery "Http Listner Auth Check Required "
-	 * 
+	 *
 	 * @param mailboxpguid
 	 * @return
 	 * @throws Exception

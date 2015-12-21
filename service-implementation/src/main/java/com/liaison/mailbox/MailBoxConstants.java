@@ -257,6 +257,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
 	public static final String PROPERTY_HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
 	public static final String PROPERTY_LENS_VISIBILITY = "lensVisibility";
+	public static final String PROPERTY_TENANCY_KEY = "MBX_TENANCY_KEY";
 
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
