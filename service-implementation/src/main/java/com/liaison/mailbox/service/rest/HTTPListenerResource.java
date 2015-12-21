@@ -343,7 +343,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 				logger.info("HTTP(S)-ASYNC : for the mailbox id {} - Start", mailboxPguid);
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-				GlassMessage glassMessage = new GlassMessage();
+				GlassMessage glassMessage = null;
 
 				try {
 				    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
@@ -365,16 +365,6 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
-					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
-					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setMailboxId(mailboxPguid);
-					glassMessage.setStatus(ExecutionState.PROCESSING);
-					glassMessage.setPipelineId(workTicket.getPipelineId());
-					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setInSize((long) request.getContentLength());
-					glassMessage.setProcessId(IdentifierUtil.getUuid());
-
                     if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
                         Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
                         workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
@@ -386,6 +376,17 @@ public class HTTPListenerResource extends AuditedResource {
                         logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
                     }
 
+                    glassMessage = new GlassMessage();
+                    glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
+					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setMailboxId(mailboxPguid);
+					glassMessage.setStatus(ExecutionState.PROCESSING);
+					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassMessage.setInAgent(GatewayType.REST);
+					glassMessage.setInSize((long) request.getContentLength());
+					glassMessage.setProcessId(IdentifierUtil.getUuid());
+					
                     //Fix for GMB-502
                     logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
                     //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
@@ -410,7 +411,9 @@ public class HTTPListenerResource extends AuditedResource {
 
                     //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
                     if (!Messages.PAYLOAD_ALREADY_EXISTS.value().equals(errorMessage)
-                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)) {
+                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)
+                            && null != glassMessage) {
+                    	
                         // Log error status
                         glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR);
                         glassMessage.setStatus(ExecutionState.FAILED);
