@@ -1,6 +1,7 @@
 3.0.3-SNAPSHOT
 -------------------------------
 * GMB-686 - Modified UUIDGen method to static
+* GMB-673 - Invalid TVAPI logged to Spectrum
 
 3.0.2
 -------------------------------
