@@ -1,3 +1,7 @@
+3.0.3-SNAPSHOT
+-------------------------------
+* GMB-686 - Modified UUIDGen method to static
+
 3.0.2
 -------------------------------
 * Glass Log Shipper and FileBeat configuration changes
