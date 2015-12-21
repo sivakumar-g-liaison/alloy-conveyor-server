@@ -54,6 +54,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
  */
 public class MailBoxUtil {
 
+	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
 
@@ -129,7 +130,7 @@ public class MailBoxUtil {
 	 * @return UUID The 32bit string.
 	 */
 	public static String getGUID() {
-		return UUIDGen.getUUID();
+		return UUID.getUUID();
 	}
 
 	/**
