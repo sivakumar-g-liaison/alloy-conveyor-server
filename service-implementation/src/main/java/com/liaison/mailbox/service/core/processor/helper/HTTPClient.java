@@ -54,7 +54,7 @@ public class HTTPClient {
 
 		try {
 
-			LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
+			LOGGER.debug("Started injecting HTTP/S configurations to HTTPClient");
 
 			// Create HTTPRequest and set the properties
 			HTTPRequest request = new HTTPRequest(null);
@@ -158,7 +158,7 @@ public class HTTPClient {
 				}
 
 			}
-			LOGGER.info("Returns HTTP/S configured HTTPClient");
+			LOGGER.debug("Returns HTTP/S configured HTTPClient");
 			return request;
 
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException

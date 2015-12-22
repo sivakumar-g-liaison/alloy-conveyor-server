@@ -98,7 +98,7 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 				try {
 					serviceCallCounter.addAndGet(1);
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					// retrieve TenancyKeys
 					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();

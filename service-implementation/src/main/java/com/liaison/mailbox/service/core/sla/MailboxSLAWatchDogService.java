@@ -447,7 +447,7 @@ public class MailboxSLAWatchDogService {
 	 */
 	private List<String> doCustomerSLAVerification(Processor processor) throws Exception {
 
-	    LOG.info("Entering Customer SLA Verification check");
+	    LOG.debug("Entering Customer SLA Verification check");
 
         try {
 
