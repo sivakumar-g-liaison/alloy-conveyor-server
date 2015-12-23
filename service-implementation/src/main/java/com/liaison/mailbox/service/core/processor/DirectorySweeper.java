@@ -344,7 +344,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 */
 	public void persistPaylaodAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
 
-		LOGGER.info(constructMessage("Persisting paylaod and workticket in spectrum starts"));
+		LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
 		for (WorkTicket workTicket : workTickets) {
 
 			File payloadFile = new File(workTicket.getPayloadURI());

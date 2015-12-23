@@ -100,7 +100,7 @@ public class StorageUtilities {
 	 */
 	static {
 
-		LOGGER.info("Initializing FS2");
+		LOGGER.debug("Initializing FS2");
 		configureSpectrum();
 		configureFilesystem();
 		FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
@@ -119,7 +119,7 @@ public class StorageUtilities {
 
 		try {
 			URI spectrumURI = new URI(payloadURL);
-			LOGGER.info("Retrieving payload from spectrum");
+			LOGGER.debug("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
 			LOGGER.error(Messages.PAYLOAD_READ_ERROR.value(), e);
@@ -455,7 +455,7 @@ public class StorageUtilities {
 
 		try {
 			URI spectrumURI = new URI(payloadURL);
-			LOGGER.info("Retrieving payload headers from spectrum");
+			LOGGER.debug("Retrieving payload headers from spectrum");
 			return FS2.getHeaders(spectrumURI);
 		} catch (URISyntaxException | FS2Exception e) {
 			LOGGER.error(Messages.PAYLOAD_HEADERS_READ_ERROR, e);

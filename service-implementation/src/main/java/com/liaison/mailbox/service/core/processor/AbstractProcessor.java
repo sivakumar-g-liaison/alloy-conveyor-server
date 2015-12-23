@@ -413,7 +413,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 */
 	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, MailBoxServicesException {
 
-		LOGGER.info("Started writing response");
+		LOGGER.debug("Started writing response");
 		String processorName = MailBoxConstants.PROCESSOR;
 		if (configurationInstance.getProcsrName() != null) {
 			processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
@@ -435,7 +435,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException,
 			MailBoxServicesException {
 
-		LOGGER.info("Started writing response");
+		LOGGER.debug("Started writing response");
 		String responseLocation = getWriteResponseURI();
 
 		if (MailBoxUtil.isEmpty(responseLocation)) {
@@ -573,7 +573,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER : MailBoxConstants.PROCESSED_FOLDER;
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
-			LOGGER.info("Creating target(processed/error) folder");
+			LOGGER.debug("Creating target(processed/error) folder");
 			createFoldersAndAssingProperPermissions(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
@@ -764,7 +764,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 */
 	public void createResponseDirectory(String fileName) throws URISyntaxException, IOException, MailBoxServicesException {
 
-		LOGGER.info("Started writing response");
+		LOGGER.debug("Started writing response");
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
