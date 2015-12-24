@@ -139,7 +139,7 @@ public class DropboxManifestResource extends AuditedResource {
 				}
 
 				// getting manifest
-				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest, getRequestHeaderValues(request));
+				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest);
 				if (manifestResponse == null) {
 					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
 					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
