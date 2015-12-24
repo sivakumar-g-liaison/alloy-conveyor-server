@@ -780,6 +780,9 @@ public class ProcessorConfigurationService {
 					// Commented by Veera -Not needed, because tenancy key format has changed as per service broker
 					// httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY,
 					// processor.getMailbox().getTenancyKey());
+
+	                httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, 
+	                        processor.getMailbox().getTenancyKey());
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,

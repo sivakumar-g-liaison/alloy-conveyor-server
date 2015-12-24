@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -28,12 +29,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
@@ -46,11 +47,14 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.core.processor.HTTPAbstractProcessor;
 import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
 import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
@@ -171,9 +175,9 @@ public class HTTPListenerResource extends AuditedResource {
 					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
 							mailboxPguid);
+
 					if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-					    logger.info("HTTP(S)-SYNC : HTTP auth check enabled for the mailbox {}", mailboxPguid);
-						syncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
+					    authenticationAndAuthorization(request, syncProcessor, httpListenerProperties, mailboxPguid);
 					}
 
 					logger.debug("construct workticket");
@@ -266,7 +270,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 	/**
 	 * Helper method to construct glass message for various cases
-	 * 
+	 *
      * @param request - http request to get content length
      * @param mailboxPguid - mailbox guid
      * @return GlassMessage
@@ -357,10 +361,9 @@ public class HTTPListenerResource extends AuditedResource {
 					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info("HTTP(S)-ASYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
                             mailboxPguid);
-					if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-					    logger.info("HTTP(S)-ASYNC : HTTP auth check enabled for the mailbox {}", mailboxPguid);
-						asyncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
-					}
+                   if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
+                        authenticationAndAuthorization(request, asyncProcessor, httpListenerProperties, mailboxPguid);
+                    }
 
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
@@ -499,5 +502,72 @@ public class HTTPListenerResource extends AuditedResource {
 		// initialize log context
 		initLogContext(path.toString(), className, methodName, globalProcessId, pipeLineId);
 	}
+
+	/**
+     * This method will authenticate and authorize the SYNC and ASYNC processor.
+     *
+     * @param request The HttpServletRequest
+     * @param processor - Either sync or Async Processor
+     * @param httpListenerProperties
+     * @param mailboxPguid
+     */
+    private void authenticationAndAuthorization(final HttpServletRequest request,
+            HTTPAbstractProcessor processor, Map<String, String> httpListenerProperties, String mailboxPguid)
+            throws IOException {
+
+        String basicAuthenticationHeader = request.getHeader(HTTP_HEADER_BASIC_AUTH);
+        if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
+
+            String[] authenticationCredentials = HTTPAbstractProcessor.getAuthenticationCredentials(basicAuthenticationHeader);
+
+            String processorType = processor instanceof HTTPSyncProcessor ? "SYNC" : "ASYNC";
+            logger.info("HTTP(S)-"+ processorType +" : HTTP auth check enabled for the mailbox {}", mailboxPguid);
+            processor.authenticateRequestor(authenticationCredentials);
+
+            authorization(httpListenerProperties, authenticationCredentials, processorType);
+        } else {
+            throw new RuntimeException("Authorization Header not available in the Request");
+        }
+    }
+
+    /**
+     * This is the helper method for authorization of SYNC and ASYNC processor.
+     *
+     * @param httpListenerProperties
+     * @param authenticationCredentials The HttpServletRequest
+     * @param processorType - Type of the Processor
+     */
+    private void authorization(Map<String, String> httpListenerProperties, String[] authenticationCredentials, String processorType)
+             throws IOException {
+
+        boolean tenancyKeyExist = false;
+        if (authenticationCredentials.length == 2) {
+
+            String loginId = authenticationCredentials[0];
+            GEMACLClient gemClient = new GEMACLClient();
+            GEMManifestResponse gemManifestResponse = gemClient.getACLManifestByloginId(loginId);
+
+            String getRequestHeaders = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
+
+            if(!MailBoxUtil.isEmpty(getRequestHeaders)) {
+                List<RoleBasedAccessControl> roleBasedAccessControl = gemClient.getDomainsFromACLManifest(getRequestHeaders);
+                String tenancyKey = httpListenerProperties.get(MailBoxConstants.PROPERTY_TENANCY_KEY);
+
+                for (RoleBasedAccessControl roleBasedAccessCtrl : roleBasedAccessControl) {
+
+                    if(roleBasedAccessCtrl.getDomainInternalName().equals(tenancyKey)) {
+                        tenancyKeyExist = true;
+                        break;
+                    }
+                }
+            } else {
+                logger.info("HTTP(S)-"+ processorType +" + : Manifest should not be empty.");
+            }
+        }
+
+        if(!tenancyKeyExist) {
+            throw new RuntimeException("You do not have sufficient privilege to invoke the service");
+        }
+    }
 
 }
