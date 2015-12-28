@@ -16,8 +16,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
 public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfilesRef> implements ProfileConfigurationDAO,
 		MailboxDTDMDAO {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationDAOBase.class);
+	private static final Logger LOG = LogManager.getLogger(ProfileConfigurationDAOBase.class);
 
 	public ProfileConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
@@ -102,8 +102,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 
 					transferProfile = (ScheduleProfilesRef) iter.next();
 					processors.add(transferProfile);
-					LOG.info("Transfer profile -Pguid : {}, profileName : {}",
-							transferProfile.getPrimaryKey(), transferProfile.getSchProfName());
+					LOG.info("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
 				}
 
 			} finally {

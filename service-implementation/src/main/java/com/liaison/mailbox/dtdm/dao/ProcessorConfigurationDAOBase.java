@@ -21,8 +21,8 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -51,7 +51,7 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
  */
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailboxDTDMDAO {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProcessorConfigurationDAOBase.class);
+	private static final Logger LOG = LogManager.getLogger(ProcessorConfigurationDAOBase.class);
 
 	public ProcessorConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
@@ -533,7 +533,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		try {
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor");
-			genearteQueryBySearchFilters(searchFilter, query);
+			generateQueryBySearchFilters(searchFilter, query);
 			addSortDirections(searchFilter, query);
 
 			Query processorSearchQuery = entityManager.createQuery(query.toString());
@@ -639,7 +639,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.debug("Fetching the processors by filters starts.");
 
 			StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor");
-			genearteQueryBySearchFilters(searchDTO, query);
+			generateQueryBySearchFilters(searchDTO, query);
 			Query processorSearchQuery = entityManager.createQuery(query.toString());
 
 			processorSearchQuery = setParamsForProcessorSearchQuery(searchDTO, processorSearchQuery);
@@ -749,7 +749,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return profileNames;
 	}
 
-	public void genearteQueryBySearchFilters(GenericSearchFilterDTO searchDTO, StringBuilder query) {
+	public void generateQueryBySearchFilters(GenericSearchFilterDTO searchDTO, StringBuilder query) {
 		
 		List<String> predicateList = new ArrayList<String>();
 		boolean isFolderAvailable = false;

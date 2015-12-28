@@ -45,8 +45,6 @@ public class DropboxService {
 
 		try {
 
-			LOG.info(MailBoxUtil.constructMessage(null, null, "JSON received from SB {}"), new JSONObject(request).toString(2));
-
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
 			//Fish tag global process id
