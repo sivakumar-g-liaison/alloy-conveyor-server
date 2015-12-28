@@ -28,12 +28,12 @@ public class HealthCheck implements HealthCheckHandler {
 
     @PostConstruct
     public void init() {
-        logger.info("Health check initialized.");
+        logger.debug("Health check initialized.");
     }
 
     @Override
     public int getStatus() {
-        logger.info("Health check invoked.");
+        logger.debug("Health check invoked.");
         return 200;
     }
 }

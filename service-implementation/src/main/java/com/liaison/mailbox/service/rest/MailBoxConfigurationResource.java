@@ -123,7 +123,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 							AddMailboxRequestDTO.class);
 
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					// creates new mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -188,7 +188,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					// search the mailbox from the given details
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 
 					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();

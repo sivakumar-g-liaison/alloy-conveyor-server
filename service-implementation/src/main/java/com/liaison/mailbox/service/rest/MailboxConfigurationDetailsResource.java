@@ -124,7 +124,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 							ReviseMailBoxRequestDTO.class);
 
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					// updates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -174,7 +174,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 				try {
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					// deactivates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -226,7 +226,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 				try {
 					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
+					LOG.debug("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					// deactivates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();

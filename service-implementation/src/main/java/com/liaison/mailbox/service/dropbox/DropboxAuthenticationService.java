@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -32,16 +31,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.service.dto.EnvelopeDTO;
-import com.liaison.gem.service.dto.request.ManifestRequestDTO;
-import com.liaison.gem.service.dto.request.ManifestRequestGEM;
-import com.liaison.gem.service.dto.request.ManifestRequestPlatform;
 import com.liaison.gem.util.GEMConstants;
-import com.liaison.gem.util.GEMUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -56,9 +48,7 @@ import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountRe
  */
 public class DropboxAuthenticationService {
 
-	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
-	private static final String PROPERTY_PLATFORM_NAME = "com.liaison.acl.request.runtime.platform.name";
 
 	/**
 	 * Method to authenticate user Account by given serviceRequest.
@@ -200,70 +190,9 @@ public class DropboxAuthenticationService {
 	 * @param serviceRequest
 	 * @return AuthenticateUserAccountResponseDTO
 	 */
-	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest, Map<String, String> requestHeaders) {
-
-		GEMManifestResponse manifestFromGEM = null;
-
-		LOG.debug("Entering into retrieve manifest service using GEM client");
-
-		try {
-
-			// get manifest from GEM for the given loginId
-			GEMACLClient gemClient = new GEMACLClient();
-			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId());
-			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
-			String signedDocument = gemClient.signRequestData(unsignedDocument);
-            String publicKeyGroupGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
-            String publicKeyGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-
-            // if both guids are not present in header get the signer guid from the properties file
-            // in order to support backward compatibility for web ui dropbox we are getting public key guid from properties file
-            // once web ui dropbox is upgraded to use public key group guid, then it should be modified to use public key group guid
-            // from properties file.
-            if (GEMUtil.isEmpty(publicKeyGroupGuid) && GEMUtil.isEmpty(publicKeyGuid)) {
-            	publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-            	publicKeyGroupGuid = configuration.getString(GEMConstants.PROPERTY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
-            }
-
-            // if public key group id is not configured then try to use public key id
-            if (!GEMUtil.isEmpty(publicKeyGroupGuid)) {
-            	manifestFromGEM = gemClient.getACLManifestUsingGroupId(unsignedDocument, signedDocument, publicKeyGroupGuid, unsignedDocument);
-            } else if (!GEMUtil.isEmpty(publicKeyGuid)) {
-    			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
-            }
-
-		} catch (Exception e) {
-			LOG.error("Dropbox - getting manifest after authentication failed.", e);
-			throw new RuntimeException(e);
-		}
-
-		LOG.debug("Exit from retrieve manifest service using GEM client");
-
-		return manifestFromGEM;
-	}
-
-	//TODO this method should be moved to the GEMACLClient
-	private ManifestRequestDTO constructACLManifestRequest(String loginID) {
-
-		LOG.debug("Constructing the gem manifest request with default values");
-		// Construct Envelope
-		EnvelopeDTO envelope = new EnvelopeDTO();
-		envelope.setUserId(loginID);
-
-		// Construct Platform
-		ManifestRequestPlatform platform = new ManifestRequestPlatform();
-		platform.setName(configuration.getString(PROPERTY_PLATFORM_NAME));
-
-		// Construct ManifestRequestGEM
-		ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
-		manifestRequestGEM.setEnvelope(envelope);
-		manifestRequestGEM.getPlatforms().add(platform);
-
-		// Construct ManifestRequestDTO
-		ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
-		manifestRequest.setAcl(manifestRequestGEM);
-
-		return manifestRequest;
+	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
+		// get manifest from GEM for the given loginId
+		return new GEMACLClient().getACLManifestByloginId(serviceRequest.getLoginId());
 	}
 
 	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) {

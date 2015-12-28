@@ -75,7 +75,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 			List<ScheduleProfilesRef> processors = new ArrayList<ScheduleProfilesRef>();
 
 			try {
-				LOG.info("Fetching the transfer profiles by specific processor type and tenancyKey starts.");
+				LOG.debug("Fetching the transfer profiles by specific processor type and tenancyKey starts.");
 
 				StringBuilder query = new StringBuilder().append("select distinct profile from Processor processor")
 							.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
