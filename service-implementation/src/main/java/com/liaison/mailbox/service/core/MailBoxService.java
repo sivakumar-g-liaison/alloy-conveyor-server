@@ -410,14 +410,8 @@ public class MailBoxService {
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
             ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-            //For FileWriter and uploader alone to persist the file name as profile name in fsm state table.
-            String fileName = MailBoxUtil.isEmpty(workTicket.getFileName())? DEFAULT_FILE_NAME : workTicket.getFileName();
-            
-            if (ProcessorType.FILEWRITER.name().equals(processor.getProcessorType().name())) {
-            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, fileName, ExecutionState.STAGED, slaVerificationStatus);
-            } else {
-            	processorStaged.setValues(MailBoxUtil.getGUID(), processor, fileName, ExecutionState.STAGED, slaVerificationStatus);
-            }
+            //In the PROFILE_NAME column of fsm state table,'NONE' will be persisted.
+            processorStaged.setValues(MailBoxUtil.getGUID(), processor, DEFAULT_FILE_NAME, ExecutionState.STAGED, slaVerificationStatus);
             fsm.addState(processorStaged);
 
             processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
