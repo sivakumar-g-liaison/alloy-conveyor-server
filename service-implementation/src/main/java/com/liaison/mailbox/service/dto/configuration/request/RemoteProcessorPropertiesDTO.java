@@ -40,6 +40,7 @@ public class RemoteProcessorPropertiesDTO {
 	private List<HTTPOtherRequestHeaderDTO> otherRequestHeader;
 	private boolean securedPayload;
 	private boolean handOverExecutionToJavaScript;
+	private boolean deleteFiles;
 	@JsonIgnore
 	private boolean deleteFileAfterSweep;
 
@@ -186,6 +187,13 @@ public class RemoteProcessorPropertiesDTO {
 
 	public void setHttpListenerPipeLineId(String httpListenerPipeLineId) {
 		this.httpListenerPipeLineId = httpListenerPipeLineId;
+	}
+	
+	public boolean getDeleteFiles() {
+		return deleteFiles;
+	}
+	public void setDeleteFiles(boolean deleteFiles) {
+		this.deleteFiles = deleteFiles;
 	}
 
 	public boolean isSecuredPayload() {
