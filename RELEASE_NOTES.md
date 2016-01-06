@@ -1,4 +1,7 @@
-3.0.3-SNAPSHOT
+3.1.0-SNAPSHOT
+-------------------------------
+
+3.0.3
 -------------------------------
 * GMB-686 - Modified UUIDGen method to static
 * GMB-673 - Invalid TVAPI logged to Spectrum
