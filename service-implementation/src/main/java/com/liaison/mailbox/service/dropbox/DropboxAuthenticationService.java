@@ -222,7 +222,12 @@ public class DropboxAuthenticationService {
 			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId());
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
 			String signedDocument = gemClient.signRequestData(unsignedDocument);
-            String publicKeyGroupGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
+			//GMB-699 - starts
+			String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
+			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
+			//GMB-699 - ends
+
+            /*String publicKeyGroupGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID);
             String publicKeyGuid = requestHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
             
             // if both guids are not present in header get the signer guid from the properties file
@@ -240,7 +245,7 @@ public class DropboxAuthenticationService {
             } else if (!GEMUtil.isEmpty(publicKeyGuid)) {
     			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid,
     					unsignedDocument);
-            }
+            }*/
 		} catch (Exception e) {
 			LOG.error("Dropbox - getting manifest after authentication failed.", e);
 			e.printStackTrace();
