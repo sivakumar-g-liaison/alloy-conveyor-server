@@ -24,6 +24,7 @@ public class TriggerProcessorRequestDTO {
 	private String processorId;
 	private String profileName;
 	
+	@SuppressWarnings("unused")
 	private TriggerProcessorRequestDTO() {
 		super();
 	}

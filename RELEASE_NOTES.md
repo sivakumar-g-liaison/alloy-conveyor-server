@@ -1,7 +1,18 @@
-3.0.3-SNAPSHOT
+3.1.0-SNAPSHOT
+-------------------------------
+
+3.0.4
+-------------------------------
+* GGT-393
+
+3.0.3
 -------------------------------
 * GMB-686 - Modified UUIDGen method to static
 * GMB-673 - Invalid TVAPI logged to Spectrum
+
+3.0.3
+-------------------------------
+* GMB-679 - Add indexes for queries with more than one unindexed column
 
 3.0.2
 -------------------------------

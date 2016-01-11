@@ -143,6 +143,7 @@
     <loggers>
         <root level="DEBUG">
             <appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
+            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
 
             <!-- not for production -->
             <appender-ref ref="Console" />
