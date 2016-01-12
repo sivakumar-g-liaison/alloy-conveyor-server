@@ -72,9 +72,16 @@ public class MailBoxService implements Runnable {
 	private static final String WORK_TICKET_GLOBAL_PROCESS_ID = "globalProcessId"; 
 	private static final String TRIGGER_PROCESSOR_REQUEST = "triggerProcessorRequest";
 	private String message;
+	private QueueMessageType messageType;
 	
-	public MailBoxService(String message) {
+	public static enum QueueMessageType {
+		WORKTICKET,
+		TRIGGERPROFILEREQUEST
+	}
+	
+	public MailBoxService(String message, QueueMessageType messageType) {
 		this.message = message;
+		this.messageType = messageType;
 	}
 	
 	public MailBoxService() {
@@ -516,9 +523,9 @@ public class MailBoxService implements Runnable {
 	@Override
 	public void run() {
 		
-		if (message.indexOf(TRIGGER_PROCESSOR_REQUEST) > -1) {
+		if (QueueMessageType.TRIGGERPROFILEREQUEST.equals(this.messageType)) {
 			this.executeProcessor(message);
-		} else if (message.indexOf(WORK_TICKET_GLOBAL_PROCESS_ID) > -1) {
+		} else if (QueueMessageType.WORKTICKET.equals(this.messageType)) {
 			this.executeFileWriter(message);
 		} else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));

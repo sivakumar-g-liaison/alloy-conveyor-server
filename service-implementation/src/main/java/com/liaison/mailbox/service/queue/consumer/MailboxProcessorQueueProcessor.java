@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
 import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.MailBoxService.QueueMessageType;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 /**
@@ -26,6 +27,6 @@ public class MailboxProcessorQueueProcessor implements QueueProcessor {
 
 	@Override
 	public void processMessage(String message) {
-		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message));
+		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.TRIGGERPROFILEREQUEST));
 	}
 }
