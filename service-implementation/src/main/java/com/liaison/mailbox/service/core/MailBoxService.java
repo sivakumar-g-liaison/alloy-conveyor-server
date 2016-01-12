@@ -39,7 +39,6 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
@@ -66,10 +65,21 @@ import com.liaison.mailbox.service.util.TransactionVisibilityClient;
  *
  * @author veerasamyn
  */
-public class MailBoxService {
+public class MailBoxService implements Runnable {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
 	private static final String DEFAULT_FILE_NAME = "NONE";
+	private static final String WORK_TICKET_GLOBAL_PROCESS_ID = "globalProcessId"; 
+	private static final String TRIGGER_PROCESSOR_REQUEST = "triggerProcessorRequest";
+	private String message;
+	
+	public MailBoxService(String message) {
+		this.message = message;
+	}
+	
+	public MailBoxService() {
+
+	}
 
 	/**
 	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes the processor.
@@ -189,7 +199,8 @@ public class MailBoxService {
 	 * @throws JsonParseException
 	 */
 	public void executeProcessor(String triggerProfileRequest) {
-
+		
+		LOG.debug("Consumed Trigger profile request [" + triggerProfileRequest + "]");
 	    String processorId = null;
 	    String executionId = null;
 		Processor processor = null;
@@ -320,6 +331,8 @@ public class MailBoxService {
 			// send email to the configured mail id in case of failure
 			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 		}
+		LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");
+
 	}
 
 	/**
@@ -330,6 +343,7 @@ public class MailBoxService {
 	 */
 	public void executeFileWriter(String request) {
 
+		LOG.info("Consumed WORKTICKET [" + request + "]");
 	    String mailboxId = null;
 	    String processorId = null;
 	    String payloadURI = null;
@@ -496,6 +510,19 @@ public class MailBoxService {
         	ThreadContext.clearMap();
         }
 
+        LOG.info("Processed WORKTICKET [" + request + "]");
+	}
+
+	@Override
+	public void run() {
+		
+		if (message.indexOf(TRIGGER_PROCESSOR_REQUEST) > -1) {
+			this.executeProcessor(message);
+		} else if (message.indexOf(WORK_TICKET_GLOBAL_PROCESS_ID) > -1) {
+			this.executeFileWriter(message);
+		} else {
+			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
+		}
 	}
 
 }

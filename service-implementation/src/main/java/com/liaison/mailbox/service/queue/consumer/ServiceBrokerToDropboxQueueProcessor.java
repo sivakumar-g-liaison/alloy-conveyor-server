@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
 import com.liaison.mailbox.service.dropbox.DropboxService;
+import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 public class ServiceBrokerToDropboxQueueProcessor implements QueueProcessor {
 
@@ -22,10 +23,6 @@ public class ServiceBrokerToDropboxQueueProcessor implements QueueProcessor {
 
 	@Override
 	public void processMessage(String message) {
-
-		logger.info("Consumed WORKTICKET [" + message + "]");
-		new DropboxService().invokeDropboxQueue(message);
-		logger.info("Processed WORKTICKET [" + message + "]");
-
+		AsyncProcessThreadPool.getExecutorService().submit(new DropboxService(message));
 	}
 }

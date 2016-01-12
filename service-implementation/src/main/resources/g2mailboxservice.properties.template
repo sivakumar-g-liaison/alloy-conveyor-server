@@ -216,3 +216,8 @@ com.liaison.mailbox.default.sla.notification=true
 com.liaison.mailbox.default.sla.max.notification.count=3
 
 com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
+
+# Properties of Async Process Thread Pool
+com.liaison.mailbox.threadpool.size=50
+com.liaison.mailbox.threadpool.keepalive.minutes=1
+com.liaison.mailbox.threadpool.corepoolsize=25

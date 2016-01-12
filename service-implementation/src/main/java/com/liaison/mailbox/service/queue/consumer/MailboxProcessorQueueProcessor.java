@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
 import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 /**
  * @author Ghazni Nattarshah
@@ -25,11 +26,6 @@ public class MailboxProcessorQueueProcessor implements QueueProcessor {
 
 	@Override
 	public void processMessage(String message) {
-
-		logger.debug("Consumed Trigger profile request [" + message + "]");
-		
-		new MailBoxService().executeProcessor(message);
-		
-		logger.debug("Processor processed Trigger profile request [" + message + "]");
+		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message));
 	}
 }
