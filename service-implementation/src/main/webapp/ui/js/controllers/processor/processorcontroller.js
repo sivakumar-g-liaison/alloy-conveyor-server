@@ -303,7 +303,6 @@ var rest = myApp.controller(
 				}
 				$scope.allProfiles = profData.getProfileResponse.profiles;
 				$scope.clearProps();
-				$scope.loadBrowseData();
 				$scope.processor.guid = data.getProcessorResponse.processor.guid;
 				$scope.processor.name = data.getProcessorResponse.processor.name;
 											
@@ -514,20 +513,10 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                     function (data) {
                         $scope.allProfiles = data.getProfileResponse.profiles;
-                        $scope.loadBrowseData();
                     }
                 );
             };
-            $scope.loadBrowseData = function () {
-                $scope.restService.get($scope.base_url + '/listFile', //Get mail box Data
-                    function (data) {
-                        $scope.roleList = data.ArrayList;
-                        //$log.info($scope.roleList);
-                        $scope.modal.roleList = $scope.roleList;
-                    }
-                );
-            };            
-           
+
             $scope.initialLoad();
            
             $scope.chooseProfile = function () {
