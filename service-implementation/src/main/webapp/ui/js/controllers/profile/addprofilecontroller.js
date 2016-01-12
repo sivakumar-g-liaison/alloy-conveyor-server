@@ -215,7 +215,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
                     displayName: 'Action',
                     width: '10%',
                     sortable: false,
-                    cellTemplate: '<button class="btn btn-default btn-xs" ng-click="openEditModal(row.entity)">\n\
+                    cellTemplate: '<button id="btnEdit" class="btn btn-default btn-xs" ng-click="openEditModal(row.entity)">\n\
 									<i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>'
              }],
             data: 'profiles',
