@@ -69,12 +69,10 @@ public class MailBoxService implements Runnable {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
 	private static final String DEFAULT_FILE_NAME = "NONE";
-	private static final String WORK_TICKET_GLOBAL_PROCESS_ID = "globalProcessId"; 
-	private static final String TRIGGER_PROCESSOR_REQUEST = "triggerProcessorRequest";
 	private String message;
 	private QueueMessageType messageType;
 	
-	public static enum QueueMessageType {
+	public enum QueueMessageType {
 		WORKTICKET,
 		TRIGGERPROFILEREQUEST
 	}
