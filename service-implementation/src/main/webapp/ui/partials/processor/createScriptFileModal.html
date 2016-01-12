@@ -32,11 +32,11 @@
 			}" class="createScriptFileModal_ace_editor">
 	   </div>	   
       <div class="modal-footer">
-	    <button class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="saveScriptFileForm.scriptName.$invalid">Load default template</button>
-		<button class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid || loader">
+	    <button id="btnLoadDefScrpt" class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="saveScriptFileForm.scriptName.$invalid">Load default template</button>
+		<button id="btnSaveFltr" class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid || loader">
 			<span class="glyphicon glyphicon-save glyphicon-white"></span> Save
 		</button>
-		<button class="btn btn-primary" type="button" ng-click="cancel()">Cancel
+		<button id="btnCancel" class="btn btn-primary" type="button" ng-click="cancel()">Cancel
 		</button>
 	</div>
    </div>  	

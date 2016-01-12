@@ -410,7 +410,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" id="emailIds" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
 											<div ng-switch-when="emailnotificationforslaviolation">\n\
 												<div class="input-group-btn">\n\
@@ -418,7 +418,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 													</div>\n\
 											</div>\n\
 										   <div ng-switch-when="maxnumberofnotificationforslaviolation">\n\
-											 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="maxnumberofnotificationforslaviolation" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+											 <textarea class="form-control" ng-model="COL_FIELD" id="maxNotifySLA" ng-input="COL_FIELD" name="maxnumberofnotificationforslaviolation" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
 												<div ng-show="formAddMbx.maxnumberofnotificationforslaviolation.$dirty && formAddMbx.maxnumberofnotificationforslaviolation.$invalid">\n\
 													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.required}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.required><strong>Email Notification for SLA violation is mandatory</strong></span>\n\
 													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern><strong>Enter Valid Number</strong></span>\n\
@@ -433,26 +433,26 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 												</div>\n\
 											</div>\n\
                                             <div ng-switch-default>\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" id="requiredFieldForProp" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\
 								   <div ng-switch-when="emailnotificationids">\n\
-           								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
+           								 <textarea class="form-control" ng-model="COL_FIELD" id="emailNotifyIds" ng-input="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
           								     <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.required}" ng-show=formAddMbx.emailnotificationids.$error.required><strong>Email is mandatory</strong></span>\n\
             								 <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.pattern}" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
                                    <div ng-switch-when="timetopickupfilepostedtomailbox">\n\
-     								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedtomailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+     								 <textarea class="form-control" ng-model="COL_FIELD" id="timeToPickupMBX" ng-input="COL_FIELD" name="timetopickupfilepostedtomailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
     								 <div ng-show="formAddMbx.timetopickupfilepostedtomailbox.$dirty && formAddMbx.timetopickupfilepostedtomailbox.$invalid">\n\
     								    <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedtomailbox.$error.required}" ng-show=formAddMbx.timetopickupfilepostedtomailbox.$error.required><strong>Time to Pickup File Posted to Mailbox is mandatory</strong></span>\n\
      								 	<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedtomailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedtomailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
      								 </div>\n\
      							   </div>\n\
                                    <div ng-switch-when="timetopickupfilepostedbymailbox">\n\
-     								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedbymailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+     								 <textarea class="form-control" ng-model="COL_FIELD" id="timeToPickupByMBX" ng-input="COL_FIELD" name="timetopickupfilepostedbymailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
      								 	<div ng-show="formAddMbx.timetopickupfilepostedbymailbox.$dirty && formAddMbx.timetopickupfilepostedbymailbox.$invalid">\n\
      								 	    <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.required}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.required><strong>Time to Pickup File Posted By Mailbox is mandatory</strong></span>\n\
      								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
@@ -477,7 +477,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 							 	        </div>\n\
 									</div>\n\
      							  <div ng-switch-default>\n\
-                                        <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
+                                        <textarea class="form-control" ng-model="COL_FIELD" id="requiredFieldForValue" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
                                   </div>'
 
@@ -487,8 +487,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 displayName: "Action",
                 sortable: false,
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                    '<div ng-switch-when="true"><button id="addBtn" ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+					'<div ng-switch-when="false"><button id="delBtn" ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                     '</div>'
 
             }]
