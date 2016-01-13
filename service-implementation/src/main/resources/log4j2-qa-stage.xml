@@ -274,13 +274,6 @@
                 <AppenderRef ref="Console"/>
             </Failovers>
         </Failover>
-		
-		<!-- Synchronous hotwire for glass -->
-        <Failover name="SyncGlassMessageSpectrumRESTWithFailover" primary="GlassMessageSpectrumREST">
-            <Failovers>
-                <AppenderRef ref="GlassMessageSpectrumFile"/>
-            </Failovers>
-        </Failover>
 
 
 
@@ -402,8 +395,7 @@
             <appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
             <appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
             <appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
-            <!--	<appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" /> -->
-			<appender-ref ref="SyncGlassMessageSpectrumRESTWithFailover" />
+            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
             <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover"/>
 			<appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
 
