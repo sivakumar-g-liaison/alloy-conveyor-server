@@ -2,7 +2,7 @@ import com.jcraft.jsch.*
 
 buildscript {
     repositories { 
-        mavenCentral() 
+        maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" }
     }
     dependencies {
         // JSch is licensed under BSD style license. http://www.jcraft.com/jsch/LICENSE.txt
