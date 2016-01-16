@@ -75,17 +75,18 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+					.append(" inner join processor.mailbox mailbox")
 					.append(" where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME)
-					.append(" and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
+					.append(" and mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
 					.append(" and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS);
 				
 			if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
-				query.append(" and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME);
+				query.append(" and mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME);
 
 			}
 				
 			if (!MailBoxUtil.isEmpty(shardKey)) {
-				query.append(" and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY);
+				query.append(" and mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY);
 			}
 				
 			Query processorQuery = entityManager.createQuery(query.toString())
@@ -567,7 +568,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         	sortDirection=sortDirection.toUpperCase();
         	switch (sortField.toLowerCase()) {
         		case "mailboxname":
-        			query.append(" order by processor.mailbox.mbxName ")
+        			query.append(" order by mailbox.mbxName ")
         			.append(sortDirection);
         		break;
         		case "name":
@@ -754,8 +755,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		List<String> predicateList = new ArrayList<String>();
 		boolean isFolderAvailable = false;
 		
-		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {			
-			predicateList.add(" LOWER(processor.mailbox.mbxName) like :" + MBX_NAME);
+		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {		
+			query.append(" inner join processor.mailbox mailbox ");
+			predicateList.add(" LOWER(mailbox.mbxName) like :" + MBX_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
 			query.append(" inner join processor.folders folder ");
