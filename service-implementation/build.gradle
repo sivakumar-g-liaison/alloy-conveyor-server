@@ -45,7 +45,7 @@ test {
 buildscript {
 
 	repositories {
-		maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" }
+		mavenCentral()
 		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
 		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
 	}
@@ -83,7 +83,7 @@ configurations {
 }
 
 allprojects {
-	repositories { maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" } }
+	repositories { mavenCentral() }
 
 }
 

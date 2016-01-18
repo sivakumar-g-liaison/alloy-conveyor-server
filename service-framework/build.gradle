@@ -2,13 +2,13 @@
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 buildscript {
-    maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" }
+    repositories { mavenCentral() }
     apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
 }
 
 
 allprojects {
-    repositories { maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" } }
+    repositories { mavenCentral() }
 
 }
 

@@ -21,7 +21,7 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 buildscript {
     repositories {
         mavenLocal()
-        maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" }
+        mavenCentral() // maven { url 'http://jcenter.bintray.com' }
     }
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
@@ -56,7 +56,7 @@ allprojects {
 		}
 
     repositories { 
-        maven { url "http://10.0.24.241:8000/nexus/content/repositories/central/" }
+        mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
 
         // Liaison Private Maven artifact repos (Nexus)
         maven { url releasesArtifactRepoURL }
@@ -197,6 +197,7 @@ project(':service-framework') {
 }
 
 allprojects {
+    //repositories { mavenCentral() }
     configurations.all {
 		
 		//force governator to 1.3.x
