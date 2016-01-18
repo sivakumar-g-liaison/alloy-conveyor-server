@@ -232,8 +232,11 @@ public class ProcessorDTO {
             }
             ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);
 
-            StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(),
-																												 Protocol.findByCode(processor.getProcsrProtocol()));
+            StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(), Protocol.findByCode(processor.getProcsrProtocol()));
+            
+            GenericValidator validator = new GenericValidator();
+            validator.validate(processorPropsDTO);
+            
     		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
     		processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
     		// set static properties into properties json to be stored in DB
@@ -243,7 +246,6 @@ public class ProcessorDTO {
     		processor.setProcsrName(this.getName());
     		processor.setJavaScriptUri(this.getJavaScriptURI());
 
-    		GenericValidator validator = new GenericValidator();
 
     		// handling of folder properties
     		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
