@@ -62,6 +62,8 @@ public class MailBoxUtil {
 
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
+	
+	private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -168,7 +170,6 @@ public class MailBoxUtil {
 	public static List<TenancyKeyDTO> getTenancyKeysFromACLManifest(String aclManifestJson)
 			throws IOException {
 
-		GEMACLClient gemClient = new GEMACLClient();
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
 		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
@@ -195,7 +196,6 @@ public class MailBoxUtil {
 			throws IOException {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
-		GEMACLClient gemClient = new GEMACLClient();
 		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
@@ -217,7 +217,6 @@ public class MailBoxUtil {
 			throws IOException {
 
 		String tenancyKeyDisplayName = null;
-		GEMACLClient gemClient = new GEMACLClient();
 		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {

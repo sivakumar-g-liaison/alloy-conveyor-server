@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
@@ -53,11 +54,10 @@ public class KMSUtil {
 	public static String getSecretFromKMS(String guid) throws MalformedURLException, LiaisonException, IOException {
 
 		// get gem manifest response from GEM
-		GEMACLClient gemClient = new GEMACLClient();
-		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
+		GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
 
 		// setting the request headers in the request to key manager from gem
-		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
@@ -85,7 +85,6 @@ public class KMSUtil {
 	public static byte[] fetchSSHPrivateKey(String keypairPguid) throws MalformedURLException, LiaisonException, IOException, JAXBException {
 
 		byte[] privateKeyBytes = null;
-		GEMACLClient gemClient = new GEMACLClient();
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/group/keypair/current/";
@@ -93,11 +92,11 @@ public class KMSUtil {
 		// To be fetched from DataBase
 		url = url + keypairPguid;
 		// get gem manifest response from GEM
-		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
+		GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
 
 		// setting the request headers in the request to key manager from gem
 		// manifest response
-		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
@@ -125,7 +124,6 @@ public class KMSUtil {
 	public static InputStream fetchTrustStore(String trustStoreId) throws MalformedURLException, LiaisonException, IOException, JAXBException {
 
 		InputStream is = null;
-		GEMACLClient gemClient = new GEMACLClient();
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/truststore/current/";
@@ -134,9 +132,9 @@ public class KMSUtil {
 		url = url + trustStoreId;
 
 		// get gem manifest response from GEM
-		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
+		GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
 
-		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
