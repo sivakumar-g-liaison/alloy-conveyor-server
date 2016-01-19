@@ -34,6 +34,7 @@ license {
 	ext.year = Calendar.getInstance().get(Calendar.YEAR)
 	skipExistingHeaders true
 	strictCheck true
+	includes(['**/*.java'])
 }
 
 test {
