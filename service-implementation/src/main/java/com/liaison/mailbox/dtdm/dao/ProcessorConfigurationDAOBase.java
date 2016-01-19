@@ -142,7 +142,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             LOG.debug("Start Time of Query Execution : " + lStartTime);
             StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
                     .append(" inner join processor.mailbox mbx")
-                     .append(" inner join processor.serviceInstance serviceInstance")
+                    .append(" inner join processor.serviceInstance serviceInstance")
                     .append(" where mbx.pguid = :")
                     .append(PGUID)
                     .append(" and serviceInstance.name like :")
