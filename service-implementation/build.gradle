@@ -45,9 +45,9 @@ test {
 buildscript {
 
 	repositories {
-		mavenCentral()
+		maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' }
 		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+		maven { url 'http://smartbearsoftware.com/repository/maven2/' } // for SoapUI
 	}
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies {
@@ -83,7 +83,7 @@ configurations {
 }
 
 allprojects {
-	repositories { mavenCentral() }
+	repositories { maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' } }
 
 }
 
