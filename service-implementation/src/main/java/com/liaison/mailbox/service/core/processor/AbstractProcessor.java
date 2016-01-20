@@ -710,6 +710,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
 		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty()) && (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
 			LOGGER.info("There is no email address configured for this mailbox.");
+			return;
 		}
 
 		if (null != configuredEmailAddress && null != toEmailAddrList) {
