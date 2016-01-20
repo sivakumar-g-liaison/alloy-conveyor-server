@@ -3,6 +3,18 @@
 * GGT-404 - Modify the log4j appenders to Async
 * GMB-703 - Cannot send email. java.lang.NullPointerException in UAT
 
+3.0.7
+-------------------------------
+* GGT-380
+
+3.0.6
+-------------------------------
+* GCL-102
+
+3.0.5
+-------------------------------
+* GMB-699
+
 3.0.4
 -------------------------------
 * GGT-393
