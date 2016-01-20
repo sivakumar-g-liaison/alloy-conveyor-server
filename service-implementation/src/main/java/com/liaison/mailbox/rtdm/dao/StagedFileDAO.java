@@ -36,6 +36,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	public static final String TYPE = "type";
 
 	public static final String PROCESSOR_ID = "processor_id";
+	public static final String FILE_PATH = "filePath";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
@@ -47,7 +48,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
 	public void persistStagedFile(WorkTicket workticket, String processorId, String processorType);
-	public StagedFile findStagedFilesByProcessorId(String processorId, String fileName);
+	public StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
 	public List <StagedFile> findStagedFilesByProcessorId(String processorId);
 
 }

@@ -900,13 +900,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     protected void logGlassMessage(String message, File file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getName());
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
 
         if (null != stagedFile) {
 
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
             GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setGlobalPId(stagedFile.getGPID());
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 
@@ -944,7 +944,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getPguid());
+		glassMessage.setGlobalPId(stagedFile.getGPID());
 		glassMessage.setCategory(configurationInstance.getProcessorType());
 		glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 

@@ -267,7 +267,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         	}
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
             GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setGlobalPId(stagedFile.getGPID());
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 
@@ -327,7 +327,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 				return false;
 			} else if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
 
-				StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), filename);
+				StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), filename);
 				if (null != stagedFile) {
 
 					//In-activate the old entity
@@ -342,7 +342,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 				}
 				
 				//To add more details in staged file
-            	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, targetLocation);
+            	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 
 				//Persist the new file deatils
 				dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
@@ -362,7 +362,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 			}
 
 			//To add more details in staged file
-        	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, targetLocation);
+        	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 
 			//Persist if no file exists
 			dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());

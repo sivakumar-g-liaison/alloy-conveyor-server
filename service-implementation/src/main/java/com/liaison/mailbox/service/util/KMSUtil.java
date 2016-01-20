@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
