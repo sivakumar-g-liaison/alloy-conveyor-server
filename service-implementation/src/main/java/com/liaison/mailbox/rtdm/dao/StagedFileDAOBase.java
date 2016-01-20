@@ -221,7 +221,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             stagedFileEntity = new StagedFile();
             stagedFileEntity.copyFromDto(stagedFileDto, true);
-            stagedFileEntity.setPguid(workticket.getGlobalProcessId());
+            stagedFileEntity.setGlobalProcessId(workticket.getGlobalProcessId());
 
             persist(stagedFileEntity);
 
@@ -236,7 +236,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 	@SuppressWarnings("unchecked")
     @Override
-	public StagedFile findStagedFilesByProcessorId(String processorId, String fileName) {
+	public StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName) {
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 
@@ -250,12 +250,15 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.stagedFileStatus =:")
 					.append(STATUS)
 					.append(" and sf.fileName =:")
-					.append(FILE_NAME);
+					.append(FILE_NAME)
+					.append(" and sf.filePath =:")
+					.append(FILE_PATH);
 
 			List<StagedFile> stagedFiles = em.createQuery(query.toString())
 					.setParameter(PROCESSOR_ID, processorId)
 					.setParameter(STATUS, EntityStatus.ACTIVE.value())
 					.setParameter(FILE_NAME, fileName)
+					.setParameter(FILE_PATH, targetLocation)
 					.getResultList();
 
 			return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
