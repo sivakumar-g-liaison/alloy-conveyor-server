@@ -1,4 +1,7 @@
-3.1.0-SNAPSHOT
+4.1.0-SNAPSHOT
+-------------------------------
+
+3.1.0
 -------------------------------
 * GGT-404 - Modify the log4j appenders to Async
 * GMB-703 - Cannot send email. java.lang.NullPointerException in UAT
