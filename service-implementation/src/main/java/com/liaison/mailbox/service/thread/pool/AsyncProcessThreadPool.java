@@ -17,8 +17,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.messagebus.queueprocessor.ProcessorAvailability;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
+import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
+import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
 
 public class AsyncProcessThreadPool {
 
@@ -52,6 +55,33 @@ public class AsyncProcessThreadPool {
         		asyncProcessingThreadPoolSize, 
         		keepAlive, 
         		TimeUnit.MINUTES);
+    }
+
+    /**
+     * Implemented to allow QueueProcessors to skip message polling when not enough async processors available.
+     */
+    public static class AsyncProcessThreadPoolProcessorAvailability implements ProcessorAvailability {
+
+        private int minThreadHeadRoom;
+
+        public AsyncProcessThreadPoolProcessorAvailability(int minThreadHeadRoom) {
+            this.minThreadHeadRoom = minThreadHeadRoom;
+        }
+
+        @Override
+        public boolean canProcess() {
+            if (executorService == null) {
+                return false; //unlikey
+            }
+
+            LiaisonExecutorServiceDetail liaisonExecutorServiceDetail = LiaisonExecutorServiceRegistrar.INSTANCE.getExecutorServiceDetail(ASYNC_PROCESS_THREADPOOL_NAME);
+            if (null == liaisonExecutorServiceDetail) {
+                logger.error("AsyncProcessThreadPool, perhaps call to ProcessorAvailability before service registered?");
+                return false;
+            }
+
+            return liaisonExecutorServiceDetail.getAvailableThreadCount() >= minThreadHeadRoom;
+        }
     }
 
     public static ExecutorService getExecutorService() {
