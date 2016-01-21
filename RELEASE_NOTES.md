@@ -1,8 +1,10 @@
-4.1.0-SNAPSHOT
+4.0.1
 -------------------------------
+* GMB-706 - Extend QueueProcessor to allow ProcessorAvailability interrupt and Cut into mailbox
 
 4.0.0
 -------------------------------
+
 3.1.0
 -------------------------------
 
