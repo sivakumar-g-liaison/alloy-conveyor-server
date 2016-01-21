@@ -23,16 +23,8 @@ import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.messagebus.queueprocessor.QueueProcessorManager;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.queue.ProcessorReceiveQueue;
-import com.liaison.mailbox.service.queue.ServiceBrokerToDropboxWorkTicketQueue;
-import com.liaison.mailbox.service.queue.ServiceBrokerToMailboxWorkTicketQueue;
-import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
+import com.liaison.mailbox.service.queue.QueueProcessInitializer;
 
 
 /**
@@ -49,32 +41,12 @@ public class InitializationServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8418412083748649428L;
 	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
-	private DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();  
-	public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
-	private final int DEFAULT_THREAD_COUNT = configuration.getInt("com.liaison.queue.processor.default.thread.count", 10);
-
-	private static final String DROPBOX_QUEUE = "dropboxQueue";
-	private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
-	private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
 
     public void init(ServletConfig config) throws ServletException {
 
-    	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
-
-    	    logger.debug("dropbox queue starts to poll");
-
-    	    QueueProcessorManager.register(DROPBOX_QUEUE, ServiceBrokerToDropboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToDropboxQueueProcessor.class);
-
-        } else {
-
-            logger.debug("processor and sweeper queues starts to poll");
-
-            QueueProcessorManager.register(MAILBOX_PROCESSOR_QUEUE, ProcessorReceiveQueue.getInstance(), DEFAULT_THREAD_COUNT, MailboxProcessorQueueProcessor.class);
-            QueueProcessorManager.register(MAILBOX_PROCESSED_PAYLOAD_QUEUE, ServiceBrokerToMailboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToMailboxQueueProcessor.class);
-        }
-
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
+        QueueProcessInitializer.initialize();
     	DAOUtil.init();
     	UUIDGen.init();
 
