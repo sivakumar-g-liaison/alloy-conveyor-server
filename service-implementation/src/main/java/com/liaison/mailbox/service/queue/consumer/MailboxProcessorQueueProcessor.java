@@ -9,11 +9,10 @@
  */
 package com.liaison.mailbox.service.queue.consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
 import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.MailBoxService.QueueMessageType;
+import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 /**
  * @author Ghazni Nattarshah
@@ -21,15 +20,8 @@ import com.liaison.mailbox.service.core.MailBoxService;
  */
 public class MailboxProcessorQueueProcessor implements QueueProcessor {
 
-	private static final Logger logger = LogManager.getLogger(MailboxProcessorQueueProcessor.class);
-
 	@Override
 	public void processMessage(String message) {
-
-		logger.debug("Consumed Trigger profile request [" + message + "]");
-		
-		new MailBoxService().executeProcessor(message);
-		
-		logger.debug("Processor processed Trigger profile request [" + message + "]");
+		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.TRIGGERPROFILEREQUEST));
 	}
 }

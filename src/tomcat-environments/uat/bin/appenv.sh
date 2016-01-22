@@ -6,9 +6,9 @@ export APP_ENV="uat"
 export APP_NAME="g2mailboxservice"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$APP_ENV"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NAME"
+
 # Make all loggers ASYNC
-#TODO renable once glass async processing is fixed
-#export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
  
 # Include Log Location (line number and file of origin)
 # This might be too slow for production, but is really great while in beta.

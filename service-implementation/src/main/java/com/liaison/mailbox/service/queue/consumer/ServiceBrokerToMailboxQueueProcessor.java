@@ -10,11 +10,10 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
 import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.MailBoxService.QueueMessageType;
+import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 /**
 *
@@ -23,15 +22,8 @@ import com.liaison.mailbox.service.core.MailBoxService;
 */
 public class ServiceBrokerToMailboxQueueProcessor implements QueueProcessor {
 
-	private static final Logger logger = LogManager.getLogger(ServiceBrokerToMailboxQueueProcessor.class);
-	
 	@Override
 	public void processMessage(String message) {
-
-		logger.info("Consumed WORKTICKET [" + message + "]");
-
-		new MailBoxService().executeFileWriter(message);
-
-		logger.info("Processed WORKTICKET [" + message + "]");
+		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.WORKTICKET));
 	}
 }

@@ -34,6 +34,7 @@ license {
 	ext.year = Calendar.getInstance().get(Calendar.YEAR)
 	skipExistingHeaders true
 	strictCheck true
+	includes(['**/*.java'])
 }
 
 test {
@@ -45,9 +46,9 @@ test {
 buildscript {
 
 	repositories {
-		mavenCentral()
+		maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' }
 		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+		maven { url 'http://smartbearsoftware.com/repository/maven2/' } // for SoapUI
 	}
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies {
@@ -83,7 +84,7 @@ configurations {
 }
 
 allprojects {
-	repositories { mavenCentral() }
+	repositories { maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' } }
 
 }
 
@@ -210,7 +211,7 @@ dependencies {
 
 
 	//TODO change to 2.+ after logging updATE
-	compile 'com.liaison.commons:lib_message_bus:5.+'
+	compile 'com.liaison.commons:lib_message_bus:5.3.+'
 
 	// inherited from NetFlix Karyon (TODO integrate with main UI)
 	//compile project(':karyon-admin-web')
@@ -239,7 +240,7 @@ dependencies {
 	}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'3.1.0-SNAPSHOT', changing: true
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'3.1.1', changing: true
 
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'

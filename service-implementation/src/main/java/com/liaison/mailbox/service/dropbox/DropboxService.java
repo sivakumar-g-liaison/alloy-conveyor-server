@@ -31,9 +31,15 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  *
  * @author OFS
  */
-public class DropboxService {
+public class DropboxService implements Runnable {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxService.class);
+	private String message;
+	
+	public DropboxService(String message) {
+		this.message = message;
+		
+	}
 
 	/**
 	 * Method which will consume request from dropbox queue and log a staged event in StagedFiles Table in DB
@@ -44,6 +50,7 @@ public class DropboxService {
 
 		try {
 
+			LOG.info("Consumed WORKTICKET [" + request + "]");
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
 			//Fish tag global process id
@@ -72,6 +79,12 @@ public class DropboxService {
 		} finally {
 			ThreadContext.clearMap(); //set new context after clearing
 		}
+		LOG.info("Processed WORKTICKET [" + request + "]");
 
+	}
+
+	@Override
+	public void run() {
+		this.invokeDropboxQueue(message);
 	}
 }

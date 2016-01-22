@@ -6,7 +6,7 @@
     <div ng-class="{ ngPinnedIcon: col.pinned, ngUnPinnedIcon: !col.pinned }" ng-click="togglePin(col)" ng-show="col.pinnable"></div>
 </div>
 
-<input type="text" ng-click="stopClickProp($event)" placeholder="Filter..." ng-model="col.filterText"
+<input id="profNameTxt" type="text" ng-click="stopClickProp($event)" placeholder="Filter..." ng-model="col.filterText"
 	ng-trim="false" ng-style="{ 'width' : col.width - 10 + 'px' }"
 	
 class="inputStyle"

@@ -11,9 +11,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NA
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.configurationSource.additionalUrls=file:///secure/tomcat/secure.properties"
 
 # Make all loggers ASYNC
-#TODO renable once glass async processing is fixed
-#export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
- 
+export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+
 # Include Log Location (line number and file of origin)
 # This might be too slow for production, but is really great while in beta.
 # Note, this is included as property in case we need to build an interface

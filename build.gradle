@@ -21,7 +21,7 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 buildscript {
     repositories {
         mavenLocal()
-        mavenCentral() // maven { url 'http://jcenter.bintray.com' }
+        maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' }
     }
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
@@ -56,7 +56,7 @@ allprojects {
 		}
 
     repositories { 
-        mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
+        maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' }
 
         // Liaison Private Maven artifact repos (Nexus)
         maven { url releasesArtifactRepoURL }
@@ -122,8 +122,8 @@ subprojects {
         //Dependency for ACL integration 
         compile 'com.liaison.commons.acl:acl-commons-lib:6.+'
 
-        compile ([group: 'com.liaison', name: 'lib_thread_management', version: '1.+', classifier: 'core'],
-                 [group: 'com.liaison', name: 'lib_thread_management', version: '1.+', classifier: 'rest'])
+        compile ([group: 'com.liaison', name: 'lib_thread_management', version: '1.2.+', classifier: 'core'],
+                 [group: 'com.liaison', name: 'lib_thread_management', version: '1.2.+', classifier: 'rest'])
      }
 
 }

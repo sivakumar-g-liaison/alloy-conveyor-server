@@ -184,7 +184,7 @@ public class MailboxWatchDogService {
 
 				transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage = new GlassMessage();
-				glassMessage.setGlobalPId(stagedFile.getPguid());
+				glassMessage.setGlobalPId(stagedFile.getGPID());
 
 				glassMessage.setStatus(ExecutionState.COMPLETED);
 				glassMessage.setOutAgent(stagedFile.getFilePath());
