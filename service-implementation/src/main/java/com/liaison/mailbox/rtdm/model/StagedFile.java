@@ -256,6 +256,7 @@ public class StagedFile implements Identifiable {
 		this.setProcessorId(stagedFileDto.getProcessorId());
 		this.setProcessorType(stagedFileDto.getProcessorType());
 		this.setModifiedDate(timestamp);
+        this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
 	}
 
 	@Transient
