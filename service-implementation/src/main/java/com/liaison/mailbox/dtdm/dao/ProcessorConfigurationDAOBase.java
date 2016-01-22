@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.math.BigDecimal;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -140,18 +141,21 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             LOG.debug("Fetching the processor count starts.");
             long lStartTime = new Date().getTime(); // start time
             LOG.debug("Start Time of Query Execution : " + lStartTime);
-            StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
-                    .append(" inner join processor.mailbox mbx")
-                    .append(" inner join processor.serviceInstance serviceInstance")
-                    .append(" where mbx.pguid = :")
-                    .append(PGUID)
-                    .append(" and serviceInstance.name like :")
-                    .append(SERV_INST_ID);
 
-            long count = (long) entityManager.createQuery(query.toString())
+            StringBuilder query = new StringBuilder().append("SELECT count(processor.pguid)")
+                    .append(" FROM PROCESSOR processor")
+                    .append(" INNER JOIN MAILBOX mailbox ON processor.MAILBOX_GUID = mailbox.pguid")
+                    .append(" INNER JOIN SERVICE_INSTANCE serviceins ON processor.SERVICE_INSTANCE_GUID = serviceins.pguid")
+                    .append(" WHERE mailbox.pguid = :")
+                    .append(PGUID)
+                    .append(" AND (serviceins.SERVICE_INSTANCE_ID LIKE :")
+                    .append(SERV_INST_ID)
+                    .append(")");
+                    
+            long count = ((BigDecimal) entityManager.createNativeQuery(query.toString())
                     .setParameter(PGUID , mbxGuid)
                     .setParameter(SERV_INST_ID, siid)
-                    .getSingleResult();
+                    .getSingleResult()).longValue();
             long lEndTime = new Date().getTime(); // end time
             LOG.debug("End Time of Query Execution : " + lEndTime);
             if (count > 0) {

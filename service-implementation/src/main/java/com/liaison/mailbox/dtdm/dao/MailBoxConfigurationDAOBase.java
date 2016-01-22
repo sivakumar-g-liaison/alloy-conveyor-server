@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,31 +59,30 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			
 			String mbxName = searchFilter.getMbxName();
 			String profName = searchFilter.getProfileName();			
-			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
-					.append(" inner join mbx.mailboxProcessors prcsr")
-					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
-					.append(" inner join schd_prof_processor.scheduleProfilesRef profile");
-					
-			if (searchFilter.isDisableFilters()) {
-				query.append(" where LOWER(mbx.mbxName) like :")
-				 .append(MBOX_NAME)				 
-				 .append(" and profile.schProfName like :")
-				 .append(SCHD_PROF_NAME);
-            } else {
-            	query.append(" where LOWER(mbx.mbxName) like :")
-					 .append(MBOX_NAME)
-					 .append(" and LOWER(mbx.tenancyKey) IN (")
+			StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MAILBOX mailbox")
+					.append(" INNER JOIN PROCESSOR processor ON mailbox.pguid = processor.MAILBOX_GUID")
+					.append(" INNER JOIN SCHED_PROCESSOR schedulepros ON processor.pguid = schedulepros.PROCESSOR_GUID")
+					.append(" INNER JOIN SCHED_PROFILE scheduleprof ON schedulepros.SCHED_PROFILE_GUID = scheduleprof.pguid");
+			
+			query.append(" WHERE (lower(mailbox.NAME) LIKE :")
+			        .append(MBOX_NAME) 
+			        .append(")");	
+			
+			if (searchFilter.isDisableFilters() == false) {
+            	query.append(" AND (lower(mailbox.TENANCY_KEY) IN (")
 					 .append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-					 .append(")")
-					 .append(" and profile.schProfName like :")
-					 .append(SCHD_PROF_NAME);
+					 .append("))");
             }
+			
+			query.append(" AND (scheduleprof.NAME LIKE :")
+			        .append(SCHD_PROF_NAME)
+			        .append(")");
 
-			totalItems = (Long)em
-					.createQuery(query.toString())
+			totalItems = ((BigDecimal)em
+					.createNativeQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
-					.getSingleResult();
+					.getSingleResult()).longValue();
 
 			count = totalItems.intValue();
 
@@ -180,26 +180,29 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
  
         try {
  
-            StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx");
+            StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MAILBOX mailbox");
             
             if (searchFilter.isDisableFilters()) {
             	if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-            		query.append(" where LOWER(mbx.mbxName) like :")
-            			 .append(MBOX_NAME);
+            	    query.append(" WHERE (lower(mailbox.NAME) LIKE :")
+                    .append(MBOX_NAME)
+                    .append(")");
             	}
             } else {
-            	query.append(" where LOWER(mbx.mbxName) like :")
+            	query.append(" WHERE (lower(mailbox.NAME) LIKE :")
                 .append(MBOX_NAME)
-            	.append(" and LOWER(mbx.tenancyKey) IN (")
+                .append(")")
+            	.append(" AND (lower(mailbox.TENANCY_KEY) IN(")
 				.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-				.append(")");
-            }					
+				.append("))");
+            }	
+            
             if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-	            totalItems = (Long)entityManager.createQuery(query.toString()).getSingleResult();
+	            totalItems = ((BigDecimal)entityManager.createNativeQuery(query.toString()).getSingleResult()).longValue();
             } else {
-            	totalItems = (Long)entityManager.createQuery(query.toString())
+            	totalItems = ((BigDecimal)entityManager.createNativeQuery(query.toString())
 	                    .setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
-	                    .getSingleResult();
+	                    .getSingleResult()).longValue();
             }
  
             count = totalItems.intValue();
