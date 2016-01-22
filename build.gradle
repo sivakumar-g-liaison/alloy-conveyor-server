@@ -66,12 +66,6 @@ allprojects {
     
     configurations {
         all {
-
-        	//force governator to 1.3.x
-             resolutionStrategy {
-                force 'com.netflix.governator:governator:1.3.+'
-             }
-
               // Most of the time this is a bad idea with little upside:   // check for updates every build
               //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 
@@ -199,11 +193,6 @@ project(':service-framework') {
 allprojects {
     //repositories { mavenCentral() }
     configurations.all {
-		
-		//force governator to 1.3.x
-		resolutionStrategy {
-			force 'com.netflix.governator:governator:1.3.+'
-		}
 		
         // make sure we are using the latest commons-io
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->

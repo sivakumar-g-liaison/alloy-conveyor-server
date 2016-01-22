@@ -8,6 +8,8 @@
  */
 package com.liaison.mailbox.service.queue;
 
+import com.liaison.health.check.threadpool.ThreadPoolCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -82,6 +84,11 @@ public class QueueProcessInitializer {
                     ServiceBrokerToDropboxQueueProcessor.class,
                     asyncProcessThreadPoolProcessorAvailability);
 
+            // threadpool check
+            String dropboxPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + DROPBOX_QUEUE;
+            LiaisonHealthCheckRegistry.INSTANCE.register(dropboxPoolName + "_check",
+                    new ThreadPoolCheck(dropboxPoolName, DEFAULT_THREAD_COUNT + 20));
+
         } else {
 
             // Initialize processor queue and processedPayload queue
@@ -98,6 +105,17 @@ public class QueueProcessInitializer {
                     DEFAULT_THREAD_COUNT,
                     ServiceBrokerToMailboxQueueProcessor.class,
                     asyncProcessThreadPoolProcessorAvailability);
+
+
+            // threadpool check
+            String processorPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSOR_QUEUE;
+            LiaisonHealthCheckRegistry.INSTANCE.register(processorPoolName + "_check",
+                    new ThreadPoolCheck(processorPoolName, DEFAULT_THREAD_COUNT + 20));
+
+            // threadpool check
+            String payloadPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSED_PAYLOAD_QUEUE;
+            LiaisonHealthCheckRegistry.INSTANCE.register(payloadPoolName + "_check",
+                    new ThreadPoolCheck(payloadPoolName, DEFAULT_THREAD_COUNT + 20));
         }
     }
 

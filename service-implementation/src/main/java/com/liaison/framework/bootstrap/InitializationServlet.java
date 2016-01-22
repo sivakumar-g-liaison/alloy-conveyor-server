@@ -14,6 +14,12 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.health.check.file.FileReadDeleteCheck;
+import com.liaison.health.check.jdbc.JdbcConnectionCheck;
+import com.liaison.health.check.threadpool.ThreadPoolCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +48,18 @@ public class InitializationServlet extends HttpServlet {
 	private static final long serialVersionUID = -8418412083748649428L;
 	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
 
+	public static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+
     public void init(ServletConfig config) throws ServletException {
+        DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+        // nfs health check
+        String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
+        if(serviceNfsMount != null) {
+            for (String mount : serviceNfsMount) {
+                LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
+                        new FileReadDeleteCheck(mount));
+            }
+        }
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
@@ -50,6 +67,22 @@ public class InitializationServlet extends HttpServlet {
     	DAOUtil.init();
     	UUIDGen.init();
 
+		// db health check
+		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
+				new JdbcConnectionCheck(
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+				));
+		LiaisonHealthCheckRegistry.INSTANCE.register("rtdm_db_connection_check",
+				new JdbcConnectionCheck(
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+				));
+		
 		// Set ACL Filter Signature Verifier
 		SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
 

@@ -19,6 +19,10 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.fs2.storage.spectrum.SpectrumConfig;
+import com.liaison.health.check.spectrum.SpectrumWriteDeleteCheck;
+import com.liaison.health.check.spectrum.SpectrumWriteReadCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -328,10 +332,18 @@ public class StorageUtilities {
 
 				final String identifier = type + "." + location;
 				FS2Configuration config;
+				FS2StorageIdentifier fs2StorageIdentifier = new FS2StorageIdentifier(type, location);
+				SpectrumConfig spectrumConfig = SpectrumConfigBuilder.buildFromConfiguration(
+						identifier, configuration);
+
+				// spectrum health check
+				LiaisonHealthCheckRegistry.INSTANCE.register(fs2StorageIdentifier + "_spectrum_write_read_check",
+						new SpectrumWriteReadCheck(fs2StorageIdentifier, spectrumConfig));
+				LiaisonHealthCheckRegistry.INSTANCE.register(fs2StorageIdentifier + "_spectrum_write_delete_check",
+						new SpectrumWriteDeleteCheck(fs2StorageIdentifier, spectrumConfig));
 
 				if (type.equals(SECURE_MONIKER)) {
-					config = new FS2DefaultSpectrumStorageConfig(new FS2StorageIdentifier(type, location),
-							SpectrumConfigBuilder.buildFromConfiguration(identifier, configuration),
+					config = new FS2DefaultSpectrumStorageConfig(fs2StorageIdentifier, spectrumConfig,
 							encryptionProvider, kekProvider) {
 						@Override
 						public boolean doCalcPayloadSize() {
@@ -344,8 +356,7 @@ public class StorageUtilities {
 					    }
 					};
 				} else {
-					config = new FS2DefaultSpectrumStorageConfig(new FS2StorageIdentifier(type, location),
-							SpectrumConfigBuilder.buildFromConfiguration(identifier, configuration), null, null) {
+					config = new FS2DefaultSpectrumStorageConfig(fs2StorageIdentifier, spectrumConfig, null, null) {
 						@Override
 						public boolean doCalcPayloadSize() {
 							return false;
