@@ -23,7 +23,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 
 #NOT FOR PRODUCTION
 #Enable Remote Debug
-## GGT-251 GGT-292 ## export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=12345,server=y,suspend=n"
+export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=12345,server=y,suspend=n"
 
 # ==================================================================
 # log overrides
