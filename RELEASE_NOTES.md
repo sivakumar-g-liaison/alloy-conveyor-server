@@ -1,5 +1,9 @@
 4.0.1
 -------------------------------
+* GMB-710 - DROPBOX- Unable to stage a file
+
+4.0.1
+-------------------------------
 * GMB-706 - Extend QueueProcessor to allow ProcessorAvailability interrupt and Cut into mailbox
 
 4.0.0
