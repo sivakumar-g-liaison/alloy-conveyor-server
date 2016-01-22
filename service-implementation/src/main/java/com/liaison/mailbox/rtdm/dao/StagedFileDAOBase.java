@@ -221,7 +221,6 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             stagedFileEntity = new StagedFile();
             stagedFileEntity.copyFromDto(stagedFileDto, true);
-            stagedFileEntity.setGlobalProcessId(workticket.getGlobalProcessId());
 
             persist(stagedFileEntity);
 
