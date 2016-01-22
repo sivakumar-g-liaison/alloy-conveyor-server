@@ -14,6 +14,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import com.liaison.health.check.file.FileReadDeleteCheck;
+import com.liaison.health.check.jdbc.JdbcConnectionCheck;
+import com.liaison.health.check.threadpool.ThreadPoolCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,6 +61,8 @@ public class InitializationServlet extends HttpServlet {
 	private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
 	private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
 
+	public static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+
     public void init(ServletConfig config) throws ServletException {
 
     	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
@@ -64,13 +70,36 @@ public class InitializationServlet extends HttpServlet {
     	    logger.debug("dropbox queue starts to poll");
 
     	    QueueProcessorManager.register(DROPBOX_QUEUE, ServiceBrokerToDropboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToDropboxQueueProcessor.class);
-
+			
+			// threadpool check
+			String dropboxPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + DROPBOX_QUEUE;
+			LiaisonHealthCheckRegistry.INSTANCE.register(dropboxPoolName + "_check",
+					new ThreadPoolCheck(dropboxPoolName, DEFAULT_THREAD_COUNT + 20));
         } else {
 
             logger.debug("processor and sweeper queues starts to poll");
 
             QueueProcessorManager.register(MAILBOX_PROCESSOR_QUEUE, ProcessorReceiveQueue.getInstance(), DEFAULT_THREAD_COUNT, MailboxProcessorQueueProcessor.class);
             QueueProcessorManager.register(MAILBOX_PROCESSED_PAYLOAD_QUEUE, ServiceBrokerToMailboxWorkTicketQueue.getInstance(), DEFAULT_THREAD_COUNT, ServiceBrokerToMailboxQueueProcessor.class);
+
+			// threadpool check
+			String processorPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSOR_QUEUE;
+			LiaisonHealthCheckRegistry.INSTANCE.register(processorPoolName + "_check",
+					new ThreadPoolCheck(processorPoolName, DEFAULT_THREAD_COUNT + 20));
+
+			// threadpool check
+			String payloadPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSED_PAYLOAD_QUEUE;
+			LiaisonHealthCheckRegistry.INSTANCE.register(payloadPoolName + "_check",
+					new ThreadPoolCheck(payloadPoolName, DEFAULT_THREAD_COUNT + 20));
+        }
+
+        // nfs health check
+        String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
+        if(serviceNfsMount != null) {
+            for (String mount : serviceNfsMount) {
+                LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
+                        new FileReadDeleteCheck(mount));
+            }
         }
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
@@ -78,6 +107,22 @@ public class InitializationServlet extends HttpServlet {
     	DAOUtil.init();
     	UUIDGen.init();
 
+		// db health check
+		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
+				new JdbcConnectionCheck(
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+				));
+		LiaisonHealthCheckRegistry.INSTANCE.register("rtdm_db_connection_check",
+				new JdbcConnectionCheck(
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
+						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+				));
+		
 		// Set ACL Filter Signature Verifier
 		SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
 

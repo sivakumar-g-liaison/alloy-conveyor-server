@@ -14,6 +14,9 @@ package com.liaison.mailbox.service.thread.pool;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.liaison.commons.messagebus.queueprocessor.QueueProcessorManager;
+import com.liaison.health.check.threadpool.ThreadPoolCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,6 +55,10 @@ public class AsyncProcessThreadPool {
         		asyncProcessingThreadPoolSize, 
         		keepAlive, 
         		TimeUnit.MINUTES);
+
+        // threadpool check
+        LiaisonHealthCheckRegistry.INSTANCE.register(ASYNC_PROCESS_THREADPOOL_NAME + "_check",
+                new ThreadPoolCheck(ASYNC_PROCESS_THREADPOOL_NAME, 20));
     }
 
     public static ExecutorService getExecutorService() {

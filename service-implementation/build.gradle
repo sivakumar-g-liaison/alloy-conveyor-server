@@ -199,10 +199,10 @@ dependencies {
 	runtime 'com.oracle:ojdbc6:${oracleVersion}'
 	compile 'com.oracle:ucp:${oracleVersion}'
 
-	compile 'com.sun.jersey:jersey-core:1.18'
-	compile 'com.sun.jersey:jersey-server:1.18'
-	compile 'com.sun.jersey:jersey-json:1.18'
-	compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
+	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
+	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
+	compile "com.sun.jersey:jersey-json:${jerseyVersion}"
+	compile "com.sun.jersey.contribs:jersey-multipart:${jerseyVersion}"
 
 
 	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
@@ -213,6 +213,12 @@ dependencies {
 	//TODO change to 2.+ after logging updATE
 	compile 'com.liaison.commons:lib_message_bus:5.+'
 
+	compile "com.liaison.commons:lib_health_monitor_core:1.1.+"
+	compile "com.liaison.commons:lib_health_monitor_file:1.1.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:1.1.+"
+	compile "com.liaison.commons:lib_health_monitor_spectrum:1.1.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:1.1.+"
+	
 	// inherited from NetFlix Karyon (TODO integrate with main UI)
 	//compile project(':karyon-admin-web')
 

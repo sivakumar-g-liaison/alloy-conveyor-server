@@ -63,26 +63,27 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 public class CustomDataSourceFactory
     implements ObjectFactory
 {
-    protected static final String DB_URL_PROPERTY                           = "com.liaison.rtdm.DB_URL";
-    protected static final String DB_USER_PROPERTY                          = "com.liaison.rtdm.DB_USER";
-    protected static final String DB_PASSWORD_PROPERTY                      = "com.liaison.rtdm.DB_PASSWORD";
-    protected static final String DB_MINPOOLSIZE_PROPERTY                   = "com.liaison.rtdm.DB_MINPOOLSIZE";
-    protected static final String DB_MAXPOOLSIZE_PROPERTY                   = "com.liaison.rtdm.DB_MAXPOOLSIZE";
-    protected static final String DB_CONNECTIONFACTORYCLASSNAME_PROPERTY    = "com.liaison.rtdm.DB_CONNECTIONFACTORYCLASSNAME";
-    protected static final String DB_INACTIVECONNECTIONTIMEOUT_PROPERTY     = "com.liaison.rtdm.DB_INACTIVECONNECTIONTIMEOUT";
-    protected static final String DB_VALIDATECONNECTIONONBORROW_PROPERTY    = "com.liaison.rtdm.DB_VALIDATECONNECTIONONBORROW";
-    protected static final String DB_DESCRIPTION_PROPERTY                   = "com.liaison.rtdm.DB_DESCRIPTION";
-    protected static final String DB_ABANDONEDCONNECTIONTIMEOUT_PROPERTY    = "com.liaison.rtdm.DB_ABANDONEDCONNECTIONTIMEOUT";
-    protected static final String DB_CONNECTIONHARVESTMAXCOUNT_PROPERTY     = "com.liaison.rtdm.DB_CONNECTIONHARVESTMAXCOUNT";
-    protected static final String DB_CONNECTIONHARVESTTRIGGERCOUNT_PROPERTY = "com.liaison.rtdm.DB_CONNECTIONHARVESTTRIGGERCOUNT";
-    protected static final String DB_CONNECTIONWAITTIMEOUT_PROPERTY         = "com.liaison.rtdm.DB_CONNECTIONWAITTIMEOUT";
-    protected static final String DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY = "com.liaison.rtdm.DB_FASTCONNECTIONFAILOVERENABLED";
-    protected static final String DB_INITIALPOOLSIZE_PROPERTY               = "com.liaison.rtdm.DB_INITIALPOOLSIZE";
-    protected static final String DB_MAXCONNECTIONREUSECOUNT_PROPERTY       = "com.liaison.rtdm.DB_MAXCONNECTIONREUSECOUNT";
-    protected static final String DB_MAXCONNECTIONREUSETIME_PROPERTY        = "com.liaison.rtdm.DB_MAXCONNECTIONREUSETIME";
-    protected static final String DB_MAXIDLETIME_PROPERTY                   = "com.liaison.rtdm.DB_MAXIDLETIME";
-    protected static final String DB_TIMEOUTCHECKINTERVAL_PROPERTY          = "com.liaison.rtdm.DB_TIMEOUTCHECKINTERVAL";
-    protected static final String DB_TIMETOLIVECONNECTIONTIMEOUT_PROPERTY   = "com.liaison.rtdm.DB_TIMETOLIVECONNECTIONTIMEOUT";
+	public static final String DB_DRIVER_PROPERTY                        = "com.liaison.rtdm.DB_DRIVER";
+    public static final String DB_URL_PROPERTY                           = "com.liaison.rtdm.DB_URL";
+    public static final String DB_USER_PROPERTY                          = "com.liaison.rtdm.DB_USER";
+    public static final String DB_PASSWORD_PROPERTY                      = "com.liaison.rtdm.DB_PASSWORD";
+    public static final String DB_MINPOOLSIZE_PROPERTY                   = "com.liaison.rtdm.DB_MINPOOLSIZE";
+    public static final String DB_MAXPOOLSIZE_PROPERTY                   = "com.liaison.rtdm.DB_MAXPOOLSIZE";
+    public static final String DB_CONNECTIONFACTORYCLASSNAME_PROPERTY    = "com.liaison.rtdm.DB_CONNECTIONFACTORYCLASSNAME";
+    public static final String DB_INACTIVECONNECTIONTIMEOUT_PROPERTY     = "com.liaison.rtdm.DB_INACTIVECONNECTIONTIMEOUT";
+    public static final String DB_VALIDATECONNECTIONONBORROW_PROPERTY    = "com.liaison.rtdm.DB_VALIDATECONNECTIONONBORROW";
+    public static final String DB_DESCRIPTION_PROPERTY                   = "com.liaison.rtdm.DB_DESCRIPTION";
+    public static final String DB_ABANDONEDCONNECTIONTIMEOUT_PROPERTY    = "com.liaison.rtdm.DB_ABANDONEDCONNECTIONTIMEOUT";
+    public static final String DB_CONNECTIONHARVESTMAXCOUNT_PROPERTY     = "com.liaison.rtdm.DB_CONNECTIONHARVESTMAXCOUNT";
+    public static final String DB_CONNECTIONHARVESTTRIGGERCOUNT_PROPERTY = "com.liaison.rtdm.DB_CONNECTIONHARVESTTRIGGERCOUNT";
+    public static final String DB_CONNECTIONWAITTIMEOUT_PROPERTY         = "com.liaison.rtdm.DB_CONNECTIONWAITTIMEOUT";
+    public static final String DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY = "com.liaison.rtdm.DB_FASTCONNECTIONFAILOVERENABLED";
+    public static final String DB_INITIALPOOLSIZE_PROPERTY               = "com.liaison.rtdm.DB_INITIALPOOLSIZE";
+    public static final String DB_MAXCONNECTIONREUSECOUNT_PROPERTY       = "com.liaison.rtdm.DB_MAXCONNECTIONREUSECOUNT";
+    public static final String DB_MAXCONNECTIONREUSETIME_PROPERTY        = "com.liaison.rtdm.DB_MAXCONNECTIONREUSETIME";
+    public static final String DB_MAXIDLETIME_PROPERTY                   = "com.liaison.rtdm.DB_MAXIDLETIME";
+    public static final String DB_TIMEOUTCHECKINTERVAL_PROPERTY          = "com.liaison.rtdm.DB_TIMEOUTCHECKINTERVAL";
+    public static final String DB_TIMETOLIVECONNECTIONTIMEOUT_PROPERTY   = "com.liaison.rtdm.DB_TIMETOLIVECONNECTIONTIMEOUT";
 
     protected static final String FALSE = "false";
     protected static final String TRUE = "true";
