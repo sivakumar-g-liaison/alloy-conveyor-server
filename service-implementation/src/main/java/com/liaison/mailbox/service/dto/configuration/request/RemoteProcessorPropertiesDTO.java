@@ -14,6 +14,9 @@ import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object that contains the properties of remote processors.
  * 
@@ -77,6 +80,7 @@ public class RemoteProcessorPropertiesDTO {
 		this.httpVerb = httpVerb;
 	}
 
+	@PatternValidation(errorMessage = "Invalid Value for Retry Attempts", type = MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)
 	public int getRetryAttempts() {
 		return retryAttempts;
 	}
@@ -85,6 +89,7 @@ public class RemoteProcessorPropertiesDTO {
 		this.retryAttempts = retryAttempts;
 	}
 
+	@PatternValidation(errorMessage = "Invalid Value for Timeout", type = MailBoxConstants.PROPERTY_SOCKET_TIMEOUT)
 	public int getSocketTimeout() {
 		return socketTimeout;
 	}
@@ -93,6 +98,7 @@ public class RemoteProcessorPropertiesDTO {
 		this.socketTimeout = socketTimeout;
 	}
 
+	@PatternValidation(errorMessage = "Invalid Value for Timeout", type = MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)
 	public int getConnectionTimeout() {
 		return connectionTimeout;
 	}
@@ -109,6 +115,7 @@ public class RemoteProcessorPropertiesDTO {
 		this.url = url;
 	}
 
+	@PatternValidation(errorMessage = "Invalid Value for port", type = MailBoxConstants.PROPERTY_PORT)
 	public int getPort() {
 		return port;
 	}

@@ -100,6 +100,13 @@ public class GenericValidator {
 				if (isMandatoryCheckPassed && m.isAnnotationPresent(DataValidation.class)) {
 					isValidationPassed = isValidationPassed && isThisValidData(m, dto);
 				}
+				
+				// Checks whether the provided value is valid port for type "PROPERTY_PORT"
+				// or value is valid for type "PROPERTY_RETRY_ATTEMPT"
+				//or value is valid for type "PROPERTY_CONNECTION_TIMEOUT" and type "PROPERTY_SOCKET_TIME_OUT"
+				if (isValidationPassed && m.isAnnotationPresent(PatternValidation.class)) {
+					isValidationPassed = isThisValidPattern(m, dto);
+				}
 			}
 
 		} catch (IllegalAccessException e) {
@@ -176,6 +183,82 @@ public class GenericValidator {
 		}
 
 		return isValidationPassed;
+	}
+	
+	/**
+	 * Method to validate whether the given value matches with the pattern
+	 * in case of retryAttempts, port, connection timeout and socket timeout
+	 *
+	 * @param method
+	 * @param dto
+	 * @return
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 */
+	private boolean isThisValidPattern (Method method, Object dto) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+		PatternValidation annotationDetails = method.getAnnotation(PatternValidation.class);
+		boolean isValidPattern = true;
+
+		Object value = method.invoke(dto);
+
+		if (value != null && !value.toString().isEmpty()) {
+
+			int fieldValue = (int)value;
+
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_PORT) && !isValidPort(fieldValue))) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(fieldValue))) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+			
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(fieldValue))) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+			
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(fieldValue))) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+		}
+		return isValidPattern;
+
+	}
+	
+	/**
+	 * Method to validate whether given string is valid port value
+	 *
+	 * @param email
+	 * @return boolean
+	 */
+	private boolean isValidPort (int port) {
+		 return Integer.toString(port).matches(MailBoxConstants.portRegex);
+	}
+
+	/**
+	 * Method to validate whether given string is valid retryAttempt value
+	 *
+	 * @param email
+	 * @return boolean
+	 */
+	private boolean isValidRetryAttemptValue (int retryAttempt) {
+		 return Integer.toString(retryAttempt).matches(MailBoxConstants.retryAttemptsRegex);
+	}
+
+	/**
+	 * Method to validate whether given string is valid port value
+	 *
+	 * @param email
+	 * @return boolean
+	 */
+	private boolean isBetweenRange (int number) {
+		 return number<=60000 && number>=0;
 	}
 
 	/**
