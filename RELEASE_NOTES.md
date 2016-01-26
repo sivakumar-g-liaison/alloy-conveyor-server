@@ -1,3 +1,8 @@
+4.0.3
+-------------------------------
+* GGEM-124 Patch/Acl Signer Public Key Group Guid Update
+* DB Rollback script
+
 4.0.2
 -------------------------------
 * GMB-710 - DROPBOX- Unable to stage a file
