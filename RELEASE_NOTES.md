@@ -1,3 +1,7 @@
+4.0.4
+-------------------------------
+* GMB-713 Mailbox and dropbox server rollback scripts need to be .rollback
+
 4.0.3
 -------------------------------
 * GGEM-124 Patch/Acl Signer Public Key Group Guid Update
