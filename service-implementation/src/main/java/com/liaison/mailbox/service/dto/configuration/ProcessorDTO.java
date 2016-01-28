@@ -234,10 +234,9 @@ public class ProcessorDTO {
 
             StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(), Protocol.findByCode(processor.getProcsrProtocol()));
             
-            GenericValidator validator = new GenericValidator();
-            validator.validate(processorPropsDTO);
-            
     		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
+    		GenericValidator validator = new GenericValidator();
+    		validator.validate(processorPropsDTO);
     		processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
     		// set static properties into properties json to be stored in DB
     		String propertiesJSON = JAXBUtility.marshalToJSON(processorPropsDTO);
