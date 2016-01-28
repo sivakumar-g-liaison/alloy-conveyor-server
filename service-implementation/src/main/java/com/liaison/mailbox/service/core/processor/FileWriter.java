@@ -336,17 +336,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 					logDuplicateStatus(stagedFile, workTicket.getGlobalProcessId());
 				}
 
-				//write the file
-				try (FileOutputStream outputStream = new FileOutputStream(file)) {
-					IOUtils.copy(response, outputStream);
-				}
-				
-				//To add more details in staged file
-            	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
-
-				//Persist the new file deatils
-				dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
-
+				persistFile(response, file, workTicket, dao);
 				return true;
 			} else {
 
@@ -357,18 +347,38 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		} else {
 
 			logGlassMessage(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
-			try (FileOutputStream outputStream = new FileOutputStream(file)) {
-				IOUtils.copy(response, outputStream);
-			}
-
-			//To add more details in staged file
-        	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
-
-			//Persist if no file exists
-			dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+			persistFile(response, file, workTicket, dao);
 			return true;
 		}
 
 	}
+
+    /**
+     * method to set the file size to workticket and persist the file 
+     * 
+     * @param response
+     * @param file
+     * @param workTicket
+     * @param dao
+     * @throws IOException
+     */
+    private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
+        
+        //write the file
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            
+            long fileSize = (long) IOUtils.copy(response, outputStream);
+            if (workTicket.getPayloadSize() == -1) {
+                workTicket.setPayloadSize(fileSize);
+            }
+        }
+        
+        //To add more details in staged file
+        workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
+
+        //Persist the new file deatils
+        dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+        
+    }
 
 }

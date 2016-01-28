@@ -376,7 +376,6 @@ public class MailBoxService implements Runnable {
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
-            glassMessage.setOutSize(workTicket.getPayloadSize());
 
             // validates mandatory value.
             mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -452,6 +451,7 @@ public class MailBoxService implements Runnable {
                     workTicket.getGlobalProcessId());
 
             processorService.runProcessor(workTicket, fsm);
+            glassMessage.setOutSize(workTicket.getPayloadSize());
 
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
