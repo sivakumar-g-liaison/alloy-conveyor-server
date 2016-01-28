@@ -1,3 +1,7 @@
+4.0.5
+-------------------------------
+* Need to get lib message bus to 5.4.0
+
 4.0.4
 -------------------------------
 * GMB-713 Mailbox and dropbox server rollback scripts need to be .rollback
