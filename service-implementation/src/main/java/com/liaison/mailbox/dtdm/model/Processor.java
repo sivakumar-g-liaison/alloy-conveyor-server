@@ -50,20 +50,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 @Entity
 @Table(name = "PROCESSOR")
 @NamedQueries({
-    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
-            query = "select processor from Processor processor"
-                    + " inner join processor.scheduleProfileProcessors schd_prof_processor"
-                    + " inner join schd_prof_processor.scheduleProfilesRef profile"
-                    + " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
-                    + " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
-                    + " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
-                    + " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
-                    + " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                    + " order by profile.schProfName" ), 
-    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
-                    query = "select count(processor) from Processor processor"
-                            + " inner join processor.mailbox mbx"
-                            + " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
                     query = "select processor from Processor processor"
                             + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),

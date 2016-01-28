@@ -35,14 +35,16 @@ on session expiration as well as webapp lifecycle) -->
 <Resource name="jdbc/UCPPool-DTDM"
 type="oracle.ucp.jdbc.PoolDataSource"
 auth="Container"
-factory="com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory"
+factory="com.liaison.commons.util.datasource.LiaisonConfigurableDataSourceFactory"
 connectionPoolName="UCPPool-DTDM"
+moniker="dtdm"
 />
 <Resource name="jdbc/UCPPool-RTDM"
 type="oracle.ucp.jdbc.PoolDataSource"
 auth="Container"
-factory="com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory"
+factory="com.liaison.commons.util.datasource.LiaisonConfigurableDataSourceFactory"
 connectionPoolName="UCPPool-RTDM"
+moniker="rtdm"
 />
 
 </Context>

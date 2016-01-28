@@ -185,8 +185,7 @@ public class ProcessorConfigurationService {
 
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(processor.getMailbox().getPguid(),
-					serviceInstance.getPguid());
+			int count = msiDao.getMailboxServiceInstanceCount(processor.getMailbox().getPguid(), serviceInstance.getPguid());
 
 			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
@@ -195,7 +194,7 @@ public class ProcessorConfigurationService {
 						processor.getMailbox().getPguid(), Response.Status.BAD_REQUEST);
 			}
 
-			if (mailboxServiceInstance == null) {
+			if (count == 0) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());

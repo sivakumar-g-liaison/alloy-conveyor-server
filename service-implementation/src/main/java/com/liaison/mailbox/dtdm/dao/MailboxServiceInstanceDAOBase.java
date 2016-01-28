@@ -60,4 +60,35 @@ public class MailboxServiceInstanceDAOBase extends GenericDAOBase<MailboxService
 		}
 		return null;
 	}
+
+	/**
+     * Returns MailboxServiceInstance count from  MAILBOX_SVC_INSTANCE database table.
+     * 
+     * @param mailboxGuid
+     * @param serviceInstanceGuid
+     * @return MailboxServiceInstance count
+     */
+    @Override
+    public int getMailboxServiceInstanceCount(String mailboxGuid, String serviceInstanceGuid) {
+        
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        Long mailboxServiceInstanceCount = null;
+        int count;
+
+        try {
+
+            mailboxServiceInstanceCount = (Long) entityManager.createNamedQuery(COUNT_MBX_SI_GUID)
+                    .setParameter(GUID_MBX, mailboxGuid)
+                    .setParameter(SERVICE_INSTANCE_GUID, serviceInstanceGuid)
+                    .getSingleResult();
+
+            count = mailboxServiceInstanceCount.intValue();
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return count;
+    }	
 }

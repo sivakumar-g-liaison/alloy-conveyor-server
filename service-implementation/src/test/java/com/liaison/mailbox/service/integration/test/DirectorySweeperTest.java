@@ -15,7 +15,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +40,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  *
  */
+@Test(enabled = false)
 public class DirectorySweeperTest extends BaseServiceTest {
 
 	private String inbox;
@@ -74,7 +74,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	@Test
+    @Test(enabled = false)
 	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		String name = "Purchase.txt";
@@ -112,7 +112,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws FS2Exception
 	 * @throws Exception
 	 */
-	@Test
+    @Test(enabled = false)
 	public void testSweeperWithoutFilePermission() throws IOException, URISyntaxException, MailBoxServicesException,
 			FS2Exception, Exception {
 
@@ -159,7 +159,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	@Test
+    @Test(enabled = false)
 	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
 			JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
@@ -203,7 +203,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	@Test
+    @Test(enabled = false)
 	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
 			JSONException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 

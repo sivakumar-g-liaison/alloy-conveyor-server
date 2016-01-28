@@ -30,6 +30,7 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Processor DTO to support migrator service
@@ -122,6 +123,9 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			}
 
 			RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
+			GenericValidator validator = new GenericValidator();
+            validator.validate(propertiesDTO);
+            
 			if (null != propertiesDTO) {
 				String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
 				processor.setProcsrProperties(propertiesJSON);

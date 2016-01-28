@@ -1,14 +1,30 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.thread.pool;
 
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.liaison.commons.messagebus.queueprocessor.QueueProcessorManager;
+import com.liaison.health.check.threadpool.ThreadPoolCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.messagebus.queueprocessor.ProcessorAvailability;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
+import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
+import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
 
 public class AsyncProcessThreadPool {
 
@@ -42,6 +58,37 @@ public class AsyncProcessThreadPool {
         		asyncProcessingThreadPoolSize, 
         		keepAlive, 
         		TimeUnit.MINUTES);
+
+        // threadpool check
+        LiaisonHealthCheckRegistry.INSTANCE.register(ASYNC_PROCESS_THREADPOOL_NAME + "_check",
+                new ThreadPoolCheck(ASYNC_PROCESS_THREADPOOL_NAME, 20));
+    }
+
+    /**
+     * Implemented to allow QueueProcessors to skip message polling when not enough async processors available.
+     */
+    public static class AsyncProcessThreadPoolProcessorAvailability implements ProcessorAvailability {
+
+        private int minThreadHeadRoom;
+
+        public AsyncProcessThreadPoolProcessorAvailability(int minThreadHeadRoom) {
+            this.minThreadHeadRoom = minThreadHeadRoom;
+        }
+
+        @Override
+        public boolean canProcess() {
+            if (executorService == null) {
+                return false; //unlikey
+            }
+
+            LiaisonExecutorServiceDetail liaisonExecutorServiceDetail = LiaisonExecutorServiceRegistrar.INSTANCE.getExecutorServiceDetail(ASYNC_PROCESS_THREADPOOL_NAME);
+            if (null == liaisonExecutorServiceDetail) {
+                logger.error("AsyncProcessThreadPool, perhaps call to ProcessorAvailability before service registered?");
+                return false;
+            }
+
+            return liaisonExecutorServiceDetail.getAvailableThreadCount() >= minThreadHeadRoom;
+        }
     }
 
     public static ExecutorService getExecutorService() {

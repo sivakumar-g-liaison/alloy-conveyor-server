@@ -33,7 +33,9 @@ public class GenericValidatorTest {
 	 */
 	@BeforeMethod
 	public void setUp() throws Exception {
-		
+        System.setProperty("com.liaison.secure.properties.path", "invalid");
+        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+        System.setProperty("archaius.deployment.environment", "test");
 	}
     
 	/**

@@ -35,9 +35,12 @@ import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAO;
 */
 @Entity
 @Table(name = "MAILBOX_SVC_INSTANCE")
-@NamedQueries({ @NamedQuery(name = MailboxServiceInstanceDAO.FIND_MBX_SI_GUID, query = "SELECT msi FROM MailboxServiceInstance msi where msi.mailbox.pguid = :"
-		+ MailboxServiceInstanceDAO.GUID_MBX + " AND msi.serviceInstance.pguid = :" + MailboxServiceInstanceDAO.SERVICE_INSTANCE_GUID),
-@NamedQuery(name = "MailboxServiceInstance.findAll", query = "SELECT msi FROM MailboxServiceInstance msi")
+@NamedQueries({ 
+        @NamedQuery(name = MailboxServiceInstanceDAO.FIND_MBX_SI_GUID, query = "SELECT msi FROM MailboxServiceInstance msi where msi.mailbox.pguid = :"
+            + MailboxServiceInstanceDAO.GUID_MBX + " AND msi.serviceInstance.pguid = :" + MailboxServiceInstanceDAO.SERVICE_INSTANCE_GUID),
+        @NamedQuery(name = MailboxServiceInstanceDAO.COUNT_MBX_SI_GUID, query = "SELECT count(msi) FROM MailboxServiceInstance msi where msi.mailbox.pguid = :"
+            + MailboxServiceInstanceDAO.GUID_MBX + " AND msi.serviceInstance.pguid = :" + MailboxServiceInstanceDAO.SERVICE_INSTANCE_GUID),
+        @NamedQuery(name = "MailboxServiceInstance.findAll", query = "SELECT msi FROM MailboxServiceInstance msi")
 })
 public class MailboxServiceInstance implements Identifiable {
 

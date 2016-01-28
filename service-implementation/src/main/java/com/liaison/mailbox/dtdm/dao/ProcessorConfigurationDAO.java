@@ -27,8 +27,6 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
  */
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
-	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "Processor.findProcessorByProfileAndMbxNamePattern";
-	public static final String FIND_PROCESSOR_COUNT = "Processor.findProcessorCountByMailboxId";
 	public static final String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
 	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
 	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";

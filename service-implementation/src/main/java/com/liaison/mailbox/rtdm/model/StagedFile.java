@@ -45,6 +45,7 @@ public class StagedFile implements Identifiable {
 	private String fileSize;
 	private String mailboxId;
 	private String processorId;
+	private String globalProcessId;
 	private String processorType;
 	private String fileName;
 	private String filePath;
@@ -93,6 +94,15 @@ public class StagedFile implements Identifiable {
 
 	public void setProcessorId(String processorId) {
 		this.processorId = processorId;
+	}
+
+	@Column(name = "GLOBAL_PROCESS_ID", length = 32)
+	public String getGlobalProcessId() {
+		return globalProcessId;
+	}
+
+	public void setGlobalProcessId(String globalProcessId) {
+		this.globalProcessId = globalProcessId;
 	}
 
 	@Column(name = "PROCESSOR_TYPE", length = 128)
@@ -246,5 +256,11 @@ public class StagedFile implements Identifiable {
 		this.setProcessorId(stagedFileDto.getProcessorId());
 		this.setProcessorType(stagedFileDto.getProcessorType());
 		this.setModifiedDate(timestamp);
+        this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
+	}
+
+	@Transient
+	public String getGPID() {
+		return ("NOT AVAILABLE".equals(this.getGlobalProcessId()) ? this.getPguid() : this.getGlobalProcessId());
 	}
 }

@@ -16,7 +16,16 @@ package com.liaison.mailbox;
  * @author OFS
  */
 public interface MailBoxConstants {
+	
+	// pattern for retry attempts validation
+	public final static String retryAttemptsRegex = "^[0-4]$";
+	
+	// pattern for port value validation
+	public final static String portRegex = "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
 
+	// pattern for timeout validation
+	public final static String TimeoutRegex = "^([0-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$";
+	
 	// Key descriminator values
 	/** File datetime format. */
 	public final static String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";

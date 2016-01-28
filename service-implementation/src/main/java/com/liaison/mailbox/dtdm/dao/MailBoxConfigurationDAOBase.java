@@ -78,8 +78,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			        .append(SCHD_PROF_NAME)
 			        .append(")");
 
-			totalItems = ((BigDecimal)em
-					.createNativeQuery(query.toString())
+			totalItems = ((BigDecimal) em.createNativeQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getSingleResult()).longValue();
@@ -198,9 +197,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             }	
             
             if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-	            totalItems = ((BigDecimal)entityManager.createNativeQuery(query.toString()).getSingleResult()).longValue();
+	            totalItems = ((BigDecimal) entityManager.createNativeQuery(query.toString()).getSingleResult()).longValue();
             } else {
-            	totalItems = ((BigDecimal)entityManager.createNativeQuery(query.toString())
+            	totalItems = ((BigDecimal) entityManager.createNativeQuery(query.toString())
 	                    .setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
 	                    .getSingleResult()).longValue();
             }

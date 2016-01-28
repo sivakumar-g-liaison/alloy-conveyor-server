@@ -194,11 +194,10 @@ public class MailBoxConfigurationService {
 			}
 
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(),
-					serviceInstance.getPguid());
+			int count = msiDao.getMailboxServiceInstanceCount(mailbox.getPguid(), serviceInstance.getPguid());
 
 			Set<MailboxServiceInstance> mbxServiceInstances = new HashSet<MailboxServiceInstance>();
-			if (mailboxServiceInstance == null) {
+			if (count ==  0) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());
@@ -397,8 +396,8 @@ public class MailBoxConfigurationService {
 			}
 
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(guid, serviceInstance.getPguid());
-			if (mailboxServiceInstance == null) {
+			int count = msiDao.getMailboxServiceInstanceCount(guid, serviceInstance.getPguid());
+			if (count == 0) {
 
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
