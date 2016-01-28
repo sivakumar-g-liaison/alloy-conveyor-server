@@ -78,13 +78,6 @@ query = "select state from FSMState state"
 		+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS
 		+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
 		+ " and stateValue.createdDate <= :" +FSMStateDAO.TO_DATE
-		+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE),
-@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS,
-query = "select state from FSMState state"
-		+ " inner join state.executionState stateValue"
-		+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS
-		+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
-		+ " and stateValue.createdDate < :" +FSMStateDAO.TO_DATE
 		+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE)
 
 })

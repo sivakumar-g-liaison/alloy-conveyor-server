@@ -37,7 +37,6 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	public static final String FIND_ALL_EXECUTING_PROC_BY_PROCESSORID = "FSMState.findAllExecutingProcessorsByProcessorId";
 	public static final String FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR = "FSMState.findMostRecentSuccessfulExecutionOfProcessor";
 	public static final String FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE = "FSMState.findNonSLAVerifiedFSMEventsByValue";
-	public static final String FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS = "FSMState.findNonSLAVerifiedFileStagedEvents";
 	public static final String INTERVAL_IN_HOURS = "interval_in_hours";
 	public static final String BY_VALUE = "by_value";
 	public static final String FROM_DATE = "from_date";
