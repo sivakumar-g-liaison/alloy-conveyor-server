@@ -47,7 +47,7 @@ public class QueueProcessInitializer {
      * Property to decide whether application should initialize dropbox queue or
      * not
      */
-    private static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
+    public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
 
     /**
      * Queue Processor default thread count

@@ -52,14 +52,18 @@ public class InitializationServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-        // nfs health check
-        String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
-        if(serviceNfsMount != null) {
-            for (String mount : serviceNfsMount) {
-                LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
-                        new FileReadDeleteCheck(mount));
-            }
-        }
+		boolean isDropbox = configuration.getBoolean(QueueProcessInitializer.START_DROPBOX_QUEUE, false);
+		// nfs health check
+		// check only if current service is not dropbox
+		if(!isDropbox) {
+			String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
+			if(serviceNfsMount != null) {
+				for(String mount : serviceNfsMount) {
+					LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
+							new FileReadDeleteCheck(mount));
+				}
+			}
+		}
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
