@@ -207,11 +207,6 @@ public class GenericValidator {
 
 			int fieldValue = (int)value;
 
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_PORT) && !isValidPort(fieldValue))) {
-				isValidPattern = false;
-				errorMessage.append(annotationDetails.errorMessage());
-			}
-
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(fieldValue))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
@@ -231,16 +226,6 @@ public class GenericValidator {
 
 	}
 	
-	/**
-	 * Method to validate whether given string is valid port value
-	 *
-	 * @param email
-	 * @return boolean
-	 */
-	private boolean isValidPort (int port) {
-		 return Integer.toString(port).matches(MailBoxConstants.portRegex);
-	}
-
 	/**
 	 * Method to validate whether given string is valid retryAttempt value
 	 *
