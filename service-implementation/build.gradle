@@ -352,7 +352,7 @@ cargo {
 
 		rmiPort = new Integer(tomcatRmiPort)
 		tomcat.ajpPort = new Integer(tomcatAjpPort)
-		timeout = 600000
+		//timeout = 600000
 
 		// set the initial value
 		// MUST HAVE leading spaces for cargo JVM args

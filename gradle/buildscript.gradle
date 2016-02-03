@@ -21,5 +21,5 @@ repositories {
 dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.10.0'
     classpath 'net.saliman:gradle-cobertura-plugin:1.0.0'
-    classpath 'org.ajoberstar:gradle-git:0.5.0'
+    classpath 'org.ajoberstar:gradle-git:1.1.0'
 }
