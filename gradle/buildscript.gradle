@@ -17,9 +17,11 @@
 // Executed in context of buildscript
 repositories {
     // Repo in addition to maven central
+    maven { url "https://plugins.gradle.org/m2/" } // plugins
 }
 dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.10.0'
     classpath 'net.saliman:gradle-cobertura-plugin:1.0.0'
-    classpath 'org.ajoberstar:gradle-git:0.5.0'
+    classpath 'org.ajoberstar:gradle-git:1.1.0'
+    classpath 'org.sonarqube.gradle:gradle-sonarqube-plugin:1.1'
 }

@@ -38,8 +38,8 @@ subprojects { project ->
         extension 'jar'
     }
 
-    configurations.add('sources')
-    configurations.add('javadoc')
+    configurations.create('sources')
+    configurations.create('javadoc')
     configurations.archives {
         extendsFrom configurations.sources
         extendsFrom configurations.javadoc
@@ -84,7 +84,7 @@ subprojects { project ->
     }
 }
 
-apply plugin: 'github-pages' // Used to create publishGhPages task
+apply plugin: 'org.ajoberstar.github-pages' // Used to create publishGhPages task
 
 def docTasks = [:]
 [Javadoc,ScalaDoc,Groovydoc].each{ Class docClass ->
@@ -100,7 +100,7 @@ def docTasks = [:]
             }
         }
         docTasks[shortName] = docTask
-        processGhPages.dependsOn(docTask)
+        publishGhPages.dependsOn(docTask)
     }
 }
 
@@ -118,5 +118,5 @@ githubPages {
 
 // Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
 task createWrapper(type: Wrapper, description:'Generates gradle wrapper', group:'Build Setup') {
-    gradleVersion = '1.12'
+    gradleVersion = '2.10'
 }
