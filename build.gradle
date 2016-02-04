@@ -85,14 +85,13 @@ allprojects {
     }    
 }
 
+apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/master/gradle/sonarqube.gradle'
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/maven.gradle')
-apply from: file('gradle/check.gradle')
 apply from: file('gradle/bundler/bundle.gradle')
 apply from: file('gradle/bundler/framework.gradle')
 apply from: file('gradle/bundler_project.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
-apply from: file('gradle/sonarqube.gradle')
 
 war {
     //a hack to remove the empty project_root war from consideration
