@@ -45,7 +45,7 @@
                         <label>
                             Name *
                         </label>
-                        <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-minLength=5 ng-maxLength=80 class="form-control" valid-number />
+                        <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-minLength="{{minimumLength}}" ng-maxLength="{{maximumLengthAllowedInProcessorDescription}}" class="form-control" valid-number />
 						
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
                             <span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.name.$error.pattern}" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
@@ -53,7 +53,7 @@
                             <span id="mbx-procsr-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formAddPrcsr.name.$error.minlength }" ng-show="formAddPrcsr.name.$error.minlength">
                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be shorter than {{minimumLength}} characters.</span>
                             <span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.name.$error.maxlength}" ng-show="formAddPrcsr.name.$error.maxlength">
-                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+                            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
 
                         </div>
                     </div>
@@ -71,7 +71,7 @@
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength=512 class="form-control processor_textArea_Editor"></textarea>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength="{{maximumLengthAllowedInProcessorDescription}}" class="form-control processor_textArea_Editor"></textarea>
                         <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
@@ -82,7 +82,7 @@
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength=512 rows="1" class="form-control"></textarea>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength={{maximumLengthAllowedInProcessorDescription}} rows="1" class="form-control"></textarea>
                         <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
