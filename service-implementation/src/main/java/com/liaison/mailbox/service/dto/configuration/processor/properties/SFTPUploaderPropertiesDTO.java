@@ -49,7 +49,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	@PatternValidation(errorMessage = "Invalid Value for port", type = MailBoxConstants.PROPERTY_PORT)
+
 	public int getPort() {
 		return port;
 	}
