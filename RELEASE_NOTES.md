@@ -1,6 +1,7 @@
 4.1.0-SNAPSHOT
 -------------------------------
 * GMB-707 - Mailbox filewriter doesn't record outbound bytes
+* GGT-194 - sonarqube integration
 
 4.0.0
 -------------------------------
