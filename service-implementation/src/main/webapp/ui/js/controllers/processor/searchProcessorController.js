@@ -239,11 +239,11 @@ var rest = myApp.controller(
                 columnDefs: [{
                     field: 'mailboxName',
                     displayName: 'Mailbox Name',
-                    width: "25%"
+                    width: "20%"
                 },{
                     field: 'name',
                     displayName: 'Processor Name',
-                    width: "26%"
+                    width: "20%"
                 }, {
                     field: 'type',
                     displayName: 'Type',
@@ -252,12 +252,16 @@ var rest = myApp.controller(
                 }, {
                     field: 'protocol',
                     displayName: 'Protocol',
-                    width: "15%",
+                    width: "8%",
                     cellTemplate: 'partials/processor/processor_section_templates/processor_protocol_field_template.html'                    
                 }, {
                     field: 'status',
-                    displayName: 'Status',
-                    width: "8%"                    
+                    displayName: 'Processor Status',
+                    width: "12%"                    
+                }, {
+                    field: 'mailboxStatus',
+                    displayName: 'Mailbox Status',
+                    width: "12%"                    
                 }, {
                     displayName: 'Action',
                     sortable: false,
