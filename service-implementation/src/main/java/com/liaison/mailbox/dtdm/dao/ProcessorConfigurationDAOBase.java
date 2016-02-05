@@ -588,6 +588,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         			query.append(" order by processor.procsrStatus ")
         			.append(sortDirection);
         			break;
+        		case "mailboxStatus":
+        			query.append(" order by mailbox.mbxStatus ")
+        			.append(sortDirection);
+        			break;
         	}
         } else {
             query.append(" order by processor.procsrName");

@@ -73,6 +73,7 @@ public class ProcessorDTO {
 	private List<ProfileDTO> profiles;
 	private boolean createConfiguredLocation;
 	private String mailboxName;
+	private String mailboxStatus;
 
 
 	public ProcessorDTO() {
@@ -193,6 +194,14 @@ public class ProcessorDTO {
 
 	public void setMailboxName(String mailboxName) {
 		this.mailboxName = mailboxName;
+	}
+	
+	public String getMailboxStatus() {
+		return mailboxStatus;
+	}
+
+	public void setMailboxStatus(String mailboxStatus) {
+		this.mailboxStatus = mailboxStatus;
 	}
 
 	/**
@@ -351,6 +360,7 @@ public class ProcessorDTO {
 		this.setName(processor.getProcsrName());
 		this.setLinkedMailboxId(processor.getMailbox().getPguid());
 		this.setMailboxName(processor.getMailbox().getMbxName());
+		this.setMailboxStatus(processor.getMailbox().getMbxStatus());
 
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		// Set protocol
