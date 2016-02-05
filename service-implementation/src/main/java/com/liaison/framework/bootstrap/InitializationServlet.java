@@ -14,12 +14,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.health.check.file.FileReadDeleteCheck;
-import com.liaison.health.check.jdbc.JdbcConnectionCheck;
-import com.liaison.health.check.threadpool.ThreadPoolCheck;
-import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +24,12 @@ import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.health.check.file.FileReadDeleteCheck;
+import com.liaison.health.check.jdbc.JdbcConnectionCheck;
+import com.liaison.health.core.LiaisonHealthCheckRegistry;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.queue.QueueProcessInitializer;
 
 
@@ -51,6 +51,7 @@ public class InitializationServlet extends HttpServlet {
 	public static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
 
     public void init(ServletConfig config) throws ServletException {
+
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 		boolean isDropbox = configuration.getBoolean(QueueProcessInitializer.START_DROPBOX_QUEUE, false);
         // nfs health check
@@ -74,17 +75,17 @@ public class InitializationServlet extends HttpServlet {
 		// db health check
 		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
 				new JdbcConnectionCheck(
-						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
-						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
-						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
-						configuration.getString(com.liaison.mailbox.dtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+                        configuration.getString(MailBoxConstants.DTDM_DB_DRIVER_PROPERTY),
+                        configuration.getString(MailBoxConstants.DTDM_DB_URL_PROPERTY),
+                        configuration.getString(MailBoxConstants.DTDM_DB_USER_PROPERTY),
+                        configuration.getString(MailBoxConstants.DTDM_DB_PASSWORD_PROPERTY)
 				));
 		LiaisonHealthCheckRegistry.INSTANCE.register("rtdm_db_connection_check",
 				new JdbcConnectionCheck(
-						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_DRIVER_PROPERTY),
-						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_URL_PROPERTY),
-						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_USER_PROPERTY),
-						configuration.getString(com.liaison.mailbox.rtdm.datasource.CustomDataSourceFactory.DB_PASSWORD_PROPERTY)
+                        configuration.getString(MailBoxConstants.RTDM_DB_DRIVER_PROPERTY),
+                        configuration.getString(MailBoxConstants.RTDM_DB_URL_PROPERTY),
+                        configuration.getString(MailBoxConstants.RTDM_DB_USER_PROPERTY),
+                        configuration.getString(MailBoxConstants.RTDM_DB_PASSWORD_PROPERTY)
 				));
 		
 		// Set ACL Filter Signature Verifier

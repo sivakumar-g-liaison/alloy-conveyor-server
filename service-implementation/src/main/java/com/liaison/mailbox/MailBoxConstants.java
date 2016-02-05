@@ -367,5 +367,18 @@ public interface MailBoxConstants {
     public static String  MBX_SLA_CONFIG_UNIT = "com.liaison.mailbox.default.sla.time.unit";
     public static String DEFAULT_SLA_EMAIL_NOTIFICATION = "com.liaison.mailbox.default.sla.notification";
     public static String DEFAULT_SLA_MAX_NOTIFICATION_COUNT = "com.liaison.mailbox.default.sla.max.notification.count";
-    
+
+    /**
+     * Properties required for Healthcheck
+     */
+    public static final String DTDM_DB_DRIVER_PROPERTY = "com.liaison.dtdm.DB_DRIVER";
+    public static final String DTDM_DB_URL_PROPERTY = "com.liaison.dtdm.DB_URL";
+    public static final String DTDM_DB_USER_PROPERTY = "com.liaison.dtdm.DB_USER";
+    public static final String DTDM_DB_PASSWORD_PROPERTY = "com.liaison.dtdm.DB_PASSWORD";
+
+    public static final String RTDM_DB_DRIVER_PROPERTY = "com.liaison.rtdm.DB_DRIVER";
+    public static final String RTDM_DB_URL_PROPERTY = "com.liaison.rtdm.DB_URL";
+    public static final String RTDM_DB_USER_PROPERTY = "com.liaison.rtdm.DB_USER";
+    public static final String RTDM_DB_PASSWORD_PROPERTY = "com.liaison.rtdm.DB_PASSWORD";
+
 }
