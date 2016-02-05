@@ -622,3 +622,7 @@ input::-moz-focus-inner {
 .ttl_alignment{
     margin-left: -13px !important;
 }
+
+#mbx-procsr-name {
+	text-overflow: ellipsis;
+}
