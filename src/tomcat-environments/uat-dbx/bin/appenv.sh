@@ -18,8 +18,6 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.includeLocation=true"
 # log4j will look for updates to log4j xml every 5 minutes
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.interval.sec=300"
 
-# Configuration for the Dynatrace APM tool
-export CATALINA_OPTS="$CATALINA_OPTS -agentpath:/opt/dynatrace-6.2/agent/lib64/libdtagent.so=name=dbox_server,server=at4m-wvdyna01.liaison.prod"
 
 # ==================================================================
 # log overrides
