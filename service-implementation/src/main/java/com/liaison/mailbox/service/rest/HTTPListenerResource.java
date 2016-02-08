@@ -57,6 +57,7 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAbstractProcessor;
 import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
 import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.util.GlassMessage;
@@ -90,6 +91,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	private static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
+	private static final String NO_PRIVILEGE = "You do not have sufficient privilege to invoke the service";
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
@@ -250,7 +252,12 @@ public class HTTPListenerResource extends AuditedResource {
 	                    glassMessage.logFourthCornerTimestamp();
 
                     }
-					throw new LiaisonRuntimeException(e.getMessage());
+					
+					if (NO_PRIVILEGE.equals(e.getMessage())) {
+					    throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
+					} else {
+					    throw new LiaisonRuntimeException(e.getMessage());
+					}
 				}
 			}
 
@@ -423,7 +430,12 @@ public class HTTPListenerResource extends AuditedResource {
                         transactionVisibilityClient.logToGlass(glassMessage);
                         glassMessage.logFourthCornerTimestamp();
                     }
-                    throw new LiaisonRuntimeException(e.getMessage());
+                    
+                    if (NO_PRIVILEGE.equals(e.getMessage())) {
+                        throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
+                    } else {
+                        throw new LiaisonRuntimeException(e.getMessage());
+                    }
 				}
 			}
 		};
@@ -549,13 +561,13 @@ public class HTTPListenerResource extends AuditedResource {
 
             String getRequestHeaders = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
 
-            if(!MailBoxUtil.isEmpty(getRequestHeaders)) {
+            if (!MailBoxUtil.isEmpty(getRequestHeaders)) {
                 List<RoleBasedAccessControl> roleBasedAccessControl = gemClient.getDomainsFromACLManifest(getRequestHeaders);
                 String tenancyKey = httpListenerProperties.get(MailBoxConstants.PROPERTY_TENANCY_KEY);
 
                 for (RoleBasedAccessControl roleBasedAccessCtrl : roleBasedAccessControl) {
 
-                    if(roleBasedAccessCtrl.getDomainInternalName().equals(tenancyKey)) {
+                    if (roleBasedAccessCtrl.getDomainInternalName().equals(tenancyKey)) {
                         tenancyKeyExist = true;
                         break;
                     }
@@ -565,8 +577,8 @@ public class HTTPListenerResource extends AuditedResource {
             }
         }
 
-        if(!tenancyKeyExist) {
-            throw new RuntimeException("You do not have sufficient privilege to invoke the service");
+        if (!tenancyKeyExist) {
+            throw new RuntimeException(NO_PRIVILEGE);
         }
     }
 
