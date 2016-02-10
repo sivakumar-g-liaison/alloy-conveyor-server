@@ -35,13 +35,6 @@ allprojects {
             options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
-
-    apply plugin: 'jacoco'
-    jacoco {
-        toolVersion = "0.7.5.201505241946"
-        reportsDir = file("${buildDir}/reports/jacoco")
-    }
-
     group = 'com.liaison.commons.mailbox'
 		
 	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
@@ -120,11 +113,31 @@ subprojects {
                  [group: 'com.liaison', name: 'lib_thread_management', version: '1.2.+', classifier: 'rest'])
      }
 
-}
+    apply plugin: 'jacoco'
+    test {
+        ignoreFailures = false
+        useTestNG()
 
-test {
-	ignoreFailures = false
-	useTestNG()
+        jacoco {
+            append = false
+            destinationFile = file("${buildDir}/jacoco/unitTest.exec")
+            classDumpFile = file("${buildDir}/jacoco/classpathdumps")
+        }
+    }
+
+    jacoco {
+        toolVersion = "0.7.5.201505241946"
+        reportsDir = file("${buildDir}/jacoco")
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled false
+            csv.enabled false
+            html.destination "${buildDir}/jacocoHtml"
+        }
+    }
+
 }
 
 /*
