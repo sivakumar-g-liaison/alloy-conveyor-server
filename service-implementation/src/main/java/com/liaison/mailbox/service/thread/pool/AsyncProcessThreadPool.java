@@ -10,17 +10,15 @@
 
 package com.liaison.mailbox.service.thread.pool;
 
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.liaison.commons.messagebus.queueprocessor.QueueProcessorManager;
+import com.liaison.commons.messagebus.common.ProcessorAvailability;
 import com.liaison.health.check.threadpool.ThreadPoolCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.messagebus.queueprocessor.ProcessorAvailability;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
 import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;

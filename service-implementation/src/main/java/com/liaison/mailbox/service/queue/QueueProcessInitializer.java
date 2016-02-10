@@ -8,12 +8,12 @@
  */
 package com.liaison.mailbox.service.queue;
 
+import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.health.check.threadpool.ThreadPoolCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.messagebus.queueprocessor.QueueProcessorManager;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
@@ -34,7 +34,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  *
  * Override queue poller pool size with property:
  * {@value #PROPERTY_QUEUE_PROCESSOR_POOL_SIZE}
- * 
+ *
  * @author VNagarajan
  *
  */
@@ -69,6 +69,11 @@ public class QueueProcessInitializer {
     private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
     private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
 
+    public static QueuePooledListenerContainer dropboxQueue;
+    public static QueuePooledListenerContainer mailboxProcessorQueue;
+    public static QueuePooledListenerContainer mailboxProcessedPayloadQueue;
+
+
     public static void initialize() {
 
         AsyncProcessThreadPool.AsyncProcessThreadPoolProcessorAvailability asyncProcessThreadPoolProcessorAvailability = new AsyncProcessThreadPool.AsyncProcessThreadPoolProcessorAvailability(
@@ -76,46 +81,41 @@ public class QueueProcessInitializer {
 
         if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
 
-            // Initialize Dropbox queue
-            logger.debug("dropbox queue starts to poll");
-            QueueProcessorManager.register(DROPBOX_QUEUE,
-                    ServiceBrokerToDropboxWorkTicketQueue.getInstance(),
-                    DEFAULT_THREAD_COUNT,
-                    ServiceBrokerToDropboxQueueProcessor.class,
-                    asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Starting Dropbox Queue Listener");
+            dropboxQueue = new QueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
+            dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started Dropbox Queue Listener");
 
-            // threadpool check
-            String dropboxPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + DROPBOX_QUEUE;
-            LiaisonHealthCheckRegistry.INSTANCE.register(dropboxPoolName + "_check",
-                    new ThreadPoolCheck(dropboxPoolName, DEFAULT_THREAD_COUNT + 20));
+
+//            // threadpool check
+//            String dropboxPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + DROPBOX_QUEUE;
+//            LiaisonHealthCheckRegistry.INSTANCE.register(dropboxPoolName + "_check",
+//                    new ThreadPoolCheck(dropboxPoolName, DEFAULT_THREAD_COUNT + 20));
 
         } else {
 
             // Initialize processor queue and processedPayload queue
-            logger.debug("processor and sweeper queues starts to poll");
-
-            QueueProcessorManager.register(MAILBOX_PROCESSOR_QUEUE,
-                    ProcessorReceiveQueue.getInstance(),
-                    DEFAULT_THREAD_COUNT,
-                    MailboxProcessorQueueProcessor.class,
-                    asyncProcessThreadPoolProcessorAvailability);
-
-            QueueProcessorManager.register(MAILBOX_PROCESSED_PAYLOAD_QUEUE,
-                    ServiceBrokerToMailboxWorkTicketQueue.getInstance(),
-                    DEFAULT_THREAD_COUNT,
-                    ServiceBrokerToMailboxQueueProcessor.class,
-                    asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
+            mailboxProcessorQueue = new QueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
+            mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
 
 
-            // threadpool check
-            String processorPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSOR_QUEUE;
-            LiaisonHealthCheckRegistry.INSTANCE.register(processorPoolName + "_check",
-                    new ThreadPoolCheck(processorPoolName, DEFAULT_THREAD_COUNT + 20));
 
-            // threadpool check
-            String payloadPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSED_PAYLOAD_QUEUE;
-            LiaisonHealthCheckRegistry.INSTANCE.register(payloadPoolName + "_check",
-                    new ThreadPoolCheck(payloadPoolName, DEFAULT_THREAD_COUNT + 20));
+            logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
+            mailboxProcessedPayloadQueue = new QueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
+            mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
+
+//            // threadpool check
+//            String processorPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSOR_QUEUE;
+//            LiaisonHealthCheckRegistry.INSTANCE.register(processorPoolName + "_check",
+//                    new ThreadPoolCheck(processorPoolName, DEFAULT_THREAD_COUNT + 20));
+//
+//            // threadpool check
+//            String payloadPoolName = QueueProcessorManager.THREAD_POOL_NAME_PREFIX + MAILBOX_PROCESSED_PAYLOAD_QUEUE;
+//            LiaisonHealthCheckRegistry.INSTANCE.register(payloadPoolName + "_check",
+//                    new ThreadPoolCheck(payloadPoolName, DEFAULT_THREAD_COUNT + 20));
         }
     }
 

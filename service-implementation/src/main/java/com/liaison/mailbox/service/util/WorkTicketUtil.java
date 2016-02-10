@@ -24,7 +24,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 
 /**
  * Utilities for WorkTicket.
@@ -63,7 +63,7 @@ public class WorkTicketUtil {
 
 	public static void postToQueue(String message)
 			throws Exception {
-		SweeperQueue.getInstance().sendMessages(message);
+		SweeperQueueSendClient.getInstance().sendMessage(message);
 		LOGGER.debug("postToQueue, message: {}", message);
 
 	}

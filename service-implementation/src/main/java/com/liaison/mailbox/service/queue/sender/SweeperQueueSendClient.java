@@ -10,23 +10,26 @@
 package com.liaison.mailbox.service.queue.sender;
 
 
-import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinSendClient;
+import com.liaison.commons.messagebus.SendClient;
+import com.liaison.commons.messagebus.queue.QueueTextSendClient;
 
 /**
- * Queue where the swept file details are enqueued as worktickets. 
+ * Owner of singleton SendClient
  * 
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class SweeperQueue extends HornetQJMSRoundRobinSendClient {
+public class SweeperQueueSendClient implements AutoCloseable {
 
     public static final String QUEUE_NAME = "sweeper";
-    private static SweeperQueue ourInstance = new SweeperQueue();
+    private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
-    public static SweeperQueue getInstance() {
-        return ourInstance;
+    public static SendClient getInstance() {
+        return getInstance();
     }
 
-    private SweeperQueue() {
-         super(QUEUE_NAME);
+
+    @Override
+    public void close() throws Exception {
+        sendClient.close();
     }
 }

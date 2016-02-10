@@ -45,7 +45,7 @@ test {
 buildscript {
 
 	repositories {
-		maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' }
+    	maven { url liaisonMavenCentralProxyURL }
 		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
 		maven { url 'http://smartbearsoftware.com/repository/maven2/' } // for SoapUI
 	}
@@ -83,8 +83,10 @@ configurations {
 }
 
 allprojects {
-	repositories { maven { url 'http://10.0.24.241:8000/nexus/content/repositories/central/' } }
-
+	repositories { 
+		maven { url liaisonJbossProxyURL } //HORNETQ JBOSS PROXY
+    	maven { url liaisonMavenCentralProxyURL }
+	 }
 }
 
 war {
@@ -209,8 +211,7 @@ dependencies {
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
 
-	//TODO change to 2.+ after logging updATE
-	compile 'com.liaison.commons:lib_message_bus:5.4.+'
+	compile 'com.liaison.commons:lib_message_bus:8.+'
 
 	compile "com.liaison.commons:lib_health_monitor_core:1.1.+"
 	compile "com.liaison.commons:lib_health_monitor_file:1.1.+"
