@@ -8,26 +8,33 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue;
+package com.liaison.mailbox.service.queue.sender;
 
-import com.liaison.commons.messagebus.hornetq.jms.HornetQJMSRoundRobinSendClient;
+
+import com.liaison.commons.messagebus.SendClient;
+import com.liaison.commons.messagebus.queue.QueueTextSendClient;
 
 /**
- * Class that enqueues request for running a processor.
+ * Owner of singleton SendClient for "processor" queue
  * 
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class ProcessorSendQueue extends HornetQJMSRoundRobinSendClient {
+public class ProcessorSendQueue implements AutoCloseable {
 
     public static final String QUEUE_NAME = "processor";
-    private static ProcessorSendQueue ourInstance = new ProcessorSendQueue();
+    private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
-    public static ProcessorSendQueue getInstance() {
-        return ourInstance;
+    public static SendClient getInstance() {
+        return sendClient;
     }
 
     private ProcessorSendQueue() {
-         super(QUEUE_NAME);
+        //NOP
     }
 
+    @Override
+    public void close() throws Exception {
+        sendClient.close();
+    }
 }
+

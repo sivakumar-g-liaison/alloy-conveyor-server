@@ -54,7 +54,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Sweepe
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -328,7 +328,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private void postToSweeperQueue(String input)   {
 
         try {
-			SweeperQueue.getInstance().sendMessages(input);
+			SweeperQueueSendClient.getInstance().sendMessage(input);
 		} catch (ClientUnavailableException e) {
 			throw new RuntimeException(e);
 		}

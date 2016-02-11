@@ -10,14 +10,15 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
+import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.mailbox.service.dropbox.DropboxService;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
-public class ServiceBrokerToDropboxQueueProcessor implements QueueProcessor {
+public class ServiceBrokerToDropboxQueueProcessor implements QueueTextMessageProcessor {
 
 	@Override
 	public void processMessage(String message) {
 		AsyncProcessThreadPool.getExecutorService().submit(new DropboxService(message));
 	}
+
 }

@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import com.liaison.commons.messagebus.queueprocessor.QueueProcessor;
+import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.core.MailBoxService.QueueMessageType;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
@@ -20,7 +20,7 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 * @author OFS
 *
 */
-public class ServiceBrokerToMailboxQueueProcessor implements QueueProcessor {
+public class ServiceBrokerToMailboxQueueProcessor implements QueueTextMessageProcessor {
 
 	@Override
 	public void processMessage(String message) {

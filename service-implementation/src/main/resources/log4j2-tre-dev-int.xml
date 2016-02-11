@@ -133,7 +133,6 @@
             <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
             <filters>
                 <!-- remove some noise -->
-                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
                 <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
             </filters>
         </Console>

@@ -1,5 +1,6 @@
 4.1.0-SNAPSHOT
 -------------------------------
+* GQ-118 - LMB Listener 
 * GMB-707 - Mailbox filewriter doesn't record outbound bytes
 * GGT-194 - sonarqube integration
 * GMB-708 - Wrong Status code returns in response when the user configured the bind users to the Mailbox ID's
