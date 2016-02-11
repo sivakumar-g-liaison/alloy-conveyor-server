@@ -24,7 +24,7 @@ public class SweeperQueueSendClient implements AutoCloseable {
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
     public static SendClient getInstance() {
-        return getInstance();
+        return sendClient;
     }
 
 
