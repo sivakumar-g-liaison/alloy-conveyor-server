@@ -23,6 +23,9 @@ public interface MailBoxConstants {
 	// pattern for timeout validation
 	public final static String TimeoutRegex = "^([0-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$";
 	
+	// pattern for number of files validation
+	public final static String NUMBER_OF_FILES_THRESHOLD_REGX = "^0*([0-9]|1[0-9]|2[0-5])$";
+
 	// Key descriminator values
 	/** File datetime format. */
 	public final static String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";

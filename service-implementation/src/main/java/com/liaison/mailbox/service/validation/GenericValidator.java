@@ -245,6 +245,20 @@ public class GenericValidator {
 	private boolean isBetweenRange (int number) {
 		 return number<=60000 && number>=0;
 	}
+	
+	/**
+	 * Method to validate whether given string is valid number of files
+	 * 
+	 * @param string
+	 * @return boolean
+	 */
+	private boolean isValidNumberOfFilesThreshold(String value) {
+	    
+	    if (null != value) {
+	        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
+	    }
+        return false;
+	}
 
 	/**
 	 * Validates the given values is avail in the Enum.
@@ -273,6 +287,10 @@ public class GenericValidator {
 				&&	Protocol.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;
+		} else if (MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD.equals(annotationDetails.type())
+                &&  !isValidNumberOfFilesThreshold(String.valueOf(value))) {
+                    errorMessage.append(annotationDetails.errorMessage());
+                    return false;
 		}
 		return true;
 	}
