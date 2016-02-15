@@ -11,6 +11,9 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -44,7 +47,9 @@ import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
@@ -434,6 +439,40 @@ public class MailBoxUtil {
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Method to construct the valid URL
+     * 
+     * @param propertiesDTO
+     * @throws URISyntaxException
+     * @throws MalformedURLException
+     */
+    public static void constructURLAndPort(RemoteProcessorPropertiesDTO propertiesDTO) throws URISyntaxException, MalformedURLException {
+        
+        URI uri = new URI(propertiesDTO.getUrl());
+        String scheme = uri.getScheme();
+        if (uri.getPort() == -1 && propertiesDTO.getPort() == 0) {
+            
+            if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+                propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
+                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.FTPS_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            } else if (Protocol.SFTP.getCode().toString().equalsIgnoreCase(scheme)) {
+                propertiesDTO.setPort(MailBoxConstants.SFTP_PORT);
+                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.SFTP_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            } else if (Protocol.HTTP.getCode().toString().equalsIgnoreCase(scheme)) {
+                propertiesDTO.setPort(MailBoxConstants.HTTP_PORT);
+                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.HTTP_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            } else if (Protocol.HTTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+                propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
+                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.HTTPS_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            } 
+        } else if (uri.getPort() != -1 &&  propertiesDTO.getPort() == 0) {
+            propertiesDTO.setPort(uri.getPort());
+        } else if (uri.getPort() != propertiesDTO.getPort()) {
+            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+        }
+        
     }
 
 }
