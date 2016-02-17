@@ -184,11 +184,11 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 
 				property = new ProcessorProperty();
 				propertyDTO.copyToEntity(property, false);
-				properties.add(property);
 				property.setProcessor(processor);
+				properties.add(property);
 			}
 			if (!properties.isEmpty()) {
-				processor.setDynamicProperties(properties);
+				processor.getDynamicProperties().addAll(properties);
 			}
 
 			// Set the protocol
