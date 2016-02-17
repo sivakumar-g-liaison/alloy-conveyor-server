@@ -10,14 +10,20 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -258,5 +264,66 @@ public class GenericValidatorTest {
 		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
+	
+	/**
+	 * Method to validate the given url
+	 * 
+	 * @throws URISyntaxException 
+	 */
+	@Test
+	public void testValidateURL() throws URISyntaxException {
+	    
+	    RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+	    GenericValidator validator = new GenericValidator();
+	    String host = "10.146.18.25";
+	    
+	    propertiesDTO.setUrl(new URI(Protocol.FTP.getCode(), null, host, MailBoxConstants.FTPS_PORT, "", null, null).toString());
+	    Assert.assertTrue(validator.validate(propertiesDTO));
+	    
+	    propertiesDTO.setUrl(new URI(Protocol.FTPS.getCode(), null, host, MailBoxConstants.FTPS_PORT, "", null, null).toString());
+	    Assert.assertTrue(validator.validate(propertiesDTO));
+	    
+	    propertiesDTO.setUrl(new URI(Protocol.SFTP.getCode(), null, "lsvlmbox01d.liaison.dev", MailBoxConstants.SFTP_PORT, "", null, null).toString());
+        Assert.assertTrue(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setUrl(new URI(Protocol.HTTP.getCode(), null, "localhost", MailBoxConstants.HTTP_PORT, "", null, null).toString());
+        Assert.assertTrue(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setUrl(new URI(Protocol.HTTPS.getCode(), null, "localhost", MailBoxConstants.HTTPS_PORT, "", null, null).toString());
+        Assert.assertTrue(validator.validate(propertiesDTO));
+	    
+	}
+	
+	/**
+	 * Method to validate the given invalid url
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+	public void testValidateInvalidURL() throws URISyntaxException {
+	    
+	    RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setUrl(new URI("tcp", null, "10.146.18.25", MailBoxConstants.FTPS_PORT, "", null, null).toString());
+        validator.validate(propertiesDTO);
+        
+	}
+	
+	/**
+	 *  Method to validate the given invalid url
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testValidateURLWithSpace() throws URISyntaxException {
+        
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setUrl("ftp://lsvlmbox01d." + " " + "liaison.dev:25");
+        validator.validate(propertiesDTO);
+        
+    }
 
 }

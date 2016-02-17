@@ -5,6 +5,7 @@
 * GGT-194 - sonarqube integration
 * GMB-708 - Wrong Status code returns in response when the user configured the bind users to the Mailbox ID's
 * GMB-718 - Set upper limit for grouping the files in Directory Sweeper
+* GMB-646 - Validation is missing for processor properties in server side
 
 4.0.0
 -------------------------------

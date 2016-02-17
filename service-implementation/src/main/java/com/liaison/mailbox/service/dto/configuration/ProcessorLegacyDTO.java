@@ -26,6 +26,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -125,6 +126,11 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
 			GenericValidator validator = new GenericValidator();
             validator.validate(propertiesDTO);
+            
+            if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
+                    ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
+                MailBoxUtil.constructURLAndPort(propertiesDTO);
+            }
             
 			if (null != propertiesDTO) {
 				String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());

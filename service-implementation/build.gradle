@@ -71,7 +71,7 @@ buildscript {
 
 		// https://github.com/zeroturnaround/gradle-jrebel-plugin
 		classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
-
+		
 	}
 }
 
@@ -267,7 +267,10 @@ dependencies {
 
 	//Dependency for Encryption
 	compile "com.liaison.commons.lib:crypto:4.0.2"
-
+	
+	//Required for URL validations
+	compile "commons-validator:commons-validator:1.5.0"
+	
 }
 
 idea {

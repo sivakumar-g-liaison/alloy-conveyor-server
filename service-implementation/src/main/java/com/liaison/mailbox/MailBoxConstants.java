@@ -383,5 +383,11 @@ public interface MailBoxConstants {
     public static final String RTDM_DB_URL_PROPERTY = "com.liaison.rtdm.DB_URL";
     public static final String RTDM_DB_USER_PROPERTY = "com.liaison.rtdm.DB_USER";
     public static final String RTDM_DB_PASSWORD_PROPERTY = "com.liaison.rtdm.DB_PASSWORD";
+    
+    //Default Ports
+    public final static int HTTP_PORT = 80;
+    public final static int HTTPS_PORT = 443;
+    public final static int FTPS_PORT = 21;
+    public final static int SFTP_PORT = 22;
 
 }

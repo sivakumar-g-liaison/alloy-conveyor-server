@@ -107,6 +107,7 @@ public class RemoteProcessorPropertiesDTO {
 		this.connectionTimeout = connectionTimeout;
 	}
 
+	@PatternValidation(errorMessage = "Invalid URL.", type = MailBoxConstants.PROPERTY_URL)
 	public String getUrl() {
 		return url;
 	}
