@@ -225,6 +225,12 @@ public class GenericValidator {
 			    isValidPattern = false;
 			    errorMessage.append(annotationDetails.errorMessage());
 			}
+			
+			if (MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD.equals(annotationDetails.type())
+	                &&  !isValidNumberOfFilesThreshold(String.valueOf(value))) {
+				isValidPattern = false;
+	            errorMessage.append(annotationDetails.errorMessage());
+			}
 		}
 		return isValidPattern;
 
@@ -258,11 +264,8 @@ public class GenericValidator {
 	 * @return boolean
 	 */
 	private boolean isValidNumberOfFilesThreshold(String value) {
-	    
-	    if (null != value) {
-	        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
-	    }
-        return false;
+        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
+
 	}
 
 	/**
@@ -292,10 +295,6 @@ public class GenericValidator {
 				&&	Protocol.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;
-		} else if (MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD.equals(annotationDetails.type())
-                &&  !isValidNumberOfFilesThreshold(String.valueOf(value))) {
-                    errorMessage.append(annotationDetails.errorMessage());
-                    return false;
 		} 
 		return true;
 	}
