@@ -23,7 +23,6 @@ import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.health.check.file.FileReadDeleteCheck;
@@ -70,7 +69,6 @@ public class InitializationServlet extends HttpServlet {
 
         QueueProcessInitializer.initialize();
     	DAOUtil.init();
-    	UUIDGen.init();
 
 		// db health check
 		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
@@ -87,7 +85,7 @@ public class InitializationServlet extends HttpServlet {
                         configuration.getString(MailBoxConstants.RTDM_DB_USER_PROPERTY),
                         configuration.getString(MailBoxConstants.RTDM_DB_PASSWORD_PROPERTY)
 				));
-		
+
 		// Set ACL Filter Signature Verifier
 		SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
 
