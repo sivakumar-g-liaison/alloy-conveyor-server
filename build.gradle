@@ -20,8 +20,7 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 
 buildscript {
     repositories {
-        mavenLocal()
-        maven { url liaisonMavenCentralProxyURL }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
     }
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
@@ -49,12 +48,14 @@ allprojects {
 		}
 
     repositories { 
-    	maven { url liaisonJbossProxyURL } //HORNETQ JBOSS PROXY
-    	maven { url liaisonMavenCentralProxyURL }
-        // Liaison Private Maven artifact repos (Nexus)
-        maven { url releasesArtifactRepoURL }
-        maven { url snapshotsArtifactRepoURL }
-        maven { url thirdpartyArtifactRepoURL }
+        maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-releases' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-snapshots' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-releases' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-snapshots' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
     }
     
     configurations {
@@ -204,7 +205,6 @@ project(':service-framework') {
 }
 
 allprojects {
-    //repositories { mavenCentral() }
     configurations.all {
 		
         // make sure we are using the latest commons-io

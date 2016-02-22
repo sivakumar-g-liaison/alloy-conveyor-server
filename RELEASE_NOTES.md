@@ -7,6 +7,7 @@
 * GMB-718 - Set upper limit for grouping the files in Directory Sweeper
 * GMB-634 - Mailbox Uploaders should check the local payload and try to connect the SFTP server once the files are available to upload
 * GMB-646 - Validation is missing for processor properties in server side
+* GGT-452 new nexus repo
 
 4.0.0
 -------------------------------

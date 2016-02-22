@@ -45,9 +45,10 @@ test {
 buildscript {
 
 	repositories {
-    	maven { url liaisonMavenCentralProxyURL }
-		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-		maven { url 'http://smartbearsoftware.com/repository/maven2/' } // for SoapUI
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/soapui' }
 	}
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies {
@@ -84,8 +85,8 @@ configurations {
 
 allprojects {
 	repositories { 
-		maven { url liaisonJbossProxyURL } //HORNETQ JBOSS PROXY
-    	maven { url liaisonMavenCentralProxyURL }
+        maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
 	 }
 }
 
