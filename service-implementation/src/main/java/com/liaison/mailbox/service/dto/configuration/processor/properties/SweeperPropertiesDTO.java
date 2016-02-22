@@ -14,7 +14,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.validation.DataValidation;
+import com.liaison.mailbox.service.validation.PatternValidation;
 
 /**
  * Data Transfer Object for the properties for sweeper.
@@ -62,7 +62,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setFileRenameFormat(String fileRenameFormat) {
 		this.fileRenameFormat = fileRenameFormat;
 	}
-	@DataValidation(errorMessage = "Invalid Value for Number of Files Threshold.", type = MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD)
+	@PatternValidation(errorMessage = "Invalid Value for Number of Files Threshold.", type = MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD)
 	public String getNumOfFilesThreshold() {
 		return numOfFilesThreshold;
 	}

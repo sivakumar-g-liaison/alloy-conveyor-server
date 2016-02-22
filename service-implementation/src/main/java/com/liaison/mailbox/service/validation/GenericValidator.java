@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -205,21 +206,30 @@ public class GenericValidator {
 
 		if (value != null && !value.toString().isEmpty()) {
 
-			int fieldValue = (int)value;
-
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(fieldValue))) {
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(fieldValue))) {
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(fieldValue))) {
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
+			}
+			
+			if (MailBoxConstants.PROPERTY_URL.equals(annotationDetails.type()) && !isValidURL(value)) {
+			    isValidPattern = false;
+			    errorMessage.append(annotationDetails.errorMessage());
+			}
+			
+			if (MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD.equals(annotationDetails.type())
+	                &&  !isValidNumberOfFilesThreshold(String.valueOf(value))) {
+				isValidPattern = false;
+	            errorMessage.append(annotationDetails.errorMessage());
 			}
 		}
 		return isValidPattern;
@@ -232,8 +242,8 @@ public class GenericValidator {
 	 * @param email
 	 * @return boolean
 	 */
-	private boolean isValidRetryAttemptValue (int retryAttempt) {
-		 return Integer.toString(retryAttempt).matches(MailBoxConstants.retryAttemptsRegex);
+	private boolean isValidRetryAttemptValue (Object value) {
+		 return value.toString().matches(MailBoxConstants.retryAttemptsRegex);
 	}
 
 	/**
@@ -242,8 +252,9 @@ public class GenericValidator {
 	 * @param email
 	 * @return boolean
 	 */
-	private boolean isBetweenRange (int number) {
-		 return number<=60000 && number>=0;
+	private boolean isBetweenRange (Object value) {
+	    int range = Integer.valueOf(value.toString()).intValue();
+		return range<=60000 && range>=0;
 	}
 	
 	/**
@@ -253,11 +264,8 @@ public class GenericValidator {
 	 * @return boolean
 	 */
 	private boolean isValidNumberOfFilesThreshold(String value) {
-	    
-	    if (null != value) {
-	        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
-	    }
-        return false;
+        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
+
 	}
 
 	/**
@@ -287,11 +295,24 @@ public class GenericValidator {
 				&&	Protocol.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;
-		} else if (MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD.equals(annotationDetails.type())
-                &&  !isValidNumberOfFilesThreshold(String.valueOf(value))) {
-                    errorMessage.append(annotationDetails.errorMessage());
-                    return false;
-		}
+		} 
 		return true;
 	}
+
+    /**
+     * Method to validate the url
+     * 
+     * @param value
+     * @return boolean
+     */
+    private boolean isValidURL(Object value) {
+        
+        String[] customSchemes = { "sftp", "ftp", "ftps", "http", "https" };
+        UrlValidator validator = new UrlValidator(customSchemes, UrlValidator.ALLOW_LOCAL_URLS);
+        
+        if (validator.isValid(value.toString())) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -182,6 +182,40 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	Assert.assertEquals(processorLegacy.getStatus(), processorReadResponse.getProcessor().getStatus());
     }
     
+    /**
+     * Method to create sweeper processor with valid data.
+     * 
+     * @throws MailBoxConfigurationServicesException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testCreateSweeperProcessor() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+        
+        // Adding Mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mailboxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        String mailboxId = response.getMailBox().getGuid();
+        
+        // Adding Processor
+        AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorLegacyDTO processorLegacy = constructLegacyProcessorDTO(ProcessorType.SWEEPER.getCode(), Protocol.SWEEPER.name(), EntityStatus.ACTIVE.value());
+        processorLegacy.setLinkedMailboxId(mailboxId);
+        processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
+        ProcessorConfigurationService processorService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+        Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
+        
+    }
+    
     private ProcessorLegacyDTO constructLegacyProcessorDTO(String type, String protocol, String status) {
     	
     	ProcessorLegacyDTO processorLegacyDTO = new ProcessorLegacyDTO();
