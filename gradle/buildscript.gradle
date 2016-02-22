@@ -16,12 +16,11 @@
 
 // Executed in context of buildscript
 repositories {
-    maven { url "http://nexus.liaison.dev/content/repositories/gradle-plugins/" }
+    maven { url "http://nexus.liaison.dev/content/repositories/gradle-plugins" }
 }
 dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.10.0'
     classpath 'net.saliman:gradle-cobertura-plugin:1.0.0'
     classpath 'org.ajoberstar:gradle-git:1.1.0'
-    classpath 'org.sonarqube.gradle:gradle-sonarqube-plugin:1.1'
     classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:1.2'
 }
