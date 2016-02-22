@@ -98,10 +98,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		try {
 
-			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
-			sftpRequest.setLogPrefix(constructMessage());
-			sftpRequest.connect();
-
 			LOGGER.info(constructMessage("Start run"));
 			long startTime = System.currentTimeMillis();
 
@@ -112,6 +108,19 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
+
+            File localDir = new File(path);
+            File[] subFiles = localDir.listFiles();
+
+            if (subFiles == null || subFiles.length == 0) {
+                LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
+                return;
+            }
+
+            G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+            sftpRequest.setLogPrefix(constructMessage());
+            sftpRequest.connect();
+            
 			if (sftpRequest.openChannel()) {
 
 			    String remotePath = getWriteResponseURI();
@@ -137,7 +146,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					sftpRequest.changeDirectory(directory);
 				}
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
+				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm, subFiles);
 
 			}
 			sftpRequest.disconnect();
@@ -173,136 +182,131 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 
-	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
+	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm, File[] subFiles)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
 
 		// variable to hold the status of file upload request execution
 		int replyCode = -1;
-		File localDir = new File(localParentDir);
-		File[] subFiles = localDir.listFiles();
 		SFTPUploaderPropertiesDTO staticProp = (SFTPUploaderPropertiesDTO) getProperties();
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
-		if (subFiles != null && subFiles.length > 0) {
-
-			for (File item : subFiles) {
-				//interrupt signal check has to be done only if execution Id is present
-				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
-					lastCheckTime = new Date();
-					if(eventDAO.isThereAInterruptSignal(executionId)) {
-						LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
-						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
-						fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
-						return;
-					}
-				}
-
-				if (item.getName().equals(".") || item.getName().equals("..")) {
-					// skip parent directory and the directory itself
-					continue;
-				}
-				if (item.isDirectory()) {
-
-					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName()) ||
-					        MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
-						// skip processed folder
-						LOGGER.info(constructMessage("skipping processed/error folder"));
-						continue;
-					}
-
-					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-					try {
-						sftpRequest.getNative().lstat(remoteFilePath);
-					} catch (Exception ex) {
-					    //happens when the directory is not available in the remote server
-						sftpRequest.getNative().mkdir(remoteFilePath);
-					}
-
-					// upload the sub directory
-					sftpRequest.changeDirectory(remoteFilePath);
-					String localDr = localParentDir + File.separatorChar + item.getName();
-	                uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
-					replyCode = MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK;
-
-				} else {
-
-				    String currentFileName = item.getName();
-
-				    //File Modification Check
-				    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
-		                LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
-		                continue;
-		            }
-
-					// Check if the file to be uploaded is included or not excluded
-					if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
-					        currentFileName,
-					        staticProp.getExcludedFiles())) {
-					    continue;
-					}
-
-					//add status indicator if specified to indicate that uploading is in progress
-					String statusIndicator = staticProp.getFileTransferStatusIndicator();
-					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
-							+ statusIndicator : currentFileName;
-
-					// upload the file
-				    try (InputStream inputStream = new FileInputStream(item)) {
-				        sftpRequest.changeDirectory(remoteParentDir);
-						LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
-								currentFileName, localParentDir, remoteParentDir);
-	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
-				    }
-
-				    // Check whether the file uploaded successfully
-					if (replyCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
-
-						totalNumberOfProcessedFiles++;
-						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
-
-						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
-						if (!MailBoxUtil.isEmpty(statusIndicator)) {
-							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
-							if (renameStatus == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
-								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
-							} else {
-								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
-							}
-						}
-						
-						// delete files once successfully uploaded
-						deleteFilesAfterSuccessfulUpload(item);
-						StringBuilder message = new StringBuilder()
-													.append("File ")
-													.append(currentFileName)
-													.append(" uploaded successfully")
-													.append(" to remote path ")
-													.append(remoteParentDir);
-						// Glass Logging 
-						logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
-					} else {
-						
-						StringBuilder message = new StringBuilder()
-													.append("Failed to upload file ")
-													.append(currentFileName)
-													.append(" from local path ")
-													.append(localDir)
-													.append(" to remote path ")
-													.append(remoteParentDir);
-						// Glass Logging 
-						logGlassMessage(message.toString(), item, ExecutionState.FAILED);
-					}
+		for (File item : subFiles) {
+		    
+			//interrupt signal check has to be done only if execution Id is present
+			if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+			    
+				lastCheckTime = new Date();
+				if(eventDAO.isThereAInterruptSignal(executionId)) {
+				    
+					LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
+					fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
+					fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
+					return;
 				}
 			}
-			// To delete the folder after uploading of all files inside this folder is done
-			deleteFilesAfterSuccessfulUpload(localDir);
+
+			if (item.getName().equals(".") || item.getName().equals("..")) {
+				// skip parent directory and the directory itself
+				continue;
+			}
+			if (item.isDirectory()) {
+
+				if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName()) ||
+				        MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
+					// skip processed folder
+					LOGGER.info(constructMessage("skipping processed/error folder"));
+					continue;
+				}
+
+				String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
+				try {
+					sftpRequest.getNative().lstat(remoteFilePath);
+				} catch (Exception ex) {
+				    //happens when the directory is not available in the remote server
+					sftpRequest.getNative().mkdir(remoteFilePath);
+				}
+
+				// upload the sub directory
+				sftpRequest.changeDirectory(remoteFilePath);
+				String localDr = localParentDir + File.separatorChar + item.getName();
+                uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm, new File(localDr).listFiles());
+				replyCode = MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK;
+
+			} else {
+
+			    String currentFileName = item.getName();
+
+			    //File Modification Check
+			    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
+	                LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
+	                continue;
+	            }
+
+				// Check if the file to be uploaded is included or not excluded
+				if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+				        currentFileName,
+				        staticProp.getExcludedFiles())) {
+				    continue;
+				}
+
+				//add status indicator if specified to indicate that uploading is in progress
+				String statusIndicator = staticProp.getFileTransferStatusIndicator();
+				String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
+						+ statusIndicator : currentFileName;
+
+				// upload the file
+			    try (InputStream inputStream = new FileInputStream(item)) {
+			        sftpRequest.changeDirectory(remoteParentDir);
+					LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
+							currentFileName, localParentDir, remoteParentDir);
+                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
+			    }
+
+			    // Check whether the file uploaded successfully
+				if (replyCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+
+					totalNumberOfProcessedFiles++;
+					LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
+
+					// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+					if (!MailBoxUtil.isEmpty(statusIndicator)) {
+						int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
+						if (renameStatus == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+							LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
+						} else {
+							LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
+						}
+					}
+					
+					// delete files once successfully uploaded
+					deleteFilesAfterSuccessfulUpload(item);
+					StringBuilder message = new StringBuilder()
+												.append("File ")
+												.append(currentFileName)
+												.append(" uploaded successfully")
+												.append(" to remote path ")
+												.append(remoteParentDir);
+					// Glass Logging 
+					logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
+				} else {
+					
+					StringBuilder message = new StringBuilder()
+												.append("Failed to upload file ")
+												.append(currentFileName)
+												.append(" from local path ")
+												.append(localParentDir)
+												.append(" to remote path ")
+												.append(remoteParentDir);
+					// Glass Logging 
+					logGlassMessage(message.toString(), item, ExecutionState.FAILED);
+				}
+			}
 		}
-		else {
-			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
-		}
+		// To delete the folder after uploading of all files inside this folder is done
+		deleteFilesAfterSuccessfulUpload(new File(localParentDir));
 	}
 
 	@Override
