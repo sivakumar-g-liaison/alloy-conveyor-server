@@ -10,8 +10,10 @@ package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -994,7 +996,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProfileConfigurationService profConfigservice = new ProfileConfigurationService();
         profConfigservice.createProfile(requestProfileDTO);
-        List<String> profiles = new ArrayList<String>();
+        Set<String> profiles = new HashSet<String>();
         profiles.add(requestProfileDTO.getProfile().getName() + "X");
         revProcRequestDTO.getProcessor().setLinkedProfiles(profiles);
 
@@ -1057,7 +1059,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProfileConfigurationService profConfigservice = new ProfileConfigurationService();
         profConfigservice.createProfile(requestProfileDTO);
-        List<String> profiles = new ArrayList<String>();
+        Set<String> profiles = new HashSet<String>();
         profiles.add(requestProfileDTO.getProfile().getName());
         revProcRequestDTO.getProcessor().setLinkedProfiles(profiles);
 

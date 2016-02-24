@@ -14,7 +14,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -411,7 +413,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(mailboxPguid);
 
-		List<String> profiles = new ArrayList<>();
+		Set<String> profiles = new HashSet<>();
 		profiles.add(profileName);
 		processorDTO.setLinkedProfiles(profiles);
 
