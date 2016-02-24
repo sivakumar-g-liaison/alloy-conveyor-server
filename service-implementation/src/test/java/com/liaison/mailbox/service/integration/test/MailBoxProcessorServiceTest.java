@@ -13,7 +13,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -255,7 +257,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
-		addProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
+		addProcessorDTO.getProcessor().getLinkedProfiles().add("dummy profiles");
 		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
@@ -941,7 +943,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
 				"ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", true);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
-		reviseProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
+		reviseProcessorDTO.getProcessor().getLinkedProfiles().add("dummy profiles");
 
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 		String reviseProcessor = "/" + reviseProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
@@ -1282,7 +1284,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			AddProfileResponseDTO response = addProfile(profileName);
 			Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
-			List<String> profiles = new ArrayList<>();
+			Set<String> profiles = new HashSet<>();
 			profiles.add(profileName);
 			processorDTO.setLinkedProfiles(profiles);
 		}

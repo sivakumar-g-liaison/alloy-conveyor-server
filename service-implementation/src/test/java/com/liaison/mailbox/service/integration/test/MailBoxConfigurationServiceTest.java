@@ -11,8 +11,8 @@
 package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -971,7 +971,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		ProcessorDTO proDTO = new ProcessorDTO();
 		proDTO = addProcessorDTO.getProcessor();
 		proDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		List<String> profiles = new ArrayList<>();
+		Set<String> profiles = new HashSet<>();
 		profiles.add(profileName);
 		proDTO.setLinkedProfiles(profiles);
 		addProcessorDTO.setProcessor(proDTO);

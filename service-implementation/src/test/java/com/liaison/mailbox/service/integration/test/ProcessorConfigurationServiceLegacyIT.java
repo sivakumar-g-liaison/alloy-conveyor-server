@@ -113,7 +113,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = MailBoxUtil.unmarshalFromJSON(ServiceUtils.readFileFromClassPath("requests/processor/create_processor_legacy.json"), AddProcessorToMailboxRequestDTO.class);
         procRequestDTO.getProcessorLegacy().setLinkedMailboxId(response.getMailBox().getGuid());
         
-        List<String> profiles = new ArrayList<String>();
+        Set<String> profiles = new HashSet<String>();
         profiles.add(profileDTO.getName());
         procRequestDTO.getProcessorLegacy().setLinkedProfiles(profiles);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
@@ -346,9 +346,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	
     }
     
-    private List<String> setLinkedProfileDetails() {
+    private Set<String> setLinkedProfileDetails() {
     	
-    	List<String> profiles = new ArrayList<>();
+    	Set<String> profiles = new HashSet<>();
     	
     	// create a profile
     	AddProfileRequestDTO profileRequest = new AddProfileRequestDTO();
