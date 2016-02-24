@@ -229,7 +229,7 @@ public class ProcessorConfigurationService {
 	private void createScheduleProfileAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
 			ReviseProcessorRequestDTO reviseRequest, Processor processor) {
 
-	    List<String> linkedProfiles = null;
+	    Set<String> linkedProfiles = null;
         if (null == reviseRequest) {
             linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
         } else {
