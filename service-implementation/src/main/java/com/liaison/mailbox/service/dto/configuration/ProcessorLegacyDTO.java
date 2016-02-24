@@ -145,7 +145,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			Folder folder = null;
 			Set<Folder> folders = new HashSet<>();
 			for (FolderDTO folderDTO : this.getFolders()) {
-
+				
+				validator.validate(folderDTO);
 				folder = new Folder();
 				folderDTO.copyToEntity(folder);
 
@@ -162,7 +163,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			Credential credential = null;
 			Set<Credential> credentialList = new HashSet<>();
 			for (CredentialDTO credentialDTO : this.getCredentials()) {
-
+				
+				validator.validate(credentialDTO);
 				credential = new Credential();
 				credentialDTO.copyToEntity(credential);
 				credential.setPguid(MailBoxUtil.getGUID());
@@ -181,7 +183,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			ProcessorProperty property = null;
 			Set<ProcessorProperty> properties = new HashSet<>();
 			for (PropertyDTO propertyDTO : this.getDynamicProperties()) {
-
+				
+				validator.validate(propertyDTO);
 				property = new ProcessorProperty();
 				propertyDTO.copyToEntity(property, false);
 				property.setProcessor(processor);

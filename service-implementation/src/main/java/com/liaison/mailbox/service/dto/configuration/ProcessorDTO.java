@@ -31,6 +31,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
@@ -69,7 +70,7 @@ public class ProcessorDTO {
 	private String protocol;
 	@ApiModelProperty( value = "Mailbox id", required = true)
 	private String linkedMailboxId;
-	private List<String> linkedProfiles;
+	private Set<String> linkedProfiles;
 	private List<ProfileDTO> profiles;
 	private boolean createConfiguredLocation;
 	private String mailboxName;
@@ -151,11 +152,11 @@ public class ProcessorDTO {
 		this.linkedMailboxId = linkedMailboxId;
 	}
 
-	public List<String> getLinkedProfiles() {
+	public Set<String> getLinkedProfiles() {
 		return linkedProfiles;
 	}
 
-	public void setLinkedProfiles(List<String> linkedProfiles) {
+	public void setLinkedProfiles(Set<String> linkedProfiles) {
 		this.linkedProfiles = linkedProfiles;
 	}
 
@@ -312,6 +313,7 @@ public class ProcessorDTO {
     			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
     				continue;
     			}
+    			validateDynamicProperty(propertyDTO);
     			property = new ProcessorProperty();
     			propertyDTO.copyToEntity(property);
     			property.setProcessor(processor);
@@ -382,5 +384,20 @@ public class ProcessorDTO {
 			this.setProcessorPropertiesInTemplateJson(ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(processor.getProcsrProperties(), processor));
  		}
 	}
+    
+    /**
+     * Method to validate if name and value are present for dynamic properties
+     * 
+     * @param propertyDTO - propertyDTO which needs to be validated
+     */
+    private void validateDynamicProperty(ProcessorPropertyDTO propertyDTO) {
+    	
+    	if (propertyDTO.isDynamic() && MailBoxUtil.isEmpty(propertyDTO.getName())) {
+    		throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Property Name", Response.Status.BAD_REQUEST);
+    	}  	
+    	if (propertyDTO.isDynamic() && MailBoxUtil.isEmpty(propertyDTO.getValue())) {
+    		throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Property Value", Response.Status.BAD_REQUEST);
+    	}
+    }
 
 }
