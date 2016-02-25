@@ -130,18 +130,24 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 
 				//GMB-320 - Creates directory to the remote folder
+				boolean isCreateFoldersInRemote = ((SFTPUploaderPropertiesDTO) getProperties()).isCreateFoldersInRemote();
+				 
 				for (String directory : remotePath.split(File.separatorChar=='\\' ? "\\\\" : File.separator)) {
 
 					if (directory.isEmpty()) {//For when path starts with /
 						continue;
 					}
-
+					
 					try {
 						sftpRequest.getNative().lstat(directory);
 						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
-					} catch (Exception ex) {
-						sftpRequest.getNative().mkdir(directory);
-						LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
+					} catch (SftpException ex) {
+					    if (isCreateFoldersInRemote) {
+					        sftpRequest.getNative().mkdir(directory);
+					        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
+					    } else {
+					        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+					    }
 					}
 					sftpRequest.changeDirectory(directory);
 				}
@@ -192,6 +198,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
+		boolean isCreateFoldersInRemote = staticProp.isCreateFoldersInRemote();
 
 		for (File item : subFiles) {
 		    
@@ -223,12 +230,17 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
 				try {
-					sftpRequest.getNative().lstat(remoteFilePath);
-				} catch (Exception ex) {
-				    //happens when the directory is not available in the remote server
-					sftpRequest.getNative().mkdir(remoteFilePath);
+				    sftpRequest.getNative().lstat(remoteFilePath);
+				    LOGGER.info(constructMessage("The remote directory {} exists."), remoteFilePath);
+				} catch (SftpException ex) {
+				    if (isCreateFoldersInRemote) {
+				        sftpRequest.getNative().mkdir(remoteFilePath);
+				        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
+				    } else {
+				        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+				    }
 				}
-
+				
 				// upload the sub directory
 				sftpRequest.changeDirectory(remoteFilePath);
 				String localDr = localParentDir + File.separatorChar + item.getName();
