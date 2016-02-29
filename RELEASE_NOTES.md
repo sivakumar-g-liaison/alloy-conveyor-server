@@ -1,5 +1,6 @@
 4.1.0-SNAPSHOT
 -------------------------------
+* GQ-131 - properties for jnp
 * GQ-118 - LMB Listener 
 * GMB-707 - Mailbox filewriter doesn't record outbound bytes
 * GGT-194 - sonarqube integration
