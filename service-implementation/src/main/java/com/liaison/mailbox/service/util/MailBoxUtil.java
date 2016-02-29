@@ -475,4 +475,14 @@ public class MailBoxUtil {
         
     }
 
+    /**
+     * Checks the given list is empty or not.
+     * 
+     * @param list
+     * @return boolean
+     */
+    public static boolean isEmptyList(List<String> list) {
+        return list == null || list.isEmpty();
+    }
+
 }

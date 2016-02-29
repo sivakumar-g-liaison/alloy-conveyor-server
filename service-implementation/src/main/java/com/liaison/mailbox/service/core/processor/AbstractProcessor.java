@@ -85,6 +85,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
 	protected static final String FILE_PERMISSION = "rw-rw----";
 	protected static final String FOLDER_PERMISSION = "rwxrwx---";
+	private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
 
 	protected static final String seperator = ": ";
 
@@ -706,30 +707,73 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *            The notification type(TEXT/HTML).
 	 */
 	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
+	    sendEmail(toEmailAddrList, subject, emailBody, type, false);
+	}
+	
+	/**
+     * Send email notifications
+     *
+     * @param toEmailAddrList
+     *            The extra receivers. The default receiver will be available in the mailbox.
+     * @param subject
+     *            The notification subject
+     * @param emailBody
+     *            The body of the notification
+     * @param type
+     *            The notification type(TEXT/HTML).
+     * @param isOverwrite
+     *            To overwrite the configured mail address in the mailbox.        
+     */
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type, boolean isOverwrite) {
+	    
+	    if (isOverwrite) {
+	        
+	        if (!MailBoxUtil.isEmptyList(toEmailAddrList)) {
+	            constructAndSendEmail(toEmailAddrList, emailBody, subject, type);
+	        } else {
+	            LOGGER.info(NO_EMAIL_ADDRESS);
+                return;
+	        }
+	    } else {
+	        
+	        List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
+	        if ((MailBoxUtil.isEmptyList(configuredEmailAddress)) && MailBoxUtil.isEmptyList(toEmailAddrList)) {
+	            LOGGER.info(NO_EMAIL_ADDRESS);
+	            return;
+	        }
 
-		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
-		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty()) && (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
-			LOGGER.info("There is no email address configured for this mailbox.");
-			return;
-		}
+	        if (!MailBoxUtil.isEmptyList(configuredEmailAddress) && !MailBoxUtil.isEmptyList(toEmailAddrList)) {
+	            toEmailAddrList.addAll(configuredEmailAddress);
+	        } else if (!MailBoxUtil.isEmptyList(configuredEmailAddress)) {
+	            toEmailAddrList = configuredEmailAddress;
+	        }
 
-		if (null != configuredEmailAddress && null != toEmailAddrList) {
-			toEmailAddrList.addAll(configuredEmailAddress);
-		} else if (null != configuredEmailAddress) {
-			toEmailAddrList = configuredEmailAddress;
-		}
-
-		// construct the email helper dto which contains all details
-		EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
-		emailInfoDTO.setEmailBody(emailBody);
-		emailInfoDTO.setSubject(subject);
-		emailInfoDTO.setType(type);
-		emailInfoDTO.setToEmailAddrList(toEmailAddrList);
-
-		EmailNotifier.sendEmail(emailInfoDTO);
+	        constructAndSendEmail(toEmailAddrList, emailBody, subject, type);
+	    }
 	}
 
 	/**
+	 * Construct and send the email.
+	 * 
+	 * @param toEmailAddrList
+	 * @param emailBody
+	 * @param subject
+	 * @param type
+	 */
+	private void constructAndSendEmail(List<String> toEmailAddrList,
+            String emailBody, String subject, String type) {
+        
+	    // construct the email helper dto which contains all details
+	    EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
+        emailInfoDTO.setEmailBody(emailBody);
+        emailInfoDTO.setSubject(subject);
+        emailInfoDTO.setType(type);
+        emailInfoDTO.setToEmailAddrList(toEmailAddrList);
+
+        EmailNotifier.sendEmail(emailInfoDTO);
+    }
+
+    /**
 	 * Get the credential Details configured for a processor
 	 *
 	 *
