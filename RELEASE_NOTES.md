@@ -1,5 +1,6 @@
 4.1.0-SNAPSHOT
 -------------------------------
+* GQ-131 - properties for jnp
 * GQ-118 - LMB Listener 
 * GMB-707 - Mailbox filewriter doesn't record outbound bytes
 * GGT-194 - sonarqube integration
@@ -10,8 +11,30 @@
 * GGT-452 new nexus repo
 * GMB-700 - Provision in the sendEmail API to overwrite the configured email address
 
+4.0.5
+-------------------------------
+* Need to get lib message bus to 5.4.0
+
+4.0.4
+-------------------------------
+* GMB-713 Mailbox and dropbox server rollback scripts need to be .rollback
+
+4.0.3
+-------------------------------
+* GGEM-124 Patch/Acl Signer Public Key Group Guid Update
+* DB Rollback script
+
+4.0.2
+-------------------------------
+* GMB-710 - DROPBOX- Unable to stage a file
+
+4.0.1
+-------------------------------
+* GMB-706 - Extend QueueProcessor to allow ProcessorAvailability interrupt and Cut into mailbox
+
 4.0.0
 -------------------------------
+
 3.1.0
 -------------------------------
 
