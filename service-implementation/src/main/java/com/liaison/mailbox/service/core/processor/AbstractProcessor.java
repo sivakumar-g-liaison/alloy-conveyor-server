@@ -731,14 +731,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	        if (!MailBoxUtil.isEmptyList(toEmailAddrList)) {
 	            constructAndSendEmail(toEmailAddrList, emailBody, subject, type);
 	        } else {
-	            LOGGER.info(NO_EMAIL_ADDRESS);
+	            LOGGER.debug(NO_EMAIL_ADDRESS);
                 return;
 	        }
 	    } else {
 	        
 	        List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
 	        if ((MailBoxUtil.isEmptyList(configuredEmailAddress)) && MailBoxUtil.isEmptyList(toEmailAddrList)) {
-	            LOGGER.info(NO_EMAIL_ADDRESS);
+	            LOGGER.debug(NO_EMAIL_ADDRESS);
 	            return;
 	        }
 
