@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -104,10 +105,14 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			throws IllegalStateException, IOException, JAXBException {
 
 		ResponseBuilder builder = Response.ok();
-		if (httpResponse.getStatusLine().getStatusCode() > 299) {
-			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}", httpResponse.getEntity()
+		
+		// Fix for GMB-716, if the status code is set as 304 the response does not include the entity
+		// this causes NPE. so added null check for httpEntity
+		HttpEntity httpEntity = httpResponse.getEntity();
+		if (httpResponse.getStatusLine().getStatusCode() > 299 && null != httpEntity) {
+			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}", httpEntity
 					.getContent());
-			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
+			WorkResult result = JAXBUtility.unmarshalFromJSON(httpEntity.getContent(), WorkResult.class);
 			builder.status(result.getStatus());
 
 			// Sets the headers
@@ -145,38 +150,43 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			}
 
 		} else {
+			
+			// Fix for GMB-716, if the status code is set as 205 the response must not include the entity
+			// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+			// if entity is null we cannot process the sync response 
+			if (null != httpEntity) {
+				
+				InputStream responseInputStream = httpEntity.getContent();
+				WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
+				logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS: {}", JAXBUtility.marshalToJSON(result));
+				// sets status code from work result
+				builder.status(result.getStatus());
 
-			InputStream responseInputStream = httpResponse.getEntity().getContent();
-			WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
-			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS: {}", JAXBUtility.marshalToJSON(result));
-			// sets status code from work result
-			builder.status(result.getStatus());
+				// Sets the headers
+				Set<String> headers = result.getHeaderNames();
+				for (String name : headers) {
+					builder.header(name, result.getHeader(name));
+				}
+				// JIRA GMB-428 - set global process id in header only if it is not already available
+				if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
+					// set global process id in the header
+					builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+				}
 
-			// Sets the headers
-			Set<String> headers = result.getHeaderNames();
-			for (String name : headers) {
-				builder.header(name, result.getHeader(name));
-			}
-			// JIRA GMB-428 - set global process id in header only if it is not already available
-			if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
-				// set global process id in the header
-				builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
-			}
+				// reads paylaod from spectrum
+				if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+					responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+					if (responseInputStream != null) {
+						builder.entity(responseInputStream);
+					}
+				}
 
-			// reads paylaod from spectrum
-			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-				responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-				if (responseInputStream != null) {
-					builder.entity(responseInputStream);
+				// Content type
+				String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
+				if (contentType == null) {
+					builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
 				}
 			}
-
-			// Content type
-			String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-			if (contentType == null) {
-				builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
-			}
-
 		}
 		return builder.build();
 	}
