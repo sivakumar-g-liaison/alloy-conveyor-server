@@ -10,6 +10,8 @@
 * GMB-646 - Validation is missing for processor properties in server side
 * GGT-452 new nexus repo
 * GMB-700 - Provision in the sendEmail API to overwrite the configured email address
+* ARP-380 - Uses LMB connection factory
+
 
 4.0.5
 -------------------------------
