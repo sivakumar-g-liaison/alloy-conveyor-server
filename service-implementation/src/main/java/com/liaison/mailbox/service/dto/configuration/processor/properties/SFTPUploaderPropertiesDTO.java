@@ -42,6 +42,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private String includeFiles;
 	private String excludeFiles;
 	private boolean debugTranscript;
+	private boolean createFoldersInRemote;
 
 	public String getUrl() {
 		return url;
@@ -137,5 +138,11 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	public void setDebugTranscript(boolean debugTranscript) {
 		this.debugTranscript = debugTranscript;
 	}
+	public boolean isCreateFoldersInRemote() {
+        return createFoldersInRemote;
+    }
+    public void setCreateFoldersInRemote(boolean createFoldersInRemote) {
+        this.createFoldersInRemote = createFoldersInRemote;
+    }
 
 }

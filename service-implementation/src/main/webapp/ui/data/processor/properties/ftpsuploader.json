@@ -187,7 +187,23 @@
             "defaultValue":"false",
 			"validationRules": null,
 	        "options":["false","true"]
-	      }
+	      },
+		   {
+            "name":"createFoldersInRemote",
+            "displayName":"Create folders in remote",
+            "value":"",
+            "type":"select",
+            "value":"false",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
+         }
       ],
       "folderProperties":[
 		   {

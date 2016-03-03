@@ -173,8 +173,14 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
 			if (!dirExists) {
 				// create directory on the server
-			    LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remotePath);
-				ftpsRequest.getNative().makeDirectory(remotePath);
+			    if (ftpUploaderStaticProperties.isCreateFoldersInRemote()) {
+    			    boolean isDirCreated = makeDirectories(ftpsRequest, remotePath);
+    				if (!isDirCreated)
+    				    throw new MailBoxServicesException("Unable to create dirctory {}.", Response.Status.CONFLICT);
+			    } else {
+			        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
+			        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+			    }
 			}
 			ftpsRequest.changeDirectory(remotePath);
 
@@ -228,6 +234,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		String statusIndicator = staticProp.getFileTransferStatusIndicator();
+		boolean isCreateFoldersInRemote = staticProp.isCreateFoldersInRemote();
 		for (File item : subFiles) {
 
 			//interrupt signal check has to be done only if execution Id is present
@@ -329,10 +336,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
 
 				boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remoteFilePath);
-				if (!dirExists) {
-					// create directory on the server
-					ftpsRequest.getNative().makeDirectory(remoteFilePath);
-				}
+                if (!dirExists) {
+                    // create directory on the server
+                    if (isCreateFoldersInRemote) {
+                        ftpsRequest.getNative().makeDirectory(remoteFilePath);
+                        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
+                    } else {
+                        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
+                        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+                    }
+                }
 				ftpsRequest.changeDirectory(remoteFilePath);
 				String localDirectory = item.getAbsolutePath();
 				uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath, executionId, fsm, new File(localDirectory).listFiles());
@@ -439,5 +452,33 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	@Override
     public void logToLens(String msg, File file, ExecutionState status) {
         logGlassMessage(msg, file, status);
+    }
+	
+	/**
+     * This method is to create nested directories in remote if not available.
+     *
+     *  @param ftpClient 
+     *  @param dirPath
+     * 
+     *  @return boolean 
+     */
+    public boolean makeDirectories(G2FTPSClient ftpClient, String dirPath) throws IOException {
+        for (String directory : dirPath.split(File.separatorChar == '\\' ? "\\\\" : File.separator)) {
+            if (directory.isEmpty()) {// For when path starts with /
+                continue;
+            }
+            boolean isExist = ftpClient.getNative().changeWorkingDirectory(directory);
+            if (!isExist) {
+                boolean isCreated = ftpClient.getNative().makeDirectory(directory);
+                if (isCreated) {
+                    LOGGER.info(constructMessage("The directory {} is not exist.So created that."), directory);
+                    ftpClient.getNative().changeWorkingDirectory(directory);
+                } else {
+                    LOGGER.info(constructMessage("The directory {} is not created. ") + directory);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
