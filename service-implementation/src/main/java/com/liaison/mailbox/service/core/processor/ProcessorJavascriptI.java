@@ -130,6 +130,22 @@ public interface ProcessorJavascriptI {
 	 *            The notification type(TEXT/HTML).
 	 */
 	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type);
+	
+	/**
+     * Send email notifications
+     *
+     * @param toEmailAddrList
+     *            The extra receivers. The default receiver will be available in the mailbox.
+     * @param subject
+     *            The notification subject
+     * @param emailBody
+     *            The body of the notification
+     * @param type
+     *            The notification type(TEXT/HTML).
+     * @param isOverwrite
+     *            To overwrite the configured mail address in the mailbox.        
+     */
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type, boolean isOverwrite);
 
 	/**
 	 * Returns the properties of the Mailbox

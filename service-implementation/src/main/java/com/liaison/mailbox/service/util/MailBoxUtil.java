@@ -452,7 +452,7 @@ public class MailBoxUtil {
         
         URI uri = new URI(propertiesDTO.getUrl());
         String scheme = uri.getScheme();
-        if (uri.getPort() == -1 && propertiesDTO.getPort() == 0) {
+        if (propertiesDTO.getPort() == 0 && (uri.getPort() == -1 || uri.getPort() == 0)) {
             
             if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().toString().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
@@ -473,6 +473,16 @@ public class MailBoxUtil {
             propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
         }
         
+    }
+
+    /**
+     * Checks the given list is empty or not.
+     * 
+     * @param list
+     * @return boolean
+     */
+    public static boolean isEmptyList(List<String> list) {
+        return list == null || list.isEmpty();
     }
 
 }
