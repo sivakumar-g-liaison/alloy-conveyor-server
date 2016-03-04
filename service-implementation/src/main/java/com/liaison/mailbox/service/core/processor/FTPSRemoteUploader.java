@@ -123,6 +123,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 */
 	protected void run(String executionId, MailboxFSM fsm) {
 
+	    G2FTPSClient ftpsRequest = null;
 		try {
 
 		    String path = getPayloadURI();
@@ -147,7 +148,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                 return;
             }
 
-			G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
+			ftpsRequest = (G2FTPSClient) getClient();
 			ftpsRequest.setLogPrefix(constructMessage());
 			//ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
@@ -185,7 +186,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			ftpsRequest.changeDirectory(remotePath);
 
 			uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm, subFiles);
-			ftpsRequest.disconnect();
 
 			long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
@@ -203,6 +203,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		        | URISyntaxException e) {
 		    LOGGER.error(constructMessage("Error occurred during ftp(s) upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
+		}
+		finally {
+		    if (ftpsRequest != null) {
+                try {
+                    ftpsRequest.disconnect();
+                } catch (LiaisonException e) {
+                    LOGGER.error(constructMessage("Error occurred during disconnect FTPSClient", seperator, e.getMessage()), e);
+                    throw new RuntimeException(e);
+                } 
+            }
 		}
 	}
 

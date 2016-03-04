@@ -83,9 +83,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 */
 	protected void run() {
 
+	    G2FTPSClient ftpsRequest = null;
 		try {
 
-			G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
+			ftpsRequest = (G2FTPSClient) getClient();
 			ftpsRequest.setLogPrefix(constructMessage());
 			ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
@@ -123,7 +124,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			ftpsRequest.changeDirectory(remotePath);
 
 			downloadDirectory(ftpsRequest, remotePath, localPath);
-			ftpsRequest.disconnect();
 
 			// to calculate the elapsed time for processing files
 			long endTime = System.currentTimeMillis();
@@ -133,8 +133,19 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
 				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
+		    
 		    LOGGER.error(constructMessage("Error occurred during ftp(s) download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
+		}
+		finally {
+		    if (ftpsRequest != null) {
+                try {
+                    ftpsRequest.disconnect();
+                } catch (LiaisonException e) {
+                    LOGGER.error(constructMessage("Error occurred during disconnect FTPSClient", seperator, e.getMessage()), e);
+                    throw new RuntimeException(e);
+                }
+            }
 		}
 	}
 
