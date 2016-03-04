@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,6 +30,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +49,6 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -62,6 +63,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -522,10 +524,11 @@ public class HTTPListenerResource extends AuditedResource {
      * @param processor - Either sync or Async Processor
      * @param httpListenerProperties
      * @param mailboxPguid
+	 * @throws ExecutionException 
      */
     private void authenticationAndAuthorization(final HttpServletRequest request,
             HTTPAbstractProcessor processor, Map<String, String> httpListenerProperties, String mailboxPguid)
-            throws IOException {
+            throws IOException, ExecutionException {
 
         String basicAuthenticationHeader = request.getHeader(HTTP_HEADER_BASIC_AUTH);
         if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
@@ -548,21 +551,22 @@ public class HTTPListenerResource extends AuditedResource {
      * @param httpListenerProperties
      * @param authenticationCredentials The HttpServletRequest
      * @param processorType - Type of the Processor
+     * @throws ExecutionException 
      */
     private void authorization(Map<String, String> httpListenerProperties, String[] authenticationCredentials, String processorType)
-             throws IOException {
+             throws IOException, ExecutionException {
 
         boolean tenancyKeyExist = false;
         if (authenticationCredentials.length == 2) {
 
             String loginId = authenticationCredentials[0];
-            GEMACLClient gemClient = new GEMACLClient();
-            GEMManifestResponse gemManifestResponse = gemClient.getACLManifestByloginId(loginId);
+            GEMManifestResponse gemManifestResponse = UserManifestCacheUtil.getACLManifestByloginId(loginId);
 
             String getRequestHeaders = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
 
-            if (!MailBoxUtil.isEmpty(getRequestHeaders)) {
-                List<RoleBasedAccessControl> roleBasedAccessControl = gemClient.getDomainsFromACLManifest(getRequestHeaders);
+            if(!MailBoxUtil.isEmpty(getRequestHeaders)) {
+                List<RoleBasedAccessControl> roleBasedAccessControl = UserManifestCacheUtil.getDomainsFromACLManifest(getRequestHeaders);
+
                 String tenancyKey = httpListenerProperties.get(MailBoxConstants.PROPERTY_TENANCY_KEY);
 
                 for (RoleBasedAccessControl roleBasedAccessCtrl : roleBasedAccessControl) {
