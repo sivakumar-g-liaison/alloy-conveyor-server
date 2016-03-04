@@ -15,10 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -26,15 +22,9 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jettison.json.JSONException;
 
-import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
-import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
@@ -59,6 +49,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteDownloader.class);
+	
+    /*
+     * Required for JS
+     */
+	private G2SFTPClient sftpClient;
 
 	@SuppressWarnings("unused")
 	private SFTPRemoteDownloader() {
@@ -70,34 +65,13 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Java method to execute the SFTPrequest
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws SymmetricAlgorithmException
-	 * @throws SftpException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws JsonParseException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
-	 *
-	 * @throws MailBoxConfigurationServicesException
 	 *
 	 */
 	private void executeSFTPRequest() {
 
 	    G2SFTPClient sftpRequest = null;
 		try {
+
 			sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.setLogPrefix(constructMessage());
 			sftpRequest.connect();
@@ -132,8 +106,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
 		    LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
-		} 
-		finally {
+		} finally {
 		    if (sftpRequest != null) {
                 sftpRequest.disconnect();
             }
@@ -291,11 +264,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public Object getClient() {
-		return ClientFactory.getClient(this);
+	    sftpClient = (G2SFTPClient) ClientFactory.getClient(this);
+	    return sftpClient;
 	}
 
 	@Override
 	public void cleanup() {
+	    if (null != sftpClient) {
+	        sftpClient.disconnect();
+	    }
 	}
 
 	/**

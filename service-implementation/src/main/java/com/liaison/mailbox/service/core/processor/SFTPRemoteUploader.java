@@ -14,10 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.util.List;
 
@@ -26,18 +22,11 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jettison.json.JSONException;
 
-import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
-import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
@@ -63,6 +52,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteUploader.class);
 
+    /*
+     * Required for JS
+     */
+	private G2SFTPClient sftpClient;
+
 	@SuppressWarnings("unused")
 	private SFTPRemoteUploader() {
 	}
@@ -73,25 +67,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws SftpException
-	 * @throws URISyntaxException
-	 * @throws FS2Exception
-	 * @throws MailBoxServicesException
-	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws JsonParseException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
 	 *
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) {
@@ -132,27 +107,22 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				//GMB-320 - Creates directory to the remote folder
 				boolean isCreateFoldersInRemote = ((SFTPUploaderPropertiesDTO) getProperties()).isCreateFoldersInRemote();
-				 
-				for (String directory : remotePath.split(File.separatorChar=='\\' ? "\\\\" : File.separator)) {
 
-					if (directory.isEmpty()) {//For when path starts with /
-						continue;
-					}
-					
-					try {
-						sftpRequest.getNative().lstat(directory);
-						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
-					} catch (SftpException ex) {
-					    if (isCreateFoldersInRemote) {
-					        sftpRequest.getNative().mkdir(directory);
-					        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
-					    } else {
-					        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), directory);
-					        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
-					    }
-					}
-					sftpRequest.changeDirectory(directory);
-				}
+                // check the given location exists in the remote server
+				try {
+				    sftpRequest.getNative().lstat(remotePath);
+                } catch (SftpException ex) {
+                    if (!isCreateFoldersInRemote) {
+                        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
+                        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+                    } else {
+                        createDirectoriesInRemote(sftpRequest, remotePath);
+                    }
+
+                }
+
+                sftpRequest.changeDirectory(remotePath);
+
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm, subFiles);
 
@@ -168,8 +138,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| JAXBException | URISyntaxException e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
-		}
-		finally {
+        } finally {
 		    if (sftpRequest != null) {
                 sftpRequest.disconnect();
             }
@@ -177,22 +146,22 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	}
 
-	/**
-	 * Java method to upload the file or folder
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws SftpException
-	 * @throws MailBoxServicesException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JAXBException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 * @throws URISyntaxException
-	 *
-	 */
+    /**
+     * Java method to upload the file or folder
+     *
+     * @throws IOException
+     * @throws LiaisonException
+     * @throws SftpException
+     * @throws MailBoxServicesException
+     * @throws com.liaison.commons.exception.LiaisonException
+     * @throws JAXBException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
+     * @throws URISyntaxException
+     *
+     */
 
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm, File[] subFiles)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
@@ -379,11 +348,15 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public Object getClient() {
-		return ClientFactory.getClient(this);
+	    sftpClient = (G2SFTPClient) ClientFactory.getClient(this);
+	    return sftpClient;
 	}
 
 	@Override
 	public void cleanup() {
+	    if (null != sftpClient) {
+	        sftpClient.disconnect();
+	    }
 	}
 
 	/**
@@ -412,4 +385,32 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
         logGlassMessage(msg, file, status);
     }
 
+    /**
+     * Create directories in the remote server if it is not available
+     * 
+     * @param sftpRequest
+     * @param remotePath
+     * @throws SftpException
+     */
+    private void createDirectoriesInRemote(G2SFTPClient sftpRequest, String remotePath) throws SftpException {
+
+        for (String directory : remotePath.split(File.separatorChar == '\\' ? "\\\\" : File.separator)) {
+
+            if (directory.isEmpty()) {// For when path starts with /
+                continue;
+            }
+
+            // Info logs are required to track the folders creation and it won't log frequently
+            try {
+                sftpRequest.getNative().lstat(directory);
+                LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
+            } catch (SftpException ex) {
+                LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
+                sftpRequest.getNative().mkdir(directory);
+                LOGGER.info(constructMessage("Created remote directory {}"), directory);
+            }
+
+        }
+
+    }
 }
