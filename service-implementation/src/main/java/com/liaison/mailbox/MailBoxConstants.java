@@ -106,7 +106,8 @@ public interface MailBoxConstants {
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX = "timetopickupfilepostedbymailbox";
 	public final static String EMAIL_NOTIFICATION_FOR_SLA_VIOLATION = "emailnotificationforslaviolation";
-	public final static String MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION = "maxnumberofnotificationforslaviolation";	
+    public final static String MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION = "maxnumberofnotificationforslaviolation";
+    public final static String LENS_NOTIFICATION_FOR_UPLOADER_FAILURE = "maxnumberoflensnotificationforuploaderfailure";
 	
 
 	// sla validation
@@ -370,6 +371,7 @@ public interface MailBoxConstants {
     public static String  MBX_SLA_CONFIG_UNIT = "com.liaison.mailbox.default.sla.time.unit";
     public static String DEFAULT_SLA_EMAIL_NOTIFICATION = "com.liaison.mailbox.default.sla.notification";
     public static String DEFAULT_SLA_MAX_NOTIFICATION_COUNT = "com.liaison.mailbox.default.sla.max.notification.count";
+    public static String DEFAULT_LENS_FAILURE_NOTIFICATION_COUNT = "com.liaison.mailbox.default.lens.failure.notification.count";
 
     /**
      * Properties required for Healthcheck

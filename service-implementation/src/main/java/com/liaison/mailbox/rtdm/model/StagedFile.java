@@ -51,6 +51,7 @@ public class StagedFile implements Identifiable {
 	private String filePath;
 	private String spectrumUri;
 	private String fileMetaData;
+    private Integer failureNotificationCount;
 	private String stagedFileStatus;
 	private Timestamp expirationTime;
 	private Timestamp createdDate;
@@ -186,6 +187,22 @@ public class StagedFile implements Identifiable {
 		this.modifiedDate = modifiedDate;
 	}
 
+    /**
+     * @return the failureNotificationCount
+     */
+    @Column(name = "NOTIFICATION_COUNT", length = 19)
+    public Integer getFailureNotificationCount() {
+        return failureNotificationCount;
+    }
+
+    /**
+     * @param failureNotificationCount
+     *            the failureNotificationCount to set
+     */
+    public void setFailureNotificationCount(Integer failureNotificationCount) {
+        this.failureNotificationCount = failureNotificationCount;
+    }
+
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
@@ -198,16 +215,17 @@ public class StagedFile implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
-	
-	/**
-	 * Copies all data from entity to DTO except PGUID.
-	 * 
-	 * @param stagedFileDTO
-	 *            The StagedFile DTO
-	 * @param copyAll - boolean           
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 */
+
+    /**
+     * Copies all data from entity to DTO except PGUID.
+     * 
+     * @param stagedFileDTO
+     *            The StagedFile DTO
+     * @param copyAll
+     *            - boolean
+     * @throws IOException
+     * @throws JAXBException
+     */
 	public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) {
 
 		// if copyAll is false, mailboxguid and spectrum uri will not be set in StagedFileDTO
