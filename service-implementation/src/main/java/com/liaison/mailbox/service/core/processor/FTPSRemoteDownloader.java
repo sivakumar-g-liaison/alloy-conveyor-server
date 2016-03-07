@@ -49,6 +49,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
 
+    /*
+     * Required for JS
+     */
+    private G2FTPSClient ftpsClient;
+
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {
 	}
@@ -266,11 +271,19 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public Object getClient() {
-		return FTPSClient.getClient(this);
+        ftpsClient = (G2FTPSClient) FTPSClient.getClient(this);
+        return ftpsClient;
 	}
 
 	@Override
 	public void cleanup() {
+        if (null != ftpsClient) {
+            try {
+                ftpsClient.disconnect();
+            } catch (LiaisonException e) {
+                LOGGER.error(constructMessage("Failed to close connection"));
+            }
+        }
 	}
 
 	/**
