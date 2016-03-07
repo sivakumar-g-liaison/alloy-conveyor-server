@@ -96,6 +96,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) {
 
+	    G2SFTPClient sftpRequest = null;
 		try {
 
 			LOGGER.info(constructMessage("Start run"));
@@ -117,7 +118,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
                 return;
             }
 
-            G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+            sftpRequest = (G2SFTPClient) getClient();
             sftpRequest.setLogPrefix(constructMessage());
             sftpRequest.connect();
             
@@ -156,7 +157,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm, subFiles);
 
 			}
-			sftpRequest.disconnect();
 			long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
@@ -168,6 +168,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| JAXBException | URISyntaxException e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
+		}
+		finally {
+		    if (sftpRequest != null) {
+                sftpRequest.disconnect();
+            }
 		}
 
 	}

@@ -96,8 +96,9 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 */
 	private void executeSFTPRequest() {
 
+	    G2SFTPClient sftpRequest = null;
 		try {
-			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+			sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.setLogPrefix(constructMessage());
 			sftpRequest.connect();
 			LOGGER.info(constructMessage("Start run"));
@@ -119,7 +120,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, localPath);
 				downloadDirectory(sftpRequest, remotePath, localPath);
 			}
-			sftpRequest.disconnect();
 
 			// to calculate the elapsed time for processing files
 			long endTime = System.currentTimeMillis();
@@ -132,6 +132,11 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
 		    LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
+		} 
+		finally {
+		    if (sftpRequest != null) {
+                sftpRequest.disconnect();
+            }
 		}
 	}
 
