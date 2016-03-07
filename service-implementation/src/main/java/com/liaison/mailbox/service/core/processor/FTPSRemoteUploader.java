@@ -180,7 +180,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
     				    throw new MailBoxServicesException("Unable to create dirctory {}.", Response.Status.CONFLICT);
 			    } else {
 			        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
-			        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+			        throw new MailBoxServicesException("The remote directory " + remotePath + " does not exist.", Response.Status.CONFLICT);
 			    }
 			}
 			ftpsRequest.changeDirectory(remotePath);
@@ -353,7 +353,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                         LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
                     } else {
                         LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
-                        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+                        throw new MailBoxServicesException("The remote directory " + remoteFilePath + " does not exist.", Response.Status.CONFLICT);
                     }
                 }
 				ftpsRequest.changeDirectory(remoteFilePath);

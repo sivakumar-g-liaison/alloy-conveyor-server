@@ -148,7 +148,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
 					    } else {
 					        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), directory);
-					        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+					        throw new MailBoxServicesException("The remote directory " + directory + " is not exist.", Response.Status.CONFLICT);
 					    }
 					}
 					sftpRequest.changeDirectory(directory);
@@ -244,7 +244,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
 				    } else {
 				        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
-				        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+				        throw new MailBoxServicesException("The remote directory " + remoteFilePath + " is not exist.", Response.Status.CONFLICT);
 				    }
 				}
 				
