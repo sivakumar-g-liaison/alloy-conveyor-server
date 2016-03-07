@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +28,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
@@ -41,13 +42,14 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -199,7 +201,9 @@ public class HTTPListenerResource extends AuditedResource {
 
                     //Fix for GMB-502
                     glassMessage = constructGlassMessage(request, workTicket, mailboxPguid, ExecutionState.PROCESSING);
-                    logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+
+                    // Fish tag global process id
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
 
                     //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
                     // Log First corner
@@ -258,6 +262,8 @@ public class HTTPListenerResource extends AuditedResource {
 					} else {
 					    throw new LiaisonRuntimeException(e.getMessage());
 					}
+                } finally {
+                    ThreadContext.clearMap();
 				}
 			}
 
@@ -396,9 +402,10 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setInSize((long) request.getContentLength());
 					glassMessage.setProcessId(IdentifierUtil.getUuid());
-					
+
                     //Fix for GMB-502
-                    logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+
                     //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
                     // Log FIRST corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
@@ -436,6 +443,8 @@ public class HTTPListenerResource extends AuditedResource {
                     } else {
                         throw new LiaisonRuntimeException(e.getMessage());
                     }
+                } finally {
+                    ThreadContext.clearMap();
 				}
 			}
 		};
@@ -491,31 +500,6 @@ public class HTTPListenerResource extends AuditedResource {
 	}
 
 	/**
-	 * Method to log gpid and pipeline id in the audit logs.
-	 *
-	 * @param globalProcessId - global process id
-	 * @param pipeLineId - pipeline id
-	 */
-	private void logGlobalProcessId(Class<?> workerClass, String globalProcessId, String pipeLineId) {
-
-		Method enclosingMethod = workerClass.getEnclosingMethod();
-
-		// getting the path value
-		Path classLevelPathAnnotation = enclosingMethod.getDeclaringClass().getAnnotation(Path.class);
-		Path methodLevelPathAnnotation = enclosingMethod.getAnnotation(Path.class);
-		StringBuilder path = new StringBuilder();
-		if (null != classLevelPathAnnotation) path.append(classLevelPathAnnotation.value());
-		if (null != methodLevelPathAnnotation) path.append("/").append(methodLevelPathAnnotation.value());
-
-		// getting the class Name
-		String className = workerClass.getEnclosingClass().getSimpleName();
-		// getting the method Name
-		String methodName = enclosingMethod.getName();
-		// initialize log context
-		initLogContext(path.toString(), className, methodName, globalProcessId, pipeLineId);
-	}
-
-	/**
      * This method will authenticate and authorize the SYNC and ASYNC processor.
      *
      * @param request The HttpServletRequest
@@ -556,13 +540,12 @@ public class HTTPListenerResource extends AuditedResource {
         if (authenticationCredentials.length == 2) {
 
             String loginId = authenticationCredentials[0];
-            GEMACLClient gemClient = new GEMACLClient();
-            GEMManifestResponse gemManifestResponse = gemClient.getACLManifestByloginId(loginId);
+            GEMManifestResponse gemManifestResponse = GEMHelper.getACLManifestByloginId(loginId, null);
 
-            String getRequestHeaders = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
+            String manifest = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
 
-            if (!MailBoxUtil.isEmpty(getRequestHeaders)) {
-                List<RoleBasedAccessControl> roleBasedAccessControl = gemClient.getDomainsFromACLManifest(getRequestHeaders);
+            if (!MailBoxUtil.isEmpty(manifest)) {
+                List<RoleBasedAccessControl> roleBasedAccessControl = GEMHelper.getDomainsFromACLManifest(manifest);
                 String tenancyKey = httpListenerProperties.get(MailBoxConstants.PROPERTY_TENANCY_KEY);
 
                 for (RoleBasedAccessControl roleBasedAccessCtrl : roleBasedAccessControl) {
@@ -573,7 +556,7 @@ public class HTTPListenerResource extends AuditedResource {
                     }
                 }
             } else {
-                logger.info("HTTP(S)-"+ processorType +" + : Manifest should not be empty.");
+                logger.info("HTTP(S)-" + processorType + " : Manifest should not be empty.");
             }
         }
 
