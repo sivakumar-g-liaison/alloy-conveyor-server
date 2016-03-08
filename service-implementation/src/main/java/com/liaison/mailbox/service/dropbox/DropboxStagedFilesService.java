@@ -45,6 +45,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -87,7 +88,7 @@ public class DropboxStagedFilesService {
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
 		// retrieve the tenancy key from acl manifest
-		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+        List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("Retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
@@ -253,7 +254,7 @@ public class DropboxStagedFilesService {
 
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 		// retrieve the tenancy key from acl manifest
-		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
+        List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("Retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);

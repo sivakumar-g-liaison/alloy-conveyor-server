@@ -23,7 +23,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTenancyKeysResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 
 /**
  * Class which has Mailbox Tenancy Key functional related operations.
@@ -50,7 +50,7 @@ public class MailboxTenancyKeyService {
 		List<TenancyKeyDTO> tenancyKeys = null;
 		try {
 
-			tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
+            tenancyKeys = TenancyKeyUtil.getTenancyKeysFromACLManifest(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.info("Retrieval of Tenancy keys failed");
 				throw new MailBoxServicesException(Messages.READ_OPERATION_FAILED, TENANCY_KEYS,

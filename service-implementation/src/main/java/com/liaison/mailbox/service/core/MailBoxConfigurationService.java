@@ -65,6 +65,7 @@ import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -146,7 +147,7 @@ public class MailBoxConfigurationService {
             mailBox.getMailboxProperties().addAll(properties);
 
 			// retrieve the tenancy key from acl manifest
-			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
 			}
@@ -245,7 +246,7 @@ public class MailBoxConfigurationService {
 			}
 
 			// retrieve the actual tenancykey Display Name from TenancyKeys
-			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
+            String tenancyKeyDisplayName = TenancyKeyUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
 
 			// if the tenancy key display name is not available then error will be logged as the given tenancyKey is
 			// not available in tenancyKeys retrieved from acl manifest
@@ -372,7 +373,7 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(retrievedMailBox);
 
 			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            List<String> tenancyKeyGuids = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 
 			if (tenancyKeyGuids.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
@@ -462,7 +463,7 @@ public class MailBoxConfigurationService {
 			}
 
 			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            List<String> tenancyKeyGuids = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 
 			if (tenancyKeyGuids.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
@@ -533,7 +534,7 @@ public class MailBoxConfigurationService {
 				}	
 				
 				// retrieve the actual tenancykey guids from DTO
-				tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+                tenancyKeyGuids = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 	
 				if (tenancyKeyGuids.isEmpty()) {
 					LOG.error("retrieval of tenancy key from acl manifest failed");
