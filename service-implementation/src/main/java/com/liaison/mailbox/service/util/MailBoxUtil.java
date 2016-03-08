@@ -43,7 +43,7 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
@@ -66,8 +66,6 @@ public class MailBoxUtil {
 
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
-	
-	private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -176,7 +174,7 @@ public class MailBoxUtil {
 
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
 		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
@@ -200,7 +198,7 @@ public class MailBoxUtil {
 			throws IOException {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 			tenancyKeyGuids.add(rbac.getDomainInternalName());
@@ -221,7 +219,7 @@ public class MailBoxUtil {
 			throws IOException {
 
 		String tenancyKeyDisplayName = null;
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
