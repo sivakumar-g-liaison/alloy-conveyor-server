@@ -102,12 +102,13 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public List<Processor> findProcessorsOfSpecificTypeByProfileAndTenancyKey(String profileId, String tenancyKey, List<String> specificProcessorTypes);
 	
 	/**
-	 * Retrieves all active processors of given types
+	 * Retrieves all processors of given types and mailbox status
 	 * 
 	 * @param specificProcessorTypes
+	 * @param mailbox status
 	 * @return
 	 */
-	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes);
+	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes, String mailboxStatus);
 	
 	/**
 	 * Retrieves list of all processors  
