@@ -99,7 +99,7 @@ public class MailboxWatchDogService {
 	 *
 	 */
 	@SuppressWarnings("unchecked")
-	public void pollAndUpdateStatus() throws Exception {
+    public void pollAndUpdateStatus() {
 
 		String filePath = null;
 		String fileName = null;
@@ -169,8 +169,12 @@ public class MailboxWatchDogService {
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
 					//No need to call the validateCustomerSLA
 					if (validateTTLUnit(stagedFile, mailboxProperties)) {
-						Files.delete(Paths.get(filePath + File.separatorChar + fileName));
-						continue;
+                        try {
+                            Files.delete(Paths.get(filePath + File.separatorChar + fileName));
+                        } catch (IOException e) {
+                            LOGGER.info(constructMessage("Unable to delete a stale file {} in the filePath {}"), fileName, filePath);
+                        }
+                        continue;
 					}
 					validateCustomerSLA(stagedFile, processor, mailboxProperties);
 					updatedNotificationCountList.add(stagedFile);
@@ -218,7 +222,7 @@ public class MailboxWatchDogService {
 			if (tx.isActive()) {
                 tx.rollback();
             }
-            throw e;
+            throw new RuntimeException(e);
 		} finally {
             if (em != null) {
                 em.close();

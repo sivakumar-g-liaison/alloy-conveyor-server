@@ -37,7 +37,6 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
@@ -64,6 +63,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteUploader.class);
+
+    /*
+     * Required for JS
+     */
+    private G2FTPSClient ftpsClient;
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteUploader() {
@@ -98,27 +102,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws SftpException
-	 * @throws URISyntaxException
-	 * @throws FS2Exception
-	 * @throws MailBoxServicesException
-	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws JsonParseException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
 	 *
 	 */
 	protected void run(String executionId, MailboxFSM fsm) {
@@ -175,12 +158,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			if (!dirExists) {
 				// create directory on the server
 			    if (ftpUploaderStaticProperties.isCreateFoldersInRemote()) {
-    			    boolean isDirCreated = makeDirectories(ftpsRequest, remotePath);
+                    boolean isDirCreated = createDirectoriesInRemote(ftpsRequest, remotePath);
     				if (!isDirCreated)
     				    throw new MailBoxServicesException("Unable to create dirctory {}.", Response.Status.CONFLICT);
 			    } else {
 			        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
-			        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+			        throw new MailBoxServicesException("The remote directory " + remotePath + " does not exist.", Response.Status.CONFLICT);
 			    }
 			}
 			ftpsRequest.changeDirectory(remotePath);
@@ -353,7 +336,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                         LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
                     } else {
                         LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
-                        throw new MailBoxServicesException("The remote directory {} does not exist.", Response.Status.CONFLICT);
+                        throw new MailBoxServicesException("The remote directory " + remoteFilePath + " does not exist.", Response.Status.CONFLICT);
                     }
                 }
 				ftpsRequest.changeDirectory(remoteFilePath);
@@ -431,11 +414,19 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public Object getClient() {
-		return FTPSClient.getClient(this);
+        ftpsClient = (G2FTPSClient) FTPSClient.getClient(this);
+        return ftpsClient;
 	}
 
 	@Override
 	public void cleanup() {
+        if (null != ftpsClient) {
+            try {
+                ftpsClient.disconnect();
+            } catch (LiaisonException e) {
+                LOGGER.error(constructMessage("Failed to close connection"));
+            }
+        }
 	}
 
 	/**
@@ -463,7 +454,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
     public void logToLens(String msg, File file, ExecutionState status) {
         logGlassMessage(msg, file, status);
     }
-	
+
 	/**
      * This method is to create nested directories in remote if not available.
      *
@@ -472,19 +463,24 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
      * 
      *  @return boolean 
      */
-    public boolean makeDirectories(G2FTPSClient ftpClient, String dirPath) throws IOException {
+    private boolean createDirectoriesInRemote(G2FTPSClient ftpClient, String dirPath) throws IOException {
+
         for (String directory : dirPath.split(File.separatorChar == '\\' ? "\\\\" : File.separator)) {
+
             if (directory.isEmpty()) {// For when path starts with /
                 continue;
             }
+
+            // Info logs are required to track the folders creation and it won't log frequently
             boolean isExist = ftpClient.getNative().changeWorkingDirectory(directory);
             if (!isExist) {
                 boolean isCreated = ftpClient.getNative().makeDirectory(directory);
                 if (isCreated) {
-                    LOGGER.info(constructMessage("The directory {} is not exist.So created that."), directory);
+                    LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
                     ftpClient.getNative().changeWorkingDirectory(directory);
+                    LOGGER.info(constructMessage("Created remote directory {}"), directory);
                 } else {
-                    LOGGER.info(constructMessage("The directory {} is not created. ") + directory);
+                    LOGGER.info(constructMessage("The directory {} is not created. "), directory);
                     return false;
                 }
             }
