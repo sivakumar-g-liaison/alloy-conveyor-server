@@ -48,7 +48,9 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
         InitInitialDualDBContext.init();
         payloadLocation = System.getProperty(TMP_DIR) + File.separator + PAYLOAD;
         Path payloadPath = Paths.get(payloadLocation);
-        FileUtils.forceDelete(payloadPath.toFile());
+        if (payloadPath.toFile().exists()) {
+            FileUtils.forceDelete(payloadPath.toFile());
+        }
 		Files.createDirectory(payloadPath);
     }
     
@@ -120,9 +122,11 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
     @AfterMethod
     public void cleanUp() throws Exception {
     	
-    	Path payloadDir = Paths.get(payloadLocation);
+    	File payloadDir = Paths.get(payloadLocation).toFile();
     	try {
-			FileUtils.forceDelete(payloadDir.toFile());
+    		if (payloadDir.exists()) {
+        		FileUtils.forceDelete(payloadDir);
+    		}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
