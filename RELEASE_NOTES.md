@@ -1,4 +1,4 @@
-4.1.0-SNAPSHOT
+4.1.0
 -------------------------------
 * GQ-131 - properties for jnp
 * GQ-118 - LMB Listener 
@@ -11,7 +11,6 @@
 * GGT-452 new nexus repo
 * GMB-700 - Provision in the sendEmail API to overwrite the configured email address
 * ARP-380 - Uses LMB connection factory
-
 
 4.0.5
 -------------------------------
