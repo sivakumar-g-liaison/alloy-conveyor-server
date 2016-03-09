@@ -664,7 +664,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			
 			public boolean accept(Path path) throws IOException {
 				File file = path.toFile();
-				return (file.isFile() && MailBoxUtil.isFileExpired(file));
+				return (file.isFile() && MailBoxUtil.isFileExpired(file.lastModified()));
 		    }
 		};
 		// once stale files are identified, they will be deleted

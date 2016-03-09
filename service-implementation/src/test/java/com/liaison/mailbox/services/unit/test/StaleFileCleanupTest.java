@@ -12,13 +12,13 @@ package com.liaison.mailbox.services.unit.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -47,8 +47,9 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
         System.setProperty("com.liaison.mailbox.sweeper.stalefile.ttl", "30");
         InitInitialDualDBContext.init();
         payloadLocation = System.getProperty(TMP_DIR) + File.separator + PAYLOAD;
-		Files.deleteIfExists(Paths.get(payloadLocation));
-		Files.createDirectory(Paths.get(payloadLocation));
+        Path payloadPath = Paths.get(payloadLocation);
+        FileUtils.forceDelete(payloadPath.toFile());
+		Files.createDirectory(payloadPath);
     }
     
     @Test
@@ -120,10 +121,8 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
     public void cleanUp() throws Exception {
     	
     	Path payloadDir = Paths.get(payloadLocation);
-    	try (DirectoryStream<Path> stream = Files.newDirectoryStream(payloadDir)) {
-			for (Path filePath : stream) {
-				Files.deleteIfExists(filePath);
-			}
+    	try {
+			FileUtils.forceDelete(payloadDir.toFile());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -490,16 +490,16 @@ public class MailBoxUtil {
      * Method to find if the file expired after the stale file ttl configured in properties file for sweeper
      * file is considered as expired if the (last modified time + ttl) is before current time
      * 
-     * @param file - the file which needs to be validation for expiry
+     * @param lastModified - the last modified time of file which needs to be validated for expiry
      * @return true if file expired otherwise false
      */
-    public static boolean isFileExpired(File file) {
+    public static boolean isFileExpired(long lastModified) {
     	
 		int staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
 												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
 		// calculate file validity
 		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(file.lastModified());
+		cal.setTimeInMillis(lastModified);
 		cal.add(Calendar.DATE, staleFileTTL);
         Timestamp fileValidity = new Timestamp(cal.getTime().getTime());
         LOGGER.debug("The file validity is {}", fileValidity);
