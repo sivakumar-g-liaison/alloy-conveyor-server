@@ -80,7 +80,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			String path = getPayloadURI();
 
 			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info(constructMessage("The given payload URI is Empty."));
+                LOGGER.error(constructMessage("The given payload URI is Empty."));
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
@@ -89,7 +89,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             File[] subFiles = localDir.listFiles();
 
             if (subFiles == null || subFiles.length == 0) {
-                LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
+                LOGGER.error(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
             }
 
@@ -183,7 +183,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				lastCheckTime = new Date();
 				if(eventDAO.isThereAInterruptSignal(executionId)) {
 				    
-					LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
+                    LOGGER.debug("The executor with execution id  " + executionId + " is gracefully interrupted");
 					fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 					fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
 					return;
@@ -199,14 +199,14 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName()) ||
 				        MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
 					// skip processed folder
-					LOGGER.info(constructMessage("skipping processed/error folder"));
+                    LOGGER.debug(constructMessage("skipping processed/error folder"));
 					continue;
 				}
 
 				String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
 				try {
 				    sftpRequest.getNative().lstat(remoteFilePath);
-				    LOGGER.info(constructMessage("The remote directory {} exists."), remoteFilePath);
+                    LOGGER.debug(constructMessage("The remote directory {} exists."), remoteFilePath);
 				} catch (SftpException ex) {
 				    if (isCreateFoldersInRemote) {
 				        sftpRequest.getNative().mkdir(remoteFilePath);
@@ -333,7 +333,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI is Empty.");
+                LOGGER.debug("The given remote URI is Empty.");
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
@@ -403,7 +403,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             // Info logs are required to track the folders creation and it won't log frequently
             try {
                 sftpRequest.getNative().lstat(directory);
-                LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
+                LOGGER.debug(constructMessage("The remote directory {} already exists."), directory);
             } catch (SftpException ex) {
                 LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
                 sftpRequest.getNative().mkdir(directory);

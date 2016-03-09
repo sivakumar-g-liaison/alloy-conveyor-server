@@ -104,7 +104,7 @@ public abstract class HTTPAbstractProcessor {
 			throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException {
 
-		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
+        logger.debug("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
 		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
 
@@ -123,7 +123,7 @@ public abstract class HTTPAbstractProcessor {
 		boolean isAuthCheckRequired = true;
 		isAuthCheckRequired = Boolean
 				.parseBoolean(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));
-		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}",
+        logger.debug("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}",
 				isAuthCheckRequired);
 		return isAuthCheckRequired;
 	}

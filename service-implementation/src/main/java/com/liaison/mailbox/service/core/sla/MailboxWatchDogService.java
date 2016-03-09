@@ -334,7 +334,7 @@ public class MailboxWatchDogService {
 			// send email notifications for sla violations
 			sendEmail(processor, emailAddress, emailSubject, body.toString());
 		} else {
-			LOGGER.info("Email Notification to the User reached Maximum So unable to sending the email to user");
+            LOGGER.info(constructMessage("Email Notification to the User reached Maximum So unable to sending the email to user"));
 		}
 
 	}
@@ -581,7 +581,7 @@ public class MailboxWatchDogService {
 	 */
 	public Processor getSpecificProcessorofMailbox(String mailboxId) {
 
-		LOGGER.info("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
+        LOGGER.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
 		// get processor of type remote uploader of given mailbox id
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		List <Processor> processors = processorDAO.findSpecificProcessorTypesOfMbx(mailboxId, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));

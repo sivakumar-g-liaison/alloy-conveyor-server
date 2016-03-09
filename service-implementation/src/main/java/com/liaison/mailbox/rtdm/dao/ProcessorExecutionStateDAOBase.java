@@ -75,7 +75,7 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 		prcsrExecution.setExecutionStatus(executionStatus);
 
 		persist(prcsrExecution);
-		LOGGER.info("Processor Execution created with status READY initialy");
+        LOGGER.debug("Processor Execution created with status READY initialy");
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 	 */
 	public void updateProcessorExecutionState(ProcessorExecutionState processorExecutionState) {
 		merge(processorExecutionState);
-		LOGGER.info("Processor execution state with id " + processorExecutionState.getPguid()
+        LOGGER.debug("Processor execution state with id " + processorExecutionState.getPguid()
 				+ " is updated with status " + processorExecutionState.getExecutionStatus() + " for processor id "
 				+ processorExecutionState.getProcessorId());
 	}

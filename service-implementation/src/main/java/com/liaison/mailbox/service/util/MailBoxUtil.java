@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -193,7 +192,7 @@ public class MailBoxUtil {
 			tenancyKeys.add(tenancyKey);
 		}
 
-		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
+        LOGGER.debug("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
 	}
 

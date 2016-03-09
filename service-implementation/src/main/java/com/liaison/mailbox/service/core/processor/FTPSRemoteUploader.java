@@ -111,13 +111,13 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		    String path = getPayloadURI();
             if (MailBoxUtil.isEmpty(path)) {
-                LOGGER.info(constructMessage("The given payload URI is Empty."));
+                LOGGER.error(constructMessage("The given payload URI is Empty."));
                 throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
             }
 
             String remotePath = getWriteResponseURI();
             if (MailBoxUtil.isEmpty(remotePath)) {
-                LOGGER.info(constructMessage("The given remote URI is Empty."));
+                LOGGER.error(constructMessage("The given remote URI is Empty."));
                 throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
             }
 
@@ -237,7 +237,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				    
 					fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 					fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
-					LOGGER.info("The executor with execution id  " + executionId + " is gracefully interrupted");
+                    LOGGER.debug("The executor with execution id  " + executionId + " is gracefully interrupted");
 					return;
 				}
 				lastCheckTime = new Date();
@@ -322,7 +322,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())
 				        || MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
 					// skip processed folder
-					LOGGER.info(constructMessage("skipping processed/error folder"));
+                    LOGGER.debug(constructMessage("skipping processed/error folder"));
 					continue;
 				}
 
@@ -396,7 +396,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(remotePath)) {
-			LOGGER.info("The given remote URI is Empty.");
+            LOGGER.error("The given remote URI is Empty.");
 			throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 		}
 

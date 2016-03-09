@@ -149,12 +149,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 persistPaylaodAndWorkticket(workTickets, staticProp);
 
             	if (workTicketGroups.isEmpty()) {
-            		LOGGER.info("The file group is empty");
+                    LOGGER.debug("The file group is empty");
             	} else {
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
             			String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
-            			LOGGER.info(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+                        LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
 
             			// For glass logging
@@ -170,15 +170,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getGlobalProcessId(),
             				        " submitted for file ",
             				        wrkTicket.getFileName()));
-            				
+
             				String payloadURI = wrkTicket.getPayloadURI();
         					String filePath = String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
             				// Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
             				if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-            					LOGGER.info("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
+                                LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
                 				delete(filePath);
             				} else {
-            					LOGGER.info("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
+                                LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
             				}
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,

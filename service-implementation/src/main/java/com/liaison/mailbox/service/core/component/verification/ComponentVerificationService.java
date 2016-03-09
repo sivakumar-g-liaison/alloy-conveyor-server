@@ -156,7 +156,7 @@ public class ComponentVerificationService  {
 			try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
 
 				String paylaod = new String(StreamUtil.streamToBytes(is));
-				logger.info("The received payload is \"{}\"", paylaod);
+                logger.debug("The received payload is \"{}\"", paylaod);
 			}
 			endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
