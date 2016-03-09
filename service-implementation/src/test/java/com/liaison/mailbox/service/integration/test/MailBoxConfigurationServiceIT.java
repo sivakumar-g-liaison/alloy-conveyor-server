@@ -60,7 +60,6 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationServiceIT.class);
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	private static final String AUTH_CREDENTIALS = "Basic testuser_dev-int@liaison.dev:Password#13";
-	
 	/**
 	 * @throws java.lang.Exception
 	 */
