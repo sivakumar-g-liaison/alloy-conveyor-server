@@ -51,6 +51,8 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.processor.DirectorySweeper;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -254,9 +256,8 @@ public class MailboxWatchDogService {
 	 * @param processor
 	 * @param mailboxPropsToBeRetrieved
 	 * @return boolean
-	 * @throws IOException
 	 */
-	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) throws IOException {
+	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) {
 
 		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
 		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
@@ -276,9 +277,8 @@ public class MailboxWatchDogService {
 	 * @param ttlDay
 	 * @param stagedFileTime
 	 * @return Timestamp
-	 * @throws IOException
 	 */
-	private Timestamp getTTLAsTimestamp(int ttlDay, Timestamp stagedFileTime) throws IOException {
+	private Timestamp getTTLAsTimestamp(int ttlDay, Timestamp stagedFileTime) {
 
 		Timestamp timeStmp = new Timestamp(stagedFileTime.getTime());
 		// get the sla time configuration unit
@@ -294,9 +294,8 @@ public class MailboxWatchDogService {
 	 * 
 	 * @param stagedFile - staged file entity which contains details of when staging occurs 
 	 * 					   and the related processor and mailbox details 
-	 * @throws IOException 
 	 */
-	private void validateCustomerSLA(StagedFile stagedFile, Processor processor, Map<String, String> mailboxProperties) throws IOException {		
+	private void validateCustomerSLA(StagedFile stagedFile, Processor processor, Map<String, String> mailboxProperties) {		
 		
 		String customerSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
@@ -391,9 +390,8 @@ public class MailboxWatchDogService {
 	 * @param customerSLAConfiguration
 	 * @param stagedFileTime
 	 * @return
-	 * @throws IOException
 	 */
-	private Timestamp getCustomerSLAConfigurationAsTimeStamp(String customerSLAConfiguration, Timestamp stagedFileTime) throws IOException {
+	private Timestamp getCustomerSLAConfigurationAsTimeStamp(String customerSLAConfiguration, Timestamp stagedFileTime) {
 
 		Timestamp timeStmp = new Timestamp(stagedFileTime.getTime());
 		// get the sla time configuration unit
@@ -411,9 +409,8 @@ public class MailboxWatchDogService {
 	 * 
 	 * @param slaConfiguration
 	 * @return timestamp value of given sla configuration
-	 * @throws IOException
 	 */
-	private Timestamp getSLAConfigurationAsTimeStamp(String slaConfiguration) throws IOException {
+	private Timestamp getSLAConfigurationAsTimeStamp(String slaConfiguration) {
 
 		Timestamp timeStmp = new Timestamp(new Date().getTime());
 
@@ -433,9 +430,8 @@ public class MailboxWatchDogService {
 	 * 			The default value is hours.The possibel values are as follows
 	 * 			12 for  Minutes
 	 * 			10 for Hours
-	 * @throws IOException
 	 */
-	private int getSLATimeConfigurationUnit() throws IOException {
+	private int getSLATimeConfigurationUnit() {
 
 		// get sla time configuration unit from properties file
 		String slaTimeConfigurationUnit = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MBX_SLA_CONFIG_UNIT, TimeUnit.MINUTES.name());
@@ -457,11 +453,12 @@ public class MailboxWatchDogService {
 	
 	/**
 	 * Iterate all Mailboxes and check whether Mailbox satisfies the SLA Rules
-	 *
+	 * 
+	 * @Param mailboxStatus
+	 * 					status of mailbox. could be ACTIVE or INACTIVE
 	 * @return boolean
-	 * @throws IOException
 	 */
-	public void validateMailboxSLARule() throws IOException {
+	public void validateMailboxSLARule(String mailboxStatus) {
 
 		LOGGER.debug("Entering into validateMailboxSLARules.");
 
@@ -470,19 +467,35 @@ public class MailboxWatchDogService {
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(Sweeper.class.getCanonicalName());
-		List <Processor> sweepers = config.findProcessorsByType(processorTypes);
+		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
 			
-			LOGGER.debug("Retrieving Mailbox properties");
-			List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
-			mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
-			mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
-			mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
-			
-			Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
-			// check whether sweeper got executed with in the configured sla time
-			checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
+			try {
+				// sla validation must be done only if both mailbox and processors are active
+				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
+								EntityStatus.ACTIVE.value().equals(procsr.getProcsrStatus())) {
+					
+					LOGGER.debug("Retrieving Mailbox properties");
+					List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
+					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
+					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
+					mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+					
+					Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
+					// check whether sweeper got executed with in the configured sla time
+					checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
+				}
+				// check sweeper location for stale file cleanup
+				DirectorySweeper directorySweeper = (DirectorySweeper) MailBoxProcessorFactory.getInstance(procsr);
+				directorySweeper.cleanupStaleFiles();
+			} catch (Exception e) {
+				
+				// Exceptions are handled gracefully so that sla validation can be continued for other processors.
+				// TODO to decide whether mail needs to be sent to internal engineering DL to notify these failure cases 
+				LOGGER.error(constructMessage("Error occured in watchdog service during mailbox sla validation" , e.getMessage()));
+
+			}
 		}
 	}
 	
@@ -492,11 +505,10 @@ public class MailboxWatchDogService {
 	 * @param processor - processor for which sla has to be validated
 	 * @param slaConfigurationTime - sla configured in mailbox
 	 * @param emailAddress - email Address to which SLA has to be notified
-	 * @throws IOException
 	 */
-	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, Map<String, String> mailboxProperties) throws IOException {
+	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, Map<String, String> mailboxProperties) {
 		
-		String mailboxSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
+		String mailboxSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);		
 		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 		LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}, emailNotificationEnabled - {}", mailboxSLAConfiguration, emailAddress, enableEmailNotification);

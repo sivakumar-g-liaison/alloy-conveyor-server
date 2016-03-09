@@ -311,7 +311,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	@Override
-	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes) {
+	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes, String mailboxStatus) {
+		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
 
@@ -320,16 +321,16 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.debug("Fetching the processor starts.");
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
-						.append(" where processor.procsrStatus = :")
-						.append(STATUS)
-						.append(" and mbx.mbxStatus = :")
+						.append(" where mbx.mbxStatus = :")
 						.append(STATUS)
 						.append(" and ( ")
 						.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
 						.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(STATUS, EntityStatus.ACTIVE.name())
+					.setParameter(STATUS, (MailBoxUtil.isEmpty(mailboxStatus) ? 
+												EntityStatus.ACTIVE.name() :
+												mailboxStatus.toUpperCase()))
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -431,46 +432,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 				entityManager.close();
 			}
 		}
-		return processors;
-	}
-
-	public List<Processor> findProcessorByType(ProcessorType type) {
-
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
-
-		try {
-
-			LOG.debug("Fetching the processor count starts.");
-
-			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox mbx")
-					.append(" where TYPE(processor) = :")
-					.append(PROCESSOR_TYPE)
-					.append(" and processor.procsrStatus = :")
-					.append(STATUS)
-					.append(" and mbx.mbxStatus = :")
-					.append(STATUS);
-			Class <?> processorType = getProcessorClass(type.getCode());
-
-			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(PROCESSOR_TYPE, processorType)
-					.setParameter(STATUS, EntityStatus.ACTIVE.value())
-					.getResultList();
-
-			Iterator<?> iter = proc.iterator();
-			Processor processor;
-			while (iter.hasNext()) {
-				processor = (Processor) iter.next();
-				processors.add(processor);
-			}
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-
 		return processors;
 	}
 
