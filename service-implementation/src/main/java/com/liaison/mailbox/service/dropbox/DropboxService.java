@@ -23,7 +23,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
-import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**

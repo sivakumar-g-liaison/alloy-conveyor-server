@@ -31,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -53,9 +52,8 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * Updates LENS status for the customer picked up the files
@@ -109,8 +107,6 @@ public class MailboxWatchDogService {
 		List<StagedFile> updatedStatusList = new ArrayList<>();
 		List<StagedFile> updatedNotificationCountList = new ArrayList<>();
 		Map<String, Processor> processors = new HashMap<>();		
-		TransactionVisibilityClient transactionVisibilityClient = null;
-		GlassMessage glassMessage = null;
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 
 		try {
@@ -188,24 +184,24 @@ public class MailboxWatchDogService {
 					continue;
 				}
 
-				transactionVisibilityClient = new TransactionVisibilityClient();
-				glassMessage = new GlassMessage();
-				glassMessage.setGlobalPId(stagedFile.getGPID());
+                GlassMessageUtil.logGlassMessage(
+                        stagedFile.getGPID(),
+                        processor.getProcessorType(),
+                        processor.getProcsrProtocol(),
+                        fileName,
+                        filePath,
+                        0,
+                        ExecutionState.COMPLETED,
+                        "File is picked up by the customer or other process");
 
-				glassMessage.setStatus(ExecutionState.COMPLETED);
-				glassMessage.setOutAgent(stagedFile.getFilePath());
-				glassMessage.setOutboundFileName(stagedFile.getFileName());
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, "File is picked up by the customer or other process", stagedFile.getProcessorType(), null);
-
-				//TVAPI
-				transactionVisibilityClient.logToGlass(glassMessage);
-				LOGGER.info(constructMessage("Updated LENS status for the file {} and location is {}"), fileName, filePath);
+                LOGGER.info(constructMessage("Updated LENS status for the file {} and location is {}"), fileName, filePath);
 
 				// Inactivate the stagedFile
 				stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
 				stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
 				updatedStatusList.add(stagedFile);
 			}
+
             //updated the stagedFile with latest notification count.
 			for (StagedFile updatedNotificationCount : updatedNotificationCountList) {
 	            em.merge(updatedNotificationCount);

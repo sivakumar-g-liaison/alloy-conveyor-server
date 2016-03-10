@@ -40,10 +40,10 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * This will place and manages the file with respect to the given location.
@@ -265,28 +265,21 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         		LOG.info("File {} is not picked up by the customer", stagedFile.getFileName());
         		continue;
         	}
-            TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-            GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getGPID());
-            glassMessage.setCategory(configurationInstance.getProcessorType());
-            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
-
-            glassMessage.setStatus(ExecutionState.COMPLETED);
-            glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
-            glassMessage.setOutSize(null);
-            glassMessage.setOutboundFileName(stagedFile.getFileName());
 
             StringBuilder message = new StringBuilder()
             					.append("File ")
             					.append(stagedFile.getFileName())
             					.append(" is picked up by the customer");
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
 
-            //Fourth corner timestamp
-            glassMessage.logFourthCornerTimestamp();
-
-            //TVAPI
-            transactionVisibilityClient.logToGlass(glassMessage);
+            GlassMessageUtil.logGlassMessage(
+                    stagedFile.getGPID(),
+                    configurationInstance.getProcessorType(),
+                    configurationInstance.getProcsrProtocol(),
+                    stagedFile.getFileName(),
+                    stagedFile.getFilePath(),
+                    0,
+                    ExecutionState.COMPLETED,
+                    message.toString());
 
             // Inactivate the stagedFile
             stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());

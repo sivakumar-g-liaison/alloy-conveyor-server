@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.util;
+package com.liaison.mailbox.service.glass.util;
 
 import java.util.Date;
 
@@ -29,6 +29,7 @@ import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Class that contains the fields required for logging messages in LENS.
