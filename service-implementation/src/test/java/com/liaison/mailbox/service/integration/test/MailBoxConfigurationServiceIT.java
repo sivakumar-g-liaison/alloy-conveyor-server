@@ -14,10 +14,6 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.time.StopWatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
@@ -27,9 +23,6 @@ import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
@@ -57,9 +50,6 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
 	private String serviceInstanceId = "5D9C3B487184426E9F9629EFEE7C5913";
 	private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
-	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationServiceIT.class);
-	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
-	private static final String AUTH_CREDENTIALS = "Basic testuser_dev-int@liaison.dev:Password#13";
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -1109,32 +1099,5 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         // Assertion
         Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
     }
-    
-    @Test(enabled = false)
-    public void PerformanceTestOfHTTPSync() {
-    	Parallel.For(0, 250, new Parallel.Action<Long>() {
-            @Override
-            public void doAction(Long element) {
-                try {
-                    StopWatch totalExecutionTime = new StopWatch();
-                    totalExecutionTime.start();
-                    HTTPRequest request;
-                    HTTPResponse response;
-                    String handleSync = "/process/sync?mailboxId=" + "C6BA095F9CB5444598E30476ECF3D2AD";
-                    String authorizationHeader = Base64.encodeBase64String(AUTH_CREDENTIALS.getBytes());
-                    
-                    request = constructHTTPRequest(getBASE_URL() + handleSync, HTTP_METHOD.POST, null, LOG);
-                    request.addHeader(HTTP_HEADER_BASIC_AUTH, authorizationHeader);
-                    response = request.execute();
-                    Assert.assertEquals("OK", response.getReasonPhrease());
-                    totalExecutionTime.stop();
-                    LOG.debug("TOTAL EXECUTION TIME : " + totalExecutionTime);
-                                      
-                } catch (Exception up) {
-                    System.out.println(up.getMessage());
-                }
-            }
-        });
-    	
-    }
+
 }
