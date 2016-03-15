@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonGenerationException;
@@ -20,12 +21,14 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
@@ -129,7 +132,11 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             
             if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
                     ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-                MailBoxUtil.constructURLAndPort(propertiesDTO);
+                if (MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
+                    MailBoxUtil.constructURLAndPort(propertiesDTO);
+                } else {
+                    throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
+                }
             }
             
 			if (null != propertiesDTO) {
