@@ -389,5 +389,9 @@ public interface MailBoxConstants {
     public final static int HTTPS_PORT = 443;
     public final static int FTPS_PORT = 21;
     public final static int SFTP_PORT = 22;
+    
+    // TTL in days for stale file cleanup in sweeper location
+    public static final int STALE_FILE_CLEAN_UP_TTL = 30;
+    public static final String PROPERTY_STALE_FILE_CLEAN_UP = "com.liaison.mailbox.sweeper.stalefile.ttl";
 
 }

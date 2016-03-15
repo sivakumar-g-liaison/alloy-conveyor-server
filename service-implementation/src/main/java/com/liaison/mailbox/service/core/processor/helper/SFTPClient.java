@@ -90,15 +90,16 @@ public class SFTPClient {
 				// in case of sftp using keys, password will not be available
 				// and hence retrieval of
 				// password from KMS is not valid in this case.
-				String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword())) ? KMSUtil
-						.getSecretFromKMS(loginCredential.getCredsPassword()) : null;
+                String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword()))
+                        ? KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword())
+                        : null;
 
 				if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
 					sftpRequest.setUser(loginCredential.getCredsUsername());
 
 				}
 				if (!MailBoxUtil.isEmpty(passwordFromKMS)) {
-					sftpRequest.setPassword(passwordFromKMS);
+                    sftpRequest.setPassword(passwordFromKMS.getBytes());
 				}
 			}
 			Credential sshKeyPairCredential = processor.getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
@@ -107,7 +108,7 @@ public class SFTPClient {
 
 				if (MailBoxUtil.isEmpty(sshKeyPairCredential.getCredsIdpUri())) {
 
-					LOGGER.info("Credential requires file path");
+                    LOGGER.error("Credential requires file path");
 					throw new MailBoxServicesException("Credential requires file path", Response.Status.CONFLICT);
 				}
 

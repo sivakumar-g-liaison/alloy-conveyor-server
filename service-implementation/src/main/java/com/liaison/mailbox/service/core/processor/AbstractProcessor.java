@@ -502,7 +502,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	private void fetchFiles(String path, List<File> files) throws MailBoxServicesException {
 
 		if (MailBoxUtil.isEmpty(path)) {
-			LOGGER.info("The given URI {} does not exist.", path);
+            LOGGER.error("The given URI {} does not exist.", path);
 			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.", Response.Status.CONFLICT);
 		}
 
@@ -513,14 +513,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			if (location.exists()) {
 				files.add(location);
 			} else {
-				LOGGER.info("The given file {} does not exist.", path);
+                LOGGER.error("The given file {} does not exist.", path);
 				throw new MailBoxServicesException("The given file '" + path + "' does not exist.", Response.Status.CONFLICT);
 			}
 
 		} else {
 
 			if (!location.exists()) {
-				LOGGER.info("The given directory {} does not exist.", path);
+                LOGGER.error("The given directory {} does not exist.", path);
 				throw new MailBoxServicesException("The given directory '" + path + "' does not exist.", Response.Status.CONFLICT);
 			} else {
 
@@ -689,7 +689,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		} else {
 			return folderPath;
 		}
-		LOGGER.info("The Processed Folder Path is" + processedFolderPath);
+        LOGGER.debug("The Processed Folder Path is" + processedFolderPath);
 		return processedFolderPath;
 	}
 
@@ -823,7 +823,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		if (MailBoxUtil.isEmpty(fileName)) {
 
-			LOGGER.info("The given URI {} does not exist.", fileName);
+            LOGGER.error("The given URI {} does not exist.", fileName);
 			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.", Response.Status.CONFLICT);
 		}
 	}

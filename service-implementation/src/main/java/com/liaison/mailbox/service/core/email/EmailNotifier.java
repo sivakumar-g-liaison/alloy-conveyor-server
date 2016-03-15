@@ -168,13 +168,13 @@ public class EmailNotifier {
         }
 
         if (null == emailAddress || emailAddress.isEmpty()) {
-            LOGGER.info("Email Address is not configured.");
+            LOGGER.debug("Email Address is not configured.");
             return;
         }
 
         EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
         emailInfoDTO.copyToDTO(processor, emailAddress, emailSubject, emailBody, isSuccess);
-        LOGGER.info("Ready to send email to {}", emailAddress);
+        LOGGER.debug("Ready to send email to {}", emailAddress);
 
         EmailNotifier.sendEmail(emailInfoDTO);
         LOGGER.info("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());

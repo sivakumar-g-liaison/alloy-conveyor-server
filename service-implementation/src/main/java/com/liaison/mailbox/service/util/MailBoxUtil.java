@@ -66,8 +66,8 @@ public class MailBoxUtil {
 
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
-	
-	private static GEMACLClient gemClient = new GEMACLClient();
+
+    private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -176,7 +176,7 @@ public class MailBoxUtil {
 
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
@@ -192,7 +192,7 @@ public class MailBoxUtil {
 			tenancyKeys.add(tenancyKey);
 		}
 
-		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
+        LOGGER.debug("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
 	}
 
@@ -200,7 +200,7 @@ public class MailBoxUtil {
 			throws IOException {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 			tenancyKeyGuids.add(rbac.getDomainInternalName());
@@ -221,7 +221,7 @@ public class MailBoxUtil {
 			throws IOException {
 
 		String tenancyKeyDisplayName = null;
-		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
@@ -484,5 +484,27 @@ public class MailBoxUtil {
     public static boolean isEmptyList(List<String> list) {
         return list == null || list.isEmpty();
     }
-
+    
+    /**
+     * Method to find if the file expired after the stale file ttl configured in properties file for sweeper
+     * file is considered as expired if the (last modified time + ttl) is before current time
+     * 
+     * @param lastModified - the last modified time of file which needs to be validated for expiry
+     * @return true if file expired otherwise false
+     */
+    public static boolean isFileExpired(long lastModified) {
+    	
+		int staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
+												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+		// calculate file validity
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(lastModified);
+		cal.add(Calendar.DATE, staleFileTTL);
+        Timestamp fileValidity = new Timestamp(cal.getTime().getTime());
+        LOGGER.debug("The file validity is {}", fileValidity);
+        
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        LOGGER.debug("Current time is {}", currentTimestamp);
+		return fileValidity.before(currentTimestamp) ;
+    }
 }

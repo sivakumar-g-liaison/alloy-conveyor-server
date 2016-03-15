@@ -116,7 +116,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 							request.inputData(contentStream, contentType);
 
 							response = request.execute();
-							LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(),
+                            LOGGER.debug("The reponse code received is {} for a request {} ", response.getStatusCode(),
 									entry.getName());
 							if (response.getStatusCode() != 200) {
 

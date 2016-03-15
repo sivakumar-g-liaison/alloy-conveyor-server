@@ -323,7 +323,7 @@ public class ProcessorConfigurationService {
 		try {
 
 			LOGGER.debug("Entering into get processor.");
-			LOGGER.info("The retrieve guid is {} ", processorGuid);
+            LOGGER.debug("The retrieve guid is {} ", processorGuid);
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
@@ -366,7 +366,7 @@ public class ProcessorConfigurationService {
 		try {
 
 			LOGGER.debug("Entering into get processor.");
-			LOGGER.info("Deactivate guid is {} ", processorGuid);
+            LOGGER.debug("Deactivate guid is {} ", processorGuid);
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor retrievedProcessor = config.find(Processor.class, processorGuid);
@@ -420,7 +420,7 @@ public class ProcessorConfigurationService {
 	            throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 	        }
 
-		    LOGGER.info("Request guid is {} ", processorDTO.getGuid());
+            LOGGER.debug("Request guid is {} ", processorDTO.getGuid());
 			if (!mailBoxId.equals(processorDTO.getLinkedMailboxId())) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MailBoxConstants.MAILBOX,
 						Response.Status.CONFLICT);
@@ -1045,7 +1045,7 @@ public class ProcessorConfigurationService {
 		try {
 
 			LOGGER.debug("Entering into get processor.");
-			LOGGER.info("The retrieve guid is {} ", processorGuid);
+            LOGGER.debug("The retrieve guid is {} ", processorGuid);
 			List <Processor> processors = null;
 
 			if (null == processorGuid) {

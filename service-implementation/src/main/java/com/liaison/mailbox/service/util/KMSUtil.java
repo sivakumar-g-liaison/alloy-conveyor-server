@@ -135,7 +135,7 @@ public class KMSUtil {
 
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
+        LOGGER.debug("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {

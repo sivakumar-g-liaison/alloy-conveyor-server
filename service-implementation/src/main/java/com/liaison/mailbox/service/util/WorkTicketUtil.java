@@ -51,7 +51,7 @@ public class WorkTicketUtil {
 
 		String pipelineId = null;
 		pipelineId = httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
-		LOGGER.info("PIPELINE ID is set to be :" + pipelineId);
+        LOGGER.debug("PIPELINE ID is set to be :" + pipelineId);
 		return pipelineId;
 	}
 

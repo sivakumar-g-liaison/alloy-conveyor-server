@@ -6,7 +6,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 import oracle.jdbc.OracleDriver
 // flyway
-import oracle.jdbc.OracleDriver
 import com.googlecode.flyway.core.Flyway
 import com.googlecode.flyway.gradle.task.AbstractFlywayTask
 import com.googlecode.flyway.core.api.FlywayException
@@ -181,7 +180,7 @@ dependencies {
 	//    compile "jboss:jnp-client:4.0.2"
 
 	// for G2Javascript engine
-	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '4.1.+'
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '5.+'
 
 	//Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
 	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
@@ -246,12 +245,13 @@ dependencies {
 	}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'4.0.4', changing: true
+
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'4.+', changing: true
 
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
 
-	compile ("com.liaison.commons.spectrum.client:spectrum-client:2.+") {
+	compile ("com.liaison.commons.spectrum.client:spectrum-client:3.+") {
 		exclude group: "com.google.collections", module: "google-collections"
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
@@ -266,7 +266,7 @@ dependencies {
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
 
 	//Dependency for Encryption
-	compile "com.liaison.commons.lib:crypto:4.0.2"
+	compile "com.liaison.commons.lib:crypto:4.+"
 	
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"

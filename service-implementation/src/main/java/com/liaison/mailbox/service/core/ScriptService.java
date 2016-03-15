@@ -65,7 +65,7 @@ public class ScriptService {
 	public ScriptServiceResponseDTO createScript(ScriptServiceDTO scriptRequest) {
 
 		LOGGER.debug("Entered into createScript() method");
-		LOGGER.info("The retrieve script uri is  {}", scriptRequest.getScriptFileUri());
+        LOGGER.debug("The script uri is  {}", scriptRequest.getScriptFileUri());
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		GenericValidator validator = new GenericValidator();
 		String uri = scriptRequest.getScriptFileUri();
@@ -106,7 +106,7 @@ public class ScriptService {
 	public ScriptServiceResponseDTO getScript(String encodedUri, String commitSha) {
 
 		LOGGER.debug("Entered into getScript() method");
-		LOGGER.info("The retrieve script uri is {} ", encodedUri);
+        LOGGER.debug("The retrieve script uri is {} ", encodedUri);
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		String script = null;
 		String[] urlParts = null;
@@ -165,7 +165,7 @@ public class ScriptService {
 	public ScriptServiceResponseDTO updateScript(ScriptServiceDTO scriptRequest) {
 
 		LOGGER.debug("Entered into updateScript() method");
-		LOGGER.info("The retrieve script uri is  ", scriptRequest.getScriptFileUri());
+        LOGGER.debug("The retrieve script uri is  ", scriptRequest.getScriptFileUri());
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		GenericValidator validator = new GenericValidator();
 

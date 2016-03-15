@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -48,6 +49,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -77,6 +79,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private String pipelineId;
 	private List<Path> activeFiles = new ArrayList<>();
     protected int totalNumberOfDeletedFiles;
+    private static final String STALE_FILE_NOTIFICATION_SUBJECT = "Deleting Stale files in Sweeper";
+    private static final String STALE_FILE_NOTIFICATION_EMAIL_FILES = "Files :";
+    private static final String STALE_FILE_NOTIFICATION_EMAIL_CONTENT = "Deleting stale files in Sweeper named '%s' from the location '%s'";
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     public void setPipeLineID(String pipeLineID) {
 		this.pipelineId = pipeLineID;
@@ -143,12 +149,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 persistPaylaodAndWorkticket(workTickets, staticProp);
 
             	if (workTicketGroups.isEmpty()) {
-            		LOGGER.info("The file group is empty");
+                    LOGGER.debug("The file group is empty");
             	} else {
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
             			String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
-            			LOGGER.info(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+                        LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
 
             			// For glass logging
@@ -164,15 +170,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getGlobalProcessId(),
             				        " submitted for file ",
             				        wrkTicket.getFileName()));
-            				
+
             				String payloadURI = wrkTicket.getPayloadURI();
         					String filePath = String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
             				// Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
             				if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-            					LOGGER.info("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
+                                LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
                 				delete(filePath);
             				} else {
-            					LOGGER.info("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
+                                LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
             				}
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
@@ -614,4 +620,99 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         // Log running status
         glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
     }	
+    
+    /**
+     * Method to clean up stale files in the payload location of sweeper
+     * 
+     * @throws MailBoxServicesException
+     * @throws IOException
+     */
+    public void cleanupStaleFiles() throws MailBoxServicesException, IOException {
+    	
+    	String payloadLocation = getPayloadURI();
+    	// filter and delete stale files in the sweeper location
+    	List<String> staleFiles = deleteStaleFilesInPath(payloadLocation);
+    	
+		// send an email if there are any stale files deleted in the sweeper location
+		if (null != staleFiles && staleFiles.size() > 0) {
+			
+			LOGGER.debug("stale files exists in sweeper ({}) location {}", configurationInstance.getPguid(), payloadLocation);
+			// notify deletion of stale files to users through mail configured in mailbox
+			notifyDeletionOfStaleFiles(staleFiles, payloadLocation);
+			
+		} else {
+			LOGGER.info("No stale files found in sweeper location {}", payloadLocation);
+		}
+    }
+    
+	/**
+	 * Method to filter stale files in the sweeper payload location
+	 * 
+	 * @param payloadLocation - Payload location configured in sweeper
+	 */
+	public List<String> deleteStaleFilesInPath(String payloadLocation) {
+		
+		LOGGER.debug("Filtering stale files in sweeper location {} for deleting them", payloadLocation);
+		final Path payloadPath = Paths.get(payloadLocation);
+		if (!Files.isDirectory(payloadPath)) {
+			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+		}
+		
+		List<String> staleFiles = new ArrayList<>();
+		// Filter for stale files
+		final DirectoryStream.Filter<Path> staleFileFilter = new DirectoryStream.Filter<Path>() {
+			
+			public boolean accept(Path path) throws IOException {
+				File file = path.toFile();
+				return (file.isFile() && MailBoxUtil.isFileExpired(file.lastModified()));
+		    }
+		};
+		// once stale files are identified, they will be deleted
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(payloadPath, staleFileFilter)) {
+			
+			for (Path filePath : stream) {
+				
+				String fileName = filePath.toFile().getName();
+				// deleting stale file
+				LOGGER.debug("Deleting stale file {} in sweeper location {} ", fileName, payloadLocation);
+				Files.deleteIfExists(filePath);
+				staleFiles.add(fileName);
+				LOGGER.debug("Stale file {} deleted successfully in sweeper location {} ", fileName, payloadLocation);
+			}
+			
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return staleFiles;
+	}
+	
+	/**
+	 * Method to notify deletion of stale files to customer
+	 * 
+	 * @param staleFiles - list of stale files
+	 * @param payloadLocation - payload location in which stale files are to be cleaned up
+	 */
+	private void notifyDeletionOfStaleFiles(List<String> staleFiles, String payloadLocation) {
+		
+		// stale file deletion email subject
+		String emailSubject = String.format(STALE_FILE_NOTIFICATION_SUBJECT, 
+									configurationInstance.getPguid(), 
+									configurationInstance.getProcsrName(), 
+									payloadLocation);
+		
+		// stale file deletion email content
+		String emailContentPrefix = String.format(STALE_FILE_NOTIFICATION_EMAIL_CONTENT, 
+										   configurationInstance.getProcsrName(),
+										   payloadLocation);
+		StringBuilder body = new StringBuilder(emailContentPrefix)
+			.append(LINE_SEPARATOR)
+			.append(LINE_SEPARATOR)
+			.append(STALE_FILE_NOTIFICATION_EMAIL_FILES)
+			.append(LINE_SEPARATOR)
+			.append(StringUtils.join(staleFiles, LINE_SEPARATOR));
+		EmailNotifier.sendEmail(configurationInstance, emailSubject, body.toString(), true);
+		
+	}
 }
+
+

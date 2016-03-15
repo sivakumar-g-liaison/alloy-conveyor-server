@@ -97,7 +97,8 @@ public class MailboxWatchDogResource extends AuditedResource {
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
 	public Response updateStatus(@Context final HttpServletRequest request, 
-			@QueryParam(value = "type") @ApiParam(name = "type", required = false, value = "Type of the SLA to be checked.") final String type) {
+			@QueryParam(value = "type") @ApiParam(name = "type", required = false, value = "Type of the SLA to be checked.") final String type,
+			@QueryParam(value = "mailboxstatus") @ApiParam(name = "mailboxstatus", required = false, value = "status of mailbox") final String mailboxStatus) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -110,7 +111,7 @@ public class MailboxWatchDogResource extends AuditedResource {
 
 					if (!MailBoxUtil.isEmpty(type) && "sweeper".equals(type.toLowerCase())) {
 						// validate the sla rules of all mailboxes
-						new MailboxWatchDogService().validateMailboxSLARule();
+						new MailboxWatchDogService().validateMailboxSLARule(mailboxStatus);
 					} else {
 						// To validate Mailbox sla for all mailboxes
 						new MailboxWatchDogService().pollAndUpdateStatus();
@@ -118,7 +119,6 @@ public class MailboxWatchDogResource extends AuditedResource {
 					return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
-					e.printStackTrace();
 					throw new LiaisonRuntimeException("Failed to validate SLA." + e.getMessage());
 
 				}
