@@ -253,7 +253,11 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 						}
 					case SFTP:
 						if (!MailBoxUtil.isEmpty(credentialDTO.getUserId()) && MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
+<<<<<<< HEAD
 							boolean sshKeyPair = checkForSSHKeyPair();
+=======
+							boolean sshKeyPair = CheckForSSHKeyPair();
+>>>>>>> origin/bug/GMB-729
 							if(!sshKeyPair) {
 								throw new MailBoxConfigurationServicesException(Messages.PASSWORD_OR_SSH_KEYPAIR_EMPTY, Response.Status.BAD_REQUEST);
 							}
