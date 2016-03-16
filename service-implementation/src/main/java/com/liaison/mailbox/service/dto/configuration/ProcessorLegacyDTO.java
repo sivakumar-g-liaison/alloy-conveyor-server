@@ -27,6 +27,7 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
+import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -44,6 +45,9 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  */
 public class ProcessorLegacyDTO extends ProcessorDTO {
 
+	
+	private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
+	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private Set<FolderDTO> folders;
 	private Set<CredentialDTO> credentials;
@@ -131,7 +135,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             
             if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
                     ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-                if (MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
+                if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
                     MailBoxUtil.constructURLAndPort(propertiesDTO);
                 } else {
                     throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
@@ -172,11 +176,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			for (CredentialDTO credentialDTO : this.getCredentials()) {
 				
 				// Validate credentials
-				if (credentialDTO.getCredentialType().equalsIgnoreCase(MailBoxConstants.LOGIN_CREDENTIAL)) {			
-					validateCredentials(processor, credentialDTO);
-				} else if (MailBoxUtil.isEmpty(credentialDTO.getIdpURI())) {
-					throw new MailBoxConfigurationServicesException(credentialDTO.getCredentialType() + " cannot be Empty", Response.Status.BAD_REQUEST);
-				}
+				validateCredentials(processor, credentialDTO);
+				
 				validator.validate(credentialDTO);
 				credential = new Credential();
 				credentialDTO.copyToEntity(credential);
@@ -226,9 +227,9 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	 * @param processor
 	 *            The processor entity
 	 * @param credentialDTO 
-	 * 				array of CredentialDTO
+	 * 			  Login Credential Details
 	 */
-	public void validateCredentials (Processor processor, CredentialDTO credentialDTO) {
+	public void validateLoginCredentials (Processor processor, CredentialDTO credentialDTO) {
 		
 		if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
                 ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
@@ -238,27 +239,17 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 				switch (protocol) {
 	
 					case FTP:
-						if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-						}
 					case FTPS:
-						if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-						}
 					case HTTPS:
 						if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
 							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
 						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
 							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
 						}
+						break;
 					case SFTP:
 						if (!MailBoxUtil.isEmpty(credentialDTO.getUserId()) && MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							boolean sshKeyPair = checkForSSHKeyPair();
-							if(!sshKeyPair) {
+							if(!isSSHKeyPairAvailable()) {
 								throw new MailBoxConfigurationServicesException(Messages.PASSWORD_OR_SSH_KEYPAIR_EMPTY, Response.Status.BAD_REQUEST);
 							}
 						} else if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
@@ -274,11 +265,58 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	}
 	
 	/**
+	 * Method to validate credentials 
+	 * 
+	 * @param processor
+	 * 			processor entity
+	 * @param credentialDTO
+	 * 			credential Details
+	 */
+	public void validateCredentials (Processor processor, CredentialDTO credentialDTO) {
+		
+		CredentialType credentialType = CredentialType.findByName(credentialDTO.getCredentialType());
+		switch(credentialType) {
+		
+		case LOGIN_CREDENTIAL:
+			validateLoginCredentials(processor, credentialDTO);
+			break;
+		case SSH_KEYPAIR:
+			validateSSHKeypair(credentialDTO.getIdpURI());
+			break;
+		case TRUSTSTORE_CERT:
+			validateTruststoreCertificate(credentialDTO.getIdpURI());
+			break;
+		}
+	}
+	
+	/**
+	 * Method to validate ssh keypair 
+	 * 
+	 * @param sshKeypairGroupId
+	 */
+	public void validateSSHKeypair(String sshKeypairGroupId) {
+		
+		if (MailBoxUtil.isEmpty(sshKeypairGroupId)) {
+			throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_NOT_PROVIDED, Response.Status.BAD_REQUEST);
+		}
+	}
+	
+	/**
+	 * Method to validate trust store
+	 * 
+	 * @param trustStoreGroupId
+	 */
+	public void validateTruststoreCertificate(String trustStoreGroupId) {
+		if (MailBoxUtil.isEmpty(trustStoreGroupId)) {
+			throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_NOT_PROVIDED, Response.Status.BAD_REQUEST);
+		}	
+	}
+	/**
 	 * Method is used to check whether the SSH Key pair is available
 	 * 
 	 * @return boolean
 	 */
-	public boolean checkForSSHKeyPair () {
+	public boolean isSSHKeyPairAvailable () {
 		
 		Set<CredentialDTO> processorCredential = this.getCredentials();
 		for (CredentialDTO credType : processorCredential) {

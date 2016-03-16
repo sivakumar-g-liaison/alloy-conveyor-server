@@ -25,7 +25,6 @@ import org.testng.annotations.Test;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
@@ -72,10 +71,10 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     private String sshType = CredentialType.SSH_KEYPAIR.getCode();
     private String VALID_SSHKEYPAIR = "254AD0C664B44B198EE736BD89509444";
     private String VALID_TRUSTSTORE = "4463C90421854F23876C11A7A39FA41F";
-    private static final String PWD_ERROR = ".* Password cannot be Empty"; 
-    private static final String UNAME_ERROR = ".* Username cannot be Empty"; 
-    private static final String TRUSTSTORE_ERROR = ".* TRUSTSTORE_CERT cannot be Empty";
-    private static final String SSH_ERROR = ".* SSH_KEYPAIR cannot be Empty";
+    private static final String PWD_ERROR = ".* Password cannot be Empty."; 
+    private static final String UNAME_ERROR = ".* Username cannot be Empty."; 
+    private static final String TRUSTSTORE_ERROR = ".* Trust store Certificate cannot be Empty.";
+    private static final String SSH_ERROR = ".* SSH Key Pair cannot be Empty.";
     
     /**
      * @throws java.lang.Exception
