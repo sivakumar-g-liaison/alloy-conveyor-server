@@ -107,7 +107,7 @@ public class MailBoxService implements Runnable {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Name",
 						Response.Status.CONFLICT);
 			}
-			LOG.info("The given profile name is {}", profileName);
+			LOG.debug("The given profile name is {}", profileName);
 
 			// Profile validation
 			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
@@ -233,8 +233,8 @@ public class MailBoxService implements Runnable {
 						Response.Status.CONFLICT);
 			}
 
-			LOG.info("The given processor id is {}", processorId);
-			LOG.info("The triggered profile name is {}", dto.getProfileName());
+			LOG.debug("The given processor id is {}", processorId);
+			LOG.debug("The triggered profile name is {}", dto.getProfileName());
 
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
@@ -390,8 +390,8 @@ public class MailBoxService implements Runnable {
                 throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
             }
 
-            LOG.info("Received mailbox id - {}", mailboxId);
-            LOG.info("Received payloadURI is {}", payloadURI);
+            LOG.debug("Received mailbox id - {}", mailboxId);
+            LOG.debug("Received payloadURI is {}", payloadURI);
 
             processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
 
