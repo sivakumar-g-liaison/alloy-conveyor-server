@@ -132,7 +132,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             
             if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
                     ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-                if (MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
+                if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
                     MailBoxUtil.constructURLAndPort(propertiesDTO);
                 } else {
                     throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
