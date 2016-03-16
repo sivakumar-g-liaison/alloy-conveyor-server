@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +49,6 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -508,11 +506,11 @@ public class HTTPListenerResource extends AuditedResource {
      * @param processor - Either sync or Async Processor
      * @param httpListenerProperties
      * @param mailboxPguid
-	 * @throws ExecutionException 
+	 * @throws IOException 
      */
     private void authenticationAndAuthorization(final HttpServletRequest request,
             HTTPAbstractProcessor processor, Map<String, String> httpListenerProperties, String mailboxPguid)
-            throws IOException, ExecutionException {
+            throws IOException {
 
         String basicAuthenticationHeader = request.getHeader(HTTP_HEADER_BASIC_AUTH);
         if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
@@ -535,22 +533,22 @@ public class HTTPListenerResource extends AuditedResource {
      * @param httpListenerProperties
      * @param authenticationCredentials The HttpServletRequest
      * @param processorType - Type of the Processor
-     * @throws ExecutionException 
+     * @throws IOException 
      */
     private void authorization(Map<String, String> httpListenerProperties, String[] authenticationCredentials, String processorType)
-             throws IOException, ExecutionException {
+             throws IOException {
 
         boolean tenancyKeyExist = false;
         if (authenticationCredentials.length == 2) {
 
             String loginId = authenticationCredentials[0];
 
-            GEMManifestResponse gemManifestResponse = GEMHelper.getACLManifestByloginId(loginId, null);
+            GEMManifestResponse gemManifestResponse = UserManifestCacheUtil.getACLManifestByloginId(loginId);
 
             String manifest = (gemManifestResponse != null) ? gemManifestResponse.getManifest() : null;
 
             if (!MailBoxUtil.isEmpty(manifest)) {
-                List<RoleBasedAccessControl> roleBasedAccessControl = GEMHelper.getDomainsFromACLManifest(manifest);
+                List<RoleBasedAccessControl> roleBasedAccessControl = UserManifestCacheUtil.getDomainsFromACLManifest(manifest);
                 
                 String tenancyKey = httpListenerProperties.get(MailBoxConstants.PROPERTY_TENANCY_KEY);
 

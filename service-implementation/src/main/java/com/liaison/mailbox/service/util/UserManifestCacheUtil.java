@@ -29,7 +29,6 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.mailbox.MailBoxConstants;
 
 public class UserManifestCacheUtil {
 	
@@ -83,12 +82,15 @@ public class UserManifestCacheUtil {
      *
      * @param loginId loginId
      * @return GEMManifestResponse
-     * @throws ExecutionException 
      */
-     public static GEMManifestResponse getACLManifestByloginId(String loginId) throws ExecutionException {
+     public static GEMManifestResponse getACLManifestByloginId(String loginId) {
     	 
     	logger.debug("retrieving manifest by given login id"); 
-    	return manifestCache.get(loginId);
+    	try {
+            return manifestCache.get(loginId);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
      
      /**
@@ -102,7 +104,6 @@ public class UserManifestCacheUtil {
      public static List <RoleBasedAccessControl> getDomainsFromACLManifest(String aclManifestJson) throws IOException {
     	 
      	logger.debug("retrieving domains from given manifest json"); 
-		GEMACLClient aclClient = new GEMACLClient();
-		return aclClient.getDomainsFromACLManifest(aclManifestJson);
+		return GEMHelper.getDomainsFromACLManifest(aclManifestJson);
      } 
 }
