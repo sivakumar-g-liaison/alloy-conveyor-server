@@ -59,7 +59,7 @@ public class ProcessorLegacyDTOTest {
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setPassword(PASSWORD);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
-		
+	
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateCredentials(processor, credentialDTO);
 	}
@@ -68,6 +68,7 @@ public class ProcessorLegacyDTOTest {
 	 * Test method for FTP to validate the empty userId.
 	 */
 	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Username cannot be Empty." )
+
 	public void testValidateFTPEmptyUserIdCredential() {
 		
 		Processor processor = constructProcessor();
@@ -82,6 +83,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method for FTP to validate the empty password.
 	 */
+
 	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Password cannot be Empty." )
 	public void testValidateFTPEmptyPasswordCredential() {
 		
@@ -90,7 +92,7 @@ public class ProcessorLegacyDTOTest {
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
-		
+
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateCredentials(processor, credentialDTO);
 	}
@@ -98,6 +100,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method for FTPS to validate the empty userId.
 	 */
+
 	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Username cannot be Empty." )
 	public void testValidateFTPSEmptyUserIdCredential() {
 		
