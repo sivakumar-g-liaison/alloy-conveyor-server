@@ -69,7 +69,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
@@ -946,7 +946,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         if (null != stagedFile) {
 
-            GlassMessageUtil.logGlassMessage(
+            MailboxGlassMessageUtil.logGlassMessage(
                     stagedFile.getGPID(),
                     configurationInstance.getProcessorType(),
                     configurationInstance.getProcsrProtocol(),
@@ -968,26 +968,29 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     }
 
     /**
-	 * Logs duplicate status in lens for the overwrite true case
-	 * 
-	 * @param processor The filewriter processor entity
-	 * @param glassMessage Glass
-	 * @param stagedFile
-	 */
-	protected void logDuplicateStatus(StagedFile stagedFile, String gpid) {
+     * Logs duplicate status in lens for the overwrite true case
+     * 
+     * @param fileName
+     * @param filePath
+     * @param dupGpid
+     *            the global process id of the old transaction
+     * @param gpid
+     *            the global process id of the current transaction which is going to overwrite the old txn
+     */
+    protected void logDuplicateStatus(String fileName, String filePath, String dupGpid, String gpid) {
 
         StringBuilder message = new StringBuilder()
                 .append("File ")
-                .append(stagedFile.getFileName())
+                .append(fileName)
                 .append(" is overwritten by another process - ")
                 .append(gpid);
 
-        GlassMessageUtil.logGlassMessage(
-                gpid,
+        MailboxGlassMessageUtil.logGlassMessage(
+                dupGpid,
                 configurationInstance.getProcessorType(),
                 configurationInstance.getProcsrProtocol(),
-                stagedFile.getFileName(),
-                stagedFile.getFilePath(),
+                fileName,
+                filePath,
                 0,
                 ExecutionState.DUPLICATE,
                 message.toString());

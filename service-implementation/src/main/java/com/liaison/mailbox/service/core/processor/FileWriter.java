@@ -14,13 +14,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
@@ -33,7 +32,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
@@ -41,7 +39,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
-import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -69,23 +67,23 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	    WorkTicket workTicket = (WorkTicket) dto;
         GlassMessage glassMessage = null;
         String processorPayloadLocation = null;
-        ProcessorType processorType = null;
         boolean writeStatus = false;
+        StopWatch stopwatch = new StopWatch();
 
         try {
 
-            glassMessage = new GlassMessage(workTicket);
-            glassMessage.setStatus(ExecutionState.COMPLETED);
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started", configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
+            stopwatch.start();
+            glassMessage = MailboxGlassMessageUtil.getGlassMessage(
+                    workTicket,
+                    configurationInstance.getProcsrProtocol(),
+                    configurationInstance.getProcessorType());
+            MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.RUNNING, "File Staging is started");
 
             LOG.info(constructMessage("Start Run"));
             LOG.info(constructMessage("Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
-            long startTime = System.currentTimeMillis();           
+
             String fileName = workTicket.getFileName();
             LOG.info(constructMessage("Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
-            processorType = configurationInstance.getProcessorType();
-            glassMessage.setCategory(processorType);
-            glassMessage.setProtocol(processorType.getCode());
             LOG.info(constructMessage("Found the processor to write the payload in the local payload location"));
 
             //get payload from spectrum
@@ -167,22 +165,19 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             }
 
             //GLASS LOGGING BEGINS//
-            glassMessage.setOutAgent(processorPayloadLocation);
-
-            //GLASS LOGGING CORNER 4 //
             StringBuilder message = new StringBuilder()
                     .append(writeStatus ? "Payload written at target location : " : "File already exists at ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
                     .append(fileName);
 
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
+            MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message.toString());
             glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
 
-            long endTime = System.currentTimeMillis();
+            stopwatch.stop();
             LOG.info(constructMessage("Number of files processed 1"));
-            LOG.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOG.info(constructMessage("Total time taken to process files {}"), stopwatch.getTime());
             LOG.info(constructMessage("End run"));
 
         } catch (Exception e) {
@@ -192,38 +187,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         }
 
 	}
-
-	/**
-	 * This method will get the file write location of filewriter and check if any file exist in that specified location
-	 *
-	 * @param processor
-	 * @return boolean - if the file exists it will return value of true otherwise a value of false.
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 */
-	public List<String> checkFileExistence() throws MailBoxServicesException, IOException {
-
-		LOG.debug ("Entering file Existence check for File Writer processor");
-		String fileWriteLocation = getFileWriteLocation();
-		List<String> fileList = new ArrayList<>();
-		if (null == fileWriteLocation) {
-			LOG.error("filewrite location not configured for processor {}", configurationInstance.getProcsrName());
-			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
-		}
-		File fileWriteLocationDirectory = new File(fileWriteLocation);
-		if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
-			String[] files =  fileWriteLocationDirectory.list();
-			// Log Message to lens
-			fileList = Arrays.asList(files);
-			logGlassMessage(Arrays.asList(files));
-		} else {
-			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
-		}
-		LOG.debug("File Eixstence check completed for File writer. File exists - {}", fileList.isEmpty());
-		return fileList;
-
-	}
-
 
 	/**
 	 * This Method create local folders if not available.
@@ -271,7 +234,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             					.append(stagedFile.getFileName())
             					.append(" is picked up by the customer");
 
-            GlassMessageUtil.logGlassMessage(
+            MailboxGlassMessageUtil.logGlassMessage(
                     stagedFile.getGPID(),
                     configurationInstance.getProcessorType(),
                     configurationInstance.getProcsrProtocol(),
@@ -326,7 +289,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 					//In-activate the old entity
 					stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
 	        		dao.merge(stagedFile);
-					logDuplicateStatus(stagedFile, workTicket.getGlobalProcessId());
+                    logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
 				}
 
 				persistFile(response, file, workTicket, dao);
@@ -359,11 +322,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         
         //write the file
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
         }
-        
+
         //To add more details in staged file
         workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 

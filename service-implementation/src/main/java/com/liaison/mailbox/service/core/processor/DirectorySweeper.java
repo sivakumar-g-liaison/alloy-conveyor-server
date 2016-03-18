@@ -55,7 +55,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Sweepe
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -599,7 +599,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 .append(inputLocation)
                 .append(" for new files");
 
-        GlassMessageUtil.logGlassMessage(
+        MailboxGlassMessageUtil.logGlassMessage(
                 wrkTicket.getGlobalProcessId(),
                 configurationInstance.getProcessorType(),
                 configurationInstance.getProcsrProtocol(),

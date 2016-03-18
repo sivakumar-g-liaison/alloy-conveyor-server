@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.glass.util.GlassMessageUtil;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -184,7 +184,7 @@ public class MailboxWatchDogService {
 					continue;
 				}
 
-                GlassMessageUtil.logGlassMessage(
+                MailboxGlassMessageUtil.logGlassMessage(
                         stagedFile.getGPID(),
                         processor.getProcessorType(),
                         processor.getProcsrProtocol(),
