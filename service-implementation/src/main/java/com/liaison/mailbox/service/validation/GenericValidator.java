@@ -247,14 +247,14 @@ public class GenericValidator {
 	}
 
 	/**
-	 * Method to validate whether given string is valid port value
+	 * Method to validate whether given string is valid timeout value
 	 *
 	 * @param email
 	 * @return boolean
 	 */
 	private boolean isBetweenRange (Object value) {
 	    int range = Integer.valueOf(value.toString()).intValue();
-		return range<=60000 && range>=0;
+		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
 	}
 	
 	/**

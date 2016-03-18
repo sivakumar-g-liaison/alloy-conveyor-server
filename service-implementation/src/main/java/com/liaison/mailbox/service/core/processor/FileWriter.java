@@ -361,9 +361,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             
             long fileSize = (long) IOUtils.copy(response, outputStream);
-            if (workTicket.getPayloadSize() == -1) {
-                workTicket.setPayloadSize(fileSize);
-            }
+            workTicket.setPayloadSize(fileSize);
         }
         
         //To add more details in staged file

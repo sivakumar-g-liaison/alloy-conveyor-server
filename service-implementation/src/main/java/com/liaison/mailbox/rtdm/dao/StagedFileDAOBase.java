@@ -251,7 +251,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.fileName =:")
 					.append(FILE_NAME)
 					.append(" and sf.filePath =:")
-					.append(FILE_PATH);
+                    .append(FILE_PATH)
+                    .append(" order by sf.createdDate desc");
 
 			List<StagedFile> stagedFiles = em.createQuery(query.toString())
 					.setParameter(PROCESSOR_ID, processorId)

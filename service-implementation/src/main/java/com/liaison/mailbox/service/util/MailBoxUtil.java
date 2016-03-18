@@ -456,17 +456,14 @@ public class MailBoxUtil {
             
             if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().toString().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
-                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.FTPS_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
             } else if (Protocol.SFTP.getCode().toString().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.SFTP_PORT);
-                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.SFTP_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
             } else if (Protocol.HTTP.getCode().toString().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTP_PORT);
-                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.HTTP_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
             } else if (Protocol.HTTPS.getCode().toString().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
-                propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), MailBoxConstants.HTTPS_PORT, uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
             } 
+            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
         } else if (uri.getPort() != -1 &&  propertiesDTO.getPort() == 0) {
             propertiesDTO.setPort(uri.getPort());
         } else if (uri.getPort() != propertiesDTO.getPort()) {

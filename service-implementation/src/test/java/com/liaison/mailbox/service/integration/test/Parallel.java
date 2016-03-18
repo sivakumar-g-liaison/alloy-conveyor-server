@@ -31,15 +31,17 @@ package com.liaison.mailbox.service.integration.test;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.concurrent.*;
-
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.*;
+import java.util.LinkedList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This class contains some useful classes and methods to parallelize code in an
@@ -188,7 +190,7 @@ public final class Parallel {
         // Executor used to invoke concurrent tasks. By default it uses as many
         // threads as processors available
         // Executors.newFixedThreadPool(8);
-        private ExecutorService executor = Executors.newCachedThreadPool();
+        private ExecutorService executor = Executors.newFixedThreadPool(8);
 
         public ForEach(Iterable<E> elements) {
             this.elements = elements;

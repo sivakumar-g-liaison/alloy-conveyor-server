@@ -6,7 +6,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 import oracle.jdbc.OracleDriver
 // flyway
-import oracle.jdbc.OracleDriver
 import com.googlecode.flyway.core.Flyway
 import com.googlecode.flyway.gradle.task.AbstractFlywayTask
 import com.googlecode.flyway.core.api.FlywayException
@@ -246,6 +245,7 @@ dependencies {
 	}
 
 	//Dependency for GEM client Integration
+
 	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'4.+', changing: true
 
 	//dependency for testng
