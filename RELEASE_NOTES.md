@@ -1,6 +1,7 @@
 4.2.0-SNAPSHOT
 -------------------------------
 * GMB-723 - Declare constants as final
+* GGT-453 publishing fixup
 
 4.1.0
 -------------------------------

@@ -15,13 +15,7 @@
  *      limitations under the License.
  */
 
-// Establish version and status
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-
 buildscript {
-    repositories {
-        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
-    }
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
 
@@ -83,18 +77,9 @@ allprojects {
     }    
 }
 
-apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/master/gradle/sonarqube.gradle'
 apply from: file('gradle/convention.gradle')
-apply from: file('gradle/maven.gradle')
-apply from: file('gradle/bundler/bundle.gradle')
-apply from: file('gradle/bundler/framework.gradle')
-apply from: file('gradle/bundler_project.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
-
-war {
-    //a hack to remove the empty project_root war from consideration
-    archiveName=".ignore_me_seriously_thanks"
-}
+apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle'
 
 task showMeCache << {
     configurations.compile.each { println it }

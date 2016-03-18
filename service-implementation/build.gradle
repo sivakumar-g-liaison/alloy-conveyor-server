@@ -16,16 +16,9 @@ import com.googlecode.flyway.gradle.FlywayExtension
 apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'flyway'
-apply from: file("$rootDir/gradle/bundler/framework.gradle")
 apply plugin: 'rebel'
 apply plugin: 'license'
-
-
-// set base name (impacts war name and context path)
-project.war.baseName = 'g2mailboxservice'
-// Establish version and status
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-
+apply plugin: 'war'
 
 license {
 	header rootProject.file('codequality/HEADER')
@@ -89,8 +82,11 @@ allprojects {
 	 }
 }
 
+apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/publish-service.gradle'
+
 war {
-	archiveName="g2mailboxservice.war"
+    baseName = 'g2mailboxservice'
+	//archiveName="g2mailboxservice.war"
 
 	// TODO
 	// Resources used for the Dynamic Services landing page are intentionally kept in the
@@ -446,7 +442,6 @@ task setDevProperties << {
 
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: [
-	'stageTomcat',
 	'setDevProperties'
 ], group:'DEV/CI Deployment', description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
 	//TODO replace tokens would be a nicer but heavier weight way of doing this.
@@ -607,38 +602,34 @@ classes.dependsOn('enhance')*/
 def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"
 def dtoArchiveDestRoot = "${projectDir}/build/libs/"
 def dtoArchiveName = "dropbox-client.jar"
-task jarDto << {
-	copy {
-		from ("${projectDir}/build/classes/main")  {
-			include 'com/liaison/mailbox/service/dto/dropbox/*/**',
-					'com/liaison/mailbox/service/dto/*',
-					'com/liaison/mailbox/enums/Messages.class'
-					}
-		into "${projectDir}/build/tmp/jar-dto"
-		includeEmptyDirs false
-	}
-	copy {
-		from ("${projectDir}/src/main/java")  {
-			include 'com/liaison/mailbox/service/dto/dropbox/*/**',
-					'com/liaison/mailbox/service/dto/*',
-					'com/liaison/mailbox/enums/Messages.java'
-		}
-		into "${projectDir}/build/tmp/jar-dto"
-		includeEmptyDirs false
-	}
+task jarDto(type: Jar) {
+    baseName = 'dropbox-client'
+    includeEmptyDirs false
 
-	// using ant because it doesn't get polluted by the war task the way gradle jar task does
-	ant.jar(destFile: (dtoArchiveDestRoot + dtoArchiveName), basedir: dtoArchiveSourceRoot)
+    from ("${projectDir}/build/classes/main")  {
+        include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+                'com/liaison/mailbox/service/dto/*',
+                'com/liaison/mailbox/enums/Messages.class'
+    }
+
+    from ("${projectDir}/src/main/java")  {
+        include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+                'com/liaison/mailbox/service/dto/*',
+                'com/liaison/mailbox/enums/Messages.java'
+    }
 }
 
 war.dependsOn('jarDto')
-artifacts {
-	archives( file(dtoArchiveDestRoot + dtoArchiveName) ) {
-		name 'dropbox-client'
-		type 'jar'
-	}
-}
 
+publishing {
+    publications {
+        servicePublication(MavenPublication) {
+            artifact(jarDto) {
+                artifactId = 'dropbox-client'
+            }
+        }
+    }
+}
 
 // jettyRun configuration properties
 jettyRun {

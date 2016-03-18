@@ -1,10 +1,4 @@
-// Establish version and status
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-
 buildscript {
-    repositories {
-        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
-    }
     apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
 }
 
@@ -15,7 +9,6 @@ allprojects {
 }
 
 apply from: file("../gradle/convention.gradle")
-apply from: file("../gradle/maven.gradle")
 apply from: file("../gradle/license.gradle")
 
 dependencies {
