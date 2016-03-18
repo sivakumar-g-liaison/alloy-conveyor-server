@@ -393,5 +393,9 @@ public interface MailBoxConstants {
     // TTL in days for stale file cleanup in sweeper location
     public static final int STALE_FILE_CLEAN_UP_TTL = 30;
     public static final String PROPERTY_STALE_FILE_CLEAN_UP = "com.liaison.mailbox.sweeper.stalefile.ttl";
-
+    
+    // Timeout range min and max
+    public static final int TIMEOUT_RANGE_MIN = 0;
+    public static final int TIMEOUT_RANGE_MAX = 60000;
+    
 }
