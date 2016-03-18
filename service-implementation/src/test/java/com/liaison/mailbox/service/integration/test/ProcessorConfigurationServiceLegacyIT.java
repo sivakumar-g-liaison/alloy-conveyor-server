@@ -11,9 +11,7 @@
 package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -68,6 +66,15 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     private String ftpUserId = "ftp_user_dev-int";
     private String ftpsUserId = "ftps_user_dev-int";
     private String sftpUserId = "sftp_user_dev-int";
+    private String loginType = CredentialType.LOGIN_CREDENTIAL.getCode(); 
+    private String trustStoreType = CredentialType.TRUSTSTORE_CERT.getCode();
+    private String sshType = CredentialType.SSH_KEYPAIR.getCode();
+    private String VALID_SSHKEYPAIR = "254AD0C664B44B198EE736BD89509444";
+    private String VALID_TRUSTSTORE = "4463C90421854F23876C11A7A39FA41F";
+    private static final String PWD_ERROR = ".* Password cannot be Empty."; 
+    private static final String UNAME_ERROR = ".* Username cannot be Empty."; 
+    private static final String TRUSTSTORE_ERROR = ".* Trust store Certificate cannot be Empty.";
+    private static final String SSH_ERROR = ".* SSH Key Pair cannot be Empty.";
     
     /**
      * @throws java.lang.Exception
@@ -216,6 +223,504 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         
     }
     
+    /**
+     * Method constructs Processor with valid credential data.
+     * @throws Exception
+     * 
+     */
+    @Test
+	public void testCreateProcessorWithValidCredentials() throws Exception {
+
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTP Processor
+    	ProcessorLegacyDTO ftpProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTP.name(), EntityStatus.ACTIVE.value());
+    	ftpProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> ftpCredentials = constructDummyCredentialDTO(ftpUserId, password, loginType, null);
+    	ftpProcessorLegacy.setCredentials(ftpCredentials);
+    	ftpProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy);
+    	ProcessorConfigurationService ftpProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, ftpProcessorResponse.getResponse().getStatus());
+    	
+    	// Adding FTPS Processor with uname and pwd
+    	ProcessorLegacyDTO ftpsProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials = constructDummyCredentialDTO(ftpsUserId, password, loginType, null);
+    	ftpsProcessorLegacy.setCredentials(ftpsCredentials);
+    	ftpsProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy);
+    	ProcessorConfigurationService ftpsProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, ftpsProcessorResponse.getResponse().getStatus());
+    	
+    	// Adding FTPS Processor with uname, pwd and truststore
+    	ProcessorLegacyDTO ftpsProcessorLegacy1 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy1.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials1 = constructDummyCredentialDTO(ftpsUserId, password, loginType, null);
+    	Set<CredentialDTO> ftpsCredentials2 = constructDummyCredentialDTO(null, null, trustStoreType, VALID_TRUSTSTORE);
+    	ftpsCredentials2.addAll(ftpsCredentials1);
+    	ftpsProcessorLegacy1.setCredentials(ftpsCredentials2);
+    	ftpsProcessorLegacy1.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy1);
+    	ProcessorConfigurationService ftpsProcessorService1 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, ftpsProcessorResponse1.getResponse().getStatus());
+    	
+    	// Adding FTPS Processor with truststore
+    	ProcessorLegacyDTO ftpsProcessorLegacy2 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy2.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials3 = constructDummyCredentialDTO(null, null, trustStoreType, VALID_TRUSTSTORE);
+    	ftpsProcessorLegacy2.setCredentials(ftpsCredentials3);
+    	ftpsProcessorLegacy2.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy2);
+    	ProcessorConfigurationService ftpsProcessorService2 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, ftpsProcessorResponse2.getResponse().getStatus());
+    	
+    	// Adding SFTP Processor with uname and pwd
+    	ProcessorLegacyDTO sftpProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials = constructDummyCredentialDTO(sftpUserId, password, loginType, null);
+    	sftpProcessorLegacy.setCredentials(sftpCredentials);
+    	sftpProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy);
+    	ProcessorConfigurationService sftpProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, sftpProcessorResponse.getResponse().getStatus());
+    	
+    	// Adding SFTP Processor with uname, pwd and SSH Keypair
+    	ProcessorLegacyDTO sftpProcessorLegacy1 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy1.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials1 = constructDummyCredentialDTO(sftpUserId, password, loginType, null);
+    	Set<CredentialDTO> sftpCredentials2 = constructDummyCredentialDTO(null, null, sshType, VALID_SSHKEYPAIR);
+    	sftpCredentials2.addAll(sftpCredentials1);
+    	sftpProcessorLegacy1.setCredentials(sftpCredentials2);
+    	sftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy1);
+    	ProcessorConfigurationService sftpProcessorService1 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, sftpProcessorResponse1.getResponse().getStatus());
+    	
+    	// Adding SFTP Processor with uname and SSH Keypair
+    	ProcessorLegacyDTO sftpProcessorLegacy2 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy2.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials3 = constructDummyCredentialDTO(sftpUserId, null, loginType, null);
+    	Set<CredentialDTO> sftpCredentials4 = constructDummyCredentialDTO(null, null, sshType, VALID_SSHKEYPAIR);
+    	sftpCredentials4.addAll(sftpCredentials3);
+    	sftpProcessorLegacy2.setCredentials(sftpCredentials4);
+    	sftpProcessorLegacy2.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy2);
+    	ProcessorConfigurationService sftpProcessorService2 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse2 = sftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, sftpProcessorResponse2.getResponse().getStatus());
+    	
+    	// Adding SFTP Processor with SSH Keypair
+    	ProcessorLegacyDTO sftpProcessorLegacy3 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy3.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials5 = constructDummyCredentialDTO(null, null, sshType, VALID_SSHKEYPAIR);
+    	sftpProcessorLegacy3.setCredentials(sftpCredentials5);
+    	sftpProcessorLegacy3.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy3);
+    	ProcessorConfigurationService sftpProcessorService3 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse3 = sftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(SUCCESS, sftpProcessorResponse3.getResponse().getStatus());
+
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = PWD_ERROR )
+	public void testCreateFTPProcessorWithoutPwd() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTP Processor without pwd
+    	ProcessorLegacyDTO ftpProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTP.name(), EntityStatus.ACTIVE.value());
+    	ftpProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> ftpCredentials = constructDummyCredentialDTO(ftpUserId, null, loginType, null);
+    	ftpProcessorLegacy.setCredentials(ftpCredentials);
+    	ftpProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy);
+    	ProcessorConfigurationService ftpProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpProcessorResponse.getResponse().getStatus());
+    	    	
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = UNAME_ERROR )
+	public void testCreateFTPProcessorWithoutUname() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTP Processor without uname
+    	ProcessorLegacyDTO ftpProcessorLegacy1 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTP.name(), EntityStatus.ACTIVE.value());
+    	ftpProcessorLegacy1.setCredentials(null);
+    	Set<CredentialDTO> ftpCredentials1 = constructDummyCredentialDTO(null, password, loginType, null);
+    	ftpProcessorLegacy1.setCredentials(ftpCredentials1);
+    	ftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy1);
+    	ProcessorConfigurationService ftpProcessorService1 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse1 = ftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpProcessorResponse1.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = UNAME_ERROR )
+	public void testCreateFTPProcessorWithoutUnameAndPwd() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTP Processor without uname and pwd
+    	ProcessorLegacyDTO ftpProcessorLegacy2 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTP.name(), EntityStatus.ACTIVE.value());
+    	ftpProcessorLegacy2.setCredentials(null);
+    	Set<CredentialDTO> ftpCredentials2 = constructDummyCredentialDTO(null, null, loginType, null);
+    	ftpProcessorLegacy2.setCredentials(ftpCredentials2);
+    	ftpProcessorLegacy2.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy2);
+    	ProcessorConfigurationService ftpProcessorService2 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse2 = ftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpProcessorResponse2.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class})
+	public void testCreateFTPProcessorWithoutCredentialType() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTP Processor without credentialType
+    	ProcessorLegacyDTO ftpProcessorLegacy3 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTP.name(), EntityStatus.ACTIVE.value());
+    	ftpProcessorLegacy3.setCredentials(null);
+    	Set<CredentialDTO> ftpCredentials3 = constructDummyCredentialDTO(null, null, null, null);
+    	ftpProcessorLegacy3.setCredentials(ftpCredentials3);
+    	ftpProcessorLegacy3.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy3);
+    	ProcessorConfigurationService ftpProcessorService3 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse3 = ftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpProcessorResponse3.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = UNAME_ERROR )
+	public void testCreateFTPSProcessorWithoutUname() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTPS Processor without uname
+    	ProcessorLegacyDTO ftpsProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials = constructDummyCredentialDTO(null, password, loginType, null);
+    	ftpsProcessorLegacy.setCredentials(ftpsCredentials);
+    	ftpsProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy);
+    	ProcessorConfigurationService ftpsProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpsProcessorResponse.getResponse().getStatus());
+    } 
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = PWD_ERROR )
+	public void testCreateFTPSProcessorWithoutPwd() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTPS Processor without pwd
+    	ProcessorLegacyDTO ftpsProcessorLegacy1 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy1.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials1 = constructDummyCredentialDTO(ftpsUserId, null, loginType, null);
+    	ftpsProcessorLegacy1.setCredentials(ftpsCredentials1);
+    	ftpsProcessorLegacy1.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy1);
+    	ProcessorConfigurationService ftpsProcessorService1 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpsProcessorResponse1.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = UNAME_ERROR )
+	public void testCreateFTPSProcessorWithoutUnameAndPwd() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTPS Processor without uname and pwd
+    	ProcessorLegacyDTO ftpsProcessorLegacy2 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy2.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials2 = constructDummyCredentialDTO(null, null, loginType, null);
+    	ftpsProcessorLegacy2.setCredentials(ftpsCredentials2);
+    	ftpsProcessorLegacy2.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy2);
+    	ProcessorConfigurationService ftpsProcessorService2 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpsProcessorResponse2.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = TRUSTSTORE_ERROR)
+	public void testCreateFTPSProcessorWithoutIdpUri() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding FTPS Processor without idpUri
+    	ProcessorLegacyDTO ftpsProcessorLegacy3 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.FTPS.name(), EntityStatus.ACTIVE.value());
+    	ftpsProcessorLegacy3.setCredentials(null);
+    	Set<CredentialDTO> ftpsCredentials3 = constructDummyCredentialDTO(null, null, trustStoreType, null);
+    	ftpsProcessorLegacy3.setCredentials(ftpsCredentials3);
+    	ftpsProcessorLegacy3.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy3);
+    	ProcessorConfigurationService ftpsProcessorService3 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse3 = ftpsProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, ftpsProcessorResponse3.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = UNAME_ERROR)
+	public void testCreateSFTPProcessorWithoutUname() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding SFTP Processor without uname
+    	ProcessorLegacyDTO sftpProcessorLegacy = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials = constructDummyCredentialDTO(null, password, loginType, null);
+    	sftpProcessorLegacy.setCredentials(sftpCredentials);
+    	sftpProcessorLegacy.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy);
+    	ProcessorConfigurationService sftpProcessorService = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, sftpProcessorResponse.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs Processor with invalid credential data.
+     * @throws IOException 
+     * @throws JAXBException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     * @throws MailBoxConfigurationServicesException 
+     * @throws Exception
+     * 
+     */
+    @Test (expectedExceptions = {MailBoxConfigurationServicesException.class, JsonParseException.class, JsonMappingException.class, JAXBException.class, IOException.class, RuntimeException.class}, expectedExceptionsMessageRegExp = SSH_ERROR)
+	public void testCreateSFTPProcessorWithoutPwdAndSSHKeyPair() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException {
+    	
+    	// Adding Mailbox
+    	AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+    	MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+    	requestDTO.setMailBox(mailboxDTO);
+    	
+    	MailBoxConfigurationService service = new MailBoxConfigurationService();
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	
+    	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+    	String mailboxId = response.getMailBox().getGuid();
+    	
+    	AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+    	
+    	// Adding SFTP Processor without pwd and SSH keyPair
+    	ProcessorLegacyDTO sftpProcessorLegacy1 = constructLegacyProcessorDTO(ProcessorType.REMOTEDOWNLOADER.getCode(), Protocol.SFTP.name(), EntityStatus.ACTIVE.value());
+    	sftpProcessorLegacy1.setCredentials(null);
+    	Set<CredentialDTO> sftpCredentials1 = constructDummyCredentialDTO(sftpUserId, null, sshType, null);
+    	sftpProcessorLegacy1.setCredentials(sftpCredentials1);
+    	sftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
+    	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy1);
+    	ProcessorConfigurationService sftpProcessorService1 = new ProcessorConfigurationService();
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	Assert.assertEquals(FAILURE, sftpProcessorResponse1.getResponse().getStatus());
+    }
+    
     private ProcessorLegacyDTO constructLegacyProcessorDTO(String type, String protocol, String status) {
     	
     	ProcessorLegacyDTO processorLegacyDTO = new ProcessorLegacyDTO();
@@ -323,26 +828,30 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	switch(protocol.toLowerCase()) {
 		
 		case "ftp":
-			credentials.add(constructDummyCredentialDTO(ftpUserId, password, credentialType, null));
+			credentials.addAll(constructDummyCredentialDTO(ftpUserId, password, credentialType, null));
 			break;
 		case "ftps":
-			credentials.add(constructDummyCredentialDTO(ftpsUserId, password, credentialType, null));
+			credentials.addAll(constructDummyCredentialDTO(ftpsUserId, password, credentialType, null));
 			break;
 		case "sftp":
-			credentials.add(constructDummyCredentialDTO(sftpUserId, password, credentialType, null));
+			credentials.addAll(constructDummyCredentialDTO(sftpUserId, password, credentialType, null));
 			break;
     	}
     	return credentials;
     }
     
-    private CredentialDTO constructDummyCredentialDTO(String userId, String password, String credentialType, String idpURI) {
+    private Set<CredentialDTO> constructDummyCredentialDTO(String userId, String password, String credentialType, String idpURI) {
     	
-    	CredentialDTO credentail = new CredentialDTO();
-    	credentail.setUserId(userId);
-    	credentail.setPassword(password);
-    	credentail.setCredentialType(credentialType);
-    	credentail.setIdpURI(idpURI);
-    	return credentail;
+    	Set<CredentialDTO> credentails = new HashSet<>();
+    	
+    	CredentialDTO credential = new CredentialDTO();
+    	credential.setUserId(userId);
+    	credential.setPassword(password);
+    	credential.setCredentialType(credentialType);
+    	credential.setIdpURI(idpURI);
+    	
+    	credentails.add(credential);
+    	return credentails;
     	
     }
     

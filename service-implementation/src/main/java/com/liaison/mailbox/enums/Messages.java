@@ -32,6 +32,9 @@ public enum Messages {
 	MBX_PROFILE_LINK_DOES_NOT_MATCH("Mailbox-Profile link with the given id %s does not match the given Mailbox."),
 	PROFILE_ALREADY_EXISTS("Profile Already exists"),
 	ENTITY_ALREADY_EXIST("%s already exists in the system."),
+	PWD_EMPTY("Password cannot be Empty."),
+	PASSWORD_OR_SSH_KEYPAIR_EMPTY("Either the Password or the SSH Keypair is Empty."),
+	USERNAME_EMPTY("Username cannot be Empty."),
 
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
