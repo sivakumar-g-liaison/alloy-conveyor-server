@@ -72,10 +72,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
             {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
-			{"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
+			{"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}, {"name":"Lens Failure Notification Count", "id":"maxnumberoflensnotificationforuploaderfailure"}];
 
         $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, 
-		   {"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}];
+		   {"name":"TTL", "id":"ttl"}, {"name":"Email Notification for SLA violation", "id":"emailnotificationforslaviolation"}, {"name":"Max No of Notification for SLA violation", "id":"maxnumberofnotificationforslaviolation"}, {"name":"Lens Failure Notification Count", "id":"maxnumberoflensnotificationforuploaderfailure"}];
 		//Data from server
         $scope.mailBoxProperties = [{
             name: '',
@@ -417,13 +417,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 														<select ng-model="notificationRequired" id="notificationRequired" ng-change="onNotificationChange(notificationRequired)" ng-options="property.name for property in enumNotification"></select>\n\
 													</div>\n\
 											</div>\n\
-										   <div ng-switch-when="maxnumberofnotificationforslaviolation">\n\
-											 <textarea class="form-control" ng-model="COL_FIELD" id="maxNotifySLA" ng-input="COL_FIELD" name="maxnumberofnotificationforslaviolation" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
-												<div ng-show="formAddMbx.maxnumberofnotificationforslaviolation.$dirty && formAddMbx.maxnumberofnotificationforslaviolation.$invalid">\n\
-													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.required}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.required><strong>Email Notification for SLA violation is mandatory</strong></span>\n\
-													<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern><strong>Enter Valid Number</strong></span>\n\
-												</div>\n\
-											</div>\n\
 											<div ng-switch-when="ttl">\n\
 												<div class="input-group col-md-5 ttl_alignment">\n\
 													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
@@ -457,6 +450,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
      								 	    <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.required}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.required><strong>Time to Pickup File Posted By Mailbox is mandatory</strong></span>\n\
      								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
      								 	</div>\n\
+									</div>\n\
+     								<div ng-switch-when="maxnumberofnotificationforslaviolation">\n\
+									 <textarea class="form-control" ng-model="COL_FIELD" id="maxNotifySLA" ng-input="COL_FIELD" name="maxnumberofnotificationforslaviolation" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+										<div ng-show="formAddMbx.maxnumberofnotificationforslaviolation.$dirty && formAddMbx.maxnumberofnotificationforslaviolation.$invalid">\n\
+											<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.required}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.required><strong>Email Notification for SLA violation is mandatory</strong></span>\n\
+											<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern}" ng-show=formAddMbx.maxnumberofnotificationforslaviolation.$error.pattern><strong>Enter Valid Number</strong></span>\n\
+										</div>\n\
+									</div>\n\
+     								<div ng-switch-when="maxnumberoflensnotificationforuploaderfailure">\n\
+									 <textarea class="form-control" ng-model="COL_FIELD" id="lensFailNotifyCount" ng-input="COL_FIELD" name="maxnumberoflensnotificationforuploaderfailure" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+										<div ng-show="formAddMbx.maxnumberoflensnotificationforuploaderfailure.$dirty && formAddMbx.maxnumberoflensnotificationforuploaderfailure.$invalid">\n\
+											<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberoflensnotificationforuploaderfailure.$error.required}" ng-show=formAddMbx.maxnumberoflensnotificationforuploaderfailure.$error.required><strong>Lens Failure Notification Count is mandatory</strong></span>\n\
+											<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.maxnumberoflensnotificationforuploaderfailure.$error.pattern}" ng-show=formAddMbx.maxnumberoflensnotificationforuploaderfailure.$error.pattern><strong>Enter Valid Number</strong></span>\n\
+										</div>\n\
 									</div>\n\
 										<div ng-switch-when="emailnotificationforslaviolation">\n\
 											<div class="input-group-btn">\n\
@@ -533,7 +540,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 			}   
 			
 			// To allow only numeric value
-			if(valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedtomailbox' || valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedbymailbox' || valueSelectedinSelectionBox.value.id ==='ttl') {
+			if(valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedtomailbox' || valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedbymailbox' || valueSelectedinSelectionBox.value.id ==='ttl' || valueSelectedinSelectionBox.value.id === 'maxnumberoflensnotificationforuploaderfailure' || valueSelectedinSelectionBox.value.id === 'maxnumberofnotificationforslaviolation') {
 				if (!($scope.numberPattern.test(row.getProperty('value')))) {
 					showAlert('Value should be a number.', 'error');
 					return;

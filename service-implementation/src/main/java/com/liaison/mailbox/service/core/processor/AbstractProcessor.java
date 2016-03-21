@@ -968,11 +968,30 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 stagedFileDAO.merge(stagedFile);
                 //Fourth corner timestamp
                 glassMessage.logFourthCornerTimestamp();
+                // TVAPI
+                transactionVisibilityClient.logToGlass(glassMessage);
             } else {
-                glassMessage.logProcessingStatus(StatusType.ERROR, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
+
+                String configCount = String.valueOf(getMailBoxProperties().get(MailBoxConstants.LENS_NOTIFICATION_FOR_UPLOADER_FAILURE));
+                int maxCount = (MailBoxUtil.isEmpty(configCount))
+                        ? MailBoxUtil.getEnvironmentProperties().getInt(MailBoxConstants.DEFAULT_LENS_FAILURE_NOTIFICATION_COUNT, 3)
+                        : Integer.valueOf(configCount);
+
+                // Update failure status only on notified times
+                if (maxCount > stagedFile.getFailureNotificationCount()) {
+
+                    glassMessage.logProcessingStatus(StatusType.ERROR,
+                            message,
+                            configurationInstance.getProcsrProtocol(),
+                            configurationInstance.getProcessorType().name());
+                    // TVAPI
+                    transactionVisibilityClient.logToGlass(glassMessage);
+
+                    // Notification count update
+                    stagedFile.setFailureNotificationCount((stagedFile.getFailureNotificationCount() + 1));
+                    stagedFileDAO.merge(stagedFile);
+                }
             }
-            //TVAPI
-            transactionVisibilityClient.logToGlass(glassMessage);
 
         }
     }
