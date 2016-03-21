@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.math.BigDecimal;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -40,7 +40,6 @@ import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;

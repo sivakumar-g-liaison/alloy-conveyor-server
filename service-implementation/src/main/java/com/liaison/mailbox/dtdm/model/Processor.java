@@ -61,8 +61,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                             + ProcessorConfigurationDAO.PRCSR_NAME),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
                             query = "select processor from Processor processor"
+                                    + " inner join processor.mailbox mbx"
                                     + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID),
+                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID
+                                    + " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
     				query = "select processor from Processor processor"
     						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME)
