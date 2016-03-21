@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -37,6 +38,7 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorLegacyDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
@@ -75,6 +77,9 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     private static final String UNAME_ERROR = ".* Username cannot be Empty."; 
     private static final String TRUSTSTORE_ERROR = ".* Trust store Certificate cannot be Empty.";
     private static final String SSH_ERROR = ".* SSH Key Pair cannot be Empty.";
+    private String includeFiles = ".txt";
+    private String excludeFiles = ".pdf";
+    private boolean createFolderInRemote = true;
     
     /**
      * @throws java.lang.Exception
@@ -187,6 +192,8 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	Assert.assertEquals(processorLegacy.getDescription(), processorReadResponse.getProcessor().getDescription());
     	Assert.assertEquals(processorLegacy.getName(), processorReadResponse.getProcessor().getName());
     	Assert.assertEquals(processorLegacy.getStatus(), processorReadResponse.getProcessor().getStatus());
+    	
+    	assertRemoteProcessorStaticCheck("url", processorLegacy.getRemoteProcessorProperties().getUrl(), processorReadResponse);
     }
     
     /**
@@ -220,6 +227,10 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         ProcessorConfigurationService processorService = new ProcessorConfigurationService();
         AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
         Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
+        
+        GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorResponse.getProcessor().getGuId());
+        assertRemoteProcessorStaticCheck("includeFiles", processorLegacy.getRemoteProcessorProperties().getIncludeFiles(), processorReadResponse);
+        assertRemoteProcessorStaticCheck("excludeFiles", processorLegacy.getRemoteProcessorProperties().getExcludeFiles(), processorReadResponse);
         
     }
     
@@ -758,7 +769,14 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	case "sweeper":
     		legacyProperties.setDeleteFileAfterSweep(true);
     		legacyProperties.setPipeLineID("pipeline" + System.currentTimeMillis());
+    		legacyProperties.setIncludeFiles(includeFiles);
+    		legacyProperties.setExcludeFiles(excludeFiles);
     	}
+    	
+    	if (ProcessorType.REMOTEUPLOADER.getCode().equals(type)) {
+    	    legacyProperties.setCreateFoldersInRemote(createFolderInRemote);
+    	}
+    	
     	return legacyProperties;
     }
     
@@ -871,6 +889,28 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	profiles.add(profile.getName());
     	return profiles;
     	
+    }
+    
+    /**
+     * Helper method for assert Remote Processor Static properties values success.
+     *
+     * @param property
+     * @param request
+     * @param procGetResponseDTO
+     */
+    public void assertRemoteProcessorStaticCheck(String property, Object request, GetProcessorResponseDTO procGetResponseDTO) {
+
+        List<ProcessorPropertyDTO> respFolderProp = procGetResponseDTO.getProcessor().getProcessorPropertiesInTemplateJson().getStaticProperties();
+        
+        int respStaticPropCount = respFolderProp.size();
+
+        for (int i = 0; i < respStaticPropCount; i++) {
+
+            if (property.equals(respFolderProp.get(i).getName())) {   
+                Assert.assertEquals(request.toString(), respFolderProp.get(i).getValue());
+                break;
+           }
+        }
     }
     
 }

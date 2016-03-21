@@ -46,6 +46,24 @@ public class RemoteProcessorPropertiesDTO {
 	private boolean deleteFiles;
 	@JsonIgnore
 	private boolean deleteFileAfterSweep;
+	
+	private String fileTransferStatusIndicator;
+    private String includeFiles;
+    private String excludeFiles;
+    private String numOfFilesThreshold;
+    private String payloadSizeThreshold;
+    @JsonIgnore
+    private String errorFileLocation;
+    @JsonIgnore
+    private String processedFileLocation;
+    @JsonIgnore
+    private String fileRenameFormat;
+    @JsonIgnore
+    private String sweepedFileLocation;
+    private boolean debugTranscript;
+    private boolean lensVisibility;
+    private boolean httpListenerAuthCheckRequired;
+    private boolean createFoldersInRemote;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -209,5 +227,111 @@ public class RemoteProcessorPropertiesDTO {
 
 	public void setSecuredPayload(boolean securedPayload) {
 		this.securedPayload = securedPayload;
-	}	
+	}
+
+    public String getFileTransferStatusIndicator() {
+        return fileTransferStatusIndicator;
+    }
+
+    public void setFileTransferStatusIndicator(String fileTransferStatusIndicator) {
+        this.fileTransferStatusIndicator = fileTransferStatusIndicator;
+    }
+
+    public String getIncludeFiles() {
+        return includeFiles;
+    }
+
+    public void setIncludeFiles(String includeFiles) {
+        this.includeFiles = includeFiles;
+    }
+
+    public String getExcludeFiles() {
+        return excludeFiles;
+    }
+
+    public void setExcludeFiles(String excludeFiles) {
+        this.excludeFiles = excludeFiles;
+    }
+
+    public String getNumOfFilesThreshold() {
+        return numOfFilesThreshold;
+    }
+
+    public void setNumOfFilesThreshold(String numOfFilesThreshold) {
+        this.numOfFilesThreshold = numOfFilesThreshold;
+    }
+
+    public String getPayloadSizeThreshold() {
+        return payloadSizeThreshold;
+    }
+
+    public void setPayloadSizeThreshold(String payloadSizeThreshold) {
+        this.payloadSizeThreshold = payloadSizeThreshold;
+    }
+
+    public String getErrorFileLocation() {
+        return errorFileLocation;
+    }
+
+    public void setErrorFileLocation(String errorFileLocation) {
+        this.errorFileLocation = errorFileLocation;
+    }
+
+    public String getProcessedFileLocation() {
+        return processedFileLocation;
+    }
+
+    public void setProcessedFileLocation(String processedFileLocation) {
+        this.processedFileLocation = processedFileLocation;
+    }
+
+    public String getFileRenameFormat() {
+        return fileRenameFormat;
+    }
+
+    public void setFileRenameFormat(String fileRenameFormat) {
+        this.fileRenameFormat = fileRenameFormat;
+    }
+
+    public String getSweepedFileLocation() {
+        return sweepedFileLocation;
+    }
+
+    public void setSweepedFileLocation(String sweepedFileLocation) {
+        this.sweepedFileLocation = sweepedFileLocation;
+    }
+
+    public boolean isDebugTranscript() {
+        return debugTranscript;
+    }
+
+    public void setDebugTranscript(boolean debugTranscript) {
+        this.debugTranscript = debugTranscript;
+    }
+
+    public boolean isLensVisibility() {
+        return lensVisibility;
+    }
+
+    public void setLensVisibility(boolean lensVisibility) {
+        this.lensVisibility = lensVisibility;
+    }
+
+    public boolean isHttpListenerAuthCheckRequired() {
+        return httpListenerAuthCheckRequired;
+    }
+
+    public void setHttpListenerAuthCheckRequired(
+            boolean httpListenerAuthCheckRequired) {
+        this.httpListenerAuthCheckRequired = httpListenerAuthCheckRequired;
+    }
+
+    public boolean isCreateFoldersInRemote() {
+        return createFoldersInRemote;
+    }
+
+    public void setCreateFoldersInRemote(boolean createFoldersInRemote) {
+        this.createFoldersInRemote = createFoldersInRemote;
+    }	
+
 }

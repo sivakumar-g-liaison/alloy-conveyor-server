@@ -946,6 +946,31 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         if (null != stagedFile) {
 
+
+            // Log running status
+            if (ExecutionState.COMPLETED.equals(status)) {
+
+                // Inactivate the stagedFile
+                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                stagedFileDAO.merge(stagedFile);
+
+            } else {
+
+                String configCount = String.valueOf(getMailBoxProperties().get(MailBoxConstants.LENS_NOTIFICATION_FOR_UPLOADER_FAILURE));
+                int maxCount = (MailBoxUtil.isEmpty(configCount))
+                        ? MailBoxUtil.getEnvironmentProperties().getInt(MailBoxConstants.DEFAULT_LENS_FAILURE_NOTIFICATION_COUNT, 3)
+                        : Integer.valueOf(configCount);
+
+                // Update failure status only on notified times
+                if (maxCount > stagedFile.getFailureNotificationCount()) {
+
+                    // Notification count update
+                    stagedFile.setFailureNotificationCount((stagedFile.getFailureNotificationCount() + 1));
+                    stagedFileDAO.merge(stagedFile);
+                }
+
+            }
+
             MailboxGlassMessageUtil.logGlassMessage(
                     stagedFile.getGPID(),
                     configurationInstance.getProcessorType(),
@@ -955,15 +980,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                     file.length(),
                     status,
                     message);
-
-            // Log running status
-            if (ExecutionState.COMPLETED.equals(status)) {
-
-                // Inactivate the stagedFile
-                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-                stagedFileDAO.merge(stagedFile);
-            }
-
         }
     }
 
