@@ -45,10 +45,10 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
-import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -297,7 +297,7 @@ public class HTTPListenerResource extends AuditedResource {
         glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
         glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
         glassMessage.setMailboxId(mailboxPguid);
-        glassMessage.setProcessId(IdentifierUtil.getUuid());
+        glassMessage.setProcessId(UUIDGen.getCustomUUID());
         glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
         glassMessage.setPipelineId(workTicket.getPipelineId());
 
@@ -401,7 +401,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setInSize((long) request.getContentLength());
-					glassMessage.setProcessId(IdentifierUtil.getUuid());
+					glassMessage.setProcessId(UUIDGen.getCustomUUID());
 
                     //Fix for GMB-502
                     ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());

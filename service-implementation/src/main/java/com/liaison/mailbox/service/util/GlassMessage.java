@@ -22,10 +22,10 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.message.glass.dom.TimeStamp;
 import com.liaison.commons.message.glass.dom.TimeStampAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -355,7 +355,7 @@ public class GlassMessage {
 		timeStampAPI.setGlobalId(getGlobalPId());
 		timeStampAPI.setPipelineId(getPipelineId());
 		timeStampAPI.getTimeStamps().add(glassTimeStamp);
-		timeStampAPI.setGlassMessageId(IdentifierUtil.getUuid());
+		timeStampAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
 		return timeStampAPI;
 	}
@@ -367,7 +367,7 @@ public class GlassMessage {
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
 		activityStatusAPI.setGlobalId(getGlobalPId());
-		activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
+		activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
 		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
@@ -387,7 +387,7 @@ public class GlassMessage {
 		} else {
 			status.setDescription(MAILBOX_ASA_IDENTIFIER);
 		}
-		status.setStatusId(IdentifierUtil.getUuid());
+		status.setStatusId(UUIDGen.getCustomUUID());
 		status.setType(statusType);
 
 		activityStatusAPI.getStatuses().add(status);
@@ -402,7 +402,7 @@ public class GlassMessage {
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
 		activityStatusAPI.setGlobalId(getGlobalPId());
-		activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
+		activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
 		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
@@ -419,7 +419,7 @@ public class GlassMessage {
 		} else {
 			status.setDescription(MAILBOX_ASA_IDENTIFIER);
 		}
-		status.setStatusId(IdentifierUtil.getUuid());
+		status.setStatusId(UUIDGen.getCustomUUID());
 		status.setType(statusType);
 
 		activityStatusAPI.getStatuses().add(status);

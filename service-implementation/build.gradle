@@ -218,9 +218,6 @@ dependencies {
 	compile "com.liaison.commons:lib_health_monitor_spectrum:1.1.+"
 	compile "com.liaison.commons:lib_health_monitor_threadpool:1.1.+"
 	
-	// inherited from NetFlix Karyon (TODO integrate with main UI)
-	//compile project(':karyon-admin-web')
-
 	// reusable utilities / framework components
 	compile project(':service-framework')
 
@@ -235,17 +232,11 @@ dependencies {
 	compile "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
 
 	// Dependency for KeyManager
-	//compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
-	compile('com.liaison.key.management:key-management:1.+:grammar') {
-		exclude module:'karyon-admin'
-		exclude module:'karyon-admin-web'
-		exclude module:'datanucleus-api-jpa'
-		exclude module:'datanucleus-rdbms'
-		exclude module:'datanucleus-core'
+	compile('com.liaison.key.management:key-management:3.+:grammar') {
+		exclude module:'service-framework'
 	}
 
 	//Dependency for GEM client Integration
-
 	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'4.+', changing: true
 
 	//dependency for testng
@@ -433,19 +424,23 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	
 }*/
 
-task setDevProperties << {
-    /*ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+task setDevProperties << {    
+    ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
     {
         filterchain {
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port=${dbServerPort}))(connect_data=(service_name=${dbServerService})))" ) }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.mailbox\\.http\\.async\\.payload\\.dir=)(.*)', replace:"\\1${asyncpayloaddir}") }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.servicebroker\\.sync\\.uri=)(.*)', replace:"\\1${servicebrokersyncuri}") }
+
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerNameDtdm})(port=${dbServerPortDtdm}))(connect_data=(service_name=${dbServerServiceDtdm})))" ) }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPasswordDtdm}") }
+
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerNameRtdm})(port=${dbServerPortRtdm}))(connect_data=(service_name=${dbServerServiceRtdm})))" ) }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPasswordRtdm}") }
+
         }
-    }*/
+    }
 
 }
 
