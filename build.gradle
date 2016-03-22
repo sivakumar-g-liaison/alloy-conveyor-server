@@ -19,6 +19,8 @@ buildscript {
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
 
+apply plugin: 'com.kageiit.url-cache'
+
 allprojects {
     apply plugin: 'eclipse' //provides tasks for eclipse. If you don't use eclipse, simply don't use these tasks :)
     apply plugin: 'idea'
@@ -79,7 +81,7 @@ allprojects {
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
-apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle'
+apply from: urlCache.get('http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle')
 
 task showMeCache << {
     configurations.compile.each { println it }

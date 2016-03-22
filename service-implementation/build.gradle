@@ -19,6 +19,7 @@ apply plugin: 'flyway'
 apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
+apply plugin: 'com.kageiit.url-cache'
 
 license {
 	header rootProject.file('codequality/HEADER')
@@ -82,10 +83,10 @@ allprojects {
 	 }
 }
 
-apply from: 'http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/publish-service.gradle'
+apply from: urlCache.get('http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/publish-service.gradle')
 
 war {
-    baseName = 'g2mailboxservice'
+    baseName = rootProject.name
 	//archiveName="g2mailboxservice.war"
 
 	// TODO

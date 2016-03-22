@@ -2,6 +2,7 @@
 -------------------------------
 * GMB-723 - Declare constants as final
 * GGT-453 publishing fixup
+* GGT-477 restore building offline
 
 4.1.0
 -------------------------------
