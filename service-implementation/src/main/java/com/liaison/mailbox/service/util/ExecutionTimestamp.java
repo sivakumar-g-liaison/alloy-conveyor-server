@@ -16,7 +16,7 @@ import java.util.Date;
 import com.liaison.commons.message.glass.dom.TimeStamp;
 import com.liaison.commons.message.glass.dom.TimeStampType;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
-import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.commons.util.UUIDGen;
 
 /**
  * used for recording timestamps eventually to glass
@@ -30,7 +30,7 @@ public class ExecutionTimestamp
 	private static final long serialVersionUID = -7781501685922032343L;
 	protected String name;
 	protected Date timestamp;
-	protected String ID = IdentifierUtil.getUuid();
+	protected String ID = UUIDGen.getCustomUUID();
 	protected String sessionID;
 	protected TimestampType type;
 
@@ -59,7 +59,7 @@ public class ExecutionTimestamp
 	 * @see #endTimestampFor(ExecutionTimestamp)
 	 */
 	public static ExecutionTimestamp beginTimestamp(String name) {
-		return new ExecutionTimestamp(name, IdentifierUtil.getUuid(), new Date(), TimestampType.Start);
+		return new ExecutionTimestamp(name, UUIDGen.getCustomUUID(), new Date(), TimestampType.Start);
 	}
 
 	/**

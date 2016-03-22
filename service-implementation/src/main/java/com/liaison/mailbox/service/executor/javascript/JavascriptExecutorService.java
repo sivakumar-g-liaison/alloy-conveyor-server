@@ -30,7 +30,7 @@ import com.liaison.commons.message.glass.dom.MetricTag;
 import com.liaison.commons.scripting.ScriptExecutorBase;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
-import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -182,7 +182,7 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
 			m.getMetricTags().add(metricTag);
 		}
 
-		 metricAPI.setGlassMessageId(IdentifierUtil.getUuid());
+		 metricAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 		// metricAPI.setPipelineProcessId(messageContext.getPipelineProcessID());
 		// metricAPI.setGlobalId(messageContext.getGlobalProcessID());
 		 metricAPI.setMetric(m);

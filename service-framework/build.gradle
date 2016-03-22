@@ -44,11 +44,11 @@ dependencies {
     compile "org.codehaus.jackson:jackson-mrbean:${jacksonVersion}"
     runtime 'javax.xml.bind:jaxb-api:2.1'
 
-    compile "com.netflix.karyon:karyon-extensions:1.0.22"
-    //compile project(':karyon-admin-web')
-
-
-    // Liaison dependencies
+    compile 'com.netflix.servo:servo-core:0.8.0'
+    compile ("com.netflix.karyon:karyon-extensions:${karyonVersion}") {
+        exclude group: "com.sun.jersey", module: "jersey-bundle"
+        exclude group: "com.netflix.servo", module: "servo-core"
+    }
 
     // JPA2.0 API
     compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
@@ -57,11 +57,10 @@ dependencies {
     // Oracle OJDBC
     compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
     compile 'com.oracle:ucp:11g-11.2.0.3.0'
+
     // Liaison code
     // commons-lib dependencies
-	compile 'com.liaison:commons-lib:5.+'
-	// Netflix
-	compile "com.netflix.karyon:karyon-admin-web:${karyonVersion}"
+	compile 'com.liaison:commons-lib:6.+'
 
 }
 

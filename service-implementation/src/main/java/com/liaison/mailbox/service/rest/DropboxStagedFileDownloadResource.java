@@ -40,11 +40,11 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
@@ -198,7 +198,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 								Response.Status.BAD_REQUEST);
 					}
 
-					String processId = IdentifierUtil.getUuid();
+					String processId = UUIDGen.getCustomUUID();
 
                     glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
                     glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());

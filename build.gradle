@@ -60,6 +60,10 @@ allprojects {
     
     configurations {
         all {
+
+            //REJECT karyon admin due to compliance reasons
+            all*.exclude group: 'com.netflix.karyon', module: 'karyon-admin'
+
               // Most of the time this is a bad idea with little upside:   // check for updates every build
               //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 
@@ -140,58 +144,6 @@ subprojects {
     }
 
 }
-
-/*
- * karyon-admin provides rest services that expose administrative data
- * like configuration properties, classes/jars loaded, jmx properties, etc
- *
- */
-/*project(':karyon-admin') {
-    dependencies {
-        compile "com.netflix.karyon:karyon-core:${karyonVersion}"
-
-	compile "com.netflix.karyon:karyon-extensions:1.0.22"
-        compile 'javax.ws.rs:jsr311-api:1.1.1'
-
-	// Added by senthilvel for downloading servlet-3.0 jar from maven repo
-	compile 'javax.servlet:javax.servlet-api:3.1.0'
-	
-        compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
-        compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
-        compile 'com.sun.jersey.contribs:jersey-guice:1.8'
-
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
-	testCompile 'org.testng:testng:6.8'
-    }
-    
-    test {
-        // com.netflix.adminresources.AdminResourceTest fails intermitantly
-        // TODO this should be fixed.  remove exclusion and test
-        exclude 'com/netflix/adminresources/**'
-    }    
-
-}
-*/
-
-/*
- * karyon-admin-web puts a pretty face (webapp) on karyon-admin
- */
-/*project(':karyon-admin-web') {
-    dependencies {
-        compile project(':karyon-admin')
-        compile 'com.google.code.gson:gson:2.1'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
-        testCompile 'org.testng:testng:6.8'
-
-//little hack for development
-//        compile fileTree(dir: '../libs', include: '*.jar')
-
-        runtime 'org.freemarker:freemarker:2.3.19'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
-    }
-}*/
 
 project(':service-framework') {
     dependencies {
