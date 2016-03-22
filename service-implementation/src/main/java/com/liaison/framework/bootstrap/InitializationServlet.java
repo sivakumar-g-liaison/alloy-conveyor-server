@@ -14,6 +14,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import com.liaison.health.core.management.ThreadBlockedHealthCheck;
+import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,19 +74,13 @@ public class InitializationServlet extends HttpServlet {
 
 		// db health check
 		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
-				new JdbcConnectionCheck(
-                        configuration.getString(MailBoxConstants.DTDM_DB_DRIVER_PROPERTY),
-                        configuration.getString(MailBoxConstants.DTDM_DB_URL_PROPERTY),
-                        configuration.getString(MailBoxConstants.DTDM_DB_USER_PROPERTY),
-                        configuration.getString(MailBoxConstants.DTDM_DB_PASSWORD_PROPERTY)
-				));
+				new JdbcConnectionCheck("jdbc/UCPPool-DTDM"));
 		LiaisonHealthCheckRegistry.INSTANCE.register("rtdm_db_connection_check",
-				new JdbcConnectionCheck(
-                        configuration.getString(MailBoxConstants.RTDM_DB_DRIVER_PROPERTY),
-                        configuration.getString(MailBoxConstants.RTDM_DB_URL_PROPERTY),
-                        configuration.getString(MailBoxConstants.RTDM_DB_USER_PROPERTY),
-                        configuration.getString(MailBoxConstants.RTDM_DB_PASSWORD_PROPERTY)
-				));
+				new JdbcConnectionCheck("jdbc/UCPPool-RTDM"));
+		LiaisonHealthCheckRegistry.INSTANCE.register("thread_deadlock_check",
+				new ThreadDeadlockHealthCheck(1));
+		LiaisonHealthCheckRegistry.INSTANCE.register("thread_blocked_check",
+				new ThreadBlockedHealthCheck(10));
 
 		// Set ACL Filter Signature Verifier
 		SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();

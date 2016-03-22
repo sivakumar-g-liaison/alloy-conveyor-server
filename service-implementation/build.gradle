@@ -212,11 +212,11 @@ dependencies {
 
 	compile 'com.liaison.commons:lib_message_bus:8.+'
 
-	compile "com.liaison.commons:lib_health_monitor_core:1.1.+"
-	compile "com.liaison.commons:lib_health_monitor_file:1.1.+"
-	compile "com.liaison.commons:lib_health_monitor_jdbc:1.1.+"
-	compile "com.liaison.commons:lib_health_monitor_spectrum:1.1.+"
-	compile "com.liaison.commons:lib_health_monitor_threadpool:1.1.+"
+	compile "com.liaison.commons:lib_health_monitor_core:2.+"
+	compile "com.liaison.commons:lib_health_monitor_file:2.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:2.+"
+	compile "com.liaison.commons:lib_health_monitor_spectrum:2.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:2.+"
 	
 	// inherited from NetFlix Karyon (TODO integrate with main UI)
 	//compile project(':karyon-admin-web')
