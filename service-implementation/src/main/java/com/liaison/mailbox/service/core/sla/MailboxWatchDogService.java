@@ -74,6 +74,7 @@ public class MailboxWatchDogService {
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
 	private static final String EMAIL_NOTIFICATION_COUNT_PATTERN= "^[0-9]*$";
+
 	private String uniqueId;
 
 	private String constructMessage(String... messages) {
@@ -153,11 +154,11 @@ public class MailboxWatchDogService {
 					//This may be old staged file
 					continue;
 				}
-
+				
+				boolean isFileExist = false;
 				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
 
-					LOGGER.info(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
-
+				    isFileExist = true;
 					// get the processor from processor Id
 					processor = processors.get(stagedFile.getProcessorId());
 					if (null == processor) {
@@ -172,7 +173,7 @@ public class MailboxWatchDogService {
                         try {
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
                         } catch (IOException e) {
-                            LOGGER.info(constructMessage("Unable to delete a stale file {} in the filePath {}"), fileName, filePath);
+                            LOGGER.error(constructMessage("Unable to delete a stale file {} in the filePath {}"), fileName, filePath);
                         }
                         continue;
 					}
@@ -180,11 +181,13 @@ public class MailboxWatchDogService {
 					updatedNotificationCountList.add(stagedFile);
 					continue;
 				}
-				LOGGER.info(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
 
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
+				    if (!isFileExist){
+		                inactiveStagedFile(stagedFile, updatedStatusList);
+				    }
 					continue;
 				}
 
@@ -199,12 +202,10 @@ public class MailboxWatchDogService {
 
 				//TVAPI
 				transactionVisibilityClient.logToGlass(glassMessage);
-				LOGGER.info(constructMessage("Updated LENS status for the file {} and location is {}"), fileName, filePath);
+				LOGGER.info(constructMessage("Pguid : {}, ProcessorName : {}, Updated LENS status for the file {} and location is {}"), processor.getPguid(), processor.getProcsrName(), fileName, filePath);
 
 				// Inactivate the stagedFile
-				stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-				stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
-				updatedStatusList.add(stagedFile);
+				inactiveStagedFile(stagedFile, updatedStatusList);
 			}
             //updated the stagedFile with latest notification count.
 			for (StagedFile updatedNotificationCount : updatedNotificationCountList) {
@@ -229,6 +230,20 @@ public class MailboxWatchDogService {
             }
         }
 
+	}
+	
+	
+	/**
+	 * Method to inactive the stagedFile
+	 * 
+	 * @param stagedFile
+	 * @param updatedStatusList
+	 * @return updatedStatusList
+	 */
+	private void inactiveStagedFile(StagedFile stagedFile, List<StagedFile> updatedStatusList) {
+	    stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+        stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
+        updatedStatusList.add(stagedFile);
 	}
 	
 	/**
@@ -262,8 +277,7 @@ public class MailboxWatchDogService {
 		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
 		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
 		if (MailBoxUtil.isEmpty(ttl)) {
-			LOGGER.info(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
-			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS);
+			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT );
 			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
 		}	
 		
@@ -312,7 +326,6 @@ public class MailboxWatchDogService {
 		
 		if (MailBoxUtil.isEmpty(customerSLAConfiguration)) {
 
-			LOGGER.info(constructMessage("customer sla is not configured in mailbox, using the default customer sla configuration"));
 			customerSLAConfiguration = (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType()))
 										? MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_CUSTOMER_SLA)
 										: MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
@@ -333,8 +346,6 @@ public class MailboxWatchDogService {
 					.append(stagedFile.getFileName());
 			// send email notifications for sla violations
 			sendEmail(processor, emailAddress, emailSubject, body.toString());
-		} else {
-            LOGGER.info(constructMessage("Email Notification to the User reached Maximum So unable to sending the email to user"));
 		}
 
 	}
@@ -514,7 +525,6 @@ public class MailboxWatchDogService {
 		LOGGER.debug("Mailbox Properties retrieved. mailbox sla - {}, emailAddress - {}, emailNotificationEnabled - {}", mailboxSLAConfiguration, emailAddress, enableEmailNotification);
 		
 		if (MailBoxUtil.isEmpty(mailboxSLAConfiguration)) {
-			LOGGER.info(constructMessage("mailbox sla is not configured in mailbox, using the default mailbox sla configuration"));
 			mailboxSLAConfiguration = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
 		}
 		if (MailBoxUtil.isEmpty(enableEmailNotification)) {
@@ -526,12 +536,10 @@ public class MailboxWatchDogService {
 
 		List<FSMStateValue> listfsmStateVal = null;
 
-		LOGGER.info(constructMessage("checking whether the processor {} is executed with in the specified SLA configuration time"), processor.getProcsrName());
 		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration));
 
 		// If the list is empty then the processor is not executed at all during the specified sla time.
 		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
-		    LOGGER.info(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
 		    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 			return;
 		}  
@@ -542,7 +550,6 @@ public class MailboxWatchDogService {
 			for (FSMStateValue fsmStateVal : listfsmStateVal) {
 
 				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
-				    LOGGER.info(constructMessage("The processor {} was executed but got failed with in the specified SLA configuration time"), processor.getProcsrName());
 				    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 				}
 			}
@@ -624,9 +631,6 @@ public class MailboxWatchDogService {
 	    	
 			String emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, mailboxSLAConfiguration);
 			sendEmail(processor, emailAddress, emailSubject, emailSubject);
-			LOGGER.info(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
-	    } else {
-	    	LOGGER.info(constructMessage("The SLA violations are not notified to the user for the prcocessor {} since the email notification for SLA is disabled"), processor.getProcsrName());
-	    }
+	    } 
 	}
 }
