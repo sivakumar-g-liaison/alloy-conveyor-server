@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -58,7 +59,7 @@ public class KMSUtil {
 		// setting the request headers in the request to key manager from gem
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + URLEncoder.encode(guid, "UTF-8");
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
