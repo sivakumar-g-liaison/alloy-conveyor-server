@@ -20,6 +20,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -34,6 +35,8 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -245,6 +248,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
 						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
 							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
+						} else {
+							validateSecret(credentialDTO.getPassword());
 						}
 						break;
 					case SFTP:
@@ -256,6 +261,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
 						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
 							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
+						} else {
+							validateSecret(credentialDTO.getPassword());
 						}
 						break;
 					default:
@@ -264,6 +271,23 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 		}
 	}
 	
+	/**
+	 * Method to validate the password
+	 * 
+	 * @param password
+	 */
+	private void validateSecret(String password) {
+		
+		try {
+			KMSUtil.getSecretFromKMS(password);
+		} catch (LiaisonException | IOException | MailBoxServicesException exception) {
+			if (exception != null && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
+				throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
+			}
+			throw new RuntimeException(exception);
+		}
+	}
+
 	/**
 	 * Method to validate credentials 
 	 * 

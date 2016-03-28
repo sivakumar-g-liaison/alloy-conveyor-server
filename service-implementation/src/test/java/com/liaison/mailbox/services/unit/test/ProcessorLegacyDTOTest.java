@@ -50,7 +50,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to validate the userId and Password.
 	 */
-	@Test
+	@Test(enabled=false)
 	public void testValidateFTPUserIdCredential() {
 		
 		Processor processor = constructProcessor();
