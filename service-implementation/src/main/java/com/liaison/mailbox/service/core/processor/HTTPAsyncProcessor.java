@@ -17,8 +17,8 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 /**
