@@ -43,9 +43,9 @@ import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**

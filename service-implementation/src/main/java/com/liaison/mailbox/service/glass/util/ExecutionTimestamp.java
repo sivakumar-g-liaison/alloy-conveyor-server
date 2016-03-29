@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.util;
+package com.liaison.mailbox.service.glass.util;
 
 import java.io.Serializable;
 import java.util.Date;

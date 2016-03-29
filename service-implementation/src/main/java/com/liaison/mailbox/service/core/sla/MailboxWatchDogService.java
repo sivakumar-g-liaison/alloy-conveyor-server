@@ -31,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -53,9 +52,8 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * Updates LENS status for the customer picked up the files
@@ -176,7 +174,15 @@ public class MailboxWatchDogService {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
                             LOGGER.info(constructMessage("{} :{} : File {} is deleted in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
-                            addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File is deleted since it isn't picked by the customer", null);
+                            MailboxGlassMessageUtil.logGlassMessage(
+                                    stagedFile.getGPID(),
+                                    processor.getProcessorType(),
+                                    processor.getProcsrProtocol(),
+                                    fileName,
+                                    filePath,
+                                    0,
+                                    ExecutionState.FAILED,
+                                    "File is deleted since it isn't picked by the customer");
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} :{} : Unable to delete a stale file {} in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
@@ -194,15 +200,34 @@ public class MailboxWatchDogService {
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
+
 				    if (!isFileExist){
-				        addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File is deleted by some other process", null);
+				        MailboxGlassMessageUtil.logGlassMessage(
+                                stagedFile.getGPID(),
+                                processor.getProcessorType(),
+                                processor.getProcsrProtocol(),
+                                fileName,
+                                filePath,
+                                0,
+                                ExecutionState.FAILED,
+                                "File is deleted by some other process");
 		                inactiveStagedFile(stagedFile, updatedStatusList);
 				    }
 					continue;
 				}
 
-				addEventLogs(processor, stagedFile, ExecutionState.COMPLETED, StatusType.SUCCESS, "File is picked up by the customer or other process", null);
-				inactiveStagedFile(stagedFile, updatedStatusList);
+                MailboxGlassMessageUtil.logGlassMessage(
+                        stagedFile.getGPID(),
+                        processor.getProcessorType(),
+                        processor.getProcsrProtocol(),
+                        fileName,
+                        filePath,
+                        0,
+                        ExecutionState.COMPLETED,
+                        "File is picked up by the customer or other process");
+                LOGGER.info(constructMessage("{} :{} : Updated LENS status for the file {} and location is {}"), processor.getPguid(), processor.getProcsrName(), stagedFile.getFileName(), stagedFile.getFilePath());
+                inactiveStagedFile(stagedFile, updatedStatusList);
+
 			}
 
             //updated the stagedFile with latest notification count.
@@ -230,31 +255,6 @@ public class MailboxWatchDogService {
 
 	}
 
-	/**
-     * Method to add event logs
-     * 
-     * @param stagedFile
-     * @param state
-     * @param status
-     * @param msg
-     * @param protocol
-     */
-	private void addEventLogs(Processor processor,StagedFile stagedFile, ExecutionState state, StatusType status, String msg, String protocol) {
-	    
-	    TransactionVisibilityClient tVClient = new TransactionVisibilityClient();
-	    GlassMessage glassMessage = new GlassMessage();
-	    
-        glassMessage.setGlobalPId(stagedFile.getGPID());
-        glassMessage.setStatus(state);
-        glassMessage.setOutAgent(stagedFile.getFilePath());
-        glassMessage.setOutboundFileName(stagedFile.getFileName());
-        glassMessage.logProcessingStatus(status, msg, stagedFile.getProcessorType(), protocol);
-        
-        //TVAPI
-        tVClient.logToGlass(glassMessage);
-        LOGGER.info(constructMessage("{} :{} : Updated LENS status for the file {} and location is {}"), processor.getPguid(), processor.getProcsrName(), stagedFile.getFileName(), stagedFile.getFilePath());
-    }
-
     /**
 	 * Method to inactive the stagedFile
 	 * 
@@ -263,6 +263,7 @@ public class MailboxWatchDogService {
 	 * @return updatedStatusList
 	 */
 	private void inactiveStagedFile(StagedFile stagedFile, List<StagedFile> updatedStatusList) {
+
 	    stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
         stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
         updatedStatusList.add(stagedFile);
@@ -299,6 +300,7 @@ public class MailboxWatchDogService {
 		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
 		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
 		if (MailBoxUtil.isEmpty(ttl)) {
+
 		    LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
 			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT );
 			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;

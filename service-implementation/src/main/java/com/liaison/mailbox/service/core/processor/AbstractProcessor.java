@@ -41,7 +41,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
@@ -70,10 +69,9 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * Base processor type for all type of processors.
@@ -948,28 +946,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         if (null != stagedFile) {
 
-            TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-            GlassMessage glassMessage = new GlassMessage();
-            glassMessage.setGlobalPId(stagedFile.getGPID());
-            glassMessage.setCategory(configurationInstance.getProcessorType());
-            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
-
-            glassMessage.setStatus(status);
-            glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
-            glassMessage.setOutSize(file.length());
-            glassMessage.setOutboundFileName(file.getName());
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
 
-                glassMessage.logProcessingStatus(StatusType.SUCCESS, message, configurationInstance.getProcsrProtocol(), configurationInstance.getProcessorType().name());
                 // Inactivate the stagedFile
                 stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
                 stagedFileDAO.merge(stagedFile);
-                //Fourth corner timestamp
-                glassMessage.logFourthCornerTimestamp();
-                // TVAPI
-                transactionVisibilityClient.logToGlass(glassMessage);
+
             } else {
 
                 String configCount = String.valueOf(getMailBoxProperties().get(MailBoxConstants.LENS_NOTIFICATION_FOR_UPLOADER_FAILURE));
@@ -980,50 +964,52 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 // Update failure status only on notified times
                 if (maxCount > stagedFile.getFailureNotificationCount()) {
 
-                    glassMessage.logProcessingStatus(StatusType.ERROR,
-                            message,
-                            configurationInstance.getProcsrProtocol(),
-                            configurationInstance.getProcessorType().name());
-                    // TVAPI
-                    transactionVisibilityClient.logToGlass(glassMessage);
-
                     // Notification count update
                     stagedFile.setFailureNotificationCount((stagedFile.getFailureNotificationCount() + 1));
                     stagedFileDAO.merge(stagedFile);
                 }
+
             }
 
+            MailboxGlassMessageUtil.logGlassMessage(
+                    stagedFile.getGPID(),
+                    configurationInstance.getProcessorType(),
+                    configurationInstance.getProcsrProtocol(),
+                    file.getName(),
+                    file.getPath(),
+                    file.length(),
+                    status,
+                    message);
         }
     }
 
     /**
-	 * Logs duplicate status in lens for the overwrite true case
-	 * 
-	 * @param processor The filewriter processor entity
-	 * @param glassMessage Glass
-	 * @param stagedFile
-	 */
-	protected void logDuplicateStatus(StagedFile stagedFile, String gpid) {
+     * Logs duplicate status in lens for the overwrite true case
+     * 
+     * @param fileName
+     * @param filePath
+     * @param dupGpid
+     *            the global process id of the old transaction
+     * @param gpid
+     *            the global process id of the current transaction which is going to overwrite the old txn
+     */
+    protected void logDuplicateStatus(String fileName, String filePath, String dupGpid, String gpid) {
 
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-		GlassMessage glassMessage = new GlassMessage();
-		glassMessage.setGlobalPId(stagedFile.getGPID());
-		glassMessage.setCategory(configurationInstance.getProcessorType());
-		glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+        StringBuilder message = new StringBuilder()
+                .append("File ")
+                .append(fileName)
+                .append(" is overwritten by another process - ")
+                .append(gpid);
 
-		glassMessage.setStatus(ExecutionState.DUPLICATE);
-		glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
-		glassMessage.setOutboundFileName(stagedFile.getFileName());
-
-		StringBuilder message = new StringBuilder()
-							.append("File ")
-							.append(stagedFile.getFileName())
-							.append(" is overwritten by another process - ")
-							.append(gpid);
-		glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString(), MailBoxConstants.FILEWRITER);
-
-		//TVAPI
-		transactionVisibilityClient.logToGlass(glassMessage);
+        MailboxGlassMessageUtil.logGlassMessage(
+                dupGpid,
+                configurationInstance.getProcessorType(),
+                configurationInstance.getProcsrProtocol(),
+                fileName,
+                filePath,
+                0,
+                ExecutionState.DUPLICATE,
+                message.toString());
 	}
 
     @Override

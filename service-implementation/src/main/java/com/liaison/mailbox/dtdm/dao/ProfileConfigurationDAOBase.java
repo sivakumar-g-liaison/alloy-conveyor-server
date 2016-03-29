@@ -48,9 +48,10 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 	@Override
 	public ScheduleProfilesRef findProfileByName(String profileName) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		EntityManager entityManager = null;
 		try {
 
+			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			@SuppressWarnings("unchecked")
 			List<ScheduleProfilesRef> profiles = entityManager.createNamedQuery(GET_PROFILE_BY_NAME)
 					.setParameter(PROF_NAME, profileName).getResultList();
@@ -71,12 +72,13 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 	@Override
 	public List<ScheduleProfilesRef> findTransferProfilesSpecificProcessorTypeByTenancyKey(String tenancyKey, List<String> specificProcessorTypes) {
 
-			EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+			EntityManager entityManager = null;
 			List<ScheduleProfilesRef> processors = new ArrayList<ScheduleProfilesRef>();
 
 			try {
 				LOG.debug("Fetching the transfer profiles by specific processor type and tenancyKey starts.");
 
+				entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 				StringBuilder query = new StringBuilder().append("select distinct profile from Processor processor")
 							.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
 							.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
@@ -103,7 +105,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 
 					transferProfile = (ScheduleProfilesRef) iter.next();
 					processors.add(transferProfile);
-					LOG.info("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
+					LOG.debug("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
 				}
 
 			} finally {
