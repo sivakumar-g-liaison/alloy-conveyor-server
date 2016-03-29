@@ -38,6 +38,10 @@ public class ProcessorLegacyDTOTest {
 	
 	private final static String VALID_SSHKEYPAIR = "254AD0C664B44B198EE736BD89509444";
 	
+	private final static String VALID_TRUSTSTORE = "4463C90421854F23876C11A7A39FA41F";
+	
+	private final static String INVALID_GUID = "1B639D47BB734094AE7B26B122C00282";
+	
 	/**
 	 * @throws Exception
 	 */
@@ -45,6 +49,7 @@ public class ProcessorLegacyDTOTest {
 	public void setUp() throws Exception {
         System.setProperty("com.liaison.secure.properties.path", "invalid");
         System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+        System.setProperty("archaius.deployment.environment", "dev-int");
 	}
 	
 	/**
@@ -230,6 +235,51 @@ public class ProcessorLegacyDTOTest {
 		
 		processorDTO.setCredentials(credentials);
 		Assert.assertFalse(processorDTO.isSSHKeyPairAvailable());
+	}
+	
+	/**
+	 * Test method to check the invalid SSH keypair
+	 */
+	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
+	public void testSSHKeyPairInvalid() {
+		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		processorDTO.validateSSHKeypair(INVALID_GUID);
+	}
+	
+	/**
+	 * Test method to check the valid SSH keypair
+	 */
+	@Test (expectedExceptions = {})
+	public void testSSHKeyPairValid() {
+		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		processorDTO.validateSSHKeypair(VALID_SSHKEYPAIR);
+	}
+	
+	/**
+	 * Test method to check the empty Truststore Certificate
+	 */
+	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Trust store Certificate cannot be Empty." )
+	public void testTruststoreCertificateEmpty() {
+		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		processorDTO.validateTruststoreCertificate(null);
+	}
+	
+	/**
+	 * Test method to check the invalid Truststore Certificate
+	 */
+	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given trust store group guid does not exist in key management system." )
+	public void testTruststoreCertificateInvalid() {
+		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		processorDTO.validateTruststoreCertificate(INVALID_GUID);
+	}
+	
+	/**
+	 * Test method to check the valid Truststore Certificate
+	 */
+	@Test (expectedExceptions = {})
+	public void testTruststoreCertificateValid() {
+		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		processorDTO.validateTruststoreCertificate(VALID_TRUSTSTORE);
 	}
 	
 	public Processor constructProcessor() {
