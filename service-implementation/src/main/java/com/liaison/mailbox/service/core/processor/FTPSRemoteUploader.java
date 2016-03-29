@@ -121,13 +121,13 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                 throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
             }
 
-            LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
+            LOGGER.debug(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 
             File localDir = new File(path);
             File[] subFiles = localDir.listFiles();
 
             if (subFiles == null || subFiles.length == 0) {
-                LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
+                LOGGER.debug(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
             }
 

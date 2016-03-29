@@ -42,6 +42,7 @@ import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
@@ -204,8 +205,8 @@ public class MailboxWatchDogService {
 				    if (!isFileExist){
 				        MailboxGlassMessageUtil.logGlassMessage(
                                 stagedFile.getGPID(),
-                                processor.getProcessorType(),
-                                processor.getProcsrProtocol(),
+                                ProcessorType.findByName(stagedFile.getProcessorType()),
+                                getProtocol(filePath),
                                 fileName,
                                 filePath,
                                 0,
@@ -218,14 +219,14 @@ public class MailboxWatchDogService {
 
                 MailboxGlassMessageUtil.logGlassMessage(
                         stagedFile.getGPID(),
-                        processor.getProcessorType(),
-                        processor.getProcsrProtocol(),
+                        ProcessorType.findByName(stagedFile.getProcessorType()),
+                        getProtocol(filePath),
                         fileName,
                         filePath,
                         0,
                         ExecutionState.COMPLETED,
                         "File is picked up by the customer or other process");
-                LOGGER.info(constructMessage("{} :{} : Updated LENS status for the file {} and location is {}"), processor.getPguid(), processor.getProcsrName(), stagedFile.getFileName(), stagedFile.getFilePath());
+                LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
                 inactiveStagedFile(stagedFile, updatedStatusList);
 
 			}
@@ -667,6 +668,25 @@ public class MailboxWatchDogService {
 			LOGGER.debug(constructMessage("The SLA violations are notified to the user by sending email for the prcocessor {}"), processor.getProcsrName());
         } else {
             LOGGER.debug(constructMessage("The SLA violations are not notified to the user for the prcocessor {} since the email notification for SLA is disabled"), processor.getProcsrName());
+        }
+	}
+
+	/**
+	 * Helper to get protocol from filepath
+	 * 
+	 * @param filePath
+	 * @return
+	 */
+	private String getProtocol(String filePath) {
+
+	    if (filePath.contains("ftps")) {
+            return Protocol.FTPS.getCode();
+        } else if (filePath.contains("sftp")) {
+            return Protocol.SFTP.getCode();
+        } else if (filePath.contains("ftp")) {
+            return Protocol.FTP.getCode();
+        } else {
+            return filePath;
         }
 	}
 }

@@ -240,7 +240,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the invalid SSH keypair
 	 */
-	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
+	@Test (enabled = false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
 	public void testSSHKeyPairInvalid() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateSSHKeypair(INVALID_GUID);
@@ -249,7 +249,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the valid SSH keypair
 	 */
-	@Test (expectedExceptions = {})
+	@Test (enabled=false, expectedExceptions = {})
 	public void testSSHKeyPairValid() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateSSHKeypair(VALID_SSHKEYPAIR);
@@ -267,7 +267,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the invalid Truststore Certificate
 	 */
-	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given trust store group guid does not exist in key management system." )
+	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given trust store group guid does not exist in key management system." )
 	public void testTruststoreCertificateInvalid() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateTruststoreCertificate(INVALID_GUID);
@@ -276,7 +276,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the valid Truststore Certificate
 	 */
-	@Test (expectedExceptions = {})
+	@Test (enabled=false, expectedExceptions = {})
 	public void testTruststoreCertificateValid() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateTruststoreCertificate(VALID_TRUSTSTORE);
