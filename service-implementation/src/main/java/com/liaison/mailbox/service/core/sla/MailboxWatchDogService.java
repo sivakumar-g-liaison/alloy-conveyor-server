@@ -131,7 +131,7 @@ public class MailboxWatchDogService {
 			List<String> processorTypes = new ArrayList<>();
 			processorTypes.add(ProcessorType.FILEWRITER.name());
 			processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
-			
+
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
 					.setParameter(StagedFileDAO.TYPE, processorTypes)
@@ -141,7 +141,7 @@ public class MailboxWatchDogService {
 				LOGGER.info(constructMessage("No active files found"));
 				return;
 			}
-			
+
 			Processor processor = null;
 			for (StagedFile stagedFile : stagedFiles) {
 
@@ -149,46 +149,53 @@ public class MailboxWatchDogService {
 				fileName = stagedFile.getFileName();
 
 				if (MailBoxUtil.isEmpty(filePath)) {
-					//This may be old staged file
+					//This may be old staged file and this needs to be in-activated
+				    inactiveStagedFile(stagedFile, updatedStatusList);
 					continue;
 				}
-				
+
 				boolean isFileExist = false;
 				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
-				    
-				    LOGGER.debug(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
+
 				    isFileExist = true;
+				    LOGGER.debug(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
+
 					// get the processor from processor Id
 					processor = processors.get(stagedFile.getProcessorId());
 					if (null == processor) {
 						processor = config.find(Processor.class, stagedFile.getProcessorId());
 						processors.put(stagedFile.getProcessorId(), processor);
 					}
+
 					//get the mailbox properties
 					Map<String, String> mailboxProperties = getMailboxProperties(processor);
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
 					//No need to call the validateCustomerSLA
 					if (validateTTLUnit(stagedFile, mailboxProperties)) {
                         try {
+
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
-                            LOGGER.info(constructMessage("{} :{} : File {} succesfully deleted in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
-                            addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File succesfully deleted", null);
+                            LOGGER.info(constructMessage("{} :{} : File {} is deleted in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
+                            addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File is deleted since it isn't picked by the customer", null);
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} :{} : Unable to delete a stale file {} in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
                         }
                         continue;
 					}
+
+					//Check SLA and send notification to the user
 					validateCustomerSLA(stagedFile, processor, mailboxProperties);
 					updatedNotificationCountList.add(stagedFile);
 					continue;
 				}
+
 				LOGGER.debug(constructMessage("File {} is not exist at the location {}"), fileName, filePath);
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 				    if (!isFileExist){
-				        addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File does not exist", null);
+				        addEventLogs(processor, stagedFile, ExecutionState.FAILED, StatusType.ERROR, "File is deleted by some other process", null);
 		                inactiveStagedFile(stagedFile, updatedStatusList);
 				    }
 					continue;
@@ -197,11 +204,12 @@ public class MailboxWatchDogService {
 				addEventLogs(processor, stagedFile, ExecutionState.COMPLETED, StatusType.SUCCESS, "File is picked up by the customer or other process", null);
 				inactiveStagedFile(stagedFile, updatedStatusList);
 			}
+
             //updated the stagedFile with latest notification count.
 			for (StagedFile updatedNotificationCount : updatedNotificationCountList) {
 	            em.merge(updatedNotificationCount);
 	        }
-			
+
 			for (StagedFile updatedFile : updatedStatusList) {
 	            em.merge(updatedFile);
 	        }
@@ -221,7 +229,7 @@ public class MailboxWatchDogService {
         }
 
 	}
-	
+
 	/**
      * Method to add event logs
      * 
@@ -294,12 +302,12 @@ public class MailboxWatchDogService {
 		    LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
 			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT );
 			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-		}	
-		
+		}
+
 		Timestamp expireTimestamp = getTTLAsTimestamp(MailBoxUtil.convertTTLIntoDays(ttlUnit, Integer.parseInt(ttl)), stagedFile.getCreatedDate());
 		return isTimeLimitExceeded(expireTimestamp);
 	}
-	
+
 	/**
 	 * Method to convert ttl into TimeStamp value
 	 *
@@ -330,25 +338,27 @@ public class MailboxWatchDogService {
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
 		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 		String maxNumOfNotification = mailboxProperties.get(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
+
 		if (MailBoxUtil.isEmpty(enableEmailNotification)) {
 			enableEmailNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_EMAIL_NOTIFICATION);					
-		}		
+		}
 		if (MailBoxUtil.isEmpty(maxNumOfNotification)) {
 			maxNumOfNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_MAX_NOTIFICATION_COUNT);
-		}			
-
+		}
 		LOGGER.debug("Mailbox Properties retrieved. customer sla - {}, emailAddress - {}", customerSLAConfiguration, emailAddress);
-		
+
 		if (MailBoxUtil.isEmpty(customerSLAConfiguration)) {
 		    LOGGER.debug(constructMessage("customer sla is not configured in mailbox, using the default customer sla configuration"));
 			customerSLAConfiguration = (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType()))
 										? MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_CUSTOMER_SLA)
 										: MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_MAILBOX_SLA);
 		}
-		
+
 		Timestamp customerSLATimeLimit = getCustomerSLAConfigurationAsTimeStamp(customerSLAConfiguration, stagedFile.getCreatedDate());
-		if (isTimeLimitExceeded(customerSLATimeLimit) && Boolean.valueOf(enableEmailNotification)
+		if (isTimeLimitExceeded(customerSLATimeLimit)
+		        && Boolean.valueOf(enableEmailNotification)
 				&& !countEmailNotification(stagedFile, maxNumOfNotification)) {
+
 			String emailSubject = null;
 			if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
 				emailSubject = String.format(SLA_VIOLATION_SUBJECT, customerSLAConfiguration);
