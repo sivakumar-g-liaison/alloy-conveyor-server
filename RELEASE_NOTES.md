@@ -4,6 +4,7 @@
 * GGT-453 publishing fixup
 * GGT-477 restore building offline
 * GMB-752 - While creating processor through REST call, the password guid from KMS must be provided in the credential section.
+* GMB-722 - Use logger.debug in ProfileConfiguratinDAOBase
 
 4.1.0
 -------------------------------

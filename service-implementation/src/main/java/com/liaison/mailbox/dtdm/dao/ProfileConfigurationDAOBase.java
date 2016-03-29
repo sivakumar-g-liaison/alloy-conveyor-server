@@ -103,7 +103,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 
 					transferProfile = (ScheduleProfilesRef) iter.next();
 					processors.add(transferProfile);
-					LOG.info("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
+					LOG.debug("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
 				}
 
 			} finally {

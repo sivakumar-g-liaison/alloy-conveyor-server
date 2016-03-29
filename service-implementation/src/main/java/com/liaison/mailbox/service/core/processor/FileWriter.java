@@ -79,9 +79,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     configurationInstance.getProcessorType());
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.RUNNING, "File Staging is started");
 
-            LOG.info(constructMessage("Start Run"));
-            LOG.info(constructMessage("Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
-
+            LOG.info(constructMessage("Start Run. Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
             String fileName = workTicket.getFileName();
             LOG.info(constructMessage("Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
             LOG.info(constructMessage("Found the processor to write the payload in the local payload location"));
