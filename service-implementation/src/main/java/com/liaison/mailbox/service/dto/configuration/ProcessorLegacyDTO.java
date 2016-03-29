@@ -51,6 +51,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	
 	private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
 	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
+	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
+	private static final String TRUSTSTORE_CERT_INVALID= "The given trust store group guid does not exist in key management system.";
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private Set<FolderDTO> folders;
 	private Set<CredentialDTO> credentials;
@@ -281,7 +283,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 		try {
 			KMSUtil.getSecretFromKMS(password);
 		} catch (LiaisonException | IOException | MailBoxServicesException exception) {
-			if (exception != null && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
+			if (null != exception && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
 				throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
 			}
 			throw new RuntimeException(exception);
@@ -320,8 +322,15 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	 */
 	public void validateSSHKeypair(String sshKeypairGroupId) {
 		
-		if (MailBoxUtil.isEmpty(sshKeypairGroupId)) {
-			throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_NOT_PROVIDED, Response.Status.BAD_REQUEST);
+		try {
+			
+			if (MailBoxUtil.isEmpty(sshKeypairGroupId)) {
+				throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_NOT_PROVIDED, Response.Status.BAD_REQUEST);
+			} else if (null == KMSUtil.fetchSSHPrivateKey(sshKeypairGroupId)) {
+				throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_INVALID, Response.Status.BAD_REQUEST);
+			}
+		} catch (LiaisonException | IOException | JAXBException exception) {
+			throw new RuntimeException(exception);
 		}
 	}
 	
@@ -331,9 +340,18 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	 * @param trustStoreGroupId
 	 */
 	public void validateTruststoreCertificate(String trustStoreGroupId) {
-		if (MailBoxUtil.isEmpty(trustStoreGroupId)) {
-			throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_NOT_PROVIDED, Response.Status.BAD_REQUEST);
-		}	
+		
+		try {
+			if (MailBoxUtil.isEmpty(trustStoreGroupId)) {
+				throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_NOT_PROVIDED, Response.Status.BAD_REQUEST);
+			}
+			KMSUtil.fetchTrustStore(trustStoreGroupId);
+		} catch (LiaisonException | IOException | JAXBException | MailBoxServicesException exception) {
+			if (null != exception && Messages.CERTIFICATE_RETRIEVE_FAILED.value().equals(exception.getMessage())) {
+				throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_INVALID, Response.Status.BAD_REQUEST);
+			}
+			throw new RuntimeException(exception);
+		}
 	}
 	/**
 	 * Method is used to check whether the SSH Key pair is available

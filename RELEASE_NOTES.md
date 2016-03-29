@@ -4,6 +4,7 @@
 * GGT-453 publishing fixup
 * GGT-477 restore building offline
 * GMB-752 - While creating processor through REST call, the password guid from KMS must be provided in the credential section.
+* GMB-753 - While creating/revising processor through REST, valid ssh keypair and trustore guid must be provided
 
 4.1.0
 -------------------------------
