@@ -258,7 +258,7 @@ public class MailboxWatchDogService {
 		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
 		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
 		if (MailBoxUtil.isEmpty(ttl)) {
-			LOGGER.info(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
+			LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
 			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS);
 			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
 		}	
