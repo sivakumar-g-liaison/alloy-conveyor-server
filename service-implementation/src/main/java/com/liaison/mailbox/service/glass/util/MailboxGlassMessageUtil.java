@@ -17,8 +17,8 @@ import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -130,7 +130,7 @@ public class MailboxGlassMessageUtil {
         activityStatusAPI.setPipelineId(glassMessage.getPipelineId());
         activityStatusAPI.setProcessId(glassMessage.getProcessId());
         activityStatusAPI.setGlobalId(glassMessage.getGlobalPId());
-        activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
+        activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
         com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
         status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
@@ -150,7 +150,7 @@ public class MailboxGlassMessageUtil {
         } else {
             status.setDescription(MAILBOX_ASA_IDENTIFIER);
         }
-        status.setStatusId(IdentifierUtil.getUuid());
+        status.setStatusId(UUIDGen.getCustomUUID());
         status.setType(statusType);
 
         activityStatusAPI.getStatuses().add(status);
