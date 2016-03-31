@@ -625,13 +625,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     	
 		// send an email if there are any stale files deleted in the sweeper location
 		if (null != staleFiles && staleFiles.size() > 0) {
-			
+
 			LOGGER.debug("stale files exists in sweeper ({}) location {}", configurationInstance.getPguid(), payloadLocation);
 			// notify deletion of stale files to users through mail configured in mailbox
 			notifyDeletionOfStaleFiles(staleFiles, payloadLocation);
-			
+
 		} else {
-			LOGGER.info("No stale files found in sweeper location {}", payloadLocation);
+			LOGGER.debug("No stale files found in sweeper location {}", payloadLocation);
 		}
     }
     
@@ -667,7 +667,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 				LOGGER.debug("Deleting stale file {} in sweeper location {} ", fileName, payloadLocation);
 				Files.deleteIfExists(filePath);
 				staleFiles.add(fileName);
-				LOGGER.debug("Stale file {} deleted successfully in sweeper location {} ", fileName, payloadLocation);
+				LOGGER.info("Stale file {} deleted successfully in sweeper location {} ", fileName, payloadLocation);
 			}
 			
 		} catch (IOException e) {

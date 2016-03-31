@@ -136,13 +136,13 @@ public class MailboxGlassMessageUtil {
         status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 
         StringBuilder lensMessage = new StringBuilder().append(MAILBOX_ASA_IDENTIFIER);
-        if (!MailBoxUtil.isEmpty(glassMessage.getProtocol())) {
-            lensMessage.append(" ");
-            lensMessage.append(glassMessage.getProtocol());
-        }
         if (glassMessage.getCategory() != null) {
             lensMessage.append(" ");
             lensMessage.append(glassMessage.getCategory().name());
+        }
+        if (!MailBoxUtil.isEmpty(glassMessage.getProtocol())) {
+            lensMessage.append(" ");
+            lensMessage.append(glassMessage.getProtocol());
         }
 
         if (message != null && !message.equals("")) {

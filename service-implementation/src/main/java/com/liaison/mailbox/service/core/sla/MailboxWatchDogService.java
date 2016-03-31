@@ -29,8 +29,10 @@ import javax.persistence.EntityTransaction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -137,13 +139,15 @@ public class MailboxWatchDogService {
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
-				LOGGER.info(constructMessage("No active files found"));
+				LOGGER.debug(constructMessage("No active files found"));
 				return;
 			}
 
 			Processor processor = null;
 			for (StagedFile stagedFile : stagedFiles) {
 
+			    // Fish tag global process id
+                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, stagedFile.getGlobalProcessId());
 				filePath = stagedFile.getFilePath();
 				fileName = stagedFile.getFileName();
 
@@ -174,7 +178,7 @@ public class MailboxWatchDogService {
                         try {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
-                            LOGGER.info(constructMessage("{} :{} : File {} is deleted in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
+                            LOGGER.info(constructMessage("{} : File {} is deleted in the filePath {}"), processor.getPguid(), fileName, filePath);
                             MailboxGlassMessageUtil.logGlassMessage(
                                     stagedFile.getGPID(),
                                     processor.getProcessorType(),
@@ -183,10 +187,10 @@ public class MailboxWatchDogService {
                                     filePath,
                                     0,
                                     ExecutionState.FAILED,
-                                    "File is deleted since it isn't picked by the customer");
+                                    "File is deleted by clean up process");
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
-                            LOGGER.error(constructMessage("{} :{} : Unable to delete a stale file {} in the filePath {}"), processor.getProcsrName(), processor.getPguid(), fileName, filePath);
+                            LOGGER.error(constructMessage("{} : Unable to delete a stale file {} in the filePath {}"), processor.getPguid(), fileName, filePath);
                         }
                         continue;
 					}
@@ -202,7 +206,8 @@ public class MailboxWatchDogService {
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
 				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 
-				    if (!isFileExist){
+                    if (!isFileExist) {
+
 				        MailboxGlassMessageUtil.logGlassMessage(
                                 stagedFile.getGPID(),
                                 ProcessorType.findByName(stagedFile.getProcessorType()),
@@ -211,7 +216,7 @@ public class MailboxWatchDogService {
                                 filePath,
                                 0,
                                 ExecutionState.FAILED,
-                                "File is deleted by some other process");
+                                "File is picked up by another process");
 		                inactiveStagedFile(stagedFile, updatedStatusList);
 				    }
 					continue;
@@ -225,7 +230,7 @@ public class MailboxWatchDogService {
                         filePath,
                         0,
                         ExecutionState.COMPLETED,
-                        "File is picked up by the customer or other process");
+                        "File is picked up by the customer or another process");
                 LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
                 inactiveStagedFile(stagedFile, updatedStatusList);
 
@@ -243,7 +248,6 @@ public class MailboxWatchDogService {
 			tx.commit();
 
 		} catch (Exception e) {
-			LOGGER.error(constructMessage("Error occured in watchdog service" , e.getMessage()));
 			if (tx.isActive()) {
                 tx.rollback();
             }
@@ -252,6 +256,7 @@ public class MailboxWatchDogService {
             if (em != null) {
                 em.close();
             }
+            ThreadContext.clearMap();
         }
 
 	}
@@ -379,7 +384,7 @@ public class MailboxWatchDogService {
         }
 
 	}
-	
+
 	/**
 	 * This method used to check the max Number Of Notification send to client.
 	 * 
@@ -410,7 +415,7 @@ public class MailboxWatchDogService {
 
 		return isReachedMaxNumOfNotification;
 	}
-	
+
 	/**
 	 * Method which checks whether the SLAConfigured Time Limit exceeds or not
 	 * by comparing the customer sla time with the current time

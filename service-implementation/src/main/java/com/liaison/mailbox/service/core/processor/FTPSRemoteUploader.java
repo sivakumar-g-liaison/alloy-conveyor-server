@@ -127,7 +127,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
             File[] subFiles = localDir.listFiles();
 
             if (subFiles == null || subFiles.length == 0) {
-                LOGGER.debug(constructMessage("The given payload location {} doesn't have files to upload."), path);
+                LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
             }
 

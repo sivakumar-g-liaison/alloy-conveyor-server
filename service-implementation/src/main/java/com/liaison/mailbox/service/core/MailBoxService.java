@@ -419,8 +419,8 @@ public class MailBoxService implements Runnable {
             }
 
             processorType = processor.getProcessorType().name();
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcsrProtocol(), processor.getProcessorType().name());
-			
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcessorType().name(), processor.getProcsrProtocol());
+
             // determine SLA status
 			String slaVerificationStatus = (processor instanceof RemoteUploader)
 					   ? SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode()

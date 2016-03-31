@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.email;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +69,9 @@ public class EmailNotifier {
 					.append(NEW_LINE)
 					.append(NOTE);
 
-			if (!emailInfo.getToEmailAddrList().isEmpty()) {
+			List<String> emailList = emailInfo.getToEmailAddrList();
+			emailList.removeAll(Arrays.asList("", null));
+			if (!emailList.isEmpty()) {
 				MailSend.Send(StringUtils.join(emailInfo.getToEmailAddrList(), ','),
 						PROPS.getString("mail.from"),
 						emailInfo.getSubject(),
@@ -78,7 +81,7 @@ public class EmailNotifier {
 
 		} catch (Exception e) {
 			//hanlde gracefully
-			LOGGER.error("Cannot send email. " + e);
+			LOGGER.error("Cannot send email.", e);
 		}
 
 	}
