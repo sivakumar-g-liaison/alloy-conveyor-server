@@ -206,6 +206,8 @@ public interface MailBoxConstants {
 	public static final String TTL_UNIT = "ttlunit";
 	public static final String TTL_IN_SECONDS = "ttlinseconds";
 	public static final String DROPBOX_PAYLOAD_TTL_DAYS = "com.liaison.dropbox.payload.ttl.days";
+	public static final String MAILBOX_PAYLOAD_TTL_DAYS = "com.liaison.mailbox.payload.ttl.days";
+	public static final String MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT = "7";
 	public static final String FS2_STORAGE_DEFAULT_USE = "fs2.storage.file.default.use";
 	public static final String VALUE_FOR_DEFAULT_TTL = "30";
 	public static final String TTL_UNIT_SECONDS = "Seconds";
