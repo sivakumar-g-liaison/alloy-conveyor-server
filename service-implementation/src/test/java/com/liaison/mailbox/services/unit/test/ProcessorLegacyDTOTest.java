@@ -240,7 +240,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the invalid SSH keypair
 	 */
-	@Test (enabled = false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
+	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
 	public void testSSHKeyPairInvalid() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateSSHKeypair(INVALID_GUID);
@@ -258,7 +258,7 @@ public class ProcessorLegacyDTOTest {
 	/**
 	 * Test method to check the empty Truststore Certificate
 	 */
-	@Test (expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Trust store Certificate cannot be Empty." )
+	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Trust store Certificate cannot be Empty." )
 	public void testTruststoreCertificateEmpty() {
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
 		processorDTO.validateTruststoreCertificate(null);

@@ -181,9 +181,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			for (CredentialDTO credentialDTO : this.getCredentials()) {
 				
 				// Validate credentials
-				validateCredentials(processor, credentialDTO);
-				
 				validator.validate(credentialDTO);
+				validateCredentials(processor, credentialDTO);
 				credential = new Credential();
 				credentialDTO.copyToEntity(credential);
 				credential.setPguid(MailBoxUtil.getGUID());

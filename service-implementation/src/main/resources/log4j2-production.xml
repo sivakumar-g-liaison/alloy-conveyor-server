@@ -368,7 +368,10 @@
             <appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
             <appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
             <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
-            <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover"/>
+            
+            <!-- disable for this isn't used -->
+            <!-- <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover"/> -->
+            
             <appender-ref ref="AuditSyslogAppender" />
 
             <!-- not for production -->
