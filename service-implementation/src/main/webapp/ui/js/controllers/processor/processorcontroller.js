@@ -494,7 +494,7 @@ var rest = myApp.controller(
 										if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
 											$scope.oldLoginDetails.userId = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
 											$scope.oldLoginDetails.passwordPguidInKMS = $scope.secret;											
-											readSecretFromKM($scope.url_secret_service + $scope.secret, i, data, profData, processorId, blockuiFlag);
+											readSecretFromKM($scope.url_secret_service + encodeURIComponent($scope.secret), i, data, profData, processorId, blockuiFlag);
 											editProcessor = true;
 											break;
 										}
