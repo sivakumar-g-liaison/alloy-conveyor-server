@@ -171,4 +171,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return List of Processors
 	 */
 	public List<Processor> findProcessorsByName(String processorName);
+	
+	
+	/**
+	 * Retrieve processors of specific type by given mailbox Name and type
+	 * 
+	 * @param mbxName
+	 * @param processorType
+	 * @return list of processors
+	 */
+	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxName, String processorType);
 }

@@ -97,6 +97,7 @@ public class GlassMessage {
 	private String meta;
 	private String inboundFileName;
 	private String outboundFileName;
+	private String mailboxName;
 
 
 	public String getTransferProfileName() {
@@ -297,8 +298,16 @@ public class GlassMessage {
     public void setOutboundFileName(String outboundFileName) {
         this.outboundFileName = outboundFileName;
     }
+    
+    public String getMailboxName() {
+		return mailboxName;
+	}
 
-    public static void logTimestamp(Logger logger, String message, Object... objects) {
+	public void setMailboxName(String mailboxName) {
+		this.mailboxName = mailboxName;
+	}
+
+	public static void logTimestamp(Logger logger, String message, Object... objects) {
 		if (logger != null) {
 			logger.info(String.format("[TIME] %s | %s", new Date(System.currentTimeMillis()),
 					String.format(message, objects)));

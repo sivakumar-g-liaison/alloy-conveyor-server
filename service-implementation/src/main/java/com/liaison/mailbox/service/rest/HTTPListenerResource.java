@@ -121,22 +121,22 @@ public class HTTPListenerResource extends AuditedResource {
 	@POST
 	@Path("sync/{token1}")
 	public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleSync(request, mailboxPguid);
+			@QueryParam(value = "mailboxName") String mailboxName) {
+		return handleSync(request, mailboxName);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}")
 	public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleSync(request, mailboxPguid);
+			@QueryParam(value = "mailboxName") String mailboxName) {
+		return handleSync(request, mailboxName);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}/{token3}")
 	public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleSync(request, mailboxPguid);
+			@QueryParam(value = "mailboxId") String mailboxName) {
+		return handleSync(request, mailboxName);
 	}
 
 	/**
@@ -149,8 +149,8 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("sync")
 	@AccessDescriptor(skipFilter = true)
 	public Response handleSync(@Context final HttpServletRequest request,
-			@QueryParam(value = "mailboxId") final String mailboxPguid) {
-
+			@QueryParam(value = "mailboxName") final String mailboxName) {
+		
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -163,30 +163,31 @@ public class HTTPListenerResource extends AuditedResource {
 				GlassMessage glassMessage = null;
 				WorkTicket workTicket = null;
 
-				logger.info("HTTP(S)-SYNC : for the mailbox id {} - Start", mailboxPguid);
+				logger.info("HTTP(S)-SYNC : for the mailbox Name {} - Start", mailboxName);
 				try {
 
 					HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
 					syncProcessor.validateRequestSize(request.getContentLength());
-					if (StringUtils.isEmpty(mailboxPguid)) {
-					    logger.error("HTTP(S)-SYNC : Mailbox ID is not passed as a query param (mailboxId)");
-						throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId)");
+					if (StringUtils.isEmpty(mailboxName)) {
+					    logger.error("HTTP(S)-SYNC : Mailbox Name is not passed as a query param (mailboxName)");
+						throw new RuntimeException("Mailbox Name is not passed as a query param (mailboxName)");
 					}
 
 					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
-							mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+							mailboxName, ProcessorType.HTTPSYNCPROCESSOR);
+					String mailboxPguid = httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_ID);
 
 					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
-							mailboxPguid);
+							mailboxName);
 
 					if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-					    authenticationAndAuthorization(request, syncProcessor, httpListenerProperties, mailboxPguid);
+					    authenticationAndAuthorization(request, syncProcessor, httpListenerProperties, mailboxName);
 					}
 
 					logger.debug("construct workticket");
 					workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+							getRequestHeaders(request), mailboxName, httpListenerProperties);
 
                     if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
 					    Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
@@ -213,10 +214,10 @@ public class HTTPListenerResource extends AuditedResource {
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
-							httpListenerProperties, request.getContentType(), mailboxPguid);
+							httpListenerProperties, request.getContentType(), mailboxName);
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
 					        syncResponse.getStatus(),
-					        mailboxPguid);
+					        mailboxName);
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
@@ -249,7 +250,7 @@ public class HTTPListenerResource extends AuditedResource {
                             && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)
                             && null != glassMessage) {
 
-				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, mailboxPguid, ExecutionState.FAILED);
+				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, mailboxName, ExecutionState.FAILED);
 	                    // Log error status
 				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR);
 				        new TransactionVisibilityClient().logToGlass(failedMsg);
@@ -269,7 +270,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxPguid);
+		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -290,16 +291,17 @@ public class HTTPListenerResource extends AuditedResource {
      */
     private GlassMessage constructGlassMessage(final HttpServletRequest request,
             final WorkTicket workTicket,
-            final String mailboxPguid,
+            final String mailboxName,
             final ExecutionState state) {
 
         GlassMessage glassMessage = new GlassMessage();
         glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
         glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
-        glassMessage.setMailboxId(mailboxPguid);
+        glassMessage.setMailboxId(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID).toString());
         glassMessage.setProcessId(UUIDGen.getCustomUUID());
         glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
         glassMessage.setPipelineId(workTicket.getPipelineId());
+        glassMessage.setMailboxName(mailboxName);
 
         if (ExecutionState.PROCESSING.equals(state)) {
             glassMessage.setStatus(ExecutionState.PROCESSING);
@@ -318,22 +320,22 @@ public class HTTPListenerResource extends AuditedResource {
 	@POST
 	@Path("async/{token1}")
 	public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleAsync(request, mailboxPguid);
+			@QueryParam(value = "mailboxName") String mailboxName) {
+		return handleAsync(request, mailboxName);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}")
 	public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleAsync(request, mailboxPguid);
+			@QueryParam(value = "mailboxName") String mailboxName) {
+		return handleAsync(request, mailboxName);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}/{token3}")
 	public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
-		return handleAsync(request, mailboxPguid);
+			@QueryParam(value = "mailboxName") String mailboxName) {
+		return handleAsync(request, mailboxName);
 	}
 
 	/**
@@ -346,7 +348,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("async")
 	@AccessDescriptor(skipFilter = true)
 	public Response handleAsync(@Context final HttpServletRequest request,
-			@QueryParam(value = "mailboxId") final String mailboxPguid) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -358,28 +360,30 @@ public class HTTPListenerResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				logger.info("HTTP(S)-ASYNC : for the mailbox id {} - Start", mailboxPguid);
+				logger.info("HTTP(S)-ASYNC : for the mailbox Name {} - Start", mailboxName);
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = null;
 
 				try {
 				    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
 					asyncProcessor.validateRequestSize(request.getContentLength());
-					if (StringUtils.isEmpty(mailboxPguid)) {
-					    logger.info("HTTP(S)-ASYNC : Mailbox ID is not passed as a query param (mailboxId)");
-						throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId)");
+					if (StringUtils.isEmpty(mailboxName)) {
+					    logger.info("HTTP(S)-ASYNC : Mailbox Name is not passed as a query param (mailboxName)");
+						throw new RuntimeException("Mailbox Name is not passed as a query param (mailboxName)");
 					}
 					Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
-							mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
+							mailboxName, ProcessorType.HTTPASYNCPROCESSOR);
+					String mailboxPguid = httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_ID);
+					
 					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info("HTTP(S)-ASYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
-                            mailboxPguid);
+							mailboxName);
                    if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-                        authenticationAndAuthorization(request, asyncProcessor, httpListenerProperties, mailboxPguid);
+                        authenticationAndAuthorization(request, asyncProcessor, httpListenerProperties, mailboxName);
                     }
 
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+							getRequestHeaders(request), mailboxName, httpListenerProperties);
 
                     if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
                         Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
@@ -397,6 +401,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setMailboxId(mailboxPguid);
+					glassMessage.setMailboxName(mailboxName);
 					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 					glassMessage.setInAgent(GatewayType.REST);
@@ -415,10 +420,10 @@ public class HTTPListenerResource extends AuditedResource {
                     transactionVisibilityClient.logToGlass(glassMessage);
 
 					workTicket.setProcessMode(ProcessMode.ASYNC);
-					asyncProcessor.processWorkTicket(workTicket, mailboxPguid, glassMessage);
+					asyncProcessor.processWorkTicket(workTicket, glassMessage);
 					logger.info("HTTP(S)-ASYNC : GlobalPID {}, Posted workticket to Service Broker", workTicket.getGlobalProcessId());
 
-					logger.info("HTTP(S)-ASYNC : for the mailbox id {} - End", mailboxPguid);
+					logger.info("HTTP(S)-ASYNC : for the mailbox id {} - End", mailboxName);
 					return Response.ok().status(Status.ACCEPTED).type(MediaType.TEXT_PLAIN).entity(
 							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
@@ -450,7 +455,7 @@ public class HTTPListenerResource extends AuditedResource {
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
 		// Added the guid
-		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxPguid);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

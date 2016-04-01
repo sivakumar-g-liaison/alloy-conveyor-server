@@ -814,4 +814,47 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 		return processors;		
 	}
+	
+	@Override
+	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxName, String processorType) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.debug("Fetching the processor starts.");
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+						.append(" inner join processor.mailbox mbx")
+						.append(" where mbx.mbxName = :")
+						.append(MBX_NAME)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(" TYPE(processor) = ")
+						.append(processorType)
+						.append(")");
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
+					.setParameter(STATUS, EntityStatus.ACTIVE.name())
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
 }
