@@ -7,6 +7,7 @@
 * GMB-753 - While creating/revising processor through REST, valid ssh keypair and trustore guid must be provided
 * GMB-721 - ProfileConfigurationDAOBase clean up
 * GMB-722 - Use logger.debug in ProfileConfiguratinDAOBase
+* GMB-751 - Display actual TenancyKey from DB in UI, if the manifest header does not contain the tenancy key
 
 4.1.0
 -------------------------------

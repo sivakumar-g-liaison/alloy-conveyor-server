@@ -230,6 +230,10 @@ public class MailBoxUtil {
 				break;
 			}
 		}
+		
+		if (null == tenancyKeyDisplayName) {
+			tenancyKeyDisplayName = tenancyKeyGuid;
+		}
 
 		return tenancyKeyDisplayName;
 	}
