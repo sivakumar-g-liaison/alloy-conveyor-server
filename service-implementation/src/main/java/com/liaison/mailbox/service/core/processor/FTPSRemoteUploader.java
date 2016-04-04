@@ -333,7 +333,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                     // create directory on the server
                     if (isCreateFoldersInRemote) {
                         ftpsRequest.getNative().makeDirectory(remoteFilePath);
-                        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
+                        LOGGER.info(constructMessage("The remote directory {} does not exist.So created that."), remoteFilePath);
                     } else {
                         LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
                         throw new MailBoxServicesException("The remote directory " + remoteFilePath + " does not exist.", Response.Status.CONFLICT);

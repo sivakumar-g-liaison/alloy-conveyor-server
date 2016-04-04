@@ -965,11 +965,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 if (null == stagedFile.getFailureNotificationCount()) {
                     stagedFile.setFailureNotificationCount(1);
                     stagedFileDAO.merge(stagedFile);
-                    return;
                 } else if (maxCount > stagedFile.getFailureNotificationCount().intValue()) {
                     // Notification count update
                     stagedFile.setFailureNotificationCount((stagedFile.getFailureNotificationCount() + 1));
                     stagedFileDAO.merge(stagedFile);
+                } else {
                     return;
                 }
 
