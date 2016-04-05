@@ -114,7 +114,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
                 } catch (SftpException ex) {
                     if (!isCreateFoldersInRemote) {
                         LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
-                        throw new MailBoxServicesException("The remote directory {} is not exist.", Response.Status.CONFLICT);
+                        throw new MailBoxServicesException("The remote directory " + remotePath+  " does not exist.", Response.Status.CONFLICT);
                     } else {
                         createDirectoriesInRemote(sftpRequest, remotePath);
                     }
@@ -210,10 +210,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				} catch (SftpException ex) {
 				    if (isCreateFoldersInRemote) {
 				        sftpRequest.getNative().mkdir(remoteFilePath);
-				        LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remoteFilePath);
+				        LOGGER.info(constructMessage("The remote directory {} does not exist.So created that."), remoteFilePath);
 				    } else {
 				        LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remoteFilePath);
-				        throw new MailBoxServicesException("The remote directory " + remoteFilePath + " is not exist.", Response.Status.CONFLICT);
+				        throw new MailBoxServicesException("The remote directory " + remoteFilePath + " does not exist.", Response.Status.CONFLICT);
 				    }
 				}
 				

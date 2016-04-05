@@ -10,7 +10,6 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -279,13 +278,9 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	 * @param password
 	 */
 	private void validateSecret(String password) {
-		
-		try {
 
-		    //Mailbox credentials are double encoded
-			Base64.getDecoder().decode(Base64.getDecoder().decode(KMSUtil.getSecretFromKMS(password)));
-		} catch(IllegalArgumentException e) {
-		    throw new MailBoxConfigurationServicesException(Messages.PWD_ENCODE_INVALID, Response.Status.BAD_REQUEST);
+		try {
+			KMSUtil.getSecretFromKMS(password);
 		} catch (LiaisonException | IOException | MailBoxServicesException exception) {
 			if (null != exception && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
 				throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
