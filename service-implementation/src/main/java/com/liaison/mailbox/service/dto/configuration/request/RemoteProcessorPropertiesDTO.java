@@ -253,6 +253,7 @@ public class RemoteProcessorPropertiesDTO {
         this.excludeFiles = excludeFiles;
     }
 
+    @PatternValidation(errorMessage = "Invalid Value for Number of Files Threshold", type = MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD)
     public String getNumOfFilesThreshold() {
         return numOfFilesThreshold;
     }
