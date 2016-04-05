@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
@@ -295,7 +296,12 @@ public class GenericValidator {
 				&&	Protocol.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;
-		} 
+		} else if (MailBoxConstants.CREDENTIAL_TYPE.equals(annotationDetails.type())
+                &&  CredentialType.findByName(String.valueOf(value)) == null) {
+            errorMessage.append(annotationDetails.errorMessage());
+            return false;
+		}
+
 		return true;
 	}
 

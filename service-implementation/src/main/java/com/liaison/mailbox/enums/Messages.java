@@ -36,6 +36,7 @@ public enum Messages {
 	PASSWORD_OR_SSH_KEYPAIR_EMPTY("Either the Password or the SSH Keypair is Empty."),
 	USERNAME_EMPTY("Username cannot be Empty."),
 	PWD_INVALID("The given secret guid does not exist in the key management system."),
+	PWD_ENCODE_INVALID("The secret from key management system is not base64 encoded."),
 
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
