@@ -428,16 +428,22 @@ var rest = myApp.controller(
 				$scope.restService.get(url,
 					function (secretData, status) {
 						if(status === 200) {
-							var decPwd = $.base64.decode($.base64.decode(secretData));
+							var decPwd = '';
+							try {
+								decPwd = $.base64.decode($.base64.decode(secretData));
+							} catch (e) {
+								showSaveMessage('The password from KMS isn\'t encoded. Please update the password.', 'error');
+							}
 							$scope.oldLoginDetails.password = decPwd;
 							data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = decPwd;
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
+	
 						} else if(status === 404) {
-						    $scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);
+							$scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);
 							$scope.block.unblockUI();
 							showSaveMessage('Key manager failed to retrieve the stored secret', 'error');
 							return;
-						} 
+						}
 					}
 				);
 			}
