@@ -29,7 +29,6 @@ var rest = myApp.controller(
 		
             // To be Populated
             $scope.mailBoxId;
-            $scope.processorUrlDisplayContent = ''; 
             $scope.urlType = '';
 			var isProcessorSearchFlag = false;
 			var procsrId = '';
@@ -48,20 +47,19 @@ var rest = myApp.controller(
 		    };    
 		    $scope.handleDisplayOfHTTPListenerURL = function (prcsrType) {
 				$scope.mailboxId = $location.search().mailBoxId;
+				$scope.mailboxName = $location.search().mbxname;
 				if( prcsrType === "HTTPSYNCPROCESSOR") {
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Sync URL";
-						$scope.processorUrlDisplayContent = ($rootScope.javaProperties.processorSyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorSyncUrlDisplayPrefix != '')?
-																$rootScope.javaProperties.processorSyncUrlDisplayPrefix +$scope.mailboxId: $scope.mailboxId;
+						$scope.displayHTTPListenerURL();
 					}	
 				}
 				if( prcsrType === "HTTPASYNCPROCESSOR") {
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Async URL";
-						$scope.processorUrlDisplayContent = ($rootScope.javaProperties.processorAsyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorAsyncUrlDisplayPrefix != '')?
-																$rootScope.javaProperties.processorAsyncUrlDisplayPrefix +  $scope.mailboxId: $scope.mailboxId;
+						$scope.displayHTTPListenerURL();
 					}
 				}
 			}
@@ -1373,6 +1371,16 @@ var rest = myApp.controller(
             $rootScope.$on("propertyModificationActionEvent", function() {
                $scope.cleanup(); 
             });
+            
+            $scope.displayHTTPListenerURL = function() {
+            	
+				$scope.urlSuffixForId = "mailboxId=" + $scope.mailboxId;
+				$scope.urlSuffixForName = "mailboxName=" + $scope.mailboxName;
+				$scope.processorUrlDisplayContentById = ($rootScope.javaProperties.processorSyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorSyncUrlDisplayPrefix != '')?
+														$rootScope.javaProperties.processorSyncUrlDisplayPrefix + $scope.urlSuffixForId: $scope.mailboxId;
+				$scope.processorUrlDisplayContentByName = ($rootScope.javaProperties.processorSyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorSyncUrlDisplayPrefix != '')?
+														$rootScope.javaProperties.processorSyncUrlDisplayPrefix + $scope.urlSuffixForName : $scope.mailboxName;
+            }
          }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {

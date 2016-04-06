@@ -105,7 +105,7 @@ public class WorkTicketUtil {
 	 * @return WorkTicket
 	 */
 	public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, List<String>> requestHeaders,
-			String mailboxName, Map<String, String> httpListenerProperties) {
+			Map<String, String> httpListenerProperties) {
 
 		WorkTicket workTicket = new WorkTicket();
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_METHOD, requestProp.get(MailBoxConstants.HTTP_METHOD));
@@ -119,7 +119,8 @@ public class WorkTicketUtil {
 				requestProp.get(MailBoxConstants.HTTP_REMOTE_USER));
 		workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, 
 				httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_ID));
-		workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
+		workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_NAME,
+				httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_NAME));
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_ADDRESS,
 				requestProp.get(MailBoxConstants.HTTP_REMOTE_ADDRESS));
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REQUEST_PATH,

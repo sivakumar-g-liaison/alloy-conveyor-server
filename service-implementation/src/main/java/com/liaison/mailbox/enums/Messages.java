@@ -139,7 +139,7 @@ public enum Messages {
 	LOCATION_NOT_CONFIGURED("The %s location is not configured or empty."),
 
 	//sync and async process
-	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this id."),
+	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this Name."),
 
 	AUTHENTICATION_SUCCESSFULL("%s authenticated successfully."),
 	AUTHENTICATION_FAILURE("Failed to authenticate user."),

@@ -728,15 +728,16 @@ public class ProcessorConfigurationService {
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async
 	 *
-	 * @param mailboxGuid
+	 * @param mailboxInfo - can be mailbox pguid or mailbox Name
 	 * @param httpListenerType
+	 * @param isMailboxIdAvailable - specify whether the mailbox info is id or not
 	 * @return a Map containing the HttpListenerSpecific Properties
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public Map<String, String> getHttpListenerProperties(String mailboxName, ProcessorType httpListenerType)
+	public Map<String, String> getHttpListenerProperties(String mailboxInfo, ProcessorType httpListenerType, boolean isMailboxIdAvailable)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Map<String, String> httpListenerProperties = new HashMap<String, String>();
@@ -749,7 +750,7 @@ public class ProcessorConfigurationService {
 		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(httpListenerType)) {
 			processorType = HTTPSyncProcessor.class.getCanonicalName();
 		}
-		List<Processor> processors = config.findProcessorsByMailboxNameAndProcessorType(mailboxName, processorType);
+		List<Processor> processors = config.findProcessorsByMailboxAndProcessorType(mailboxInfo, processorType, isMailboxIdAvailable);
 
 		if (processors.isEmpty()) {
 			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
@@ -784,6 +785,7 @@ public class ProcessorConfigurationService {
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
 					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, processor.getMailbox().getPguid());
+					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, processor.getMailbox().getMbxName());
 					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
 					if(!ttlMap.isEmpty())
 					{
@@ -805,7 +807,7 @@ public class ProcessorConfigurationService {
 			}
 
 		} catch (IOException e) {
-			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxName);
+			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxInfo);
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
 		}

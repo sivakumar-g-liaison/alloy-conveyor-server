@@ -43,6 +43,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
+import com.sun.mail.imap.protocol.MailboxInfo;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -816,7 +817,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	@Override
-	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxName, String processorType) {
+	public List<Processor> findProcessorsByMailboxAndProcessorType(String mbxInfo, String processorType, boolean isMailboxIdAvailable) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -824,11 +825,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		try {
 
 			LOG.debug("Fetching the processor starts.");
-			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+			StringBuilder queryStr = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
-						.append(" where mbx.mbxName = :")
-						.append(MBX_NAME)
-						.append(" and mbx.mbxStatus = :")
+						.append(" where mbx.mbxStatus = :")
 						.append(STATUS)
 						.append(" and processor.procsrStatus = :")
 						.append(STATUS)
@@ -836,12 +835,26 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" TYPE(processor) = ")
 						.append(processorType)
 						.append(")");
+			
+			String paramName = null;
+			if (isMailboxIdAvailable) {
+				
+				paramName = MBX_ID;
+				queryStr.append(" and mbx.pguid = :")
+						.append(paramName);
+			} else {
+				
+				paramName = MBX_NAME;
+				queryStr.append(" and LOWER(mbx.mbxName) = :")
+						.append(paramName);
+				mbxInfo = mbxInfo.toLowerCase();
+			}
 
-			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
-					.setParameter(STATUS, EntityStatus.ACTIVE.name())
-					.getResultList();
-
+			Query query = entityManager.createQuery(queryStr.toString())
+						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
+						  .setParameter(paramName, (MailBoxUtil.isEmpty(mbxInfo) ? "''" : mbxInfo));
+	
+			List<?> proc = query.getResultList(); 
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {

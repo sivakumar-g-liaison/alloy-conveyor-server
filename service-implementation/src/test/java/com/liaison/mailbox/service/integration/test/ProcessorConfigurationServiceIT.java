@@ -9,7 +9,6 @@
 package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1260,7 +1259,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      *
      */
     @Test
-    public void testGetHttpListenerProperties() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testGetHttpListenerPropertiesByMailboxName() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1282,7 +1281,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
-        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(mbxDTO.getName(), ProcessorType.HTTPASYNCPROCESSOR, false);
 
         // Assertion
         Assert.assertEquals("false", httpListenerProperties.get("lensVisibility"));
@@ -1299,7 +1298,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      *
      */
     @Test
-    public void testGetHttpListenerPropertiesWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+    public void testGetHttpListenerPropertiesByMailboxNameWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1313,7 +1312,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
         try {
-            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+            procsrService.getHttpListenerProperties(mbxDTO.getName(), ProcessorType.HTTPASYNCPROCESSOR, false);
         } catch (Exception e) {
             Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
         }
@@ -1327,7 +1326,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      *
      */
     @Test
-    public void testGetHttpListenerPropertiesWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
+    public void testGetHttpListenerPropertiesByMailboxNameWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1349,7 +1348,103 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
         try {
-            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR);
+            procsrService.getHttpListenerProperties(mbxDTO.getName(), ProcessorType.HTTPASYNCPROCESSOR, false);
+        } catch (Exception e) {
+            Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    public void testGetHttpListenerPropertiesByMailboxId() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
+                mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
+
+        // Assertion
+        Assert.assertEquals("false", httpListenerProperties.get("lensVisibility"));
+        Assert.assertEquals("false", httpListenerProperties.get("securedPayload"));
+        Assert.assertEquals("false", httpListenerProperties.get("httpListenerAuthCheckRequired"));
+        Assert.assertEquals("5D9C3B487184426E9F9629EFEE7C5913", httpListenerProperties.get("SERVICE_INSTANCE_ID"));
+    }
+
+    /**
+     * Method Get Http Listener Properties With Empty From Date And Status
+     * @throws IOException
+     * @throws JAXBException
+     * @throws MailBoxConfigurationServicesException
+     *
+     */
+    @Test
+    public void testGetHttpListenerPropertiesByMailboxIdWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        try {
+            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
+        } catch (Exception e) {
+            Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Method Get Http Listener Properties With Other than HttpProcessor
+     * @throws IOException
+     * @throws JAXBException
+     * @throws MailBoxConfigurationServicesException
+     *
+     */
+    @Test
+    public void testGetHttpListenerPropertiesByMailboxIdWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        try {
+            procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
         } catch (Exception e) {
             Assert.assertEquals(Messages.MISSING_PROCESSOR.value().replaceAll("%s", ProcessorType.HTTPASYNCPROCESSOR.getCode()), e.getLocalizedMessage());
         }

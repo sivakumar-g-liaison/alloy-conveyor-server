@@ -82,6 +82,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             value: '',
             allowAdd: true
         }];
+		
+		$scope.isMailboxNameChanged = false;
         
        // Type ahead method to retrieve all domains in tenancy keys
        $scope.getTenancyKeys = function () {
@@ -625,4 +627,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		$scope.onTTLUnitChanged = function(ttl) {
 			selectTTLUnit(ttl.name);
 		};
+		
+		$scope.toggleWarningEnabler = function(value) {
+			$scope.isMailboxNameChanged = value;
+		}
 }]);
