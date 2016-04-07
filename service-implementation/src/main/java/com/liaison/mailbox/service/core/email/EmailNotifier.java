@@ -180,7 +180,7 @@ public class EmailNotifier {
         LOGGER.debug("Ready to send email to {}", emailAddress);
 
         EmailNotifier.sendEmail(emailInfoDTO);
-        LOGGER.info("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());
+        LOGGER.debug("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());
     }
 
 
