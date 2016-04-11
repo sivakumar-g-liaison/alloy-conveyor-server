@@ -122,7 +122,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("sync/{token1}")
 	public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") String mailboxName) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
@@ -130,7 +130,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("sync/{token1}/{token2}")
 	public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") String mailboxName) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
@@ -138,7 +138,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("sync/{token1}/{token2}/{token3}")
 	public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxId") String mailboxName) {
+			@QueryParam(value = "mailboxId") final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
@@ -284,6 +284,8 @@ public class HTTPListenerResource extends AuditedResource {
 
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
+		// Added the guid
+		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxId);
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
@@ -334,7 +336,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("async/{token1}")
 	public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") String mailboxName) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
@@ -342,7 +344,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("async/{token1}/{token2}")
 	public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") String mailboxName) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
@@ -350,7 +352,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("async/{token1}/{token2}/{token3}")
 	public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") String mailboxName) {
+			@QueryParam(value = "mailboxName") final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
@@ -483,7 +485,8 @@ public class HTTPListenerResource extends AuditedResource {
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
 		// Added the guid
-		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxName);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxId);
+		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

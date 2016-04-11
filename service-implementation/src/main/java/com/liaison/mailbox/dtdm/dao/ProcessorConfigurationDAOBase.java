@@ -817,7 +817,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	@Override
-	public List<Processor> findProcessorsByMailboxAndProcessorType(String mbxInfo, String processorType, boolean isMailboxIdAvailable) {
+	public List<Processor> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -827,7 +827,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.debug("Fetching the processor starts.");
 			StringBuilder queryStr = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
-						.append(" where mbx.mbxStatus = :")
+						.append(" where mbx.pguid = :")
+						.append(MBX_ID)
+						.append(" and mbx.mbxStatus = :")
 						.append(STATUS)
 						.append(" and processor.procsrStatus = :")
 						.append(STATUS)
@@ -835,26 +837,55 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" TYPE(processor) = ")
 						.append(processorType)
 						.append(")");
-			
-			String paramName = null;
-			if (isMailboxIdAvailable) {
-				
-				paramName = MBX_ID;
-				queryStr.append(" and mbx.pguid = :")
-						.append(paramName);
-			} else {
-				
-				paramName = MBX_NAME;
-				queryStr.append(" and LOWER(mbx.mbxName) = :")
-						.append(paramName);
-				mbxInfo = mbxInfo.toLowerCase();
+
+			List<?> proc = entityManager.createQuery(queryStr.toString())
+						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
+						  .setParameter(MBX_ID, (MailBoxUtil.isEmpty(mbxId) ? "''" : mbxId))
+						  .getResultList();
+	
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+				processor = (Processor) iter.next();
+				processors.add(processor);
 			}
 
-			Query query = entityManager.createQuery(queryStr.toString())
-						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
-						  .setParameter(paramName, (MailBoxUtil.isEmpty(mbxInfo) ? "''" : mbxInfo));
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
 	
-			List<?> proc = query.getResultList(); 
+	@Override
+	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxName, String processorType) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.debug("Fetching the processor starts.");
+			StringBuilder queryStr = new StringBuilder().append("select processor from Processor processor")
+						.append(" inner join processor.mailbox mbx")
+						.append(" where LOWER(mbx.mbxName) = :")
+						.append(MBX_NAME)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(" TYPE(processor) = ")
+						.append(processorType)
+						.append(")");
+
+			List<?> proc = entityManager.createQuery(queryStr.toString())
+						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
+						  .setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName.toLowerCase()))
+						  .getResultList();
+	
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {

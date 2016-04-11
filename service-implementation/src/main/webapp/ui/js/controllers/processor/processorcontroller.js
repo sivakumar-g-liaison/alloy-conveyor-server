@@ -52,6 +52,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Sync URL";
+						$scope.urlPrefix = $rootScope.javaProperties.processorSyncUrlDisplayPrefix;
 						$scope.displayHTTPListenerURL();
 					}	
 				}
@@ -59,6 +60,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Async URL";
+						$scope.urlPrefix = $rootScope.javaProperties.processorAsyncUrlDisplayPrefix;
 						$scope.displayHTTPListenerURL();
 					}
 				}
@@ -1375,11 +1377,11 @@ var rest = myApp.controller(
             $scope.displayHTTPListenerURL = function() {
             	
 				$scope.urlSuffixForId = "mailboxId=" + $scope.mailboxId;
-				$scope.urlSuffixForName = "mailboxName=" + $scope.mailboxName;
-				$scope.processorUrlDisplayContentById = ($rootScope.javaProperties.processorSyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorSyncUrlDisplayPrefix != '')?
-														$rootScope.javaProperties.processorSyncUrlDisplayPrefix + $scope.urlSuffixForId: $scope.mailboxId;
-				$scope.processorUrlDisplayContentByName = ($rootScope.javaProperties.processorSyncUrlDisplayPrefix != null && $rootScope.javaProperties.processorSyncUrlDisplayPrefix != '')?
-														$rootScope.javaProperties.processorSyncUrlDisplayPrefix + $scope.urlSuffixForName : $scope.mailboxName;
+				$scope.urlSuffixForName = "mailboxName=" + encodeURIComponent($scope.mailboxName);
+				$scope.processorUrlDisplayContentById = ($scope.urlPrefix != null && $scope.urlPrefix != '')?
+						$scope.urlPrefix + $scope.urlSuffixForId: $scope.urlSuffixForId;
+				$scope.processorUrlDisplayContentByName = ($scope.urlPrefix != null && $scope.urlPrefix != '')?
+						$scope.urlPrefix + $scope.urlSuffixForName : $scope.urlSuffixForName;
             }
          }
     ]);

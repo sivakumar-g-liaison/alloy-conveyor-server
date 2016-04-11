@@ -750,7 +750,9 @@ public class ProcessorConfigurationService {
 		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(httpListenerType)) {
 			processorType = HTTPSyncProcessor.class.getCanonicalName();
 		}
-		List<Processor> processors = config.findProcessorsByMailboxAndProcessorType(mailboxInfo, processorType, isMailboxIdAvailable);
+		List<Processor> processors = (isMailboxIdAvailable)
+										? config.findProcessorsByMailboxIdAndProcessorType(mailboxInfo, processorType)
+										: config.findProcessorsByMailboxNameAndProcessorType(mailboxInfo, processorType);
 
 		if (processors.isEmpty()) {
 			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
