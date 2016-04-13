@@ -5,14 +5,14 @@ allprojects {
 // These are all overrides for properties that are found in usermanagement/gradle.properties
 	
 ext.dbServerNameDtdm='lsildb23d.liaison.dev'
-ext.dbServerServiceDtdm='G2DEV.liaison.dev'
+ext.dbServerServiceDtdm='G2DEV1.liaison.dev'
 ext.dbServerPortDtdm='1521'
 ext.dbSchemaNameDtdm='GATEWAY_DTDM'
 ext.dbSchemaNamePrefixDtdm='SHARED'
 ext.dbaPasswordDtdm='12345678'
 
 ext.dbServerNameRtdm='lsildb23d.liaison.dev'
-ext.dbServerServiceRtdm='G2DEV.liaison.dev'
+ext.dbServerServiceRtdm='G2DEV1.liaison.dev'
 ext.dbServerPortRtdm='1521'
 ext.dbSchemaNameRtdm='GATEWAY_RTDM'
 ext.dbSchemaNamePrefixRtdm='SHARED'

@@ -8,7 +8,7 @@ def main( argv ):
 	# Setup and initialize primary settings
 	# --------------------------------------
 	dbserver = 'lsildb23d.liaison.dev'
-	oraservice = 'G2DEV.liaison.dev'
+	oraservice = 'G2DEV1.liaison.dev'
 	moniker = ''
 	password = '12345678'
 	userprefix = ''
