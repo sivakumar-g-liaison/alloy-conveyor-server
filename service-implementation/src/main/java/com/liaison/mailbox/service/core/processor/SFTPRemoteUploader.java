@@ -409,7 +409,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
                 sftpRequest.getNative().mkdir(directory);
                 LOGGER.info(constructMessage("Created remote directory {}"), directory);
             }
-
+            
+            sftpRequest.getNative().cd(directory);
         }
 
     }
