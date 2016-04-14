@@ -89,10 +89,10 @@ public abstract class HTTPAbstractProcessor {
 	 * Method to retrieve http listener properties of processor of specific type
 	 * by given mailboxGuid
 	 *
-	 * @param mailboxGuid
-	 *            mailbox Pguid
-	 * @param isSync
-	 *            boolean specifying
+	 * @param mailboxInfo
+	 *            it can be either mailbox Pguid or mailbox Name
+	 * @param isMailboxIdAvailableAsQueryParam
+	 *            boolean specify if mailboxId 
 	 * @return
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
@@ -100,13 +100,13 @@ public abstract class HTTPAbstractProcessor {
 	 * @throws NoSuchFieldException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public  Map<String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType)
+	public  Map<String, String> retrieveHttpListenerProperties(String mailboxInfo, ProcessorType processorType, boolean isMailboxIdAvailable)
 			throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException {
 
-        logger.debug("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
+        logger.debug("retrieving the properties configured in httplistener of mailbox {}", mailboxInfo);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
-		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
+		return procsrService.getHttpListenerProperties(mailboxInfo, processorType, isMailboxIdAvailable);
 
 	}
 

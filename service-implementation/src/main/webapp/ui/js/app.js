@@ -17,6 +17,7 @@ var myApp = angular.module('myApp', ['myApp.filters',
 	'myApp.dynamicFolderDescValueFieldDirective',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
+    'myApp.copyToClipboard',
     'ngGrid', // angular grid
     'ngSanitize', // for html-bind in ckeditor
     'ui.ace', // ace code editor

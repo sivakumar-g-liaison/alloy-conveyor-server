@@ -68,6 +68,13 @@ public class TransactionVisibilityClient {
 			item.setValue(message.getMailboxId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
+		
+		if (!MailBoxUtil.isEmpty(message.getMailboxName())) {
+			item = new MapItemType();
+			item.setKey("mailbox-name");
+			item.setValue(message.getMailboxName());
+			visibilityAPI.getAdditionalInformation().add(item);
+		}
 
 		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
 			item = new MapItemType();

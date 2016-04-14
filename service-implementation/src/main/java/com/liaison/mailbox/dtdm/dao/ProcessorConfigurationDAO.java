@@ -45,6 +45,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String FOLDER_URI = "folder_uri";
 	public static final String PROTOCOL = "protocol";
 	public static final String PIPELINE_ID = "pipeline_id";
+	public static final String MBX_ID = "mbx_id";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -171,4 +172,23 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return List of Processors
 	 */
 	public List<Processor> findProcessorsByName(String processorName);
+	
+	
+	/**
+	 * Retrieve processors of specific type by given mailbox Id and type
+	 * 
+	 * @param mailboxId
+	 * @param processorType
+	 * @return list of processors
+	 */
+	public List<Processor> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType);
+	
+	/**
+	 * Retrieve processors of specific type by given mailbox Name and type
+	 * 
+	 * @param mailboxName
+	 * @param processorType
+	 * @return list of processors
+	 */
+	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxId, String processorType);
 }

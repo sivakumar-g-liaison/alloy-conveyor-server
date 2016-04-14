@@ -15,7 +15,7 @@
             Name *
           </label>
             <input type="text" class="form-control" id="name" ng-model="mailBox.name" required="" name="name"
-                   ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 />
+                   ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 ng-change="toggleWarningEnabler(true)" ng-blur="toggleWarningEnabler(false)"/>
             <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
                 <span id="mbx-add-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom': formAddMbx.name.$error.pattern}" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
                 <span id="mbx-add-nameInvalid-required" class="customHide" ng-class= "{'help-block-custom': formAddMbx.name.$error.required}" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
@@ -24,9 +24,11 @@
 		        <span id="mbx-add-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block': formAddMbx.name.$error.maxlength}" ng-show="formAddMbx.name.$error.maxlength">
 		       <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
-
-
-        </div>
+			<div ng-show = "(isMailBoxEdit && isMailboxNameChanged)">
+				<span id="mbx-edit-warning" class="customHide" ng-class = "{'custom-info-block': true}">
+				<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Changing the Mailbox Name will affect the related sync and async transactions.</span>
+			</div>
+		</div>
         
         
         <div class="form-group">

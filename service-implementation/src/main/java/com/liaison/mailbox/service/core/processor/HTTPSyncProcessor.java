@@ -59,7 +59,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	 * @throws JAXBException
 	 */
 	public Response processRequest(WorkTicket workTicket, InputStream inputStream,
-			Map<String, String> httpListenerProperties, String contentType, String mailboxPguid) throws Exception {
+			Map<String, String> httpListenerProperties, String contentType) throws Exception {
 		logger.info("Starting to forward request...");
 
 		workTicket.setProcessMode(ProcessMode.SYNC);

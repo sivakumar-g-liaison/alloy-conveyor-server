@@ -104,7 +104,6 @@ public class ProcessorConfigurationService {
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
 	private static final String PROCESSOR = "Processor";
 
-
 	/**
 	 * Creates processor for the mailbox.
 	 *
@@ -729,22 +728,31 @@ public class ProcessorConfigurationService {
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async
 	 *
-	 * @param mailboxGuid
+	 * @param mailboxInfo - can be mailbox pguid or mailbox Name
 	 * @param httpListenerType
+	 * @param isMailboxIdAvailable - specify whether the mailbox info is id or not
 	 * @return a Map containing the HttpListenerSpecific Properties
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public Map<String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType)
+	public Map<String, String> getHttpListenerProperties(String mailboxInfo, ProcessorType httpListenerType, boolean isMailboxIdAvailable)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Map<String, String> httpListenerProperties = new HashMap<String, String>();
 
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		Set<Processor> processors = config.findProcessorByMbx(mailboxGuid, true);
+		String processorType = null;
+		if (ProcessorType.HTTPASYNCPROCESSOR.equals(httpListenerType)) {
+			processorType = HTTPAsyncProcessor.class.getCanonicalName();
+		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(httpListenerType)) {
+			processorType = HTTPSyncProcessor.class.getCanonicalName();
+		}
+		List<Processor> processors = (isMailboxIdAvailable)
+										? config.findProcessorsByMailboxIdAndProcessorType(mailboxInfo, processorType)
+										: config.findProcessorsByMailboxNameAndProcessorType(mailboxInfo, processorType);
 
 		if (processors.isEmpty()) {
 			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
@@ -754,14 +762,10 @@ public class ProcessorConfigurationService {
 		try {
 
 			ProcessorDTO processorDTO = null;
-
 			for (Processor processor : processors) {
-
-				if (((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())))
-						|| ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())))) {
-					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor, false);
-				}
+			
+				processorDTO = new ProcessorDTO();
+				processorDTO.copyFromEntity(processor, false);
 
 				if (null != processorDTO) {
 
@@ -776,16 +780,14 @@ public class ProcessorConfigurationService {
 
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
 							processor.getServiceInstance().getName());
-					// Commented by Veera -Not needed, because tenancy key format has changed as per service broker
-					// httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY,
-					// processor.getMailbox().getTenancyKey());
-
 	                httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, 
 	                        processor.getMailbox().getTenancyKey());
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
+					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, processor.getMailbox().getPguid());
+					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, processor.getMailbox().getMbxName());
 					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
 					if(!ttlMap.isEmpty())
 					{
@@ -807,7 +809,7 @@ public class ProcessorConfigurationService {
 			}
 
 		} catch (IOException e) {
-			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
+			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxInfo);
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
 		}

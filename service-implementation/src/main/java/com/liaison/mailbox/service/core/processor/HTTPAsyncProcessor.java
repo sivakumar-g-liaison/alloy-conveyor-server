@@ -30,7 +30,7 @@ public class HTTPAsyncProcessor extends HTTPAbstractProcessor {
 
     private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
-    public void processWorkTicket(WorkTicket workTicket, String mailboxPguid, GlassMessage glassMessage) {
+    public void processWorkTicket(WorkTicket workTicket, GlassMessage glassMessage) {
 
         try {
             WorkTicketUtil.postWrkTcktToQ(workTicket);

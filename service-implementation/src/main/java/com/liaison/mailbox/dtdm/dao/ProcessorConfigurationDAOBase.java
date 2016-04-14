@@ -43,6 +43,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
+import com.sun.mail.imap.protocol.MailboxInfo;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -813,5 +814,91 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 		return processors;		
+	}
+	
+	@Override
+	public List<Processor> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.debug("Fetching the processor starts.");
+			StringBuilder queryStr = new StringBuilder().append("select processor from Processor processor")
+						.append(" inner join processor.mailbox mbx")
+						.append(" where mbx.pguid = :")
+						.append(MBX_ID)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(" TYPE(processor) = ")
+						.append(processorType)
+						.append(")");
+
+			List<?> proc = entityManager.createQuery(queryStr.toString())
+						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
+						  .setParameter(MBX_ID, (MailBoxUtil.isEmpty(mbxId) ? "''" : mbxId))
+						  .getResultList();
+	
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
+	
+	@Override
+	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxName, String processorType) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.debug("Fetching the processor starts.");
+			StringBuilder queryStr = new StringBuilder().append("select processor from Processor processor")
+						.append(" inner join processor.mailbox mbx")
+						.append(" where LOWER(mbx.mbxName) = :")
+						.append(MBX_NAME)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(" TYPE(processor) = ")
+						.append(processorType)
+						.append(")");
+
+			List<?> proc = entityManager.createQuery(queryStr.toString())
+						  .setParameter(STATUS, EntityStatus.ACTIVE.name())
+						  .setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName.toLowerCase()))
+						  .getResultList();
+	
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
 	}
 }

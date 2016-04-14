@@ -37,7 +37,7 @@ public class HTTPPerformanceIT extends BaseServiceTest {
     // sync and async url
     private static final String SYNC_URL = "http://at4d-vpmbox.liaison.dev/g2mailboxservice/process/sync?mailboxId=37FFD6A75C0E40979A7784D1D79AD5D3";
     private static final String ASYNC_URL = "http://at4d-vpmbox.liaison.dev/g2mailboxservice/process/async?mailboxId=C612109F65AE42E5A85604E76B7F78FF";
-
+    
     @Test(enabled = false)
     public void testSync() {
 
