@@ -117,10 +117,6 @@ public class WorkTicketUtil {
 				requestProp.get(MailBoxConstants.HTTP_CHARACTER_ENCODING));
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_USER,
 				requestProp.get(MailBoxConstants.HTTP_REMOTE_USER));
-		workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, 
-				httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_ID));
-		workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_NAME,
-				httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_NAME));
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_ADDRESS,
 				requestProp.get(MailBoxConstants.HTTP_REMOTE_ADDRESS));
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REQUEST_PATH,
@@ -133,6 +129,10 @@ public class WorkTicketUtil {
 
 		if (null != httpListenerProperties) {
 			workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(httpListenerProperties));
+			workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, 
+					httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_ID));
+			workTicket.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_NAME,
+					httpListenerProperties.get(MailBoxConstants.KEY_MAILBOX_NAME));
 		}
 		setGlobalProcessId(workTicket, (String) requestProp.get(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
 
