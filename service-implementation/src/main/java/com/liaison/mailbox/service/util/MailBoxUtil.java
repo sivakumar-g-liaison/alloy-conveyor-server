@@ -62,7 +62,7 @@ public class MailBoxUtil {
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
 
-	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
+	private static String propDataRetentionTTL = "fs2.storage.%sdataRetentionTTL";
 
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
