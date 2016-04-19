@@ -150,9 +150,7 @@ dependencies {
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
-	compile("com.liaison:fs2:4.+"){
-		exclude group:"bouncycastle", module:"bcprov-jdk16"
-	}
+	compile group: "com.liaison", name: "fs2", version: "6.1.0", changing: true
 
 	// inherited from NetFlix Karyon
 	//compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -254,7 +252,7 @@ dependencies {
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
 
 	//Dependency for Encryption
-	compile "com.liaison.commons.lib:crypto:4.+"
+	compile "com.liaison.commons.lib:crypto:4.2.1"
 	
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"

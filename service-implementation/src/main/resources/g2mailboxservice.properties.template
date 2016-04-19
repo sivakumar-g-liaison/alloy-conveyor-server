@@ -163,18 +163,8 @@ com.liaison.acl.signer.public.key.group.guid=57B07C1651134F4AAED8527FF0C7922C
 #Never Change this configuration, the only unit supported is MINUTES
 mailbox.sla.time.configuration.unit=MINUTES
 
-##############################
-# FS2 properties             #
-##############################
-
-# flag to use a local filesystem FS2
-fs2.storage.file.default.use=false
-fs2.storage.file.default.type=file
-fs2.storage.file.default.location=local
-fs2.storage.file.default.mount=/tmp
-
 #############################################################
-# START SPECTRUM PROPERTIES FOR PAYLOADS
+# START FS2 PROPERTIES FOR PAYLOADS
 #
 # Mailbox supports at least two types and at least
 # one location.  The types must be:
@@ -183,52 +173,63 @@ fs2.storage.file.default.mount=/tmp
 #
 # The one location should be the closest one and is the
 # default.
-#   dev-int
+#   dev-int - this is for spectrum
+#	dev-int-boss - this is for boss
 #
-# Any other location or type is suppored in the URI as
-# long as it is configured below.  The types and locations
-# are a cross product and each unique combination is
-# a different Spectrum instance.
 #############################################################
 
-# Spectrum client properties for secure payloads
-# Requires at least two types, "secure" and "unsecure"
-fs2.storage.spectrum.types=secure,unsecure
-fs2.storage.spectrum.locations=dev-int
+# Storage Identifiers
+fs2.storage.identifiers=secure@dev-int,unsecure@dev-int,secure@dev-int-boss,unsecure@dev-int-boss
 
 # The default location has to be one of the locations above
 # The default should always be the closest instance
-fs2.storage.spectrum.location.default=dev-int
+fs2.storage.location.default=dev-int
 
 # The properties below are a matrix of types and locations
 # Combination secure and dev
-fs2.storage.spectrum.secure.dev-int.ip=at4d-vpspectrum.liaison.dev
-fs2.storage.spectrum.secure.dev-int.port=443
-fs2.storage.spectrum.secure.dev-int.username=g2devlab
-
-fs2.storage.spectrum.secure.dev-int.source=G2_SB_DEV_INT
-fs2.storage.spectrum.secure.dev-int.spaceName=g2-dev-ls
-fs2.storage.spectrum.secure.dev-int.dataDefinition=Payload
-fs2.storage.spectrum.secure.dev-int.dataRetentionTTL=2592000
-fs2.storage.spectrum.secure.dev-int.threadPoolSize=20
-fs2.storage.spectrum.secure.dev-int.threadPrepareTimeOut=60
-fs2.storage.spectrum.secure.dev-int.threadWriteTimeOut=5000
+fs2.storage.secure@dev-int.type=SPECTRUM
+fs2.storage.secure@dev-int.ip=at4d-vpspectrum.liaison.dev
+fs2.storage.secure@dev-int.port=443
+fs2.storage.secure@dev-int.username=g2devlab
+fs2.storage.secure@dev-int.password=Herne3Omena56Siili
+fs2.storage.secure@dev-int.source=G2_MB_DEV_INT
+fs2.storage.secure@dev-int.spaceName=g2-dev-ls
+fs2.storage.secure@dev-int.dataDefinition=Payload
+fs2.storage.secure@dev-int.dataRetentionTTL=2592000
+fs2.storage.secure@dev-int.threadPoolSize=20
+fs2.storage.secure@dev-int.threadPrepareTimeOut=60
+fs2.storage.secure@dev-int.threadWriteTimeOut=5000
 
 # Combination unsecure and dev
-fs2.storage.spectrum.unsecure.dev-int.ip=at4d-vpspectrum.liaison.dev
-fs2.storage.spectrum.unsecure.dev-int.port=443
-fs2.storage.spectrum.unsecure.dev-int.username=g2devlab
+fs2.storage.unsecure@dev-int.type=SPECTRUM
+fs2.storage.unsecure@dev-int.ip=at4d-vpspectrum.liaison.dev
+fs2.storage.unsecure@dev-int.port=443
+fs2.storage.unsecure@dev-int.username=g2devlab
+fs2.storage.unsecure@dev-int.password=Herne3Omena56Siili
+fs2.storage.unsecure@dev-int.source=G2_MB_DEV_INT
+fs2.storage.unsecure@dev-int.spaceName=g2-dev-ls
+fs2.storage.unsecure@dev-int.dataDefinition=Payload
+fs2.storage.unsecure@dev-int.dataRetentionTTL=2592000
+fs2.storage.unsecure@dev-int.threadPoolSize=20
+fs2.storage.unsecure@dev-int.threadPrepareTimeOut=60
+fs2.storage.unsecure@dev-int.threadWriteTimeOut=5000
 
-fs2.storage.spectrum.unsecure.dev-int.source=G2_SB_DEV_INT
-fs2.storage.spectrum.unsecure.dev-int.spaceName=g2-dev-ls
-fs2.storage.spectrum.unsecure.dev-int.dataDefinition=Payload
-fs2.storage.spectrum.unsecure.dev-int.dataRetentionTTL=2592000
-fs2.storage.spectrum.unsecure.dev-int.threadPoolSize=20
-fs2.storage.spectrum.unsecure.dev-int.threadPrepareTimeOut=60
-fs2.storage.spectrum.unsecure.dev-int.threadWriteTimeOut=5000
+# properties for secure@dev-int-boss
+fs2.storage.secure@dev-int-boss.type=BOSS
+fs2.storage.secure@dev-int-boss.url=https://at4d-vpkvgw.liaison.dev
+fs2.storage.secure@dev-int-boss.username=bosstestg2@liaison.dev
+fs2.storage.secure@dev-int-boss.password=Password#01
+fs2.storage.secure@dev-int-boss.tenancy=g2_tenancy
+
+# properties for unsecure@dev-int-boss
+fs2.storage.unsecure@dev-int-boss.type=BOSS
+fs2.storage.unsecure@dev-int-boss.url=https://at4d-vpkvgw.liaison.dev
+fs2.storage.unsecure@dev-int-boss.username=bosstestg2@liaison.dev
+fs2.storage.unsecure@dev-int-boss.password=Password#01
+fs2.storage.unsecure@dev-int-boss.tenancy=g2_tenancy
 
 #############################################################
-# END SPECTRUM PROPERTIES FOR PAYLOADS
+# END FS2 PROPERTIES FOR PAYLOADS
 #############################################################
 
 # ACL Filter uses mock verifier

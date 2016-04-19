@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -51,17 +52,18 @@ public class StorageUtilitiesTest {
 		InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
 
 		//Dummy headers
-		long globalProcessId = System.currentTimeMillis();
-		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
-		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
-		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
+		String globalProcessId = UUIDGen.getCustomUUID();
 
 		WorkTicket wTicket = new WorkTicket();
 		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
+		wTicket.setTtlDays(1);
 		Map <String, String>properties = new HashMap <String, String>();
-		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
+		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(true));
+		properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, "12345678");
 
 		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+		System.out.println(metaSnapshot.getURI().toString());
 		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
