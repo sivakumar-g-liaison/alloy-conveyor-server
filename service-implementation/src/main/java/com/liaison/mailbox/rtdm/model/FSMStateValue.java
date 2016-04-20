@@ -11,11 +11,10 @@
 package com.liaison.mailbox.rtdm.model;
 
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -24,9 +23,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.rtdm.dao.FSMStateValueDAO;
@@ -49,8 +45,8 @@ public class FSMStateValue implements Identifiable {
 	private String pguid;
 	private String value;
 	private Timestamp createdDate;
-	private List<FSMTransitionState> oldTransitionStates;
-	private List<FSMTransitionState> newTransitionStates;
+	private Set<FSMTransitionState> oldTransitionStates;
+	private Set<FSMTransitionState> newTransitionStates;
 	private FSMState fsmState;
 	
 	public FSMStateValue () {
@@ -85,23 +81,21 @@ public class FSMStateValue implements Identifiable {
 		this.createdDate = createdDate;
 	}
 	
-	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.EAGER)
-	@Fetch(FetchMode.SELECT)
-	public List<FSMTransitionState> getNewTransitionStates() {
+	@OneToMany(mappedBy = "newStateValue")
+	public Set<FSMTransitionState> getNewTransitionStates() {
 		return newTransitionStates;
 	}
 
-	public void setNewTransitionStates(List<FSMTransitionState> newTransitionStates) {
+	public void setNewTransitionStates(Set<FSMTransitionState> newTransitionStates) {
 		this.newTransitionStates = newTransitionStates;
 	}
 
-	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.EAGER)
-	@Fetch(FetchMode.SELECT)
-	public List<FSMTransitionState> getOldTransitionStates() {
+	@OneToMany(mappedBy = "oldStateValue")
+	public Set<FSMTransitionState> getOldTransitionStates() {
 		return oldTransitionStates;
 	}
 
-	public void setOldTransitionStates(List<FSMTransitionState> oldTransitionStates) {
+	public void setOldTransitionStates(Set<FSMTransitionState> oldTransitionStates) {
 		this.oldTransitionStates = oldTransitionStates;
 	}
 	

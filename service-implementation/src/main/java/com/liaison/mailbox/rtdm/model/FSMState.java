@@ -35,7 +35,8 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 @Entity
 @Table(name = "FSM_STATE")
 @NamedQueries({ @NamedQuery(name = FSMStateDAO.FIND_FSM_STATE_BY_NAME,
-query = "SELECT state FROM FSMState state WHERE state.executionId = :" + FSMStateDAO.EXECUTION_ID),
+query = "SELECT state FROM FSMState state "
+		+ "WHERE state.executionId = :" + FSMStateDAO.EXECUTION_ID),
 @NamedQuery(name = FSMStateDAO.FIND_ALL_EXECUTING_PROC,
 query = "select stateVal from FSMStateValue stateVal"
 		+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
@@ -107,7 +108,7 @@ public class FSMState implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@OneToMany(mappedBy = "fsmState", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "fsmState", orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@OrderBy(value="createdDate DESC")
 	public List<FSMStateValue> getExecutionState() {

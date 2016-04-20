@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -150,16 +151,19 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 	public FSMState find(String executionId) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-
+		FSMState state = null;
 		try {
 
 			List<FSMState> states = entityManager.createNamedQuery(FIND_FSM_STATE_BY_NAME)
 					.setParameter(EXECUTION_ID, executionId)
 					.getResultList();
+			
 
 			Iterator<FSMState> iter = states.iterator();
 			while (iter.hasNext()) {
-				return iter.next();
+				
+				state = iter.next();
+				Hibernate.initialize(state.getExecutionState());
 			}
 
 		} finally {
@@ -170,7 +174,7 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 
 		}
 
-		return null;
+		return state;
 	}
 
     /**

@@ -216,6 +216,9 @@ public class MailBoxService implements Runnable {
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+		long actualStartTime = System.currentTimeMillis();
+		long startTime = 0;
+		long endTime = 0;
 		try {
 
 			dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest, TriggerProcessorRequestDTO.class);
@@ -275,14 +278,22 @@ public class MailBoxService implements Runnable {
                     mbx.getPguid());
 
 			LOG.debug("The Processor type is {}", processor.getProcessorType());
+			startTime = System.currentTimeMillis();
 			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
+			endTime = System.currentTimeMillis();
+			LOG.debug("Calculating elapsed time for changing processor state to PROCESSING");
+			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 			processorService.runProcessor(dto, fsm);
+			startTime = System.currentTimeMillis();
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+			endTime = System.currentTimeMillis();
+			LOG.debug("Calculating elapsed time for changing processor state to COMPLETED");
+			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 			LOG.info("CronJob : {} : {} : {} : {} : {} : Processor service exectuion is completed",
                     dto.getProfileName(),
@@ -290,6 +301,7 @@ public class MailBoxService implements Runnable {
                     processor.getProcsrName(),
                     mbx.getMbxName(),
                     mbx.getPguid());
+			LOG.debug("Total Time taken is {} ", (actualStartTime - endTime));
 
 		} catch (MailBoxServicesException e) {
 
@@ -304,7 +316,7 @@ public class MailBoxService implements Runnable {
                         processor.getMailbox().getPguid(),
                         e.getMessage(), e);
             }
-
+		    
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
