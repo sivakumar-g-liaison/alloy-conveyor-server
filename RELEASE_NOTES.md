@@ -1,5 +1,6 @@
 4.3.0-SNAPSHOT
 -------------------------------
+GMB-768 - Able to save processors even without providing password for FTP and SFTP protocols.
 
 4.2.0
 -------------------------------

@@ -614,6 +614,10 @@ var rest = myApp.controller(
 				//add credential properties
                 for (var i = 0; i < $scope.processorCredProperties.length; i++) {
                     var credObj = $scope.processorCredProperties[i];
+					if (!isvalidCredentials($scope.processor, credObj)) {
+						$scope.clearCredentialProps();
+						return;
+					}
                     delete credObj.passwordDirtyState;
                     if (credObj.credentialType === "LOGIN_CREDENTIAL" && credObj.userId !== "" && credObj.userId !== null 
                     		&& typeof credObj.userId !== "undefined" && credObj.valueProvided === true ) {
@@ -725,7 +729,78 @@ var rest = myApp.controller(
 						}
                 }
             };
-	
+			
+			function isvalidCredentials(processor, credObj) {
+				
+				var credType = credObj.credentialType;
+				if (credType === "LOGIN_CREDENTIAL" && credObj.valueProvided == true) {
+					
+					var ProcessorType = $scope.processor.processorPropertiesInTemplateJson.type;
+					if (ProcessorType === "REMOTEUPLOADER" || ProcessorType === "REMOTEDOWNLOADER") {
+						
+						var protocol =  $scope.processor.processorPropertiesInTemplateJson.protocol;
+						
+						switch (protocol) {
+							
+							case "FTP":
+							case "FTPS":
+							case "FTPS":
+								if (credObj.userId === "" || credObj.userId === null || typeof credObj.userId === "undefined") {
+									$scope.block.unblockUI();
+									showSaveMessage('Username cannot be empty', 'error');
+									return false;
+								} else if (credObj.password === "" || credObj.password === null || typeof credObj.password === "undefined") {
+									$scope.block.unblockUI();
+									showSaveMessage('Password cannot be empty', 'error');
+									return false;
+								} else {
+									return true;
+								}
+							case "SFTP":
+								if ((credObj.userId != null && credObj.userId != "" && typeof credObj.userId != "undefined") 
+									&& (credObj.password === "" || credObj.password === null || typeof credObj.password === "undefined")) {
+										
+									if (!isSSHKeyPairAvailable()) {
+										$scope.block.unblockUI();
+										showSaveMessage('Either the Password or the SSH Keypair is Empty.', 'error');
+										return false;
+									}
+								} else if (credObj.userId === "" || credObj.userId === null || typeof credObj.userId === "undefined") {
+									$scope.block.unblockUI();
+									showSaveMessage('Username cannot be empty', 'error');
+									return false;
+								} else if (credObj.password === "" || credObj.password === null || typeof credObj.password === "undefined") {
+									$scope.block.unblockUI();
+									showSaveMessage('Password cannot be empty', 'error');
+									return false;
+								} else {
+									return true;
+								}
+							default:
+								return true;
+						}
+					} else {
+						return true;
+					}
+				
+				} else {
+					return true;
+				}
+			}
+			
+			function isSSHKeyPairAvailable() {
+				
+				for (var credProperty = 0; credProperty < $scope.processorCredProperties.length; credProperty++) {
+					
+					var credObj = $scope.processorCredProperties[credProperty];
+					if (credObj.credentialType === "SSH_KEYPAIR" && (credObj.idpURI != null 
+						&& credObj.idpURI != "" && typeof credObj.idpURI != "undefined")) {
+							return true;
+						}
+				}
+				return false;
+			}
+			
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
