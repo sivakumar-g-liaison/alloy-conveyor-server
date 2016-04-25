@@ -170,7 +170,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getFileName()));
 
             				String payloadURI = wrkTicket.getPayloadURI();
-        					String filePath = String.valueOf(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
+        					String filePath = String.valueOf((Object) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
             				// Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
             				if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
                                 LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
