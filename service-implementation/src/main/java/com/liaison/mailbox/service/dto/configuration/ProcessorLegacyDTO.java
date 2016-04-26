@@ -10,7 +10,9 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -20,7 +22,6 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -28,15 +29,12 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
-import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -49,10 +47,6 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 public class ProcessorLegacyDTO extends ProcessorDTO {
 
 	
-	private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
-	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
-	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
-	private static final String TRUSTSTORE_CERT_INVALID= "The given trust store group guid does not exist in key management system.";
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private Set<FolderDTO> folders;
 	private Set<CredentialDTO> credentials;
@@ -178,11 +172,12 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			// Setting the credentials
 			Credential credential = null;
 			Set<Credential> credentialList = new HashSet<>();
+			List<CredentialDTO> credentials = new ArrayList<CredentialDTO>(this.getCredentials());
 			for (CredentialDTO credentialDTO : this.getCredentials()) {
 				
 				// Validate credentials
 				validator.validate(credentialDTO);
-				validateCredentials(processor, credentialDTO);
+				validateCredentials(processor.getProcessorType(), processor.getProcsrProtocol(), credentialDTO, credentials);
 				credential = new Credential();
 				credentialDTO.copyToEntity(credential);
 				credential.setPguid(MailBoxUtil.getGUID());
@@ -225,149 +220,6 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 
 	}
 	
-	/**
-	 * Method is used to Validate the credentials given
-	 * 
-	 * @param processor
-	 *            The processor entity
-	 * @param credentialDTO 
-	 * 			  Login Credential Details
-	 */
-	public void validateLoginCredentials (Processor processor, CredentialDTO credentialDTO) {
-		
-		if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
-                ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-			
-			Protocol protocol = Protocol.findByName(processor.getProcsrProtocol());
-			
-				switch (protocol) {
-	
-					case FTP:
-					case FTPS:
-					case HTTPS:
-						if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-						} else {
-							validateSecret(credentialDTO.getPassword());
-						}
-						break;
-					case SFTP:
-						if (!MailBoxUtil.isEmpty(credentialDTO.getUserId()) && MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							if(!isSSHKeyPairAvailable()) {
-								throw new MailBoxConfigurationServicesException(Messages.PASSWORD_OR_SSH_KEYPAIR_EMPTY, Response.Status.BAD_REQUEST);
-							}
-						} else if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-							throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-						} else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-							throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-						} else {
-							validateSecret(credentialDTO.getPassword());
-						}
-						break;
-					default:
-						break;
-				}
-		}
-	}
-	
-	/**
-	 * Method to validate the password
-	 * 
-	 * @param password
-	 */
-	private void validateSecret(String password) {
-
-		try {
-			KMSUtil.getSecretFromKMS(password);
-		} catch (LiaisonException | IOException | MailBoxServicesException exception) {
-			if (null != exception && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
-				throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
-			}
-			throw new RuntimeException(exception);
-		}
-	}
-
-	/**
-	 * Method to validate credentials 
-	 * 
-	 * @param processor
-	 * 			processor entity
-	 * @param credentialDTO
-	 * 			credential Details
-	 */
-	public void validateCredentials (Processor processor, CredentialDTO credentialDTO) {
-		
-		CredentialType credentialType = CredentialType.findByName(credentialDTO.getCredentialType());
-		switch(credentialType) {
-		
-		case LOGIN_CREDENTIAL:
-			validateLoginCredentials(processor, credentialDTO);
-			break;
-		case SSH_KEYPAIR:
-			validateSSHKeypair(credentialDTO.getIdpURI());
-			break;
-		case TRUSTSTORE_CERT:
-			validateTruststoreCertificate(credentialDTO.getIdpURI());
-			break;
-		}
-	}
-	
-	/**
-	 * Method to validate ssh keypair 
-	 * 
-	 * @param sshKeypairGroupId
-	 */
-	public void validateSSHKeypair(String sshKeypairGroupId) {
-		
-		try {
-			
-			if (MailBoxUtil.isEmpty(sshKeypairGroupId)) {
-				throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_NOT_PROVIDED, Response.Status.BAD_REQUEST);
-			} else if (null == KMSUtil.fetchSSHPrivateKey(sshKeypairGroupId)) {
-				throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_INVALID, Response.Status.BAD_REQUEST);
-			}
-		} catch (LiaisonException | IOException | JAXBException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-	
-	/**
-	 * Method to validate trust store
-	 * 
-	 * @param trustStoreGroupId
-	 */
-	public void validateTruststoreCertificate(String trustStoreGroupId) {
-		
-		try {
-			if (MailBoxUtil.isEmpty(trustStoreGroupId)) {
-				throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_NOT_PROVIDED, Response.Status.BAD_REQUEST);
-			}
-			KMSUtil.fetchTrustStore(trustStoreGroupId);
-		} catch (LiaisonException | IOException | JAXBException | MailBoxServicesException exception) {
-			if (null != exception && Messages.CERTIFICATE_RETRIEVE_FAILED.value().equals(exception.getMessage())) {
-				throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_INVALID, Response.Status.BAD_REQUEST);
-			}
-			throw new RuntimeException(exception);
-		}
-	}
-	/**
-	 * Method is used to check whether the SSH Key pair is available
-	 * 
-	 * @return boolean
-	 */
-	public boolean isSSHKeyPairAvailable () {
-		
-		Set<CredentialDTO> processorCredential = this.getCredentials();
-		for (CredentialDTO credType : processorCredential) {
-			if (credType.getCredentialType().toString().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && !MailBoxUtil.isEmpty(credType.getIdpURI())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Copies the values from Entity to DTO.
 	 * 

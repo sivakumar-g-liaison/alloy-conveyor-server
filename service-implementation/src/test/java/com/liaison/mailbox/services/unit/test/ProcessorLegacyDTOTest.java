@@ -10,9 +10,8 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -22,6 +21,7 @@ import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorLegacyDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
@@ -59,14 +59,15 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateFTPUserIdCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.FTP.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setPassword(PASSWORD);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
-	
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
+		ProcessorDTO processorDTO = new ProcessorDTO();
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.FTP.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -77,12 +78,13 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateFTPEmptyUserIdCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.FTP.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.FTP.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -93,13 +95,14 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateFTPEmptyPasswordCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.FTP.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.FTP.name(), credentialDTO ,credentials);
 	}
 	
 	/**
@@ -110,12 +113,13 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateFTPSEmptyUserIdCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.FTPS.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.FTPS.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -125,13 +129,14 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateFTPSEmptyPasswordCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.FTPS.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.FTPS.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -141,12 +146,13 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateHTTPSEmptyUserIdCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.HTTPS.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.HTTPS.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -156,13 +162,14 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateHTTPSEmptyPasswordCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.HTTPS.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.HTTPS.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -172,12 +179,13 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateSFTPEmptyUserIdCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.SFTP.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.SFTP.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -187,13 +195,14 @@ public class ProcessorLegacyDTOTest {
 	public void testValidateSFTPEmptyPasswordCredential() {
 		
 		Processor processor = constructProcessor();
-		processor.setProcsrProtocol(Protocol.SFTP.name());
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setUserId(USER_NAME);
 		credentialDTO.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
+		credentials.add(credentialDTO);
 		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.validateCredentials(processor, credentialDTO);
+		processorDTO.validateCredentials(processor.getProcessorType(), Protocol.SFTP.name(), credentialDTO, credentials);
 	}
 	
 	/**
@@ -202,15 +211,14 @@ public class ProcessorLegacyDTOTest {
 	@Test
 	public void testisSSHKeyPairAvailable() {
 		
-		Set<CredentialDTO> credentials = new HashSet<>();
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
 		CredentialDTO credential = new CredentialDTO();
 		credential.setCredentialType(CredentialType.SSH_KEYPAIR.getCode());
 		credential.setIdpURI(VALID_SSHKEYPAIR);
 		credentials.add(credential);
 		
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.setCredentials(credentials);
-		Assert.assertTrue(processorDTO.isSSHKeyPairAvailable());
+		ProcessorDTO processorDTO = new ProcessorDTO();
+		Assert.assertTrue(processorDTO.isSSHKeyPairAvailable(credentials));
 	}
 	
 	/**
@@ -219,22 +227,20 @@ public class ProcessorLegacyDTOTest {
 	@Test
 	public void testisSSHKeyPairAvailableInvalid() {
 		
-		Set<CredentialDTO> credentials = new HashSet<>();
+		List<CredentialDTO> credentials = new ArrayList<CredentialDTO>();
 		CredentialDTO credential = new CredentialDTO();
 		credential.setCredentialType(CredentialType.LOGIN_CREDENTIAL.getCode());
 		credentials.add(credential);
 		
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
-		processorDTO.setCredentials(credentials);
-		Assert.assertFalse(processorDTO.isSSHKeyPairAvailable());
+		ProcessorDTO processorDTO = new ProcessorDTO();
+		Assert.assertFalse(processorDTO.isSSHKeyPairAvailable(credentials));
 		
 		//Asset by testing the empty idpUri and valid credential type.
 		credentials.clear();
 		credential.setCredentialType(CredentialType.SSH_KEYPAIR.getCode());
 		credentials.add(credential);
 		
-		processorDTO.setCredentials(credentials);
-		Assert.assertFalse(processorDTO.isSSHKeyPairAvailable());
+		Assert.assertFalse(processorDTO.isSSHKeyPairAvailable(credentials));
 	}
 	
 	/**
@@ -242,7 +248,7 @@ public class ProcessorLegacyDTOTest {
 	 */
 	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given SSH key pair group guid does not exist in key management system." )
 	public void testSSHKeyPairInvalid() {
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.validateSSHKeypair(INVALID_GUID);
 	}
 	
@@ -251,7 +257,7 @@ public class ProcessorLegacyDTOTest {
 	 */
 	@Test (enabled=false, expectedExceptions = {})
 	public void testSSHKeyPairValid() {
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.validateSSHKeypair(VALID_SSHKEYPAIR);
 	}
 	
@@ -260,7 +266,7 @@ public class ProcessorLegacyDTOTest {
 	 */
 	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "Trust store Certificate cannot be Empty." )
 	public void testTruststoreCertificateEmpty() {
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.validateTruststoreCertificate(null);
 	}
 	
@@ -269,7 +275,7 @@ public class ProcessorLegacyDTOTest {
 	 */
 	@Test (enabled=false, expectedExceptions = MailBoxConfigurationServicesException.class, expectedExceptionsMessageRegExp = "The given trust store group guid does not exist in key management system." )
 	public void testTruststoreCertificateInvalid() {
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.validateTruststoreCertificate(INVALID_GUID);
 	}
 	
@@ -278,7 +284,7 @@ public class ProcessorLegacyDTOTest {
 	 */
 	@Test (enabled=false, expectedExceptions = {})
 	public void testTruststoreCertificateValid() {
-		ProcessorLegacyDTO processorDTO = new ProcessorLegacyDTO();
+		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.validateTruststoreCertificate(VALID_TRUSTSTORE);
 	}
 	

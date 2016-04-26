@@ -42,9 +42,6 @@ angular.module(
     					scope.showerrormessage = true;
     					scope.password = '';
     					scope.repeatepassword = '';
-						scope.$parent.formAddPrcsr.$setValidity('pwd', false);
-						scope.errorMessage = "Please enter password";
-						
     				})
                 scope.showConfirmBox =
                         function () {
