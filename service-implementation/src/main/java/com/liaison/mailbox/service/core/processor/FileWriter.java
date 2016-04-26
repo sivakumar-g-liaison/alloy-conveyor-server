@@ -271,7 +271,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
 		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
 		StagedFileDAOBase dao = new StagedFileDAOBase();
-		String isOverwrite = String.valueOf(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE)).toLowerCase();
+		String isOverwrite = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase();
 
 		File file = new File(targetLocation + File.separatorChar + filename);
 

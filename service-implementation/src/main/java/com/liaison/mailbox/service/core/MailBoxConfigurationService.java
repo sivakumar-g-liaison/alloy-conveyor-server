@@ -571,7 +571,7 @@ public class MailBoxConfigurationService {
 
                 serachMailBoxDTO = new SearchMailBoxDTO();
                 serachMailBoxDTO.copyFromEntity(mbx,
-                        dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
+                        dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId(), searchFilter.isDisableFilters()));
                 searchMailBoxDTOList.add(serachMailBoxDTO);
             }
 			

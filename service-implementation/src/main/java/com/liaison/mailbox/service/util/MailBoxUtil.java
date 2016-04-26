@@ -62,8 +62,6 @@ public class MailBoxUtil {
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
 
-	private static String propDataRetentionTTL = "fs2.storage.%sdataRetentionTTL";
-
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
 
@@ -298,18 +296,6 @@ public class MailBoxUtil {
 
 		return pageParameters;
 	}
-
-	/**
-	 * Method to get the data retention value from the properties
-	 *
-	 * @param identifier
-	 * @return
-	 */
-	public static Integer getDataRetentionTTL(String identifier) {
-	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
-	    return getEnvironmentProperties().getInteger(ttl, 2592000);
-	}
-
 
 	/**
 	 * Method to convertTTLIntoSeconds

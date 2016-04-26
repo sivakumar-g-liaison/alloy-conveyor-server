@@ -57,16 +57,17 @@ export GLASS_RING_BUFFER_SIZE=262144
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
 
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
+
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
 
-export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
+export LOGSTASHMACHINE=10.10.96.44
 export LOGSTASHPORT=4560
-export LOGSTASH_ROLLING_SIZE="250 MB"
-
 export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
 export LOGSTASH_RING_BUFFER_SIZE=262144
+export LOGSTASH_ROLLING_SIZE="250 MB"
+
 # ==================================================================
 # log overrides
 # ==================================================================

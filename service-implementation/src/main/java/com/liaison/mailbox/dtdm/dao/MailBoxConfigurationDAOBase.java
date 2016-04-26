@@ -10,13 +10,13 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -56,34 +56,34 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
-			
-			String mbxName = searchFilter.getMbxName();
-			String profName = searchFilter.getProfileName();			
-			StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MAILBOX mailbox")
-					.append(" INNER JOIN PROCESSOR processor ON mailbox.pguid = processor.MAILBOX_GUID")
-					.append(" INNER JOIN SCHED_PROCESSOR schedulepros ON processor.pguid = schedulepros.PROCESSOR_GUID")
-					.append(" INNER JOIN SCHED_PROFILE scheduleprof ON schedulepros.SCHED_PROFILE_GUID = scheduleprof.pguid");
-			
-			query.append(" WHERE (lower(mailbox.NAME) LIKE :")
-			        .append(MBOX_NAME) 
-			        .append(")");	
-			
-			if (searchFilter.isDisableFilters() == false) {
-            	query.append(" AND (lower(mailbox.TENANCY_KEY) IN (")
-					 .append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-					 .append("))");
+
+            String mbxName = searchFilter.getMbxName();
+            String profName = searchFilter.getProfileName();
+            StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MailBox mailbox")
+                    .append(" INNER JOIN mailbox.mailboxProcessors processor")
+                    .append(" INNER JOIN processor.scheduleProfileProcessors schedulepros")
+                    .append(" INNER JOIN schedulepros.scheduleProfilesRef scheduleprof")
+                    .append(" WHERE (lower(mailbox.mbxName) LIKE :")
+                    .append(MBOX_NAME).append(")")
+                    .append(" AND (scheduleprof.schProfName LIKE :")
+                    .append(SCHD_PROF_NAME).append(")");
+
+            //Set Tenancy Key when filter isn't disabled
+            if (!searchFilter.isDisableFilters()) {
+                query.append(" AND (mailbox.tenancyKey IN (:" + TENANCY_KEYS + "))");
             }
-			
-			query.append(" AND (scheduleprof.NAME LIKE :")
-			        .append(SCHD_PROF_NAME)
-			        .append(")");
 
-			totalItems = ((BigDecimal) em.createNativeQuery(query.toString())
-					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
-					.getSingleResult()).longValue();
+            Query jpaQuery = em.createQuery(query.toString())
+                    .setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%");
 
-			count = totalItems.intValue();
+            //Set Tenancy Key when filter isn't disabled
+            if (!searchFilter.isDisableFilters()) {
+                jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);
+            }
+
+            totalItems = ((Long) jpaQuery.getSingleResult());
+            count = totalItems.intValue();
 
 		} finally {
 			if (em != null) {
@@ -179,33 +179,30 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
  
         try {
  
-            StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MAILBOX mailbox");
-            
-            if (searchFilter.isDisableFilters()) {
-            	if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-            	    query.append(" WHERE (lower(mailbox.NAME) LIKE :")
-                    .append(MBOX_NAME)
-                    .append(")");
-            	}
-            } else {
-            	query.append(" WHERE (lower(mailbox.NAME) LIKE :")
-                .append(MBOX_NAME)
-                .append(")")
-            	.append(" AND (lower(mailbox.TENANCY_KEY) IN(")
-				.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-				.append("))");
-            }	
-            
-            if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-	            totalItems = ((BigDecimal) entityManager.createNativeQuery(query.toString()).getSingleResult()).longValue();
-            } else {
-            	totalItems = ((BigDecimal) entityManager.createNativeQuery(query.toString())
-	                    .setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
-	                    .getSingleResult()).longValue();
+            StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MailBox mailbox");
+
+            boolean isNameAdded = false;
+            if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+                query.append(" WHERE (lower(mailbox.mbxName) LIKE :").append(MBOX_NAME).append(")");
+                isNameAdded = true;
             }
- 
+
+            if (!searchFilter.isDisableFilters()) {
+                query.append(isNameAdded ?  " AND" : " WHERE");
+                query.append(" (mailbox.tenancyKey IN (:" + TENANCY_KEYS + "))");
+            }
+
+            Query jpaQuery = entityManager.createQuery(query.toString());
+            if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+                jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
+            }
+            if (!searchFilter.isDisableFilters()) {
+                jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);
+            }
+
+            totalItems = ((Long) jpaQuery.getSingleResult());
             count = totalItems.intValue();
- 
+
         } finally {
             if (entityManager != null) {
                 entityManager.close();

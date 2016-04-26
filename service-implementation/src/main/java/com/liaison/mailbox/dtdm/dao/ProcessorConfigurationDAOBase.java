@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -43,7 +42,6 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
-import com.sun.mail.imap.protocol.MailboxInfo;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -131,7 +129,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * @return boolean
      */
     @Override
-    public boolean isMailboxHasProcessor( String mbxGuid, String siid) {
+    public boolean isMailboxHasProcessor( String mbxGuid, String siid, boolean disableFilter) {
 
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
         boolean status = false;
@@ -142,20 +140,24 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             long lStartTime = new Date().getTime(); // start time
             LOG.debug("Start Time of Query Execution : " + lStartTime);
 
-            StringBuilder query = new StringBuilder().append("SELECT count(processor.pguid)")
-                    .append(" FROM PROCESSOR processor")
-                    .append(" INNER JOIN MAILBOX mailbox ON processor.MAILBOX_GUID = mailbox.pguid")
-                    .append(" INNER JOIN SERVICE_INSTANCE serviceins ON processor.SERVICE_INSTANCE_GUID = serviceins.pguid")
+            StringBuilder query = new StringBuilder().append("SELECT count(*)")
+                    .append(" FROM Processor processor")
+                    .append(" INNER JOIN processor.mailbox mailbox")
+                    .append(" INNER JOIN processor.serviceInstance si")
                     .append(" WHERE mailbox.pguid = :")
-                    .append(PGUID)
-                    .append(" AND (serviceins.SERVICE_INSTANCE_ID LIKE :")
-                    .append(SERV_INST_ID)
-                    .append(")");
-                    
-            long count = ((BigDecimal) entityManager.createNativeQuery(query.toString())
-                    .setParameter(PGUID , mbxGuid)
-                    .setParameter(SERV_INST_ID, siid)
-                    .getSingleResult()).longValue();
+                    .append(PGUID);
+
+            //SID_CHECK FOR PROCESSOR STATUS
+            if (!disableFilter) {
+                query.append(" AND si.pguid = :");
+                query.append(SERV_INST_ID);
+            }
+
+            Query jpaQuery = entityManager.createQuery(query.toString())
+                    .setParameter(PGUID , mbxGuid);
+            jpaQuery =  (!disableFilter) ? jpaQuery.setParameter(SERV_INST_ID , siid) : jpaQuery ;
+            long count = ((Long) jpaQuery.getSingleResult());
+
             long lEndTime = new Date().getTime(); // end time
             LOG.debug("End Time of Query Execution : " + lEndTime);
             if (count > 0) {
