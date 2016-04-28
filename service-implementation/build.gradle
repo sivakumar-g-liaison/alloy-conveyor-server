@@ -228,7 +228,7 @@ dependencies {
 	compile "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
 
 	// Dependency for KeyManager
-	compile('com.liaison.key.management:key-management:3.+:grammar') {
+	compile('com.liaison.key.management:key-management:3.2.0:grammar') {
 		exclude module:'service-framework'
 	}
 
