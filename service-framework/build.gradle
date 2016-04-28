@@ -5,6 +5,7 @@ buildscript {
 allprojects {
     repositories {
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
     }
 }
 
@@ -48,12 +49,12 @@ dependencies {
     compile 'javax.servlet:javax.servlet-api:3.1.0'
 
     // Oracle OJDBC
-    compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
-    compile 'com.oracle:ucp:11g-11.2.0.3.0'
+    compile 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
+    compile 'com.oracle.jdbc:ucp:${oracleVersion}'
 
     // Liaison code
     // commons-lib dependencies
-	compile 'com.liaison:commons-lib:6.+'
+	compile 'com.liaison:commons-lib:7.+'
 
 }
 
