@@ -82,10 +82,10 @@
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength={{maximumLengthAllowedInProcessorDescription}} rows="1" class="form-control"></textarea>
-                        <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
-                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="editDescription" ng-pattern="userInputPattern" ng-maxlength={{maximumLengthAllowedInProcessorDescription}} rows="1" class="form-control"></textarea>
+                        <div ng-show="formAddPrcsr.editDescription.$dirty && formAddPrcsr.editDescription.$invalid">
+                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.editDescription.$error.pattern}" ng-show="formAddPrcsr.editDescription.$error.pattern">Invalid Description</span>
+                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.editDescription.$error.maxlength}" ng-show="formAddPrcsr.editDescription.$error.maxlength">
                              <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>
