@@ -52,6 +52,7 @@ allprojects {
         maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-releases' }
         //maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-snapshots' }
         maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
     }
     
     configurations {

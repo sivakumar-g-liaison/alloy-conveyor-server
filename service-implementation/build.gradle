@@ -42,6 +42,7 @@ buildscript {
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
         maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
         maven { url 'http://nexus.liaison.dev/content/repositories/soapui' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
 	}
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies {
@@ -51,7 +52,7 @@ buildscript {
 		// Flyway Plugin
 		// License: Apache v2
         classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
-		classpath "com.oracle:ojdbc6:11g-11.2.0.3.0"
+		classpath "com.oracle.jdbc:ojdbc7:${oracleVersion}"
 
 		// SOAP UI
 		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
@@ -192,8 +193,8 @@ dependencies {
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime 'com.oracle:ojdbc6:${oracleVersion}'
-	compile 'com.oracle:ucp:${oracleVersion}'
+	runtime 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
+	compile 'com.oracle.jdbc:ucp:${oracleVersion}'
 
 	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
 	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
@@ -207,11 +208,11 @@ dependencies {
 
 	compile 'com.liaison.commons:lib_message_bus:8.+'
 
-	compile "com.liaison.commons:lib_health_monitor_core:2.+"
-	compile "com.liaison.commons:lib_health_monitor_file:2.+"
-	compile "com.liaison.commons:lib_health_monitor_jdbc:2.+"
+	compile "com.liaison.commons:lib_health_monitor_core:3.+"
+	compile "com.liaison.commons:lib_health_monitor_file:3.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:3.+"
 	compile "com.liaison.commons:lib_health_monitor_spectrum:2.+"
-	compile "com.liaison.commons:lib_health_monitor_threadpool:2.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:3.+"
 	
 	// reusable utilities / framework components
 	compile project(':service-framework')
@@ -221,7 +222,7 @@ dependencies {
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
-	jdbc "com.oracle:ojdbc6:${oracleVersion}"
+	jdbc "com.oracle.jdbc:ojdbc7:${oracleVersion}"
 
 	//Dependency for UM integration
 	compile "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
