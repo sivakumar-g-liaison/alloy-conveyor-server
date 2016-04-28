@@ -149,7 +149,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             //SID_CHECK FOR PROCESSOR STATUS
             if (!disableFilter) {
-                query.append(" AND si.pguid = :");
+                query.append(" AND si.name = :");
                 query.append(SERV_INST_ID);
             }
 
