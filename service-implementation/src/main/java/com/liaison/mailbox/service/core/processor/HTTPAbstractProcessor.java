@@ -40,8 +40,7 @@ public abstract class HTTPAbstractProcessor {
 	/**
 	 * This method will validate the size of the request.
 	 *
-	 * @param request
-	 *            The HttpServletRequest
+	 * @param contentLength the content length
 	 */
 	public  void validateRequestSize(long contentLength) {
 		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
@@ -91,8 +90,8 @@ public abstract class HTTPAbstractProcessor {
 	 *
 	 * @param mailboxInfo
 	 *            it can be either mailbox Pguid or mailbox Name
-	 * @param isMailboxIdAvailableAsQueryParam
-	 *            boolean specify if mailboxId 
+	 * @param isMailboxIdAvailable
+	 *            boolean specify if mailboxId presents
 	 * @return
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
@@ -114,7 +113,7 @@ public abstract class HTTPAbstractProcessor {
 	 * Method to retrieve the mailbox from the pguid and return the value of
 	 * HTTPListener propery "Http Listner Auth Check Required "
 	 *
-	 * @param mailboxpguid
+	 * @param httpListenerProperties
 	 * @return
 	 * @throws Exception
 	 */
