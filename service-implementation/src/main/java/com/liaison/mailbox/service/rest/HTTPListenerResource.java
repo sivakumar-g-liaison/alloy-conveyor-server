@@ -229,7 +229,7 @@ public class HTTPListenerResource extends AuditedResource {
 							httpListenerProperties, request.getContentType());
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
 					        syncResponse.getStatus(),
-					        mailboxName);
+							mailboxInfo);
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
