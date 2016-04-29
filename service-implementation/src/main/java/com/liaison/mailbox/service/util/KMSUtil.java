@@ -40,13 +40,16 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 public class KMSUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(KMSUtil.class);
-	public static final String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
-	public static final String UTF_ENCODE = "UTF-8";
+	private static final String SECRET = "/secret/";
+	private static final String GROUP_KEYPAIR = "/fetch/group/keypair/current/";
+	private static final String GROUP_TRUSTSTORE = "/fetch/truststore/current/";
+	private static final String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
+	private static final String UTF_ENCODE = "UTF-8";
 
 	/**
 	 * Util method get stored secret from KMS
 	 *
-	 * @param guid
+	 * @param guid stored secret guid
 	 * @return String
 	 * @throws MalformedURLException
 	 * @throws LiaisonException
@@ -60,7 +63,7 @@ public class KMSUtil {
 		// setting the request headers in the request to key manager from gem
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + URLEncoder.encode(guid, UTF_ENCODE);
+		String url = getKeyManagementUrl(SECRET + URLEncoder.encode(guid, UTF_ENCODE));
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
@@ -87,11 +90,6 @@ public class KMSUtil {
 
 		byte[] privateKeyBytes = null;
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
-		url = url + "fetch/group/keypair/current/";
-
-		// To be fetched from DataBase
-		url = url + URLEncoder.encode(keypairPguid, UTF_ENCODE);
 		// get gem manifest response from GEM
 		GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
 
@@ -99,6 +97,7 @@ public class KMSUtil {
 		// manifest response
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
+		String url = getKeyManagementUrl(GROUP_KEYPAIR + URLEncoder.encode(keypairPguid, UTF_ENCODE));
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
@@ -126,17 +125,12 @@ public class KMSUtil {
 
 		InputStream is = null;
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
-		url = url + "fetch/truststore/current/";
-
-		// To be fetched from DataBase
-		url = url + URLEncoder.encode(trustStoreId, UTF_ENCODE);
-
 		// get gem manifest response from GEM
 		GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
 
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
+		String url = getKeyManagementUrl(GROUP_TRUSTSTORE + URLEncoder.encode(trustStoreId, UTF_ENCODE));
         LOGGER.debug("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 

@@ -130,7 +130,7 @@ public class StorageUtilities {
 
 		try {
 			URI payloadURI = new URI(payloadURL);
-			LOGGER.debug("Retrieving payload from spectrum");
+			LOGGER.debug("Retrieving payload from fs2 storage");
 			return FS2.getFS2PayloadInputStream(payloadURI);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
 			LOGGER.error(Messages.PAYLOAD_READ_ERROR.value(), e);
@@ -140,13 +140,13 @@ public class StorageUtilities {
 
 	/**
 	 * A helper method to persist the payload into spectrum(secure/unsecure)/boss(secure/unsecure) and file system.
-	 * 
+	 *
 	 * @param payload
-	 * @param globalProcessId
-	 * @param fs2Headers
-	 * @param isSecure
-	 * @return
-	 */
+	 * @param workTicket
+	 * @param httpListenerProperties
+	 * @param isDropbox
+     * @return
+     */
 	public static FS2MetaSnapshot persistPayload(InputStream payload, WorkTicket workTicket,
 			Map<String, String> httpListenerProperties, boolean isDropbox) {
 
@@ -179,11 +179,11 @@ public class StorageUtilities {
 			FS2MetaSnapshot metaSnapshot = null;
 			try (InputStream is = payload) {
 				metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, is);
-				LOGGER.debug("Time spent on uploading file {} of size {} to spectrum only is {} ms",
+				LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
 						workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
 			}
 
-			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
+			LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
 			return metaSnapshot;
 
 		} catch (FS2ObjectAlreadyExistsException e) {
@@ -198,12 +198,10 @@ public class StorageUtilities {
 	/**
 	 * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
 	 * 
-	 * @param payload
-	 * @param globalProcessId
-	 * @param fs2Headers
-	 * @param isSecure
-	 * @return
-	 */
+	 * @param workTicket
+	 * @param properties
+     * @return
+     */
 	public static FS2MetaSnapshot persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
 
 		try {
@@ -278,9 +276,10 @@ public class StorageUtilities {
 	 * location don't match a configured value.
 	 * 
 	 * @param path
-	 * @param secure
-	 * @return
-	 */
+	 * @param type
+	 * @param location
+     * @return
+     */
 	public static URI createPayloadURI(String path, String type, String location) {
 
 		URI uri = null;
@@ -344,10 +343,12 @@ public class StorageUtilities {
 	/**
 	 * This method will persist payload in spectrum or boss.
 	 * 
-	 * @param request
+	 * @param stream
 	 * @param workTicket
-	 * @throws IOException
-	 */
+	 * @param httpListenerProperties
+	 * @param isDropbox
+     * @throws Exception
+     */
 	public static void storePayload(InputStream stream, WorkTicket workTicket,
 			Map<String, String> httpListenerProperties, boolean isDropbox)
 			throws Exception {

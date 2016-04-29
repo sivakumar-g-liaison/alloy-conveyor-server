@@ -62,6 +62,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class MailboxWatchDogResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxWatchDogResource.class);
+	private static final String TYPE = "type";
+	private static final String MAILBOX_STATUS = "mailboxstatus";
+	private static final String SWEEPER = "sweeper";
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -97,8 +100,8 @@ public class MailboxWatchDogResource extends AuditedResource {
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
 	public Response updateStatus(@Context final HttpServletRequest request, 
-			@QueryParam(value = "type") @ApiParam(name = "type", required = false, value = "Type of the SLA to be checked.") final String type,
-			@QueryParam(value = "mailboxstatus") @ApiParam(name = "mailboxstatus", required = false, value = "status of mailbox") final String mailboxStatus) {
+			@QueryParam(value = TYPE) @ApiParam(name = TYPE, required = false, value = "Type of the SLA to be checked.") final String type,
+			@QueryParam(value = MAILBOX_STATUS) @ApiParam(name = MAILBOX_STATUS, required = false, value = "status of mailbox") final String mailboxStatus) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -109,7 +112,7 @@ public class MailboxWatchDogResource extends AuditedResource {
 				try {
 					LOG.debug("Entering into mailbox watchdog resource");
 
-					if (!MailBoxUtil.isEmpty(type) && "sweeper".equals(type.toLowerCase())) {
+					if (!MailBoxUtil.isEmpty(type) && SWEEPER.equals(type.toLowerCase())) {
 						// validate the sla rules of all mailboxes
 						new MailboxWatchDogService().validateMailboxSLARule(mailboxStatus);
 					} else {
