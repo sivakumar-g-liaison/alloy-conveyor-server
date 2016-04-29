@@ -23,7 +23,6 @@ import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -36,10 +35,23 @@ public class TransactionVisibilityClient {
 	public static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
 	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
 	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
-	final String DEFAULT_SENDER_PGUID = "00000000000000000000000000000000";
 
-	protected static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 	private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
+
+	private static final String PROCESSOR_EXEC_ID = "proc-exec-id";
+	private static final String MAILBOX_ID = "mailbox-id";
+	private static final String MAILBOX_NAME = "mailbox-name";
+	private static final String PROCESSOR_ID = "processor-id";
+	private static final String TENANCY_KEY = "tenancy-key";
+	private static final String SIID = "siid";
+	private static final String INBOUND_PIPELINE_ID = "inbound-pipeline-id";
+	private static final String OUTBOUND_PIPELINE_ID = "outbound-pipeline-id";
+	private static final String TRANSFER_PROFILE_NAME = "transfer-profile-name";
+	private static final String STAGED_FILE_ID = "staged-file-id";
+	private static final String META = "meta";
+	private static final String INBOUND_FILE_NAME = "inboundfilename";
+	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
 
 	private TransactionVisibilityAPI visibilityAPI;
 
@@ -57,84 +69,91 @@ public class TransactionVisibilityClient {
 
 		if (!MailBoxUtil.isEmpty(message.getExecutionId())) {
 			item = new MapItemType();
-			item.setKey("proc-exec-id");
+			item.setKey(PROCESSOR_EXEC_ID);
 			item.setValue(message.getExecutionId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMailboxId())) {
 			item = new MapItemType();
-			item.setKey("mailbox-id");
+			item.setKey(MAILBOX_ID);
 			item.setValue(message.getMailboxId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 		
 		if (!MailBoxUtil.isEmpty(message.getMailboxName())) {
 			item = new MapItemType();
-			item.setKey("mailbox-name");
+			item.setKey(MAILBOX_NAME);
 			item.setValue(message.getMailboxName());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
 			item = new MapItemType();
-			item.setKey("processor-id");
+			item.setKey(PROCESSOR_ID);
 			item.setValue(message.getProcessorId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTenancyKey())) {
 			item = new MapItemType();
-			item.setKey("tenancy-key");
+			item.setKey(TENANCY_KEY);
 			item.setValue(message.getTenancyKey());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getServiceInstandId())) {
 			item = new MapItemType();
-			item.setKey("siid");
+			item.setKey(SIID);
 			item.setValue(message.getServiceInstandId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (!MailBoxUtil.isEmpty(message.getPipelineId())) {
+		if (!MailBoxUtil.isEmpty(message.getInboundPipelineId())) {
 			item = new MapItemType();
-			item.setKey("pipeline-id");
-			item.setValue(message.getPipelineId());
+			item.setKey(INBOUND_PIPELINE_ID);
+			item.setValue(message.getInboundPipelineId());
+			visibilityAPI.getAdditionalInformation().add(item);
+		}
+
+		if (!MailBoxUtil.isEmpty(message.getOutboundPipelineId())) {
+			item = new MapItemType();
+			item.setKey(OUTBOUND_PIPELINE_ID);
+			item.setValue(message.getOutboundPipelineId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTransferProfileName())) {
 			item = new MapItemType();
-			item.setKey("tranfer-profile-name");
+			item.setKey(TRANSFER_PROFILE_NAME);
 			item.setValue(message.getTransferProfileName());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getStagedFileId())) {
 			item = new MapItemType();
-			item.setKey("staged-file-id");
+			item.setKey(STAGED_FILE_ID);
 			item.setValue(message.getStagedFileId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMeta())) {
 			item = new MapItemType();
-			item.setKey("meta");
+			item.setKey(META);
 			item.setValue(message.getMeta());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getInboundFileName())) {
             item = new MapItemType();
-            item.setKey("inboundfilename");
+            item.setKey(INBOUND_FILE_NAME);
             item.setValue(message.getInboundFileName());
             visibilityAPI.getAdditionalInformation().add(item);
         }
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundFileName())) {
             item = new MapItemType();
-            item.setKey("outboundfilename");
+            item.setKey(OUTBOUND_FILE_NAME);
             item.setValue(message.getOutboundFileName());
             visibilityAPI.getAdditionalInformation().add(item);
         }
@@ -147,35 +166,7 @@ public class TransactionVisibilityClient {
 			}
 		}
 
-		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.P);
-			if (null != message.getInSize()) {
-			    visibilityAPI.setInSize(message.getInSize());
-			}
-	        visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
-	        visibilityAPI.setInAgent(message.getInAgent());
-		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.B);
-		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.R);
-			if (null != message.getOutSize()) {
-                visibilityAPI.setOutSize(message.getOutSize());
-            }
-		} else if (ExecutionState.FAILED.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.F);
-		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.S);
-			if (null != message.getOutSize()) {
-			    visibilityAPI.setOutSize(message.getOutSize());
-            }
-			visibilityAPI.setOutAgent(message.getOutAgent());
-		} else if (ExecutionState.SKIPPED.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.N);
-		} else if (ExecutionState.STAGED.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.G);
-		} else if (ExecutionState.DUPLICATE.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.U);
-		}
+		handleExecutionState(message);
 
 		visibilityAPI.setId(message.getGlobalPId());
 		visibilityAPI.setGlobalId(message.getGlobalPId());
@@ -187,5 +178,51 @@ public class TransactionVisibilityClient {
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
 		        message.getGlobalPId(), visibilityAPI.getId());
 		
+	}
+
+	/**
+	 *
+	 * @param message
+     */
+	private void handleExecutionState(GlassMessage message) {
+
+		switch (message.getStatus()) {
+			case PROCESSING :
+				visibilityAPI.setStatus(StatusCode.P);
+				if (null != message.getInSize()) {
+					visibilityAPI.setInSize(message.getInSize());
+				} else {
+					logger.warn("The inbound size is null for the gpid {}", message.getGlobalPId());
+				}
+				visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+				visibilityAPI.setInAgent(message.getInAgent());
+				break;
+			case QUEUED :
+				visibilityAPI.setStatus(StatusCode.B);
+				break;
+			case READY :
+				visibilityAPI.setStatus(StatusCode.R);
+				if (null != message.getOutSize()) {
+					visibilityAPI.setOutSize(message.getOutSize());
+				}
+				break;
+			case COMPLETED :
+				visibilityAPI.setStatus(StatusCode.S);
+				if (null != message.getOutSize()) {
+					visibilityAPI.setOutSize(message.getOutSize());
+				}
+				visibilityAPI.setOutAgent(message.getOutAgent());
+				break;
+			case SKIPPED :
+				visibilityAPI.setStatus(StatusCode.N);
+				break;
+			case STAGED :
+				visibilityAPI.setStatus(StatusCode.G);
+				break;
+			case DUPLICATE :
+				visibilityAPI.setStatus(StatusCode.U);
+				break;
+		}
+
 	}
 }

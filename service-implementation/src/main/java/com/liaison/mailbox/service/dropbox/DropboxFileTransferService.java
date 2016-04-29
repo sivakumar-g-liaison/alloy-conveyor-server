@@ -70,12 +70,13 @@ public class DropboxFileTransferService {
 	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
 	/**
-	 * @param request
-	 * @param profileId
-	 * @param aclManifest
-	 * @return DropboxTransferContentResponseDTO
-	 * @throws Exception
-	 */
+	 *
+	 * @param workTicket
+	 * @param fileTransferDTO
+	 * @param aclManifestJson
+	 * @return
+     * @throws Exception
+     */
 	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferMetaDTO fileTransferDTO, String aclManifestJson)
 			throws Exception {
 
@@ -294,7 +295,7 @@ public class DropboxFileTransferService {
             glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
             glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
             glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-            glassMessage.setPipelineId(workTicket.getPipelineId());
+            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
             glassMessage.setInSize(workTicket.getPayloadSize());
             glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
@@ -329,11 +330,11 @@ public class DropboxFileTransferService {
 	}
 
 	/**
-	 * @param request
+	 *
 	 * @param aclManifest
 	 * @return
 	 * @throws IOException
-	 */
+     */
 	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest)
 			throws IOException {
 

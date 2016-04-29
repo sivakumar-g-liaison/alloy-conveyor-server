@@ -62,17 +62,6 @@ public class ExecutionTimestamp
 		return new ExecutionTimestamp(name, UUIDGen.getCustomUUID(), new Date(), TimestampType.Start);
 	}
 
-	/**
-	 * Handy means to end a timestamp
-	 * 
-	 * @param beginTimestamp ExecutionTimestamp
-	 * @return ExecutionTimestamp instance
-	 */
-	public static ExecutionTimestamp endTimestampFor(ExecutionTimestamp beginTimestamp) {
-		return new ExecutionTimestamp(beginTimestamp.getName(), beginTimestamp.getSessionID(), new Date(),
-				TimestampType.End);
-	}
-
 	public static ExecutionTimestamp endTimestamp(String name) {
 		return new ExecutionTimestamp(name, null, new Date(), TimestampType.End);
 	}

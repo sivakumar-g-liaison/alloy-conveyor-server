@@ -59,7 +59,7 @@ public class GlassMessage {
 
 	public GlassMessage(WorkTicket wrkTicket) {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());
-		this.setPipelineId(wrkTicket.getPipelineId());
+		this.setOutboundPipelineId(wrkTicket.getPipelineId());
 		Long payloadSize = wrkTicket.getPayloadSize();
 		if (payloadSize != null && payloadSize != -1L) {
 			this.setOutSize(payloadSize);
@@ -84,7 +84,8 @@ public class GlassMessage {
 	private String tenancyKey;
 	private String serviceInstandId;
 	private String protocol;
-	private String pipelineId;
+	private String inboundPipelineId;
+	private String outboundPipelineId;
 	private GatewayType inAgent;
 	private GatewayType outAgent;
 	private String message;
@@ -168,12 +169,20 @@ public class GlassMessage {
         }
     }
 
-	public String getPipelineId() {
-		return pipelineId;
+	public String getInboundPipelineId() {
+		return inboundPipelineId;
 	}
 
-	public void setPipelineId(String pipelineId) {
-		this.pipelineId = pipelineId;
+	public void setInboundPipelineId(String inboundPipelineId) {
+		this.inboundPipelineId = inboundPipelineId;
+	}
+
+	public String getOutboundPipelineId() {
+		return outboundPipelineId;
+	}
+
+	public void setOutboundPipelineId(String outboundPipelineId) {
+		this.outboundPipelineId = outboundPipelineId;
 	}
 
 	public String getProtocol() {
@@ -358,6 +367,10 @@ public class GlassMessage {
 		return constructTimeStampAPI(ExecutionTimestamp.buildGlassTimeStamp(timestamp));
 	}
 
+	public String getPipelineId() {
+		return getInboundPipelineId() == null ? getOutboundPipelineId() : getInboundPipelineId();
+	}
+
 	private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
 
 		TimeStampAPI timeStampAPI = new TimeStampAPI();
@@ -374,6 +387,7 @@ public class GlassMessage {
 
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+		String pipelineId = getInboundPipelineId() == null ? getOutboundPipelineId() : getInboundPipelineId();
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
 		activityStatusAPI.setGlobalId(getGlobalPId());

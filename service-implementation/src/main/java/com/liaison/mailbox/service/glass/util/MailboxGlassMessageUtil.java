@@ -104,11 +104,8 @@ public class MailboxGlassMessageUtil {
 
         GlassMessage glassMessage = new GlassMessage();
         glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-        glassMessage.setPipelineId(wrkTicket.getPipelineId());
-        Long payloadSize = wrkTicket.getPayloadSize();
-        if (payloadSize != null && payloadSize != -1L) {
-            glassMessage.setOutSize(payloadSize);
-        }
+        glassMessage.setOutboundPipelineId(wrkTicket.getPipelineId());
+        glassMessage.setOutSize(wrkTicket.getPayloadSize());
 
         glassMessage.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
         glassMessage.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));

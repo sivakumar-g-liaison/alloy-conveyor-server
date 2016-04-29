@@ -183,8 +183,6 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
 		}
 
 		 metricAPI.setGlassMessageId(UUIDGen.getCustomUUID());
-		// metricAPI.setPipelineProcessId(messageContext.getPipelineProcessID());
-		// metricAPI.setGlobalId(messageContext.getGlobalProcessID());
 		 metricAPI.setMetric(m);
 		 logger.info(GlassMessageMarkers.METRICS_GM_MARKER, metricAPI);
 	}
