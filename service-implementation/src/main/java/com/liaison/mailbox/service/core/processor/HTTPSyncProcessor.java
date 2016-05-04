@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -133,7 +135,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
 				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
 				if (responseInputStream != null) {
-					builder.entity(responseInputStream);
+					builder.entity(IOUtils.toString(responseInputStream, CharEncoding.UTF_8));
 				}
 			} else {
 				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
