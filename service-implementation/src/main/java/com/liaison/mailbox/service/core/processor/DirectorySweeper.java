@@ -604,7 +604,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 configurationInstance.getProcessorType(),
                 configurationInstance.getProcsrProtocol(),
                 wrkTicket.getFileName(),
-                null,
+				wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString(),
                 wrkTicket.getPayloadSize(),
                 ExecutionState.PROCESSING,
                 message.toString(),
