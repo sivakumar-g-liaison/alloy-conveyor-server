@@ -187,7 +187,8 @@ public class MailboxWatchDogService {
                                     filePath,
                                     0,
                                     ExecutionState.FAILED,
-                                    "File is deleted by clean up process");
+                                    "File is deleted by clean up process",
+									null);
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} : Unable to delete a stale file {} in the filePath {}"), processor.getPguid(), fileName, filePath);
@@ -216,7 +217,8 @@ public class MailboxWatchDogService {
                                 filePath,
                                 0,
                                 ExecutionState.FAILED,
-                                "File is picked up by another process");
+                                "File is picked up by another process",
+								null);
 		                inactiveStagedFile(stagedFile, updatedStatusList);
 				    }
 					continue;
@@ -230,7 +232,8 @@ public class MailboxWatchDogService {
                         filePath,
                         0,
                         ExecutionState.COMPLETED,
-                        "File is picked up by the customer or another process");
+                        "File is picked up by the customer or another process",
+						null);
                 LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
                 inactiveStagedFile(stagedFile, updatedStatusList);
 

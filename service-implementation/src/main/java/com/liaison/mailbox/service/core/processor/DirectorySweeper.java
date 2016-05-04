@@ -607,7 +607,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 null,
                 wrkTicket.getPayloadSize(),
                 ExecutionState.PROCESSING,
-                message.toString());
+                message.toString(),
+				wrkTicket.getPipelineId());
 
     }	
     

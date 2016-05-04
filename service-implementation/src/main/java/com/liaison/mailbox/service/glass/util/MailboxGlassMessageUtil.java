@@ -55,7 +55,8 @@ public class MailboxGlassMessageUtil {
             final String filePath,
             final long fileLength,
             final ExecutionState status,
-            final String message) {
+            final String message,
+            final String pipelineId) {
 
         TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
         GlassMessage glassMessage = new GlassMessage();
@@ -63,7 +64,6 @@ public class MailboxGlassMessageUtil {
         glassMessage.setCategory(processorType);
         glassMessage.setProtocol(processProtocol);
         glassMessage.setStatus(status);
-        glassMessage.setOutboundFileName(fileName);
 
         if (ExecutionState.COMPLETED.equals(status)) {
             glassMessage.setOutAgent(processProtocol);
@@ -76,10 +76,17 @@ public class MailboxGlassMessageUtil {
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         } else if (ExecutionState.DUPLICATE.equals(status)) {
             glassMessage.setOutAgent(processProtocol);
+            glassMessage.setOutboundFileName(fileName);
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.PROCESSING.equals(status)) {
 
-            glassMessage.setInAgent(processProtocol);
+            if (ProcessorType.SWEEPER.equals(processorType)) {
+                glassMessage.setInAgent(filePath);
+            } else {
+                glassMessage.setInAgent(processProtocol);
+            }
+            glassMessage.setInboundFileName(fileName);
+            glassMessage.setInboundPipelineId(pipelineId);
             glassMessage.setInSize(fileLength);
 
             // Fourth corner timestamp
@@ -92,7 +99,10 @@ public class MailboxGlassMessageUtil {
                 logProcessingStatus(glassMessage, StatusType.QUEUED, "Workticket queued for file " + fileName);
             }
         } else if (ExecutionState.READY.equals(status)) {
+
             glassMessage.setOutAgent(processProtocol);
+            glassMessage.setOutboundFileName(fileName);
+            glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
         }
 

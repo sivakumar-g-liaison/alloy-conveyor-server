@@ -209,9 +209,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 /**
      * Logs TVAPI status and event message in LENS
      *
-     * @param message Message String to be logged in LENS event log
-     * @param file java.io.File
-     * @param status Status of the LENS logging
+     * @param files file names
      */
 	protected void logGlassMessage(List<String> files) {
 
@@ -240,7 +238,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     stagedFile.getFilePath(),
                     0,
                     ExecutionState.COMPLETED,
-                    message.toString());
+                    message.toString(),
+					null);
 
             // Inactivate the stagedFile
             stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
@@ -263,7 +262,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @param response payload
 	 * @param targetLocation location to write the payload
 	 * @param filename file name 
-	 * @param isOverwrite whether to overwrite or not
 	 * @return true if it is successfully written the file to the location, otherwise false
 	 * @throws IOException
 	 */

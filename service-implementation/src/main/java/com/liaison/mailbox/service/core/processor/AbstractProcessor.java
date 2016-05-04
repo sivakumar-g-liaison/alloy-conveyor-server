@@ -983,7 +983,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                     file.getPath(),
                     file.length(),
                     status,
-                    message);
+                    message,
+					null);
         }
     }
 
@@ -1013,7 +1014,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 filePath,
                 0,
                 ExecutionState.DUPLICATE,
-                message.toString());
+                message.toString(),
+				null);
 	}
 
     @Override
