@@ -788,6 +788,7 @@ public class ProcessorConfigurationService {
 							String.valueOf(authCheckRequired));
 					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, processor.getMailbox().getPguid());
 					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, processor.getMailbox().getMbxName());
+					httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
 					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
 					if(!ttlMap.isEmpty())
 					{
