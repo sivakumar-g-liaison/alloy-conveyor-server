@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -46,6 +48,7 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
@@ -494,4 +497,24 @@ public class MailBoxUtil {
         LOGGER.debug("Current time is {}", currentTimestamp);
 		return fileValidity.before(currentTimestamp) ;
     }
+
+	/**
+	 * Method to get the storage type
+	 * 
+	 * @param dynamicProperties
+	 * @return storageType
+	 */
+	public static String getStorageType(Set<ProcessorProperty> dynamicProperties) {
+		
+		String storageType = null;
+		Iterator<ProcessorProperty> iterator = dynamicProperties.iterator();
+		while (iterator.hasNext()) {
+			ProcessorProperty property = iterator.next();
+			if (MailBoxConstants.STORAGE_IDENTIFIER_TYPE.equals(property.getProcsrPropName())) {
+				storageType = property.getProcsrPropValue();
+				break;
+			}
+		}
+		return storageType;
+	}
 }
