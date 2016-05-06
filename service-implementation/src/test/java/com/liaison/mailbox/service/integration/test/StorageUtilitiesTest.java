@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.util.StreamUtil;
@@ -61,17 +62,46 @@ public class StorageUtilitiesTest {
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
 		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(true));
 		properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, "12345678");
+		properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, "SPECTRUM");
 
 		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		System.out.println(metaSnapshot.getURI().toString());
 		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
-
-			String paylaod = new String(StreamUtil.streamToBytes(is));
-			logger.info("The received payload is \"{}\"", paylaod);
+			logger.info("The received payload is \"{}\"", new String(StreamUtil.streamToBytes(is)));
 		}
+		Assert.assertTrue((!metaSnapshot.getURI().toString().contains("boss")));
 
 	}
 
+	@Test
+	public void testWriteAndReadUnsecurePayloadInBOSS() throws IOException {
+		
+		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "test");
+
+		String exampleString = "This is the sample string";
+		InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
+
+		//Dummy headers
+		String globalProcessId = UUIDGen.getCustomUUID();
+
+		WorkTicket wTicket = new WorkTicket();
+		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
+		wTicket.setTtlDays(1);
+		Map <String, String>properties = new HashMap <String, String>();
+		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(true));
+		properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, "12345678");
+		properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, "BOSS");
+
+		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
+		System.out.println(metaSnapshot.getURI().toString());
+		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
+			logger.info("The received payload is \"{}\"", new String(StreamUtil.streamToBytes(is)));
+		}
+		Assert.assertTrue(metaSnapshot.getURI().toString().contains("boss"));
+
+	}
 	//@Test
 	public void readAPalyload() throws Exception {
 
@@ -118,9 +148,7 @@ public class StorageUtilitiesTest {
 
 		FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
-
-			String paylaod = new String(StreamUtil.streamToBytes(is));
-			logger.info("The received payload is \"{}\"", paylaod);
+			logger.info("The received payload is \"{}\"", new String(StreamUtil.streamToBytes(is)));
 		}
 
 	}

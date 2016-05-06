@@ -147,6 +147,7 @@ public interface MailBoxConstants {
 	public final static String KEY_TARGET_DIRECTORY = "targetDirectory";
 	public final static String KEY_TARGET_DIRECTORY_MODE = "targetDirectoryMode";
 	public final static String KEY_MAILBOX_NAME = "mailboxName";
+	public static final String STORAGE_IDENTIFIER_TYPE = "Storage Type";
 
 	public final static String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
