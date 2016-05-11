@@ -1,44 +1,27 @@
 angular.module(
-	    'myApp.copyToClipboard', []
-	    ).directive('copyToClipboard', function copyClipboardDirective() {
-    var clip;
-    function link(scope, element) {
-        function clipboardSimulator() {
-            var self = this,
-                textarea,
-                container;
-            function createTextarea() {
-                if (!self.textarea) {
-                    container = document.createElement('div');
-                    container.id = 'simulate-clipboard-container';
-                    container.setAttribute('style', ['position: fixed;', 'left: 0px;', 'top: 0px;', 'width: 0px;', 'height: 0px;', 'z-index: 100;', 'opacity: 0;', 'display: block;'].join(''));
-                    document.body.appendChild(container);
-                    textarea = document.createElement('textarea');
-                    textarea.setAttribute('style', ['width: 1px;', 'height: 1px;', 'padding: 0px;'].join(''));
-                    textarea.id = 'simulate-clipboard';
-                    self.textarea = textarea;
-                    container.appendChild(textarea);
-                }
-            }
-            createTextarea();
-        }
-        clipboardSimulator.prototype.copy = function() {
-            this.textarea.innerHTML = '';
-            this.textarea.appendChild(document.createTextNode(scope.textToCopy));
-            this.textarea.focus();
-            this.textarea.select();         
-            document.execCommand('copy');
-        };
-        clip = new clipboardSimulator();
-        element[0].addEventListener('click', function() {
-            clip.copy();
-        });
-    }
-    return {
-        restrict: 'A',
-        link: link,
-        scope: {
-            textToCopy: '='
-        }
-    };
+	'myApp.copyToClipboard', []
+).directive('copyToClipboard', function($window) {
+	var body = angular.element($window.document.body);
+	var textarea = angular.element('<textarea/>');
+	textarea.css({
+		position: 'fixed',
+		opacity: '0'
+	});
+
+	function copy(toCopy) {
+		textarea.val(toCopy);
+		body.append(textarea);
+		textarea[0].select();
+		document.execCommand('copy');
+		textarea.remove();
+	}
+	
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			element.bind('click', function(e) {
+				copy(attrs.copyToClipboard);
+			});
+		}
+	};
 });

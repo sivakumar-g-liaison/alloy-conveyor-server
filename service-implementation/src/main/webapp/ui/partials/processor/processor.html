@@ -302,14 +302,14 @@
 				<div class="input-group">
 					<input type="text" class="form-control" ng-model="processorUrlDisplayContentById" ng-show = "isEdit && isProcessorTypeHTTPListener" readonly = "readonly" id="Processor_url" rows="2" name="processorurl"/>
 						<span class="input-group-btn">
-							<button class="btn" copy-to-clipboard text-to-copy="processorUrlDisplayContentById"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
+							<button class="btn" copy-to-clipboard="{{processorUrlDisplayContentById}}"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
 						</span>
 				</div>
 				</br>
 				<div class="input-group">
 					<input type="text" class="form-control" ng-model="processorUrlDisplayContentByName" ng-show = "isEdit && isProcessorTypeHTTPListener" readonly = "readonly" id="Processor_url" rows="2" name="processorurl"/>
 						<span class="input-group-btn">
-							<button class="btn" copy-to-clipboard text-to-copy="processorUrlDisplayContentByName"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
+							<button class="btn" copy-to-clipboard="{{processorUrlDisplayContentByName}}"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
 						</span>
 				</div>
 			</div>       
