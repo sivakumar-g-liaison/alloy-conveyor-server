@@ -1,4 +1,4 @@
-4.3.0-SNAPSHOT
+4.3.0
 -------------------------------
 GMB-768 - Able to save processors even without providing password for FTP and SFTP protocols.
 GMB-776 - Config Status is displayed as "Incomplete Configuration" for all mailbox.
