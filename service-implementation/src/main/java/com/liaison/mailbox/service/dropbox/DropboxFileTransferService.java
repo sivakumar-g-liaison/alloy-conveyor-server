@@ -244,6 +244,7 @@ public class DropboxFileTransferService {
     		properties.put(MailBoxConstants.KEY_TENANCY_KEY, fileTransferDTO.getTenancyKey());
     		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
     		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
+			properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
 
     		workTicket.setPipelineId(pipeLineId);
     		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);

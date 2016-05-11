@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,6 +73,13 @@ public class StorageUtilities {
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE = "fs2.storage.file.default.type";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION = "fs2.storage.file.default.location";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT = "fs2.storage.file.default.mount";
+	
+	/**
+	 * Constants of Storage Identifiers
+	 */
+	public static final String SPECTRUM_STORAGE_IDENTIFIER = "SPECTRUM";
+    public static final String BOSS_STORAGE_IDENTIFIER = "BOSS";
+	public static final String STORAGE_IDENTIFIER_BOSS_SUFFIX = "-boss";
 
 	/**
 	 * Moniker to identify secure and unsecure
@@ -173,7 +181,7 @@ public class StorageUtilities {
 
 			// persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
-			URI requestUri = createPayloadURI(uri, isSecure);
+			URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
 
 			// fetch the metdata includes payload size
 			FS2MetaSnapshot metaSnapshot = null;
@@ -219,7 +227,7 @@ public class StorageUtilities {
 
 			// persists the message in spectrum.
 			LOGGER.debug("Persist the workticket **");
-			URI requestUri = createPayloadURI(uri, false);
+			URI requestUri = createPayloadURI(uri, false, properties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
 
 			// fetch the metdata includes payload size
 			FS2MetaSnapshot metaSnapshot = null;
@@ -247,9 +255,10 @@ public class StorageUtilities {
 	 * 
 	 * @param path
 	 * @param secure
+	 * @param storageIdentifier
 	 * @return
 	 */
-	public static URI createPayloadURI(String path, boolean secure) {
+	public static URI createPayloadURI(String path, boolean secure, String storageIdentifier) {
 
 		URI uri = null;
 		boolean defaultFileuse = configuration.getBoolean(PROPERTY_FS2_STORAGE_FILE_DEFAULT_USE, false);
@@ -261,15 +270,43 @@ public class StorageUtilities {
 			return uri;
 		}
 
-		String defaultLocation = configuration.getString(PROPERTY_LOCATION_DEFAULT);
 		if (secure) {
-			uri = createPayloadURI(path, SECURE_MONIKER, defaultLocation);
+			uri = createPayloadURI(path, SECURE_MONIKER, getStorageIdentifierType(storageIdentifier));
 		} else {
-			uri = createPayloadURI(path, UNSECURE_MONIKER, defaultLocation);
+			uri = createPayloadURI(path, UNSECURE_MONIKER, getStorageIdentifierType(storageIdentifier));
 		}
 
 		return uri;
 	}
+	
+	/**
+	 * A helper method to get the storageIdentifier type.
+	 * 
+	 * @param storageIdentifier
+	 * @return string
+	 */
+	private static String getStorageIdentifierType(String storageIdentifier) {
+
+        String defaultLocation = configuration.getString(PROPERTY_LOCATION_DEFAULT);
+        if (StringUtils.isEmpty(storageIdentifier)) {
+            return defaultLocation;
+        } else {
+
+            switch (storageIdentifier.toUpperCase()) {
+                case BOSS_STORAGE_IDENTIFIER:
+                    return defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
+                            ? defaultLocation
+                            : defaultLocation + STORAGE_IDENTIFIER_BOSS_SUFFIX;
+                case SPECTRUM_STORAGE_IDENTIFIER:
+                    return defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
+                            ? defaultLocation.substring(0, defaultLocation.lastIndexOf("-"))
+                            : defaultLocation;
+                default:
+                    LOGGER.warn("Invalid storage identifier - {}, and using default storage - {}.", storageIdentifier, defaultLocation);
+                    return defaultLocation;
+            }
+        }
+    }
 
 	/**
 	 * A helper method to automatically create a spectrum URI in the format needed. Throws an exception if the type and

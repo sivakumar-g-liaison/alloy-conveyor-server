@@ -56,6 +56,18 @@
             "defaultValue":"false",
             "validationRules": null,
             "options":["false","true"]          
+        },
+        {
+        "name":"add new -->",
+        "displayName" : "add new -->",
+        "value":"",
+        "type":"textarea",
+        "readOnly":false,
+        "mandatory":false,
+        "dynamic": true,
+        "valueProvided":false,
+        "defaultValue":"",
+        "validationRules": null            
         }
     ],
     "folderProperties":[],
