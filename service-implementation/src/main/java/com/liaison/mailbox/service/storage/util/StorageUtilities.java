@@ -77,7 +77,8 @@ public class StorageUtilities {
 	/**
 	 * Constants of Storage Identifiers
 	 */
-	public static final String STORAGE_IDENTIFIER_DEFAULT_TYPE = "SPECTRUM";
+	public static final String SPECTRUM_STORAGE_IDENTIFIER = "SPECTRUM";
+    public static final String BOSS_STORAGE_IDENTIFIER = "BOSS";
 	public static final String STORAGE_IDENTIFIER_BOSS_SUFFIX = "-boss";
 
 	/**
@@ -254,7 +255,7 @@ public class StorageUtilities {
 	 * 
 	 * @param path
 	 * @param secure
-	 * @param string 
+	 * @param storageIdentifier
 	 * @return
 	 */
 	public static URI createPayloadURI(String path, boolean secure, String storageIdentifier) {
@@ -285,20 +286,27 @@ public class StorageUtilities {
 	 * @return string
 	 */
 	private static String getStorageIdentifierType(String storageIdentifier) {
-		
-		String defaultLocation = configuration.getString(PROPERTY_LOCATION_DEFAULT);
-		if (StringUtils.isEmpty(storageIdentifier)) {
-		    return defaultLocation;
-		} else {
-			return STORAGE_IDENTIFIER_DEFAULT_TYPE.equals(storageIdentifier)
-                    ? (!defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
+
+        String defaultLocation = configuration.getString(PROPERTY_LOCATION_DEFAULT);
+        if (StringUtils.isEmpty(storageIdentifier)) {
+            return defaultLocation;
+        } else {
+
+            switch (storageIdentifier.toUpperCase()) {
+                case BOSS_STORAGE_IDENTIFIER:
+                    return defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
                             ? defaultLocation
-                            : defaultLocation.substring(0, defaultLocation.lastIndexOf("-")))
-                    : ((defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
-                            ? defaultLocation
-                            : defaultLocation + STORAGE_IDENTIFIER_BOSS_SUFFIX));
-		}
-	}
+                            : defaultLocation + STORAGE_IDENTIFIER_BOSS_SUFFIX;
+                case SPECTRUM_STORAGE_IDENTIFIER:
+                    return defaultLocation.endsWith(STORAGE_IDENTIFIER_BOSS_SUFFIX)
+                            ? defaultLocation.substring(0, defaultLocation.lastIndexOf("-"))
+                            : defaultLocation;
+                default:
+                    LOGGER.warn("Invalid storage identifier - {}, and using default storage - {}.", storageIdentifier, defaultLocation);
+                    return defaultLocation;
+            }
+        }
+    }
 
 	/**
 	 * A helper method to automatically create a spectrum URI in the format needed. Throws an exception if the type and
