@@ -1,3 +1,7 @@
+4.3.1
+-------------------------------
+* GMB-777 Storage Type
+
 4.3.0
 -------------------------------
 GMB-768 - Able to save processors even without providing password for FTP and SFTP protocols.
