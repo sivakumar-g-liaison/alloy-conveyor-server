@@ -41,7 +41,8 @@ export SYSLOG_RING_BUFFER_SIZE=128
 export GLASS_SPECTRUM_PORT=443
 export GLASS_SPECTRUM_IP=at4p-spectrum-lens.liaison.prod
 export GLASS_SPECTRUM_USER=g2-aa-prod
-export GLASS_SPECTRUM_PASSWORD=L3nsAdm2
+# defined in secure_tomcat_env.sh
+export GLASS_SPECTRUM_PASSWORD=
 export GLASS_SPECTRUM_DATASPACE=g2-glass
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_NAME
 export GLASS_SPECTRUM_MESSAGE_TTL=36288000
@@ -52,7 +53,8 @@ export GLASS_RING_BUFFER_SIZE=262144
 export GLASS_METRIC_PORT=443
 export GLASS_METRIC_IP=at4p-vpspectrum.liaison.prod
 export GLASS_METRIC_USER=g2prod
-export GLASS_METRIC_PASSWORD=4Va2mHXK7bJPcbcjdWKc8QjVMa
+# defined in secure_tomcat_env.sh
+export GLASS_METRIC_PASSWORD=
 export GLASS_METRIC_DATASPACE=g2-prod
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
