@@ -67,6 +67,7 @@ public enum Messages {
 	NO_PROCESSORS_AVAIL("No Processors available matching the given criteria."),
 	PROCESSORS_LIST("The list of running processors are "),
 	NO_EXECUTING_PROCESSORS_AVAIL("No %s available"),
+	PROPERTY_DUPLICATE_ERROR("Property name should always be unique"),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),

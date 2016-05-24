@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
@@ -195,12 +194,18 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			}
 			ProcessorProperty property = null;
 			Set<ProcessorProperty> properties = new HashSet<>();
+			Set<String> propertySet = new HashSet<>();
 			for (PropertyDTO propertyDTO : this.getDynamicProperties()) {
+				
+				if(propertySet.contains(propertyDTO.getName())) {
+					throw new MailBoxConfigurationServicesException(Messages.PROPERTY_DUPLICATE_ERROR, Response.Status.BAD_REQUEST);
+				}
 				
 				validator.validate(propertyDTO);
 				property = new ProcessorProperty();
 				propertyDTO.copyToEntity(property, false);
 				property.setProcessor(processor);
+				propertySet.add(propertyDTO.getName());
 				properties.add(property);
 			}
 			if (!properties.isEmpty()) {

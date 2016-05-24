@@ -22,8 +22,23 @@ angular.module(
                              showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                              return;
                         }
-                         var isPropertyFound = false;
-                         scope.currentRowObject.valueProvided = true;
+                        
+                        var propertyCount = 0;
+                        var propertyToAdd = scope.currentRowObject.name;
+						for (var i = 0; i < scope.addedProperties.length; i++) {
+							var property = scope.addedProperties[i];
+							if (property.dynamic == true && propertyToAdd == property.name) {
+								propertyCount += 1;
+							}
+							
+							if (propertyCount > 1) {
+								showAlert('Property ' + propertyToAdd + ' already exists.', 'error');
+								return;
+							}
+						}
+						
+                        var isPropertyFound = false;
+                        scope.currentRowObject.valueProvided = true;
                         for (var i = 0; i < scope.availableProperties.length; i ++) {
                             var propertyToBeChanged = scope.availableProperties[i];
                             if (propertyToBeChanged.name === scope.currentRowObject.name) {
