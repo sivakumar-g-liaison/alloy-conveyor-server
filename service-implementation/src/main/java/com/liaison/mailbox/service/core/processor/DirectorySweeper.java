@@ -227,34 +227,57 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		}
 
 		List<Path> result = new ArrayList<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
-			for (Path file : stream) {
-
-				String fileName = file.getFileName().toString();
-				// Check if the file to be uploaded is included or not excluded
-				if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
-                        fileName,
-                        staticProp.getExcludedFiles())) {
-                    continue;
-                }
-
-                LOGGER.debug("Sweeping file {}", file.toString());
-				if (MailBoxUtil.validateLastModifiedTolerance(file)) {
-					LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
-					activeFiles.add(file);
-					continue;
-				}
-				result.add(file);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		addFilesToList(result, rootPath, listDirectoryOnly, staticProp);
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
 		return generateWorkTickets(result);
 	}
 
 	/**
+	 * Method to add file path to list. 
+	 * If SweepSubDirectories is true includes sub directory file path to list. 
+	 *  
+	 * @param result
+	 * @param rootPath
+	 * @param listDirectoryOnly
+	 * @param staticProp
+	 */
+	
+	private void addFilesToList(List<Path> result, Path rootPath, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) {
+	    
+	    try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
+            for (Path file : stream) {
+
+                String fileName = file.getFileName().toString();
+                // Check if the file to be uploaded is included or not excluded
+                if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                        fileName,
+                        staticProp.getExcludedFiles())) {
+                    continue;
+                }
+
+                LOGGER.debug("Sweeping file {}", file.toString());
+                if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
+                    activeFiles.add(file);
+                    continue;
+                }
+                result.add(file);
+            }
+            
+            if (staticProp.isSweepSubDirectories()) {
+                DirectoryStream<Path> streamDir = Files.newDirectoryStream(rootPath, defineFilter(true));
+                for (Path dirPath : streamDir) {
+                    addFilesToList(result, dirPath, listDirectoryOnly, staticProp);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+	   
+    }
+
+    /**
 	 * Method to get the pipe line id from the remote processor properties.
 	 *
 	 * @return pipelineId
