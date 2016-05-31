@@ -70,7 +70,6 @@ scripting.classloader.white.list = java.io.PrintWriter, java.io.File
 scripting.classloader.black.list = java.lang.System, java.lang.Thread, java.lang.reflect.AccessibleObject, java.lang.reflect.Array, java.lang.reflect.Constructor<T>, java.lang.reflect.Field, java.lang.reflect.Modifier, java.lang.reflect.ReflectPermission
 
 # Properties to read JS file from  git lab for script execution through commons-scripting library
-#com.liaison.gitlab.script.server.host=lsvlgitrpt01d.liaison.dev
 com.liaison.gitlab.script.server.host=at4d-vpgitlab.liaison.dev
 com.liaison.gitlab.script.server.port=443
 com.liaison.gitlab.script.project.name=g2/mailbox-scripts
@@ -79,8 +78,7 @@ com.liaison.gitlab.script.server.password=ubxwtfGeuqsVfZqMoBwZ
 com.liaison.gitlab.script.server.protocol=https
 
 # Activity GitLab properties
-#com.liaison.gitlab.mailbox.script.server.host=lsvlgitrpt01d.liaison.dev
-com.liaison.gitlab.mailbox.script.server.host=http://at4d-vpgitlab.liaison.dev
+com.liaison.gitlab.mailbox.script.server.host=https://at4d-vpgitlab.liaison.dev
 com.liaison.gitlab.mailbox.script.project.id=g2%2Fmailbox-scripts
 com.liaison.gitlab.mailbox.script.folder=gitlab:/processor-scripts
 com.liaison.gitlab.mailbox.script.private_token=ubxwtfGeuqsVfZqMoBwZ
