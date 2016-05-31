@@ -1,5 +1,6 @@
 4.4.0-SNAPSHOT
 -------------------------------
+* GMB-788: Mailbox - Processor :'Error while saving the processor' error message occurs when the user trying to add the two storage types as BOSS and SPECTRUM
 
 4.3.0
 -------------------------------
