@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.glass.util;
 
 import java.util.Date;
 
+import com.liaison.commons.message.glass.dom.Status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,12 +118,12 @@ public class MailboxGlassMessageUtil {
         glassMessage.setOutboundPipelineId(wrkTicket.getPipelineId());
         glassMessage.setOutSize(wrkTicket.getPayloadSize());
 
-        glassMessage.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
-        glassMessage.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
-        glassMessage.setTenancyKey((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
-        glassMessage.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
-        glassMessage.setServiceInstandId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-        glassMessage.setMailboxId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID));
+        glassMessage.setTransferProfileName(wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
+        glassMessage.setProcessorId(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
+        glassMessage.setTenancyKey(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
+        glassMessage.setTransferProfileName(wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
+        glassMessage.setServiceInstandId(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
+        glassMessage.setMailboxId(wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID));
 
         glassMessage.setProtocol(processorProtocol);
         glassMessage.setCategory(processorType);
@@ -139,7 +140,7 @@ public class MailboxGlassMessageUtil {
         activityStatusAPI.setGlobalId(glassMessage.getGlobalPId());
         activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
-        com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
+        Status status = new Status();
         status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 
         StringBuilder lensMessage = new StringBuilder().append(MAILBOX_ASA_IDENTIFIER);

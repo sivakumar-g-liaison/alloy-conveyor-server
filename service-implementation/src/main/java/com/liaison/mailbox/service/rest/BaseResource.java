@@ -61,6 +61,8 @@ public class BaseResource {
 	private static final Logger kpi = LogManager.getLogger("com.liaison.mailbox.metrics.KPI");
 	public static final String HEADER_X_GATE_GATEWAYID = "x-gate-gatewayid";
 	public static final String HEADER_USER_ID = "UserId";
+    public static final String MAILBOX_ID = "mailboxId";
+    public static final String MAILBOX_NAME = "mailboxName";
 
 	protected void auditAttempt(String message) {
 

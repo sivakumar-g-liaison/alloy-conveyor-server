@@ -89,7 +89,7 @@ import com.netflix.servo.stats.StatsConfig;
 @Produces(MediaType.WILDCARD)
 public class HTTPListenerResource extends AuditedResource {
 
-	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
+    private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	private static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
@@ -101,7 +101,7 @@ public class HTTPListenerResource extends AuditedResource {
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
-	private Stopwatch stopwatch;
+    private Stopwatch stopwatch;
     private static final StatsTimer statsTimer = new StatsTimer(
             MonitorConfig.builder("HTTPListenerResource_statsTimer").build(),
             new StatsConfig.Builder().build());
@@ -119,24 +119,24 @@ public class HTTPListenerResource extends AuditedResource {
 	@POST
 	@Path("sync/{token1}")
 	public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}")
 	public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}/{token3}")
 	public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxId") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_ID) final String mailboxName) {
 		return handleSync(request, mailboxId, mailboxName);
 	}
 
@@ -150,8 +150,8 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("sync")
 	@AccessDescriptor(skipFilter = true)
 	public Response handleSync(@Context final HttpServletRequest request,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -283,7 +283,7 @@ public class HTTPListenerResource extends AuditedResource {
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
 		// Added the guid
-		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxId);
+		worker.queryParams.put(HEADER_GUID, mailboxId);
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
@@ -332,24 +332,24 @@ public class HTTPListenerResource extends AuditedResource {
 	@POST
 	@Path("async/{token1}")
 	public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}")
 	public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}/{token3}")
 	public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 		return handleAsync(request, mailboxId, mailboxName);
 	}
 
@@ -363,8 +363,8 @@ public class HTTPListenerResource extends AuditedResource {
 	@Path("async")
 	@AccessDescriptor(skipFilter = true)
 	public Response handleAsync(@Context final HttpServletRequest request,
-			@QueryParam(value = "mailboxId") final String mailboxId,
-			@QueryParam(value = "mailboxName") final String mailboxName) {
+			@QueryParam(value = MAILBOX_ID) final String mailboxId,
+			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -482,7 +482,7 @@ public class HTTPListenerResource extends AuditedResource {
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
 		// Added the guid
-		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxId);
+		worker.queryParams.put(HEADER_GUID, mailboxId);
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		try {
