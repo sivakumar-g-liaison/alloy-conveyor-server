@@ -149,7 +149,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	            ThreadContext.clearMap(); //set new context after clearing
             	            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-            			    logToLens(inputLocation, wrkTicket);
+            			    logToLens(wrkTicket);
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
@@ -590,14 +590,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
 	 *
-     * @param inputLocation folderPath for logging
      * @param wrkTicket workticket for logging
      */
-    protected void logToLens(String inputLocation, WorkTicket wrkTicket) {
+    protected void logToLens(WorkTicket wrkTicket) {
 
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString();
         StringBuilder message = new StringBuilder()
                 .append("Starting to sweep input folder ")
-                .append(inputLocation)
+                .append(filePath)
                 .append(" for new files");
 
         MailboxGlassMessageUtil.logGlassMessage(
@@ -605,7 +605,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 configurationInstance.getProcessorType(),
                 configurationInstance.getProcsrProtocol(),
                 wrkTicket.getFileName(),
-				wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString(),
+                filePath,
                 wrkTicket.getPayloadSize(),
                 ExecutionState.PROCESSING,
                 message.toString(),
