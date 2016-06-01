@@ -212,7 +212,7 @@ public class DropboxStagedFilesService {
 
 			// successfully staged
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR);
+				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR, null);
 				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}
@@ -234,7 +234,7 @@ public class DropboxStagedFilesService {
 
 			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR);
+				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, e.getStackTrace().toString());
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}

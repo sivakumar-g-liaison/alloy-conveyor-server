@@ -284,7 +284,7 @@ public class DropboxFileTransferService {
             glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
             // Log running status
-            glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload", MailBoxConstants.DROPBOXPROCESSOR);
+            glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload", MailBoxConstants.DROPBOXPROCESSOR, null);
 
     		// end time to calculate elapsed time for storing payload in spectrum
     		endTime = System.currentTimeMillis();
@@ -314,7 +314,7 @@ public class DropboxFileTransferService {
             transactionVisibilityClient.logToGlass(glassMessage);
 
             // log activity status before posting to queue
-            glassMessage.logProcessingStatus(StatusType.QUEUED, MailBoxConstants.FILE_QUEUED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR);
+            glassMessage.logProcessingStatus(StatusType.QUEUED, MailBoxConstants.FILE_QUEUED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR, null);
             // log time stamp before posting to queue
             glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 	    } catch (Exception e) {

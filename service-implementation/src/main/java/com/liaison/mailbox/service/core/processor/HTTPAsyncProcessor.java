@@ -34,7 +34,7 @@ public class HTTPAsyncProcessor extends HTTPAbstractProcessor {
 
         try {
             WorkTicketUtil.postWrkTcktToQ(workTicket);
-            glassMessage.logProcessingStatus(StatusType.QUEUED, "Http Async - Work Ticket queued.", MailBoxConstants.HTTPASYNCPROCESSOR);
+            glassMessage.logProcessingStatus(StatusType.QUEUED, "Http Async - Work Ticket queued.", MailBoxConstants.HTTPASYNCPROCESSOR, null);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

@@ -222,7 +222,7 @@ public class HTTPListenerResource extends AuditedResource {
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR);
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR, null);
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
@@ -233,10 +233,10 @@ public class HTTPListenerResource extends AuditedResource {
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity(), MailBoxConstants.HTTPSYNCPROCESSOR);
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity(), MailBoxConstants.HTTPSYNCPROCESSOR, null);
                     } else {
                         GlassMessage successMessage = constructGlassMessage(request, workTicket, ExecutionState.COMPLETED);
-                        successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
+                        successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR, null);
 
                         //Hack to set outbound size
                         List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
@@ -264,7 +264,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
 	                    // Log error status
-				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR);
+				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, e.getStackTrace().toString());
 				        new TransactionVisibilityClient().logToGlass(failedMsg);
 	                    glassMessage.logFourthCornerTimestamp();
 
@@ -442,7 +442,7 @@ public class HTTPListenerResource extends AuditedResource {
                     // Log FIRST corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success", MailBoxConstants.HTTPASYNCPROCESSOR);
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success", MailBoxConstants.HTTPASYNCPROCESSOR, null);
                     // Log TVA status
                     transactionVisibilityClient.logToGlass(glassMessage);
 
@@ -464,7 +464,7 @@ public class HTTPListenerResource extends AuditedResource {
                             && null != glassMessage) {
                     	
                         // Log error status
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR);
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR, e.getStackTrace().toString());
                         glassMessage.setStatus(ExecutionState.FAILED);
                         transactionVisibilityClient.logToGlass(glassMessage);
                         glassMessage.logFourthCornerTimestamp();

@@ -383,7 +383,7 @@ public class GlassMessage {
 		return timeStampAPI;
 	}
 
-	public void logProcessingStatus(StatusType statusType, String message, String processorType , String processorProtocol) {
+	public void logProcessingStatus(String processorProtocol, String message, String processorType, StatusType statusType) {
 
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
@@ -419,7 +419,7 @@ public class GlassMessage {
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
 	}
 	
-	public void logProcessingStatus(StatusType statusType, String message, String processorType) {
+	public void logProcessingStatus(StatusType statusType, String message, String processorType, String techDescription) {
 
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
@@ -443,6 +443,11 @@ public class GlassMessage {
 		} else {
 			status.setDescription(MAILBOX_ASA_IDENTIFIER);
 		}
+		
+		if (!MailBoxUtil.isEmpty(techDescription)) {
+			status.setTechDescription(techDescription);
+		}
+		
 		status.setStatusId(UUIDGen.getCustomUUID());
 		status.setType(statusType);
 

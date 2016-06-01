@@ -431,7 +431,7 @@ public class MailBoxService implements Runnable {
             }
 
             processorType = processor.getProcessorType().name();
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcessorType().name(), processor.getProcsrProtocol());
+            glassMessage.logProcessingStatus(processor.getProcsrProtocol(), "Consumed workticket from queue", processor.getProcessorType().name(), StatusType.RUNNING);
 
             // determine SLA status
 			String slaVerificationStatus = (processor instanceof RemoteUploader)
@@ -472,7 +472,7 @@ public class MailBoxService implements Runnable {
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
 
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER, null);
 
             	// send notification for successful file staging
             	String emailSubject = workTicket.getFileName() + "' is available for pick up";
@@ -482,7 +482,7 @@ public class MailBoxService implements Runnable {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER, null);
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
@@ -511,7 +511,7 @@ public class MailBoxService implements Runnable {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER);
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, e.getStackTrace().toString());
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
