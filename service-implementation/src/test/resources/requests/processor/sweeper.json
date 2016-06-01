@@ -1,0 +1,11 @@
+{
+  "staticProperties": "SweeperPropertiesDTO",
+  "handOverExecutionToJavaScript": false,
+  "pipeLineID": "5A8A7C5F69374279B0168D5D65615410",
+  "securedPayload": false,
+  "numOfFilesThreshold": null,
+  "payloadSizeThreshold": null,
+  "lensVisibility": false,
+  "includedFiles": null,
+  "excludedFiles": null
+}
