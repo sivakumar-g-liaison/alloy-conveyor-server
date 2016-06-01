@@ -471,7 +471,6 @@ var rest = myApp.controller(
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
-                        //$log.info($filter('json')(data));
 						$scope.scriptIsEdit = false;
 						if (data.getProcessorResponse.processor.javaScriptURI != null && 
 						data.getProcessorResponse.processor.javaScriptURI != "") {
@@ -485,8 +484,6 @@ var rest = myApp.controller(
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
                                 
-								//$log.info($filter('json')(profData));
-								
 									var editProcessor = false;
 									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
 										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
@@ -887,7 +884,6 @@ var rest = myApp.controller(
 			}
 			
 			$scope.processorReviseAfterKM = function() {
-				//$log.info($filter('json')(editRequest));
 				$scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
 					function (data, status) {
 						if (status === 200 || status === 400) {
@@ -918,7 +914,6 @@ var rest = myApp.controller(
 			}
 			
 			$scope.processorSaveAfterKM = function() {
-				//$log.info($filter('json')(addRequest));
 				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor' + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
 					function (data, status) {
 						if (status === 200 || status === 400) {
