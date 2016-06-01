@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 public class StaleFileCleanupTest  extends BaseServiceTest {
 	
 	private String payloadLocation;
+    private Path payloadPath;
 	private static String PAYLOAD = "PAYLOAD";
 	private static String TMP_DIR = "java.io.tmpdir";
 	
@@ -47,7 +49,7 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
         System.setProperty("com.liaison.mailbox.sweeper.stalefile.ttl", "30");
         InitInitialDualDBContext.init();
         payloadLocation = System.getProperty(TMP_DIR) + File.separator + PAYLOAD;
-        Path payloadPath = Paths.get(payloadLocation);
+        payloadPath = Paths.get(payloadLocation);
         if (payloadPath.toFile().exists()) {
             FileUtils.forceDelete(payloadPath.toFile());
         }
@@ -68,32 +70,34 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
         File file = filePath.toFile();
         
         // Case 1 no stale files in location 
-        List<String> staleFiles = sweeperProcsr.deleteStaleFilesInPath(payloadLocation);
+        List<String> staleFiles = new ArrayList<>();
+        sweeperProcsr.deleteStaleFiles(payloadPath, staleFiles);
         // As the file got created just now it should not be considered for deletion by stale file cleanu API
-        Assert.assertTrue((staleFiles.size() == 0));
+        Assert.assertTrue((staleFiles.isEmpty()));
         
         // Case 2 stale files present in the given location
         file.setLastModified(getLastModifiedTime(true));
-        staleFiles = sweeperProcsr.deleteStaleFilesInPath(payloadLocation);
+        sweeperProcsr.deleteStaleFiles(payloadPath, staleFiles);
         Assert.assertTrue(staleFiles.size() == 1);
         Assert.assertEquals(staleFiles.get(0), file.getName());
         
         // case 3 no files present in the payload location
-        staleFiles = sweeperProcsr.deleteStaleFilesInPath(payloadLocation);
+        staleFiles = new ArrayList<>();
+        sweeperProcsr.deleteStaleFiles(payloadPath, staleFiles);
         // As there are no files present, the staleFiles size should be zero
         Assert.assertTrue((staleFiles.size() == 0));
         
         //case 4 payload location contains only folders
         String folderPath = payloadLocation + File.separator + "folder1" + File.separator + "folder2";
         Files.createDirectories(Paths.get(folderPath));
-        staleFiles = sweeperProcsr.deleteStaleFilesInPath(payloadLocation);
+        sweeperProcsr.deleteStaleFiles(payloadPath, staleFiles);
         // As there are no files and only folders, the staleFiles size should be zero
         Assert.assertTrue((staleFiles.size() == 0));
         
         Files.createFile(filePath);
         // Case 5 files and folders present in the given location but files did not expire
         file.setLastModified(getLastModifiedTime(false));
-        staleFiles = sweeperProcsr.deleteStaleFilesInPath(payloadLocation);
+        sweeperProcsr.deleteStaleFiles(payloadPath, staleFiles);
         Assert.assertTrue(staleFiles.size() == 0);
     }
     

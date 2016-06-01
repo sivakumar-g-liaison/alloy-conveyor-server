@@ -114,6 +114,21 @@
             "dynamic":false,
             "valueProvided":false,
             "validationRules":null
+         },
+         {
+            "name":"sweepSubDirectories",
+            "displayName":"Sweep Sub Directories",
+            "value":"false",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
          }
       ],
       "folderProperties":[
