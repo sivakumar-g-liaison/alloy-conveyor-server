@@ -594,7 +594,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      */
     protected void logToLens(WorkTicket wrkTicket) {
 
-        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString();
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message = new StringBuilder()
                 .append("Starting to sweep input folder ")
                 .append(filePath)

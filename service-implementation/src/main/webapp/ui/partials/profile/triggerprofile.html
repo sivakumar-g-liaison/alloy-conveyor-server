@@ -44,7 +44,7 @@
 			<div class="row">
 				<div class="col-md-5">
 					<label for="prof"> Profiles * </label> <select id="mbx-trigger-profile-prof" name="prof" ng-model="profile"
-						ng-options="prof.name for prof in profiles" class="form-control" required>
+						ng-options="prof.name for prof in profiles | orderBy:'name'" class="form-control" required>
 						<option value="">-- select--</option>
 					</select>
 				</div>
