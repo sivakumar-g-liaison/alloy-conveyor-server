@@ -1,3 +1,7 @@
+4.3.3
+-------------------------------
+* removed boss storage identifiers for prod properties.
+
 4.3.2
 -------------------------------
 * GMB-794 - Bleeding reports errors
