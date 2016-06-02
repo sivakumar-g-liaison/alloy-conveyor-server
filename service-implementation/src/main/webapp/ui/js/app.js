@@ -171,6 +171,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	* Pipeline Id code
 	*/
 	$rootScope.appendQueryParamAddMBox = function() {
+		if ($rootScope.pipelineId == "" || $rootScope.serviceInstanceId == "") {
+			showSaveMessage("Mailbox creation is not allowed", 'error');
+			return;
+		}
 		return "#/mailbox/addMailBox";
 	};
 
