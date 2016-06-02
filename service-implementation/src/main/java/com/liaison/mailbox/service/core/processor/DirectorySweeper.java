@@ -45,7 +45,6 @@ import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -98,20 +97,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	@Override
 	public void runProcessor(Object dto, MailboxFSM fsm) {
-
-		try {
-
-		    setReqDTO((TriggerProcessorRequestDTO) dto);
-			if (getProperties().isHandOverExecutionToJavaScript()) {
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-				// Use custom G2JavascriptEngine
-				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
-			 } else {
-				run(getReqDTO().getExecutionId());
-			}
-		} catch (IOException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+        setReqDTO((TriggerProcessorRequestDTO) dto);
+        run(getReqDTO().getExecutionId());
 	}
 
 	private void run(String executionId) {
@@ -134,7 +121,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             LOGGER.debug("Is in-progress file list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
-            								? sweepDirectory(inputLocation , false, staticProp)
+            								? sweepDirectory(inputLocation, staticProp)
             								: retryGenWrkTktForActiveFiles(activeFiles);
 
             if (!workTickets.isEmpty()) {
@@ -162,7 +149,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	            ThreadContext.clearMap(); //set new context after clearing
             	            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-            			    logToLens(inputLocation, wrkTicket);
+            			    logToLens(wrkTicket);
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
@@ -211,14 +198,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Method is used to retrieve all the WorkTickets from the given mailbox.
 	 *
 	 * @param root The mailbox root directory
-	 * @param listDirectoryOnly Sweep file only
 	 * @param staticProp sweeper properties
 	 * @return list of worktickets
-	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws IOException
 	 */
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
+	public List<WorkTicket> sweepDirectory(String root, SweeperPropertiesDTO staticProp) throws IllegalAccessException, IOException {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), root);
 		Path rootPath = Paths.get(root);
@@ -227,47 +212,66 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		}
 
 		List<Path> result = new ArrayList<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
-			for (Path file : stream) {
-
-				String fileName = file.getFileName().toString();
-				// Check if the file to be uploaded is included or not excluded
-				if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
-                        fileName,
-                        staticProp.getExcludedFiles())) {
-                    continue;
-                }
-
-                LOGGER.debug("Sweeping file {}", file.toString());
-				if (MailBoxUtil.validateLastModifiedTolerance(file)) {
-					LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
-					activeFiles.add(file);
-					continue;
-				}
-				result.add(file);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        listFiles(result, rootPath, staticProp);
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
 		return generateWorkTickets(result);
 	}
 
-	/**
+    /**
+     * Traverse the directory and list the files
+     * Sub Directories will be included if sweepSubDirectories set to true
+     *
+     * @param rootPath Sweeper Payload Location
+     * @param staticProp sweeper properties
+     */
+    private void listFiles(List<Path> files, Path rootPath, SweeperPropertiesDTO staticProp) {
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
+
+            String fileName = null;
+            for (Path file : stream) {
+
+                fileName = file.getFileName().toString();
+                //Sweep Directories if the property is set to true
+                if (Files.isDirectory(file) && staticProp.isSweepSubDirectories()) {
+                    listFiles(files, file, staticProp);
+                    continue;
+                }
+
+                // Check if the file to be uploaded is included or not excluded
+                if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                        fileName,
+                        staticProp.getExcludedFiles())) {
+                    continue;
+                }
+
+                LOGGER.debug(constructMessage("Sweeping file {}"), file.toString());
+                if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
+                    activeFiles.add(file);
+                    continue;
+                }
+                files.add(file);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
 	 * Method to get the pipe line id from the remote processor properties.
 	 *
 	 * @return pipelineId
-	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws IOException
 	 */
-	private String getPipeLineID() throws IllegalArgumentException, IllegalAccessException, IOException {
+	private String getPipeLineID() throws IOException, IllegalAccessException {
 
 		if (MailBoxUtil.isEmpty(this.pipelineId)) {
-			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
-			this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
-		}
+            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
+            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
+        }
 
 		return this.pipelineId;
 	}
@@ -278,11 +282,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param workTickets Group of all workTickets in a WorkTicketGroup.
 	 * @param staticProp sweeper properties
 	 * @return workticket group
-	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws IOException
 	 */
-	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalArgumentException, IllegalAccessException, IOException {
+	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalAccessException, IOException {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
@@ -383,10 +386,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Method is used to move the file to the sweeped folder.
 	 *
-	 * @param file
-	 *            The source location
-	 * @param target
-	 *            The target location
+	 * @param file the file to be deleted
 	 * @throws IOException
 	 */
 	private void delete(String file) throws IOException {
@@ -398,11 +398,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 *
 	 * @param result workTickets
 	 * @return list of worktickets
-	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws IOException
 	 */
-	private List<WorkTicket> generateWorkTickets(List<Path> result) throws IllegalArgumentException, IllegalAccessException, IOException {
+	private List<WorkTicket> generateWorkTickets(List<Path> result) throws IOException, IllegalAccessException {
 
 		List<WorkTicket> workTickets = new ArrayList<>();
 		WorkTicket workTicket = null;
@@ -500,7 +499,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param staticProp sweeper properties
 	 * @return true or false based on the size and number of files check
 	 */
-	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO staticProp) {
+	private Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO
+            staticProp) {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
@@ -543,7 +543,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Get the total file size of the group.
 	 *
-	 * @param fileGroup
+	 * @param workTicketGroup
 	 * @return
 	 */
 	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
@@ -590,14 +590,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
 	 *
-     * @param inputLocation folderPath for logging
      * @param wrkTicket workticket for logging
      */
-    protected void logToLens(String inputLocation, WorkTicket wrkTicket) {
+    protected void logToLens(WorkTicket wrkTicket) {
 
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message = new StringBuilder()
                 .append("Starting to sweep input folder ")
-                .append(inputLocation)
+                .append(filePath)
                 .append(" for new files");
 
         MailboxGlassMessageUtil.logGlassMessage(
@@ -605,7 +605,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 configurationInstance.getProcessorType(),
                 configurationInstance.getProcsrProtocol(),
                 wrkTicket.getFileName(),
-				wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString(),
+                filePath,
                 wrkTicket.getPayloadSize(),
                 ExecutionState.PROCESSING,
                 message.toString(),
@@ -620,63 +620,57 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      * @throws IOException
      */
     public void cleanupStaleFiles() throws MailBoxServicesException, IOException {
-    	
-    	String payloadLocation = getPayloadURI();
-    	// filter and delete stale files in the sweeper location
-    	List<String> staleFiles = deleteStaleFilesInPath(payloadLocation);
-    	
-		// send an email if there are any stale files deleted in the sweeper location
-		if (null != staleFiles && staleFiles.size() > 0) {
 
-			LOGGER.debug("stale files exists in sweeper ({}) location {}", configurationInstance.getPguid(), payloadLocation);
-			// notify deletion of stale files to users through mail configured in mailbox
+        List<String> staleFiles = new ArrayList<>();
+        String payloadLocation = getPayloadURI();
+
+        //validates sweeper location
+        final Path payloadPath = Paths.get(payloadLocation);
+        if (!Files.isDirectory(payloadPath)) {
+            throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+        }
+
+        // filter and delete stale files in the sweeper location
+        deleteStaleFiles(payloadPath, staleFiles);
+
+        // notify deletion of stale files to users through mail configured in mailbox
+        if (!staleFiles.isEmpty()) {
 			notifyDeletionOfStaleFiles(staleFiles, payloadLocation);
-
-		} else {
-			LOGGER.debug("No stale files found in sweeper location {}", payloadLocation);
 		}
     }
     
-	/**
-	 * Method to filter stale files in the sweeper payload location
-	 * 
-	 * @param payloadLocation - Payload location configured in sweeper
-	 */
-	public List<String> deleteStaleFilesInPath(String payloadLocation) {
-		
-		LOGGER.debug("Filtering stale files in sweeper location {} for deleting them", payloadLocation);
-		final Path payloadPath = Paths.get(payloadLocation);
-		if (!Files.isDirectory(payloadPath)) {
-			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
-		}
-		
-		List<String> staleFiles = new ArrayList<>();
-		// Filter for stale files
-		final DirectoryStream.Filter<Path> staleFileFilter = new DirectoryStream.Filter<Path>() {
-			
-			public boolean accept(Path path) throws IOException {
-				File file = path.toFile();
-				return (file.isFile() && MailBoxUtil.isFileExpired(file.lastModified()));
-		    }
-		};
-		// once stale files are identified, they will be deleted
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(payloadPath, staleFileFilter)) {
-			
-			for (Path filePath : stream) {
-				
-				String fileName = filePath.toFile().getName();
-				// deleting stale file
-				LOGGER.debug("Deleting stale file {} in sweeper location {} ", fileName, payloadLocation);
-				Files.deleteIfExists(filePath);
-				staleFiles.add(fileName);
-				LOGGER.info("Stale file {} deleted successfully in sweeper location {} ", fileName, payloadLocation);
-			}
-			
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		return staleFiles;
-	}
+    /**
+     * Traverse the directory and deletes the stale files
+     *
+     * @param rootPath Payload location
+     * @param fileNames Deleted files list
+     */
+    public void deleteStaleFiles(Path rootPath, List<String> fileNames) {
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
+
+            String fileName = null;
+            for (Path file : stream) {
+
+                fileName = file.getFileName().toString();
+                //Sweep Directories if the property is set to true
+                if (Files.isDirectory(file)) {
+                    deleteStaleFiles(file, fileNames);
+                    continue;
+                }
+
+                if (!MailBoxUtil.isFileExpired(file.toFile().lastModified())) {
+                    continue;
+                }
+
+                Files.deleteIfExists(file);
+                fileNames.add(fileName);
+                LOGGER.info("Stale file {} deleted successfully in sweeper location {} ", fileName, file.toAbsolutePath().toString());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 	/**
 	 * Method to notify deletion of stale files to customer
