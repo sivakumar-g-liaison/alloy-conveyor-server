@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -265,7 +265,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
 	                    // Log error status
-				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, Arrays.toString(e.getStackTrace()));
+				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
 				        new TransactionVisibilityClient().logToGlass(failedMsg);
 	                    glassMessage.logFourthCornerTimestamp();
 
@@ -465,7 +465,7 @@ public class HTTPListenerResource extends AuditedResource {
                             && null != glassMessage) {
                     	
                         // Log error status
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR, Arrays.toString(e.getStackTrace()));
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
                         glassMessage.setStatus(ExecutionState.FAILED);
                         transactionVisibilityClient.logToGlass(glassMessage);
                         glassMessage.logFourthCornerTimestamp();

@@ -11,13 +11,13 @@ package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -235,7 +235,7 @@ public class DropboxStagedFilesService {
 
 			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, Arrays.toString(e.getStackTrace()));
+				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, ExceptionUtils.getStackTrace(e));
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}

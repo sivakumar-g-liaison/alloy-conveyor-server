@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +28,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -236,7 +236,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					// Log Failed status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, Arrays.toString(e.getStackTrace()));
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, ExceptionUtils.getStackTrace(e));
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} finally {

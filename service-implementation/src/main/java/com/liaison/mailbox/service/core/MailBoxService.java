@@ -12,12 +12,12 @@ package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -512,7 +512,7 @@ public class MailBoxService implements Runnable {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, Arrays.toString(e.getStackTrace()));
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, ExceptionUtils.getStackTrace(e));
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
