@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -222,7 +223,7 @@ public class HTTPListenerResource extends AuditedResource {
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR, null);
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR);
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
@@ -233,10 +234,10 @@ public class HTTPListenerResource extends AuditedResource {
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity(), MailBoxConstants.HTTPSYNCPROCESSOR, null);
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity(), MailBoxConstants.HTTPSYNCPROCESSOR);
                     } else {
                         GlassMessage successMessage = constructGlassMessage(request, workTicket, ExecutionState.COMPLETED);
-                        successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR, null);
+                        successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
 
                         //Hack to set outbound size
                         List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
@@ -264,7 +265,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
 	                    // Log error status
-				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, e.getStackTrace().toString());
+				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, Arrays.toString(e.getStackTrace()));
 				        new TransactionVisibilityClient().logToGlass(failedMsg);
 	                    glassMessage.logFourthCornerTimestamp();
 
@@ -442,7 +443,7 @@ public class HTTPListenerResource extends AuditedResource {
                     // Log FIRST corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success", MailBoxConstants.HTTPASYNCPROCESSOR, null);
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success", MailBoxConstants.HTTPASYNCPROCESSOR);
                     // Log TVA status
                     transactionVisibilityClient.logToGlass(glassMessage);
 
@@ -464,7 +465,7 @@ public class HTTPListenerResource extends AuditedResource {
                             && null != glassMessage) {
                     	
                         // Log error status
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR, e.getStackTrace().toString());
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage(), MailBoxConstants.HTTPASYNCPROCESSOR, Arrays.toString(e.getStackTrace()));
                         glassMessage.setStatus(ExecutionState.FAILED);
                         transactionVisibilityClient.logToGlass(glassMessage);
                         glassMessage.logFourthCornerTimestamp();

@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -211,14 +212,14 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, null);
+					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// getting the file stream from spectrum for the given file id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
 
 					transactionVisibilityClient.logToGlass(glassMessage);
 
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, null);
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
 
 					// response message construction
 					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, payload);
@@ -235,7 +236,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					// Log Failed status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, e.getStackTrace().toString());
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, Arrays.toString(e.getStackTrace()));
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} finally {

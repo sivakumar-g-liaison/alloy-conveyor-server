@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -472,7 +473,7 @@ public class MailBoxService implements Runnable {
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
 
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER, null);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
 
             	// send notification for successful file staging
             	String emailSubject = workTicket.getFileName() + "' is available for pick up";
@@ -482,7 +483,7 @@ public class MailBoxService implements Runnable {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER, null);
+            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER);
             }
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
@@ -511,7 +512,7 @@ public class MailBoxService implements Runnable {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, e.getStackTrace().toString());
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, Arrays.toString(e.getStackTrace()));
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//

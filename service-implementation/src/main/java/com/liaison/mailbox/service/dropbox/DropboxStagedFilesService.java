@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -212,7 +213,7 @@ public class DropboxStagedFilesService {
 
 			// successfully staged
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR, null);
+				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY, MailBoxConstants.DROPBOXPROCESSOR);
 				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}
@@ -234,7 +235,7 @@ public class DropboxStagedFilesService {
 
 			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, e.getStackTrace().toString());
+				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, Arrays.toString(e.getStackTrace()));
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}
