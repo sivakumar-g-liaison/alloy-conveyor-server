@@ -126,6 +126,10 @@ public class MailboxWatchDogService {
 					.append(StagedFileDAO.STATUS)
 					.append(" and sf.processorType in (:")
 					.append(StagedFileDAO.TYPE)
+					.append(")")
+					.append(" and sf.processorId not in (")
+					.append(" select exstate.processorId from ProcessorExecutionState exstate")
+					.append(" where exstate.executionStatus like :" +StagedFileDAO.EXEC_STATUS)
 					.append(")");
 
 			//Processor Types
@@ -136,6 +140,7 @@ public class MailboxWatchDogService {
 			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
 					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
 					.setParameter(StagedFileDAO.TYPE, processorTypes)
+					.setParameter(StagedFileDAO.EXEC_STATUS, ExecutionState.PROCESSING.value())
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
@@ -220,6 +225,7 @@ public class MailboxWatchDogService {
                                 "File is picked up by another process",
 								null);
 		                inactiveStagedFile(stagedFile, updatedStatusList);
+		                LOGGER.debug(constructMessage("{} : File {} is not present but stagedfile entity is active so updated lens status as failed."), stagedFile.getProcessorId(), stagedFile.getFileName());
 				    }
 					continue;
 				}
