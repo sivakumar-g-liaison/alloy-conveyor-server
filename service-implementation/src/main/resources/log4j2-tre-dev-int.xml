@@ -63,7 +63,7 @@
         <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
         <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
             <Failovers>
-                <AppenderRef ref="Console" />
+                <AppenderRef ref="FinalFailoverLocalFile" />
             </Failovers>
         </Failover>
 
@@ -71,7 +71,7 @@
         <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
         <Failover name="AsyncMetricsGMSpectrumAppenderWithFailoverFailover" primary="AsyncMetricsGMSpectrumAppenderWithFailover">
             <Failovers>
-                <AppenderRef ref="Console" />
+                <AppenderRef ref="FinalFailoverLocalFile" />
             </Failovers>
         </Failover>
 
@@ -119,23 +119,35 @@
         <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
         <Failover name="AsyncFileSyslogWithFailoverFailover" primary="AsyncFileSyslogWithFailover">
             <Failovers>
-                <AppenderRef ref="Console"/>
+                <AppenderRef ref="FinalFailoverLocalFile"/>
             </Failovers>
         </Failover>
 
 
 
         <!-- ############################################################## -->
-        <!-- ######### Console ############ -->
+        <!-- ######### Instead of Console Use LocalLog File ############ -->
         <!-- ############################################################## -->
-
-        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
-            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+        <File name="LocalLog" fileName="/var/log/tomcat/local.log" append="true" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}"/>
             <filters>
                 <!-- remove some noise -->
-                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
             </filters>
-        </Console>
+        </File>
+
+        <!-- Replaces "Console" with final_failover_console.log -->
+        <File name="FinalFailoverLocalFile" fileName="/var/log/tomcat/final_failover_console.log" append="true" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}"/>
+            <filters>
+                <!-- remove some noise -->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </filters>
+        </File>
 
     </appenders>
 
@@ -144,8 +156,7 @@
             <appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
             <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
 
-            <!-- not for production -->
-            <appender-ref ref="Console" />
+            <appender-ref ref="LocalLog" />
 
         </root>
     </loggers>
