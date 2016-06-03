@@ -49,28 +49,9 @@ export GLASS_SPECTRUM_MESSAGE_TTL=36288000
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"
 export GLASS_RING_BUFFER_SIZE=262144
- 
-export GLASS_METRIC_PORT=443
-export GLASS_METRIC_IP=at4p-vpspectrum.liaison.prod
-export GLASS_METRIC_USER=g2prod
-# defined in secure_tomcat_env.sh
-export GLASS_METRIC_PASSWORD=
-export GLASS_METRIC_DATASPACE=g2-prod
-export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
-export GLASS_METRIC_SOURCE_NAME=$APP_ENV
-export GLASS_METRIC_TTL=36288000
-export METRICS_LOG_DIR="/var/log/tomcat/metrics_failover"
-export METRICS_ROLLING_SIZE="250 MB"
-export METRICS_RING_BUFFER_SIZE=262144
-
-export GSA_LENS_IP=at4p-vpLENSIndex.liaison.prod
 
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
-export ORGANIZATION_GSA_ROLLING_SIZE="250 MB"
-export ORGANIZATION_GSA_RING_BUFFER_SIZE=128
-export PAIRWISE_GSA_ROLLING_SIZE="250 MB"
-export PAIRWISE_GSA_RING_BUFFER_SIZE=128
- 
+
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
