@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -234,7 +235,7 @@ public class DropboxStagedFilesService {
 
 			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR);
+				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.DROPBOXPROCESSOR, ExceptionUtils.getStackTrace(e));
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}

@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -235,7 +236,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					// Log Failed status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR);
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download", MailBoxConstants.DROPBOXPROCESSOR, ExceptionUtils.getStackTrace(e));
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} finally {
