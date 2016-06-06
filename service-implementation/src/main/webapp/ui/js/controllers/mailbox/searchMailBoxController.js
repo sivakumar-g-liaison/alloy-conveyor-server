@@ -187,6 +187,12 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             if (null !== $location.search().disableFilters && ($location.search().disableFilters === true || $location.search().disableFilters === "true")) {
                 disableFiltr = true;
             }
+            
+            $scope.sidInURL = true;
+			if ($rootScope.serviceInstanceId == "") {
+				$scope.sidInURL = false;
+				disableFiltr = true;
+			}
 			
             $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
