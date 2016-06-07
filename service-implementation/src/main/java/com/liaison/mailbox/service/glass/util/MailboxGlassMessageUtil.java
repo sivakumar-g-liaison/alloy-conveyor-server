@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.glass.util;
 import java.util.Date;
 
 import com.liaison.commons.message.glass.dom.Status;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,6 +37,43 @@ public class MailboxGlassMessageUtil {
     private static final String MAILBOX_ASA_IDENTIFIER = "MAILBOX";
 
     private static final Logger logger = LogManager.getLogger(MailboxGlassMessageUtil.class);
+    
+    /**
+     * log TVAPI and Event logs
+     * 
+     * @param globalProcessId
+     * @param processorType
+     * @param processProtocol
+     * @param fileName
+     * @param filePath
+     * @param fileLength
+     * @param status
+     * @param message
+     * @param pipelineId
+     */
+    public static void logGlassMessage(final String globalProcessId,
+            final ProcessorType processorType,
+            final String processProtocol,
+            final String fileName,
+            final String filePath,
+            final long fileLength,
+            final ExecutionState status,
+            final String message,
+            final String pipelineId
+            ) {
+        
+        MailboxGlassMessageUtil.logGlassMessage(
+                globalProcessId,
+                processorType,
+                processProtocol,
+                fileName,
+                filePath,
+                fileLength,
+                status,
+                message,
+                pipelineId, 
+                null);
+    }
 
     /**
      * log TVAPI and Event logs
@@ -57,7 +95,8 @@ public class MailboxGlassMessageUtil {
             final long fileLength,
             final ExecutionState status,
             final String message,
-            final String pipelineId) {
+            final String pipelineId,
+            final ExecutionTimestamp firstCornerTimeStamp) {
 
         TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
         GlassMessage glassMessage = new GlassMessage();
@@ -90,8 +129,10 @@ public class MailboxGlassMessageUtil {
             glassMessage.setInboundPipelineId(pipelineId);
             glassMessage.setInSize(fileLength);
 
-            // Fourth corner timestamp
-            glassMessage.logFirstCornerTimestamp();
+            // First corner timestamp
+            if (null != firstCornerTimeStamp) {
+                glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
+            }
             logProcessingStatus(glassMessage, StatusType.RUNNING, message);
 
             // Queued message for async inbound
@@ -165,4 +206,5 @@ public class MailboxGlassMessageUtil {
 
         logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
     }
+
 }

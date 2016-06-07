@@ -54,6 +54,8 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Sweepe
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
@@ -129,6 +131,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 LOGGER.debug("There are {} files to process", workTickets.size());
             	// Read from mailbox property - grouping js location
             	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
+            	
+            	//first corner timestamp
+            	ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
                 LOGGER.debug("Persist workticket to spectrum");
                 persistPaylaodAndWorkticket(workTickets, staticProp);
@@ -149,7 +154,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	            ThreadContext.clearMap(); //set new context after clearing
             	            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-            			    logToLens(wrkTicket);
+            			    logToLens(wrkTicket, firstCornerTimeStamp);
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
@@ -593,8 +598,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
 	 *
      * @param wrkTicket workticket for logging
+	 * @param firstCornerTimeStamp 
      */
-    protected void logToLens(WorkTicket wrkTicket) {
+    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp) {
 
         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message = new StringBuilder()
@@ -611,7 +617,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 wrkTicket.getPayloadSize(),
                 ExecutionState.PROCESSING,
                 message.toString(),
-				wrkTicket.getPipelineId());
+				wrkTicket.getPipelineId(), 
+				firstCornerTimeStamp);
 
     }	
     
