@@ -119,23 +119,15 @@ public class MailboxWatchDogService {
 			em = DAOUtil.getEntityManager(MailboxRTDMDAO.PERSISTENCE_UNIT_NAME);
 			tx = em.getTransaction();
 			tx.begin();
-
+			
 			// query
-			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.stagedFileStatus =:")
-					.append(StagedFileDAO.STATUS)
-					.append(" and sf.processorType in (:")
-					.append(StagedFileDAO.TYPE)
-					.append(")");
+			StringBuilder queryString = new StringBuilder().append("SELECT sf.* FROM STAGED_FILE sf")
+					.append(" INNER JOIN PROCESSOR_EXEC_STATE pes ON sf.PROCESSOR_GUID = pes.PROCESSOR_ID")
+					.append(" WHERE sf.STATUS = 'ACTIVE'")
+					.append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
+					.append(" AND pes.EXEC_STATUS != 'PROCESSING'");
 
-			//Processor Types
-			List<String> processorTypes = new ArrayList<>();
-			processorTypes.add(ProcessorType.FILEWRITER.name());
-			processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
-
-			List<StagedFile> stagedFiles = em.createQuery(queryString.toString())
-					.setParameter(StagedFileDAO.STATUS, EntityStatus.ACTIVE.value())
-					.setParameter(StagedFileDAO.TYPE, processorTypes)
+			List<StagedFile> stagedFiles = em.createNativeQuery(queryString.toString(), StagedFile.class)
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
@@ -220,6 +212,7 @@ public class MailboxWatchDogService {
                                 "File is picked up by another process",
 								null);
 		                inactiveStagedFile(stagedFile, updatedStatusList);
+		                LOGGER.debug(constructMessage("{} : File {} is not present but stagedfile entity is active so updated lens status as failed."), stagedFile.getProcessorId(), stagedFile.getFileName());
 				    }
 					continue;
 				}
