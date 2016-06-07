@@ -234,8 +234,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
                 fileName = file.getFileName().toString();
                 //Sweep Directories if the property is set to true
-                if (Files.isDirectory(file) && staticProp.isSweepSubDirectories()) {
-                    listFiles(files, file, staticProp);
+                if (Files.isDirectory(file)) {
+                    if (staticProp.isSweepSubDirectories()) {
+                        listFiles(files, file, staticProp);
+                    }
                     continue;
                 }
 
