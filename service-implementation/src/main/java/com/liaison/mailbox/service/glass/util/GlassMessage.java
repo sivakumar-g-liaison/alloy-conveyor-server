@@ -383,11 +383,19 @@ public class GlassMessage {
 		return timeStampAPI;
 	}
 
-	public void logProcessingStatus(StatusType statusType, String message, String processorType , String processorProtocol) {
-
-		// Log ActivityStatusAPI
+	/**
+	 * Method to construct the Activity Status API.
+	 * 
+	 * @param statusType
+	 * @param message
+	 * @param processorType
+	 * @param techDescription
+	 * @param processorProtocol
+	 * @return ActivityStatusAPI
+	 */
+	private ActivityStatusAPI constructActivityStatusAPI(StatusType statusType, String message, String processorType, String techDescription, String processorProtocol) {
+		
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
-		String pipelineId = getInboundPipelineId() == null ? getOutboundPipelineId() : getInboundPipelineId();
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
 		activityStatusAPI.setGlobalId(getGlobalPId());
@@ -405,6 +413,9 @@ public class GlassMessage {
 			lensMessage.append(" ");
 			lensMessage.append(processorType);
 		}
+		if (!MailBoxUtil.isEmpty(techDescription)) {
+			status.setTechDescription(techDescription);
+		}
 		
 		if (message != null && !message.equals("")) {
 				status.setDescription(lensMessage.toString() + ": " + message);
@@ -415,39 +426,51 @@ public class GlassMessage {
 		status.setType(statusType);
 
 		activityStatusAPI.getStatuses().add(status);
-
+		
+		return activityStatusAPI;
+	}
+	
+	/**
+	 * Method to log the ActivityStatusAPI along with processorProtocol.
+	 * 
+	 * @param processorProtocol
+	 * @param message
+	 * @param processorType
+	 * @param statusType
+	 */
+	public void logProcessingStatus(String processorProtocol, String message, String processorType, StatusType statusType) {
+		
+		// Log ActivityStatusAPI
+		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, null, processorProtocol);
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
 	}
 	
+	/**
+	 * Method to log the ActivityStatusAPI.
+	 * 
+	 * @param statusType
+	 * @param message
+	 * @param processorType
+	 */
 	public void logProcessingStatus(StatusType statusType, String message, String processorType) {
 
 		// Log ActivityStatusAPI
-		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
-		activityStatusAPI.setPipelineId(getPipelineId());
-		activityStatusAPI.setProcessId(getProcessId());
-		activityStatusAPI.setGlobalId(getGlobalPId());
-		activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
+		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, null, null);
+		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
+	}
 
-		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
-		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+	/**
+	 * Method to log the errors and technical description in ActivityStatusAPI 
+	 * 
+	 * @param statusType
+	 * @param message
+	 * @param processorType
+	 * @param techDescription
+	 */
+	public void logProcessingStatus(StatusType statusType, String message, String processorType, String techDescription) {
 		
-		StringBuilder lensMessage = new StringBuilder().append(MAILBOX_ASA_IDENTIFIER);
-		
-		if (!MailBoxUtil.isEmpty(processorType)) {
-			lensMessage.append(" ");
-			lensMessage.append(processorType);
-		}
-		
-		if (message != null && !message.equals("")) {
-				status.setDescription(lensMessage.toString() + ": " + message);
-		} else {
-			status.setDescription(MAILBOX_ASA_IDENTIFIER);
-		}
-		status.setStatusId(UUIDGen.getCustomUUID());
-		status.setType(statusType);
-
-		activityStatusAPI.getStatuses().add(status);
-
+		// Log ActivityStatusAPI
+		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, techDescription, null);
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
 	}
 }

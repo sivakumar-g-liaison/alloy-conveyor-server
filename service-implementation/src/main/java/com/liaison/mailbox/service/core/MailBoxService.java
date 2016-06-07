@@ -17,6 +17,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -431,7 +432,7 @@ public class MailBoxService implements Runnable {
             }
 
             processorType = processor.getProcessorType().name();
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue", processor.getProcessorType().name(), processor.getProcsrProtocol());
+            glassMessage.logProcessingStatus(processor.getProcsrProtocol(), "Consumed workticket from queue", processor.getProcessorType().name(), StatusType.RUNNING);
 
             // determine SLA status
 			String slaVerificationStatus = (processor instanceof RemoteUploader)
@@ -511,7 +512,7 @@ public class MailBoxService implements Runnable {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER);
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, ExceptionUtils.getStackTrace(e));
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
