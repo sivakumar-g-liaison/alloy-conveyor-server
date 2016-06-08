@@ -37,6 +37,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
 	public static final String PROCESSOR_ID = "processor_id";
 	public static final String FILE_PATH = "filePath";
+	public static final String EXEC_STATUS = "exec_status";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
