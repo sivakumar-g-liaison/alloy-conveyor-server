@@ -222,6 +222,11 @@ public class TransactionVisibilityClient {
 			case DUPLICATE :
 				visibilityAPI.setStatus(StatusCode.U);
 				break;
+            case FAILED :
+                visibilityAPI.setStatus(StatusCode.F);
+                break;
+            default:
+                throw new RuntimeException("Invalid glass message status - " + message.getStatus());
 		}
 
 	}
