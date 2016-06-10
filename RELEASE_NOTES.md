@@ -3,6 +3,10 @@
 * GMB-788: Mailbox - Processor :'Error while saving the processor' error message occurs when the user trying to add the two storage types as BOSS and SPECTRUM
 * GMB-779: use techDescription for more specific error messages
 
+4.3.4
+-------------------------------
+* force commons-lib to version without metrics/stats
+
 4.3.3
 -------------------------------
 * removed boss storage identifiers for prod properties.
