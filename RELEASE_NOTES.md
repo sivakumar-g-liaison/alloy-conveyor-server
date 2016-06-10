@@ -3,11 +3,22 @@
 * GMB-788: Mailbox - Processor :'Error while saving the processor' error message occurs when the user trying to add the two storage types as BOSS and SPECTRUM
 * GMB-779: use techDescription for more specific error messages
 
+4.3.3
+-------------------------------
+* removed boss storage identifiers for prod properties.
+
+4.3.2
+-------------------------------
+* GMB-794 - Bleeding reports errors
+
+4.3.1
+-------------------------------
+* GMB-777 Storage Type
+
 4.3.0
 -------------------------------
 GMB-768 - Able to save processors even without providing password for FTP and SFTP protocols.
 GMB-776 - Config Status is displayed as "Incomplete Configuration" for all mailbox.
-GMB-771 - Mailbox issue on the HTTP sync error case
 
 4.2.0
 -------------------------------
