@@ -258,6 +258,9 @@ dependencies {
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"
 	
+	//METRICS
+	compile 'com.liaison.commons:lib_metrics:1.+'
+	
 }
 
 idea {

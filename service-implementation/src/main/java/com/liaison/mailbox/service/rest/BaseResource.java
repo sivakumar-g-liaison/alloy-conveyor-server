@@ -29,8 +29,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import com.liaison.commons.audit.AuditStatement;
@@ -58,8 +56,6 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 public class BaseResource {
 
 	private static final Logger logger = LogManager.getLogger(BaseResource.class);
-	private static final Logger kpi = LogManager.getLogger("com.liaison.mailbox.metrics.KPI");
-	public static final String HEADER_X_GATE_GATEWAYID = "x-gate-gatewayid";
 	public static final String HEADER_USER_ID = "UserId";
     public static final String MAILBOX_ID = "mailboxId";
     public static final String MAILBOX_NAME = "mailboxName";
@@ -244,11 +240,6 @@ public class BaseResource {
 		return response.build();
 	}
 
-	protected void logKPIMetric(Object message, String markerLabel) {
-		Marker marker = MarkerManager.getMarker(markerLabel);
-		kpi.info(marker, message);
-	}
-
 	/**
 	 * @param request
 	 * @return
@@ -264,10 +255,6 @@ public class BaseResource {
 
 			return requestString;
 		}
-	}
-
-	public static String getGatewayIdFromHeader(HttpServletRequest request) {
-		return request.getHeader(HEADER_X_GATE_GATEWAYID);
 	}
 
 	protected String getUserIdFromHeader(final HttpServletRequest request) {
