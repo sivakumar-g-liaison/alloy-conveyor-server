@@ -53,7 +53,7 @@ public interface ProcessorJavascriptI {
 	 *
 	 * @return
 	 */
-	public File[] getFilesToUpload() throws MailBoxServicesException, IOException;
+	public File[] getFilesToUpload(boolean recurseSubDirs);
 
 	/**
 	 * Returns the location to write the payload
@@ -213,6 +213,5 @@ public interface ProcessorJavascriptI {
      * @param status Status of the LENS logging
      */
     public void logToLens(String msg, File file, ExecutionState status);
-
 
 }

@@ -403,5 +403,8 @@ public interface MailBoxConstants {
     // Timeout range min and max
     public static final int TIMEOUT_RANGE_MIN = 0;
     public static final int TIMEOUT_RANGE_MAX = 60000;
+
+    String POST = "POST";
+    String PUT = "PUT";
    
 }

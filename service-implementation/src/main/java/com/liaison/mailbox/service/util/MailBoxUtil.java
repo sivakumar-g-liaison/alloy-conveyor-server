@@ -517,4 +517,14 @@ public class MailBoxUtil {
 		}
 		return storageType;
 	}
+
+    /**
+     * http success code validation
+     *
+     * @param http_status
+     * @return
+     */
+    public static boolean isSuccessCode(int http_status) {
+        return (http_status > 200 || http_status < 299);
+    }
 }

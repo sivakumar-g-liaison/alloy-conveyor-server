@@ -63,6 +63,7 @@
 			<filters>
 				<!-- remove some noise -->
 				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="ACCEPT"/>
 			</filters>
 
 		</Socket>
@@ -105,6 +106,7 @@
 			<filters>
 				<!-- remove some noise -->
 				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="ACCEPT"/>
 			</filters>
 
 			<Policies>
