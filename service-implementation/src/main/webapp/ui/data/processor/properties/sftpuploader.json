@@ -169,9 +169,25 @@
                "true"
             ]
          },
-		 {
+         		 {
             "name":"createFoldersInRemote",
             "displayName":"Create folders in remote",
+            "value":"",
+            "type":"select",
+            "value":"false",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
+         },
+		 {
+            "name":"recurseSubDirectories",
+            "displayName":"Recurse sub directories",
             "value":"",
             "type":"select",
             "value":"false",
