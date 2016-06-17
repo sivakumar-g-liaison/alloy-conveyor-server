@@ -426,7 +426,7 @@ public class MailBoxService implements Runnable {
                 } else {
                     errorMessage.append("Unable to find a processor type of uploader/filewriter")
                         .append(" for the given mailbox guid ")
-                        .append(processorId);
+                        .append(mailboxId);
                 }
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }

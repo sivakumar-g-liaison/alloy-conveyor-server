@@ -270,9 +270,9 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         List<StagedFile> stagedFiles;
 
         if (recurseSubDirs) {
-            stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid(), validateLocalPath());
-        } else {
             stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid());
+        } else {
+            stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid(), validateLocalPath());
         }
 
         for (StagedFile stagedFile : stagedFiles) {

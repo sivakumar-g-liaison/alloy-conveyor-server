@@ -8,32 +8,22 @@
  */
 package com.liaison.mailbox.service.executor.javascript;
 
+import com.liaison.commons.scripting.ScriptExecutorBase;
+import com.liaison.commons.scripting.javascript.JavascriptExecutor;
+import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.Metric;
-import com.liaison.commons.message.glass.dom.MetricAPI;
-import com.liaison.commons.message.glass.dom.MetricTag;
-import com.liaison.commons.scripting.ScriptExecutorBase;
-import com.liaison.commons.scripting.javascript.JavascriptExecutor;
-import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
-import com.liaison.commons.util.UUIDGen;
-import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
-
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * This actually executes a javascript in a thread. Siblings to this could include a JavaExecutor or any other
@@ -58,7 +48,6 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
 	protected JavascriptScriptContext scriptContext = null;
 	protected String script = null;
 	protected ProcessorJavascriptI processor = null;
-	protected MetricAPI metricAPI = new MetricAPI();
 
 	private static final Logger logger = LogManager.getLogger(JavascriptExecutorService.class);
 
@@ -152,39 +141,11 @@ public class JavascriptExecutorService extends ScriptExecutorBase {
     					+ elapsedTime + " ms.");
     		}
     
-    		logMetrics(elapsedTime, je.getMetricData());
 		} catch (ScriptException e) {
             throw new RuntimeException(e.getMessage());
         }
 
 		return scriptContext;
-	}
-
-	private void logMetrics(String elapsedTime, Map<String, String> metricData) {
-
-		Metric m = new Metric();
-		m.setMetricName("system.metrics.javascriptExecutor.processTime");
-		m.setPayloadByteLength(BigInteger.ZERO);
-
-		MetricTag metricTag = new MetricTag();
-		metricTag.setName("scriptTime");
-		metricTag.setValue(elapsedTime);
-		m.getMetricTags().add(metricTag);
-
-		Map<String, String> scriptExecutionTimes = metricData;
-		String[] keys = scriptExecutionTimes.keySet().toArray(new String[1]);
-		int count = scriptExecutionTimes.size();
-		
-		for (int i = 0; i < count; i++) {
-			metricTag = new MetricTag();
-			metricTag.setName(keys[i]);
-			metricTag.setValue(scriptExecutionTimes.get(keys[i]));
-			m.getMetricTags().add(metricTag);
-		}
-
-		 metricAPI.setGlassMessageId(UUIDGen.getCustomUUID());
-		 metricAPI.setMetric(m);
-		 logger.info(GlassMessageMarkers.METRICS_GM_MARKER, metricAPI);
 	}
 
 	protected void logContext(JavascriptScriptContext context) {
