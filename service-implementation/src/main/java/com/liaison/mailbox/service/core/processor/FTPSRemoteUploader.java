@@ -9,6 +9,15 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -19,14 +28,6 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
 
 /**
  *
@@ -70,10 +71,12 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             //validates the remote path
             String remotePath = validateRemotePath();
-
-            //Checks the local path has files to upload
-            //TODO recurseSubDirs
-            File[] subFiles = getFilesToUpload(false);
+            
+            // retrieve required properties
+            FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
+            
+            boolean recursiveSubdirectories = ftpUploaderStaticProperties.isRecurseSubDirectories();
+            File[] subFiles = getFilesToUpload(recursiveSubdirectories);
             if (subFiles == null || subFiles.length == 0) {
                 LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
@@ -84,8 +87,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             ftpsRequest.connect();
             ftpsRequest.login();
 
-            // retrieve required properties
-            FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO) getProperties();
+            // set required properties
             setPassive(ftpsRequest, ftpUploaderStaticProperties);
 
             LOGGER.info(constructMessage("Start run"));

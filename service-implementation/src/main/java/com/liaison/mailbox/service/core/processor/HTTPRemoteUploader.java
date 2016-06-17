@@ -10,6 +10,18 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
@@ -24,16 +36,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.ws.rs.core.Response;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods
@@ -76,9 +78,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 //Checks the local path has files to upload
                 String path = validateLocalPath();
-                File localDir = new File(path);
-                //TODO recurseSubDirs
-                File[] files = getFilesToUpload(false);
+                File localDir = new File(path);              
+                boolean recursiveSubdirectories = httpUploaderStaticProperties.isRecurseSubDirectories();
+                File[] files = getFilesToUpload(recursiveSubdirectories);
                 if (files == null || files.length == 0) {
                     LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                     return;

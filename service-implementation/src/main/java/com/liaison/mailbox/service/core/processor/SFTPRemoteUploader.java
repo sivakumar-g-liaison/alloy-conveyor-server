@@ -71,9 +71,11 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             //validates the remote path
             String remotePath = validateRemotePath();
 
-            //Checks the local path has files to upload
-            //TODO recurseSubDirs
-            File[] subFiles = getFilesToUpload(false);
+            //retrieve required properties
+            SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
+            
+            boolean recursiveSubdirectories = sftpUploaderStaticProperties.isRecurseSubDirectories();
+            File[] subFiles = getFilesToUpload(recursiveSubdirectories);
             if (subFiles == null || subFiles.length == 0) {
                 LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
