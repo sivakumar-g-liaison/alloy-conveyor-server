@@ -175,7 +175,7 @@ var rest = myApp.controller(
             // Set the paging data to grid from server object
             $scope.setPagingData = function (data, page, pageSize) {
                 if (data === null || data.length <= 0) {
-                     showSaveMessage("No results found", 'error');
+                     showSaveMessage("No results found", 'warning');
                 }				
                 var pagedData = data;
                 $scope.processorList = pagedData;                				

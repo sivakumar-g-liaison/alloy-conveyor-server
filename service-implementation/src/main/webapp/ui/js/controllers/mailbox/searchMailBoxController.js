@@ -91,7 +91,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 			$scope.disableFiltr = data.disableFilter;
             if ( $scope.mailboxes.length === 0)
 			{
-            	showSaveMessage("No Results Found", 'error');
+            	showSaveMessage("No Results Found", 'warning');
 			}
             if (!$scope.$$phase) {
                 $scope.$apply();

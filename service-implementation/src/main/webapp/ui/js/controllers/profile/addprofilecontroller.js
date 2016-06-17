@@ -99,7 +99,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 					}
 					if ($scope.profiles.length === 0)
 					{
-					 showSaveMessage("No Results Found ", 'error');
+					 showSaveMessage("No Results Found ", 'warning');
 					 }
 					if (!$scope.$$phase){
 					 $scope.$apply();
