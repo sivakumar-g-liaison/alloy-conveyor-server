@@ -134,14 +134,14 @@
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/AclResourceMaps</param-value>
+            <param-value>/rest/AclResourceMaps</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>aclFilter</filter-name>
-        <url-pattern>/AclResourceMaps</url-pattern>
+        <url-pattern>/rest/AclResourceMaps</url-pattern>
     </filter-mapping>
-    
+
 	<!-- ComponentVerificationResource -->
     <filter>
         <filter-name>componentVerifyFilter</filter-name>
@@ -218,12 +218,12 @@
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/config/dropbox/stagedFiles/{stagedFileId}</param-value>
+            <param-value>/config/dropbox/stagedFiles/*</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>dropboxStagedFileDLFilter</filter-name>
-        <url-pattern>/config/dropbox/stagedFiles/{stagedFileId}</url-pattern>
+        <url-pattern>/config/dropbox/stagedFiles/*</url-pattern>
     </filter-mapping>
     
     <!-- DropboxTransferProfileResource -->
@@ -246,12 +246,12 @@
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/{id}</param-value>
+            <param-value>/config/mailbox/*</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>mailboxConfigDetailsFilter</filter-name>
-        <url-pattern>/config/mailbox/{id}</url-pattern>
+        <url-pattern>/config/mailbox/*</url-pattern>
     </filter-mapping>
     
     <!-- MailBoxConfigurationResource -->
@@ -266,34 +266,6 @@
     <filter-mapping>
         <filter-name>mailboxConfigFilter</filter-name>
         <url-pattern>/config/mailbox</url-pattern>
-    </filter-mapping>
-    
-    <!-- MailBoxProcessorDetailsResource -->
-    <filter>
-        <filter-name>mailboxProcDetailsFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-        <init-param>
-            <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/{mailboxid}/processor/{processorid}</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>mailboxProcDetailsFilter</filter-name>
-        <url-pattern>/config/mailbox/{mailboxid}/processor/{processorid}</url-pattern>
-    </filter-mapping>
-    
-    <!-- MailBoxProcessorResource -->
-    <filter>
-        <filter-name>mailboxProcFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-        <init-param>
-            <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/{mailboxid}/processor</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>mailboxProcFilter</filter-name>
-        <url-pattern>/config/mailbox/{mailboxid}/processor</url-pattern>
     </filter-mapping>
     
     <!-- MailBoxProfileResource -->
@@ -316,42 +288,29 @@
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/config/entity/read/{type}/{guid}</param-value>
+            <param-value>/config/entity/read/*</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>mailboxReadFilter</filter-name>
-        <url-pattern>/config/entity/read/{type}/{guid}</url-pattern>
+        <url-pattern>/config/entity/read/*</url-pattern>
     </filter-mapping>
     
     <!-- MailBoxScriptConfigurationResource -->
-    <filter>
-        <filter-name>mailBoxScriptConfigFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-        <init-param>
-            <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/git/content</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>mailBoxScriptConfigFilter</filter-name>
-        <url-pattern>/config/mailbox/git/content</url-pattern>
-    </filter-mapping>
-    
     <!-- MailBoxScriptDetailsConfigurationResource -->
     <filter>
         <filter-name>mailBoxScriptDetConfigFilter</filter-name>
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/git/content/{git.file.name}</param-value>
+            <param-value>/config/mailbox/git/content/*</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>mailBoxScriptDetConfigFilter</filter-name>
-        <url-pattern>/config/mailbox/git/content/{git.file.name}</url-pattern>
+        <url-pattern>/config/mailbox/git/content/*</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailboxServiceConfigurationsResource -->
     <filter>
         <filter-name>mailBoxServiceConfigFilter</filter-name>
@@ -456,42 +415,41 @@
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/typeAhead</param-value>
+            <param-value>/config/mailbox/typeAhead/getEntityByNames</param-value>
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>typeaheadFilter</filter-name>
-        <url-pattern>/config/mailbox/typeAhead</url-pattern>
+        <url-pattern>/config/mailbox/typeAhead/getEntityByNames</url-pattern>
     </filter-mapping>
     
     <!-- HTTPListenerResource -->
     <filter>
-        <filter-name>httpListenerFilter</filter-name>
+        <filter-name>httpSyncFilter</filter-name>
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
         <init-param>
             <param-name>name-prefix</param-name>
-            <param-value>/process/*</param-value>
+            <param-value>/process/sync/*</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>httpListenerFilter</filter-name>
-        <url-pattern>/process/*</url-pattern>
-    </filter-mapping>
-    
-    <!-- Generic -->
-    <filter>
-        <filter-name>genericMailboxFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-        <init-param>
-            <param-name>name-prefix</param-name>
-            <param-value>/*</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>genericMailboxFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <filter-name>httpSyncFilter</filter-name>
+        <url-pattern>/process/sync/*</url-pattern>
     </filter-mapping>
 
+    <filter>
+        <filter-name>httpAsyncFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/process/async/*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>httpAsyncFilter</filter-name>
+        <url-pattern>/process/async/*</url-pattern>
+    </filter-mapping>
+    
     <listener>
         <listener-class>com.liaison.health.core.MetricsServletContextListener</listener-class>
     </listener>

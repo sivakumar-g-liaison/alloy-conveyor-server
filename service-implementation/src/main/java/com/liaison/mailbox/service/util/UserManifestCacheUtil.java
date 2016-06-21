@@ -75,7 +75,7 @@ public class UserManifestCacheUtil {
         	 );
         
       //Register Manifst Cache
-      CacheStatsRegistrar.register("manifest-cache", manifestCache);
+      CacheStatsRegistrar.register("cache-usermanifest", manifestCache);
 	}
 
 	
