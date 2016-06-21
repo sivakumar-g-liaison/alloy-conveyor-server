@@ -66,7 +66,7 @@ public abstract class AuditedResource extends BaseResource {
 			// Log boiler plate (hopefully to be added to filter soon).
 
 		} catch (Throwable t) {
-		    logger.error(t); // Hack
+		    logger.error(t.getMessage(), t); // Hack
 			initLogContext(worker);
 			if (t instanceof LiaisonAuditableRuntimeException) {
 				throw (LiaisonAuditableRuntimeException) t; // Hack
