@@ -38,6 +38,7 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String errorFileLocation;
 	@JsonIgnore
 	private String processedFileLocation;
+	private boolean recurseSubDirectories;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -115,4 +116,11 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setProcessedFileLocation(String processedFileLocation) {
 		this.processedFileLocation = processedFileLocation;
 	}
+	public boolean isRecurseSubDirectories() {
+		return recurseSubDirectories;
+	}
+	public void setRecurseSubDirectories(boolean recurseSubDirectories) {
+		this.recurseSubDirectories = recurseSubDirectories;
+	}
+	
 }

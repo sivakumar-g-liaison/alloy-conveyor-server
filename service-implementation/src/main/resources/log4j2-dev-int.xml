@@ -62,7 +62,9 @@
 			</LogStashJSONLayout>
 			<filters>
 				<!-- remove some noise -->
-				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
 			</filters>
 
 		</Socket>
@@ -104,7 +106,9 @@
 			</LogStashJSONLayout>
 			<filters>
 				<!-- remove some noise -->
-				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
 			</filters>
 
 			<Policies>
@@ -154,8 +158,7 @@
 			ignoreExceptions="false">
 			<GlassMessageJSONLayout compact="true" />
 			<filters>
-				<MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
-					onMismatch="DENY" />
+				<MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
 			</filters>
 
 			<Policies>

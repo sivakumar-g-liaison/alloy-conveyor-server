@@ -43,6 +43,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private String excludeFiles;
 	private boolean debugTranscript;
 	private boolean createFoldersInRemote;
+	private boolean recurseSubDirectories;
 
 	public String getUrl() {
 		return url;
@@ -144,5 +145,12 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
     public void setCreateFoldersInRemote(boolean createFoldersInRemote) {
         this.createFoldersInRemote = createFoldersInRemote;
     }
+	public boolean isRecurseSubDirectories() {
+		return recurseSubDirectories;
+	}
+	public void setRecurseSubDirectories(boolean recurseSubDirectories) {
+		this.recurseSubDirectories = recurseSubDirectories;
+	}
+    
 
 }

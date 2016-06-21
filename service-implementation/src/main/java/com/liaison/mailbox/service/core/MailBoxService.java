@@ -426,7 +426,7 @@ public class MailBoxService implements Runnable {
                 } else {
                     errorMessage.append("Unable to find a processor type of uploader/filewriter")
                         .append(" for the given mailbox guid ")
-                        .append(processorId);
+                        .append(mailboxId);
                 }
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }
@@ -458,12 +458,11 @@ public class MailBoxService implements Runnable {
             workTicket.setFileName(stagedFileName);
             FileWriter processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
-            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
+            LOG.debug("CronJob : NONE : {} : {} : {} : {} : Handover execution to the filewriter service",
             		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
-                    mbx.getPguid(),
-                    workTicket.getGlobalProcessId());
+                    mbx.getPguid());
 
             processorService.runProcessor(workTicket, fsm);
             glassMessage.setOutSize(workTicket.getPayloadSize());
@@ -486,12 +485,11 @@ public class MailBoxService implements Runnable {
             	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER);
             }
 
-            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
+            LOG.debug("CronJob : NONE : {} : {} : {} : {} : Filewriter service execution is completed",
             		processorType,
                     processor.getProcsrName(),
                     mbx.getMbxName(),
-                    mbx.getPguid(),
-                    workTicket.getGlobalProcessId());
+                    mbx.getPguid());
 
         } catch (Exception e) {
 
@@ -499,12 +497,11 @@ public class MailBoxService implements Runnable {
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {
-                LOG.error("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : File Staging failed : {}",
+                LOG.error("CronJob : NONE : {} : {} : {} : {} : File Staging failed : {}",
                 		processorType,
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),
                         processor.getMailbox().getPguid(),
-                        (workTicket == null ? DEFAULT_FILE_NAME : workTicket.getGlobalProcessId()),
                         e.getMessage(), e);
             }
 

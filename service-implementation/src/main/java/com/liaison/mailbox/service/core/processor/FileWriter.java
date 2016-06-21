@@ -79,20 +79,14 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     configurationInstance.getProcessorType());
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.RUNNING, "File Staging is started");
 
-            LOG.info(constructMessage("Start Run. Workticket received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
             String fileName = workTicket.getFileName();
-            LOG.info(constructMessage("Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
-            LOG.info(constructMessage("Found the processor to write the payload in the local payload location"));
+            LOG.info("filename from the workticket - {}", fileName);
 
             //get payload from spectrum
             try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
 
                 if (null == payload) {
-                    LOG.error(constructMessage("Global PID",
-                            seperator,
-                            workTicket.getGlobalProcessId(),
-                            seperator,
-                            "Failed to retrieve payload from spectrum"));
+                    LOG.error("Failed to retrieve payload from spectrum");
                     throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
                 }
 
@@ -117,46 +111,19 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 }
 
                 if (null == processorPayloadLocation) {
-                    LOG.error(constructMessage("Global PID",
-                            seperator,
-                            workTicket.getGlobalProcessId(),
-                            seperator,
-                            "payload or filewrite location not configured for processor {}"), configurationInstance.getProcsrName());
+                    LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
                     throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
                 }
-
-                LOG.info(constructMessage("Global PID",
-                        seperator,
-                        workTicket.getGlobalProcessId(),
-                        seperator,
-                        "Started writing payload to ",
-                        processorPayloadLocation,
-                        seperator,
-                        fileName));
+                LOG.info("Started writing payload to {} and the filename is {}", processorPayloadLocation, fileName);
 
                 // write the payload retrieved from spectrum to the configured location of processor
                 writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
                 if (writeStatus) {
-
-                	LOG.info(constructMessage("Global PID",
-                			seperator,
-                			workTicket.getGlobalProcessId(),
-                			seperator,
-                			"Payload is successfully written to ",
-                			processorPayloadLocation,
-                			seperator,
-                			fileName));
+                	LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                 } else {
 
-                	LOG.info(constructMessage("Global PID",
-                			seperator,
-                			workTicket.getGlobalProcessId(),
-                			seperator,
-                			"File {} already exists at {} and should not be overwritten"),
-                			fileName,
-                			processorPayloadLocation);
-
-                	//To aviod staged file entry
+                	LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
+                	//To avoid staged file entry
                 	workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
 
@@ -174,12 +141,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
              //GLASS LOGGING ENDS//
 
             stopwatch.stop();
-            LOG.info(constructMessage("Number of files processed 1"));
-            LOG.info(constructMessage("Total time taken to process files {}"), stopwatch.getTime());
-            LOG.info(constructMessage("End run"));
+            LOG.info("Total time taken to process files {}", stopwatch.getTime());
 
         } catch (Exception e) {
-            LOG.error(constructMessage("File Staging failed", seperator, e.getMessage()), e);
+            LOG.error("File Staging failed", e);
              //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
         }
