@@ -11,9 +11,6 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -26,14 +23,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
-import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
@@ -43,14 +38,6 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.netflix.servo.DefaultMonitorRegistry;
-import com.netflix.servo.annotations.DataSourceType;
-import com.netflix.servo.annotations.Monitor;
-import com.netflix.servo.monitor.MonitorConfig;
-import com.netflix.servo.monitor.Monitors;
-import com.netflix.servo.monitor.StatsTimer;
-import com.netflix.servo.monitor.Stopwatch;
-import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -71,27 +58,6 @@ public class MailBoxProfileResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxProfileResource.class);
 
-	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger failureCounter = new AtomicInteger(0);
-
-	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-
-	private Stopwatch stopwatch;
-	private static final StatsTimer statsTimer = new StatsTimer(
-            MonitorConfig.builder("MailBoxProfileResource_statsTimer").build(),
-            new StatsConfig.Builder().build());
-	
-	static {
-        DefaultMonitorRegistry.getInstance().register(statsTimer);
-    }
-	
-	public MailBoxProfileResource()
-			throws IOException {
-
-		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
-	}
-
 	/**
 	 * REST method to initiate profile creation.
 	 * 
@@ -102,16 +68,14 @@ public class MailBoxProfileResource extends AuditedResource {
 	@ApiOperation(value = "Create Profile", notes = "create a new profile", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
-	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Create new profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body")})
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response createProfile(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
-				serviceCallCounter.addAndGet(1);
 
 				String requestString;
 				try {
@@ -136,14 +100,7 @@ public class MailBoxProfileResource extends AuditedResource {
 		worker.actionLabel = "MailBoxProfileResource.createProfile()";
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	/**
@@ -156,16 +113,14 @@ public class MailBoxProfileResource extends AuditedResource {
 	@ApiOperation(value = "Update profile", notes = "Update an existing profile", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update an existing profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body") })
-	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Update an existing profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body")})
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response reviseProfile(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
-				serviceCallCounter.addAndGet(1);
 
 				String requestString;
 				try {
@@ -188,14 +143,7 @@ public class MailBoxProfileResource extends AuditedResource {
 		worker.actionLabel = "MailBoxProfileResource.updateProfile()";
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	/**
@@ -219,7 +167,6 @@ public class MailBoxProfileResource extends AuditedResource {
 			@Override
 			public Object call() {
 
-				serviceCallCounter.addAndGet(1);
 				// read Profiles
 				ProfileConfigurationService profile = new ProfileConfigurationService();
 				return profile.getProfiles(page, pageSize, sortInfo, filterText);
@@ -230,15 +177,7 @@ public class MailBoxProfileResource extends AuditedResource {
 		worker.queryParams.put("filterText", filterText);
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
-
+		return process(request, worker);
 	}
 
 	@Override
@@ -249,32 +188,4 @@ public class MailBoxProfileResource extends AuditedResource {
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
 	}
 
-	@Override
-	protected void beginMetricsCollection() {
-		
-		stopwatch = statsTimer.start();
-        int globalCount = globalServiceCallCounter.addAndGet(1);
-        logKPIMetric(globalCount, "Global_serviceCallCounter");
-        int serviceCount = serviceCallCounter.addAndGet(1);
-        logKPIMetric(serviceCount, "MailBoxProfileResource_serviceCallCounter");
-	}
-
-	@Override
-	protected void endMetricsCollection(boolean success) {
-		
-		stopwatch.stop();
-        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
-        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
-        statsTimer.record(duration, TimeUnit.MILLISECONDS);
-
-        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
-                "Global_timer");
-        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "MailBoxProfileResource_timer");
-        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "MailBoxProfileResource_timer");
-
-        if (!success) {
-            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-            logKPIMetric(failureCounter.addAndGet(1), "MailBoxProfileResource_failureCounter");
-        }
-	}
 }

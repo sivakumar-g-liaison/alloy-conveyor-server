@@ -10,13 +10,14 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,12 +26,6 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.exception.LiaisonUnhandledContainerException;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
-import com.netflix.servo.DefaultMonitorRegistry;
-import com.netflix.servo.annotations.DataSourceType;
-import com.netflix.servo.annotations.Monitor;
-import com.netflix.servo.monitor.MonitorConfig;
-import com.netflix.servo.monitor.StatsTimer;
-import com.netflix.servo.stats.StatsConfig;
 
 /**
  * Resource class to audit all the incoming requests and their corresponding responses.
@@ -46,20 +41,6 @@ public abstract class AuditedResource extends BaseResource {
 	public static final String HEADER_GUID = "guid";
 	public static final String MULTIPLE = "MULTIPLE";
 	
-	// global KPIs
-	@Monitor(name = "Global_failureCounter", type = DataSourceType.COUNTER)
-	protected static final AtomicInteger globalFailureCounter = new AtomicInteger(0);
-
-	@Monitor(name = "Global_serviceCallCounter", type = DataSourceType.COUNTER)
-	protected static final AtomicInteger globalServiceCallCounter = new AtomicInteger(0);
-
-	protected static final StatsTimer globalStatsTimer = new StatsTimer(
-			MonitorConfig.builder("Global_statsTimer").build(), new StatsConfig.Builder().build());
-
-	static {
-		DefaultMonitorRegistry.getInstance().register(globalStatsTimer);
-	}
-
 	/**
 	 * This handles auditing around your business logic, then hands the worker off to the KPI instrumented caller.
 	 * 
@@ -88,13 +69,10 @@ public abstract class AuditedResource extends BaseResource {
 		    logger.error(t); // Hack
 			initLogContext(worker);
 			if (t instanceof LiaisonAuditableRuntimeException) {
-				logger.error(t); // Hack
 				throw (LiaisonAuditableRuntimeException) t; // Hack
 			} else {
-			    logger.error(t); // Hack
 				LiaisonAuditableRuntimeException e = new LiaisonUnhandledContainerException(t,
 						Response.Status.INTERNAL_SERVER_ERROR); // Hack
-				logger.error(e); // Hack
 				throw e; // Hack
 			}
 		}
@@ -112,7 +90,6 @@ public abstract class AuditedResource extends BaseResource {
 	 */
 	public Response performServiceRequest(HttpServletRequest request, Callable<Object> worker,
 			String... expectedMediaTypes) {
-		beginMetricsCollection();
 
 		Serializable serviceResponse = null;
 		Response returnResponse = null;
@@ -156,12 +133,21 @@ public abstract class AuditedResource extends BaseResource {
 		} catch (Exception onc) {
 			success = false;
 			throw new RuntimeException(onc);
-		} finally {
-			endMetricsCollection(success);
-
 		}
 
 		return returnResponse;
+	}
+	
+	protected Response process(@Context HttpServletRequest request, AbstractResourceDelegate<Object> worker) {
+		
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}
 	}
 
 	/**
@@ -171,15 +157,5 @@ public abstract class AuditedResource extends BaseResource {
 	 * @return
 	 */
 	protected abstract AuditStatement getInitialAuditStatement(String actionLabel);
-
-	/**
-	 * Implement Service specific metrics begin
-	 */
-	protected abstract void beginMetricsCollection();
-
-	/**
-	 * Implement Service specific metrics end
-	 */
-	protected abstract void endMetricsCollection(boolean success);
 
 }

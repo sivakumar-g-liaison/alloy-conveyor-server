@@ -119,6 +119,379 @@
         <load-on-startup>2</load-on-startup>
     </servlet>
 
+	<!--
+    =========================================================================
+    Begin:  Metric Filters
+    =========================================================================
+    -->
+    
+    <listener>
+        <listener-class>com.liaison.metrics.rest.InstrumentedFilterContextListenerImpl</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>aclFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/AclResourceMaps</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>aclFilter</filter-name>
+        <url-pattern>/AclResourceMaps</url-pattern>
+    </filter-mapping>
+    
+	<!-- ComponentVerificationResource -->
+    <filter>
+        <filter-name>componentVerifyFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/verifycomponent</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>componentVerifyFilter</filter-name>
+        <url-pattern>/verifycomponent</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxAuthenticationResource -->
+    <filter>
+        <filter-name>dropboxAuthFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/authenticate</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxAuthFilter</filter-name>
+        <url-pattern>/config/dropbox/authenticate</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxFileStagedResource -->
+    <filter>
+        <filter-name>dropboxFileStageFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/stagedFiles</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxFileStageFilter</filter-name>
+        <url-pattern>/config/dropbox/stagedFiles</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxFileTransferResource -->
+    <filter>
+        <filter-name>dropboxFileTransStageFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/transferContent</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxFileTransStageFilter</filter-name>
+        <url-pattern>/config/dropbox/transferContent</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxManifestResource -->
+    <filter>
+        <filter-name>dropboxManifestFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/authAndGetACL</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxManifestFilter</filter-name>
+        <url-pattern>/config/dropbox/authAndGetACL</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxStagedFileDownloadResource -->
+    <filter>
+        <filter-name>dropboxStagedFileDLFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/stagedFiles/{stagedFileId}</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxStagedFileDLFilter</filter-name>
+        <url-pattern>/config/dropbox/stagedFiles/{stagedFileId}</url-pattern>
+    </filter-mapping>
+    
+    <!-- DropboxTransferProfileResource -->
+    <filter>
+        <filter-name>dropboxTransferProfileFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/dropbox/transferProfiles</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>dropboxTransferProfileFilter</filter-name>
+        <url-pattern>/config/dropbox/transferProfiles</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailboxConfigurationDetailsResource -->
+    <filter>
+        <filter-name>mailboxConfigDetailsFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/{id}</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxConfigDetailsFilter</filter-name>
+        <url-pattern>/config/mailbox/{id}</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxConfigurationResource -->
+    <filter>
+        <filter-name>mailboxConfigFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxConfigFilter</filter-name>
+        <url-pattern>/config/mailbox</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxProcessorDetailsResource -->
+    <filter>
+        <filter-name>mailboxProcDetailsFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/{mailboxid}/processor/{processorid}</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxProcDetailsFilter</filter-name>
+        <url-pattern>/config/mailbox/{mailboxid}/processor/{processorid}</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxProcessorResource -->
+    <filter>
+        <filter-name>mailboxProcFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/{mailboxid}/processor</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxProcFilter</filter-name>
+        <url-pattern>/config/mailbox/{mailboxid}/processor</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxProfileResource -->
+    <filter>
+        <filter-name>mailboxProfileFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/profile</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxProfileFilter</filter-name>
+        <url-pattern>/config/mailbox/profile</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailboxReadResource -->
+    <filter>
+        <filter-name>mailboxReadFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/entity/read/{type}/{guid}</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxReadFilter</filter-name>
+        <url-pattern>/config/entity/read/{type}/{guid}</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxScriptConfigurationResource -->
+    <filter>
+        <filter-name>mailBoxScriptConfigFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/git/content</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailBoxScriptConfigFilter</filter-name>
+        <url-pattern>/config/mailbox/git/content</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailBoxScriptDetailsConfigurationResource -->
+    <filter>
+        <filter-name>mailBoxScriptDetConfigFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/git/content/{git.file.name}</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailBoxScriptDetConfigFilter</filter-name>
+        <url-pattern>/config/mailbox/git/content/{git.file.name}</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailboxServiceConfigurationsResource -->
+    <filter>
+        <filter-name>mailBoxServiceConfigFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/serviceconfigurations</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailBoxServiceConfigFilter</filter-name>
+        <url-pattern>/config/mailbox/serviceconfigurations</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailboxTenancyKeyResource -->
+    <filter>
+        <filter-name>mailboxTenancyKeyFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/tenancyKeys</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxTenancyKeyFilter</filter-name>
+        <url-pattern>/config/mailbox/tenancyKeys</url-pattern>
+    </filter-mapping>
+    
+    <!-- MailboxWatchDogResource -->
+    <filter>
+        <filter-name>mailboxWatchDogFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/trigger/status</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>mailboxWatchDogFilter</filter-name>
+        <url-pattern>/config/mailbox/trigger/status</url-pattern>
+    </filter-mapping>
+    
+    <!-- ProcessorAdminDetailsResource -->
+    <filter>
+        <filter-name>processorAdminDetFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/processoradmin/processor/status</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>processorAdminDetFilter</filter-name>
+        <url-pattern>/config/mailbox/processoradmin/processor/status</url-pattern>
+    </filter-mapping>
+    
+    <!-- ProcessorAdminResource -->
+    <filter>
+        <filter-name>processorAdminFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/processoradmin/processor/execution</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>processorAdminFilter</filter-name>
+        <url-pattern>/config/mailbox/processoradmin/processor/execution</url-pattern>
+    </filter-mapping>
+    
+    <!-- ProcessorSearchResource -->
+    <filter>
+        <filter-name>processorSearchFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/searchprocessor</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>processorSearchFilter</filter-name>
+        <url-pattern>/config/mailbox/searchprocessor</url-pattern>
+    </filter-mapping>
+    
+    <!-- TriggerProfileResource -->
+    <filter>
+        <filter-name>triggerProfileFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/trigger/profile</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>triggerProfileFilter</filter-name>
+        <url-pattern>/config/mailbox/trigger/profile</url-pattern>
+    </filter-mapping>
+    
+    <!-- TypeaheadResource -->
+    <filter>
+        <filter-name>typeaheadFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/mailbox/typeAhead</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>typeaheadFilter</filter-name>
+        <url-pattern>/config/mailbox/typeAhead</url-pattern>
+    </filter-mapping>
+    
+    <!-- HTTPListenerResource -->
+    <filter>
+        <filter-name>httpListenerFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/process/*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>httpListenerFilter</filter-name>
+        <url-pattern>/process/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- Generic -->
+    <filter>
+        <filter-name>genericMailboxFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>genericMailboxFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <listener>
         <listener-class>com.liaison.health.core.MetricsServletContextListener</listener-class>
     </listener>

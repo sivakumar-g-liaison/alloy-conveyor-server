@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -39,7 +36,6 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
-import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
@@ -67,16 +63,6 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
-import com.netflix.servo.DefaultMonitorRegistry;
-import com.netflix.servo.MonitorRegistry;
-import com.netflix.servo.annotations.DataSourceType;
-import com.netflix.servo.annotations.Monitor;
-import com.netflix.servo.monitor.CompositeMonitor;
-import com.netflix.servo.monitor.MonitorConfig;
-import com.netflix.servo.monitor.Monitors;
-import com.netflix.servo.monitor.StatsTimer;
-import com.netflix.servo.monitor.Stopwatch;
-import com.netflix.servo.stats.StatsConfig;
 
 /**
  * G2 HTTP Gateway.
@@ -95,27 +81,6 @@ public class HTTPListenerResource extends AuditedResource {
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	private static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	private static final String NO_PRIVILEGE = "You do not have sufficient privilege to invoke the service";
-
-	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-
-	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger failureCounter = new AtomicInteger(0);
-
-    private Stopwatch stopwatch;
-    private static final StatsTimer statsTimer = new StatsTimer(
-            MonitorConfig.builder("HTTPListenerResource_statsTimer").build(),
-            new StatsConfig.Builder().build());
-
-    static {
-        DefaultMonitorRegistry.getInstance().register(statsTimer);
-    }
-
-	public HTTPListenerResource() {
-		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
-		MonitorRegistry monitorRegistry = DefaultMonitorRegistry.getInstance();
-		monitorRegistry.register(monitor);
-	}
 
 	@POST
 	@Path("sync/{token1}")
@@ -162,7 +127,6 @@ public class HTTPListenerResource extends AuditedResource {
 			    //first corner timestamp
 		        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
-				serviceCallCounter.incrementAndGet();
 				GlassMessage glassMessage = null;
 				WorkTicket workTicket = null;
 				
@@ -287,14 +251,7 @@ public class HTTPListenerResource extends AuditedResource {
 		worker.queryParams.put(HEADER_GUID, mailboxId);
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	/**
@@ -374,8 +331,6 @@ public class HTTPListenerResource extends AuditedResource {
 
 			    //first corner timestamp
                 ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
-
-				serviceCallCounter.incrementAndGet();
 
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = null;
@@ -486,14 +441,7 @@ public class HTTPListenerResource extends AuditedResource {
 		worker.queryParams.put(HEADER_GUID, mailboxId);
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	@Override
@@ -502,35 +450,6 @@ public class HTTPListenerResource extends AuditedResource {
 				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
-
-	@Override
-	protected void beginMetricsCollection() {
-
-	    stopwatch = statsTimer.start();
-        int globalCount = globalServiceCallCounter.addAndGet(1);
-        logKPIMetric(globalCount, "Global_serviceCallCounter");
-        int serviceCount = serviceCallCounter.addAndGet(1);
-        logKPIMetric(serviceCount, "HTTPListenerResource_serviceCallCounter");
-	}
-
-	@Override
-	protected void endMetricsCollection(boolean success) {
-
-	    stopwatch.stop();
-        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
-        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
-        statsTimer.record(duration, TimeUnit.MILLISECONDS);
-
-        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
-                "Global_timer");
-        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "HTTPListenerResource_timer");
-        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "HTTPListenerResource_timer");
-
-        if (!success) {
-            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-            logKPIMetric(failureCounter.addAndGet(1), "HTTPListenerResource_failureCounter");
-        }
 	}
 
 	/**

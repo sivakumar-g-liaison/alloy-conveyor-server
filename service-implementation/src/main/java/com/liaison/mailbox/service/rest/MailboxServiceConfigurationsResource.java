@@ -10,10 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,24 +18,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
-import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
-import com.netflix.servo.DefaultMonitorRegistry;
-import com.netflix.servo.annotations.DataSourceType;
-import com.netflix.servo.annotations.Monitor;
-import com.netflix.servo.monitor.MonitorConfig;
-import com.netflix.servo.monitor.Monitors;
-import com.netflix.servo.monitor.StatsTimer;
-import com.netflix.servo.monitor.Stopwatch;
-import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -55,27 +40,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/mailbox/serviceconfigurations", description = "Gateway for the mailbox helper services.")
 public class MailboxServiceConfigurationsResource extends AuditedResource {
 
-	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger failureCounter = new AtomicInteger(0);
-
-	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-
-	private Stopwatch stopwatch;
-	private static final StatsTimer statsTimer = new StatsTimer(
-            MonitorConfig.builder("MailboxServiceConfigurationsResource_statsTimer").build(),
-            new StatsConfig.Builder().build());
-	
-	static {
-        DefaultMonitorRegistry.getInstance().register(statsTimer);
-    }
-	
-	public MailboxServiceConfigurationsResource()
-			throws IOException {
-
-		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
-	}
-
 	/**
 	 * REST method to retrieve property file values.
 	 * 
@@ -84,15 +48,13 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "Property File", notes = "returns property file values", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response getPropertyFileValues(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
-				serviceCallCounter.addAndGet(1);
 
 				// get Property File
 				MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -102,14 +64,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 		worker.actionLabel = "MailboxServiceConfigurationsResource.getPropertyFileValues()";
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	@Override
@@ -119,35 +74,5 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
 	}
-
-	@Override
-	protected void beginMetricsCollection() {
-		
-		stopwatch = statsTimer.start();
-        int globalCount = globalServiceCallCounter.addAndGet(1);
-        logKPIMetric(globalCount, "Global_serviceCallCounter");
-        int serviceCount = serviceCallCounter.addAndGet(1);
-        logKPIMetric(serviceCount, "MailboxServiceConfigurationsResource_serviceCallCounter");
-	}
-
-	@Override
-	protected void endMetricsCollection(boolean success) {
-		
-		stopwatch.stop();
-        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
-        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
-        statsTimer.record(duration, TimeUnit.MILLISECONDS);
-
-        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
-                "Global_timer");
-        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "MailboxServiceConfigurationsResource_timer");
-        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "MailboxServiceConfigurationsResource_timer");
-
-        if (!success) {
-            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-            logKPIMetric(failureCounter.addAndGet(1), "MailboxServiceConfigurationsResource_failureCounter");
-        }
-	}
-
 
 }

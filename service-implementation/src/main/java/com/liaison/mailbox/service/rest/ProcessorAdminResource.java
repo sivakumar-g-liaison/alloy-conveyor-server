@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,28 +20,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
-import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
-import com.netflix.servo.DefaultMonitorRegistry;
-import com.netflix.servo.annotations.DataSourceType;
-import com.netflix.servo.annotations.Monitor;
-import com.netflix.servo.monitor.MonitorConfig;
-import com.netflix.servo.monitor.Monitors;
-import com.netflix.servo.monitor.StatsTimer;
-import com.netflix.servo.monitor.Stopwatch;
-import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -60,25 +47,6 @@ public class ProcessorAdminResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
-	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger failureCounter = new AtomicInteger(0);
-
-	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-
-	private Stopwatch stopwatch;
-	private static final StatsTimer statsTimer = new StatsTimer(
-            MonitorConfig.builder("ProcessorAdminResource_statsTimer").build(),
-            new StatsConfig.Builder().build());
-	
-	static {
-        DefaultMonitorRegistry.getInstance().register(statsTimer);
-    }
-	
-	public ProcessorAdminResource() {
-		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
-	}
-
 	/**
 	 * REST service to get the list processors latest state
 	 * 
@@ -92,7 +60,7 @@ public class ProcessorAdminResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21, response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response getExecutingProcessors(
 			@Context HttpServletRequest request,
 			@QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "get list of executing processors with the status specified") final String status,
@@ -105,8 +73,6 @@ public class ProcessorAdminResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
-				serviceCallCounter.addAndGet(1);
 
 				GetExecutingProcessorResponseDTO serviceResponse = null;
 				ProcessorConfigurationService processor = new ProcessorConfigurationService();
@@ -123,14 +89,7 @@ public class ProcessorAdminResource extends AuditedResource {
 		worker.queryParams.put("toDate", toDate);
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 
 	/**
@@ -142,8 +101,8 @@ public class ProcessorAdminResource extends AuditedResource {
 	@DELETE
 	@ApiOperation(value = "Interrupt processors", notes = "interrupt running processor", position = 22, response = com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body") })
-	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body")})
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response interruptRunningProcessor(
 			@Context final HttpServletRequest request,
 			@QueryParam(value = "executionID") @ApiParam(name = "executionID", required = false, value = "executionID") final String executionID) {
@@ -153,8 +112,6 @@ public class ProcessorAdminResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
-				serviceCallCounter.addAndGet(1);
 
 				try {
 
@@ -171,14 +128,7 @@ public class ProcessorAdminResource extends AuditedResource {
 		worker.queryParams.put("executionID", executionID);
 
 		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
+		return process(request, worker);
 	}
 	
 	@Override
@@ -189,32 +139,4 @@ public class ProcessorAdminResource extends AuditedResource {
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
 	}
 
-	@Override
-	protected void beginMetricsCollection() {
-		
-		stopwatch = statsTimer.start();
-        int globalCount = globalServiceCallCounter.addAndGet(1);
-        logKPIMetric(globalCount, "Global_serviceCallCounter");
-        int serviceCount = serviceCallCounter.addAndGet(1);
-        logKPIMetric(serviceCount, "ProcessorAdminResource_serviceCallCounter");
-	}
-
-	@Override
-	protected void endMetricsCollection(boolean success) {
-		
-		stopwatch.stop();
-        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
-        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
-        statsTimer.record(duration, TimeUnit.MILLISECONDS);
-
-        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
-                "Global_timer");
-        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "ProcessorAdminResource_timer");
-        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "ProcessorAdminResource_timer");
-
-        if (!success) {
-            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-            logKPIMetric(failureCounter.addAndGet(1), "ProcessorAdminResource_failureCounter");
-        }
-	}
 }

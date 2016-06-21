@@ -26,9 +26,9 @@ import com.google.common.cache.LoadingCache;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
+import com.liaison.metrics.cache.CacheStatsRegistrar;
 
 public class UserManifestCacheUtil {
 	
@@ -60,6 +60,7 @@ public class UserManifestCacheUtil {
         manifestCache =  CacheBuilder.newBuilder()
 	        .maximumSize(maxCacheSize)
 	        .expireAfterWrite(cacheTimeToLive, cacheTimeToLiveUnit)
+	        .recordStats()
 	        .build(new CacheLoader<String, GEMManifestResponse>() {
         			public GEMManifestResponse load(String loginId) throws MalformedURLException, IOException, URISyntaxException {
         				
@@ -72,6 +73,9 @@ public class UserManifestCacheUtil {
         			}
 	            }
         	 );
+        
+      //Register Manifst Cache
+      CacheStatsRegistrar.register("manifest-cache", manifestCache);
 	}
 
 	

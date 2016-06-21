@@ -54,7 +54,7 @@ dependencies {
 
     // Liaison code
     // commons-lib dependencies
-	compile 'com.liaison:commons-lib:7.+'
+	compile 'com.liaison:commons-lib:8.+'
 
 }
 

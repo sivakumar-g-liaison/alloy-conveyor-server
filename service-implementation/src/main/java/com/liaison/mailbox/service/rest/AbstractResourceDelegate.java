@@ -23,8 +23,8 @@ import javax.ws.rs.Path;
  * @param <T>
  * 
  */
-public abstract class AbstractResourceDelegate<T>
-		implements Callable<T> {
+public abstract class AbstractResourceDelegate<T> implements Callable<T> {
+	
 	protected String id = null;
 	protected String actionLabel = "SERVICE REQUEST";
 	protected Map<String, String> queryParams = new HashMap<String, String>();
