@@ -18,7 +18,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
                         if (data.processorExecutionStateResponse.response.status == 'success') {
                         	 $scope.getPagedDataAsync(data);
                         } else {
-                        	showSaveMessage(data.processorExecutionStateResponse.response.message, 'error');
+                        	showSaveMessage(data.processorExecutionStateResponse.response.message, 'warning');
                           }
                     } else {
                     	 showSaveMessage(data.processorExecutionStateResponse.response.message, 'error');
@@ -41,7 +41,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
             $scope.processors = data.processors;
             $scope.totalServerItems = data.totalItems;
             if ( $scope.processors.length === 0) {
-            	showSaveMessage("No Results Found", 'error');
+            	showSaveMessage("No Results Found", 'warning');
 			}
             if (!$scope.$$phase) {
                 $scope.$apply();
