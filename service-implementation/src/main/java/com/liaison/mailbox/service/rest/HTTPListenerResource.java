@@ -190,16 +190,19 @@ public class HTTPListenerResource extends AuditedResource {
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR);
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
 
-					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
-							httpListenerProperties, request.getContentType());
+					Response syncResponse = syncProcessor.processRequest(workTicket, httpListenerProperties, request.getContentType());
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
 					        syncResponse.getStatus(),
 							mailboxInfo);
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity(), MailBoxConstants.HTTPSYNCPROCESSOR);
-                    } else {
+						glassMessage.logProcessingStatus(StatusType.ERROR,
+								"HTTP Sync Request failed",
+								MailBoxConstants.HTTPSYNCPROCESSOR,
+								syncResponse.getEntity().toString());
+					} else {
+
                         GlassMessage successMessage = constructGlassMessage(request, workTicket, ExecutionState.COMPLETED);
                         successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
 
