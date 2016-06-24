@@ -10,24 +10,23 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.HTTPResponse;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,6 +40,8 @@ import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
+
 /**
  * Class that deals with processing of sync request.
  * 
@@ -50,147 +51,162 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 	private static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
+	private static final String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
+	private static String SERVICE_BROKER_URI = null;
+	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
+
+	static {
+
+		SERVICE_BROKER_URI = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
+		if (MailBoxUtil.isEmpty(SERVICE_BROKER_URI)) {
+			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
+		}
+
+		try {
+			URL uri = new URL(SERVICE_BROKER_URI);
+			HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+			HTTPRequest.registerHealthCheck();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		ENV_CONNECTION_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT, 60000);
+	}
 
 	/**
 	 * This method will persist payload in spectrum.
 	 *
-	 * @param sessionContext
-	 * @param request
-	 * @return HttpResponse
-	 * @throws Exception
-	 * @throws JAXBException
-	 */
-	public Response processRequest(WorkTicket workTicket, InputStream inputStream,
-			Map<String, String> httpListenerProperties, String contentType) throws Exception {
-		logger.info("Starting to forward request...");
+	 * @param workTicket workticket to be posted to SB
+	 * @param httpListenerProperties props
+	 * @param contentType request content type
+	 * @return response
+     * @throws Exception
+     */
+	public Response processRequest(WorkTicket workTicket,
+								   Map<String, String> httpListenerProperties,
+								   String contentType) throws Exception {
+
+		logger.info("Starting to forward request to sb...");
 
 		workTicket.setProcessMode(ProcessMode.SYNC);
+		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
 
-		String serviceBrokerSyncUri = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
-        if (serviceBrokerSyncUri.isEmpty()) {
-			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
+			int connectionTimeout = httpListenerProperties.get(CONNECTION_TIMEOUT) != null
+					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
+					: ENV_CONNECTION_TIMEOUT_VALUE;
+
+			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+					.connectionTimeout(connectionTimeout)
+					.inputData(JAXBUtility.marshalToJSON(workTicket))
+					.outputStream(responseStream);
+
+			// execute request and handle response
+			HTTPResponse response = request.execute();
+			return buildResponse(contentType, response, responseStream.toString());
+
 		}
-
-		HttpPost httpRequest = new HttpPost(serviceBrokerSyncUri);
-		httpRequest.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType());
-		StringEntity requestBody = new StringEntity(JAXBUtility.marshalToJSON(workTicket));
-		httpRequest.setEntity(requestBody);
-		HttpClient httpClient = createHttpClient();
-		HttpResponse httpResponse = httpClient.execute(httpRequest);
-		return buildResponse(contentType, httpResponse);
-
 	}
 
 	/**
-	 * This method will create HttpClient.
+	 * This method will copy all Response Information from SB
 	 *
-	 * @return HttpClient
-	 */
-	private HttpClient createHttpClient() {
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-		HttpClient httpClient = httpClientBuilder.build();
-		return httpClient;
-	}
-
-
-	/**
-	 * This method will copy all Response Information.
-	 *
-	 * @param httpResponse
-	 * @param builder
-	 * @param globalProcessId
+	 * @param reqContentType request content type
+	 * @param httpResponse sb response
+	 * @return response
 	 * @throws IllegalStateException
 	 * @throws IOException
-	 * @throws JAXBException
-	 */
-	private Response buildResponse(String reqContentType, HttpResponse httpResponse)
-			throws IllegalStateException, IOException, JAXBException {
+     * @throws JAXBException
+     */
+	private Response buildResponse(String reqContentType, HTTPResponse httpResponse, String response) throws IOException, JAXBException {
+
+		String contentType = null;
 
 		ResponseBuilder builder = Response.ok();
-		
-		// Fix for GMB-716, if the status code is set as 304 the response does not include the entity
-		// this causes NPE. so added null check for httpEntity
-		HttpEntity httpEntity = httpResponse.getEntity();
-		if (httpResponse.getStatusLine().getStatusCode() > 299 && null != httpEntity) {
-			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}", httpEntity
-					.getContent());
-			WorkResult result = JAXBUtility.unmarshalFromJSON(httpEntity.getContent(), WorkResult.class);
-			builder.status(result.getStatus());
+		if (!MailBoxUtil.isSuccessful(httpResponse.getStatusCode())) {
 
-			// Sets the headers
-			Set<String> headers = result.getHeaderNames();
-
-			for (String name : headers) {
-				builder.header(name, result.getHeader(name));
-			}
-			// JIRA GMB-428 - set global process id in header only if it is not already available
-			if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
-				// set global process id in the header
-				builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			// Fix for GMB-716, if the status code is set as 304 the response does not include the entity
+			// this causes NPE. so added null check for httpEntity
+			if (!MailBoxUtil.isEmpty(response)) {
+				build(builder, response, reqContentType);
+			} else {
+				logger.warn("No response received from service broker");
 			}
 
+		} else {
+
+			// Fix for GMB-716, if the status code is set as 205 the response must not include the entity
+			// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+			// if entity is null we cannot process the sync response
+			if (!MailBoxUtil.isEmpty(response)) {
+				build(builder, response, reqContentType);
+			} else {
+				logger.warn("No response received from service broker");
+			}
+
+		}
+
+		return builder.build();
+	}
+
+	/**
+	 * response builder for both success and error response
+	 *
+	 * @param builder response builder
+	 * @param response response from SB
+	 * @param reqContentType request content type
+	 * @throws IOException
+	 * @throws JAXBException
+     */
+	private void build(ResponseBuilder builder, String response, String reqContentType) throws IOException, JAXBException {
+
+		WorkResult result = JAXBUtility.unmarshalFromJSON(response, WorkResult.class);
+		builder.status(result.getStatus());
+
+		// Sets the headers
+		Set<String> headers = result.getHeaderNames();
+		for (String name : headers) {
+            builder.header(name, result.getHeader(name));
+        }
+
+		// JIRA GMB-428 - set global process id in header only if it is not already available
+		if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
+            // set global process id in the header
+            builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+        }
+
+		// Content type
+		String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
+		if (contentType == null) {
+			builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
+		}
+
+		//sets the response payload for both success and error case
+		if (MailBoxUtil.isSuccessful(result.getStatus())) {
+
+			// reads payload from spectrum
+			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+				if (responseInputStream != null) {
+					builder.entity(responseInputStream);
+				}
+			}
+
+		} else {
 
 			// If payload URI avail, reads payload from spectrum. Mostly it
 			// would be an error message payload
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-				if (responseInputStream != null) {
-					builder.entity(IOUtils.toString(responseInputStream, CharEncoding.UTF_8));
+				InputStream inputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+				if (inputStream != null) {
+					builder.entity(IOUtils.toString(inputStream, CharEncoding.UTF_8));
 				}
+			} else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+				builder.entity(result.getErrorMessage());
 			} else {
-				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
-					builder.entity(result.getErrorMessage());
-				} else {
-					builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-				}
-			}
-
-			// Content type
-			String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-			if (contentType == null) {
-				builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
-			}
-
-		} else {
-			
-			// Fix for GMB-716, if the status code is set as 205 the response must not include the entity
-			// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-			// if entity is null we cannot process the sync response 
-			if (null != httpEntity) {
-				
-				InputStream responseInputStream = httpEntity.getContent();
-				WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
-				logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS: {}", JAXBUtility.marshalToJSON(result));
-				// sets status code from work result
-				builder.status(result.getStatus());
-
-				// Sets the headers
-				Set<String> headers = result.getHeaderNames();
-				for (String name : headers) {
-					builder.header(name, result.getHeader(name));
-				}
-				// JIRA GMB-428 - set global process id in header only if it is not already available
-				if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
-					// set global process id in the header
-					builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
-				}
-
-				// reads paylaod from spectrum
-				if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-					responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-					if (responseInputStream != null) {
-						builder.entity(responseInputStream);
-					}
-				}
-
-				// Content type
-				String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-				if (contentType == null) {
-					builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
-				}
+				builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 			}
 		}
-		return builder.build();
 	}
 
 }

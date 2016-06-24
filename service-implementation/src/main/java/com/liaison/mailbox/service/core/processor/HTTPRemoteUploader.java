@@ -142,7 +142,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             LOGGER.debug(constructMessage("The response code received is {} for a request {} "),
                     response.getStatusCode(),
                     file.getName());
-            if (!MailBoxUtil.isSuccessCode(response.getStatusCode())) {
+            if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
 
                 LOGGER.warn(constructMessage("The response code received is {} "), response.getStatusCode());
                 LOGGER.warn(constructMessage("Execution failure for "), file.getAbsolutePath());

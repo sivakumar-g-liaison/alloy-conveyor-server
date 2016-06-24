@@ -524,7 +524,7 @@ public class MailBoxUtil {
      * @param http_status
      * @return
      */
-    public static boolean isSuccessCode(int http_status) {
-        return (http_status > 200 || http_status < 299);
+    public static boolean isSuccessful(int http_status) {
+		return http_status >= 200 && http_status <= 299;
     }
 }
