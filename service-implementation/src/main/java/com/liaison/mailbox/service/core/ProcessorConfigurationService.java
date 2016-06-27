@@ -142,6 +142,15 @@ public class ProcessorConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST, MailBoxConstants.MAILBOX_PROCESSOR,
 						Response.Status.CONFLICT);
 			}
+			
+			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
+            if ((ProcessorType.FILEWRITER.equals(foundProcessorType) 
+                    || ProcessorType.HTTPSYNCPROCESSOR.equals(foundProcessorType) 
+                    || ProcessorType.HTTPASYNCPROCESSOR.equals(foundProcessorType))
+                    && !MailBoxUtil.isEmptySet(serviceRequest.getProcessor().getLinkedProfiles())) {
+                throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_PROFILE_NOT_ALLOWED, processorDTO.getType(),
+                        Response.Status.BAD_REQUEST);
+            }
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
@@ -156,7 +165,6 @@ public class ProcessorConfigurationService {
 			}
 
 			// Instantiate the processor and copying the values from DTO to entity.
-			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			processorDTO.copyToEntity(processor, true);
 
