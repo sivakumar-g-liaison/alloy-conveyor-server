@@ -526,5 +526,15 @@ public class MailBoxUtil {
      */
     public static boolean isSuccessful(int http_status) {
 		return http_status >= 200 && http_status <= 299;
+    } 
+    
+    /**
+     * Checks the given set is empty or not.
+     * 
+     * @param set
+     * @return boolean
+     */
+    public static boolean isEmptySet(Set<String> set) {
+        return set == null || set.isEmpty();
     }
 }
