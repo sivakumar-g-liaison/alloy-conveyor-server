@@ -57,6 +57,7 @@ angular.module(
                     }
                     if (property.name === "add new -->") {
                         scope.showAddNewComponent.value = true;
+                        document.getElementById("addNewText").value = "";
                     } else {
                     	
                     	if (property.defaultValue && !property.value) {
