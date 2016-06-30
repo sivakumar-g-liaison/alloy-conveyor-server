@@ -572,6 +572,10 @@ var rest = myApp.controller(
             $scope.save = function () {
                 //To notify passwordDirective to clear the password and error message
                 //$scope.doSend();
+            	if ($rootScope.serviceInstanceId == "" && !$scope.isEdit) {
+            		showSaveMessage('Processor creation is not allowed', 'error');
+        			return;
+        		}
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
                 $scope.showAddNewComponent.value=false;
@@ -970,6 +974,10 @@ var rest = myApp.controller(
 			}
             $scope.addNew = function () {
 
+	            	if ($rootScope.serviceInstanceId == "") {
+						showSaveMessage('Processor creation is not allowed', 'error');
+						return;
+					}
                     $scope.formAddPrcsr.$setPristine();
                     $scope.loadOrigin();
 					$scope.resetProcessorType($scope.procsrType);

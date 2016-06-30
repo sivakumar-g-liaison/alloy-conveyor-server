@@ -530,7 +530,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Get the mailbox
-        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, "", aclManifest);
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), true, "", aclManifest);
 
         // Assertion
         Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
@@ -613,7 +613,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true);
 
         Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
 
@@ -655,7 +655,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
         reviseRequestDTO.setMailBox(mbxDTO);
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "", aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "", aclManifest, true);
 
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
 
@@ -697,7 +697,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
         reviseRequestDTO.setMailBox(mbxDTO);
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "dummy" + System.currentTimeMillis(), aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "dummy" + System.currentTimeMillis(), aclManifest, true);
 
         Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
 
@@ -739,7 +739,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
         reviseRequestDTO.setMailBox(mbxDTO);
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid()+"X", serviceInstanceId, aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid()+"X", serviceInstanceId, aclManifest, true);
 
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
 
@@ -782,7 +782,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         mbxDTO.setGuid(response.getMailBox().getGuid());
         reviseRequestDTO.setMailBox(mbxDTO);
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true);
 
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
 
@@ -832,7 +832,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true);
 
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
 
@@ -873,7 +873,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
         reviseRequestDTO.setMailBox(null);
 
-        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true);
 
         // Assertion
         Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());

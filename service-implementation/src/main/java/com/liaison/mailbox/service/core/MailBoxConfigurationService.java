@@ -230,7 +230,7 @@ public class MailBoxConfigurationService {
 		try {
 
 			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+			if (addConstraint && MailBoxUtil.isEmpty(serviceInstanceId)) {
 				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
 						Response.Status.BAD_REQUEST);
 			}
@@ -292,7 +292,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid,
-			String serviceInstanceId, String aclManifestJson) throws IOException {
+			String serviceInstanceId, String aclManifestJson, boolean addConstraint) throws IOException {
 
 	    EntityManager em = null;
         EntityTransaction tx = null;
@@ -305,7 +305,7 @@ public class MailBoxConfigurationService {
 		    em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
 
 			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+			if (addConstraint && MailBoxUtil.isEmpty(serviceInstanceId)) {
 				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
 						Response.Status.BAD_REQUEST);
 			}
@@ -385,27 +385,6 @@ public class MailBoxConfigurationService {
 
 			//Merge the changes and commit the transaction
 			em.merge(retrievedMailBox);
-
-			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
-			if (serviceInstance == null) {
-				serviceInstance = new ServiceInstance();
-				serviceInstance.setName(serviceInstanceId);
-				serviceInstance.setPguid(MailBoxUtil.getGUID());
-				em.persist(serviceInstance);
-			}
-
-			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-			int count = msiDao.getMailboxServiceInstanceCount(guid, serviceInstance.getPguid());
-			if (count == 0) {
-
-				// Creates relationship mailbox and service instance id
-				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtil.getGUID());
-				msi.setServiceInstance(serviceInstance);
-				msi.setMailbox(retrievedMailBox);
-				em.persist(msi);
-			}
 
 			//commit the transaction
 			tx.commit();

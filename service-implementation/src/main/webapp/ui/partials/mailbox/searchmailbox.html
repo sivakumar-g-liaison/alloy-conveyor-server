@@ -30,7 +30,7 @@
 		</form>
 		<div class="col-md-2">
 				<label for="name">&nbsp;</label><br/>
-				<button id="disableFilters" class="btn btn-primary pull-left" ng-click="disableFilter()" style="width:164px">{{filterBtnValue}}</button>
+				<button id="disableFilters" class="btn btn-primary pull-left" ng-hide="!sidInURL" ng-click="disableFilter()" style="width:164px">{{filterBtnValue}}</button>
 		</div>
 	</div>
 	<br />
