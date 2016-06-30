@@ -1,6 +1,7 @@
 4.5.0-SNAPSHOT
 -------------------------------
 * GGT-797 BOSS Properties removed and defaulted to SPECTRUM
+* GGT-797 Updated UAT TTL value to 90 days 
 
 4.4.0
 -------------------------------
