@@ -82,7 +82,7 @@ allprojects {
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
-apply from: urlCache.get('http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle')
 
 task showMeCache << {
     configurations.compile.each { println it }
