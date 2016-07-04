@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -374,7 +375,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
 			properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
 			properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
-
+			
+			String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? ContentType.DEFAULT_TEXT.getMimeType() : staticProp.getContentType();
+			properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
 			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
 			// persist payload in spectrum
