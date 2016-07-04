@@ -116,6 +116,17 @@
             "validationRules":null
          },
          {
+            "name":"contentType",
+            "displayName":"Content Type",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "validationRules":null
+         },
+         {
             "name":"sweepSubDirectories",
             "displayName":"Sweep Sub Directories",
             "value":"false",
