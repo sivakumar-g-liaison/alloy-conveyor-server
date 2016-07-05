@@ -433,6 +433,9 @@ public class StorageUtilities {
                     workTicket.getTtlDays());
             fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, ttlValue.toString());
         }
+        if (null != httpListenerProperties.get(MailBoxConstants.CONTENT_TYPE)) {
+        	fs2Header.addHeader(MailBoxConstants.CONTENT_TYPE, httpListenerProperties.get(MailBoxConstants.CONTENT_TYPE));
+        }
         LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;
