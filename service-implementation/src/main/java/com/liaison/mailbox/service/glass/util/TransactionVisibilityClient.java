@@ -205,6 +205,9 @@ public class TransactionVisibilityClient {
 				if (null != message.getOutSize()) {
 					visibilityAPI.setOutSize(message.getOutSize());
 				}
+				if (null != message.getOutAgent()) {
+					visibilityAPI.setOutAgent(message.getOutAgent());
+				}
 				break;
 			case COMPLETED :
 				visibilityAPI.setStatus(StatusCode.S);
@@ -221,6 +224,9 @@ public class TransactionVisibilityClient {
 				break;
 			case DUPLICATE :
 				visibilityAPI.setStatus(StatusCode.U);
+				if (null != message.getOutAgent()) {
+					visibilityAPI.setOutAgent(message.getOutAgent());
+				}
 				break;
             case FAILED :
                 visibilityAPI.setStatus(StatusCode.F);

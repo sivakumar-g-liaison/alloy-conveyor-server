@@ -467,6 +467,9 @@ public class MailBoxService implements Runnable {
             processorService.runProcessor(workTicket, fsm);
             glassMessage.setOutSize(workTicket.getPayloadSize());
 			glassMessage.setOutboundFileName(stagedFileName);
+			if (null != workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH)) {
+				glassMessage.setOutAgent(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString());
+			}
 
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
             if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
