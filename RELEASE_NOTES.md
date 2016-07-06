@@ -1,3 +1,7 @@
+4.6.0-SNAPSHOT
+-------------------------------
+* 
+
 4.5.0
 -------------------------------
 * GGT-797 BOSS Properties removed and defaulted to SPECTRUM
