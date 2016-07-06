@@ -200,7 +200,7 @@ public class HTTPListenerResource extends AuditedResource {
 						glassMessage.logProcessingStatus(StatusType.ERROR,
 								"HTTP Sync Request failed",
 								MailBoxConstants.HTTPSYNCPROCESSOR,
-								syncResponse.getEntity().toString());
+								(syncResponse.getEntity() != null) ? syncResponse.getEntity().toString(): null);
 					} else {
 
                         GlassMessage successMessage = constructGlassMessage(request, workTicket, ExecutionState.COMPLETED);
@@ -230,13 +230,13 @@ public class HTTPListenerResource extends AuditedResource {
                             && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)
                             && null != glassMessage) {
 
-				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
-	                    // Log error status
-				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
-				        new TransactionVisibilityClient().logToGlass(failedMsg);
-	                    glassMessage.logFourthCornerTimestamp();
+						GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
+						// Log error status
+						failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
+						new TransactionVisibilityClient().logToGlass(failedMsg);
+						glassMessage.logFourthCornerTimestamp();
 
-                    }
+					}
 					
 					if (NO_PRIVILEGE.equals(e.getMessage())) {
 					    throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
