@@ -573,7 +573,7 @@ var rest = myApp.controller(
                 //To notify passwordDirective to clear the password and error message
                 //$scope.doSend();
             	if ($rootScope.serviceInstanceId == "" && !$scope.isEdit) {
-            		showSaveMessage('Processor creation is not allowed', 'error');
+            		showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
         			return;
         		}
                 $scope.saveProcessor();

@@ -367,7 +367,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.saveMailbox = function () {
         	
         	if (!$scope.isMailBoxEdit && $rootScope.serviceInstanceId == "") {
-    			showSaveMessage("Mailbox creation is not allowed", 'error');
+    			showSaveMessage("Mailbox creation is not allowed, and it is allowed when it traverses from a task", 'error');
     			return;
     		}
             fromAddProcsr = false;
