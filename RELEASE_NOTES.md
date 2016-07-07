@@ -2,6 +2,10 @@
 -------------------------------
 * 
 
+4.5.1
+-------------------------------
+* GMB-821 Sync Mailbox Transaction Fails
+
 4.5.0
 -------------------------------
 * GGT-797 BOSS Properties removed and defaulted to SPECTRUM
