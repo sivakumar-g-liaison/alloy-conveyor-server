@@ -377,7 +377,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
 			properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
 			workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
-			LOGGER.info(constructMessage("Sweeping file {}", workTicket.getPayloadURI()));
+			LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
 
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {

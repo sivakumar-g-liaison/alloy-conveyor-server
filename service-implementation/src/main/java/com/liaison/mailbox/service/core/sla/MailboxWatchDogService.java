@@ -170,8 +170,9 @@ public class MailboxWatchDogService {
                         try {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
-                            LOGGER.info(constructMessage("{} : File {} is deleted in the filePath {}"), processor.getPguid(), fileName, filePath);
-                            MailboxGlassMessageUtil.logGlassMessage(
+                            LOGGER.warn(constructMessage("{} : File {} is deleted in the filePath {}"), processor.getPguid(), fileName, filePath);
+							// GMB-823
+                            /*MailboxGlassMessageUtil.logGlassMessage(
                                     stagedFile.getGPID(),
                                     processor.getProcessorType(),
                                     processor.getProcsrProtocol(),
@@ -180,7 +181,7 @@ public class MailboxWatchDogService {
                                     0,
                                     ExecutionState.FAILED,
                                     "File is deleted by clean up process",
-									null);
+									null);*/
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} : Unable to delete a stale file {} in the filePath {}"), processor.getPguid(), fileName, filePath);
@@ -201,7 +202,8 @@ public class MailboxWatchDogService {
 
                     if (!isFileExist) {
 
-				        MailboxGlassMessageUtil.logGlassMessage(
+						// GMB-823
+				        /*MailboxGlassMessageUtil.logGlassMessage(
                                 stagedFile.getGPID(),
                                 ProcessorType.findByName(stagedFile.getProcessorType()),
                                 getProtocol(filePath),
@@ -210,9 +212,9 @@ public class MailboxWatchDogService {
                                 0,
                                 ExecutionState.FAILED,
                                 "File is picked up by another process",
-								null);
+								null);*/
 		                inactiveStagedFile(stagedFile, updatedStatusList);
-		                LOGGER.debug(constructMessage("{} : File {} is not present but stagedfile entity is active so updated lens status as failed."), stagedFile.getProcessorId(), stagedFile.getFileName());
+		                LOGGER.warn(constructMessage("{} : File {} is not present but staged file entity is active."), stagedFile.getProcessorId(), stagedFile.getFileName());
 				    }
 					continue;
 				}
