@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,8 +47,6 @@ import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAOBase;
-import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
-import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -60,6 +59,7 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -69,6 +69,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.HTTPListenerHelperDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
@@ -732,6 +733,140 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
+	
+	/**
+	 * Method to construct processorProperty with name and value
+	 * 
+	 * @param name
+	 * 			processor property name
+	 * @param value
+	 * 			processor property value
+	 * @return processorProperty obj
+	 */
+	private ProcessorProperty constructProcessorProperty(String name, String value) {
+		ProcessorProperty procsrProperty = new ProcessorProperty();
+		procsrProperty.setProcsrPropName(name);
+		procsrProperty.setProcsrPropValue(value);
+		return procsrProperty;
+	}
+	
+	/**
+	 * Method to map received results from DB to corresponding httpListnerHelperDTO
+	 * 
+	 * @param receivedResults
+	 * 					actual resutlSet from DB
+	 * @return Map of HTTPListnerHelperDTO with processorID as key
+	 */
+	private Map<String, HTTPListenerHelperDTO> mapResultSet(List<Object[]> receivedResults) {
+		
+		Map<String, HTTPListenerHelperDTO> httpListenerDetails = new HashMap<>();
+		for (Object[] obj : receivedResults) {
+			
+			String processorId = (String) obj[0];
+			String procsrType = (String) obj[1];
+			String protocol = (String) obj[2];
+			String propertiesJson = (String) obj[3];
+			String procsrPropName = (String) obj[4];
+			String procsrPropValue = (String) obj[5];
+			String serviceInstanceId = (String) obj[6];
+			String mbxId = (String) obj[7];
+			String mbxName = (String) obj[8];
+			String tenancyKey = (String) obj[9];
+			String mbxPropName = (String) obj[10];
+			String mbxPropValue = (String) obj[11];
+			
+			// if the details are already available handle the processorProperty and mbx property alone
+			HTTPListenerHelperDTO helperDTO = httpListenerDetails.get(processorId);
+			if (null != helperDTO) {
+				
+				// handle dynamic properties of a processor
+				if (!MailBoxUtil.isEmpty(procsrPropName) && !MailBoxUtil.isEmpty(procsrPropValue)) {
+					ProcessorProperty procsrProperty = constructProcessorProperty(procsrPropName, procsrPropValue);
+					helperDTO.getDynamicProperties().add(procsrProperty);
+				}
+				// handle only ttl value and ttl unit in mbx properties
+				if (!MailBoxUtil.isEmpty(mbxPropName) 
+								&& !MailBoxUtil.isEmpty(mbxPropValue)
+								&& MailBoxUtil.isEmpty(helperDTO.getTtlValue()) 
+								&& (mbxPropName.equals(MailBoxConstants.TTL))) {
+					helperDTO.setTtlValue(mbxPropValue);
+				}
+				if (!MailBoxUtil.isEmpty(mbxPropName) 
+								&& !MailBoxUtil.isEmpty(mbxPropValue)
+								&& MailBoxUtil.isEmpty(helperDTO.getTtlUnit()) 
+								&& (mbxPropName.equals(MailBoxConstants.TTL_UNIT))) {
+					helperDTO.setTtlUnit(mbxPropValue);
+				}
+
+			} else {
+				String ttlValue = null;
+				String ttlUnit = null;
+				// if the details are not already available construct helperDTO
+				if (!MailBoxUtil.isEmpty(mbxPropName) 
+							&& !MailBoxUtil.isEmpty(mbxPropValue)
+							&& mbxPropName.equals(MailBoxConstants.TTL)) {
+					ttlValue = mbxPropValue;
+				}
+				if (!MailBoxUtil.isEmpty(mbxPropName)
+							&& !MailBoxUtil.isEmpty(mbxPropValue)
+							&& mbxPropName.equals(MailBoxConstants.TTL_UNIT)) {
+					ttlUnit = mbxPropValue;
+				}
+				Set<ProcessorProperty> dynamicProperties = new HashSet<>();
+				if (!MailBoxUtil.isEmpty(procsrPropName) && !MailBoxUtil.isEmpty(procsrPropValue)) {
+					ProcessorProperty procsrProperty = constructProcessorProperty(procsrPropName, procsrPropValue);
+					dynamicProperties.add(procsrProperty);
+				}
+				// if the details are not already available construct a new helperDTO
+				helperDTO = new HTTPListenerHelperDTO(processorId, protocol, procsrType, propertiesJson, 
+														serviceInstanceId, mbxId, mbxName, tenancyKey, ttlValue, ttlUnit, dynamicProperties);
+				httpListenerDetails.put(processorId, helperDTO);
+			}
+		}
+		return httpListenerDetails;
+	}
+	
+	/**
+	 * @param httpListnerDetailsDTOs
+	 * @return
+	 * @throws IOException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	private Map<String, String> buildHTTPListenerProperties(Collection<HTTPListenerHelperDTO> httpListnerDetailsDTOs) 
+									throws IllegalArgumentException, IllegalAccessException, IOException { 
+		
+		Map<String, String> httpListenerProperties = new HashMap<String, String>();
+		for (HTTPListenerHelperDTO httpListenerDetail : httpListnerDetailsDTOs) {
+			
+			Protocol protocol = Protocol.findByCode(httpListenerDetail.getProcsrProtocol());
+			ProcessorType procsrType = ProcessorType.findByCode(httpListenerDetail.getProcsrType());
+			// retrieve required properties
+			HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(httpListenerDetail.getProcsrPropertyJson(), protocol, procsrType, httpListenerDetail.getDynamicProperties());
+			String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
+			boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
+			boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+			boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
+			
+			httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerDetail.getServiceInstanceId());
+			httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, httpListenerDetail.getTenancyKey());
+			httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+			httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
+			httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, httpListenerDetail.getMbxId());
+			httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, httpListenerDetail.getMbxName());
+			httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
+			httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
+			if (MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
+				Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
+				httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));
+			}
+			if (!MailBoxUtil.isEmpty(pipeLineId)) {
+				httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
+			}
+			break;
+		}
+		return httpListenerProperties;
+	}
 
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async
@@ -748,84 +883,29 @@ public class ProcessorConfigurationService {
 	public Map<String, String> getHttpListenerProperties(String mailboxInfo, ProcessorType httpListenerType, boolean isMailboxIdAvailable)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		Map<String, String> httpListenerProperties = new HashMap<String, String>();
+		Map<String, String> httpListenerProperties = null;
 
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		String processorType = null;
-		if (ProcessorType.HTTPASYNCPROCESSOR.equals(httpListenerType)) {
-			processorType = HTTPAsyncProcessor.class.getCanonicalName();
-		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(httpListenerType)) {
-			processorType = HTTPSyncProcessor.class.getCanonicalName();
-		}
-		List<Processor> processors = (isMailboxIdAvailable)
+		String processorType = httpListenerType.getCode();
+		List<Object[]> receivedResults = (isMailboxIdAvailable)
 										? config.findProcessorsByMailboxIdAndProcessorType(mailboxInfo, processorType)
 										: config.findProcessorsByMailboxNameAndProcessorType(mailboxInfo, processorType);
 
-		if (processors.isEmpty()) {
+		if (null == receivedResults || receivedResults.isEmpty()) {
 			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
 					Response.Status.NOT_FOUND);
 		}
-
 		try {
 
-			ProcessorDTO processorDTO = null;
-			for (Processor processor : processors) {
-			
-				processorDTO = new ProcessorDTO();
-				processorDTO.copyFromEntity(processor, false);
-
-				if (null != processorDTO) {
-
-					// retrieve required properties
-					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(
-							processor.getProcsrProperties(), processor);
-
-					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
-					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
-					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
-					boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
-
-					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
-							processor.getServiceInstance().getName());
-	                httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, 
-	                        processor.getMailbox().getTenancyKey());
-					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
-							String.valueOf(securedPayload));
-					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
-							String.valueOf(authCheckRequired));
-					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, processor.getMailbox().getPguid());
-					httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, processor.getMailbox().getMbxName());
-					httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
-					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
-					if(!ttlMap.isEmpty())
-					{
-					Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-					httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
-					}
-					httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY,
-							String.valueOf(lensVisibility));
-					if (!MailBoxUtil.isEmpty(pipeLineId))
-						httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
-					break;
-				}
-
-			}
-
-			if (null == processorDTO) {
-				throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
-						Response.Status.NOT_FOUND);
-			}
-
+			Map<String, HTTPListenerHelperDTO> httpListenerDetails = mapResultSet(receivedResults);
+			httpListenerProperties = buildHTTPListenerProperties(httpListenerDetails.values());
 		} catch (IOException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxInfo);
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
 		}
-
-
 		return httpListenerProperties;
-
 	}
 
 	/**
