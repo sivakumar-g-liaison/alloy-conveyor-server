@@ -1,6 +1,6 @@
 4.6.0-SNAPSHOT
 -------------------------------
-* 
+* GMB-802: Processor - Create : Dynamic property name is not cleared after clicking on save button
 
 4.5.1
 -------------------------------

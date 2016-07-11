@@ -5,7 +5,7 @@
             <select ng-change="constructProperty(selectedValue.value)" ng-model="selectedValue.value" ng-options="property.displayName for property in allProps | orderBy:sortName ">
                 <option value="">-- select--</option>
             </select>
-            <textarea class="form-control alignDynamicTextarea propertyNameDirectiveStyle" ng-input="selectedValue.value.name" ng-show="showAddNewComponent.value" ng-model="COL_FIELD" placeholder="required" ng-blur="handlePropertyConstructionForAddNew(COL_FIELD)"></textarea>
+            <textarea class="form-control alignDynamicTextarea propertyNameDirectiveStyle" id="addNewText" ng-input="selectedValue.value.name" ng-show="showAddNewComponent.value" ng-model="COL_FIELD" placeholder="required" ng-blur="handlePropertyConstructionForAddNew(COL_FIELD)"></textarea>
         </div>
     </div>
 </div>    
