@@ -38,6 +38,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String excludeFiles;
 	private boolean lensVisibility;
 	private boolean sweepSubDirectories;
+	private String contentType;
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -107,5 +108,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setSweepSubDirectories(boolean sweepSubDirectories) {
         this.sweepSubDirectories = sweepSubDirectories;
     }
+    public String getContentType() {
+		return contentType;
+	}
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
 
 }

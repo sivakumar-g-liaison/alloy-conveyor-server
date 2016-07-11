@@ -10,27 +10,9 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
-
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import org.apache.commons.codec.CharEncoding;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
@@ -39,6 +21,23 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Map;
+import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
 
@@ -120,32 +119,14 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
      */
 	private Response buildResponse(String reqContentType, HTTPResponse httpResponse, String response) throws IOException, JAXBException {
 
-		String contentType = null;
-
 		ResponseBuilder builder = Response.ok();
-		if (!MailBoxUtil.isSuccessful(httpResponse.getStatusCode())) {
 
-			// Fix for GMB-716, if the status code is set as 304 the response does not include the entity
-			// this causes NPE. so added null check for httpEntity
-			if (!MailBoxUtil.isEmpty(response)) {
-				build(builder, response, reqContentType);
-			} else {
-				logger.warn("No response received from service broker");
-			}
-
-		} else {
-
-			// Fix for GMB-716, if the status code is set as 205 the response must not include the entity
-			// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-			// if entity is null we cannot process the sync response
-			if (!MailBoxUtil.isEmpty(response)) {
-				build(builder, response, reqContentType);
-			} else {
-				logger.warn("No response received from service broker");
-			}
-
-		}
-
+		// if the status code is set as 304 the response does not include the entity
+		// this causes NPE. so added null check for httpEntity
+		// if the status code is set as 205 the response must not include the entity
+		// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+		// if entity is null we cannot process the sync response
+		build(builder, response, reqContentType, httpResponse.getStatusCode());
 		return builder.build();
 	}
 
@@ -158,9 +139,23 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	 * @throws IOException
 	 * @throws JAXBException
      */
-	private void build(ResponseBuilder builder, String response, String reqContentType) throws IOException, JAXBException {
+	private void build(ResponseBuilder builder, String response, String reqContentType, int status) throws IOException, JAXBException {
 
-		WorkResult result = JAXBUtility.unmarshalFromJSON(response, WorkResult.class);
+		if (MailBoxUtil.isEmpty(response)) {
+			logger.warn("No response received from service broker");
+			builder.status(status);
+			return;
+		}
+
+		WorkResult result = null;
+		try {
+			result = JAXBUtility.unmarshalFromJSON(response, WorkResult.class);
+		} catch (JsonParseException e) {
+			logger.error("Failed to parse the service broker response", response);
+			builder.status(status);
+			builder.entity(response);
+			return;
+		}
 		builder.status(result.getStatus());
 
 		// Sets the headers
@@ -176,9 +171,9 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
         }
 
 		// Content type
-		String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
+		String contentType = result.getHeader(MailBoxConstants.CONTENT_TYPE);
 		if (contentType == null) {
-			builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, reqContentType);
+			builder.header(MailBoxConstants.CONTENT_TYPE, reqContentType);
 		}
 
 		//sets the response payload for both success and error case

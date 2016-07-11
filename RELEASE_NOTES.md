@@ -1,6 +1,17 @@
-4.5.0-SNAPSHOT
+4.6.0-SNAPSHOT
 -------------------------------
 * GMB-802: Processor - Create : Dynamic property name is not cleared after clicking on save button
+
+4.5.1
+-------------------------------
+* GMB-821 Sync Mailbox Transaction Fails
+
+4.5.0
+-------------------------------
+* GGT-797 BOSS Properties removed and defaulted to SPECTRUM
+* GGT-797 Updated UAT TTL value to 90 days 
+* GGT-652 update gitlab hostname and protocol
+* GMB-817 Provision to add the lens content type for the files swept by Directory Sweeper
 
 4.4.0
 -------------------------------

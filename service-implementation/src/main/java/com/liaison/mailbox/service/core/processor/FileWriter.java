@@ -241,6 +241,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		if (file.exists()) {
 
 			if (MailBoxConstants.OVERWRITE_FALSE.equals(isOverwrite)) {
+				workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 				return false;
 			} else if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
 

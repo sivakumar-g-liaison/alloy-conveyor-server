@@ -84,7 +84,7 @@ allprojects {
 	 }
 }
 
-apply from: urlCache.get('http://gitlab-g2.liaison.tech/g2/gradle-configuration/raw/release/1.x.x/publish-service.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/1.x.x/publish-service.gradle')
 
 war {
     baseName = rootProject.name

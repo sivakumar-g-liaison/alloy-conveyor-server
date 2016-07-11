@@ -146,7 +146,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.mailBoxId = $location.search().mailBoxId;
 				$scope.isDisableFilters = $location.search().disableFilters;
                 block.blockUI();
-                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + true + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
+                var sIdConstraint = $rootScope.serviceInstanceId == "" ? false : true;
+                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + sIdConstraint + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data, status) {
 
                         block.unblockUI();
@@ -263,7 +264,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 //$log.info($filter('json')(editReq));
 
-                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$rootScope.serviceInstanceId, $filter('json')(editReq),
+                var sidConstraint = true;
+                if ($rootScope.serviceInstanceId == "") {
+                	sidConstraint = false;
+                }
+                
+                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" + $rootScope.serviceInstanceId + '&addServiceInstanceIdConstraint=' +sidConstraint, $filter('json')(editReq),
                     function (data, status) {                        
                 	    block.unblockUI();
                         if (status === 200 || status === 400) {
@@ -359,6 +365,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         };
 
         $scope.saveMailbox = function () {
+        	
+        	if (!$scope.isMailBoxEdit && $rootScope.serviceInstanceId == "") {
+    			showSaveMessage("Mailbox creation is not allowed, and it is allowed when it traverses from a task", 'error');
+    			return;
+    		}
             fromAddProcsr = false;
             $scope.saveForm();
             $scope.valueSelectedinSelectionBox.value = '';

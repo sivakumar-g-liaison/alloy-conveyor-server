@@ -294,7 +294,7 @@ public interface MailBoxConstants {
 	public static final String GATEWAY_HEADER_PREFIX = "x-gate-";
 	public static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
     public static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_TYPE = "Content-Type";
     public static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
 
 	//WORKTICKET CONSTANTS

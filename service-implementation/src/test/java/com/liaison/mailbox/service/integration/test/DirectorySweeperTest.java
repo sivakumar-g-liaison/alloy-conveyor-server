@@ -21,6 +21,7 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -63,7 +64,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 
     @AfterClass
     public void tearDown() throws Exception {
-        Files.deleteIfExists(Paths.get(inbox));
+        FileUtils.deleteDirectory(Paths.get(inbox).toFile());
     }
 
 	/**

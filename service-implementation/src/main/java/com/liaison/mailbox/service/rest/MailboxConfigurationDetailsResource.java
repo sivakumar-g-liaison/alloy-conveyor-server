@@ -74,7 +74,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	public Response reviseMailBox(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
-			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
+			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId,
+			@QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -92,7 +93,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					String manifestJson = request.getHeader("acl-manifest");
 					// updates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson);
+					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson, addConstraint);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
