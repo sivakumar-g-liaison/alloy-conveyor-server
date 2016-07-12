@@ -262,8 +262,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.editReq.reviseMailBoxRequest.mailBox.guid = $scope.mailBoxId;
                 $scope.editReq.reviseMailBoxRequest.mailBox.status = $scope.status.id;
 
-                //$log.info($filter('json')(editReq));
-
                 var sidConstraint = true;
                 if ($rootScope.serviceInstanceId == "") {
                 	sidConstraint = false;
