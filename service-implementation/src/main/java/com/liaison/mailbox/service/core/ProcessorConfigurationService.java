@@ -882,7 +882,9 @@ public class ProcessorConfigurationService {
 	 */
 	public Map<String, String> getHttpListenerProperties(String mailboxInfo, ProcessorType httpListenerType, boolean isMailboxIdAvailable)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-
+		
+		long startTime = System.currentTimeMillis();
+		long endTime = 0;
 		Map<String, String> httpListenerProperties = null;
 
 		// retrieve the list of processors of specific type
@@ -905,6 +907,8 @@ public class ProcessorConfigurationService {
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
 		}
+		endTime = System.currentTimeMillis();
+		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 		return httpListenerProperties;
 	}
 
