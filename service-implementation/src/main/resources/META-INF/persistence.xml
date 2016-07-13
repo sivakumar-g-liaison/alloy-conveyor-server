@@ -39,7 +39,6 @@
 			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.connection.autocommit" value="false"/>
 			<property name="hibernate.cache.use_second_level_cache" value="false"/>
-			<property name="hibernate.generate_statistics" value="true"/>
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="mailbox-rtdm" transaction-type="RESOURCE_LOCAL">
@@ -57,7 +56,6 @@
 			<property name="hibernate.show_sql" value="false"/>
 			<property name="hibernate.connection.autocommit" value="false"/>
 			<property name="hibernate.cache.use_second_level_cache" value="false"/>
-			<property name="hibernate.generate_statistics" value="true"/>
 		</properties>
 	</persistence-unit>
 	

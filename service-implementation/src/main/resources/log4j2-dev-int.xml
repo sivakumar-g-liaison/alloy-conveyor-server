@@ -259,7 +259,7 @@
 	</appenders>
 
 	<loggers>
-        <root level="DEBUG">
+        <root level="INFO">
 			<appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
 			<appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover"/>
 			<appender-ref ref="AsyncFileSyslogWithFailoverFailover"/>
