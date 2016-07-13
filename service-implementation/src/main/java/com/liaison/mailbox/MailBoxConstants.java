@@ -142,6 +142,7 @@ public interface MailBoxConstants {
 	public final static String KEY_PROCESSOR_ID = "processorId";
 	public final static String KEY_OVERWRITE = "overwrite";
 	public final static String KEY_FILE_PATH = "path";
+	public final static String DIRECT_UPLOAD = "directUpload";
 	public final static String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
 	public final static String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	public final static String KEY_TARGET_DIRECTORY = "targetDirectory";
