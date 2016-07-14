@@ -108,4 +108,36 @@ public class MailBoxProcessorFactory {
 		return mailBoxProcessor;
 	}
 
+    /**
+     * Factory to method to create instances for mailbox processor.
+     *
+     * @param processor
+     *            The Processor Entity
+     * @return The MailBox Processor instance.
+     */
+    public static RemoteUploaderI getUploaderInstance(Processor processor) {
+
+        Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
+        if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
+
+            switch (foundProtocolType) {
+
+                case FTPS:
+                    return new FTPSRemoteUploader(processor);
+                case FTP:
+                    return new FTPSRemoteUploader(processor);
+                case SFTP:
+                    return new SFTPRemoteUploader(processor);
+                case HTTP:
+                    return new HTTPRemoteUploader(processor);
+                case HTTPS:
+                    return new HTTPRemoteUploader(processor);
+                default:
+                    return null;
+
+            }
+        }
+        return null;
+    }
+
 }

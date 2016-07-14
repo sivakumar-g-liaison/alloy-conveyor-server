@@ -54,6 +54,10 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 
 /**
  * Utilities for MailBox.
@@ -536,5 +540,23 @@ public class MailBoxUtil {
      */
     public static boolean isEmptySet(Set<String> set) {
         return set == null || set.isEmpty();
+    }
+
+    /**
+     * Util method to read the direct upload value from processor properties
+     * @param json processor properties json
+     * @return boolean
+     */
+    public static boolean isDirectUploadEnabled(String json) {
+
+        try {
+
+            JSONObject obj = new JSONObject(json);
+            Object o = obj.get(DIRECT_UPLOAD);
+            return Boolean.TRUE.equals(o) ? true : false;
+        } catch (JSONException e) {
+            return false;
+        }
+
     }
 }

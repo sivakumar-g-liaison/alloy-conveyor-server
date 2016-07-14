@@ -10,21 +10,6 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
-
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -32,7 +17,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -42,6 +26,16 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This will place and manages the file with respect to the given location.
@@ -170,47 +164,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		}
 
 	}
-
-	 /**
-     * Logs TVAPI status and event message in LENS
-     *
-     * @param files file names
-     */
-	protected void logGlassMessage(List<String> files) {
-
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        List <StagedFile> stagedFiles = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid());
-
-        for (StagedFile stagedFile : stagedFiles) {
-
-        	// if the files contain the stagedFile Name, then the file is not picked up
-        	// by the customer so continue to next staged file
-        	if (files.contains(stagedFile.getFileName())) {
-        		LOG.info("File {} is not picked up by the customer", stagedFile.getFileName());
-        		continue;
-        	}
-
-            StringBuilder message = new StringBuilder()
-            					.append("File ")
-            					.append(stagedFile.getFileName())
-            					.append(" is picked up by the customer");
-
-            MailboxGlassMessageUtil.logGlassMessage(
-                    stagedFile.getGPID(),
-                    configurationInstance.getProcessorType(),
-                    configurationInstance.getProcsrProtocol(),
-                    stagedFile.getFileName(),
-                    stagedFile.getFilePath(),
-                    0,
-                    ExecutionState.COMPLETED,
-                    message.toString(),
-					null);
-
-            // Inactivate the stagedFile
-            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-            stagedFileDAO.merge(stagedFile);
-        }
-    }
 
 	@Override
     public Object getClient() {

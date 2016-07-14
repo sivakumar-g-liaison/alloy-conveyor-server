@@ -46,6 +46,7 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean debugTranscript;
 	private boolean createFoldersInRemote;
 	private boolean recurseSubDirectories;
+    private boolean directUpload;
 
 	public String getUrl() {
 		return url;
@@ -165,5 +166,12 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setRecurseSubDirectories(boolean recurseSubDirectories) {
 		this.recurseSubDirectories = recurseSubDirectories;
 	}
-    
+
+    public boolean isDirectUpload() {
+        return directUpload;
+    }
+
+    public void setDirectUpload(boolean directUpload) {
+        this.directUpload = directUpload;
+    }
 }

@@ -9,11 +9,11 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import com.google.inject.Stage;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -798,6 +798,26 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         }
         return false;
+    }
+
+    /**
+     * To update staged file status.
+     *
+     * @param workticket
+     * @param status
+     */
+    public void updateStagedFileStatus(WorkTicket workticket, String status) {
+
+        StagedFileDAOBase dao = new StagedFileDAOBase();
+        String path = workticket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString();
+        StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), path, workticket.getFileName());
+
+        if (null != stagedFile) {
+
+            stagedFile.setStagedFileStatus(status);
+            stagedFile.setFailureNotificationCount(1);
+            dao.merge(stagedFile);
+        }
     }
 
     /**

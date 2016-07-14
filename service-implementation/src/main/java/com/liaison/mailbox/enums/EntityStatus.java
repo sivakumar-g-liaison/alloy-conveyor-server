@@ -19,8 +19,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public enum EntityStatus {
 
-	ACTIVE("ACTIVE"),
-	INACTIVE("INACTIVE");
+    ACTIVE("ACTIVE"),
+    INACTIVE("INACTIVE"),
+    STAGED("STAGED"),
+    FAILED("FAILED");
 
 	private String value;
 

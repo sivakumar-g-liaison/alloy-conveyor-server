@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -76,6 +77,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
             
             boolean recursiveSubdirectories = ftpUploaderStaticProperties.isRecurseSubDirectories();
+            setDirectUpload(ftpUploaderStaticProperties.isDirectUpload());
             File[] subFiles = getFilesToUpload(recursiveSubdirectories);
             if (subFiles == null || subFiles.length == 0) {
                 LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
@@ -238,6 +240,54 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             } catch (LiaisonException e) {
                 LOGGER.error(constructMessage("Failed to close connection"), e);
             }
+        }
+    }
+
+    @Override
+    public void doDirectUpload(String fileName, String folderPath) {
+
+        setDirectUpload(true);
+        boolean isHandOverExecutionToJavaScript = false;
+        try {
+            isHandOverExecutionToJavaScript = ((FTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+        } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (isHandOverExecutionToJavaScript) {
+            setFileName(fileName);
+            setFolderPath(folderPath);
+            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+        } else {
+
+            G2FTPSClient ftpsRequest = null;
+            try {
+
+                String remotePath = validateRemotePath();
+
+                ftpsRequest = (G2FTPSClient) getClient();
+                ftpsRequest.setLogPrefix(constructMessage());
+                ftpsRequest.connect();
+                ftpsRequest.login();
+
+                // retrieve required properties
+                FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO) getProperties();
+                setPassive(ftpsRequest, ftpUploaderStaticProperties);
+
+                changeDirectory(ftpsRequest, remotePath);
+                LOGGER.info(constructMessage("Ready to upload file {} from local path {} to remote path {}"),
+                        fileName,
+                        folderPath,
+                        remotePath);
+                uploadFile(ftpsRequest, folderPath, remotePath, new File(folderPath + File.separatorChar + fileName));
+
+            } catch (Exception e) {
+                LOGGER.error(constructMessage("Error occurred during direct upload", seperator, e.getMessage()), e);
+                throw new RuntimeException(e);
+            } finally {
+                disconnect(ftpsRequest);
+            }
+
         }
     }
 

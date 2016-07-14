@@ -123,7 +123,7 @@ public class MailboxWatchDogService {
 			// query
 			StringBuilder queryString = new StringBuilder().append("SELECT sf.* FROM STAGED_FILE sf")
 					.append(" INNER JOIN PROCESSOR_EXEC_STATE pes ON sf.PROCESSOR_GUID = pes.PROCESSOR_ID")
-					.append(" WHERE sf.STATUS = 'ACTIVE'")
+					.append(" WHERE sf.STATUS in ('ACTIVE', 'FAILED')")
 					.append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
 					.append(" AND pes.EXEC_STATUS != 'PROCESSING'");
 
@@ -291,10 +291,9 @@ public class MailboxWatchDogService {
 	
 	/**
 	 *  Method to validate the expire time.
-	 *  
+	 *
 	 * @param stagedFile
-	 * @param processor
-	 * @param mailboxPropsToBeRetrieved
+	 * @param mailboxProperties
 	 * @return boolean
 	 */
 	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) {
@@ -384,7 +383,7 @@ public class MailboxWatchDogService {
 	/**
 	 * This method used to check the max Number Of Notification send to client.
 	 * 
-	 * @param metaData
+	 * @param stagedFile
 	 * @param maxNumOfNotification
 	 * @return isReachedMaxNumOfNotification;
 	 */
@@ -425,7 +424,6 @@ public class MailboxWatchDogService {
 		return slaConfiguredTime.before(currentTimeStamp);
 	}
 
-	
 	/**
 	 * Method to convert sla configuration property from mailbox into TimeStamp value
 	 *
@@ -540,13 +538,12 @@ public class MailboxWatchDogService {
 			}
 		}
 	}
-	
+
 	/**
 	 * Method which checks if the given processor is executed with in the given slaconfiguration time.
 	 *
 	 * @param processor - processor for which sla has to be validated
-	 * @param slaConfigurationTime - sla configured in mailbox
-	 * @param emailAddress - email Address to which SLA has to be notified
+	 * @param mailboxProperties - mailbox properties
 	 */
 	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, Map<String, String> mailboxProperties) {
 		

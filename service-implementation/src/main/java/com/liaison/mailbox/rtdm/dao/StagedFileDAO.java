@@ -47,21 +47,22 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
 	void persistStagedFile(WorkTicket workticket, String processorId, String processorType);
 	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
-	List <StagedFile> findStagedFilesByProcessorId(String processorId);
 
     /**
      * list staged files by processor id
-     * @param processorId procesor id
+     * @param processorId processor id
+     * @param directUpload boolean to denote direct upload enabled or not
      * @return list of staged files
      */
-    List<StagedFile> findStagedFilesForUploader(String processorId);
+    List<StagedFile> findStagedFilesForUploader(String processorId, boolean directUpload);
 
     /**
      * list staged files by processor id
-     * @param processorId procesor id
+     * @param processorId processor id
+     * @param directUpload boolean to denote direct upload enabled or not
      * @return list of staged files
      */
-    List<StagedFile> findStagedFilesForUploader(String processorId, String filePath);
+    List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload);
 
     /**
      * get staged file by gpid
@@ -69,5 +70,49 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @return staged file
      */
     StagedFile findStagedFile(String gpid);
+
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) = :")
+            .append(PROCESSOR_ID)
+            .append(" and sf.stagedFileStatus IN (:")
+            .append(STATUS)
+            .append("))");
+
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) = :")
+            .append(PROCESSOR_ID)
+            .append(" and sf.stagedFileStatus != :")
+            .append(STATUS)
+            .append(")");
+
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) =:")
+            .append(PROCESSOR_ID)
+            .append(" and sf.filePath =:")
+            .append(FILE_PATH)
+            .append(" and sf.stagedFileStatus IN (:")
+            .append(StagedFileDAO.STATUS)
+            .append("))");
+
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) =:")
+            .append(PROCESSOR_ID)
+            .append(" and sf.filePath =:")
+            .append(FILE_PATH)
+            .append(" and sf.stagedFileStatus !=:")
+            .append(StagedFileDAO.STATUS)
+            .append(")");
+
+    StringBuilder FIND_STAGED_FILE = new StringBuilder()
+            .append("select sf from StagedFile sf")
+            .append(" where sf.processorId =:")
+            .append(PROCESSOR_ID)
+            .append(" and sf.stagedFileStatus in (:")
+            .append(STATUS)
+            .append(") and sf.fileName =:")
+            .append(FILE_NAME)
+            .append(" and sf.filePath =:")
+            .append(FILE_PATH)
+            .append(" order by sf.createdDate desc");
 
 }

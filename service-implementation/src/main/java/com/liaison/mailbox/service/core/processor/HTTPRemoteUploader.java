@@ -78,8 +78,8 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 //Checks the local path has files to upload
                 String path = validateLocalPath();
-                File localDir = new File(path);              
                 boolean recursiveSubdirectories = httpUploaderStaticProperties.isRecurseSubDirectories();
+                setDirectUpload(httpUploaderStaticProperties.isDirectUpload());
                 File[] files = getFilesToUpload(recursiveSubdirectories);
                 if (files == null || files.length == 0) {
                     LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
@@ -195,6 +195,19 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
     }
 
+    @Override
+    public void doDirectUpload(String fileName, String folderPath) {
 
+        try {
+
+            LOGGER.info(constructMessage("Ready to upload file {} from local path {} to remote "),
+                    fileName,
+                    folderPath);
+            uploadFile(new File(folderPath + File.separatorChar + fileName));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 }
