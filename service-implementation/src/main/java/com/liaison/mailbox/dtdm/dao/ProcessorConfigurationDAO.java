@@ -181,7 +181,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param processorType
 	 * @return list of processors
 	 */
-	public List<Processor> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType);
+	public List<Object[]> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType);
 	
 	/**
 	 * Retrieve processors of specific type by given mailbox Name and type
@@ -190,5 +190,36 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param processorType
 	 * @return list of processors
 	 */
-	public List<Processor> findProcessorsByMailboxNameAndProcessorType(String mbxId, String processorType);
+	public List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mbxId, String processorType);
+	
+	
+	public static final StringBuilder PROCESSOR__RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
+		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
+		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
+		.append(" SI.SERVICE_INSTANCE_ID,")
+		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")		
+		.append(" FROM PROCESSOR P")
+		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
+		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
+		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
+		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
+		.append(" WHERE P.TYPE = ? AND")
+		.append(" M.PGUID = ? AND")
+		.append(" P.STATUS = 'ACTIVE' AND")
+		.append(" M.STATUS = 'ACTIVE' ");
+	
+	public static final StringBuilder PROCESSOR__RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
+		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
+		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
+		.append(" SI.SERVICE_INSTANCE_ID,")
+		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
+		.append(" FROM PROCESSOR P")
+		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
+		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
+		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
+		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
+		.append(" WHERE P.TYPE = ? AND")
+		.append(" LOWER(M.NAME) = ? AND")
+		.append(" P.STATUS = 'ACTIVE' AND")
+		.append(" M.STATUS = 'ACTIVE' ");
 }
