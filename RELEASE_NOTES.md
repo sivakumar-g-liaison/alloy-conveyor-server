@@ -2,6 +2,10 @@
 -------------------------------
 * GMB-802: Processor - Create : Dynamic property name is not cleared after clicking on save button
 
+4.5.2
+-------------------------------
+* Rebuild to get new commons-lib to fix GSB-2877, "Unable to run large pgp decryption in uat"
+
 4.5.1
 -------------------------------
 * GMB-821 Sync Mailbox Transaction Fails
