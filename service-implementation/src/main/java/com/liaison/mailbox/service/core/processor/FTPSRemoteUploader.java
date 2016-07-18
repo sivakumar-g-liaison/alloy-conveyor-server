@@ -142,7 +142,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             }
 
             //FTPS
-            uploadFile(ftpsRequest, localParentDir, remoteParentDir, item);
+            uploadFile(ftpsRequest, remoteParentDir, item);
         }
     }
 
@@ -157,10 +157,11 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
      * @throws LiaisonException
      * @throws IllegalAccessException
      */
-    private void uploadFile(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, File file)
+    private void uploadFile(G2FTPSClient ftpsRequest, String remoteParentDir, File file)
             throws IOException, LiaisonException, IllegalAccessException {
 
         int replyCode;
+        String filePath = file.getParent();
         FTPUploaderPropertiesDTO staticProp = (FTPUploaderPropertiesDTO) getProperties();
         String statusIndicator = staticProp.getFileTransferStatusIndicator();
         String currentFileName = file.getName();
@@ -181,7 +182,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         try (InputStream inputStream = new FileInputStream(file)) {
             ftpsRequest.changeDirectory(remoteParentDir);
             LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
-                    currentFileName, localParentDir, remoteParentDir);
+                    currentFileName, filePath, remoteParentDir);
             replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
         }
 
@@ -217,7 +218,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                     .append("Failed to upload file ")
                     .append(currentFileName)
                     .append(" from local path ")
-                    .append(localParentDir)
+                    .append(filePath)
                     .append(" to remote path ")
                     .append(remoteParentDir);
 
@@ -279,7 +280,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                         fileName,
                         folderPath,
                         remotePath);
-                uploadFile(ftpsRequest, folderPath, remotePath, new File(folderPath + File.separatorChar + fileName));
+                uploadFile(ftpsRequest, remotePath, new File(folderPath + File.separatorChar + fileName));
 
             } catch (Exception e) {
                 LOGGER.error(constructMessage("Error occurred during direct upload", seperator, e.getMessage()), e);

@@ -306,14 +306,11 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
 
         //default profile invocation
-        if (recurseSubDirs) {
-            stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid(), isDirectUpload());
-        } else {
-            stagedFiles = dao.findStagedFilesForUploader(
-                    this.configurationInstance.getPguid(),
-                    new File(validateLocalPath()).getPath(),
-                    isDirectUpload());
-        }
+        stagedFiles = dao.findStagedFilesForUploader(
+                this.configurationInstance.getPguid(),
+                new File(validateLocalPath()).getPath(),
+                isDirectUpload(),
+                recurseSubDirs);
 
         for (StagedFile stagedFile : stagedFiles) {
 
