@@ -172,11 +172,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
         // Sets the headers
         Set<String> headers = result.getHeaderNames();
         for (String name : headers) {
-			builder.header(name, result.getHeader(name));
 			if (KEY_RAW_PAYLOAD_SIZE.equals(name)) {
 				setPayloadSize(Long.valueOf(result.getHeader(name)));
+				continue;
 			}
-        }
+			builder.header(name, result.getHeader(name));
+		}
 
 		// JIRA GMB-428 - set global process id in header only if it is not already available
 		if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
