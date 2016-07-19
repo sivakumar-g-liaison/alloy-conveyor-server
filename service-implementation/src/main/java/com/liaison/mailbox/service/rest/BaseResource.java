@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -278,15 +279,18 @@ public class BaseResource {
 
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements()) {
+
 			String headerName = headerNames.nextElement();
-			List<String> headerValues = new ArrayList<>();
-			Enumeration<String> values = request.getHeaders(headerName);
+			if (!HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(headerName)) {
+				List<String> headerValues = new ArrayList<>();
+				Enumeration<String> values = request.getHeaders(headerName);
 
-			while (values.hasMoreElements()) {
-				headerValues.add(values.nextElement());
+				while (values.hasMoreElements()) {
+					headerValues.add(values.nextElement());
+				}
+
+				headers.put(headerName, headerValues);
 			}
-
-			headers.put(headerName, headerValues);
 		}
 
 		return headers;

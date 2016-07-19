@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -65,6 +67,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.HTTP_HEADER_CONTENT_LENGTH;
+import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
+import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
+import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
+
 /**
  * G2 HTTP Gateway.
  *
@@ -80,8 +88,17 @@ public class HTTPListenerResource extends AuditedResource {
     private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
-	private static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	private static final String NO_PRIVILEGE = "You do not have sufficient privilege to invoke the service";
+
+	private Map<String, List<String>> formValues = null;
+
+	public Map<String, List<String>> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(Map<String, List<String>> formValues) {
+		this.formValues = formValues;
+	}
 
 	@POST
 	@Path("sync/{token1}")
@@ -119,26 +136,26 @@ public class HTTPListenerResource extends AuditedResource {
 	public Response handleSync(@Context final HttpServletRequest request,
 			@QueryParam(value = MAILBOX_ID) final String mailboxId,
 			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws Exception {
 
 			    //first corner timestamp
-		        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+                ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
-				GlassMessage glassMessage = null;
-				WorkTicket workTicket = null;
-				
-				if (StringUtils.isEmpty(mailboxId) && StringUtils.isEmpty(mailboxName)) {
-				    logger.error("HTTP(S)-SYNC : Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
-					throw new RuntimeException("Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
-				}
-				
+                GlassMessage glassMessage = null;
+                WorkTicket workTicket = null;
+
+                if (StringUtils.isEmpty(mailboxId) && StringUtils.isEmpty(mailboxName)) {
+                    logger.error("HTTP(S)-SYNC : Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
+                    throw new RuntimeException("Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
+                }
+
 				String mailboxInfo = null;
 				boolean isMailboxIdAvailable = false;
-				
+
 				if (!MailBoxUtil.isEmpty(mailboxId)) {
 					mailboxInfo = mailboxId;
 					isMailboxIdAvailable = true;
@@ -153,7 +170,9 @@ public class HTTPListenerResource extends AuditedResource {
 					syncProcessor.validateRequestSize(request.getContentLength());
 
 					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
-							mailboxInfo, ProcessorType.HTTPSYNCPROCESSOR, isMailboxIdAvailable);
+							mailboxInfo,
+							HTTPSYNCPROCESSOR,
+							isMailboxIdAvailable);
 
 					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
@@ -164,19 +183,31 @@ public class HTTPListenerResource extends AuditedResource {
 					}
 
 					logger.debug("construct workticket");
-					workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-							getRequestHeaders(request), httpListenerProperties);
+					workTicket = new WorkTicketUtil().createWorkTicket(
+							getRequestProperties(request),
+							getRequestHeaders(request),
+							httpListenerProperties);
 
-                    if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
-					    Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
-					    workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
+                    if (httpListenerProperties.containsKey(TTL_IN_SECONDS)) {
+					    Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(TTL_IN_SECONDS));
+					    workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(TTL_UNIT_SECONDS, ttlNumber));
 					}
 
                     // persist payload in spectrum
-                    try (InputStream inputStream = request.getInputStream()) {
-                        StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
-                        logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
-                    }
+					if (formValues == null) {
+
+						try (InputStream inputStream = request.getInputStream()) {
+							StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+							logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+						}
+					} else {
+
+						try (InputStream inputStream = new ByteArrayInputStream(new Gson().toJson(formValues).getBytes())) {
+                            workTicket.getHeaders().putAll(formValues);
+                            StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+                            logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+                        }
+					}
 
                     //Fix for GMB-502
                     glassMessage = constructGlassMessage(request, workTicket, ExecutionState.PROCESSING);
@@ -207,14 +238,11 @@ public class HTTPListenerResource extends AuditedResource {
                         GlassMessage successMessage = constructGlassMessage(request, workTicket, ExecutionState.COMPLETED);
                         successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
 
-                        //Hack to set outbound size
-                        List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
-                        if (null != contenLength && !contenLength.isEmpty()) {
-                            String outSize = String.valueOf(syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0));
-                            if (!MailBoxUtil.isEmpty(outSize) && !("null".equals(outSize))) {
-                                successMessage.setOutSize(Long.valueOf(outSize));
-                            }
-                        }
+                        //set outbound size
+						if (syncProcessor.getPayloadSize() != 0
+								&& syncProcessor.getPayloadSize() != -1) {
+							successMessage.setOutSize(syncProcessor.getPayloadSize());
+						}
                         new TransactionVisibilityClient().logToGlass(successMessage);
                     }
 
@@ -238,7 +266,7 @@ public class HTTPListenerResource extends AuditedResource {
 						glassMessage.logFourthCornerTimestamp();
 
 					}
-					
+
 					if (NO_PRIVILEGE.equals(e.getMessage())) {
 					    throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
 					} else {
@@ -259,20 +287,23 @@ public class HTTPListenerResource extends AuditedResource {
 	}
 
 	/**
-	 * This method will processing the sync message by give request.
+	 * Handles the application/x-www-form-urlencoded requests
 	 *
-	 * @param request The HttpServletRequest
-	 * @return The Response Object
-	 */
+	 * @param mailboxId mailbox guid
+	 * @param mailboxName mailbox name
+	 * @param formValues form values
+     * @return The Response Object
+     */
 	@POST
 	@Path("sync")
 	@AccessDescriptor(skipFilter = true)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response handleSync(@Context final HttpServletRequest request,
+							   @QueryParam(value = MAILBOX_ID) final String mailboxId,
+							   @QueryParam(value = MAILBOX_NAME) final String mailboxName,
 							   MultivaluedMap<String,String> formValues) {
-
-		logger.info(formValues.toString());
-		return Response.ok().build();
+		this.setFormValues(formValues);
+		return handleSync(request, mailboxId, mailboxName);
 	}
 
 	/**
@@ -286,7 +317,7 @@ public class HTTPListenerResource extends AuditedResource {
             final ExecutionState state) {
 
         GlassMessage glassMessage = new GlassMessage();
-        glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
+        glassMessage.setCategory(HTTPSYNCPROCESSOR);
         glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
         glassMessage.setMailboxId(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID).toString());
         glassMessage.setProcessId(UUIDGen.getCustomUUID());
@@ -389,16 +420,26 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), httpListenerProperties);
 
-                    if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
-                        Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
-                        workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
+                    if (httpListenerProperties.containsKey(TTL_IN_SECONDS)) {
+                        Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(TTL_IN_SECONDS));
+                        workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(TTL_UNIT_SECONDS, ttlNumber));
                     }
 
                     // persist payload in spectrum
-                    try (InputStream inputStream = request.getInputStream()) {
-                        StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
-                        logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
-                    }
+					if (formValues == null) {
+
+						try (InputStream inputStream = request.getInputStream()) {
+							StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+							logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+						}
+					} else {
+
+						try (InputStream inputStream = new ByteArrayInputStream(new Gson().toJson(formValues).getBytes())) {
+							workTicket.getHeaders().putAll(formValues);
+							StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+							logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+						}
+					}
 
                     glassMessage = new GlassMessage();
                     glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
@@ -463,6 +504,26 @@ public class HTTPListenerResource extends AuditedResource {
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		return process(request, worker);
+	}
+
+	/**
+	 * Handles the application/x-www-form-urlencoded requests
+	 *
+	 * @param mailboxId mailbox guid
+	 * @param mailboxName mailbox name
+	 * @param formValues form values
+	 * @return The Response Object
+	 */
+	@POST
+	@Path("async")
+	@AccessDescriptor(skipFilter = true)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response handleAsync(@Context final HttpServletRequest request,
+							   @QueryParam(value = MAILBOX_ID) final String mailboxId,
+							   @QueryParam(value = MAILBOX_NAME) final String mailboxName,
+							   MultivaluedMap<String,String> formValues) {
+		this.setFormValues(formValues);
+		return handleAsync(request, mailboxId, mailboxName);
 	}
 
 	@Override
