@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -255,6 +256,23 @@ public class HTTPListenerResource extends AuditedResource {
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		return process(request, worker);
+	}
+
+	/**
+	 * This method will processing the sync message by give request.
+	 *
+	 * @param request The HttpServletRequest
+	 * @return The Response Object
+	 */
+	@POST
+	@Path("sync")
+	@AccessDescriptor(skipFilter = true)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response handleSync(@Context final HttpServletRequest request,
+							   MultivaluedMap<String,String> formValues) {
+
+		logger.info(formValues.toString());
+		return Response.ok().build();
 	}
 
 	/**
