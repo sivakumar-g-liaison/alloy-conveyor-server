@@ -297,7 +297,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
-			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
+			//JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 		} else {
 
 			if (workTickets.isEmpty()) {

@@ -38,63 +38,6 @@ public final class JavaScriptExecutorUtil {
 	 *  in the script path provided using G2 custom Js engine.
 	 *
 	 * @param scriptPath String
-	 * @param methodName String
-	 * @Param parameters Object
-	 * @return Object
-	 * @throws Exception
-	 *
-	 */
-	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) {
-
-		Exception expectedException = null;
-		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
-		JavascriptScriptContext scriptContext = null;
-		URI myUri = null;
-
-		try {
-
-			String scriptName = scriptPath;
-
-			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
-					  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
-			scriptPath = gitlabDirectory+"/"+scriptPath;
-
-			if(scriptPath.contains("gitlab:")) {
-				myUri = new URI(scriptPath);
-				LOGGER.debug("The process script uri is {}" + myUri);
-			}
-
-			if (scriptContext == null) {
-
-			    try (InputStreamReader reader = new InputStreamReader(System.in, "UTF-8"); PrintWriter outputWriter = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
-			            PrintWriter errorWriter = new PrintWriter(new OutputStreamWriter(System.err, "UTF-8"))) {
-			        scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
-			    }
-
-			}
-		    scriptExecutor.setScriptContext(scriptContext);
-
-		    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, myUri, methodName, parameters);
-
-		    // did my function call throw?
-		    expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
-		    if (null != expectedException) {
-		       	throw expectedException;
-		    }
-
-		    return returnValue;
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Executes the specified method in the javascript available
-	 *  in the script path provided using G2 custom Js engine.
-	 *
-	 * @param scriptPath String
-	 * @param methodName String
 	 * @Param parameters Object
 	 * @return Object
 	 * @throws Exception
@@ -136,8 +79,6 @@ public final class JavaScriptExecutorUtil {
 	 * Executes the specified method in the javascript available
 	 *  in the script uri provided using G2 custom Js engine.
 	 *
-	 * @param scriptPath String
-	 * @param methodName String
 	 * @Param parameters Object
 	 * @return Object
 	 * @throws Exception
