@@ -278,56 +278,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * Returns the staged files of the given processor
      */
     @Override
-    public List<StagedFile> findStagedFilesForUploader(String processorId, boolean directUpload) {
-
-        List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
-        EntityManager entityManager = null;
-
-        try {
-
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-
-            Query query = null;
-            if (directUpload) {
-
-				List<String> statuses = new ArrayList<>();
-				statuses.add(EntityStatus.FAILED.name());
-				statuses.add(EntityStatus.ACTIVE.name());
-
-                //to retrieve failed files for profile invocation if direct upload is enabled
-                query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD.toString());
-                query.setParameter(PROCESSOR_ID, processorId);
-                query.setParameter(STATUS, statuses);
-            } else {
-
-                //to retrieve both active and failed files for profile invocation if direct upload is disabled
-				query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID.toString());
-                query.setParameter(PROCESSOR_ID, processorId);
-                query.setParameter(STATUS, EntityStatus.INACTIVE.name());
-            }
-
-            List<?> files = query.getResultList();
-
-            Iterator<?> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                StagedFile stagedFile = (StagedFile) iterator.next();
-                stagedFiles.add(stagedFile);
-            }
-
-        } finally {
-
-            if (null != entityManager) {
-                entityManager.close();
-            }
-        }
-        return stagedFiles;
-    }
-
-    /**
-     * Returns the staged files of the given processor
-     */
-    @Override
-    public List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload) {
+    public List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload, boolean recurseSubDir) {
 
         List<StagedFile> stagedFiles = new ArrayList<>();
         EntityManager entityManager = null;
@@ -344,17 +295,29 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 				statuses.add(EntityStatus.ACTIVE.name());
 
                 //to retrieve failed files for profile invocation if direct upload is enabled
-                query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
+				if (recurseSubDir) {
+				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
+				    query.setParameter(FILE_PATH, filePath + "%");
+				} else {
+				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
+				    query.setParameter(FILE_PATH, filePath);
+				}
+                
                 query.setParameter(PROCESSOR_ID, processorId);
                 query.setParameter(STATUS, statuses);
-                query.setParameter(FILE_PATH, filePath);
             } else {
 
                 //to retrieve both active and failed files for profile invocation if direct upload is disabled
-				query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH.toString());
+                if (recurseSubDir) {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE.toString());
+                    query.setParameter(FILE_PATH, filePath + "%");
+                } else {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH.toString());
+                    query.setParameter(FILE_PATH, filePath);
+                }
+				
                 query.setParameter(PROCESSOR_ID, processorId);
                 query.setParameter(STATUS, EntityStatus.INACTIVE.name());
-                query.setParameter(FILE_PATH, filePath);
             }
 
             List<?> files = query.getResultList();

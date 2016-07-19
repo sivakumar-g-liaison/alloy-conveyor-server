@@ -54,15 +54,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param directUpload boolean to denote direct upload enabled or not
      * @return list of staged files
      */
-    List<StagedFile> findStagedFilesForUploader(String processorId, boolean directUpload);
-
-    /**
-     * list staged files by processor id
-     * @param processorId processor id
-     * @param directUpload boolean to denote direct upload enabled or not
-     * @return list of staged files
-     */
-    List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload);
+    List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload, boolean recurseSubDir);
 
     /**
      * get staged file by gpid
@@ -71,16 +63,22 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      */
     StagedFile findStagedFile(String gpid);
 
-    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
             .append(PROCESSOR_ID)
+            .append(" and ( sf.filePath LIKE :")
+            .append(FILE_PATH)
+            .append(" )")
             .append(" and sf.stagedFileStatus IN (:")
             .append(STATUS)
             .append("))");
 
-    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID = new StringBuilder().append("select sf from StagedFile sf")
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
             .append(PROCESSOR_ID)
+            .append(" and ( sf.filePath LIKE :")
+            .append(FILE_PATH)
+            .append(" )")
             .append(" and sf.stagedFileStatus != :")
             .append(STATUS)
             .append(")");

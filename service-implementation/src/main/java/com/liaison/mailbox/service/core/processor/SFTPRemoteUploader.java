@@ -146,7 +146,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                 lastCheckTime = new Date();
             }
 
-            uploadFile(sftpClient, localParentDir, remoteParentDir, item);
+            uploadFile(sftpClient, remoteParentDir, item);
 
         }
 
@@ -163,11 +163,11 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * @throws LiaisonException
      */
     private void uploadFile(G2SFTPClient sftpRequest,
-                            String localParentDir,
                             String remoteParentDir,
                             File file) throws IOException, LiaisonException, IllegalAccessException {
 
         int replyCode;
+        String filePath = file.getParent();
         SFTPUploaderPropertiesDTO staticProp = (SFTPUploaderPropertiesDTO) getProperties();
         String currentFileName = file.getName();
 
@@ -189,7 +189,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
             sftpRequest.changeDirectory(remoteParentDir);
             LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
-                    currentFileName, localParentDir, remoteParentDir);
+                    currentFileName, filePath, remoteParentDir);
             replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
         }
 
@@ -225,7 +225,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                     .append("Failed to upload file ")
                     .append(currentFileName)
                     .append(" from local path ")
-                    .append(localParentDir)
+                    .append(filePath)
                     .append(" to remote path ")
                     .append(remoteParentDir);
 
@@ -281,7 +281,6 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                             folderPath,
                             remotePath);
                     uploadFile(sftpRequest,
-                            folderPath,
                             remotePath,
                             new File(folderPath + File.separatorChar + fileName));
 
