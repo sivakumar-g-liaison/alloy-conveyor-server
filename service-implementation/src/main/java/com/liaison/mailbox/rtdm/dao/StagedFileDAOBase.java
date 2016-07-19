@@ -31,6 +31,8 @@ import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+
 /**
  * This will fetch the Staged file details. 
  * 
@@ -71,7 +73,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.stagedFileStatus = :")
 					.append(STATUS);
 
-			// GMB-595 - Setting expirationTime based on the status - (Setting only for ACTIVE status). 
+			// GMB-595 - Setting expirationTime based on the status - (Setting only for ACTIVE status).
 			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
 				queryString.append(" and sf.expirationTime > :");
 				queryString.append(CURRENT_TIME);
@@ -175,26 +177,26 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 			String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
-			
+
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :")
 					.append(FILE_NAME)
 					.append(" and sf.mailboxId in (")
 					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.append(")");
-			
+
 			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
 				query.append(" and sf.expirationTime > :")
 				     .append(CURRENT_TIME);
 			}
 			query.append(" and sf.stagedFileStatus = :")
 				 .append(STATUS);
-			
+
 			Query queryResult = entityManager.createQuery(query.toString());
 			if(EntityStatus.ACTIVE.name().equals(entityStatus)) {
 				queryResult.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
 			}
-			
+
 			queryResult.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 			           .setParameter(STATUS, entityStatus);
 
@@ -225,9 +227,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         	stagedFileDto.setProcessorId(processorId);
         	stagedFileDto.setProcessorType(processorType);
 
+			if (null != workticket.getAdditionalContextItem(DIRECT_UPLOAD)) {
+				stagedFileDto.setStatus(EntityStatus.STAGED.value());
+			}
+
             stagedFileEntity = new StagedFile();
             stagedFileEntity.copyFromDto(stagedFileDto, true);
-
             persist(stagedFileEntity);
 
         } finally {
@@ -248,56 +253,19 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		try {
 
             em = DAOUtil.getEntityManager(persistenceUnitName);
-			// query
-			StringBuilder query = new StringBuilder()
-					.append("select sf from StagedFile sf")
-					.append(" where sf.processorId =:")
-					.append(PROCESSOR_ID)
-					.append(" and sf.stagedFileStatus =:")
-					.append(STATUS)
-					.append(" and sf.fileName =:")
-					.append(FILE_NAME)
-					.append(" and sf.filePath =:")
-                    .append(FILE_PATH)
-                    .append(" order by sf.createdDate desc");
 
-			List<StagedFile> stagedFiles = em.createQuery(query.toString())
-					.setParameter(PROCESSOR_ID, processorId)
-					.setParameter(STATUS, EntityStatus.ACTIVE.value())
-					.setParameter(FILE_NAME, fileName)
-					.setParameter(FILE_PATH, targetLocation)
-					.getResultList();
+            List<String> statuses = new ArrayList<>();
+            statuses.add(EntityStatus.STAGED.name());
+            statuses.add(EntityStatus.ACTIVE.name());
 
-			return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
-		} finally {
+            List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE.toString())
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(STATUS, statuses)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(FILE_PATH, targetLocation)
+                    .getResultList();
 
-			if (null != em) {
-			    em.close();
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<StagedFile> findStagedFilesByProcessorId(String processorId) {
-
-		EntityManager em = null;
-
-		try {
-
-            em = DAOUtil.getEntityManager(persistenceUnitName);
-			// query
-			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.processorId =:")
-					.append(PROCESSOR_ID)
-					.append(" and sf.stagedFileStatus =:")
-					.append(STATUS);
-
-			List<StagedFile> stagedFiles = em.createQuery(query.toString())
-					.setParameter(PROCESSOR_ID, processorId)
-					.setParameter(STATUS, EntityStatus.ACTIVE.value()).getResultList();
-
-			return stagedFiles;
+            return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
 		} finally {
 
 			if (null != em) {
@@ -310,70 +278,49 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * Returns the staged files of the given processor
      */
     @Override
-    public List<StagedFile> findStagedFilesForUploader(String processorId) {
+    public List<StagedFile> findStagedFilesForUploader(String processorId, String filePath, boolean directUpload, boolean recurseSubDir) {
 
-        List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
+        List<StagedFile> stagedFiles = new ArrayList<>();
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-                    .append(" where (sf.processorId) = :")
-                    .append(PROCESSOR_ID)
-                    .append(" and sf.stagedFileStatus = :")
-                    .append(STATUS)
-                    .append(")");
 
-            List<?> files = entityManager
-                    .createQuery(query.toString())
-                    .setParameter(PROCESSOR_ID, processorId)
-                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
-                    .getResultList();
+            Query query = null;
+            if (directUpload) {
 
-            Iterator<?> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                StagedFile stagedFile = (StagedFile) iterator.next();
-                stagedFiles.add(stagedFile);
+				List<String> statuses = new ArrayList<>();
+				statuses.add(EntityStatus.FAILED.name());
+				statuses.add(EntityStatus.ACTIVE.name());
+
+                //to retrieve failed files for profile invocation if direct upload is enabled
+				if (recurseSubDir) {
+				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
+				    query.setParameter(FILE_PATH, filePath + "%");
+				} else {
+				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
+				    query.setParameter(FILE_PATH, filePath);
+				}
+                
+                query.setParameter(PROCESSOR_ID, processorId);
+                query.setParameter(STATUS, statuses);
+            } else {
+
+                //to retrieve both active and failed files for profile invocation if direct upload is disabled
+                if (recurseSubDir) {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE.toString());
+                    query.setParameter(FILE_PATH, filePath + "%");
+                } else {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH.toString());
+                    query.setParameter(FILE_PATH, filePath);
+                }
+				
+                query.setParameter(PROCESSOR_ID, processorId);
+                query.setParameter(STATUS, EntityStatus.INACTIVE.name());
             }
 
-        } finally {
-
-            if (null != entityManager) {
-                entityManager.close();
-            }
-        }
-        return stagedFiles;
-    }
-
-    /**
-     * Returns the staged files of the given processor
-     */
-    @Override
-    public List<StagedFile> findStagedFilesForUploader(String processorId, String filePath) {
-
-        List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
-        EntityManager entityManager = null;
-
-        try {
-
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-                    .append(" where (sf.processorId) =:")
-                    .append(PROCESSOR_ID)
-                    .append(" and sf.filePath =:")
-                    .append(FILE_PATH)
-                    .append(" and sf.stagedFileStatus =:")
-                    .append(StagedFileDAO.STATUS)
-                    .append(")");
-
-            List<?> files = entityManager
-                    .createQuery(query.toString())
-                    .setParameter(PROCESSOR_ID, processorId)
-                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
-                    .setParameter(FILE_PATH, filePath)
-                    .getResultList();
-
+            List<?> files = query.getResultList();
             Iterator<?> iterator = files.iterator();
             while (iterator.hasNext()) {
                 StagedFile stagedFile = (StagedFile) iterator.next();

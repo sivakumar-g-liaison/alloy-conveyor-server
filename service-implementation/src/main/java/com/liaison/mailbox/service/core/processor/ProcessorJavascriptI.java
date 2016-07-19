@@ -30,7 +30,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
  * 
  * @author OFS
  */
-public interface ProcessorJavascriptI {
+public interface ProcessorJavascriptI extends MailBoxProcessorI {
 
 	/**
 	 * This will return a HTTP, FTP, and HTTPS or FTPS client based on the processor type.

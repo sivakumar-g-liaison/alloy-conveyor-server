@@ -10,20 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
@@ -37,6 +23,7 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -50,6 +37,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
 import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -59,6 +47,20 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
+import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 
 
 /**
@@ -71,6 +73,7 @@ public class MailBoxService implements Runnable {
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
 	private static final String DEFAULT_FILE_NAME = "NONE";
 	private String message;
+    private boolean directUpload = false;
 	private QueueMessageType messageType;
 	
 	public enum QueueMessageType {
@@ -201,10 +204,6 @@ public class MailBoxService implements Runnable {
 	 * Unique id for processor
 	 *
 	 * @return The trigger profile response DTO
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
 	 */
 	public void executeProcessor(String triggerProfileRequest) {
 		
@@ -365,13 +364,14 @@ public class MailBoxService implements Runnable {
 
 		LOG.info("Consumed WORKTICKET [" + request + "]");
 	    String mailboxId = null;
-	    String processorId = null;
 	    String payloadURI = null;
 	    String processorType = null;
+        boolean directUploadEnabled = false;
 
 	    WorkTicket workTicket = null;
 	    Processor processor = null;
         ProcessorExecutionState processorExecutionState = null;
+        FileWriter processorService = null;
 
         MailboxFSM fsm = new MailboxFSM();
         ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
@@ -406,31 +406,7 @@ public class MailBoxService implements Runnable {
             LOG.debug("Received mailbox id - {}", mailboxId);
             LOG.debug("Received payloadURI is {}", payloadURI);
 
-            processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
-
-            if (!MailBoxUtil.isEmpty(processorId)) {
-                processor = processorDAO.findActiveProcessorById(processorId);
-            } else {
-                processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
-            }
-
-            
-            //Check the processor is null or not
-            if (null == processor) {
-
-                StringBuilder errorMessage = new StringBuilder();
-                if (!MailBoxUtil.isEmpty(processorId)) {
-                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
-                        .append(" for the given processor guid ")
-                        .append(processorId);
-                } else {
-                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
-                        .append(" for the given mailbox guid ")
-                        .append(mailboxId);
-                }
-                throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
-            }
-
+            processor = validateAndGetProcessor(mailboxId, workTicket, processorDAO);
             processorType = processor.getProcessorType().name();
             glassMessage.logProcessingStatus(processor.getProcsrProtocol(), "Consumed workticket from queue", processor.getProcessorType().name(), StatusType.RUNNING);
 
@@ -456,7 +432,7 @@ public class MailBoxService implements Runnable {
             // provided file Name if not save with processor Name with Timestamp
             String stagedFileName = MailBoxUtil.isEmpty(workTicket.getFileName()) ? (processor.getProcsrName() + System.nanoTime()) : workTicket.getFileName();
             workTicket.setFileName(stagedFileName);
-            FileWriter processorService = new FileWriter(processor);
+            processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
             LOG.debug("CronJob : NONE : {} : {} : {} : {} : Handover execution to the filewriter service",
             		processorType,
@@ -464,28 +440,42 @@ public class MailBoxService implements Runnable {
                     mbx.getMbxName(),
                     mbx.getPguid());
 
+            //sets the direct upload details in workticet and it would be used to set the STAGED_FILE status
+            if (processor instanceof RemoteUploader) {
+                directUploadEnabled = MailBoxUtil.isDirectUploadEnabled(processor.getProcsrProperties());
+                if (directUploadEnabled) {
+                    workTicket.setAdditionalContext(DIRECT_UPLOAD, directUploadEnabled);
+                }
+            }
+
             processorService.runProcessor(workTicket, fsm);
             glassMessage.setOutSize(workTicket.getPayloadSize());
-			glassMessage.setOutboundFileName(stagedFileName);
-			if (null != workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH)) {
-				glassMessage.setOutAgent(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString());
-			}
+            glassMessage.setOutboundFileName(stagedFileName);
+            if (null != workTicket.getAdditionalContextItem(KEY_FILE_PATH)) {
+                glassMessage.setOutAgent(workTicket.getAdditionalContextItem(KEY_FILE_PATH).toString());
+            }
 
             //DUPLICATE LENS LOGGING BASED ON FILE_EXISTS
-            if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
+            if (workTicket.getAdditionalContextItem(FILE_EXISTS) == null) {
 
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", MailBoxConstants.FILEWRITER);
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", FILEWRITER);
 
             	// send notification for successful file staging
             	String emailSubject = workTicket.getFileName() + "' is available for pick up";
             	String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
+
+                //file writer to kick of an uploader
+                if (directUploadEnabled) {
+                    directUpload(processor, workTicket);
+                }
+
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
             	transactionVisibilityClient.logToGlass(glassMessage);
-            	glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", MailBoxConstants.FILEWRITER);
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, "File isn't staged because duplicate file exists at the target location", FILEWRITER);
             }
 
             LOG.debug("CronJob : NONE : {} : {} : {} : {} : Filewriter service execution is completed",
@@ -512,7 +502,11 @@ public class MailBoxService implements Runnable {
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
-                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage(), MailBoxConstants.FILEWRITER, ExceptionUtils.getStackTrace(e));
+                if (directUpload && null != processorService) {
+                    processorService.updateStagedFileStatus(workTicket, EntityStatus.FAILED.name());
+                }
+                String msg = (directUpload) ? "Direct upload Failed" : "File Stage Failed";
+                glassMessage.logProcessingStatus(StatusType.ERROR, msg, FILEWRITER, ExceptionUtils.getStackTrace(e));
                 glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
@@ -546,4 +540,53 @@ public class MailBoxService implements Runnable {
 		}
 	}
 
+    /**
+     * Validates the incoming processor guid and returns the processor entity
+     *
+     * @param mailboxId
+     * @param workTicket
+     * @param processorDAO
+     * @return
+     */
+    private Processor validateAndGetProcessor(String mailboxId, WorkTicket workTicket, ProcessorConfigurationDAO processorDAO) {
+
+        Processor processor = null;
+        String processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
+        if (!MailBoxUtil.isEmpty(processorId)) {
+            processor = processorDAO.findActiveProcessorById(processorId);
+        } else {
+            processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+        }
+
+        //Check the processor is null or not
+        if (null == processor) {
+
+            StringBuilder errorMessage = new StringBuilder();
+            if (!MailBoxUtil.isEmpty(processorId)) {
+                errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given processor guid ")
+                        .append(processorId);
+            } else {
+                errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given mailbox guid ")
+                        .append(mailboxId);
+            }
+            throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
+        }
+        return processor;
+    }
+
+    /**
+     * Invoke the uploader for the staged file
+     *
+     * @param processor  processor instance
+     * @param workticket workticket
+     */
+    private void directUpload(Processor processor, WorkTicket workticket) {
+
+        directUpload = true;
+        RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
+        String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
+        directUploader.doDirectUpload(workticket.getFileName(), path);
+    }
 }

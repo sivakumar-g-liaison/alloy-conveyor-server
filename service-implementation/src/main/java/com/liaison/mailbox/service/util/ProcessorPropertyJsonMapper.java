@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -179,16 +180,43 @@ public class ProcessorPropertyJsonMapper {
 	public static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFromJson(String propertyJson, Processor processor)
 			throws IOException, IllegalArgumentException, IllegalAccessException {
 
+		return getProcessorBasedStaticPropsFromJson(propertyJson, 
+											Protocol.findByCode(processor.getProcsrProtocol()), 
+											processor.getProcessorType(), 
+											processor.getDynamicProperties());
+	}
+	
+	
+	/**
+	 * Method to retrieve static properties in format stored in DB (ie StaticProcessorPropertiesDTO) from the properties
+	 * JSON stored in DB. This method will convert the json to StaticProcessorPropertiesDTO format even if it is in
+	 * older format (RemoteProcessorPropertiesDTO)
+	 *
+	 * @param propertyJson
+	 * 				Processor Properties stored as Json in DB
+	 * @param Protocol
+	 * 				Protocol of the processor
+	 * @param ProcessorType
+	 * 				Type of the Processor
+	 * @param dyamicProperties
+	 * 				set contain dynamic properties of the processor
+	 * @return StaticProcessorPropertiesDTO
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	public static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFromJson(String propertyJson, Protocol protocol, ProcessorType procsrType, Set<ProcessorProperty> dynamicProperties)
+			throws IOException, IllegalArgumentException, IllegalAccessException {
+
 		StaticProcessorPropertiesDTO staticProcessorProperties = null;
-		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		try {
 			staticProcessorProperties = getProcessorBasedStaticProps(propertyJson);
 		} catch (JsonMappingException | JsonParseException | JAXBException e) {
 
 			RemoteProcessorPropertiesDTO leagcyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
-			staticProcessorProperties = getProcessorBasedStaticPropsFrmLegacyProps(processor.getProcessorType(), protocol);
+			staticProcessorProperties = getProcessorBasedStaticPropsFrmLegacyProps(procsrType, protocol);
 			mapLegacyProps(leagcyProps, staticProcessorProperties);
-			handleDynamicProperties(staticProcessorProperties, processor);
+			handleDynamicProperties(staticProcessorProperties, dynamicProperties);
 		}
 		return staticProcessorProperties;
 
@@ -614,12 +642,12 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO, Processor processor)
+	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO, Set<ProcessorProperty> dynamicProperties)
 			throws IllegalArgumentException, IllegalAccessException {
 
-		if (null != processor.getDynamicProperties()) {
+		if (null != dynamicProperties) {
 
-			for (ProcessorProperty property : processor.getDynamicProperties()) {
+			for (ProcessorProperty property : dynamicProperties) {
 				Field field;
 				String propertyName = getPropertyNameOfDynamicProperty(property.getProcsrPropName());
 				boolean isDynamic = (propertyMapper.keySet().contains(property.getProcsrPropName())) ? false : true;
@@ -646,6 +674,7 @@ public class ProcessorPropertyJsonMapper {
 			}
 		}
 	}
+
 
 	/**
 	 * Method to construct list of folderDTO from the folderDTOTemplateList

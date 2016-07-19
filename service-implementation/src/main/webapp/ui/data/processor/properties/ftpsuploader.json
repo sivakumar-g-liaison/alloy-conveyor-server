@@ -219,7 +219,23 @@
                "false",
                "true"
             ]
-         }
+         },
+        {
+          "name":"directUpload",
+          "displayName":"Direct Upload",
+          "value":"",
+          "type":"select",
+          "value":"true",
+          "mandatory":true,
+          "dynamic":false,
+          "valueProvided":false,
+          "defaultValue":"true",
+          "validationRules":null,
+          "options":[
+              "false",
+              "true"
+          ]
+        }
       ],
       "folderProperties":[
 		   {

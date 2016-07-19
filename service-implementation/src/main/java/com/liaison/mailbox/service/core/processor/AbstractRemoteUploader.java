@@ -43,9 +43,37 @@ import java.util.List;
 /**
  * Created by VNagarajan on 6/3/2016.
  */
-public abstract class AbstractRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
+public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
-    private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteUploader.class);
+    private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
+
+    private String fileName;
+    private String folderPath;
+    private boolean directUpload;
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
+    }
+
+    public boolean isDirectUpload() {
+        return directUpload;
+    }
+
+    public void setDirectUpload(boolean directUpload) {
+        this.directUpload = directUpload;
+    }
 
     public AbstractRemoteUploader() {}
 
@@ -222,10 +250,8 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
         if (ftpUploaderStaticProperties != null) {
 
-            boolean binary = ftpUploaderStaticProperties.isBinary();
-            boolean passive = ftpUploaderStaticProperties.isPassive();
-            ftpsRequest.setBinary(binary);
-            ftpsRequest.setPassive(passive);
+            ftpsRequest.setBinary(ftpUploaderStaticProperties.isBinary());
+            ftpsRequest.setPassive(ftpUploaderStaticProperties.isPassive());
 
         }
     }
@@ -269,11 +295,22 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         List<File> files = new ArrayList<>();
         List<StagedFile> stagedFiles;
 
-        if (recurseSubDirs) {
-            stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid());
-        } else {
-            stagedFiles = dao.findStagedFilesForUploader(this.configurationInstance.getPguid(), new File(validateLocalPath()).getPath());
+        //for javascript direct upload
+        if (getFileName() != null
+                && getFolderPath() != null
+                && isDirectUpload()) {
+
+            File[] fileArray = new File[1];
+            fileArray[0] = new File(folderPath + File.separatorChar + fileName);
+            return fileArray;
         }
+
+        //default profile invocation
+        stagedFiles = dao.findStagedFilesForUploader(
+                this.configurationInstance.getPguid(),
+                new File(validateLocalPath()).getPath(),
+                isDirectUpload(),
+                recurseSubDirs);
 
         for (StagedFile stagedFile : stagedFiles) {
 
