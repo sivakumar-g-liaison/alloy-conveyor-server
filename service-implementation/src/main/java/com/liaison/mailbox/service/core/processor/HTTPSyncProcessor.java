@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 
 /**
  * Class that deals with processing of sync request.
@@ -53,6 +54,16 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	private static final String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
 	private static String SERVICE_BROKER_URI = null;
 	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
+
+	private long payloadSize = 0;
+
+	public long getPayloadSize() {
+		return payloadSize;
+	}
+
+	public void setPayloadSize(long payloadSize) {
+		this.payloadSize = payloadSize;
+	}
 
 	static {
 
@@ -158,10 +169,13 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		}
 		builder.status(result.getStatus());
 
-		// Sets the headers
-		Set<String> headers = result.getHeaderNames();
-		for (String name : headers) {
-            builder.header(name, result.getHeader(name));
+        // Sets the headers
+        Set<String> headers = result.getHeaderNames();
+        for (String name : headers) {
+			builder.header(name, result.getHeader(name));
+			if (KEY_RAW_PAYLOAD_SIZE.equals(name)) {
+				setPayloadSize(Long.valueOf(result.getHeader(name)));
+			}
         }
 
 		// JIRA GMB-428 - set global process id in header only if it is not already available
