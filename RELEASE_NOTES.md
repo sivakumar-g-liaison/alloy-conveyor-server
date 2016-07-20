@@ -2,6 +2,10 @@
 -------------------------------
 * 
 
+4.6.1
+-------------------------------
+* GMB-805: sweepSubDirectories property is added as dynamic property.
+
 4.6.0
 -------------------------------
 * GMB-802: Processor - Create : Dynamic property name is not cleared after clicking on save button
