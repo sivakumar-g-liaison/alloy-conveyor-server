@@ -64,6 +64,10 @@ public class RemoteProcessorPropertiesDTO {
     private boolean lensVisibility;
     private boolean httpListenerAuthCheckRequired;
     private boolean createFoldersInRemote;
+    
+    private boolean sweepSubDirectories;
+    private boolean recurseSubDirectories;
+    private boolean directUpload;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -333,6 +337,30 @@ public class RemoteProcessorPropertiesDTO {
 
     public void setCreateFoldersInRemote(boolean createFoldersInRemote) {
         this.createFoldersInRemote = createFoldersInRemote;
-    }	
+    }
 
+    public boolean isSweepSubDirectories() {
+        return sweepSubDirectories;
+    }
+
+    public void setSweepSubDirectories(boolean sweepSubDirectories) {
+        this.sweepSubDirectories = sweepSubDirectories;
+    }
+
+    public boolean isRecurseSubDirectories() {
+        return recurseSubDirectories;
+    }
+
+    public void setRecurseSubDirectories(boolean recurseSubDirectories) {
+        this.recurseSubDirectories = recurseSubDirectories;
+    }
+
+    public boolean isDirectUpload() {
+        return directUpload;
+    }
+
+    public void setDirectUpload(boolean directUpload) {
+        this.directUpload = directUpload;
+    }
+    
 }
