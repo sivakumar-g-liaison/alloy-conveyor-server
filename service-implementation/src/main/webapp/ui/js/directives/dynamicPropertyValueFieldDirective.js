@@ -132,7 +132,7 @@ angular.module(
 									if (typeof port !== 'undefined' && port !== '') {
 										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = port;
 									} else {
-										scope.$parent.$parent.$parent.$parent.defaultPortValue();
+										scope.$parent.$parent.$parent.$parent.defaultPortValue;
 										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
 									}
 									if(port === '') scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
