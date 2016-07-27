@@ -462,7 +462,7 @@ public class MailBoxService implements Runnable {
                 glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", FILEWRITER);
 
             	// send notification for successful file staging
-            	String emailSubject = workTicket.getFileName() + "' is available for pick up";
+            	String emailSubject = workTicket.getFileName() + " is available for pick up";
             	String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
 
