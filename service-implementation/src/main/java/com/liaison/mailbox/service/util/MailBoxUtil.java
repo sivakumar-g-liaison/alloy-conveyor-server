@@ -553,7 +553,7 @@ public class MailBoxUtil {
 
             JSONObject obj = new JSONObject(json);
             Object o = obj.get(DIRECT_UPLOAD);
-            return Boolean.TRUE.equals(o) ? true : false;
+            return Boolean.TRUE.equals(o);
         } catch (JSONException e) {
             return false;
         }

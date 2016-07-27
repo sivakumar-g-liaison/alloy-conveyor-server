@@ -60,6 +60,7 @@ public class BaseResource {
 	public static final String HEADER_USER_ID = "UserId";
     public static final String MAILBOX_ID = "mailboxId";
     public static final String MAILBOX_NAME = "mailboxName";
+	private static final int MAX_STATUS_CODE = 299;
 
 	protected void auditAttempt(String message) {
 
@@ -105,12 +106,7 @@ public class BaseResource {
 	 * @return true if it is success, false otherwise
 	 */
 	public boolean isSuccess(ResponseDTO serviceResponse) {
-
-		if (Messages.SUCCESS.value().equals(serviceResponse.getStatus())) {
-			return true;
-		}
-
-		return false;
+		return Messages.SUCCESS.value().equals(serviceResponse.getStatus());
 	}
 
 	/**
@@ -170,7 +166,7 @@ public class BaseResource {
 	 * @param response
 	 */
 	protected void exitLog(Response response) {
-		if (response.getStatus() >= 200 && response.getStatus() <= 299) {
+		if (response.getStatus() >= Response.Status.OK.getStatusCode() && response.getStatus() <= MAX_STATUS_CODE) {
 			logger.info(successExitStatement);
 		} else if (response.getStatus() == -1) {
 			logger.info(unknownExitStatusStatement);
@@ -411,7 +407,6 @@ public class BaseResource {
 		if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
 				|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)
 				|| StringUtil.isNullOrEmptyAfterTrim(loginId)) {
-			logger.error("ACL manifest or mailbox token or loginId is missing.");
 			throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
 		}
 

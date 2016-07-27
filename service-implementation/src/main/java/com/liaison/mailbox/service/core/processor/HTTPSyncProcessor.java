@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 
@@ -99,7 +100,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		logger.info("Starting to forward request to sb...");
 
 		workTicket.setProcessMode(ProcessMode.SYNC);
-		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
+		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
 			int connectionTimeout = httpListenerProperties.get(CONNECTION_TIMEOUT) != null
 					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))

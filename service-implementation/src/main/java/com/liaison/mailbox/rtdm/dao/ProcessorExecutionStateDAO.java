@@ -23,21 +23,21 @@ import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
  */
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 
-	public static final String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
-	public static final String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
-	public static final String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
-	public static final String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
-	public static final String PROCESSOR_ID = "processorId";
-	public static final String EXEC_STATUS = "exec_status";
+	String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
+	String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
+	String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
+	String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
+	String PROCESSOR_ID = "processorId";
+	String EXEC_STATUS = "exec_status";
 
-	public ProcessorExecutionState findByProcessorId(String processorId);
+	ProcessorExecutionState findByProcessorId(String processorId);
 
-	public void addProcessorExecutionState(String processorId, String executionStatus);
+	void addProcessorExecutionState(String processorId, String executionStatus);
 
-	public List <String> findNonExecutingProcessors();
+	List <String> findNonExecutingProcessors();
 	
-	public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+	List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
 	
-	public int findAllExecutingProcessors();
+	int findAllExecutingProcessors();
 
 }

@@ -172,8 +172,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		EntityManager entityManager = null;
 		Long totalItems = null;
 		int count = 0;
+		boolean isActive = false;
 
 		try {
+
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 			String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
@@ -185,7 +187,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.append(")");
 
-			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+			isActive = (EntityStatus.ACTIVE.name().equals(entityStatus));
+			if (isActive) {
 				query.append(" and sf.expirationTime > :")
 				     .append(CURRENT_TIME);
 			}
@@ -193,7 +196,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 				 .append(STATUS);
 
 			Query queryResult = entityManager.createQuery(query.toString());
-			if(EntityStatus.ACTIVE.name().equals(entityStatus)) {
+			if (isActive) {
 				queryResult.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
 			}
 

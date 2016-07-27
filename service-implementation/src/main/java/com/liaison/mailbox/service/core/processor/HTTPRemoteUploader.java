@@ -37,6 +37,8 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+
 /**
  * Http remote uploader to perform push operation, also it has support methods
  * for JavaScript.
@@ -130,7 +132,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
         String contentType = httpUploaderStaticProperties.getContentType();
 
         try (InputStream contentStream = FileUtils.openInputStream(file);
-             ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
+             ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
             LOGGER.info(constructMessage("uploading file {}"), file.getName());
 
