@@ -46,7 +46,7 @@ public class JavaScriptEngineUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testExecuteJavaScript() throws ScriptException {
+	public void testExecuteJavaScript() {
 		
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
 		System.setProperty("archaius.deployment.environment", "dev-int");
@@ -56,10 +56,21 @@ public class JavaScriptEngineUtilTest {
 		try {
 			myUri = new URI(testJs);
 		} catch (URISyntaxException e) {
-		Assert.assertTrue(false);
+			Assert.assertTrue(false);
 		}
 
 		JavaScriptExecutorUtil.executeJavaScript(myUri, new HTTPRemoteUploader(new Processor()));
+	}
+
+	@Test
+	public void testExecuteJavaScriptSweeper() {
+
+		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "dev-int");
+
+		String testJs = "gitlab:/processor-scripts/sweeper_unit_test.js";
+		Object returnValue = JavaScriptExecutorUtil.executeJavaScript(testJs, "process", 4, 5);
+		Assert.assertEquals(returnValue, 20);
 	}
 
 }

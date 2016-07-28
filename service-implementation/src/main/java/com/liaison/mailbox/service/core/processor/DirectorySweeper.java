@@ -73,6 +73,7 @@ import java.util.Map;
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
+	public static final String PROCESS = "process";
 
 	private String pipelineId;
 	private List<Path> activeFiles = new ArrayList<>();
@@ -297,7 +298,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
-			//JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
+			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, PROCESS, workTickets, LOGGER);
 		} else {
 
 			if (workTickets.isEmpty()) {
@@ -711,5 +712,3 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		
 	}
 }
-
-
