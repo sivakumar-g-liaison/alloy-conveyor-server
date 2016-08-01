@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.fsm.FSMDao;
 import com.liaison.mailbox.enums.ExecutionEvents;
@@ -21,6 +18,9 @@ import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 
+import java.sql.Timestamp;
+import java.util.List;
+
 /**
  * The dao class for the FSM_STATE database table.
  * 
@@ -28,22 +28,22 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
  */
 public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorStateDTO, ExecutionEvents> {
 
-	public static final String FIND_FSM_STATE_BY_NAME = "FSMState.findByExecutionId";
-	public static final String EXECUTION_ID = "execution_id";
-	public static final String FIND_ALL_EXECUTING_PROC = "FSMState.findAllExecutingProcessors";
-	public static final String FIND_EXECUTING_PROC_BY_VALUE = "FSMState.findProcessorsByValue";
-	public static final String FIND_EXECUTING_PROC_BY_DATE = "FSMState.findProcessorsByDate";
-	public static final String FIND_EXECUTING_PROC_BY_VALUE_AND_DATE = "FSMState.findProcessorsByValueAndDate";
-	public static final String FIND_ALL_EXECUTING_PROC_BY_PROCESSORID = "FSMState.findAllExecutingProcessorsByProcessorId";
-	public static final String FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR = "FSMState.findMostRecentSuccessfulExecutionOfProcessor";
-	public static final String FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE = "FSMState.findNonSLAVerifiedFSMEventsByValue";
-	public static final String INTERVAL_IN_HOURS = "interval_in_hours";
-	public static final String BY_VALUE = "by_value";
-	public static final String FROM_DATE = "from_date";
-	public static final String TO_DATE = "to_date";
-	public static final String PROCESSOR_ID = "processor_id";
-	public static final String FSM_STATE_VALUE = "fsm_state_value";
-	public static final String SLA_VERIFICATION_STATUS = "sla_verification_status";
+	String FIND_FSM_STATE_BY_NAME = "FSMState.findByExecutionId";
+	String EXECUTION_ID = "execution_id";
+	String FIND_ALL_EXECUTING_PROC = "FSMState.findAllExecutingProcessors";
+	String FIND_EXECUTING_PROC_BY_VALUE = "FSMState.findProcessorsByValue";
+	String FIND_EXECUTING_PROC_BY_DATE = "FSMState.findProcessorsByDate";
+	String FIND_EXECUTING_PROC_BY_VALUE_AND_DATE = "FSMState.findProcessorsByValueAndDate";
+	String FIND_ALL_EXECUTING_PROC_BY_PROCESSORID = "FSMState.findAllExecutingProcessorsByProcessorId";
+	String FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR = "FSMState.findMostRecentSuccessfulExecutionOfProcessor";
+	String FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE = "FSMState.findNonSLAVerifiedFSMEventsByValue";
+	String INTERVAL_IN_HOURS = "interval_in_hours";
+	String BY_VALUE = "by_value";
+	String FROM_DATE = "from_date";
+	String TO_DATE = "to_date";
+	String PROCESSOR_ID = "processor_id";
+	String FSM_STATE_VALUE = "fsm_state_value";
+	String SLA_VERIFICATION_STATUS = "sla_verification_status";
 
 	/**
 	 * Find FSMState by given status value.
@@ -51,7 +51,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param state
 	 * @return FSMState
 	 */
-	public FSMState find(String state);
+	FSMState find(String state);
 
 	/**
 	 * Find list of FSMStateValue by given time.
@@ -59,7 +59,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param listJobsIntervalInHours
 	 * @return The list of FSMStateValue
 	 */
-	public List<FSMStateValue> findAllExecutingProcessors(Timestamp listJobsIntervalInHours);
+	List<FSMStateValue> findAllExecutingProcessors(Timestamp listJobsIntervalInHours);
 
 	/**
 	 * Find list of FSMStateValue by given status and time.
@@ -68,7 +68,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param listJobsIntervalInHours
 	 * @return The list of FSMStateValue
 	 */
-	public List<FSMStateValue> findExecutingProcessorsByValue(String value, Timestamp listJobsIntervalInHours);
+	List<FSMStateValue> findExecutingProcessorsByValue(String value, Timestamp listJobsIntervalInHours);
 
 	/**
 	 * Find list of FSMStateValue by given date.
@@ -77,7 +77,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param toDate
 	 * @return The list of FSMStateValue
 	 */
-	public List<FSMStateValue> findExecutingProcessorsByDate(String frmDate, String toDate);
+	List<FSMStateValue> findExecutingProcessorsByDate(String frmDate, String toDate);
 
 	/**
 	 * Find list of FSMStateValue by given status and date.
@@ -87,7 +87,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param toDate
 	 * @return The list of FSMStateValue
 	 */
-	public List<FSMStateValue> findExecutingProcessorsByValueAndDate(String value, String frmDate, String toDate);
+	List<FSMStateValue> findExecutingProcessorsByValueAndDate(String value, String frmDate, String toDate);
 
 	/**
 	 * Find list of FSMStateValue by given processorId, status, time Interval
@@ -98,7 +98,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 *
 	 * @return The list of FSMStateValue
 	 */
-	public List<FSMStateValue> findExecutingProcessorsByProcessorId(String processorId, Timestamp timeInterval);
+	List<FSMStateValue> findExecutingProcessorsByProcessorId(String processorId, Timestamp timeInterval);
 
 
 	/**
@@ -108,7 +108,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @return FSMStateValue
 	 */
 
-	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId, ProcessorType processorType);
+	List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId, ProcessorType processorType);
 
 
 	/**
@@ -117,7 +117,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param processorId
 	 * @return list of FSMState
 	 */
-	public List <FSMState> findNonSLAVerifiedFSMEventsByValue(String processorId, Timestamp processorLastExecution, String value);
+	List <FSMState> findNonSLAVerifiedFSMEventsByValue(String processorId, Timestamp processorLastExecution, String value);
 
 	/**
 	 * Find the non sla verified events by given fsm state value
@@ -125,6 +125,6 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param processorId
 	 * @return list of FSMState
 	 */
-	public List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution, ProcessorType processorType);
+	List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution, ProcessorType processorType);
 
 }

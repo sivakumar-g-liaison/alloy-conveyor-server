@@ -67,14 +67,22 @@ public class MailboxWatchDogService {
 
 	private static final Logger LOGGER = LogManager.getLogger(MailboxWatchDogService.class);
 
-	protected static final String logPrefix = "WatchDog ";
-	protected static final String seperator = " :";
+	private static final String logPrefix = "WatchDog ";
+	private static final String seperator = " :";
 	private static final String SLA_VIOLATION_SUBJECT = "Files are not picked up by the customer within configured SLA of %s minutes";
 	private static final String SLA_UPLOADER_VIOLATION_SUBJECT = "Files are not uploaded to the customer within configured SLA of %s minutes";
 	private static final String SLA_MBX_VIOLATION_SUBJECT = "Files are not picked up by the Alloy Mailbox within configured SLA of %s minutes";
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
 	private static final String EMAIL_NOTIFICATION_COUNT_PATTERN= "^[0-9]*$";
+	private static final String MINUTES = "MINUTES";
+	private static final String HOURS = "HOURS";
+
+	private static StringBuilder QUERY_STRING = new StringBuilder().append("SELECT sf.* FROM STAGED_FILE sf")
+			.append(" INNER JOIN PROCESSOR_EXEC_STATE pes ON sf.PROCESSOR_GUID = pes.PROCESSOR_ID")
+			.append(" WHERE sf.STATUS in ('ACTIVE', 'FAILED')")
+			.append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
+			.append(" AND pes.EXEC_STATUS != 'PROCESSING'");
 
 	private String uniqueId;
 
@@ -120,14 +128,7 @@ public class MailboxWatchDogService {
 			tx = em.getTransaction();
 			tx.begin();
 			
-			// query
-			StringBuilder queryString = new StringBuilder().append("SELECT sf.* FROM STAGED_FILE sf")
-					.append(" INNER JOIN PROCESSOR_EXEC_STATE pes ON sf.PROCESSOR_GUID = pes.PROCESSOR_ID")
-					.append(" WHERE sf.STATUS in ('ACTIVE', 'FAILED')")
-					.append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
-					.append(" AND pes.EXEC_STATUS != 'PROCESSING'");
-
-			List<StagedFile> stagedFiles = em.createNativeQuery(queryString.toString(), StagedFile.class)
+			List<StagedFile> stagedFiles = em.createNativeQuery(QUERY_STRING.toString(), StagedFile.class)
 					.getResultList();
 
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
@@ -171,17 +172,6 @@ public class MailboxWatchDogService {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
                             LOGGER.warn(constructMessage("{} : File {} is deleted in the filePath {}"), processor.getPguid(), fileName, filePath);
-							// GMB-823
-                            /*MailboxGlassMessageUtil.logGlassMessage(
-                                    stagedFile.getGPID(),
-                                    processor.getProcessorType(),
-                                    processor.getProcsrProtocol(),
-                                    fileName,
-                                    filePath,
-                                    0,
-                                    ExecutionState.FAILED,
-                                    "File is deleted by clean up process",
-									null);*/
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} : Unable to delete a stale file {} in the filePath {}"), processor.getPguid(), fileName, filePath);
@@ -202,17 +192,6 @@ public class MailboxWatchDogService {
 
                     if (!isFileExist) {
 
-						// GMB-823
-				        /*MailboxGlassMessageUtil.logGlassMessage(
-                                stagedFile.getGPID(),
-                                ProcessorType.findByName(stagedFile.getProcessorType()),
-                                getProtocol(filePath),
-                                fileName,
-                                filePath,
-                                0,
-                                ExecutionState.FAILED,
-                                "File is picked up by another process",
-								null);*/
 		                inactiveStagedFile(stagedFile, updatedStatusList);
 		                LOGGER.warn(constructMessage("{} : File {} is not present but staged file entity is active."), stagedFile.getProcessorId(), stagedFile.getFileName());
 				    }
@@ -480,12 +459,10 @@ public class MailboxWatchDogService {
 		int timeConfigurationUnit = 0;
 		switch(slaTimeConfigurationUnit.toUpperCase()) {
 
-		case "MINUTES":
+		case MINUTES:
 			timeConfigurationUnit = Calendar.MINUTE;
 			break;
-		case "HOURS":
-			timeConfigurationUnit = Calendar.HOUR;
-			break;
+		case HOURS:
 		default:
 			timeConfigurationUnit = Calendar.HOUR;
 			break;
@@ -534,7 +511,6 @@ public class MailboxWatchDogService {
 			} catch (Exception e) {
 				
 				// Exceptions are handled gracefully so that sla validation can be continued for other processors.
-				// TODO to decide whether mail needs to be sent to internal engineering DL to notify these failure cases 
 				LOGGER.error(constructMessage("Error occured in watchdog service during mailbox sla validation" , e.getMessage()));
 
 			}
@@ -679,11 +655,11 @@ public class MailboxWatchDogService {
 	 */
 	private String getProtocol(String filePath) {
 
-	    if (filePath.contains("ftps")) {
+	    if (filePath.contains(Protocol.FTPS.getCode())) {
             return Protocol.FTPS.getCode();
-        } else if (filePath.contains("sftp")) {
+        } else if (filePath.contains(Protocol.SFTP.getCode())) {
             return Protocol.SFTP.getCode();
-        } else if (filePath.contains("ftp")) {
+        } else if (filePath.contains(Protocol.FTP.getCode())) {
             return Protocol.FTP.getCode();
         } else {
             return filePath;

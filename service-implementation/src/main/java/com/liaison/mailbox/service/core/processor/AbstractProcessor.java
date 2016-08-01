@@ -81,9 +81,13 @@ import java.util.Properties;
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
-    protected static final String FILE_PERMISSION = "rw-rw----";
-    protected static final String FOLDER_PERMISSION = "rwxrwx---";
+    private static final String FILE_PERMISSION = "rw-rw----";
+    private static final String FOLDER_PERMISSION = "rwxrwx---";
     private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
+    private static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
+    private static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
+    private static final String INBOX = "inbox";
+    private static final String OUTBOX = "outbox";
 
     protected static final String seperator = ": ";
 
@@ -94,7 +98,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     protected TriggerProcessorRequestDTO reqDTO;
 
     public Properties mailBoxProperties;
-    public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
     public StaticProcessorPropertiesDTO staticProcessorProperties;
 
     protected Map<String, StagedFile> stagedFileMap = new HashMap<>();
@@ -317,7 +320,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                     throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
                 } else if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
                     return replaceTokensInFolderPath(folder.getFldrUri());
-                } else if (configurationInstance.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)
+                } else if (ProcessorType.REMOTEUPLOADER.equals(configurationInstance.getProcessorType())
                         && FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
                     return replaceTokensInFolderPath(folder.getFldrUri());
                 }
@@ -541,14 +544,17 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         } else {
 
             List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
-            if ((MailBoxUtil.isEmptyList(configuredEmailAddress)) && MailBoxUtil.isEmptyList(toEmailAddrList)) {
+            boolean configuredEmailList = MailBoxUtil.isEmptyList(configuredEmailAddress);
+            boolean toEmailList = MailBoxUtil.isEmptyList(toEmailAddrList);
+
+            if ((configuredEmailList) && (toEmailList)) {
                 LOGGER.debug(NO_EMAIL_ADDRESS);
                 return;
             }
 
-            if (!MailBoxUtil.isEmptyList(configuredEmailAddress) && !MailBoxUtil.isEmptyList(toEmailAddrList)) {
+            if (!configuredEmailList && !toEmailList) {
                 toEmailAddrList.addAll(configuredEmailAddress);
-            } else if (!MailBoxUtil.isEmptyList(configuredEmailAddress)) {
+            } else if (!configuredEmailList) {
                 toEmailAddrList = configuredEmailAddress;
             }
 
@@ -654,7 +660,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         Path filePathToCreate = fileDirectory.toPath();
         LOGGER.debug("Setting on to create - {}", filePathToCreate);
         FileSystem fileSystem = FileSystems.getDefault();
-        String pattern = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.data.folder.pattern","glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**");
+        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
         PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
         if(!pathMatcher.matches(filePathToCreate)){
             throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);
@@ -665,7 +671,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
         }
 
-        createFoldersAndAssingProperPermissions(filePathToCreate);
+        createFoldersAndAssignProperPermissions(filePathToCreate);
     }
 
     private String getGroupFor(String protocol) {
@@ -705,7 +711,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
      * @param filePathToCreate - file Path which is to be created
      * @throws IOException
      */
-    protected void createFoldersAndAssingProperPermissions(Path filePathToCreate)
+    protected void createFoldersAndAssignProperPermissions(Path filePathToCreate)
             throws IOException {
 
         FileSystem fileSystem = FileSystems.getDefault();
@@ -717,17 +723,17 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
 
         // skip when reaching inbox/outbox
-        while (!(filePathToCreate.getFileName().toString().equals("inbox") ||
-                filePathToCreate.getFileName().toString().equals("outbox"))) {
+        String pathToCreate = filePathToCreate.getFileName().toString();
+        while (!(INBOX.equals(pathToCreate) ||
+                OUTBOX.equals(pathToCreate))) {
 
             LOGGER.debug("setting the group of  {} to {}", filePathToCreate, group);
             Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
             Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
 
             // if it is PROCESSED/ERROR Folder then skip assigning permissions to parent folders.
-            if ((filePathToCreate.getFileName().toString().equals(MailBoxConstants.PROCESSED_FOLDER) ||
-                    filePathToCreate.getFileName().toString().equals(MailBoxConstants.ERROR_FOLDER))) {
-
+            if ((MailBoxConstants.PROCESSED_FOLDER.equals(pathToCreate) ||
+                    MailBoxConstants.ERROR_FOLDER.equals(pathToCreate))) {
                 LOGGER.debug("setting file permissions of PROCESSED/ERROR Folder is done. Skipping permission setting for parent folders as it is not needed.");
                 break;
             }
@@ -950,8 +956,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         String remotePath = getWriteResponseURI();
         if (MailBoxUtil.isEmpty(remotePath)) {
-            LOGGER.info(constructMessage("The given remote URI is Empty."));
-            throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
+            throw new MailBoxServicesException("The given remote path is Empty.", Response.Status.CONFLICT);
         }
         return remotePath;
     }
@@ -966,8 +971,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         String path = getPayloadURI();
         if (MailBoxUtil.isEmpty(path)) {
-            LOGGER.error(constructMessage("The given payload URI is Empty."));
-            throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
+            throw new MailBoxServicesException("The given local path is Empty.", Response.Status.CONFLICT);
         }
         return path;
     }

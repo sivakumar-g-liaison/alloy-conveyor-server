@@ -19,27 +19,18 @@ import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
  */
 public interface MailboxServiceInstanceDAO extends GenericDAO<MailboxServiceInstance> {
 
-	public static final String FIND_MBX_SI_GUID = "MailboxServiceInstance.findByMbxAndServiceInsId";
-	public static final String COUNT_MBX_SI_GUID = "MailboxServiceInstance.countByMbxAndServiceInsId";
-	public static final String SERVICE_INSTANCE_GUID = "serviceInstanceeGuid";
-	public static final String GUID_MBX = "guidOfMbx";
+	String FIND_MBX_SI_GUID = "MailboxServiceInstance.findByMbxAndServiceInsId";
+	String COUNT_MBX_SI_GUID = "MailboxServiceInstance.countByMbxAndServiceInsId";
+	String SERVICE_INSTANCE_GUID = "serviceInstanceeGuid";
+	String GUID_MBX = "guidOfMbx";
     
-	/**
-	 * Find MailboxServiceInstance by given mailboxGuid and serviceInstanceGuid.
-	 * 
-	 * @param mailboxGuid
-	 * @param serviceInstanceGuid
-	 * @return MailboxServiceInstance
-	 */
-	public MailboxServiceInstance findByGuids(String mailboxGuid, String serviceInstanceGuid);
-	
 	/**
      * To check whether MailboxServiceInstance is empty or not by given mailboxGuid and serviceInstanceGuid.
      * 
-     * @param mailboxGuid
-     * @param serviceInstanceGuid
+     * @param mailboxGuid mailbox guid
+     * @param serviceInstanceGuid service instance guid
      * @return int (MailboxServiceInstance count)
      */
-	public int getMailboxServiceInstanceCount(String mailboxGuid, String serviceInstanceGuid); 
+	int getMailboxServiceInstanceCount(String mailboxGuid, String serviceInstanceGuid);
 
 }

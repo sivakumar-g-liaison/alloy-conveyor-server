@@ -45,9 +45,6 @@ public class MailBoxProcessorFactory {
 			switch (foundProtocolType) {
 
 			case FTPS:
-				mailBoxProcessor = new FTPSRemoteDownloader(processor);
-				break;
-
 			case FTP:
 				mailBoxProcessor = new FTPSRemoteDownloader(processor);
 				break;
@@ -57,8 +54,6 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case HTTP:
-				mailBoxProcessor = new HTTPRemoteDownloader(processor);
-				break;
 			case HTTPS:
 				mailBoxProcessor = new HTTPRemoteDownloader(processor);
 				break;
@@ -72,9 +67,6 @@ public class MailBoxProcessorFactory {
 			switch (foundProtocolType) {
 
 			case FTPS:
-				mailBoxProcessor = new FTPSRemoteUploader(processor);
-				break;
-
 			case FTP:
 				mailBoxProcessor = new FTPSRemoteUploader(processor);
 				break;
@@ -84,8 +76,6 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case HTTP:
-				mailBoxProcessor = new HTTPRemoteUploader(processor);
-				break;
 			case HTTPS:
 				mailBoxProcessor = new HTTPRemoteUploader(processor);
 				break;
@@ -123,13 +113,11 @@ public class MailBoxProcessorFactory {
             switch (foundProtocolType) {
 
                 case FTPS:
-                    return new FTPSRemoteUploader(processor);
                 case FTP:
                     return new FTPSRemoteUploader(processor);
                 case SFTP:
                     return new SFTPRemoteUploader(processor);
                 case HTTP:
-                    return new HTTPRemoteUploader(processor);
                 case HTTPS:
                     return new HTTPRemoteUploader(processor);
                 default:

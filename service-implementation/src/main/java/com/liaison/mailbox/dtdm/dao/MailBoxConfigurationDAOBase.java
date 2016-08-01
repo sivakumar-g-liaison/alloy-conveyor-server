@@ -301,7 +301,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		try {
 
-			mailboxList = entityManager.createNamedQuery(FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME)
+			mailboxList = entityManager.createNamedQuery(FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME)
 					.setParameter(MBOX_NAME,  (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.setParameter(TENANCY_KEYS, (MailBoxUtil.isEmpty(tenancyKeyName) ? "''" : tenancyKeyName))
 					.getResultList();

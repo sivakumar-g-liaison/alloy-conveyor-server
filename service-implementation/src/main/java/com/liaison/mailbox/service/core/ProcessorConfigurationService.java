@@ -373,7 +373,6 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get processor.");
             LOGGER.debug("Deactivate guid is {} ", processorGuid);
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
@@ -564,11 +563,7 @@ public class ProcessorConfigurationService {
 			// Add the property if empty
 			if (existingProperties == null || existingProperties.isEmpty()) {
 
-				processorProperty = new ProcessorProperty();
-				processorProperty.setPguid(MailBoxUtil.getGUID());
-				processorProperty.setProcsrPropName(properties.getName());
-				processorProperty.setProcsrPropValue(properties.getValue());
-
+				processorProperty = getProcessorProperty(properties);
 				processorPropertyList.add(processorProperty);
 				processor.setDynamicProperties(processorPropertyList);
 
@@ -580,15 +575,27 @@ public class ProcessorConfigurationService {
 				if (null != property) {
 					property.setProcsrPropValue(properties.getValue());
 				} else { // else create a new property and add it to the existing properties
-					processorProperty = new ProcessorProperty();
-					processorProperty.setPguid(MailBoxUtil.getGUID());
-					processorProperty.setProcsrPropName(properties.getName());
-					processorProperty.setProcsrPropValue(properties.getValue());
+					processorProperty = getProcessorProperty(properties);
 					existingProperties.add(processorProperty);
 				}
 			}
 		}
 		configDao.merge(processor);
+	}
+
+	/**
+	 * Helper to construct processor property entity
+	 *
+	 * @param properties properties dto
+	 * @return ProcessorProperty entity
+     */
+	private ProcessorProperty getProcessorProperty(PropertyDTO properties) {
+
+		ProcessorProperty processorProperty = new ProcessorProperty();
+		processorProperty.setPguid(MailBoxUtil.getGUID());
+		processorProperty.setProcsrPropName(properties.getName());
+		processorProperty.setProcsrPropValue(properties.getValue());
+		return processorProperty;
 	}
 
 	/**
@@ -617,41 +624,44 @@ public class ProcessorConfigurationService {
 
 			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString(
 					MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS);
-			Timestamp timeStmp = new Timestamp(new Date().getTime());
+			Timestamp timeStamp = new Timestamp(new Date().getTime());
 
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(timeStmp);
+			cal.setTime(timeStamp);
 			cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
-			timeStmp.setTime(cal.getTime().getTime());
-			timeStmp = new Timestamp(cal.getTime().getTime());
+			timeStamp.setTime(cal.getTime().getTime());
+			timeStamp = new Timestamp(cal.getTime().getTime());
 
 			FSMStateDAO procDAO = new FSMStateDAOBase();
 
 			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
+			boolean isFrmDate = MailBoxUtil.isEmpty(frmDate);
+			boolean isToDate = MailBoxUtil.isEmpty(toDate);
+			boolean isStatus = MailBoxUtil.isEmpty(status);
 
-			if ((!MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate))
-					|| (MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate))) {
+			if ((!isFrmDate && isToDate)
+					|| (isFrmDate && !isToDate)) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_DATE_RANGE);
 			}
 
-			if (!MailBoxUtil.isEmpty(status) && ExecutionState.findByCode(status) == null) {
+			if (!isStatus && ExecutionState.findByCode(status) == null) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_PROCESSOR_STATUS);
 			}
 
-			if (!MailBoxUtil.isEmpty(status) && !MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate)) {
+			if (!isStatus && !isFrmDate && !isToDate) {
 				listfsmStateVal = procDAO.findExecutingProcessorsByValueAndDate(status, frmDate, toDate);
 			}
 
-			if (!MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
-				listfsmStateVal = procDAO.findExecutingProcessorsByValue(status, timeStmp);
+			if (!isStatus && isFrmDate && isToDate) {
+				listfsmStateVal = procDAO.findExecutingProcessorsByValue(status, timeStamp);
 			}
 
-			if (!MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate) && MailBoxUtil.isEmpty(status)) {
+			if (!isFrmDate && !isToDate && isStatus) {
 				listfsmStateVal = procDAO.findExecutingProcessorsByDate(frmDate, toDate);
 			}
 
-			if (MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
-				listfsmStateVal = procDAO.findAllExecutingProcessors(timeStmp);
+			if (isStatus && isFrmDate && isToDate) {
+				listfsmStateVal = procDAO.findAllExecutingProcessors(timeStamp);
 			}
 
 			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
@@ -717,14 +727,7 @@ public class ProcessorConfigurationService {
 			LOGGER.debug("Exiting from interrupt processor.");
 
 			return serviceResponse;
-		} catch (ProcessorManagementFailedException e) {
-
-			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, MailBoxConstants.INTERRUPT_SIGNAL,
-					Messages.FAILURE, e.getMessage()));
-
-			return serviceResponse;
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (ProcessorManagementFailedException | MailBoxConfigurationServicesException e) {
 
 			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, MailBoxConstants.INTERRUPT_SIGNAL,
@@ -1139,8 +1142,7 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get processor.");
-            LOGGER.debug("The retrieve guid is {} ", processorGuid);
+			LOGGER.debug("The processor guid is {}", processorGuid);
 			List <Processor> processors = null;
 
 			if (null == processorGuid) {

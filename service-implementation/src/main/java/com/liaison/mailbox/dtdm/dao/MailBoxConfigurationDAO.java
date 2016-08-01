@@ -24,34 +24,74 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
  */
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
-	public static final String FIND_BY_MBX_NAME = "MailBox.findByMboxName";
-	public static final String PGUID = "pguid";
-	public static final String MBOX_NAME = "mbox_name";
-	public static final String GET_MBX = "MailBox.findMailBoxes";
-	public static final String SCHD_PROF_NAME = "schd_name";
-	public static final String TENANCY_KEYS = "tenancy_keys";
-	public static final String FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
-	public static final String GET_MBX_BY_NAME = "MailBox.getMailboxByName";
+	String FIND_BY_MBX_NAME = "MailBox.findByMboxName";
+	String PGUID = "pguid";
+	String MBOX_NAME = "mbox_name";
+	String GET_MBX = "MailBox.findMailBoxes";
+	String SCHD_PROF_NAME = "schd_name";
+	String TENANCY_KEYS = "tenancy_keys";
+	String FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
+	String GET_MBX_BY_NAME = "MailBox.getMailboxByName";
 
-	public int getMailboxCountByProfile(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys);
-	public List<MailBox> find(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
+	/**
+	 * retrieve number of mailboxes that linked with profile
+	 *
+	 * @param searchFilter filters
+	 * @param tenancyKeys tenancy ket
+     * @return count
+     */
+	int getMailboxCountByProfile(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys);
 
-	public int getMailboxCountByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys);
-	public List<MailBox> findByName(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
-	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
-	
+	/**
+	 * search mailboxes by the given filter
+	 *
+	 * @param searchFilter search filter
+	 * @param tenancyKeys tenancy keys
+	 * @param pageOffsetDetails page details
+     * @return list of mailbox
+     */
+	List<MailBox> find(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys, Map<String, Integer> pageOffsetDetails);
+
+	/**
+	 * retrieve mailbox count by name
+	 *
+	 * @param searchFilter search filter
+	 * @param tenancyKeys tenancy keys
+     * @return count
+     */
+	int getMailboxCountByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys);
+
+	/**
+	 * search mailboxes by the given filter
+	 *
+	 * @param searchFilter search filter
+	 * @param tenancyKeys tenancy keys
+	 * @param pageOffsetDetails page details
+     * @return list of mailbox
+     */
+	List<MailBox> findByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys, Map<String, Integer> pageOffsetDetails);
+
+	/**
+	 * find mailbox by name and tenancy key
+	 *
+	 * @param mbxName mailbox name
+	 * @param tenancyKeyName tenancy key name
+     * @return mailbox entity
+     */
+	MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
+
 	/**
 	 * Method to retrieve all mailbox guids linked to a given tenancy keys
-	 * @param tenancyKey
+	 * @param tenancyKeys tenancy keys
 	 * @return List of Mailbox Ids linked to given tenancykeys
 	 */
-	public List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys);
-	
+	List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys);
+
 	/**
 	 * retrieve mailbox based on given name
 	 * 
-	 * @param name
-	 * @return
+	 * @param name mailbox name
+	 * @return mailbox entity
 	 */
-	public MailBox getMailboxByName(String name);
+	MailBox getMailboxByName(String name);
 }

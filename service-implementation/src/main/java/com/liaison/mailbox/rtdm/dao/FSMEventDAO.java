@@ -22,8 +22,8 @@ import com.liaison.mailbox.rtdm.model.FSMEvent;
 
 public interface FSMEventDAO extends GenericDAO<FSMEvent> {
 
-	public static final String FIND_INTERRUPT_EVENT = "FSMEvent.findInterruptEvent";
-	public static final String EXECUTION_ID = "execution_id";
+	String FIND_INTERRUPT_EVENT = "FSMEvent.findInterruptEvent";
+	String EXECUTION_ID = "execution_id";
 	
 	/**
 	 * Validating by given excutionId.
@@ -31,5 +31,5 @@ public interface FSMEventDAO extends GenericDAO<FSMEvent> {
 	 * @param excutionId
 	 * @return boolean
 	 */
-	public boolean isThereAInterruptSignal(String excutionId);
+	boolean isThereAInterruptSignal(String excutionId);
 }
