@@ -73,6 +73,7 @@ import java.util.Map;
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
+	private static final String PROCESS = "process";
 	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
 	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
 
@@ -299,7 +300,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
-			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
+			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, PROCESS, workTickets, LOGGER);
 		} else {
 
 			if (workTickets.isEmpty()) {
@@ -713,5 +714,3 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		
 	}
 }
-
-

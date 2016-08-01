@@ -8,20 +8,23 @@
  */
 package com.liaison.mailbox.service.executor.javascript;
 
+import com.liaison.commons.scripting.javascript.JavascriptExecutor;
+import com.liaison.commons.scripting.javascript.JavascriptFunction;
+import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.scripting.javascript.JavascriptExecutor;
-import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
@@ -44,45 +47,49 @@ public final class JavaScriptExecutorUtil {
 	 * @throws Exception
 	 *
 	 */
-	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) {
+	public static Object executeJavaScript(String scriptPath, String methodName, Object... parameters) {
 
 		Exception expectedException = null;
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;
-		URI myUri = null;
+		URI scriptUri = null;
 
 		try {
 
 			String scriptName = scriptPath;
 
-			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
-					  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
-			scriptPath = gitlabDirectory+"/"+scriptPath;
+			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
+			scriptPath = gitlabDirectory + "/" + scriptPath;
 
-			if(scriptPath.contains("gitlab:")) {
-				myUri = new URI(scriptPath);
-				LOGGER.debug("The process script uri is {}" + myUri);
+			if (scriptPath.contains("gitlab:")) {
+				scriptUri = new URI(scriptPath);
+				LOGGER.debug("The process script uri is {}", scriptUri);
 			}
 
 			if (scriptContext == null) {
 
-			    try (InputStreamReader reader = new InputStreamReader(System.in, "UTF-8"); PrintWriter outputWriter = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
-			            PrintWriter errorWriter = new PrintWriter(new OutputStreamWriter(System.err, "UTF-8"))) {
-			        scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
-			    }
+				try (InputStreamReader reader = new InputStreamReader(System.in, UTF_8);
+					 PrintWriter outputWriter = new PrintWriter(new OutputStreamWriter(System.out, UTF_8));
+					 PrintWriter errorWriter = new PrintWriter(new OutputStreamWriter(System.err, UTF_8))) {
+
+					scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
+
+					scriptExecutor.setScriptContext(scriptContext);
+					JavascriptFunction function = new JavascriptFunction(scriptUri, methodName, parameters);
+					Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, function);
+
+					// did my function call throw?
+					expectedException = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
+					if (null != expectedException) {
+						throw expectedException;
+					}
+
+					return returnValue;
+				}
 
 			}
-		    scriptExecutor.setScriptContext(scriptContext);
 
-		    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, myUri, methodName, parameters);
-
-		    // did my function call throw?
-		    expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
-		    if (null != expectedException) {
-		       	throw expectedException;
-		    }
-
-		    return returnValue;
+			return null;
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -94,7 +101,6 @@ public final class JavaScriptExecutorUtil {
 	 *  in the script path provided using G2 custom Js engine.
 	 *
 	 * @param scriptPath String
-	 * @param methodName String
 	 * @Param parameters Object
 	 * @return Object
 	 * @throws Exception
@@ -109,7 +115,7 @@ public final class JavaScriptExecutorUtil {
 		try {
 
 			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
-					  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
+					  PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
 			scriptPath = gitlabDirectory+"/"+scriptPath;
 
 			if (scriptPath.contains("gitlab:")) {
@@ -136,8 +142,6 @@ public final class JavaScriptExecutorUtil {
 	 * Executes the specified method in the javascript available
 	 *  in the script uri provided using G2 custom Js engine.
 	 *
-	 * @param scriptPath String
-	 * @param methodName String
 	 * @Param parameters Object
 	 * @return Object
 	 * @throws Exception

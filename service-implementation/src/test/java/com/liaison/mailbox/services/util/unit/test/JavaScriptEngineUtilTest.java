@@ -19,6 +19,9 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.service.core.processor.HTTPRemoteUploader;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -43,42 +46,31 @@ public class JavaScriptEngineUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testExecuteJavaScript() throws ScriptException {
+	public void testExecuteJavaScript() {
 		
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
 		System.setProperty("archaius.deployment.environment", "dev-int");
-		
-		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
-		JavascriptScriptContext scriptContext = null;
-		String testJs = "gitlab:/processor-scripts/veera_sftp_downloader";
+
+		String testJs = "gitlab:/processor-scripts/sample_unit_test.js";
 		URI myUri = null;
 		try {
 			myUri = new URI(testJs);
 		} catch (URISyntaxException e) {
-		Assert.assertTrue(false);
+			Assert.assertTrue(false);
 		}
-		
-		
-		 if (scriptContext == null) {
-		     try (InputStreamReader reader = new InputStreamReader(System.in); PrintWriter outputWriter = new PrintWriter(System.out); 
-		             PrintWriter errorWriter = new PrintWriter(System.err)) {
-		         scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
-		     } catch (IOException e) {
-		         logger.error("could not close streams while executing the javascript", e);
-		     }
-			 
-		 }
-	    scriptExecutor.setScriptContext(scriptContext);
-	    
-	    Object returnValue = scriptExecutor.executeInContext(scriptContext, "sandbox-tests.js", myUri, "testHappyPathWithArgs", "Test");
-	    logger.debug("returnValue "+returnValue);
-	    // did my function call throw?
-	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPathWithArgs");
-	    if (null != expectedException) {
-	    	logger.error(expectedException.getMessage(), expectedException);
-	    	Assert.assertTrue(false);
-	    }
-	   
+
+		JavaScriptExecutorUtil.executeJavaScript(myUri, new HTTPRemoteUploader(new Processor()));
+	}
+
+	@Test
+	public void testExecuteJavaScriptSweeper() {
+
+		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "dev-int");
+
+		String testJs = "gitlab:/processor-scripts/sweeper_unit_test.js";
+		Object returnValue = JavaScriptExecutorUtil.executeJavaScript(testJs, "process", 4, 5);
+		Assert.assertEquals(returnValue, 20);
 	}
 
 }
