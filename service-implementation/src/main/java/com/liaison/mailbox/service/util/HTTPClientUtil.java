@@ -25,6 +25,8 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
 
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+
 /**
  * This class provide the HTTP web content in different format.
  * <ul>
@@ -50,7 +52,7 @@ public final class HTTPClientUtil {
 	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers)
 			throws MalformedURLException, LiaisonException, IOException {
 
-		try (OutputStream output = new ByteArrayOutputStream(4096)) {
+		try (OutputStream output = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
 			String clientContent = null;
 			URL url = new URL(httpURL);

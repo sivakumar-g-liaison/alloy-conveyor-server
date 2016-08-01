@@ -122,13 +122,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             try {
                 sftpClient.getNative().lstat(remotePath);
             } catch (SftpException ex) {
-
-                if (!isCreateFoldersInRemote) {
-                    LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
-                    throw new MailBoxServicesException("The remote directory " + remotePath + " does not exist.", Response.Status.CONFLICT);
-                } else {
-                    createDirectoriesInRemote(sftpClient, remotePath);
-                }
+                checkAndCreateDirectory(remotePath, isCreateFoldersInRemote, sftpClient);
             }
 
             sftpClient.changeDirectory(remotePath);
@@ -140,15 +134,20 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             boolean dirExists = ftpsClient.getNative().changeWorkingDirectory(remotePath);
             if (!dirExists) {
                 // create directory on the server
-                if (!isCreateFoldersInRemote) {
-                    LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
-                    throw new MailBoxServicesException("The remote directory " + remotePath + " does not exist.", Response.Status.CONFLICT);
-                } else {
-                    createDirectoriesInRemote(ftpsClient, remotePath);
-                }
+                checkAndCreateDirectory(remotePath, isCreateFoldersInRemote, ftpsClient);
             }
 
             ftpsClient.changeDirectory(remotePath);
+        }
+    }
+
+    private void checkAndCreateDirectory(String remotePath, boolean isCreateFoldersInRemote, Object client) {
+
+        if (!isCreateFoldersInRemote) {
+            LOGGER.error(constructMessage("Unable to create directory {} because create folders in remote is not enabled."), remotePath);
+            throw new MailBoxServicesException("The remote directory " + remotePath + " does not exist.", Response.Status.CONFLICT);
+        } else {
+            createDirectoriesInRemote(client, remotePath);
         }
     }
 

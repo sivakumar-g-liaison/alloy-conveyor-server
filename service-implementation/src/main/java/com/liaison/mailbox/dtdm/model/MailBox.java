@@ -51,7 +51,7 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 					+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
 					+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 					+ " order by mbx.mbxName"),
-    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME, query = "SELECT mbx from MailBox mbx "
+    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx from MailBox mbx "
 			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME + " and mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
 	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
 	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 

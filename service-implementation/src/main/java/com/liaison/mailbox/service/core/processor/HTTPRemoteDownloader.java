@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+
 /**
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
@@ -89,7 +91,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     protected void executeRequest() {
 
         HTTPRequest request = (HTTPRequest) getClient();
-        ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096);
+        ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE);
         request.setOutputStream(responseStream);
 
         HTTPResponse response = null;

@@ -41,6 +41,8 @@ import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
 import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
 
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+
 /**
  * Class which has mailbox configuration related operations.
  * 
@@ -101,7 +103,7 @@ public class DropboxAuthenticationService {
 		MimeMultipart multiPartResponse = new MimeMultipart();
 		Session session = Session.getDefaultInstance(new Properties());
 		MimeMessage mm = new MimeMessage(session);
-		ByteArrayOutputStream rawMimeBAOS = new ByteArrayOutputStream(4096);
+		ByteArrayOutputStream rawMimeBAOS = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE);
 		InputStream mimeStreamResponse = null;
 		GEMManifestResponse gemManifestFromGEM = null;
 

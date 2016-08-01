@@ -16,5 +16,5 @@ package com.liaison.mailbox.rtdm.dao;
  * @author OFS
  */
 public interface MailboxRTDMDAO {
-	public static final String PERSISTENCE_UNIT_NAME = "mailbox-rtdm";
+	String PERSISTENCE_UNIT_NAME = "mailbox-rtdm";
 }

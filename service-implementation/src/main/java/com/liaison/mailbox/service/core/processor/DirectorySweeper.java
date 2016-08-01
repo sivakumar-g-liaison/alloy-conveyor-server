@@ -73,7 +73,9 @@ import java.util.Map;
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
-	public static final String PROCESS = "process";
+	private static final String PROCESS = "process";
+	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
+	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
 
 	private String pipelineId;
 	private List<Path> activeFiles = new ArrayList<>();
@@ -136,7 +138,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
                 LOGGER.debug("Persist workticket to spectrum");
-                persistPaylaodAndWorkticket(workTickets, staticProp);
+                persistPayloadAndWorkticket(workTickets, staticProp);
 
             	if (workTicketGroups.isEmpty()) {
                     LOGGER.debug("The file group is empty");
@@ -356,7 +358,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param staticProp sweeper properties
 	 * @throws IOException
 	 */
-	public void persistPaylaodAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
+	public void persistPayloadAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
 
 		LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
 		for (WorkTicket workTicket : workTickets) {
@@ -533,10 +535,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		}
 
 		if (maxPayloadSize == 0) {
-			maxPayloadSize = 131072;
+			maxPayloadSize = MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP;
 		}
 		if (maxNoOfFiles == 0) {
-			maxNoOfFiles = 10;
+			maxNoOfFiles = MAX_NUMBER_OF_FILES_IN_GROUP;
 		}
 
 		if (maxNoOfFiles <= workTicketGroup.getWorkTicketGroup().size()) {

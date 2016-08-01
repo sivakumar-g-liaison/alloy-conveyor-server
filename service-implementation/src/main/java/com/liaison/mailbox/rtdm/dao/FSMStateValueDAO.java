@@ -21,8 +21,8 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
  */
 public interface FSMStateValueDAO extends GenericDAO <FSMStateValue>{
 	
-	public static final String FIND_FSM_STATE_VALUE_BY_NAME = "FSMStateValue.findStateValByName";
-	public static final String NAME = "fsmStateValue";
-	public FSMStateValue find(String stateValue);
+	String FIND_FSM_STATE_VALUE_BY_NAME = "FSMStateValue.findStateValByName";
+	String NAME = "fsmStateValue";
+	FSMStateValue find(String stateValue);
 
 }

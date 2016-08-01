@@ -100,9 +100,9 @@ public class MailBoxService implements Runnable {
 	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern, String shardKey) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
-		List<Processor> processorMatchingProfile = new ArrayList<Processor>();
-		List<String> nonExecutingProcessorIds = new ArrayList<String>();
-		List<Processor> nonExecutingProcessorMatchingProfile = new ArrayList<Processor>();
+		List<Processor> processorMatchingProfile = null;
+		List<String> nonExecutingProcessorIds = null;
+		List<Processor> nonExecutingProcessorMatchingProfile = null;
 
 		try {
 
@@ -123,13 +123,16 @@ public class MailBoxService implements Runnable {
 
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+			processorMatchingProfile = new ArrayList<Processor>();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern,
 					shardKey);
 
 			// filter processors which are not running currently
 			ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+			nonExecutingProcessorIds = new ArrayList<String>();
 			nonExecutingProcessorIds = processorExecutionStateDAO.findNonExecutingProcessors();
 
+			nonExecutingProcessorMatchingProfile = new ArrayList<Processor>();
 			for (Processor procsr : processorMatchingProfile) {
 
 				if (nonExecutingProcessorIds.contains(procsr.getPguid())) {
@@ -462,7 +465,7 @@ public class MailBoxService implements Runnable {
                 glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully", FILEWRITER);
 
             	// send notification for successful file staging
-            	String emailSubject = workTicket.getFileName() + "' is available for pick up";
+            	String emailSubject = workTicket.getFileName() + " is available for pick up";
             	String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
 
@@ -562,14 +565,11 @@ public class MailBoxService implements Runnable {
         if (null == processor) {
 
             StringBuilder errorMessage = new StringBuilder();
-            if (!MailBoxUtil.isEmpty(processorId)) {
-                errorMessage.append("Unable to find a processor type of uploader/filewriter")
-                        .append(" for the given processor guid ")
-                        .append(processorId);
-            } else {
-                errorMessage.append("Unable to find a processor type of uploader/filewriter")
-                        .append(" for the given mailbox guid ")
-                        .append(mailboxId);
+			errorMessage.append("Unable to find a processor type of uploader/filewriter");
+			if (!MailBoxUtil.isEmpty(processorId)) {
+				errorMessage.append(" for the given processor guid ").append(processorId);
+			} else {
+                errorMessage.append(" for the given mailbox guid ").append(mailboxId);
             }
             throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
         }
