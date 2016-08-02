@@ -24,6 +24,7 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean securedPayload;
 	private boolean httpListenerAuthCheckRequired;
 	private boolean lensVisibility;
+	private int connectionTimeout;
 
 	public String getHttpListenerPipeLineId() {
 		return httpListenerPipeLineId;
@@ -50,5 +51,11 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
 	}
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
 
 }

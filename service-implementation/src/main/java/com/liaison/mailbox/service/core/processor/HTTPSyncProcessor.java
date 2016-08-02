@@ -102,7 +102,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
-			int connectionTimeout = httpListenerProperties.get(CONNECTION_TIMEOUT) != null
+			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					: ENV_CONNECTION_TIMEOUT_VALUE;
 

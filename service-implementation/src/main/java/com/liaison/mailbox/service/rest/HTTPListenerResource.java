@@ -67,8 +67,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
-import static com.liaison.mailbox.MailBoxConstants.HTTP_HEADER_CONTENT_LENGTH;
-import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
