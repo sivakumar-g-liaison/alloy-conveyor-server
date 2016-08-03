@@ -18,10 +18,12 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
@@ -30,10 +32,12 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -226,16 +230,19 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             return;
         }
 
-        MailboxGlassMessageUtil.logGlassMessage(
-                stagedFile.getGPID(),
-                configurationInstance.getProcessorType(),
-                configurationInstance.getProcsrProtocol(),
-                file.getName(),
-                file.getPath(),
-                file.length(),
-                status,
-                msg,
-                null);
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(file.getName());
+        glassMessageDTO.setFilePath(file.getPath());
+        glassMessageDTO.setFileLength(file.length());
+        glassMessageDTO.setStatus(status);
+        glassMessageDTO.setMessage(msg);
+        glassMessageDTO.setPipelineId(null);
+        glassMessageDTO.setFirstCornerTimeStamp(null);
+        
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     /**

@@ -24,6 +24,7 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -38,69 +39,26 @@ public class MailboxGlassMessageUtil {
 
     private static final Logger logger = LogManager.getLogger(MailboxGlassMessageUtil.class);
     
+    
     /**
      * log TVAPI and Event logs
      * 
-     * @param globalProcessId
-     * @param processorType
-     * @param processProtocol
-     * @param fileName
-     * @param filePath
-     * @param fileLength
-     * @param status
-     * @param message
-     * @param pipelineId
+     * @param glassMessageDTO
      */
-    public static void logGlassMessage(final String globalProcessId,
-            final ProcessorType processorType,
-            final String processProtocol,
-            final String fileName,
-            final String filePath,
-            final long fileLength,
-            final ExecutionState status,
-            final String message,
-            final String pipelineId
-            ) {
+    public static void logGlassMessage(GlassMessageDTO glassMessageDTO) {
         
-        MailboxGlassMessageUtil.logGlassMessage(
-                globalProcessId,
-                processorType,
-                processProtocol,
-                fileName,
-                filePath,
-                fileLength,
-                status,
-                message,
-                pipelineId, 
-                null);
-    }
-
-    /**
-     * log TVAPI and Event logs
-     * 
-     * @param globalProcessId
-     * @param processorType
-     * @param processProtocol
-     * @param fileName
-     * @param filePath
-     * @param fileLength
-     * @param status
-     * @param message
-     */
-    public static void logGlassMessage(final String globalProcessId,
-            final ProcessorType processorType,
-            final String processProtocol,
-            final String fileName,
-            final String filePath,
-            final long fileLength,
-            final ExecutionState status,
-            final String message,
-            final String pipelineId,
-            final ExecutionTimestamp firstCornerTimeStamp) {
+        ProcessorType processorType = glassMessageDTO.getProcessorType();
+        String processProtocol = glassMessageDTO.getProcessProtocol();
+        String fileName = glassMessageDTO.getFileName();
+        long fileLength = glassMessageDTO.getFileLength();
+        ExecutionState status = glassMessageDTO.getStatus();
+        String message = glassMessageDTO.getMessage();
+        String pipelineId = glassMessageDTO.getPipelineId();
+        ExecutionTimestamp firstCornerTimeStamp = glassMessageDTO.getFirstCornerTimeStamp();
 
         TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
         GlassMessage glassMessage = new GlassMessage();
-        glassMessage.setGlobalPId(globalProcessId);
+        glassMessage.setGlobalPId(glassMessageDTO.getGlobalProcessId());
         glassMessage.setCategory(processorType);
         glassMessage.setProtocol(processProtocol);
         glassMessage.setStatus(status);
@@ -121,7 +79,7 @@ public class MailboxGlassMessageUtil {
         } else if (ExecutionState.PROCESSING.equals(status)) {
 
             if (ProcessorType.SWEEPER.equals(processorType)) {
-                glassMessage.setInAgent(filePath);
+                glassMessage.setInAgent(glassMessageDTO.getFilePath());
             } else {
                 glassMessage.setInAgent(processProtocol);
             }

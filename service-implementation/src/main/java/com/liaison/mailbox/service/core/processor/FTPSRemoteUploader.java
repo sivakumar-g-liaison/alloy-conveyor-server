@@ -210,7 +210,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                     .append(remoteParentDir);
 
             // Glass Logging
-            logGlassMessage(message.toString(), file, ExecutionState.COMPLETED);
+            logToLens(message.toString(), file, ExecutionState.COMPLETED);
             totalNumberOfProcessedFiles++;
         } else {
 
@@ -223,7 +223,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                     .append(remoteParentDir);
 
             // Glass Logging
-            logGlassMessage(message.toString(), file, ExecutionState.FAILED);
+            logToLens(message.toString(), file, ExecutionState.FAILED);
         }
     }
 
