@@ -35,6 +35,7 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -46,12 +47,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -761,16 +764,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 return;
             }
 
-            MailboxGlassMessageUtil.logGlassMessage(
-                    stagedFile.getGPID(),
-                    configurationInstance.getProcessorType(),
-                    configurationInstance.getProcsrProtocol(),
-                    file.getName(),
-                    file.getPath(),
-                    file.length(),
-                    status,
-                    message,
-                    null);
+            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+            glassMessageDTO.setFileName(file.getName());
+            glassMessageDTO.setFilePath(file.getPath());
+            glassMessageDTO.setFileLength(file.length());
+            glassMessageDTO.setStatus(status);
+            glassMessageDTO.setMessage(message.toString());
+            glassMessageDTO.setPipelineId(null);
+            glassMessageDTO.setFirstCornerTimeStamp(null);
+            
+            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+                   
         }
     }
 
@@ -843,17 +850,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 .append(fileName)
                 .append(" is overwritten by another process - ")
                 .append(gpid);
+        
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(dupGpid);
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(fileName);
+        glassMessageDTO.setFilePath(filePath);
+        glassMessageDTO.setFileLength(0);
+        glassMessageDTO.setStatus(ExecutionState.DUPLICATE);
+        glassMessageDTO.setMessage(message.toString());
+        glassMessageDTO.setPipelineId(null);
+        glassMessageDTO.setFirstCornerTimeStamp(null);
 
-        MailboxGlassMessageUtil.logGlassMessage(
-                dupGpid,
-                configurationInstance.getProcessorType(),
-                configurationInstance.getProcsrProtocol(),
-                fileName,
-                filePath,
-                0,
-                ExecutionState.DUPLICATE,
-                message.toString(),
-                null);
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     @Override

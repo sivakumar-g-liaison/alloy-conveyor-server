@@ -23,6 +23,7 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -34,6 +35,7 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +46,7 @@ import org.codehaus.jettison.json.JSONObject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -612,18 +615,20 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 .append("Starting to sweep input folder ")
                 .append(filePath)
                 .append(" for new files");
+       
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(wrkTicket.getGlobalProcessId());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(wrkTicket.getFileName());
+        glassMessageDTO.setFilePath(filePath);
+        glassMessageDTO.setFileLength(wrkTicket.getPayloadSize());
+        glassMessageDTO.setStatus(ExecutionState.PROCESSING);
+        glassMessageDTO.setMessage(message.toString());
+        glassMessageDTO.setPipelineId(wrkTicket.getPipelineId());
+        glassMessageDTO.setFirstCornerTimeStamp(firstCornerTimeStamp);
 
-        MailboxGlassMessageUtil.logGlassMessage(
-                wrkTicket.getGlobalProcessId(),
-                configurationInstance.getProcessorType(),
-                configurationInstance.getProcsrProtocol(),
-                wrkTicket.getFileName(),
-                filePath,
-                wrkTicket.getPayloadSize(),
-                ExecutionState.PROCESSING,
-                message.toString(),
-				wrkTicket.getPipelineId(), 
-				firstCornerTimeStamp);
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
 
     }	
     

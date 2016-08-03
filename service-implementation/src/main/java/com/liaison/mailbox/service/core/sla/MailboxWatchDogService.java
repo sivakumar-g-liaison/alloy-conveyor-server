@@ -55,6 +55,7 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -198,16 +199,19 @@ public class MailboxWatchDogService {
 					continue;
 				}
 
-                MailboxGlassMessageUtil.logGlassMessage(
-                        stagedFile.getGPID(),
-                        ProcessorType.findByName(stagedFile.getProcessorType()),
-                        getProtocol(filePath),
-                        fileName,
-                        filePath,
-                        0,
-                        ExecutionState.COMPLETED,
-                        "File is picked up by the customer or another process",
-						null);
+				GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+	            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+	            glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+	            glassMessageDTO.setProcessProtocol(getProtocol(filePath));
+	            glassMessageDTO.setFileName(fileName);
+	            glassMessageDTO.setFilePath(filePath);
+	            glassMessageDTO.setFileLength(0);
+	            glassMessageDTO.setStatus(ExecutionState.COMPLETED);
+	            glassMessageDTO.setMessage("File is picked up by the customer or another process");
+	            glassMessageDTO.setPipelineId(null);
+	            glassMessageDTO.setFirstCornerTimeStamp(null);
+	            
+                MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
                 LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
                 inactiveStagedFile(stagedFile, updatedStatusList);
 
