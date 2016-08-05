@@ -87,6 +87,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private static final String STALE_FILE_NOTIFICATION_EMAIL_FILES = "Files :";
     private static final String STALE_FILE_NOTIFICATION_EMAIL_CONTENT = "Deleting stale files in Sweeper named '%s' from the location '%s'";
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    private static final Object SORT_BY_NAME = "Name";
+    private static final Object SORT_BY_SIZE = "Size";
 
     public void setPipeLineID(String pipeLineID) {
 		this.pipelineId = pipeLineID;
@@ -309,7 +311,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			if (workTickets.isEmpty()) {
 				LOGGER.info(constructMessage("There are no files available in the directory."));
 			}
-
+			
+			sortWorkTicket(workTickets, staticProp.getSort());
 			WorkTicketGroup workTicketGroup = new WorkTicketGroup();
 			List <WorkTicket> workTicketsInGroup = new ArrayList <WorkTicket>();
 			workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
@@ -337,6 +340,24 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		return workTicketGroups;
 	}
 
+	/**
+	 * Method to sort work tickets based on name/size/date
+	 * 
+	 * @param workTickets
+	 * @param staticProp
+	 */
+	
+    private void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
+    
+        if (SORT_BY_NAME.equals(sortType)) {
+             workTickets.sort((w1, w2) -> w1.getFileName().compareTo(w2.getFileName()));
+        } else if(SORT_BY_SIZE.equals(sortType)) {
+            workTickets.sort((w1, w2) -> w1.getPayloadSize().compareTo(w2.getPayloadSize()));
+        } else {
+            ISO8601Util dateUtil = new ISO8601Util();
+            workTickets.sort((w1, w2) -> dateUtil.fromDate(w1.getCreatedTime()).compareTo(dateUtil.fromDate(w2.getCreatedTime())));
+        }
+    }
 
     /**
 	 * Method to post meta data to rest service/ queue.

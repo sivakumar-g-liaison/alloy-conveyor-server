@@ -39,6 +39,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean lensVisibility;
 	private boolean sweepSubDirectories;
 	private String contentType;
+	private String sort;
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -114,5 +115,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
+    public String getSort() {
+        return sort;
+    }
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
 
 }
