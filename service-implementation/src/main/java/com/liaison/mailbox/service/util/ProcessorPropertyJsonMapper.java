@@ -66,7 +66,8 @@ public class ProcessorPropertyJsonMapper {
 
 	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
 	public static final String JSON_ROOT_PATH = "processor/properties/";
-
+	private static final String DOT_SEPERATOR = ".";
+	private static final String FILE_FORMAT = "json";
 
 	private static Map<String, String> propertyMapper = null;
 
@@ -248,17 +249,17 @@ public class ProcessorPropertyJsonMapper {
 
 		ProcessorPropertyUITemplateDTO processorProperties = null;
 		String propertiesJson = null;
-		String dotSaparator = ".";
-		String fileFormate = "json";
-		String jsonFileName = null;
+		StringBuilder jsonFileName = new StringBuilder().append(JSON_ROOT_PATH)
+		                 .append(processorType)
+		                 .append(DOT_SEPERATOR);
 
-		if (processorType.name().equalsIgnoreCase(protocol.name())) {
-			jsonFileName = JSON_ROOT_PATH + processorType + dotSaparator + fileFormate;
-		} else {
-			jsonFileName = JSON_ROOT_PATH + processorType + dotSaparator + protocol + dotSaparator + fileFormate;
+		if (!processorType.name().equalsIgnoreCase(protocol.name())) {
+		    jsonFileName.append(protocol)
+		                .append(DOT_SEPERATOR);
 		}
+		jsonFileName.append(FILE_FORMAT);
 
-		propertiesJson = ServiceUtils.readFileFromClassPath(jsonFileName);
+		propertiesJson = ServiceUtils.readFileFromClassPath(jsonFileName.toString());
 		processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertyUITemplateDTO.class);
 		return processorProperties;
 
