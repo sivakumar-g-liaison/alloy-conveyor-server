@@ -140,6 +140,22 @@
                "false",
                "true"
             ]
+         },
+         {
+            "name":"sort",
+            "displayName":"Sort By",
+            "value":"Date",
+            "type":"select",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"Date",
+            "validationRules":null,
+            "options":[
+               "Name",
+               "Date",
+               "Size"
+            ]
          }
       ],
       "folderProperties":[
