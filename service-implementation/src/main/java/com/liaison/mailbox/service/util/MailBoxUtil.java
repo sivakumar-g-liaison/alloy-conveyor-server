@@ -549,9 +549,18 @@ public class MailBoxUtil {
      */
     public static boolean isDirectUploadEnabled(String json) {
 
+		String remotePrcsr = "remoteProcessorProperties";
+
         try {
 
-            JSONObject obj = new JSONObject(json);
+			JSONObject obj = null;
+			if (json.contains(remotePrcsr)) {
+				JSONObject innerObj = new JSONObject(json);
+				obj = innerObj.getJSONObject(remotePrcsr);
+			} else {
+				obj = new JSONObject(json);
+			}
+
             Object o = obj.get(DIRECT_UPLOAD);
             return Boolean.TRUE.equals(o);
         } catch (JSONException e) {
