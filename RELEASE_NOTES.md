@@ -1,6 +1,24 @@
 4.7.0-SNAPSHOT
 -------------------------------
-* 
+* GMB-837   - HTTP time out too aggressive on PROD - 5 minutes
+* GMB-836	- Direct Upload is not working for the processor created by Configurator
+* GMB-830	- Provide an option to sort the files in sweeper
+* GMB-803	- Read/list mailbox returns entity with different fields
+* GMB-802	- Processor - Create : Dynamic property name is not cleared after clicking on save button
+* GMB-799	- FirstCorner Timestamp
+* GMB-797	- Try to useCriteriaQuery for building querie
+* GMB-666	- random exception in MailBox PROD: "Key manager failed to retrieve stored secret"
+* GMB-665	- No content to map to Object due to end of input
+* GMB-656	- Maintenance
+* GMB-649	- DropboxService cleanup on exception handling
+* GMB-517	- Setup a workflow for dropbox test in dev and qa environment
+* GMB-494	- ConstructMessage Method refinements
+* GMB-489	- Renew Session: Renew session in Mail box is not redirecting to SOA Proxy login page.
+* GMB-465	- Users cannot reach the Mail Box UI, possibly due to PermGen exhausted.
+* GMB-449	- Processor creation : URL is not updated when the user modify the url using ACE Editor while creating an new processor
+* GMB-288	- Please augment the documentation concerning scripts used by mailbox processors.
+* GMB-211	- Mailbox should be configured with Truststore Group Name, not GUID
+* GMB-129	- Warning dialog should be displayed if the user tries to do any new operation without saving the previous operation
 
 4.6.1
 -------------------------------
