@@ -41,23 +41,4 @@ public class QueryBuilderUtil {
 
 	}
 
-	/**
-	 * Generate "in" clause string from the list.
-	 * 
-	 * @param mailboxIds list of mailboxIds
-	 * @return String
-	 */
-	public static String collectionToSqlString(List<String> list) {
-
-		if (null == list || list.isEmpty()) {
-			return null;
-		}
-
-		StringBuilder s = new StringBuilder();
-		for (final String str : list) {
-			s.append("'").append(str).append("'").append(",");
-		}
-
-		return s.toString().substring(0, s.toString().length() - 1);
-	}
 }

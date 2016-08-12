@@ -35,6 +35,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String GLOBAL_PROCESS_ID = "gpid";
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
+    String MAILBOX_IDS = "mailbox_ids";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids

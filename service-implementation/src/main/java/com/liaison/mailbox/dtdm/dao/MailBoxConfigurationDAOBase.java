@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -105,6 +106,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	public List<MailBox> find(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys,Map <String, Integer> pageOffsetDetails) {
 
 		List<MailBox> mailBoxes = null;
+		List<String> tenancyKeysLowerCase = null;
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 			
@@ -123,10 +125,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					 .append(" and profile.schProfName like :")
 					 .append(SCHD_PROF_NAME);
 			} else {
+			    tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
 				query.append(" where LOWER(mbx.mbxName) like :")
 				 	 .append(MBOX_NAME)
-				 	 .append(" and LOWER(mbx.tenancyKey) IN (")
-				 	 .append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+				 	 .append(" and LOWER(mbx.tenancyKey) IN (:")
+				 	 .append(TENANCY_KEYS)
 				 	 .append(")")
 				 	 .append(" and profile.schProfName like :")
 				 	 .append(SCHD_PROF_NAME);
@@ -152,6 +155,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
 					.setFirstResult( pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 					.setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
 					.getResultList();
@@ -224,6 +228,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<MailBox> mailboxList = null;
+		List<String> tenancyKeysLowerCase = null;
 
 		try {
 
@@ -235,10 +240,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					 	  .append(MBOX_NAME);
 				 }
 			 } else {
+			     tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
 				 query.append(" where LOWER(mbx.mbxName) like :")
 				 	.append(MBOX_NAME)
-				 	.append(" and LOWER(mbx.tenancyKey) IN (")
-					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+				 	.append(" and LOWER(mbx.tenancyKey) IN (:")
+					.append(TENANCY_KEYS)
 					.append(")");
 			 }
 					
@@ -270,6 +276,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			} else {			
 				mailboxList = entityManager.createQuery(query.toString())
 						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+						.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
 						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 						.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
 						.getResultList();
@@ -330,10 +337,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
-							.append(" where mailbox.tenancyKey in (")
-							.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys))
-							.append(")");
-			List<?> mailboxIds = entityManager.createQuery(query.toString()).getResultList();
+							.append(" where mailbox.tenancyKey in (:")
+							.append(TENANCY_KEYS)
+			                .append(")");
+			List<?> mailboxIds = entityManager.createQuery(query.toString())
+			            .setParameter(TENANCY_KEYS, tenancyKeys)    
+			            .getResultList();
 			
 			Iterator<?> iter = mailboxIds.iterator();
 			
