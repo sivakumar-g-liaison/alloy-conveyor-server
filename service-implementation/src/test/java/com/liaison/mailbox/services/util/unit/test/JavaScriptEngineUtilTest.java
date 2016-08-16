@@ -73,4 +73,28 @@ public class JavaScriptEngineUtilTest {
 		Assert.assertEquals(returnValue, 20);
 	}
 
+    @Test
+    public void testExecuteJavaScripteFailure() {
+
+        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+        System.setProperty("archaius.deployment.environment", "dev-int");
+
+        String testJs = "gitlab:/processor-scripts/sample_unit_test_failure.js";
+        URI myUri = null;
+        try {
+            myUri = new URI(testJs);
+        } catch (URISyntaxException e) {
+            Assert.assertTrue(false);
+        }
+
+        try {
+            JavaScriptExecutorUtil.executeJavaScript(myUri, new HTTPRemoteUploader(new Processor()));
+        } catch (Exception e) {
+            if (e.getMessage().contains("StackOverflowError")) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.assertTrue(false);
+            }
+        }
+    }
 }
