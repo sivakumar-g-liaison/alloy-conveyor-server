@@ -1,3 +1,6 @@
+4.8.0-SNAPSHOT
+-------------------------------
+
 4.7.0
 -------------------------------
 * GMB-837   - HTTP time out too aggressive on PROD - 5 minutes
