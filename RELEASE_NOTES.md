@@ -1,4 +1,4 @@
-4.7.0-SNAPSHOT
+4.7.0
 -------------------------------
 * GMB-837   - HTTP time out too aggressive on PROD - 5 minutes
 * GMB-836	- Direct Upload is not working for the processor created by Configurator
