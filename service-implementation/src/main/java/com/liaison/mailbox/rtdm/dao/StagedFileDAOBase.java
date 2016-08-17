@@ -67,8 +67,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		    String entityStatus = MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase();
 
 			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.mailboxId in (")
-					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(" where sf.mailboxId in (:")
+					.append(MAILBOX_IDS)
 					.append(")")
 					.append(" and sf.stagedFileStatus = :")
 					.append(STATUS);
@@ -92,7 +92,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			}
 
 			Query query = entityManager.createQuery(queryString.toString());
-		    query.setParameter(STATUS, entityStatus);
+		    query.setParameter(STATUS, entityStatus)
+		          .setParameter(MAILBOX_IDS, mailboxIds);
 			query.setFirstResult(pagingOffset);
 			query.setMaxResults(pagingCount);
 
@@ -137,13 +138,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where (sf.pguid) = :")
 					.append(StagedFileDAO.GUID)
-					.append(" and sf.mailboxId in (")
-					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(" and sf.mailboxId in (:")
+					.append(MAILBOX_IDS)
 					.append(")");
 
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
+					.setParameter(MAILBOX_IDS, mailboxIds)
 					.getResultList();
 
 			Iterator<?> iterator = files.iterator();
@@ -183,8 +185,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :")
 					.append(FILE_NAME)
-					.append(" and sf.mailboxId in (")
-					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(" and sf.mailboxId in (:")
+					.append(MAILBOX_IDS)
 					.append(")");
 
 			isActive = (EntityStatus.ACTIVE.name().equals(entityStatus));
@@ -201,7 +203,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			}
 
 			queryResult.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
-			           .setParameter(STATUS, entityStatus);
+			           .setParameter(STATUS, entityStatus)
+			           .setParameter(MAILBOX_IDS, mailboxIds);
 
 			totalItems = (Long) queryResult.getSingleResult();
 			count = totalItems.intValue();
