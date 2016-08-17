@@ -49,7 +49,9 @@ public class GlassMessage {
 	public static final String PROPERTY_FOURTH_CORNER_NAME = "com.liaison.fourthcorner.name";
 
 	private transient ExecutionTimestamp firstCornerTimestamp;
+	private transient ExecutionTimestamp secondCornerTimestamp;
 	private transient ExecutionTimestamp thirdCornerTimestamp;
+	private transient ExecutionTimestamp fourthCornerTimestamp;
 
 	private static final String MAILBOX_ASA_IDENTIFIER = "MAILBOX";
 
@@ -328,11 +330,12 @@ public class GlassMessage {
 	}
 
 	public void logFirstCornerTimestamp(ExecutionTimestamp timeStamp) {
+		firstCornerTimestamp = timeStamp;
         logTimeStamp(timeStamp);
     }
 
 	public void logSecondCornerTimestamp() {
-		logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
+		secondCornerTimestamp = logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
 	}
 
 	public void logThirdCrnerTimestamp() {
@@ -340,7 +343,7 @@ public class GlassMessage {
 	}
 
 	public void logFourthCornerTimestamp() {
-		logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
+		fourthCornerTimestamp = logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
 	}
 
 	public ExecutionTimestamp logBeginTimestamp(String name) {
@@ -354,9 +357,10 @@ public class GlassMessage {
 		logTimeStamp(timeStamp);
 	}
 
-	public void logEndTimestamp(String name) {
+	public ExecutionTimestamp logEndTimestamp(String name) {
 		ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name);
 		logTimeStamp(timeStamp);
+		return timeStamp;
 	}
 
 	private void logTimeStamp(ExecutionTimestamp timestamp) {
@@ -472,5 +476,37 @@ public class GlassMessage {
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, techDescription, null);
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
+	}
+
+	public ExecutionTimestamp getFirstCornerTimestamp() {
+		return firstCornerTimestamp;
+	}
+
+	public void setFirstCornerTimestamp(ExecutionTimestamp firstCornerTimestamp) {
+		this.firstCornerTimestamp = firstCornerTimestamp;
+	}
+
+	public ExecutionTimestamp getSecondCornerTimestamp() {
+		return secondCornerTimestamp;
+	}
+
+	public void setSecondCornerTimestamp(ExecutionTimestamp secondCornerTimestamp) {
+		this.secondCornerTimestamp = secondCornerTimestamp;
+	}
+
+	public ExecutionTimestamp getThirdCornerTimestamp() {
+		return thirdCornerTimestamp;
+	}
+
+	public void setThirdCornerTimestamp(ExecutionTimestamp thirdCornerTimestamp) {
+		this.thirdCornerTimestamp = thirdCornerTimestamp;
+	}
+
+	public ExecutionTimestamp getFourthCornerTimestamp() {
+		return fourthCornerTimestamp;
+	}
+
+	public void setFourthCornerTimestamp(ExecutionTimestamp fourthCornerTimestamp) {
+		this.fourthCornerTimestamp = fourthCornerTimestamp;
 	}
 }

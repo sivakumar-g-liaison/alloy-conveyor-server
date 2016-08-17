@@ -166,6 +166,22 @@ public class TransactionVisibilityClient {
 			}
 		}
 
+		if (message.getFirstCornerTimestamp() != null) {
+			GlassMessageUtil.logFirstCorner(visibilityAPI, message.getFirstCornerTimestamp().getTimestamp());
+		}
+
+		if (message.getSecondCornerTimestamp() != null) {
+			GlassMessageUtil.logSecondCorner(visibilityAPI, message.getSecondCornerTimestamp().getTimestamp());
+		}
+
+		if (message.getThirdCornerTimestamp() != null) {
+			GlassMessageUtil.logThirdCorner(visibilityAPI, message.getThirdCornerTimestamp().getTimestamp());
+		}
+
+		if (message.getFourthCornerTimestamp() != null) {
+			GlassMessageUtil.logFourthCorner(visibilityAPI, message.getFourthCornerTimestamp().getTimestamp());
+		}
+
 		handleExecutionState(message);
 
 		visibilityAPI.setId(message.getGlobalPId());
