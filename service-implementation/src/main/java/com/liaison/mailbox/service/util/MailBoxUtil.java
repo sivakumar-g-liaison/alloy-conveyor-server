@@ -71,7 +71,13 @@ public class MailBoxUtil {
 
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
-
+	private static final float SECONDS_PER_MIN = 60;
+	private static final float MINUTES_PER_HOUR = 60;
+	private static final float HOURS_PER_DAY = 24;
+	private static final float DAYS_IN_WEEK = 7;
+	private static final float DAYS_IN_MONTH = 30;
+	private static final float DAYS_IN_YEAR = 365;
+	
     private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
@@ -313,23 +319,23 @@ public class MailBoxUtil {
 	 */
 	public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
 
-		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
-			return ttlNumber * 365 * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
-			return ttlNumber * 30 * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
-			return ttlNumber * 7 * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
-			return ttlNumber * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
-			return ttlNumber * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
-			return ttlNumber * 60;
-		} else {
-			return ttlNumber;
-		}
+		switch (ttlUnit) {
+        case MailBoxConstants.TTL_UNIT_YEARS:
+            return (int) (ttlNumber * DAYS_IN_YEAR * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+        case MailBoxConstants.TTL_UNIT_MONTHS:
+            return (int) (ttlNumber * DAYS_IN_MONTH  * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+        case MailBoxConstants.TTL_UNIT_WEEKS:
+            return (int) (ttlNumber * DAYS_IN_WEEK * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+        case MailBoxConstants.TTL_UNIT_DAYS:
+            return (int) (ttlNumber * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+        case MailBoxConstants.TTL_UNIT_HOURS:
+            return (int) (ttlNumber * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+        case MailBoxConstants.TTL_UNIT_MINUTES:
+            return (int) (ttlNumber * SECONDS_PER_MIN);
+        default:
+            return ttlNumber;
+        }
 	}
-
 
 	/**
 	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer.
@@ -340,22 +346,23 @@ public class MailBoxUtil {
 	* @return Integer
 	*/
 	public static Integer convertTTLIntoDays(String ttlUnit, Integer ttlNumber) {
-		// decimal value is used with operators in order to round up to next no
-		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
-			return (int) Math.ceil(ttlNumber * 365.0);
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
-			return (int) Math.ceil(ttlNumber * 30.0);
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
-			return (int) Math.ceil(ttlNumber * 7.0);
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
-			return ttlNumber;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
-			return (int) Math.ceil(ttlNumber / 24.0);
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
-			return  (int) Math.ceil(ttlNumber / (24.0 * 60.0));
-		} else {
-			return (int) Math.ceil(ttlNumber / (24.0 * 60.0 * 60.0));
-		}
+	    
+		switch (ttlUnit) {
+        case MailBoxConstants.TTL_UNIT_YEARS:
+            return (int) Math.ceil(ttlNumber * DAYS_IN_YEAR);
+        case MailBoxConstants.TTL_UNIT_MONTHS:
+            return (int) Math.ceil(ttlNumber * DAYS_IN_MONTH);
+        case MailBoxConstants.TTL_UNIT_WEEKS:
+            return (int) Math.ceil(ttlNumber * DAYS_IN_WEEK);
+        case MailBoxConstants.TTL_UNIT_DAYS:
+            return ttlNumber;
+        case MailBoxConstants.TTL_UNIT_HOURS:
+            return (int) Math.ceil(ttlNumber / HOURS_PER_DAY);
+        case MailBoxConstants.TTL_UNIT_MINUTES:
+            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR));
+        default:
+            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * HOURS_PER_DAY * MINUTES_PER_HOUR));
+        }
 	}
 
 	/**
