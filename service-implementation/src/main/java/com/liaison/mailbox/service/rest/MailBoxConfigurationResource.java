@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,11 +33,14 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxMinResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
@@ -131,7 +135,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
 			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
 			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId,
-			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters) {
+			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters,
+			@QueryParam(value = "isMaxResponse") @ApiParam(name = "isMaxResponse", required = false, value = "is Maximum Response") final String isMaxResponse) {
 
 
 		// create the worker delegate to perform the business logic
@@ -156,13 +161,23 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
 					// search the mailbox based on the given query parameters
-					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
-					serviceResponse.setHitCounter(hitCounter);
-
-					return serviceResponse;
+			
+					if (Boolean.parseBoolean(isMaxResponse)) {
+					    SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
+	                    serviceResponse.setHitCounter(hitCounter);
+	                    return serviceResponse;
+					} else {
+						SearchMailBoxMinResponseDTO serviceResponse = mailbox.searchMailBoxMinResponse(searchFilter, manifestJson);
+						serviceResponse.setHitCounter(hitCounter);
+					    return serviceResponse;
+					}
+					
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to read mailbox. " + e.getMessage());
 				}
 			}
 		};
