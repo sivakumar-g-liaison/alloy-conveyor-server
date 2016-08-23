@@ -740,7 +740,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
                 LOGGER.debug("setting file permissions of PROCESSED/ERROR Folder is done. Skipping permission setting for parent folders as it is not needed.");
                 break;
             }
+
             filePathToCreate = filePathToCreate.getParent();
+            pathToCreate = filePathToCreate.getFileName().toString();
         }
 
         LOGGER.debug("Done setting group");
