@@ -241,10 +241,12 @@ public class HTTPListenerResource extends AuditedResource {
 								&& syncProcessor.getPayloadSize() != -1) {
 							successMessage.setOutSize(syncProcessor.getPayloadSize());
 						}
+
+						successMessage.logFourthCornerTimestamp();
+
                         new TransactionVisibilityClient().logToGlass(successMessage);
                     }
 
-                    glassMessage.logFourthCornerTimestamp();
                     logger.info("HTTP(S)-SYNC : for the mailbox {} - End", mailboxInfo);
 					return syncResponse;
 				} catch (Exception e) {
@@ -260,8 +262,9 @@ public class HTTPListenerResource extends AuditedResource {
 						GlassMessage failedMsg = constructGlassMessage(request, workTicket, ExecutionState.FAILED);
 						// Log error status
 						failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
-						new TransactionVisibilityClient().logToGlass(failedMsg);
-						glassMessage.logFourthCornerTimestamp();
+                        failedMsg.logFourthCornerTimestamp();
+
+                        new TransactionVisibilityClient().logToGlass(failedMsg);
 
 					}
 
