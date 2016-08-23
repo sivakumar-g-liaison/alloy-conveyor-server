@@ -1,3 +1,8 @@
+4.7.1
+-------------------------------
+* GMB-839, GMB-851 - Operation not permitted error is received inconsistently while staging a file.
+
+
 4.7.0
 -------------------------------
 * GMB-837   - HTTP time out too aggressive on PROD - 5 minutes
