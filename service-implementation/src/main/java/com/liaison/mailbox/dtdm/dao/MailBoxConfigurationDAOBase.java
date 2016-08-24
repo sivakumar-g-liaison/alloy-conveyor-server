@@ -268,11 +268,19 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				query.append(" order by mbx.mbxName");
 			}
 			
-			if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-				mailboxList = entityManager.createQuery(query.toString())					
-						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-						.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
-						.getResultList();
+			if (searchFilter.isDisableFilters() ) {	
+				if (MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+					mailboxList = entityManager.createQuery(query.toString())					
+							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+							.getResultList();
+				 } else {
+					 mailboxList = entityManager.createQuery(query.toString())
+							.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+							.getResultList();
+				 }
 			} else {			
 				mailboxList = entityManager.createQuery(query.toString())
 						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
