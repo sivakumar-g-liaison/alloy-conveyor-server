@@ -40,8 +40,8 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
-import com.liaison.mailbox.service.dto.ui.SearchMailBoxMinResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
@@ -122,7 +122,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	 * @return The Response
 	 */
 	@GET
-	@ApiOperation(value = "Search Mailbox", notes = "search a mailbox using given query parameters", position = 1, response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
+	@ApiOperation(value = "Search Mailbox", notes = "search a mailbox using given query parameters", position = 1, response = com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response searchMailBox(
@@ -136,7 +136,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
 			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId,
 			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters,
-			@QueryParam(value = "isMaxResponse") @ApiParam(name = "isMaxResponse", required = false, value = "is Maximum Response") final String isMaxResponse) {
+			@QueryParam(value = "maxResponse") @ApiParam(name = "maxResponse", required = false, value = "Maximum Response") final String maxResponse) {
 
 
 		// create the worker delegate to perform the business logic
@@ -161,14 +161,13 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
 					// search the mailbox based on the given query parameters
-			
-					if (Boolean.parseBoolean(isMaxResponse)) {
-					    SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
-	                    serviceResponse.setHitCounter(hitCounter);
-	                    return serviceResponse;
+					
+					if (Boolean.parseBoolean(maxResponse)) {
+					    SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
+					    return serviceResponse;
 					} else {
-						SearchMailBoxMinResponseDTO serviceResponse = mailbox.searchMailBoxMinResponse(searchFilter, manifestJson);
-						serviceResponse.setHitCounter(hitCounter);
+					    SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, manifestJson);
+					    serviceResponse.setHitCounter(hitCounter);
 					    return serviceResponse;
 					}
 					

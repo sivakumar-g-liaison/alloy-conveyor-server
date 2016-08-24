@@ -37,8 +37,8 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxR
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
-import com.liaison.mailbox.service.dto.ui.SearchMailBoxMinResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -985,7 +985,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
 
-        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
@@ -1012,7 +1012,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("test");
 
-        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
@@ -1037,7 +1037,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
 
-        SearchMailBoxMinResponseDTO serviceResponse = mailbox.searchMailBoxMinResponse(searchFilter, aclManifest);
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
@@ -1064,7 +1064,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("test");
 
-        SearchMailBoxMinResponseDTO serviceResponse = mailbox.searchMailBoxMinResponse(searchFilter, aclManifest);
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));

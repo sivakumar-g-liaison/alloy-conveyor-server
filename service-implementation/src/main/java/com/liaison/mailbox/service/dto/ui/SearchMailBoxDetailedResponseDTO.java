@@ -16,6 +16,7 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 
 /**
  * Data Transfer Object used for retrieving the mailbox responses.
@@ -23,13 +24,13 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
  * @author OFS
  */
 @JsonRootName("searchMailBoxResponse")
-public class SearchMailBoxMinResponseDTO extends CommonResponseDTO {
+public class SearchMailBoxDetailedResponseDTO extends CommonResponseDTO {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private List<SearchMailBoxDTO> mailBox;
+	private List<MailBoxDTO> mailBox;
 	private String hitCounter;
 	private int totalItems;
 	private boolean isDisableFilter;
@@ -42,15 +43,15 @@ public class SearchMailBoxMinResponseDTO extends CommonResponseDTO {
 		this.totalItems = totalItems;
 	}
 
-	public List<SearchMailBoxDTO> getMailBox() {
+	public List<MailBoxDTO> getMailBox() {
 
 		if (null == mailBox) {
-			mailBox = new ArrayList<SearchMailBoxDTO>();
+			mailBox = new ArrayList<MailBoxDTO>();
 		}
 		return mailBox;
 	}
 
-	public void setMailBox(List<SearchMailBoxDTO> mailBox) {
+	public void setMailBox(List<MailBoxDTO> mailBox) {
 		this.mailBox = mailBox;
 	}
 
