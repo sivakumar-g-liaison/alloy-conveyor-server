@@ -18,9 +18,11 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -252,8 +254,10 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
         setDirectUpload(true);
         boolean isHandOverExecutionToJavaScript = false;
+        int scriptExecutionTimeout;
         try {
             isHandOverExecutionToJavaScript = ((SFTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+            scriptExecutionTimeout =  ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -261,7 +265,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
-            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this,scriptExecutionTimeout );
         } else {
 
             G2SFTPClient sftpRequest = null;

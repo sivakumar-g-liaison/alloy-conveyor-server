@@ -245,11 +245,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// G2SFTP executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
-
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
 				// Use custom G2JavascriptEngine
-				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, ((SFTPDownloaderPropertiesDTO)getProperties()).getScriptExecutionTimeout());
 
 			} else {
 				// G2SFTP executed through Java
@@ -261,7 +260,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		}
 
 	}
-
+	
 	@Override
 	public Object getClient() {
 	    sftpClient = (G2SFTPClient) ClientFactory.getClient(this);

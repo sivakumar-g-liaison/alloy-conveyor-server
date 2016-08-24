@@ -26,11 +26,13 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +74,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (getProperties().isHandOverExecutionToJavaScript()) {
                 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
                 // Use custom G2JavascriptEngine
-                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, ((HTTPDownloaderPropertiesDTO)getProperties()).getScriptExecutionTimeout());
 
             } else {
                 // HTTPRequest executed through Java

@@ -46,7 +46,8 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean debugTranscript;
 	private boolean createFoldersInRemote;
 	private boolean recurseSubDirectories;
-    private boolean directUpload;
+    private boolean directUpload;	
+	private int scriptExecutionTimeout;
 
 	public String getUrl() {
 		return url;
@@ -174,4 +175,12 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
     }
+
+	@PatternValidation(errorMessage = "Invalid Value for Script Execution Timeout", type = MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT)	
+	public int getScriptExecutionTimeout() {
+		return scriptExecutionTimeout;
+	}
+	public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
+		this.scriptExecutionTimeout = scriptExecutionTimeout;
+	}
 }

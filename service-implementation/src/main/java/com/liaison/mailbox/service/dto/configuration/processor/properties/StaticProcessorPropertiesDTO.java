@@ -13,6 +13,9 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object for the static properties of processor.
  * 
