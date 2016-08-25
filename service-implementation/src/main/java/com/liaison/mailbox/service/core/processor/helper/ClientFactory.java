@@ -19,11 +19,11 @@ import com.liaison.mailbox.service.core.processor.AbstractProcessor;
  */
 public class ClientFactory {
 
-	public static final String HTTP = "http";
-	public static final String HTTPS = "https";
-	public static final String FTP = "ftp";
-	public static final String FTPS = "ftps";
-	public static final String SFTP = "sftp";
+	private static final String HTTP = "http";
+	private static final String HTTPS = "https";
+	private static final String FTP = "ftp";
+	private static final String FTPS = "ftps";
+	private static final String SFTP = "sftp";
 
 	/**
 	 *

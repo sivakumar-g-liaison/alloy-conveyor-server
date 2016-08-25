@@ -12,32 +12,22 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.RemoteUploader;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
-import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
-import com.liaison.mailbox.service.core.processor.helper.HTTPClient;
-import com.liaison.mailbox.service.core.processor.helper.SFTPClient;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +46,7 @@ import java.util.List;
 public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
-
+    
     private String fileName;
     private String folderPath;
     private boolean directUpload;
@@ -112,24 +102,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     }
 
-    private int getScriptExecutionTimeout() throws IllegalArgumentException, IllegalAccessException, IOException {
-    	ProcessorType processorType = configurationInstance.getProcessorType();
-    	if (RemoteUploader.TYPE_REMOTEUPLOADER.equals(processorType)) {
-    		switch (configurationInstance.getProcsrProtocol()) {
-    		case ClientFactory.HTTP:
-			case ClientFactory.HTTPS:
-				return ((HTTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
-			case ClientFactory.FTP:
-			case ClientFactory.FTPS:
-				return ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
-			case ClientFactory.SFTP:
-				return ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
-			default: //It won't happen.
-				return 0;
-			}
-    	}    	
-		return 0;
-	}
+   
 
 	/**
      * change directory and create if it doesn't exist
@@ -357,4 +330,11 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         return files.toArray(new File[files.size()]);
     }
 
+    /**
+     * This method gets script execution timeout set at profile configuration.
+     * If execution takes more than the default time, 
+     * script executor uses this.
+     *
+     */
+    protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
 }

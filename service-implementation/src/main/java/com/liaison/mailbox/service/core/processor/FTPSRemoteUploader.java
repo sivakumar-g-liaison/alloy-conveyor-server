@@ -252,7 +252,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         int scriptExecutionTimeout ;        
         try {
             isHandOverExecutionToJavaScript = ((FTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
-            scriptExecutionTimeout = ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+            scriptExecutionTimeout = getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -293,5 +293,10 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         }
     }
+
+	@Override
+	protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+		return ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+	}
 
 }

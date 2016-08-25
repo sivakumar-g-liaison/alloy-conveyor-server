@@ -20,7 +20,6 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import java.io.StringWriter;
