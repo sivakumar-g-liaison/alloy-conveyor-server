@@ -277,7 +277,8 @@ public class BaseResource {
 		while (headerNames.hasMoreElements()) {
 
 			String headerName = headerNames.nextElement();
-			if (!HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(headerName)) {
+			if (!HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(headerName)
+					&& !HttpHeaders.AUTHORIZATION.equalsIgnoreCase(headerName)) {
 				List<String> headerValues = new ArrayList<>();
 				Enumeration<String> values = request.getHeaders(headerName);
 
@@ -298,7 +299,7 @@ public class BaseResource {
 	 * @param request HTTP request
 	 * @return Map contains workticket properties
 	 */
-	protected Map<String, Object> getRequestProperties(HttpServletRequest request) {
+    protected Map<String, Object> getRequestProperties(HttpServletRequest request, String globalProcessId) {
 
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(MailBoxConstants.HTTP_METHOD, request.getMethod());
@@ -312,8 +313,13 @@ public class BaseResource {
 		headers.put(MailBoxConstants.HTTP_REQUEST_PATH, request.getRequestURL().toString());
 		headers.put(MailBoxConstants.HTTP_CONTENT_TYPE,
 				(request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType()));
-		headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER,
-				request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
+
+        String gpidFromHeader = request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER);
+        if (MailBoxUtil.isEmpty(gpidFromHeader)) {
+            headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, globalProcessId);
+        } else {
+            headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, gpidFromHeader);
+        }
 
 		return headers;
 	}

@@ -246,6 +246,15 @@ public class TransactionVisibilityClient {
 				break;
             case FAILED :
                 visibilityAPI.setStatus(StatusCode.F);
+                if (message.isArrivalTime()) {
+                    visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+                    if (null != message.getInAgent()) {
+                        visibilityAPI.setInAgent(message.getInAgent());
+                    }
+                }
+				if (null != message.getOutAgent()) {
+					visibilityAPI.setOutAgent(message.getOutAgent());
+				}
                 break;
             default:
                 throw new RuntimeException("Invalid glass message status - " + message.getStatus());

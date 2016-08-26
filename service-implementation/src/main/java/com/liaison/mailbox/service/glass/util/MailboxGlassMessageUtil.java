@@ -64,11 +64,9 @@ public class MailboxGlassMessageUtil {
         glassMessage.setStatus(status);
 
         if (ExecutionState.COMPLETED.equals(status)) {
+
             glassMessage.setOutAgent(processProtocol);
             glassMessage.setOutSize(fileLength);
-
-            // Fourth corner timestamp
-            glassMessage.logFourthCornerTimestamp();
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
