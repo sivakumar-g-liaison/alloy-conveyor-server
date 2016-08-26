@@ -45,7 +45,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
-import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -996,7 +996,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		SearchMailBoxDetailedResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
 		Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
 
 		//search mailbox by profile name
@@ -1005,7 +1005,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
 		Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
 	}
 
@@ -1027,7 +1027,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		SearchMailBoxDetailedResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
 		Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
 	}
 
@@ -1049,7 +1049,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		SearchMailBoxDetailedResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
 		Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
 
 	}

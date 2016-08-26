@@ -1,6 +1,7 @@
 4.8.0-SNAPSHOT
 -------------------------------
 * GGT-726   - Four corner logging to TransactionVisibilityAPI
+* 2.3.2 code review comments
 
 4.7.0
 -------------------------------

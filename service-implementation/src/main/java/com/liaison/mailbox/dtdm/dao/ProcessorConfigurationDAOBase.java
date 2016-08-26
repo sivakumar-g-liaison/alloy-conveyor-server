@@ -548,11 +548,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         			query.append(" order by processor.procsrProtocol ")
         			.append(sortDirection);
         			break;
-        		case SORY_STATUS:
+        		case SORT_STATUS:
         			query.append(" order by processor.procsrStatus ")
         			.append(sortDirection);
         			break;
-        		case SORY_MAILBOX_STATUS:
+        		case SORT_MAILBOX_STATUS:
         			query.append(" order by mailbox.mbxStatus ")
         			.append(sortDirection);
         			break;

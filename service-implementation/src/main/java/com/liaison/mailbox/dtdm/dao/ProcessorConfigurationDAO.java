@@ -64,8 +64,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String SORT_MAILBOX_NAME = "mailboxname";
 	String SORT_NAME = "name";
 	String SORT_PROTOCOL = "protocol";
-	String SORY_STATUS = "status";
-	String SORY_MAILBOX_STATUS = "mailboxStatus";
+	String SORT_STATUS = "status";
+	String SORT_MAILBOX_STATUS = "mailboxStatus";
 
 	/**
 	 * Find by profileName and mailbox name pattern.

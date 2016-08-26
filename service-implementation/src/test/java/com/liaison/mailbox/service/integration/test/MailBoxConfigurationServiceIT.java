@@ -38,6 +38,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -971,11 +972,12 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
      * @throws JAXBException
      * @throws JsonMappingException
      * @throws JsonParseException
+     * @throws SymmetricAlgorithmException 
      *
      */
     @Test
     public void testSearchMailBox()
-            throws JsonParseException, JsonMappingException, JAXBException, IOException {
+            throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
         // search the mailbox from the given details
         MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -983,7 +985,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
 
-        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
@@ -1002,6 +1004,58 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testSearchMailBoxWithProfile()
+            throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+
+        // search the mailbox from the given details
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setProfileName("test");
+
+        SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+    }
+
+    /**
+     * Method Search MailBox with Valid scenario.
+     *
+     * @throws IOException
+     * @throws JAXBException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     *
+     */
+    @Test
+    public void testSearchMailBoxMinResponse()
+            throws JsonParseException, JsonMappingException, JAXBException, IOException {
+
+        // search the mailbox from the given details
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST");
+
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
+
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+    }
+    
+    /**
+     * Method Search MailBox with Valid Profile name.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testSearchMailBoxMinResponseWithProfile()
             throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
         // search the mailbox from the given details
@@ -1010,11 +1064,12 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("test");
 
-        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
     }
+
 
     /**
      * Method read property file.
