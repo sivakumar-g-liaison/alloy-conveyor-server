@@ -90,7 +90,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
                 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, getScriptExecutionTimeout());
+                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, getScriptExecutionTimeout(), getOrganization());
             } else {
                 // FTPSRequest executed through Java
                 executeRequest(getReqDTO().getExecutionId(), fsm);
@@ -101,8 +101,6 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
 
     }
-
-   
 
 	/**
      * change directory and create if it doesn't exist
@@ -337,4 +335,9 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      *
      */
     protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
+    
+    /**
+     * This method used to get Organization.
+     */
+    protected abstract String getOrganization();
 }

@@ -18,7 +18,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -265,7 +264,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
-            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout );
+            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout, getOrganization());
         } else {
 
             G2SFTPClient sftpRequest = null;
@@ -299,8 +298,14 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         }
     }
 
-	@Override
-	protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
-		return  ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
-	}
+    @Override
+    protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+        return ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+
+    @Override
+    protected String getOrganization() {
+        return getConfigurationInstance().getMailbox().getTenancyKey();
+    }   
+   
 }

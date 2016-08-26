@@ -13,7 +13,6 @@ import com.liaison.commons.scripting.javascript.JavascriptFunction;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -108,7 +106,7 @@ public final class JavaScriptExecutorUtil {
 	 * @throws Exception
 	 *
 	 */
-	public static Object executeJavaScript(String scriptPath, ProcessorJavascriptI processorService,int scriptExecutionTimeout) {
+	public static Object executeJavaScript(String scriptPath, ProcessorJavascriptI processorService, int scriptExecutionTimeout, String organization) {
 
 		JavascriptScriptContext scriptContext = null;
 		URI scriptUri = null;
@@ -125,7 +123,8 @@ public final class JavaScriptExecutorUtil {
 			}
 
 		    JavascriptExecutorService exec = new JavascriptExecutorService(scriptUri.toString(), processorService);
-		    exec.setMaxExecutionTimeout((int) TimeUnit.MINUTES.toMillis(scriptExecutionTimeout));		    
+		    exec.setMaxExecutionTimeout((int) TimeUnit.MINUTES.toMillis(scriptExecutionTimeout));	
+		    exec.setOrganization(organization);
 		    scriptContext = exec.call();
 
 		    // did my function call throw?

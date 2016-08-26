@@ -14,14 +14,11 @@ import com.liaison.commons.scripting.javascript.JavascriptFunction;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
-
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.script.ScriptException;
-
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
@@ -57,7 +54,6 @@ public class JavascriptExecutorService extends ScriptExecutorBase implements Scr
 	protected JavascriptScriptContext scriptContext = null;
 	protected String script = null;
 	protected ProcessorJavascriptI processor = null;
-	private final Object lock = new Object();
 
 	private static final Logger logger = LogManager.getLogger(JavascriptExecutorService.class);
 
@@ -260,22 +256,24 @@ public class JavascriptExecutorService extends ScriptExecutorBase implements Scr
 
 	
 	private int scriptExecutionTimeout;
+	private String organization;
 	
 	public void setMaxExecutionTimeout(int executionTimeout) {
-		synchronized (lock) {
-	           this.scriptExecutionTimeout = executionTimeout;
-	       }
+	    this.scriptExecutionTimeout = executionTimeout;
 	}
 	
 	@Override
 	public int getMaxExecutionTimeout() {
 		return scriptExecutionTimeout;
 	}
+	
+	public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 
 	@Override
 	public String getOrganization() {
-		// TODO Auto-generated method stub
-		return null;
+		return organization;
 	}
 
 }
