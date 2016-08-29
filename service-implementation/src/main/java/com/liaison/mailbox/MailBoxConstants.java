@@ -400,7 +400,7 @@ public interface MailBoxConstants {
 	int BYTE_ARRAY_INITIAL_SIZE = 4096;
    
     // Script Execution Timeout range min and max
-	int SCRIPT_EXC_TIMEOUT_RANGE_MIN = 30;
+    int SCRIPT_EXC_TIMEOUT_RANGE_MIN = 30;
     int SCRIPT_EXC_TIMEOUT_RANGE_MAX = 120;
     
 }

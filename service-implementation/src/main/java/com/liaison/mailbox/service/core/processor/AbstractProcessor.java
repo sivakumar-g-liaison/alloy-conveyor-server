@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.dto.queue.WorkTicket;
@@ -75,13 +76,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base processor type for all type of processors.
  *
  * @author OFS
  */
-public abstract class AbstractProcessor implements ProcessorJavascriptI {
+public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptExecutionEnvironment {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
     private static final String FILE_PERMISSION = "rw-rw----";
@@ -93,6 +95,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
     private static final String OUTBOX = "outbox";
 
     protected static final String seperator = ": ";
+
+    private int scriptExecutionTimeout = 0;
 
     protected Processor configurationInstance;
     protected String payloadLocation;
@@ -988,4 +992,17 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         return path;
     }
 
+    public void setMaxExecutionTimeout(int executionTimeout) {
+        this.scriptExecutionTimeout = executionTimeout;
+    }
+    
+    @Override
+    public int getMaxExecutionTimeout() {
+        return (int) TimeUnit.MINUTES.toMillis(scriptExecutionTimeout);
+    }
+    
+    @Override
+    public String getOrganization() {
+        return this.getConfigurationInstance().getMailbox().getTenancyKey();
+    }
 }
