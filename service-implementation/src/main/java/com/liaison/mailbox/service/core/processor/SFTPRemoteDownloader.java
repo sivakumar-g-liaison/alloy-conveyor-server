@@ -261,7 +261,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		}
 
 	}
-	
+
 	@Override
 	public Object getClient() {
 	    sftpClient = (G2SFTPClient) ClientFactory.getClient(this);
