@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER;

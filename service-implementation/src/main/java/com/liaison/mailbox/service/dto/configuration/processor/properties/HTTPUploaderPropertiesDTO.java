@@ -40,6 +40,7 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String processedFileLocation;
 	private boolean recurseSubDirectories;
     private boolean directUpload;
+    private int scriptExecutionTimeout;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -131,4 +132,12 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
     }
+
+    public int getScriptExecutionTimeout() {
+        return scriptExecutionTimeout;
+    }
+    public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
+        this.scriptExecutionTimeout = scriptExecutionTimeout;
+    }
+
 }

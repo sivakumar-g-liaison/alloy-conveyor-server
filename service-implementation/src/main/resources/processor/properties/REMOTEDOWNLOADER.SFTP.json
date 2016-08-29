@@ -174,7 +174,23 @@
          "defaultValue":"false",
 	     "validationRules": null,
 	     "options":["false","true"]
-	   }
+	   },
+      {
+	    "name": "scriptExecutionTimeout",
+	    "displayName": "Script Execution Timeout",
+        "type": "textarea",
+        "value": "",
+        "readOnly": false,
+	    "mandatory": false,
+	    "dynamic": false,
+        "valueProvided":false,
+        "defaultValue":"30",
+        "validationRules": {
+	      "pattern": "\/^([3-9][0-9]|1[0-1][0-9]|120)$\/",
+		  "minLength": "",
+		  "maxLength": ""
+        }
+      }
     ],
       "folderProperties":[
 		  {

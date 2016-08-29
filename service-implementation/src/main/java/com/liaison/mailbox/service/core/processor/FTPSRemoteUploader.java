@@ -249,8 +249,10 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         setDirectUpload(true);
         boolean isHandOverExecutionToJavaScript = false;
+        int scriptExecutionTimeout ;
         try {
             isHandOverExecutionToJavaScript = ((FTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+            scriptExecutionTimeout = ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -258,6 +260,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
+            setMaxExecutionTimeout(scriptExecutionTimeout);
             JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
         } else {
 

@@ -71,9 +71,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             setReqDTO((TriggerProcessorRequestDTO) dto);
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
-                fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
+                fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+                setMaxExecutionTimeout(((FTPDownloaderPropertiesDTO) getProperties()).getScriptExecutionTimeout());
+                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {
                 // FTPSRequest executed through Java
                 run();
