@@ -21,7 +21,6 @@ import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -264,7 +263,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
-            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout, getOrganization());
+            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout);
         } else {
 
             G2SFTPClient sftpRequest = null;
@@ -303,9 +302,4 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         return ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
     }
 
-    @Override
-    protected String getOrganization() {
-        return getConfigurationInstance().getMailbox().getTenancyKey();
-    }   
-   
 }

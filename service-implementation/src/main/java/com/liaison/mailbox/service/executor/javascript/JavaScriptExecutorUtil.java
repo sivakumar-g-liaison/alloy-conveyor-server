@@ -106,7 +106,7 @@ public final class JavaScriptExecutorUtil {
 	 * @throws Exception
 	 *
 	 */
-	public static Object executeJavaScript(String scriptPath, ProcessorJavascriptI processorService, int scriptExecutionTimeout, String organization) {
+	public static Object executeJavaScript(String scriptPath, ProcessorJavascriptI processorService, int scriptExecutionTimeout) {
 
 		JavascriptScriptContext scriptContext = null;
 		URI scriptUri = null;
@@ -124,7 +124,6 @@ public final class JavaScriptExecutorUtil {
 
 		    JavascriptExecutorService exec = new JavascriptExecutorService(scriptUri.toString(), processorService);
 		    exec.setMaxExecutionTimeout((int) TimeUnit.MINUTES.toMillis(scriptExecutionTimeout));	
-		    exec.setOrganization(organization);
 		    scriptContext = exec.call();
 
 		    // did my function call throw?

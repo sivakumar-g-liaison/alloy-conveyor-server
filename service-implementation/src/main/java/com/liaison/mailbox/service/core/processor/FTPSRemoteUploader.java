@@ -260,7 +260,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
-            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout, getOrganization());
+            JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this, scriptExecutionTimeout);
         } else {
 
             G2FTPSClient ftpsRequest = null;
@@ -298,10 +298,5 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 	protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
 		return ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
 	}
-
-    @Override
-    protected String getOrganization() {
-        return getConfigurationInstance().getMailbox().getTenancyKey();
-    }
 
 }

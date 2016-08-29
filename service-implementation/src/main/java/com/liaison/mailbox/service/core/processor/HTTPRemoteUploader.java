@@ -217,9 +217,4 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
         return ((HTTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
     }
 
-    @Override
-    protected String getOrganization() {
-        return getConfigurationInstance().getMailbox().getTenancyKey();
-    }
-
 }
