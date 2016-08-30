@@ -361,7 +361,7 @@ public class MailBoxUtil {
         case MailBoxConstants.TTL_UNIT_MINUTES:
             return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR));
         default:
-            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * HOURS_PER_DAY * MINUTES_PER_HOUR));
+            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN));
         }
 	}
 
