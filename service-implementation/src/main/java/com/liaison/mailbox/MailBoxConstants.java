@@ -275,6 +275,7 @@ public interface MailBoxConstants {
 	String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 	String PROPERTY_TENANCY_KEY = "MBX_TENANCY_KEY";
 	String PROPERTY_SCRIPT_EXECUTION_TIMEOUT = "scriptExecutionTimeout";
+	String PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT = "syncAndAsyncConnectionTimeout";
 
 	// Properties for sweeper grouping boundary condition
 	String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
@@ -399,8 +400,12 @@ public interface MailBoxConstants {
 
 	int BYTE_ARRAY_INITIAL_SIZE = 4096;
    
-    // Script Execution Timeout range min and max
+    // Script Execution Timeout range min and max in minutes
     int SCRIPT_EXC_TIMEOUT_RANGE_MIN = 30;
     int SCRIPT_EXC_TIMEOUT_RANGE_MAX = 120;
+    
+    // Sycn and async connection timeoug range min and max in seconds
+    int SYNC_ASYNC_TIMEOUT_RANGE_MIN = 60000;
+    int SYNC_ASYNC_TIMEOUT_RANGE_MAX = 300000;
     
 }

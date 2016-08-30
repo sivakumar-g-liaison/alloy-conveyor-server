@@ -222,6 +222,11 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT) && !isSyncAndAsyncBetweenRange(value))) {
+			    isValidPattern = false;
+			    errorMessage.append(annotationDetails.errorMessage());
+			}
+            
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
@@ -273,6 +278,17 @@ public class GenericValidator {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN;
 	}
+	
+	/**
+     * Method to validate whether given string is valid sync and async timeout value
+     *
+     * @param email
+     * @return boolean
+     */
+    private boolean isSyncAndAsyncBetweenRange (Object value) {
+        int range = Integer.valueOf(value.toString()).intValue();
+        return range <= MailBoxConstants.SYNC_ASYNC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SYNC_ASYNC_TIMEOUT_RANGE_MIN;
+    }
 	
 	/**
 	 * Method to validate whether given string is valid number of files
