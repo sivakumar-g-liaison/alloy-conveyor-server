@@ -69,7 +69,8 @@ public class RemoteProcessorPropertiesDTO {
     private boolean recurseSubDirectories;
     private boolean directUpload;
     private int scriptExecutionTimeout;
-
+    private int syncAndAsyncConnectionTimeout;
+    
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
 	}
@@ -370,6 +371,14 @@ public class RemoteProcessorPropertiesDTO {
 
     public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
+    }
+    
+    public int getSyncAndAsyncConnectionTimeout() {
+        return syncAndAsyncConnectionTimeout;
+    }
+
+    public void setSyncAndAsyncConnectionTimeout(int syncAndAsyncConnectionTimeout) {
+        this.syncAndAsyncConnectionTimeout = syncAndAsyncConnectionTimeout;
     }
     
 }

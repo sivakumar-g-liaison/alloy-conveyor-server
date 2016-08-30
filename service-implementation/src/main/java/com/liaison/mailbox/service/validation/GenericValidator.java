@@ -232,6 +232,11 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT) && !isSyncAndAsyncBetweenRange(value))) {
+			    isValidPattern = false;
+			    errorMessage.append(annotationDetails.errorMessage());
+			}
+            
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
