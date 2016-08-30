@@ -72,8 +72,8 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (getProperties().isHandOverExecutionToJavaScript()) {
                 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
                 // Use custom G2JavascriptEngine
-                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this,
-                        ((HTTPDownloaderPropertiesDTO) getProperties()).getScriptExecutionTimeout());
+                setMaxExecutionTimeout(((HTTPDownloaderPropertiesDTO) getProperties()).getScriptExecutionTimeout());
+                JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
             } else {
                 // HTTPRequest executed through Java
