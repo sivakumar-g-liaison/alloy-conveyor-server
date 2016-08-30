@@ -295,4 +295,9 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         }
     }
 
+    @Override
+    protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+        return ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+
 }
