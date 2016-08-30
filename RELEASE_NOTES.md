@@ -1,7 +1,17 @@
 4.8.0-SNAPSHOT
 -------------------------------
-* GGT-726   - Four corner logging to TransactionVisibilityAPI
+* GGT-726 - Four corner logging to TransactionVisibilityAPI
 * 2.3.2 code review comments
+* GMB-844 - Provision to override the script default timeout value
+* GMB-841 - Unable to download large file using processor script
+* GMB-829 - ProcessorPropertyJsonMapper clean up
+* GMB-827 - Pass list as parameter instead of appending to the query
+* GMB-828 - Modify convertTTLIntoSeconds
+* GMB-849 - The overridden TTL is not property set for HTTP Sync and Async transactions
+
+4.7.1
+-------------------------------
+* GMB-839, GMB-851 - Operation not permitted error is received inconsistently while staging a file.
 
 4.7.0
 -------------------------------
