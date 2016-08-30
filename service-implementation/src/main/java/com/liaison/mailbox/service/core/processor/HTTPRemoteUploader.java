@@ -212,4 +212,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
     }
 
+    @Override
+    protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+        return ((HTTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+
 }

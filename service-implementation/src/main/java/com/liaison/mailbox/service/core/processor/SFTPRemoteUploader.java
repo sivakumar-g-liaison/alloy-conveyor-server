@@ -298,4 +298,9 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         }
     }
 
+    @Override
+    protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+        return ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+
 }
