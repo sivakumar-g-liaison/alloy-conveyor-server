@@ -95,4 +95,14 @@ public class JavascriptExecutorTest {
 
     }
 
+	@Test
+	public void testExecutor_Stacktrace() throws URISyntaxException {
+
+		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
+		String scriptRelativePath = "processor-scripts/veera/handle_java_exception.ns";
+		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+
+	}
+
 }
