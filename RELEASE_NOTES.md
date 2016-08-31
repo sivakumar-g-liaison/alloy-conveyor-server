@@ -8,6 +8,7 @@
 * GMB-827 - Pass list as parameter instead of appending to the query
 * GMB-828 - Modify convertTTLIntoSeconds
 * GMB-849 - The overridden TTL is not property set for HTTP Sync and Async transactions
+* GMB-856 - LENS logging updates
 
 4.7.1
 -------------------------------

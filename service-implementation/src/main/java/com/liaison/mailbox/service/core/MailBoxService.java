@@ -510,7 +510,6 @@ public class MailBoxService implements Runnable {
                 }
                 String msg = (directUpload) ? "Direct upload Failed" : "File Stage Failed";
                 glassMessage.logProcessingStatus(StatusType.ERROR, msg, FILEWRITER, ExceptionUtils.getStackTrace(e));
-                glassMessage.logFourthCornerTimestamp();
             }
             //GLASS LOGGING ENDS//
 

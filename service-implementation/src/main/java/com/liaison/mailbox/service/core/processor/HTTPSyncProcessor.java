@@ -97,7 +97,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 								   Map<String, String> httpListenerProperties,
 								   String contentType) throws Exception {
 
-		logger.info("Starting to forward request to sb...");
+		logger.info("Starting to forward request to sb");
 
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {

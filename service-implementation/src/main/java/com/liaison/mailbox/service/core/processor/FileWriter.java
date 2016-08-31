@@ -131,7 +131,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     .append(fileName);
 
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message.toString());
-            glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
 
             stopwatch.stop();

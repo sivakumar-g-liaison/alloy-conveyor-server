@@ -101,6 +101,7 @@ public class GlassMessage {
 	private String inboundFileName;
 	private String outboundFileName;
 	private String mailboxName;
+	private boolean arrivalTime;
 
 
 	public String getTransferProfileName() {
@@ -373,6 +374,14 @@ public class GlassMessage {
 
 	public String getPipelineId() {
 		return getInboundPipelineId() == null ? getOutboundPipelineId() : getInboundPipelineId();
+	}
+
+	public boolean isArrivalTime() {
+		return arrivalTime;
+	}
+
+	public void setArrivalTime(boolean arrivalTime) {
+		this.arrivalTime = arrivalTime;
 	}
 
 	private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
