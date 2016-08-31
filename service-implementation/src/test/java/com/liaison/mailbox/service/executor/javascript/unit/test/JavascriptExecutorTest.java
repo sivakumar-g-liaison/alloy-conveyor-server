@@ -62,12 +62,12 @@ public class JavascriptExecutorTest {
 	@Test
 	public void testExecutor() throws URISyntaxException {
 
-		String scriptRelativePath = "processor-scripts/httpdownloader.js";
+		String scriptRelativePath = "processor-scripts/veera/noop.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 	}
 
-	@Test(expectedExceptions = java.lang.RuntimeException.class)
+	@Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
 	public void testExecutor_MissingRequiredFunction_FailureWithJavaRuntimeException() throws URISyntaxException {
 
 		String scriptRelativePath = "processor-scripts/veera/invalidfunction.js";
@@ -94,5 +94,15 @@ public class JavascriptExecutorTest {
         JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 
     }
+
+	@Test
+	public void testExecutor_Stacktrace() throws URISyntaxException {
+
+		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
+		String scriptRelativePath = "processor-scripts/veera/handle_java_exception.ns";
+		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+
+	}
 
 }

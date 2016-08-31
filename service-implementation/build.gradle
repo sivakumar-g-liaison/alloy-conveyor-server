@@ -503,7 +503,6 @@ test.doFirst {
             excludeGroups "$testExcludeGroups".split()
         }
     }
-    exclude '**/JavascriptExecutorTest.class'
     exclude '**/DropboxIntegrationServiceTest.class'
     exclude '**/KeyManagerIntegrationServiceTest.class'
     exclude '**/MailBoxConfigurationServiceTest.class'

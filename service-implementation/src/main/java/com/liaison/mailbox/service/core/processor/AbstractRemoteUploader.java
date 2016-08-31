@@ -90,6 +90,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
                 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+                setMaxExecutionTimeout(getScriptExecutionTimeout());
                 JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {
                 // FTPSRequest executed through Java
@@ -327,5 +328,13 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
         return files.toArray(new File[files.size()]);
     }
+    
+    /**
+     * This method gets script execution timeout set at profile configuration.
+     * If execution takes more than the default time, 
+     * script executor uses this.
+     *
+     */
+    protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
 
 }

@@ -946,7 +946,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public void logError(Throwable error) {
-        logError(error.getLocalizedMessage());
+        LOGGER.error(error.getLocalizedMessage(), error);
     }
 
     /**
