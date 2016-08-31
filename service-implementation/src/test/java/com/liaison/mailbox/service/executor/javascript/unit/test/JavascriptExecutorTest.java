@@ -88,6 +88,10 @@ public class JavascriptExecutorTest {
     @Test(expectedExceptions = java.lang.RuntimeException.class)
     public void testExecutor_Timeout() throws URISyntaxException {
 
+		System.setProperty("com.liaison.secure.properties.path", "invalid");
+		System.setProperty("archaius.deployment.applicationId", "scripting");
+		System.setProperty("archaius.deployment.environment", "test");
+
 		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
         String scriptRelativePath = "processor-scripts/veera/timeout_test.js";
         URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
