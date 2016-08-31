@@ -70,7 +70,7 @@
         "validationRules": null            
         },
         {
-            "name":"syncAndAsyncConnectionTimeout",
+            "name":"connectionTimeout",
             "displayName":"Connection Timeout",
             "type":"textarea",
             "value":"60000",

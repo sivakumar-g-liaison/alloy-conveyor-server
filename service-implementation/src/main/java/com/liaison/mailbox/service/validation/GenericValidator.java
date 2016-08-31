@@ -207,9 +207,19 @@ public class GenericValidator {
 
 		if (value != null && !value.toString().isEmpty()) {
 
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(value))) {
-				isValidPattern = false;
-				errorMessage.append(annotationDetails.errorMessage());
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)) {
+			    ProcessorType processorType = ProcessorType.findByName(String.valueOf(value));
+			    if (processorType == ProcessorType.HTTPASYNCPROCESSOR || processorType == ProcessorType.HTTPSYNCPROCESSOR) {
+			        if (!isSyncAndAsyncBetweenRange(value)) {
+			            isValidPattern = false;
+			            errorMessage.append(annotationDetails.errorMessage());
+			        }
+			    } else {
+			       if (!isBetweenRange(value)) {
+			           isValidPattern = false;
+			           errorMessage.append(annotationDetails.errorMessage());
+			       }
+			    }
 			}
 			
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(value))) {
@@ -222,11 +232,6 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT) && !isSyncAndAsyncBetweenRange(value))) {
-			    isValidPattern = false;
-			    errorMessage.append(annotationDetails.errorMessage());
-			}
-            
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
