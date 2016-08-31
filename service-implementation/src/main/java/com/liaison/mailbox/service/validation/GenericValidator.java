@@ -217,6 +217,11 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT) && !isScriptExecutionBetweenRange(value))) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+			
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
@@ -256,6 +261,17 @@ public class GenericValidator {
 	private boolean isBetweenRange (Object value) {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
+	}
+	
+	/**
+	 * Method to validate whether given string is valid timeout value
+	 *
+	 * @param email
+	 * @return boolean
+	 */
+	private boolean isScriptExecutionBetweenRange (Object value) {
+	    int range = Integer.valueOf(value.toString()).intValue();
+		return range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN;
 	}
 	
 	/**

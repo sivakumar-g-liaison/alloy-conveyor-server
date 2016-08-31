@@ -252,8 +252,10 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
         setDirectUpload(true);
         boolean isHandOverExecutionToJavaScript = false;
+        int scriptExecutionTimeout;
         try {
             isHandOverExecutionToJavaScript = ((SFTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+            scriptExecutionTimeout = ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -261,6 +263,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         if (isHandOverExecutionToJavaScript) {
             setFileName(fileName);
             setFolderPath(folderPath);
+            setMaxExecutionTimeout(scriptExecutionTimeout);
             JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
         } else {
 
@@ -294,4 +297,10 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             }
         }
     }
+
+    @Override
+    protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
+        return ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+
 }

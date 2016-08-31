@@ -12,13 +12,10 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
@@ -31,7 +28,6 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +46,7 @@ import java.util.List;
 public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
-
+    
     private String fileName;
     private String folderPath;
     private boolean directUpload;
@@ -94,6 +90,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
                 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+                setMaxExecutionTimeout(getScriptExecutionTimeout());
                 JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {
                 // FTPSRequest executed through Java
@@ -331,5 +328,13 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
         return files.toArray(new File[files.size()]);
     }
+    
+    /**
+     * This method gets script execution timeout set at profile configuration.
+     * If execution takes more than the default time, 
+     * script executor uses this.
+     *
+     */
+    protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
 
 }

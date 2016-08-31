@@ -33,6 +33,7 @@ public class HTTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean chunkedEncoding;
 	private String contentType;
 	private String otherRequestHeader;
+	private int scriptExecutionTimeout;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -98,5 +99,10 @@ public class HTTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setOtherRequestHeader(String otherRequestHeader) {
 		this.otherRequestHeader = otherRequestHeader;
 	}
-
+	public int getScriptExecutionTimeout() {
+		return scriptExecutionTimeout;
+	}
+	public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
+		this.scriptExecutionTimeout = scriptExecutionTimeout;
+	}
 }

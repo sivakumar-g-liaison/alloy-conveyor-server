@@ -13,6 +13,10 @@ package com.liaison.mailbox.service.executor.javascript.unit.test;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
+import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,7 +42,13 @@ public class JavascriptExecutorTest {
 		System.setProperty("archaius.deployment.applicationId", "scripting");
 		System.setProperty("archaius.deployment.environment", "test");
 
-		processorService = new HTTPRemoteDownloader(new Processor());
+		MailBox mailbox = new MailBox();
+		mailbox.setTenancyKey("JUNIT");
+
+		Processor processor = new Processor();
+		processor.setMailbox(mailbox);
+
+		processorService = new SFTPRemoteDownloader(processor);
 	}
 
 	@Test
@@ -52,12 +62,12 @@ public class JavascriptExecutorTest {
 	@Test
 	public void testExecutor() throws URISyntaxException {
 
-		String scriptRelativePath = "processor-scripts/httpdownloader.js";
+		String scriptRelativePath = "processor-scripts/veera/noop.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 	}
 
-	@Test(expectedExceptions = java.lang.RuntimeException.class)
+	@Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
 	public void testExecutor_MissingRequiredFunction_FailureWithJavaRuntimeException() throws URISyntaxException {
 
 		String scriptRelativePath = "processor-scripts/veera/invalidfunction.js";
@@ -70,6 +80,26 @@ public class JavascriptExecutorTest {
 	public void testExecutor_InvalidScriptURI_FailureWithJavaRuntimeException() throws URISyntaxException {
 
 		String scriptRelativePath = "processor-scripts/veeras/invalidfunction.js";
+		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+
+	}
+
+    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    public void testExecutor_Timeout() throws URISyntaxException {
+
+		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
+        String scriptRelativePath = "processor-scripts/veera/timeout_test.js";
+        URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
+        JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+
+    }
+
+	@Test
+	public void testExecutor_Stacktrace() throws URISyntaxException {
+
+		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
+		String scriptRelativePath = "processor-scripts/veera/handle_java_exception.ns";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 
