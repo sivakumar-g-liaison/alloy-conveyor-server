@@ -361,12 +361,12 @@ public class GenericValidatorTest {
      * 
      */
     @Test
-    public void testValidateValidConnectionTimoutSync() {
+    public void testValidateValidHttpConnectionTimout() {
         
         RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
         GenericValidator validator = new GenericValidator();
         
-        propertiesDTO.setSyncAndAsyncConnectionTimeout(700000);
+        propertiesDTO.setHttpConnectionTimeout(700000);
         Assert.assertTrue(validator.validate(propertiesDTO));
         
     }
@@ -376,15 +376,15 @@ public class GenericValidatorTest {
      * 
      */
     @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
-    public void testValidateInvalidConnectionTimoutSync() {
+    public void testValidateInvalidHttpConnectionTimout() {
         
         RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
         GenericValidator validator = new GenericValidator();
         
-        propertiesDTO.setSyncAndAsyncConnectionTimeout(1000);
+        propertiesDTO.setHttpConnectionTimeout(1000);
         Assert.assertFalse(validator.validate(propertiesDTO));
         
-        propertiesDTO.setSyncAndAsyncConnectionTimeout(800000);
+        propertiesDTO.setHttpConnectionTimeout(800000);
         Assert.assertFalse(validator.validate(propertiesDTO));
         
     }

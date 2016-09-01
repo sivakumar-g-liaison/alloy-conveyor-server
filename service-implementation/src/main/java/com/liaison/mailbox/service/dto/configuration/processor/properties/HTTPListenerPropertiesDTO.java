@@ -27,7 +27,7 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean securedPayload;
 	private boolean httpListenerAuthCheckRequired;
 	private boolean lensVisibility;
-	private int syncAndAsyncConnectionTimeout;
+	private int httpConnectionTimeout;
 
 	public String getHttpListenerPipeLineId() {
 		return httpListenerPipeLineId;
@@ -54,12 +54,12 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
 	}
-	@PatternValidation(errorMessage = "Invalid Value for sync/async connection Timeout", type = MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT)
-    public int getSyncAndAsyncConnectionTimeout() {
-        return syncAndAsyncConnectionTimeout;
+	@PatternValidation(errorMessage = "Invalid Value for http connection Timeout", type = MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT)
+    public int getHttpConnectionTimeout() {
+        return httpConnectionTimeout;
     }
-    public void setSyncAndAsyncConnectionTimeout(int syncAndAsyncConnectionTimeout) {
-        this.syncAndAsyncConnectionTimeout = syncAndAsyncConnectionTimeout;
+    public void setHttpConnectionTimeout(int httpConnectionTimeout) {
+        this.httpConnectionTimeout = httpConnectionTimeout;
     }
 	
 }

@@ -69,7 +69,7 @@ public class RemoteProcessorPropertiesDTO {
     private boolean recurseSubDirectories;
     private boolean directUpload;
     private int scriptExecutionTimeout;
-    private int syncAndAsyncConnectionTimeout;
+    private int httpConnectionTimeout;
     
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -373,13 +373,13 @@ public class RemoteProcessorPropertiesDTO {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
     }
     
-    @PatternValidation(errorMessage = "Invalid Value for sync/async connection Timeout", type = MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT)
-    public int getSyncAndAsyncConnectionTimeout() {
-        return syncAndAsyncConnectionTimeout;
+    @PatternValidation(errorMessage = "Invalid Value for http connection Timeout", type = MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT)
+    public int getHttpConnectionTimeout() {
+        return httpConnectionTimeout;
     }
 
-    public void setSyncAndAsyncConnectionTimeout(int syncAndAsyncConnectionTimeout) {
-        this.syncAndAsyncConnectionTimeout = syncAndAsyncConnectionTimeout;
+    public void setHttpConnectionTimeout(int httpConnectionTimeout) {
+        this.httpConnectionTimeout = httpConnectionTimeout;
     }
     
 }

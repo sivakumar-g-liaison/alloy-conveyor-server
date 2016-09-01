@@ -221,7 +221,7 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT) && !isSyncAndAsyncBetweenRange(value)) {
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT) && !isHttpConnectionBetweenRange(value)) {
 			    isValidPattern = false;
 			    errorMessage.append(annotationDetails.errorMessage());
 			}
@@ -284,9 +284,9 @@ public class GenericValidator {
      * @param email
      * @return boolean
      */
-    private boolean isSyncAndAsyncBetweenRange (Object value) {
+    private boolean isHttpConnectionBetweenRange (Object value) {
         int range = Integer.valueOf(value.toString()).intValue();
-        return range <= MailBoxConstants.SYNC_ASYNC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SYNC_ASYNC_TIMEOUT_RANGE_MIN;
+        return range <= MailBoxConstants.HTTP_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.HTTP_TIMEOUT_RANGE_MIN;
     }
 	
 	/**
