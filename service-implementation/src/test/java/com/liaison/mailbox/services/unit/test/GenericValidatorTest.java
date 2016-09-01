@@ -325,5 +325,68 @@ public class GenericValidatorTest {
         validator.validate(propertiesDTO);
         
     }
+	
+	 /**
+     * Method to validate the given invalid invalid connection timeout 
+     * 
+     */
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testValidateInvalidConnectionTimout() {
+        
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setConnectionTimeout(70000);
+        Assert.assertFalse((validator.validate(propertiesDTO)));
+        
+    }
+    
+    /**
+     * Method to validate the given invalid valid connection timeout 
+     * 
+     */
+    @Test
+    public void testValidateValidConnectionTimout() {
+        
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setConnectionTimeout(20000);
+        Assert.assertTrue(validator.validate(propertiesDTO));
+        
+    }
+   
+    /**
+     * Method to validate the given invalid valid connection timeout for sync and async
+     * 
+     */
+    @Test
+    public void testValidateValidConnectionTimoutSync() {
+        
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setSyncAndAsyncConnectionTimeout(700000);
+        Assert.assertTrue(validator.validate(propertiesDTO));
+        
+    }
+    
+    /**
+     * Method to validate the given invalid invalid connnction timeout for sync and async
+     * 
+     */
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testValidateInvalidConnectionTimoutSync() {
+        
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+        
+        propertiesDTO.setSyncAndAsyncConnectionTimeout(1000);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setSyncAndAsyncConnectionTimeout(800000);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+    }
 
 }

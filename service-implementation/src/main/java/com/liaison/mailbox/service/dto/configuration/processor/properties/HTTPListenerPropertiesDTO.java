@@ -12,6 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object for the properties of HTTP listener.
  * 
@@ -51,6 +54,7 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
 	}
+	@PatternValidation(errorMessage = "Invalid Value for sync/async connection Timeout", type = MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT)
     public int getSyncAndAsyncConnectionTimeout() {
         return syncAndAsyncConnectionTimeout;
     }

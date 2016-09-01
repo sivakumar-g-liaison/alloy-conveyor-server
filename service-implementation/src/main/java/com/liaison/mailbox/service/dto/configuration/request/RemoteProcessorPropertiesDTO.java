@@ -373,6 +373,7 @@ public class RemoteProcessorPropertiesDTO {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
     }
     
+    @PatternValidation(errorMessage = "Invalid Value for sync/async connection Timeout", type = MailBoxConstants.PROPERTY_SYNC_AND_ASYNC_CONNECTION_TIMEOUT)
     public int getSyncAndAsyncConnectionTimeout() {
         return syncAndAsyncConnectionTimeout;
     }
