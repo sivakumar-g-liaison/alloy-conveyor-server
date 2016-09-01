@@ -85,12 +85,12 @@ public class JavascriptExecutorTest {
 
 	}
 
-    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    @Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
     public void testExecutor_Timeout() throws URISyntaxException {
 
-		System.setProperty("com.liaison.secure.properties.path", "invalid");
-		System.setProperty("archaius.deployment.applicationId", "scripting");
-		System.setProperty("archaius.deployment.environment", "test");
+        System.setProperty("com.liaison.secure.properties.path", "invalid");
+        System.setProperty("archaius.deployment.applicationId", "scripting");
+        System.setProperty("archaius.deployment.environment", "test");
 
 		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
         String scriptRelativePath = "processor-scripts/veera/timeout_test.js";
