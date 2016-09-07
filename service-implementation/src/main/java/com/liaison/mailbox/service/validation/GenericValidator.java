@@ -202,27 +202,31 @@ public class GenericValidator {
 
 		PatternValidation annotationDetails = method.getAnnotation(PatternValidation.class);
 		boolean isValidPattern = true;
-
 		Object value = method.invoke(dto);
 
 		if (value != null && !value.toString().isEmpty()) {
-
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(value))) {
+			
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT) && !isBetweenRange(value)) {
+				isValidPattern = false;
+				errorMessage.append(annotationDetails.errorMessage());
+			}
+            
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(value)) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(value))) {
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT) && !isScriptExecutionBetweenRange(value)) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT) && !isScriptExecutionBetweenRange(value))) {
-				isValidPattern = false;
-				errorMessage.append(annotationDetails.errorMessage());
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT) && !isHttpConnectionBetweenRange(value)) {
+			    isValidPattern = false;
+			    errorMessage.append(annotationDetails.errorMessage());
 			}
-			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
+            
+			if (annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value)) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
@@ -273,6 +277,17 @@ public class GenericValidator {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN;
 	}
+	
+	/**
+     * Method to validate whether given string is valid sync and async timeout value
+     *
+     * @param email
+     * @return boolean
+     */
+    private boolean isHttpConnectionBetweenRange (Object value) {
+        int range = Integer.valueOf(value.toString()).intValue();
+        return range <= MailBoxConstants.HTTP_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.HTTP_TIMEOUT_RANGE_MIN;
+    }
 	
 	/**
 	 * Method to validate whether given string is valid number of files

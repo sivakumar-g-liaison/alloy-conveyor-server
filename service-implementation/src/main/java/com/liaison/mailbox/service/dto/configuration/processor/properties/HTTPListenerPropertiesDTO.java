@@ -12,6 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object for the properties of HTTP listener.
  * 
@@ -24,7 +27,7 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean securedPayload;
 	private boolean httpListenerAuthCheckRequired;
 	private boolean lensVisibility;
-	private int connectionTimeout;
+	private int httpConnectionTimeout;
 
 	public String getHttpListenerPipeLineId() {
 		return httpListenerPipeLineId;
@@ -51,11 +54,12 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setLensVisibility(boolean lensVisibility) {
 		this.lensVisibility = lensVisibility;
 	}
-    public int getConnectionTimeout() {
-        return connectionTimeout;
+	@PatternValidation(errorMessage = "Invalid Value for http connection Timeout", type = MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT)
+    public int getHttpConnectionTimeout() {
+        return httpConnectionTimeout;
     }
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
+    public void setHttpConnectionTimeout(int httpConnectionTimeout) {
+        this.httpConnectionTimeout = httpConnectionTimeout;
     }
-
+	
 }

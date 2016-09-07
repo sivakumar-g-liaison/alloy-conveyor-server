@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
-import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 
 /**
@@ -102,8 +102,8 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
-			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
-					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
+			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(PROPERTY_HTTP_CONNECTION_TIMEOUT))
+					? Integer.parseInt(httpListenerProperties.get(PROPERTY_HTTP_CONNECTION_TIMEOUT))
 					: ENV_CONNECTION_TIMEOUT_VALUE;
 
 			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
