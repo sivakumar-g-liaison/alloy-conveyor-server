@@ -69,8 +69,7 @@ public class RemoteProcessorPropertiesDTO {
     private boolean recurseSubDirectories;
     private boolean directUpload;
     private int scriptExecutionTimeout;
-    private int httpConnectionTimeout;
-    
+
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
 	}
@@ -371,15 +370,6 @@ public class RemoteProcessorPropertiesDTO {
 
     public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
-    }
-    
-    @PatternValidation(errorMessage = "Invalid Value for http connection Timeout", type = MailBoxConstants.PROPERTY_HTTP_CONNECTION_TIMEOUT)
-    public int getHttpConnectionTimeout() {
-        return httpConnectionTimeout;
-    }
-
-    public void setHttpConnectionTimeout(int httpConnectionTimeout) {
-        this.httpConnectionTimeout = httpConnectionTimeout;
     }
     
 }
