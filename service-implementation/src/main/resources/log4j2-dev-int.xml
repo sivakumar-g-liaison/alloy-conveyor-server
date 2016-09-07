@@ -71,9 +71,6 @@
 
 
 		<!-- destination of failover when logstash socket fails -->
-<!--		<RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
-					 filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}-%i.log"
-					 ignoreExceptions="false">-->
 		<File name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
 			  append="true" ignoreExceptions="false">
 			<!-- exclude redundant log element -->
@@ -112,11 +109,6 @@
 				<MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
                 <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
 			</filters>
-
-<!--			<Policies>
-				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="${env:LOGSTASH_ROLLING_SIZE}" />
-			</Policies>-->
 		</File>
 
 		<!-- Failover when either logstash socket appender fails or we run out of slots in buffer (overrun) -->
@@ -155,9 +147,6 @@
 		</GlassMessageSpectrum>
 
 		<!-- failover destination -->
-<!--        <RollingFile name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
-			filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}-%i.log"
-			ignoreExceptions="false">-->
 		<File name="GlassMessageSpectrumFile"
 					 fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
 					 append="true"
@@ -166,11 +155,6 @@
 			<filters>
 				<MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
 			</filters>
-
-<!--			<Policies>
-				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="${env:GLASS_ROLLING_SIZE}" />
-			</Policies>-->
 		</File>
 
         <!-- Failover when either GlassMessageSpectrumREST appender fails or we run out of slots in buffer (overrun) -->
@@ -203,9 +187,6 @@
         </File>
 
         <!-- failover destination  -->
-<!--        <RollingFile name="FileSyslogFailoverFile" fileName="${env:SYSLOG_LOG_DIR}/filesyslog.failover.log"
-                     filePattern="${env:SYSLOG_LOG_DIR}/filesyslog.failover-%d{MM-dd-yyyy}.log.gz"
-                     ignoreExceptions="false">-->
 		<File name="FileSyslogFailoverFile" fileName="${env:SYSLOG_LOG_DIR}/filesyslog.failover.log"
 			  append="true"
 			  ignoreExceptions="false">
@@ -213,11 +194,6 @@
             <filters>
                 <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
             </filters>
- 
-<!--            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${env:SYSLOG_ROLLING_SIZE}"/>
-            </Policies>-->
         </File>
 
  
