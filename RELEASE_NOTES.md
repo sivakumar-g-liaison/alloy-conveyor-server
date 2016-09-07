@@ -9,6 +9,7 @@
 * GMB-828 - Modify convertTTLIntoSeconds
 * GMB-849 - The overridden TTL is not property set for HTTP Sync and Async transactions
 * GMB-856 - LENS logging updates
+* GMB-859 - Disable rolling logs in log4j config file in all env
 
 4.7.1
 -------------------------------
