@@ -156,7 +156,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 $scope.mailBox.guid = $scope.mailBoxId;
                                 $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                                 $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-								$scope.mailBox.guid = $scope.mailBoxId ;
+								$scope.mailBox.modifiedBy = data.getMailBoxResponse.mailBox.modifiedBy;
+								$scope.mailBox.modifiedDate = data.getMailBoxResponse.mailBox.modifiedDate;
         						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
         							
         							$scope.addProcessorBtnValue = 'List Processors';

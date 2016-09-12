@@ -107,7 +107,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         
@@ -129,7 +129,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         profiles.add(profileDTO.getName());
         procRequestDTO.getProcessorLegacy().setLinkedProfiles(profiles);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -159,7 +159,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -170,7 +170,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	processorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
     	ProcessorConfigurationService processorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
     	Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
     	
     	// revise Processor
@@ -183,7 +183,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	processorLegacy.getRemoteProcessorProperties().setConnectionTimeout(60000);
     	processorLegacy.getRemoteProcessorProperties().setRetryAttempts(3);
     	processorReviseRequestDTO.setProcessorLegacy(processorLegacy);
-    	ReviseProcessorResponseDTO processorReviseResponse =  processorService.reviseProcessor(processorReviseRequestDTO, response.getMailBox().getGuid(), processorResponse.getProcessor().getGuId());
+    	ReviseProcessorResponseDTO processorReviseResponse =  processorService.reviseProcessor(processorReviseRequestDTO, response.getMailBox().getGuid(), processorResponse.getProcessor().getGuId(), processorCreateRequestDTO.getProcessor().getModifiedBy());
     	Assert.assertEquals(SUCCESS, processorReviseResponse.getResponse().getStatus());
     	
     	// read Processor
@@ -214,7 +214,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
         
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
         
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -225,7 +225,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacy.setLinkedMailboxId(mailboxId);
         processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
         ProcessorConfigurationService processorService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
         Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
         
         GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorResponse.getProcessor().getGuId());
@@ -248,7 +248,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -263,7 +263,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy);
     	ProcessorConfigurationService ftpProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
     	Assert.assertEquals(SUCCESS, ftpProcessorResponse.getResponse().getStatus());
     	
     	// Adding FTPS Processor with uname and pwd
@@ -274,7 +274,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy);
     	ProcessorConfigurationService ftpsProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
     	Assert.assertEquals(SUCCESS, ftpsProcessorResponse.getResponse().getStatus());
     	
     	// Adding FTPS Processor with uname, pwd and truststore
@@ -287,7 +287,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy1.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy1);
     	ProcessorConfigurationService ftpsProcessorService1 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy1.getModifiedBy());
     	Assert.assertEquals(SUCCESS, ftpsProcessorResponse1.getResponse().getStatus());
     	
     	// Adding FTPS Processor with truststore
@@ -298,7 +298,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy2.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy2);
     	ProcessorConfigurationService ftpsProcessorService2 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy2.getModifiedBy());
     	Assert.assertEquals(SUCCESS, ftpsProcessorResponse2.getResponse().getStatus());
     	
     	// Adding SFTP Processor with uname and pwd
@@ -309,7 +309,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy);
     	ProcessorConfigurationService sftpProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy.getModifiedBy());
     	Assert.assertEquals(SUCCESS, sftpProcessorResponse.getResponse().getStatus());
     	
     	// Adding SFTP Processor with uname, pwd and SSH Keypair
@@ -322,7 +322,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy1);
     	ProcessorConfigurationService sftpProcessorService1 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy1.getModifiedBy());
     	Assert.assertEquals(SUCCESS, sftpProcessorResponse1.getResponse().getStatus());
     	
     	// Adding SFTP Processor with uname and SSH Keypair
@@ -335,7 +335,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy2.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy2);
     	ProcessorConfigurationService sftpProcessorService2 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse2 = sftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse2 = sftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy2.getModifiedBy());
     	Assert.assertEquals(SUCCESS, sftpProcessorResponse2.getResponse().getStatus());
     	
     	// Adding SFTP Processor with SSH Keypair
@@ -346,7 +346,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy3.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy3);
     	ProcessorConfigurationService sftpProcessorService3 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse3 = sftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse3 = sftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy3.getModifiedBy());
     	Assert.assertEquals(SUCCESS, sftpProcessorResponse3.getResponse().getStatus());
 
     }
@@ -370,7 +370,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -385,7 +385,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy);
     	ProcessorConfigurationService ftpProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse = ftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpProcessorLegacy.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpProcessorResponse.getResponse().getStatus());
     	    	
     }
@@ -409,7 +409,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -424,7 +424,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy1);
     	ProcessorConfigurationService ftpProcessorService1 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpProcessorResponse1 = ftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse1 = ftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpProcessorLegacy1.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpProcessorResponse1.getResponse().getStatus());
     }
     
@@ -447,7 +447,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -462,7 +462,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpProcessorLegacy2.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy2);
     	ProcessorConfigurationService ftpProcessorService2 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpProcessorResponse2 = ftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse2 = ftpProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpProcessorLegacy2.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpProcessorResponse2.getResponse().getStatus());
     }
     
@@ -485,7 +485,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -500,7 +500,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpProcessorLegacy3.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpProcessorLegacy3);
     	ProcessorConfigurationService ftpProcessorService3 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpProcessorResponse3 = ftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpProcessorResponse3 = ftpProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpProcessorLegacy3.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpProcessorResponse3.getResponse().getStatus());
     }
     
@@ -523,7 +523,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -538,7 +538,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy);
     	ProcessorConfigurationService ftpsProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse = ftpsProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpsProcessorResponse.getResponse().getStatus());
     } 
     
@@ -561,7 +561,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -576,7 +576,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy1.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy1);
     	ProcessorConfigurationService ftpsProcessorService1 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse1 = ftpsProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy1.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpsProcessorResponse1.getResponse().getStatus());
     }
     
@@ -599,7 +599,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -614,7 +614,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy2.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy2);
     	ProcessorConfigurationService ftpsProcessorService2 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse2 = ftpsProcessorService2.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy2.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpsProcessorResponse2.getResponse().getStatus());
     }
     
@@ -637,7 +637,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -652,7 +652,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	ftpsProcessorLegacy3.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(ftpsProcessorLegacy3);
     	ProcessorConfigurationService ftpsProcessorService3 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse3 = ftpsProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO ftpsProcessorResponse3 = ftpsProcessorService3.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, ftpsProcessorLegacy3.getModifiedBy());
     	Assert.assertEquals(FAILURE, ftpsProcessorResponse3.getResponse().getStatus());
     }
     
@@ -675,7 +675,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -690,7 +690,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy);
     	ProcessorConfigurationService sftpProcessorService = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse = sftpProcessorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy.getModifiedBy());
     	Assert.assertEquals(FAILURE, sftpProcessorResponse.getResponse().getStatus());
     }
     
@@ -713,7 +713,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	requestDTO.setMailBox(mailboxDTO);
     	
     	MailBoxConfigurationService service = new MailBoxConfigurationService();
-    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+    	AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
     	
     	Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
     	String mailboxId = response.getMailBox().getGuid();
@@ -728,7 +728,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	sftpProcessorLegacy1.setLinkedMailboxId(mailboxId);
     	processorCreateRequestDTO.setProcessorLegacy(sftpProcessorLegacy1);
     	ProcessorConfigurationService sftpProcessorService1 = new ProcessorConfigurationService();
-    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId);
+    	AddProcessorToMailboxResponseDTO sftpProcessorResponse1 = sftpProcessorService1.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, sftpProcessorLegacy1.getModifiedBy());
     	Assert.assertEquals(FAILURE, sftpProcessorResponse1.getResponse().getStatus());
     }
     
@@ -744,6 +744,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	processorLegacyDTO.setCredentials(setCredentialDetails(protocol));
     	processorLegacyDTO.setLinkedProfiles(setLinkedProfileDetails());
     	processorLegacyDTO.setRemoteProcessorProperties(constructLegacyProperties(type, protocol));
+    	processorLegacyDTO.setModifiedBy("unknown-user");
     	return processorLegacyDTO;
     	
     }

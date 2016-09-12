@@ -95,7 +95,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					String manifestJson = request.getHeader("acl-manifest");
 					// creates new mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson);
+					final String userId = getUserIdFromHeader(request);
+					AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson, userId);
 					//Added the guid
 					if (null != serviceResponse.getMailBox()) {
 					    queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getMailBox().getGuid());

@@ -82,6 +82,7 @@ public class MailBoxConfigurationService {
 	 * Creates Mail Box.
 	 *
 	 * @param request The request DTO.
+	 * @param userId 
 	 * @return The responseDTO.
 	 * @throws IOException
 	 * @throws JAXBException
@@ -89,7 +90,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String serviceInstanceId,
-			String aclManifestJson)
+			String aclManifestJson, String userId)
 			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
 			IOException {
 
@@ -154,6 +155,9 @@ public class MailBoxConfigurationService {
 
 			// creating a link between mailbox and service instance table
 			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
+			
+			mailBox.setModifiedBy(userId);
+			mailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 
 			// persisting the mailbox entity
 			configDao.persist(mailBox);
@@ -287,13 +291,14 @@ public class MailBoxConfigurationService {
 	 * Method revise the mailbox configurations.
 	 *
 	 * @param guid The mailbox pguid.
+	 * @param userId 
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid,
-			String serviceInstanceId, String aclManifestJson, boolean addConstraint) throws IOException {
+			String serviceInstanceId, String aclManifestJson, boolean addConstraint, String userId) throws IOException {
 
 	    EntityManager em = null;
         EntityTransaction tx = null;
@@ -384,6 +389,8 @@ public class MailBoxConfigurationService {
 				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
 			}
 
+			retrievedMailBox.setModifiedBy(userId);
+			retrievedMailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 			//Merge the changes and commit the transaction
 			em.merge(retrievedMailBox);
 
@@ -422,9 +429,10 @@ public class MailBoxConfigurationService {
 	 * Method revise the mailbox configurations.
 	 *
 	 * @param guid The mailbox pguid.
+	 * @param userId 
 	 * @throws IOException
 	 */
-	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid, String aclManifestJson)
+	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid, String aclManifestJson, String userId)
 			throws IOException {
 
 		LOG.debug("Entering into deactivate mailbox.");
@@ -452,6 +460,9 @@ public class MailBoxConfigurationService {
 			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
 				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
 			}
+			
+			retrievedMailBox.setModifiedBy(userId);
+			retrievedMailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(EntityStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);

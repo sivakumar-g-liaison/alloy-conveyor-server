@@ -87,7 +87,8 @@ public class MailBoxProcessorResource extends AuditedResource {
 							AddProcessorToMailboxRequestDTO.class);
 					// create the new Processor
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
+					final String userId = getUserIdFromHeader(request);
+					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId, userId);
 
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);

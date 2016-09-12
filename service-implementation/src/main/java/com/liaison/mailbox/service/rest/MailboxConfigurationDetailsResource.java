@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -93,7 +94,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					String manifestJson = request.getHeader("acl-manifest");
 					// updates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson, addConstraint);
+					final String userId = getUserIdFromHeader(request);
+					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson, addConstraint, userId);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -134,7 +136,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					String manifestJson = request.getHeader("acl-manifest");
 					// deactivates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.deactivateMailBox(guid, manifestJson);
+					final String userId = getUserIdFromHeader(request);
+					return mailbox.deactivateMailBox(guid, manifestJson, userId);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

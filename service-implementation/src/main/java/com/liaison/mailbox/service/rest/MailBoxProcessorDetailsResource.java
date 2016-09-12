@@ -81,7 +81,8 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 
 				// Deactivating processor
 				ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-				return mailbox.deactivateProcessor(mailboxguid, guid);
+				final String userId = getUserIdFromHeader(request);
+				return mailbox.deactivateProcessor(mailboxguid, guid, userId);
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.deleteProcessor()";
@@ -168,7 +169,8 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 							ReviseProcessorRequestDTO.class);
 					// updates existing processor
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-					return mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
+					final String userId = getUserIdFromHeader(request);
+					return mailbox.reviseProcessor(serviceRequest, mailboxguid, guid, userId);
 
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);

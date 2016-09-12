@@ -85,7 +85,7 @@ public class MailBoxSendEmailTest extends BaseServiceTest{
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
         MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
         MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, response.getMailBox().getGuid());
         

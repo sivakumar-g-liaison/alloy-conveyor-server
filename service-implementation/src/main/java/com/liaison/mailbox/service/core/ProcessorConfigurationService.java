@@ -111,10 +111,11 @@ public class ProcessorConfigurationService {
 	 * @param mailBoxGuid Mailbox GUID
 	 * @param serviceRequest Processor request
 	 * @param serviceInstanceId Service Instance Id
+	 * @param userId 
 	 * @return AddProcessorToMailboxResponseDTO
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid,
-			AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId) {
+			AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId, String userId) {
 
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
 		
@@ -184,6 +185,8 @@ public class ProcessorConfigurationService {
 			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
 
+			processor.setModifiedBy(userId);
+			processor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 			// persist the processor.
 			configDAO.persist(processor);
 
@@ -365,9 +368,10 @@ public class ProcessorConfigurationService {
 	 * Deactivate the processor using guid.
 	 *
 	 * @param processorGuid The guid of the Processor.
+	 * @param userId 
 	 * @return The responseDTO.
 	 */
-	public DeActivateProcessorResponseDTO deactivateProcessor(String mailBoxGuid, String processorGuid) {
+	public DeActivateProcessorResponseDTO deactivateProcessor(String mailBoxGuid, String processorGuid, String userId) {
 
 		DeActivateProcessorResponseDTO serviceResponse = new DeActivateProcessorResponseDTO();
 
@@ -387,6 +391,8 @@ public class ProcessorConfigurationService {
 
 			// Changing the processor status
 			retrievedProcessor.setProcsrStatus(EntityStatus.INACTIVE.value());
+			retrievedProcessor.setModifiedBy(userId);
+			retrievedProcessor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 			config.merge(retrievedProcessor);
 
 			// response message construction
@@ -411,9 +417,10 @@ public class ProcessorConfigurationService {
 	 * @param request The Revise Processor Request DTO
 	 * @param mailBoxId The guid of the mailbox.The given processor should belongs to the given mailbox.
 	 * @param processorId The processor guid which is to be revised.
+	 * @param userId 
 	 * @return The Revise Processor ResponseDTO
 	 */
-	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId) {
+	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId, String userId) {
 
 	    EntityManager em = null;
         EntityTransaction tx = null;
@@ -499,6 +506,8 @@ public class ProcessorConfigurationService {
 				}
 			}
 
+            processor.setModifiedBy(userId);
+            processor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
 			//Merge the changes and commit the transaction
 			em.merge(processor);
 		    tx.commit();

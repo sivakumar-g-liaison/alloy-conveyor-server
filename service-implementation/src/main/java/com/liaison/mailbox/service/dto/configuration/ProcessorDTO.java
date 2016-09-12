@@ -80,6 +80,8 @@ public class ProcessorDTO {
 	private boolean createConfiguredLocation;
 	private String mailboxName;
 	private String mailboxStatus;
+	private String modifiedBy;
+	private String modifiedDate;
 	private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
 	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
 	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
@@ -214,7 +216,23 @@ public class ProcessorDTO {
 		this.mailboxStatus = mailboxStatus;
 	}
 
-	/**
+	public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    /**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
 	 * MailBoxSchedProfile and Processor. That step will be done in the service.
 	 *
@@ -373,6 +391,11 @@ public class ProcessorDTO {
 		this.setLinkedMailboxId(processor.getMailbox().getPguid());
 		this.setMailboxName(processor.getMailbox().getMbxName());
 		this.setMailboxStatus(processor.getMailbox().getMbxStatus());
+		
+		this.setModifiedBy(processor.getModifiedBy());
+		if (null != processor.getModifiedDate()) {
+		    this.setModifiedDate(processor.getModifiedDate().toString());
+		}
 
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		// Set protocol
