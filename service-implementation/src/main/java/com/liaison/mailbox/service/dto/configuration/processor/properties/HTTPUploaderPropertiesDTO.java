@@ -133,6 +133,7 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
         this.directUpload = directUpload;
     }
 
+    @PatternValidation(errorMessage = "Invalid value for script execution timeout", type = MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT)
     public int getScriptExecutionTimeout() {
         return scriptExecutionTimeout;
     }
