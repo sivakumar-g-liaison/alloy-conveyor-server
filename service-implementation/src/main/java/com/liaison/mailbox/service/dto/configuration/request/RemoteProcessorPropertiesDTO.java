@@ -121,7 +121,6 @@ public class RemoteProcessorPropertiesDTO {
 		this.socketTimeout = socketTimeout;
 	}
 
-	@PatternValidation(errorMessage = "Invalid Value for Timeout", type = MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)
 	public int getConnectionTimeout() {
 		return connectionTimeout;
 	}

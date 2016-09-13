@@ -69,6 +69,7 @@ public enum Messages {
 	PROCESSORS_LIST("The list of running processors are "),
 	NO_EXECUTING_PROCESSORS_AVAIL("No %s available"),
 	PROPERTY_DUPLICATE_ERROR("Property name should always be unique"),
+	INVALID_CONNECTION_TIMEOUT("Invalid value for timeout"),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
