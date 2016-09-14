@@ -99,6 +99,7 @@ public class HTTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setOtherRequestHeader(String otherRequestHeader) {
 		this.otherRequestHeader = otherRequestHeader;
 	}
+	@PatternValidation(errorMessage = "Invalid value for script execution timeout", type = MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT)
 	public int getScriptExecutionTimeout() {
 		return scriptExecutionTimeout;
 	}
