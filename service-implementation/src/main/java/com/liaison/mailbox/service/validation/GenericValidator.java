@@ -271,7 +271,7 @@ public class GenericValidator {
 	 */
 	private boolean isScriptExecutionBetweenRange (Object value) {
 	    int range = Integer.valueOf(value.toString()).intValue();
-		return range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN;
+		return (0 == range) || (range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN);
 	}
 	
 	/**
