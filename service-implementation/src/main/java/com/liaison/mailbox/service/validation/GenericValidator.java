@@ -262,18 +262,19 @@ public class GenericValidator {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
 	}
-	
+
 	/**
-     * Method to validate whether given string is valid Http connection timeout value
-     *
-     * @param connectionTimeout
-     * @return boolean
-     */
-    public boolean isHttpBetweenRange (Object value) {
-        int range = Integer.valueOf(value.toString()).intValue();
-        return range <= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MIN;
-    }
-	
+	 * Method to validate whether given string is valid Http connection timeout
+	 * value
+	 *
+	 * @param connectionTimeout
+	 * @return boolean
+	 */
+	public boolean isHttpBetweenRange (Object value) {
+		int range = Integer.valueOf(value.toString()).intValue();
+		return range <= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MAX && range >= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MIN;
+	}
+
 	/**
 	 * Method to validate whether given string is valid timeout value
 	 *
