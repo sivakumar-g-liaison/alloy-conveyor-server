@@ -129,17 +129,38 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 
 			RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
 			GenericValidator validator = new GenericValidator();
-            validator.validate(propertiesDTO);
-            
-            if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
-                    ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-                if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
-                    MailBoxUtil.constructURLAndPort(propertiesDTO);
-                } else {
-                    throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
-                }
-            }
-            
+			validator.validate(propertiesDTO);
+
+			if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
+					ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
+				if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
+					MailBoxUtil.constructURLAndPort(propertiesDTO);
+				} else {
+					throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
+				}
+			}
+
+			if (ProcessorType.HTTPSYNCPROCESSOR.equals(processor.getProcessorType()) ||
+					ProcessorType.HTTPASYNCPROCESSOR.equals(processor.getProcessorType())) {
+				if ((0 != propertiesDTO.getConnectionTimeout()) && !validator.isHttpBetweenRange(propertiesDTO.getConnectionTimeout())) {
+					throw new MailBoxConfigurationServicesException(Messages.INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
+				}
+			} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
+					ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
+				if ((0 != propertiesDTO.getConnectionTimeout()) && !validator.isBetweenRange(propertiesDTO.getConnectionTimeout())) {
+					throw new MailBoxConfigurationServicesException(Messages.INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
+				}
+			}
+
+			if (ProcessorType.HTTPSYNCPROCESSOR.equals(processor.getProcessorType()) ||
+					ProcessorType.HTTPASYNCPROCESSOR.equals(processor.getProcessorType()) ||
+					ProcessorType.SWEEPER.equals(processor.getProcessorType()) ||
+					ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType())) {
+				if (MailBoxUtil.isEmpty(propertiesDTO.getPipeLineID())) {
+					throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
+				}
+			}
+
 			if (null != propertiesDTO) {
 				String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
 				processor.setProcsrProperties(propertiesJSON);
