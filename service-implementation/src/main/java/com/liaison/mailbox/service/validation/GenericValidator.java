@@ -255,14 +255,26 @@ public class GenericValidator {
 	/**
 	 * Method to validate whether given string is valid timeout value
 	 *
-	 * @param email
+	 * @param connection timeout 
 	 * @return boolean
 	 */
-	private boolean isBetweenRange (Object value) {
+	public boolean isBetweenRange (Object value) {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
 	}
-	
+
+	/**
+	 * Method to validate whether given string is valid Http connection timeout
+	 * value
+	 *
+	 * @param connectionTimeout
+	 * @return boolean
+	 */
+	public boolean isHttpBetweenRange (Object value) {
+		int range = Integer.valueOf(value.toString()).intValue();
+		return range <= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MAX && range >= MailBoxConstants.HTTP_CONNECITON_TIMEOUT_RANGE_MIN;
+	}
+
 	/**
 	 * Method to validate whether given string is valid timeout value
 	 *
@@ -271,7 +283,7 @@ public class GenericValidator {
 	 */
 	private boolean isScriptExecutionBetweenRange (Object value) {
 	    int range = Integer.valueOf(value.toString()).intValue();
-		return range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN;
+		return (0 == range) || (range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN);
 	}
 	
 	/**

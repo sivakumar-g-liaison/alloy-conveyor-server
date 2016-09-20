@@ -403,4 +403,8 @@ public interface MailBoxConstants {
     int SCRIPT_EXC_TIMEOUT_RANGE_MIN = 30;
     int SCRIPT_EXC_TIMEOUT_RANGE_MAX = 120;
     
+    // Http connection timeout range min and max
+    int HTTP_CONNECITON_TIMEOUT_RANGE_MIN = 60000;
+    int HTTP_CONNECITON_TIMEOUT_RANGE_MAX = 300000;
+    
 }
