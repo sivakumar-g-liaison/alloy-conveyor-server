@@ -28,6 +28,9 @@ import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.validation.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -58,6 +61,16 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
+import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
+import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
+import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
+import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
 
 /**
  * Utilities for MailBox.
@@ -577,11 +590,67 @@ public class MailBoxUtil {
     }
 
     /**
-     * @return Timestamp
+     * validates pipeline id
+     *
+     * @param processorType processor type and
+     * @param propertiesDTO remote processor properties dto
      */
-    public static Timestamp getCurrentSysDateInTimeStamp() {
+    public static void validatePipelineId(ProcessorType processorType, RemoteProcessorPropertiesDTO propertiesDTO) {
 
-        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-        return timeStamp;
+        String pipelineId = null;
+        if (HTTPSYNCPROCESSOR.equals(processorType) ||
+                HTTPASYNCPROCESSOR.equals(processorType)) {
+            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
+        } else if (SWEEPER.equals(processorType) ||
+                DROPBOXPROCESSOR.equals(processorType)) {
+            pipelineId = propertiesDTO.getPipeLineID();
+        }
+
+        if (isEmpty(pipelineId)) {
+            throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
+        }
     }
+
+    /**
+     * validates connection timeout
+     *
+     * @param processorType the processor type
+     * @param connectionTimeout connection timeout
+     * @param validator generic validator instance
+     */
+    public static void validateConnectionTimeout(ProcessorType processorType, int connectionTimeout, GenericValidator validator) {
+
+        if (HTTPSYNCPROCESSOR.equals(processorType) ||
+                HTTPASYNCPROCESSOR.equals(processorType)) {
+            if ((0 != connectionTimeout) && !validator.isHttpBetweenRange(connectionTimeout)) {
+                throw new MailBoxConfigurationServicesException(INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
+            }
+        } else if (REMOTEUPLOADER.equals(processorType) ||
+                REMOTEDOWNLOADER.equals(processorType)) {
+            if ((0 != connectionTimeout) && !validator.isBetweenRange(connectionTimeout)) {
+                throw new MailBoxConfigurationServicesException(INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * validates url
+     *
+     * @param processorType the processor type
+     * @param propertiesDTO remote processor properties dto
+     * @throws URISyntaxException
+     * @throws MalformedURLException
+     */
+    public static void validateURL(ProcessorType processorType, RemoteProcessorPropertiesDTO propertiesDTO) throws URISyntaxException, MalformedURLException {
+
+        if (REMOTEUPLOADER.equals(processorType) ||
+                REMOTEDOWNLOADER.equals(processorType)) {
+            if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
+                MailBoxUtil.constructURLAndPort(propertiesDTO);
+            } else {
+                throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
+            }
+        }
+    }
+
 }

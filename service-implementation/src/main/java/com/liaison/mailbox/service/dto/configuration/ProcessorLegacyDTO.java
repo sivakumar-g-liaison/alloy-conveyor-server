@@ -9,20 +9,7 @@
  */
 package com.liaison.mailbox.service.dto.configuration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -36,6 +23,30 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
+import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
+import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
+import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
+import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
+import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
 
 /**
  * Processor DTO to support migrator service
@@ -131,35 +142,10 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			GenericValidator validator = new GenericValidator();
 			validator.validate(propertiesDTO);
 
-			if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
-					ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-				if (!MailBoxUtil.isEmpty(propertiesDTO.getUrl())) {
-					MailBoxUtil.constructURLAndPort(propertiesDTO);
-				} else {
-					throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
-				}
-			}
-
-			if (ProcessorType.HTTPSYNCPROCESSOR.equals(processor.getProcessorType()) ||
-					ProcessorType.HTTPASYNCPROCESSOR.equals(processor.getProcessorType())) {
-				if ((0 != propertiesDTO.getConnectionTimeout()) && !validator.isHttpBetweenRange(propertiesDTO.getConnectionTimeout())) {
-					throw new MailBoxConfigurationServicesException(Messages.INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
-				}
-			} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) ||
-					ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-				if ((0 != propertiesDTO.getConnectionTimeout()) && !validator.isBetweenRange(propertiesDTO.getConnectionTimeout())) {
-					throw new MailBoxConfigurationServicesException(Messages.INVALID_CONNECTION_TIMEOUT, Response.Status.BAD_REQUEST);
-				}
-			}
-
-			if (ProcessorType.HTTPSYNCPROCESSOR.equals(processor.getProcessorType()) ||
-					ProcessorType.HTTPASYNCPROCESSOR.equals(processor.getProcessorType()) ||
-					ProcessorType.SWEEPER.equals(processor.getProcessorType()) ||
-					ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType())) {
-				if (MailBoxUtil.isEmpty(propertiesDTO.getPipeLineID())) {
-					throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MailBoxConstants.PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
-				}
-			}
+            ProcessorType processorType = processor.getProcessorType();
+            MailBoxUtil.validateURL(processorType, propertiesDTO);
+            MailBoxUtil.validateConnectionTimeout(processorType, propertiesDTO.getConnectionTimeout(), validator);
+            MailBoxUtil.validatePipelineId(processorType, propertiesDTO);
 
 			if (null != propertiesDTO) {
 				String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
@@ -245,7 +231,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 		}
 
 	}
-	
+
 	/**
 	 * Copies the values from Entity to DTO.
 	 * 
