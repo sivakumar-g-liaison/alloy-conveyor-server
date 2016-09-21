@@ -1,5 +1,6 @@
 4.9.0-SNAPSHOT
 -------------------------------
+* GMB-860 - Audit Resource is missing user information
 
 4.8.0
 -------------------------------

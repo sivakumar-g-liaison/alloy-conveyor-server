@@ -27,6 +27,7 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -52,7 +53,9 @@ public class MailBoxDTO implements Serializable {
 	private String status;
 	private String shardKey;
 	private String tenancyKey;
-	private String tenancyKeyDisplayName;	
+	private String tenancyKeyDisplayName;
+	private String modifiedBy;
+	private String modifiedDate;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -142,7 +145,23 @@ public class MailBoxDTO implements Serializable {
 		this.tenancyKeyDisplayName = tenancyKeyDisplayName;
 	}
 
-	/**
+	public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    /**
 	 * Copies all data from DTO to entity except PGUID.
 	 * 
 	 * @param mailBox
@@ -184,6 +203,11 @@ public class MailBoxDTO implements Serializable {
 
 		this.setShardKey(mailBox.getShardKey());
 		this.setTenancyKey(mailBox.getTenancyKey());
+		
+		this.setModifiedBy(mailBox.getModifiedBy());
+		if (null != mailBox.getModifiedDate()) {
+		    this.setModifiedDate(mailBox.getModifiedDate().toString());
+		}
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

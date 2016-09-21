@@ -305,6 +305,8 @@ var rest = myApp.controller(
 				$scope.clearProps();
 				$scope.processor.guid = data.getProcessorResponse.processor.guid;
 				$scope.processor.name = data.getProcessorResponse.processor.name;
+				$scope.processor.modifiedBy = data.getProcessorResponse.processor.modifiedBy;
+				$scope.processor.modifiedDate = data.getProcessorResponse.processor.modifiedDate;
 											
 				//check if it is the gitlab url
 				if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {

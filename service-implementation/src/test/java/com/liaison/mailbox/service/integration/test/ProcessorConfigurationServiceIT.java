@@ -96,14 +96,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -173,14 +173,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, "");
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, "", procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());
@@ -215,14 +215,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid() + System.currentTimeMillis(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid() + System.currentTimeMillis(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());
@@ -257,7 +257,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -265,7 +265,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         procRequestDTO.setProcessor(null);
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
 
         // Assertion
@@ -301,21 +301,21 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO processorRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         processorRequestDTO.getProcessor().setName(procRequestDTO.getProcessor().getName());
-        AddProcessorToMailboxResponseDTO processorResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), processorRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO processorResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), processorRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
@@ -350,14 +350,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, MailBoxUtil.getGUID());
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, MailBoxUtil.getGUID(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -398,7 +398,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -406,7 +406,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         procRequestDTO.getProcessor().setCreateConfiguredLocation(true);
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -447,14 +447,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), dummyValue);
@@ -492,14 +492,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -511,7 +511,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
 
-        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procDeactResponseDTO.getResponse().getStatus());
@@ -545,14 +545,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -564,7 +564,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
 
-        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), dummyValue);
+        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), dummyValue, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procDeactResponseDTO.getResponse().getStatus());
@@ -598,14 +598,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -617,7 +617,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
 
-        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(dummyValue, procResponseDTO.getProcessor().getGuId());
+        DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(dummyValue, procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procDeactResponseDTO.getResponse().getStatus());
@@ -651,14 +651,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -668,7 +668,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
@@ -702,14 +702,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -722,7 +722,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         //Set invalid MailBox Guid
         revProcRequestDTO.getProcessor().setLinkedMailboxId(MailBoxUtil.getGUID());
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
@@ -756,14 +756,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -776,7 +776,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         //Set invalid Processor Guid
         revProcRequestDTO.getProcessor().setGuid(MailBoxUtil.getGUID());
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
@@ -810,14 +810,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -830,7 +830,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         //Set invalid Processor Guid
         revProcRequestDTO.setProcessor(null);
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
@@ -864,14 +864,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -883,7 +883,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
 
         revProcRequestDTO.getProcessor().setGuid(dummyValue);
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), dummyValue);
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), dummyValue, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
@@ -917,14 +917,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -936,7 +936,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
 
         revProcRequestDTO.getProcessor().setCreateConfiguredLocation(true);
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
@@ -970,14 +970,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -999,7 +999,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         profiles.add(requestProfileDTO.getProfile().getName() + "X");
         revProcRequestDTO.getProcessor().setLinkedProfiles(profiles);
 
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO,response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO,response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
@@ -1033,14 +1033,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
@@ -1062,7 +1062,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         profiles.add(requestProfileDTO.getProfile().getName());
         revProcRequestDTO.getProcessor().setLinkedProfiles(profiles);
 
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
@@ -1267,7 +1267,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -1275,7 +1275,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
                 mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
@@ -1306,7 +1306,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -1334,14 +1334,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
@@ -1363,7 +1363,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -1371,7 +1371,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
                 mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
@@ -1402,7 +1402,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -1430,14 +1430,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
@@ -1606,14 +1606,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
         
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
@@ -1656,14 +1656,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
         
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 

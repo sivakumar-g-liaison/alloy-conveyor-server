@@ -214,6 +214,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setTenancyKey(tenancyKey);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
+			mailBoxDTO.setModifiedBy("unknown-user");
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -225,6 +226,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
+			mailBoxDTO.setModifiedBy("unknown-user");
 
 			property.setName("MBX_REV_SIZE");
 			property.setValue("1024");
@@ -269,6 +271,7 @@ public abstract class BaseServiceTest {
         procDTO.setStatus("ACTIVE");
         procDTO.setType("REMOTEDOWNLOADER");
         procDTO.setProtocol("FTP");
+        procDTO.setModifiedBy("unknown-user");
         return procDTO;
     }
 

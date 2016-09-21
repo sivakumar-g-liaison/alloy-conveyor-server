@@ -49,6 +49,13 @@
 		  </select>
             <input class="form-control" type="text" id="tenancykey" ng-model="tenancyKey.name" name="tenancykey" ng-show = "isMailBoxEdit" ng-disabled = "isMailBoxEdit"/>
          </div>
+         
+         <div class="form-group" ng-show = "isMailBoxEdit && mailBox.modifiedBy">
+	          <label for="modifiedBy">
+	            Last Modified By
+	          </label>
+	          <input class="form-control" type="text" id="modifiedById" ng-model="mailBox.modifiedBy" name="modifiedByName" ng-disabled = "true"/>
+         </div>
         
    </div>
       
@@ -85,7 +92,7 @@
           		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
           </div>
-			<div>
+			<div class="form-group">
 			<label for="mailboxId">
 				MailboxId
 			</label>
@@ -99,6 +106,13 @@
           		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>MailboxId cannot be longer than {{mailBoxIdMaxLength}} characters.</span>
               </div>
 		  </div>
+		  
+         <div class="form-group" ng-show = "isMailBoxEdit && mailBox.modifiedDate">
+			  <label for="modifiedDate">
+				Last Modified Date
+			  </label>
+				<input class="form-control" type="text" id="modifiedDateId" ng-model="mailBox.modifiedDate" name="modifiedDateName" ng-disabled = "true"/>
+         </div>
           </div>
        </div>
    

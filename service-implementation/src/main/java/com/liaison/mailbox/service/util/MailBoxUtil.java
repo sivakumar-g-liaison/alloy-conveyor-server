@@ -575,4 +575,13 @@ public class MailBoxUtil {
         }
 
     }
+
+    /**
+     * @return Timestamp
+     */
+    public static Timestamp getCurrentSysDateInTimeStamp() {
+
+        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+        return timeStamp;
+    }
 }

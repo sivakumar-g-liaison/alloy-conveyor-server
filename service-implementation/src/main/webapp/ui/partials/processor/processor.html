@@ -119,7 +119,7 @@
                     </div>
                 </div>
             </div>            			
-            <div class="row">
+            <div class="row form-group">
 			    <div class="col-sm-6 col-md-6 processor_adjustPaddingTop">
 				 <span>{{initialProcessorData.supportedJavaScriptCheckBox.displayName}}
 				 <input type="checkbox" ng-model="isJavaScriptExecution" id="mbx_procsr_javascript" ng-click="onChangeJavaScriptExecutor()">
@@ -167,7 +167,27 @@
 					</div>
 			  </div>
 							
-			</div>       
+			</div>
+			
+			</br>
+			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<label for="modifiedBy">
+							Last Modified By
+						</label>
+						<input class="form-control" type="text" id="modifiedById" ng-model="processor.modifiedBy" name="modifiedByName" ng-show = "true" ng-disabled = "true"/>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<label for="modifiedDate">
+							Last Modified Date
+						</label>
+						<input class="form-control" type="text" id="modifiedDateId" ng-model="processor.modifiedDate" name="modifiedDateName" ng-show = "true" ng-disabled = "true"/>
+                    </div>
+                </div>
+            </div>            
 
             <!-- Modal -->
             <div class="modal-custom fade" id="myModal" role="dialog" aria-hidden="true">

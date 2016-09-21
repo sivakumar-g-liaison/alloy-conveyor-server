@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,6 +27,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
@@ -72,6 +75,8 @@ public class MailBox implements Identifiable {
 	private Set<Processor> mailboxProcessors;
 	private Set<MailboxServiceInstance> mailboxServiceInstances;
 	private String tenancyKey;
+	private String modifiedBy;
+	private Date modifiedDate;
 	
 
 	public MailBox() {
@@ -182,7 +187,26 @@ public class MailBox implements Identifiable {
 		this.tenancyKey = tenancyKey;
 	}
 	
-	/**
+	@Column(name = "MODIFIED_BY", length = 128)
+	public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "MODIFIED_DATE")
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    /**
 	 * Method to retrieve the given properties form Mailbox
 	 * 
 	 * @param propertiesToBeRetrieved - list of property Names to be retrieved
