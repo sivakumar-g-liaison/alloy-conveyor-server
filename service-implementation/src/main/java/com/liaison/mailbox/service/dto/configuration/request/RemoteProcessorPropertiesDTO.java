@@ -62,7 +62,7 @@ public class RemoteProcessorPropertiesDTO {
     private String sweepedFileLocation;
     private boolean debugTranscript;
     private boolean lensVisibility;
-    private boolean httpListenerAuthCheckRequired;
+    private boolean httpListenerAuthCheckRequired = true;
     private boolean createFoldersInRemote;
     
     private boolean sweepSubDirectories;

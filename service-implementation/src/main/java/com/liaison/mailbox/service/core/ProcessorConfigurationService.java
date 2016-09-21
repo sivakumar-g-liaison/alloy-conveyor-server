@@ -10,28 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -94,6 +72,26 @@ import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class which has Processor configuration related operations.
@@ -186,7 +184,7 @@ public class ProcessorConfigurationService {
 			processor.setServiceInstance(serviceInstance);
 
 			processor.setModifiedBy(userId);
-			processor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+            processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			// persist the processor.
 			configDAO.persist(processor);
 
@@ -392,7 +390,7 @@ public class ProcessorConfigurationService {
 			// Changing the processor status
 			retrievedProcessor.setProcsrStatus(EntityStatus.INACTIVE.value());
 			retrievedProcessor.setModifiedBy(userId);
-			retrievedProcessor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+			retrievedProcessor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			config.merge(retrievedProcessor);
 
 			// response message construction
@@ -507,7 +505,7 @@ public class ProcessorConfigurationService {
 			}
 
             processor.setModifiedBy(userId);
-            processor.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+            processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			//Merge the changes and commit the transaction
 			em.merge(processor);
 		    tx.commit();

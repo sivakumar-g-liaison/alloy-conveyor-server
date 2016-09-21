@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -157,7 +158,7 @@ public class MailBoxConfigurationService {
 			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
 			
 			mailBox.setModifiedBy(userId);
-			mailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+			mailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 
 			// persisting the mailbox entity
 			configDao.persist(mailBox);
@@ -390,7 +391,7 @@ public class MailBoxConfigurationService {
 			}
 
 			retrievedMailBox.setModifiedBy(userId);
-			retrievedMailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+			retrievedMailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			//Merge the changes and commit the transaction
 			em.merge(retrievedMailBox);
 
@@ -462,7 +463,7 @@ public class MailBoxConfigurationService {
 			}
 			
 			retrievedMailBox.setModifiedBy(userId);
-			retrievedMailBox.setModifiedDate(MailBoxUtil.getCurrentSysDateInTimeStamp());
+			retrievedMailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(EntityStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
