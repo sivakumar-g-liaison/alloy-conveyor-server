@@ -55,6 +55,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -92,6 +93,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class which has Processor configuration related operations.
@@ -1138,14 +1140,10 @@ public class ProcessorConfigurationService {
 	 * Get the Processor details using guid.
 	 *
 	 * @param processorGuid The pguid of the processor
+     * @param trimResponse true to trim the response
 	 * @return serviceResponse GetProcessorResponseDTO
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws IOException
 	 */
-	public GetProcessorResponseDTO getProcessor(String processorGuid) {
+	public GetProcessorResponseDTO getProcessor(String processorGuid, boolean trimResponse) {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -1177,6 +1175,16 @@ public class ProcessorConfigurationService {
 				
 				ProcessorDTO dto = new ProcessorDTO();
 				dto.copyFromEntity(processor, true);
+
+                //GMB-711
+                if (trimResponse) {
+                    List<ProcessorFolderPropertyDTO> folderProp = dto.getProcessorPropertiesInTemplateJson().getFolderProperties();
+                    folderProp = folderProp.stream()
+                            .filter(folder -> !MailBoxUtil.isEmpty(folder.getFolderURI()))
+                            .collect(Collectors.toList());
+                    dto.getProcessorPropertiesInTemplateJson().setFolderProperties(folderProp);
+                }
+
 				serviceResponse.setProcessor(dto);
 				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
 				LOGGER.debug("Exit from get processor by guid.");

@@ -139,7 +139,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
             IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
         // Get the processor
-        GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid");
+        GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid", false);
 
         // Assertion
         Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
@@ -1618,7 +1618,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         // Get the processor by guid
-        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procResponseDTO.getProcessor().getGuId());
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procResponseDTO.getProcessor().getGuId(), false);
 
         // Assertion
         Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
@@ -1668,7 +1668,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         // Get the processor by Name
-        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procRequestDTO.getProcessor().getName());
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(procRequestDTO.getProcessor().getName(), false);
 
         // Assertion
         Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
@@ -1702,7 +1702,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         // Get the processor by Name
-        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor("invalid");
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor("invalid", false);
         // Assertion
         Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
     }
@@ -1730,7 +1730,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         // Get the processor by Name
-        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(null);
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(null, false);
         // Assertion
         Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
     }

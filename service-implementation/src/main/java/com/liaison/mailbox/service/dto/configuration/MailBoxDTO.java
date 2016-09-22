@@ -183,16 +183,8 @@ public class MailBoxDTO implements Serializable {
 	 * 
 	 * @param mailBox
 	 *            The MailBox Entity
-	 * @throws SymmetricAlgorithmException
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
 	 */
-	public void copyFromEntity(MailBox mailBox) throws JsonParseException, JsonMappingException, JAXBException,
-			IOException,
-			MailBoxConfigurationServicesException, SymmetricAlgorithmException {
+	public void copyFromEntity(MailBox mailBox) {
 
 		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());

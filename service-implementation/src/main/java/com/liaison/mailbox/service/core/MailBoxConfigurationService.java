@@ -221,12 +221,10 @@ public class MailBoxConfigurationService {
 	 *
 	 * @param guid The guid of the mailbox.
 	 * @return The responseDTO.
-	 * @throws SymmetricAlgorithmException
 	 * @throws IOException
-	 * @throws JAXBException 
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String serviceInstanceId,
-			String aclManifestJson) throws IOException, JAXBException, SymmetricAlgorithmException {
+			String aclManifestJson) throws IOException {
 
 		LOG.debug("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);
@@ -484,28 +482,19 @@ public class MailBoxConfigurationService {
 		}
 	}
 
-	/**
-	 * Searches the mailbox using mailbox name and profile name.
-	 *
-	 * @param mbxName The name of the mailbox
-	 *
-	 * @param profName The name of the profile
-	 * @param serviceInstId
-	 *
-	 * @return The SearchMailBoxResponseDTO
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 */
-	public SearchMailBoxDetailedResponseDTO searchMailBox(GenericSearchFilterDTO searchFilter, String aclManifestJson)
-			throws JAXBException, IOException, SymmetricAlgorithmException {
+    /**
+     * Searches the mailbox using mailbox name and profile name.
+     *
+     * @param searchFilter search filter contains mailbxo and profile name
+     * @param aclManifestJson manifest json
+     * @return search response
+     * @throws IOException
+     */
+	public SearchMailBoxDetailedResponseDTO searchMailBox(GenericSearchFilterDTO searchFilter, String aclManifestJson) throws IOException {
 
 		LOG.debug("Entering into search mailbox.");
 
 		int totalCount = 0;
-		List<MailBox> retrievedMailBoxes = null;
-		Map<String, Integer> pageOffsetDetails = null;
 		SearchMailBoxDetailedResponseDTO serviceResponse = new SearchMailBoxDetailedResponseDTO();
 
 		try {
@@ -513,69 +502,38 @@ public class MailBoxConfigurationService {
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
-			List<String> tenancyKeyGuids = new ArrayList<String>();
-			
-			if (!searchFilter.isDisableFilters()) {
 
-				// check if service instance id is available in query param if not throw an exception
-				if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
-					LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-				}	
-				
-				// retrieve the actual tenancykey guids from DTO
-				tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
-	
-				if (tenancyKeyGuids.isEmpty()) {
-					LOG.error("retrieval of tenancy key from acl manifest failed");
-					throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
-							Response.Status.BAD_REQUEST);
-				}
-			}
-	
-			if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
-	
-				totalCount = configDao.getMailboxCountByProfile(searchFilter, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
-						searchFilter.getPageSize(), totalCount);
-				retrievedMailBoxes = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-	
-			} else {
-	
-				// If the profile name is empty it will use findByName
-				totalCount = configDao.getMailboxCountByName(searchFilter, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
-						searchFilter.getPageSize(), totalCount);
-				retrievedMailBoxes = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-			}			
-			
+            List<String> tenancyKeyGuids = getTenancyKeyGuids(searchFilter, aclManifestJson);
+            List<MailBox> retrievedMailBoxes = new ArrayList<>();
+            totalCount = search(searchFilter, tenancyKeyGuids, retrievedMailBoxes);
+
 			mailboxes.addAll(retrievedMailBoxes);
 			serviceResponse.setTotalItems(totalCount);
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
-			List<MailBoxDTO> searchMailBoxDTOList = new ArrayList<MailBoxDTO>();
-			MailBoxDTO serachMailBoxDTO = null;
-			
+			List<MailBoxDTO> mailBoxDTOList = new ArrayList<MailBoxDTO>();
+			MailBoxDTO mailBoxDTO = null;
+
 			String tenancyKeyDisplayName;
 			Set<Processor> processors;
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
 			for (MailBox mbx : mailboxes) {
-				
+
 				processors = processorDao.findProcessorByMbx(mbx.getPguid(), false);
 	            mbx.setMailboxProcessors(processors);
 	            tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
-	            
-                serachMailBoxDTO = new MailBoxDTO();
-                serachMailBoxDTO.copyFromEntity(mbx);
-                serachMailBoxDTO.setTenancyKeyDisplayName(tenancyKeyDisplayName);
-                searchMailBoxDTOList.add(serachMailBoxDTO);
-                
+
+                mailBoxDTO = new MailBoxDTO();
+                mailBoxDTO.copyFromEntity(mbx);
+                mailBoxDTO.setTenancyKeyDisplayName(tenancyKeyDisplayName);
+                mailBoxDTOList.add(mailBoxDTO);
             }
-			
+
 			// Constructing the responses.
-			serviceResponse.setMailBox(searchMailBoxDTOList);
+			serviceResponse.setMailBox(mailBoxDTOList);
 			serviceResponse.setDisableFilter(searchFilter.isDisableFilters());
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
-			
+
 			LOG.debug("Exit from search mailbox.");
 			return serviceResponse;
 
@@ -592,76 +550,38 @@ public class MailBoxConfigurationService {
 	/**
 	 * Searches the mailbox using mailbox name and profile name for UI resonse.
 	 *
-	 * @param mbxName The name of the mailbox
-	 *
-	 * @param profName The name of the profile
-	 * @param serviceInstId
+	 * @param searchFilter search filter contains mailbox and profile name
+	 * @param aclManifestJson manifest json which contains tenancy keys
 	 *
 	 * @return The SearchMailBoxResponseDTO
 	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
 	 */
 	public SearchMailBoxResponseDTO searchMailBoxUIResponse(GenericSearchFilterDTO searchFilter, String aclManifestJson)
-			throws  IOException {
+			throws IOException {
 
 		LOG.debug("Entering into search mailbox.");
 
 		int totalCount = 0;
-		List<MailBox> retrievedMailBoxes = null;
-		Map<String, Integer> pageOffsetDetails = null;
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
 		try {
 			
 			// Getting mailbox
-			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
-			List<String> tenancyKeyGuids = new ArrayList<String>();
-			
-			if (!searchFilter.isDisableFilters()) {
 
-				// check if service instance id is available in query param if not throw an exception
-				if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
-					LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-				}	
-				
-				// retrieve the actual tenancykey guids from DTO
-				tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
-	
-				if (tenancyKeyGuids.isEmpty()) {
-					LOG.error("retrieval of tenancy key from acl manifest failed");
-					throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
-							Response.Status.BAD_REQUEST);
-				}
-			}
-	
-			if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
-	
-				totalCount = configDao.getMailboxCountByProfile(searchFilter, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
-						searchFilter.getPageSize(), totalCount);
-				retrievedMailBoxes = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-	
-			} else {
-	
-				// If the profile name is empty it will use findByName
-				totalCount = configDao.getMailboxCountByName(searchFilter, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
-						searchFilter.getPageSize(), totalCount);
-				retrievedMailBoxes = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-			}			
-			
+            List<String> tenancyKeyGuids = getTenancyKeyGuids(searchFilter, aclManifestJson);
+            List<MailBox> retrievedMailBoxes = new ArrayList<>();
+            totalCount = search(searchFilter, tenancyKeyGuids, retrievedMailBoxes);
+
 			mailboxes.addAll(retrievedMailBoxes);
 			serviceResponse.setTotalItems(totalCount);
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
 			SearchMailBoxDTO serachMailBoxDTO = null;
-			
+
 			for (MailBox mbx : mailboxes) {
 
                 serachMailBoxDTO = new SearchMailBoxDTO();
@@ -669,12 +589,12 @@ public class MailBoxConfigurationService {
                         dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId(), searchFilter.isDisableFilters()));
                 searchMailBoxDTOList.add(serachMailBoxDTO);
             }
-			
+
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
 			serviceResponse.setDisableFilter(searchFilter.isDisableFilters());
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
-			
+
 			LOG.debug("Exit from search mailbox.");
 			return serviceResponse;
 
@@ -688,11 +608,79 @@ public class MailBoxConfigurationService {
 
 	}
 
+    /**
+     * reads tenancy keys from the manifest
+     * @param searchFilter search filter
+     * @param aclManifestJson manifest json
+     * @return tenancy keys
+     * @throws IOException
+     */
+    private List<String> getTenancyKeyGuids(GenericSearchFilterDTO searchFilter,
+                                            String aclManifestJson) throws IOException {
+
+        List<String> tenancyKeyGuids = new ArrayList<>();
+        if (!searchFilter.isDisableFilters()) {
+
+            // check if service instance id is available in query param if not throw an exception
+            if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
+                LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+            }
+
+            // retrieve the actual tenancykey guids from DTO
+            tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+
+            if (tenancyKeyGuids.isEmpty()) {
+                LOG.error("retrieval of tenancy key from acl manifest failed");
+                throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
+                        Response.Status.BAD_REQUEST);
+            }
+        }
+
+        return tenancyKeyGuids;
+    }
+
+    /**
+     * Common method for both UI and MIGRATOR search
+     *
+     * @param searchFilter search filters
+     * @param tenancyKeyGuids tenancy key guids
+     * @param retrievedMailBoxes mailbox results
+     * @return total count and retrieved mailboxes
+     */
+    private int search(GenericSearchFilterDTO searchFilter,
+                       List<String> tenancyKeyGuids,
+                       List<MailBox> retrievedMailBoxes) {
+
+        int totalCount = 0;
+        Map<String, Integer> pageOffsetDetails = null;
+        List<MailBox> results = null;
+        MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+
+
+        if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
+
+            totalCount = configDao.getMailboxCountByProfile(searchFilter, tenancyKeyGuids);
+            pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+                    searchFilter.getPageSize(),
+                    totalCount);
+            results = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
+        } else {
+
+            // If the profile name is empty it will use findByName
+            totalCount = configDao.getMailboxCountByName(searchFilter, tenancyKeyGuids);
+            pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+                    searchFilter.getPageSize(), totalCount);
+            results = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
+        }
+
+        if (!results.isEmpty()) {
+            retrievedMailBoxes.addAll(results);
+        }
+        return totalCount;
+    }
+
 	/**
-	 *
 	 * getting values from java properties file
-	 *
-	 * @param trustStore
 	 * @return
 	 * @throws IOException
 	 */
@@ -738,7 +726,7 @@ public class MailBoxConfigurationService {
 	 * @throws JAXBException
 	 * @throws SymmetricAlgorithmException
 	 */
-	public GetMailBoxResponseDTO readMailbox(String guid) throws IOException, JAXBException, SymmetricAlgorithmException {
+	public GetMailBoxResponseDTO readMailbox(String guid) {
 
 		LOG.debug("Entering into read mailbox.");
 		LOG.info("The retrieve guid or name  is {} ", guid);

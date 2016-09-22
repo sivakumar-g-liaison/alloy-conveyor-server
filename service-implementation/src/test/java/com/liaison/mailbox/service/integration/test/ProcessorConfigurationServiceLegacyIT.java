@@ -187,7 +187,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     	Assert.assertEquals(SUCCESS, processorReviseResponse.getResponse().getStatus());
     	
     	// read Processor
-    	GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorReviseResponse.getProcessor().getGuId());
+    	GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorReviseResponse.getProcessor().getGuId(), false);
     	Assert.assertEquals(SUCCESS, processorReadResponse.getResponse().getStatus());
     	Assert.assertEquals(processorLegacy.getDescription(), processorReadResponse.getProcessor().getDescription());
     	Assert.assertEquals(processorLegacy.getName(), processorReadResponse.getProcessor().getName());
@@ -228,7 +228,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
         Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
         
-        GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorResponse.getProcessor().getGuId());
+        GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorResponse.getProcessor().getGuId(), false);
         assertRemoteProcessorStaticCheck("includeFiles", processorLegacy.getRemoteProcessorProperties().getIncludeFiles(), processorReadResponse);
         assertRemoteProcessorStaticCheck("excludeFiles", processorLegacy.getRemoteProcessorProperties().getExcludeFiles(), processorReadResponse);
         

@@ -264,3 +264,6 @@ com.liaison.mailbox.threadpool.keepalive.minutes=1
 com.liaison.mailbox.threadpool.corepoolsize=25
 
 com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
+
+#skips the queue initializer and works as standalone server
+com.liaison.skip.queue=true

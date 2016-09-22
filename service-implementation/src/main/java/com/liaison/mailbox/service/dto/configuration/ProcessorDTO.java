@@ -369,12 +369,9 @@ public class ProcessorDTO {
 	 * @param processor
 	 * @throws IOException
 	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-    public void copyFromEntity(Processor processor, boolean includeUITemplate)
-    		throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
+    public void copyFromEntity(Processor processor, boolean includeUITemplate) throws IllegalAccessException, NoSuchFieldException, IOException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
