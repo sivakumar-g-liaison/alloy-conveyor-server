@@ -161,8 +161,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortField(sortField);
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
-					// search the mailbox based on the given query parameters
-					
+
+                    // search the mailbox based on the given query parameters
 					if (Boolean.parseBoolean(maxResponse)) {
 					    SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
 					    return serviceResponse;
@@ -172,12 +172,9 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					    return serviceResponse;
 					}
 					
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (SymmetricAlgorithmException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to read mailbox. " + e.getMessage());
 				}
 			}
 		};

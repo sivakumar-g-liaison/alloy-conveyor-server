@@ -15,6 +15,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -56,7 +57,8 @@ public class MailboxReadResource extends AuditedResource {
 	public Response readEntity(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "type") final @ApiParam(name = "type", required = true, value = "type") String type,
-			@PathParam(value = "guid") final @ApiParam(name = "guid", required = true, value = "guid") String guid) {
+			@PathParam(value = "guid") final @ApiParam(name = "guid", required = true, value = "guid") String guid,
+			@QueryParam(value = "trimResponse") final @ApiParam(name = "trimResponse", required = true, value = "trimResponse") String trimResponse) {
 
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
@@ -69,7 +71,7 @@ public class MailboxReadResource extends AuditedResource {
 					case MailBoxConstants.TYPE_PROFILE :
 						 return new ProfileConfigurationService().getProfileByGuid(guid);
 					case MailBoxConstants.TYPE_PROCESSOR :
-						 return new ProcessorConfigurationService().getProcessor(guid);
+						 return new ProcessorConfigurationService().getProcessor(guid, Boolean.parseBoolean(trimResponse));
 					case MailBoxConstants.TYPE_MAILBOX :
 						 return new MailBoxConfigurationService().readMailbox(guid);
 					default:

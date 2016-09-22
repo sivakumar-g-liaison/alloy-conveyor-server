@@ -181,12 +181,9 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					// deactivates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					return mailbox.getMailBox(guid, addConstraint, serviceInstanceId, manifestJson);
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (SymmetricAlgorithmException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
 				}
 
 			}

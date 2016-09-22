@@ -20,6 +20,7 @@ apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
 apply plugin: 'com.kageiit.url-cache'
+apply from: file("../gradle/tomcat.gradle")
 
 license {
 	header rootProject.file('codequality/HEADER')
@@ -140,7 +141,6 @@ war {
 }
 
 war.dependsOn('configureTomcat')
-
 
 dependencies {
 
@@ -373,9 +373,11 @@ cargo {
 	}
 }
 project.afterEvaluate {
+	cargoRunLocal.dependsOn('cargoDirectories')
 	cargoRunLocal.dependsOn('configureTomcat')
 	cargoRunLocal.dependsOn('setDevProperties')
 	cargoRunLocal.dependsOn('devConfigLogging')
+	cargoStartLocal.dependsOn('cargoDirectories')
 	cargoStartLocal.dependsOn('configureTomcat')
 	cargoStartLocal.dependsOn('setDevProperties')
 	cargoStartLocal.dependsOn('devConfigLogging')
@@ -445,6 +447,7 @@ task setDevProperties << {
 
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: [
+	'stageTomcat',
 	'setDevProperties'
 ], group:'DEV/CI Deployment', description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
 	//TODO replace tokens would be a nicer but heavier weight way of doing this.
