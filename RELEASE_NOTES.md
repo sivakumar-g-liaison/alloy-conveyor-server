@@ -1,6 +1,8 @@
 4.9.0-SNAPSHOT
 -------------------------------
 * GMB-860 - Audit Resource is missing user information
+* GGT-870 publish dependency report
+* GGT-868 publish WAR
 
 4.8.0
 -------------------------------
