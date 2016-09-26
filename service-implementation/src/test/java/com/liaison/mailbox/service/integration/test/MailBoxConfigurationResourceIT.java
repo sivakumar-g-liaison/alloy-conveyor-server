@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  *
  * @author veerasamyn
  */
-public class MailBoxConfigurationServiceTest extends BaseServiceTest {
+public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
 	private Logger logger;
 	private String jsonResponse;
@@ -67,7 +67,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	 */
 	@BeforeMethod
 	public void setUp() throws Exception {
-		logger = LogManager.getLogger(MailBoxConfigurationServiceTest.class);
+		logger = LogManager.getLogger(MailBoxConfigurationResourceIT.class);
 	}
 
 	/**

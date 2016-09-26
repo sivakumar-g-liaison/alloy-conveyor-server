@@ -41,9 +41,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  *
  * @author OFS
  */
-public class MailBoxServiceTest extends BaseServiceTest {
+public class MailBoxServiceIT extends BaseServiceTest {
 
 	private Logger logger = null;
+	private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
+	private String aclManifest_UnknownOrganization = "H4sIAAAAAAAAAM1UTU/jMBD9KysfVw1qA8uuctpAWYhUgtR6tRIIoWkym7XwR2S7EVHV/87YSSkc9sQBFMnKzDy/9zLxeMtQdyhNiyzbssoieKzntLCMpdPZaTI9To6nfJZm306yk/To9PuPWzZhjTRrkEXNMr2RcsJasKj9q9iaCp07JDYObYjYb3rhhqPzHDXoqv8pBQhn9FGNHRuAv4R1vgSFr3cv4G1u9HrW520rRQVeGE381yDk2jyxHZmQ4P8aq1h2t30JBgp2mZKWNRLPwGGdV8HtudGeUhFeGwVCj+DF4PALx+qfNtI0At10RgQDivehe+xmeZmXxW3Oi5vypVZoj1aD3DOtygd+cX4Vdwd5EmP5/LooKXMf+iY6IbHBaMKiMxtbhY1fA34MR70l9XC5Rxyq4SvwyROgBg+JgrZFS3ValXAudom4O5CbPfGhNFL/uSr4xaJYcba7303ebST8PgUaGlR0Sj7WS5Oq4YSQp05E0Ae6ecQ++SydGRuSrK15fN+JoWfCNOlhvRpI59iirpHGPQ4ZDYaPnKPmOB372Y1zoMD2h/vjDVtI3/1fIhSji2dVzm3b3QQAAA==";
 
 	private HTTPRequest request;
 	private String jsonRequest;
@@ -52,22 +54,14 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 	@BeforeMethod
 	public void setUp() throws Exception {
-		logger = LogManager.getLogger(MailBoxServiceTest.class);
+		logger = LogManager.getLogger(MailBoxServiceIT.class);
 	}
 
 	/**
 	 * Method to test triggerprofile.
-	 *
-	 * @throws LiaisonException
-	 * @throws JSONException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
-	 * @throws IOException
 	 */
 	@Test
-	public void testTriggerProfile() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException, IOException {
+	public void testTriggerProfile() throws Exception {
 
 		// Add the Mailbox
 		String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
@@ -81,6 +75,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
         Assert.assertEquals(SUCCESS, getResponse(getOutput().toString(), "addMailBoxResponse", STATUS));
 
@@ -110,8 +105,9 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		AddProcessorToMailboxRequestDTO addProcessorDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest,
 				AddProcessorToMailboxRequestDTO.class);
 
-		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		addProcessorDTO.getProcessor().getLinkedProfiles().add(profileName);
+		addProcessorDTO.getProcessorLegacy().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
+		addProcessorDTO.getProcessorLegacy().getLinkedProfiles().add(profileName);
+		addProcessorDTO.setProcessor(null);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 

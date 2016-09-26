@@ -57,7 +57,7 @@ import com.liaison.mailbox.service.util.HTTPClientUtil;
  * 
  * @author OFS
  */
-public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
+public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
 	private Logger logger;
 	private String jsonResponse;
@@ -70,7 +70,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 */
 	@BeforeClass
 	public void setUp() throws Exception {
-		logger = LogManager.getLogger(KeyManagerIntegrationServiceTest.class);
+		logger = LogManager.getLogger(KeyManagerIntegrationServiceIT.class);
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
 		System.setProperty("archaius.deployment.environment", "ci");
 	}

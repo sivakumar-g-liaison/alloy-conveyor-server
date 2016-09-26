@@ -7,7 +7,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.integration.test;
+package com.liaison.mailbox.service.unit.test;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.UUIDGen;

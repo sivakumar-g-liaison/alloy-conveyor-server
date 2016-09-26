@@ -65,7 +65,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  */
 
-public class DropboxIntegrationServiceTest extends BaseServiceTest {
+public class DropboxIntegrationResourceIT extends BaseServiceTest {
 
 	private Logger logger;
 	private String jsonResponse;
@@ -74,7 +74,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 
 	@BeforeClass
 	public void setUp() throws Exception {
-		logger = LogManager.getLogger(DropboxIntegrationServiceTest.class);
+		logger = LogManager.getLogger(DropboxIntegrationResourceIT.class);
 	}
 
 	@Test

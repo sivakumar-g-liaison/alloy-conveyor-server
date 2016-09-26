@@ -508,7 +508,6 @@ test.doFirst {
     }
     exclude '**/DropboxIntegrationServiceTest.class'
     exclude '**/KeyManagerIntegrationServiceTest.class'
-    exclude '**/MailBoxConfigurationServiceTest.class'
     exclude '**/MailBoxProcessorServiceTest.class'
     exclude '**/StorageUtilitiesTest.class'
     exclude '**/JavaScriptEngineUtilTest.class'
@@ -517,8 +516,6 @@ test.doFirst {
     exclude '**/MailBoxProfileServiceTest.class'
     exclude '**/MailBoxAdminServiceTest.class'
     exclude '**/RemoteProcessorTest.class'
-	exclude '**/FS2ResourceTest.class'
-	exclude '**/HelloWorldResourceTest.class'
     include '**/*Test.class'
 }
 
