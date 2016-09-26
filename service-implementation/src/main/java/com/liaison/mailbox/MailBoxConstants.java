@@ -406,5 +406,9 @@ public interface MailBoxConstants {
     // Http connection timeout range min and max
     int HTTP_CONNECITON_TIMEOUT_RANGE_MIN = 60000;
     int HTTP_CONNECITON_TIMEOUT_RANGE_MAX = 300000;
-    
+
+	//constant for callback
+    String KEY_MESSAGE_CONTEXT_URI = "MESSAGE_CONTEXT_URI";
+    String RESUME = "resume";
+
 }
