@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -45,6 +47,7 @@ import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResp
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
+import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -53,14 +56,17 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.CALLBACK;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
+import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
 
 
 /**
@@ -474,6 +480,15 @@ public class MailBoxService implements Runnable {
                     directUpload(processor, workTicket);
                 }
 
+                //Sends response back to SB
+                String callback = workTicket.getAdditionalContextItem(CALLBACK);
+                if (Boolean.parseBoolean(callback)
+                        && (processor instanceof com.liaison.mailbox.dtdm.model.FileWriter
+                        || directUpload)) {
+                    WorkResult result = constructWorkResult(workTicket, null);
+                    MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
+                }
+
             } else {
 
             	glassMessage.setStatus(ExecutionState.DUPLICATE);
@@ -521,6 +536,21 @@ public class MailBoxService implements Runnable {
 
             // send email to the configured mail id in case of failure
             EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
+
+            //sends the response to SB
+            if (null != workTicket) {
+
+                String callback = workTicket.getAdditionalContextItem(CALLBACK);
+                if (Boolean.parseBoolean(callback)) {
+                    WorkResult result = constructWorkResult(workTicket, e);
+                    try {
+                        MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
+                    } catch (IOException | JAXBException | ClientUnavailableException ioe) {
+                        LOG.error(ioe.getMessage(), ioe);
+                    }
+                }
+
+            }
 
         } finally {
         	//Clearing thread context map
@@ -587,5 +617,28 @@ public class MailBoxService implements Runnable {
         RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
         String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
         directUploader.doDirectUpload(workticket.getFileName(), path);
+    }
+
+    /**
+     * Constructs the work result for pause/resume in SB
+     *
+     * @param workTicket workticket
+     * @param e exception
+     * @return workResult
+     */
+    private WorkResult constructWorkResult(WorkTicket workTicket, Exception e) {
+
+        WorkResult workResult = new WorkResult();
+        workResult.setPipelineId(workTicket.getPipelineId());
+        workResult.setProcessId(workTicket.getGlobalProcessId());
+        workResult.setTaskId(workTicket.getTaskId());
+        workResult.addHeader(KEY_MESSAGE_CONTEXT_URI, (String) workTicket.getAdditionalContextItem(KEY_MESSAGE_CONTEXT_URI));
+
+        if (null != e) {
+            workResult.setStatus(500);
+            workResult.setErrorMessage(e.getMessage());
+        }
+
+        return workResult;
     }
 }
