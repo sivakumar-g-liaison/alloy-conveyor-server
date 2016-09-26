@@ -1,8 +1,9 @@
-4.9.0-SNAPSHOT
+4.9.0
 -------------------------------
 * GMB-860 - Audit Resource is missing user information
 * GGT-870 publish dependency report
 * GGT-868 publish WAR
+* update Gradle to 3.0
 
 4.8.0
 -------------------------------
