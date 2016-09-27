@@ -409,6 +409,6 @@ public interface MailBoxConstants {
 
 	//constant for callback
     String KEY_MESSAGE_CONTEXT_URI = "MESSAGE_CONTEXT_URI";
-    String CALLBACK = "CALLBACK";
+    String RESUME = "resume";
 
 }

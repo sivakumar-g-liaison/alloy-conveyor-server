@@ -61,12 +61,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.liaison.mailbox.MailBoxConstants.CALLBACK;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
+import static com.liaison.mailbox.MailBoxConstants.RESUME;
 
 
 /**
@@ -481,8 +481,8 @@ public class MailBoxService implements Runnable {
                 }
 
                 //Sends response back to SB
-                String callback = workTicket.getAdditionalContextItem(CALLBACK);
-                if (Boolean.parseBoolean(callback)
+                Object isResume = workTicket.getAdditionalContextItem(RESUME);
+                if ((isResume != null && ((Boolean) isResume))
                         && (processor instanceof com.liaison.mailbox.dtdm.model.FileWriter
                         || directUpload)) {
                     WorkResult result = constructWorkResult(workTicket, null);
@@ -540,8 +540,8 @@ public class MailBoxService implements Runnable {
             //sends the response to SB
             if (null != workTicket) {
 
-                String callback = workTicket.getAdditionalContextItem(CALLBACK);
-                if (Boolean.parseBoolean(callback)) {
+                Object isResume = workTicket.getAdditionalContextItem(RESUME);
+                if (isResume != null && ((Boolean) isResume)) {
                     WorkResult result = constructWorkResult(workTicket, e);
                     try {
                         MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
