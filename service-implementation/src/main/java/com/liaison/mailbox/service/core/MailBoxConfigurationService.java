@@ -580,14 +580,14 @@ public class MailBoxConfigurationService {
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
-			SearchMailBoxDTO serachMailBoxDTO = null;
+			SearchMailBoxDTO searchMailBoxDTO = null;
 
 			for (MailBox mbx : mailboxes) {
 
-                serachMailBoxDTO = new SearchMailBoxDTO();
-                serachMailBoxDTO.copyFromEntity(mbx,
+                searchMailBoxDTO = new SearchMailBoxDTO();
+                searchMailBoxDTO.copyFromEntity(mbx,
                         dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId(), searchFilter.isDisableFilters()));
-                searchMailBoxDTOList.add(serachMailBoxDTO);
+                searchMailBoxDTOList.add(searchMailBoxDTO);
             }
 
 			// Constructing the responses.

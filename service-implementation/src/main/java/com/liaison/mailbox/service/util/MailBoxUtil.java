@@ -604,7 +604,9 @@ public class MailBoxUtil {
         } else if (SWEEPER.equals(processorType) ||
                 DROPBOXPROCESSOR.equals(processorType)) {
             pipelineId = propertiesDTO.getPipeLineID();
-        }
+        } else {
+			return;
+		}
 
         if (isEmpty(pipelineId)) {
             throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
