@@ -30,7 +30,7 @@ allprojects {
             options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
-    group = 'com.liaison.commons.mailbox'
+    group = 'com.liaison.alloy.service'
 		
 	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
 	    file("${rootDir}/RELEASE_NOTES.md").withReader {
@@ -47,10 +47,8 @@ allprojects {
         maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-releases' }
-        //maven { url 'http://nexus.liaison.dev/content/repositories/g2-snapshots' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
         maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-releases' }
-        //maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-snapshots' }
         maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
         maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
     }
@@ -82,8 +80,7 @@ allprojects {
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/1.x.x/sonarqube.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/war.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/sonarqube.gradle')
 
 task showMeCache << {
     configurations.compile.each { println it }

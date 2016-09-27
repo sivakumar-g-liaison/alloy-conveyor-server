@@ -23,7 +23,7 @@ dependencies {
     classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.10.0'
     classpath 'net.saliman:gradle-cobertura-plugin:1.0.0'
     classpath 'org.ajoberstar:gradle-git:1.1.0'
-    classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:1.2'
+    classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.+'
     classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
-    classpath 'com.kageiit:url-cache-plugin:1.0.0'
+    classpath 'com.kageiit:url-cache-plugin:1.+'
 }
