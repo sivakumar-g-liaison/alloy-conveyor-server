@@ -551,56 +551,37 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     sourceSets.test.runtimeClasspath += files("${projectDir}/src/main/resources")
 
     ignoreFailures true
-}
-
-/*// JPA (datanucleus) bytecode enhancement
-task enhance()  << {
-	logger.info("... Enhancing ...");
-
-	ant.taskdef(
-			name      : 'datanucleusenhancer',
-			classpath : (project.runtimeClasspath - configurations.workTicket).asPath,
-			classname : 'org.datanucleus.enhancer.EnhancerTask'
-			)
-
-	ant.datanucleusenhancer(
-			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
-			verbose     : true,
-			api : "JPA",
-			persistenceUnit : "mailbox-dtdm",
-			failonerror : true)
-
-	ant.datanucleusenhancer(
-			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
-			verbose     : true,
-			api : "JPA",
-			persistenceUnit : "mailbox-rtdm",
-			failonerror : true)
-
-	ant.taskdef(
-	 name      : 'datanucleusenhancer',
-	 classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
-	 classname : 'org.datanucleus.enhancer.EnhancerTask'
-	 )
-	 ant.datanucleusenhancer(
-	 classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
-	 verbose     : true,
-	 api : "JPA",
-	 persistenceUnit : "mailbox-dtdm",
-	 failonerror : true)
-	 ant.datanucleusenhancer(
-	 classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
-	 verbose     : true,
-	 api : "JPA",
-	 persistenceUnit : "mailbox-rtdm",
-	 failonerror : true)
-
 
 }
 
+def isTomcatRunning = false
+gradle.taskGraph.beforeTask { Task task ->
+	if (task.name.equals('integrationTest')) {
+		if (!isTomcatRunning) {
+			println('Configuring and starting Tomcat...')
+			// The "cargoRunLocal.dependsOn('configureTomcat')" gets skipped here because it is inside "project.afterEvaluate"
+			// so we are explicitly configuring Tomcat for in container testing
+			configureTomcat.execute()
+			cargoStartLocal.execute()
+			isTomcatRunning = true
+		}
+	}
+}
 
-classes.dependsOn('enhance')*/
-
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (task.name.equals('integrationTest')) {
+		// if containerTestSuite is in the task graph, then
+		if (isTomcatRunning && (task.name.equals('containerTestSuite'))) {
+			logger.info 'Stopping Tomcat server'
+			try {
+				cargoStopLocal.execute()
+				isTomcatRunning = false
+			} catch (Throwable t) {
+				println('Tomcat Stop failure...continuing...')
+			}
+		}
+	}
+}
 
 def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"
 def dtoArchiveDestRoot = "${projectDir}/build/libs/"
