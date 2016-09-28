@@ -392,8 +392,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			Map <String, String> properties = new HashMap <String, String>();
 			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
 			if (!ttlMap.isEmpty()) {
-				Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-				workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			    Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+			    workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
 			}
 
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
@@ -698,8 +698,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     deleteStaleFiles(file, fileNames);
                     continue;
                 }
-
-                if (!MailBoxUtil.isFileExpired(file.toFile().lastModified())) {
+                int staleFileTTL = ((SweeperPropertiesDTO) getProperties()).getStaleFileTTL();
+                if (!MailBoxUtil.isFileExpired(file.toFile().lastModified(), staleFileTTL)) {
                     continue;
                 }
 
@@ -707,7 +707,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 fileNames.add(fileName);
                 LOGGER.info("Stale file {} deleted successfully in sweeper location {} ", fileName, file.toAbsolutePath().toString());
             }
-        } catch (IOException e) {
+        } catch (IOException |IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

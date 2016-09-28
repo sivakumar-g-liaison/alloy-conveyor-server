@@ -406,6 +406,16 @@ public class Processor implements Identifiable {
 	}
 	
 	/**
+	 *  Get the configured TTL value from Processor Properties
+	 *  
+	 *  @return TTL value
+	 */
+	@Transient
+	public String getTTLNumber() {
+	    return MailBoxUtil.getStaleFileTTLValue(getProcsrProperties());
+	}
+	
+	/**
 	 * Method to retrieve the given properties form Mailbox
 	 * 
 	 * @param propertiesToBeRetrieved - list of property Names to be retrieved

@@ -202,7 +202,6 @@
 		 {
             "name":"createFoldersInRemote",
             "displayName":"Create folders in remote",
-            "value":"",
             "type":"select",
             "value":"false",
             "mandatory":true,
@@ -218,7 +217,6 @@
 		 {
             "name":"recurseSubDirectories",
             "displayName":"Recurse sub directories",
-            "value":"",
             "type":"select",
             "value":"false",
             "mandatory":true,
@@ -234,7 +232,6 @@
          {
             "name":"directUpload",
             "displayName":"Direct Upload",
-            "value":"",
             "type":"select",
             "value":"true",
             "mandatory":true,
@@ -262,6 +259,22 @@
 			  "minLength": "",
 			  "maxLength": ""
 	        }
+	      },
+	      {
+	      	"name": "staleFileTTL",
+	      	"displayName": "Stale File TTL",
+	      	"type": "textarea",
+	      	"value": "",
+	      	"readOnly": false,
+	      	"mandatory": false,
+	      	"dynamic": false,
+	      	"valueProvided":false,
+	      	"defaultValue":"15",
+	      	"validationRules": {
+	      		"pattern": "\/^(1[5-9]|[2-8][0-9]|90)$\/",
+	      		"minLength": "",
+	      		"maxLength": ""
+	      	}
 	      }
       ],
       "folderProperties":[

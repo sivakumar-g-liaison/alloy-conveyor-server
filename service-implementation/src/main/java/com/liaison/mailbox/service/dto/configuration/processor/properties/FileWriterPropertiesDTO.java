@@ -12,6 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object for the properties of file writer.
  * 
@@ -19,5 +22,15 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="staticProperties")
 public class FileWriterPropertiesDTO extends StaticProcessorPropertiesDTO {
+    private int staleFileTTL;
 
+    @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
+    public int getStaleFileTTL() {
+        return staleFileTTL;
+    }
+
+    public void setStaleFileTTL(int staleFileTTL) {
+        this.staleFileTTL = staleFileTTL;
+    }
+    
 }

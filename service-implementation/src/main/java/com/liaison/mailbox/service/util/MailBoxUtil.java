@@ -71,6 +71,7 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 
 /**
  * Utilities for MailBox.
@@ -504,12 +505,15 @@ public class MailBoxUtil {
      * file is considered as expired if the (last modified time + ttl) is before current time
      * 
      * @param lastModified - the last modified time of file which needs to be validated for expiry
+     * @param staleFileTTL 
      * @return true if file expired otherwise false
      */
-    public static boolean isFileExpired(long lastModified) {
+    public static boolean isFileExpired(long lastModified, int staleFileTTL) {
     	
-		int staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
-												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+        if (0 == staleFileTTL) {
+    		staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
+    												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+        }
 		// calculate file validity
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(lastModified);
@@ -652,6 +656,32 @@ public class MailBoxUtil {
             } else {
                 throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
             }
+        }
+    }
+
+    /**
+     * Util method to read the stale file TTL value from processor properties
+     * @param json processor properties json
+     * @return String TTl value
+     */
+    public static String getStaleFileTTLValue(String json) {
+        
+        String remotePrcsr = "remoteProcessorProperties";
+        
+        try {
+
+            JSONObject obj = null;
+            if (json.contains(remotePrcsr)) {
+                JSONObject innerObj = new JSONObject(json);
+                obj = innerObj.getJSONObject(remotePrcsr);
+            } else {
+                obj = new JSONObject(json);
+            }
+
+            Object o = obj.get(PROPERTY_STALE_FILE_TTL);
+            return (String) o;
+        } catch (JSONException e) {
+            return null;
         }
     }
 

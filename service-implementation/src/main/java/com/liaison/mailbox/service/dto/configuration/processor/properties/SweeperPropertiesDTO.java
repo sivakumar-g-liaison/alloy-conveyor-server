@@ -40,6 +40,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean sweepSubDirectories;
 	private String contentType;
 	private String sort;
+	private int staleFileTTL;
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -120,6 +121,13 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
     }
     public void setSort(String sort) {
         this.sort = sort;
+    }
+    @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
+    public int getStaleFileTTL() {
+        return staleFileTTL;
+    }
+    public void setStaleFileTTL(int staleFileTTL) {
+        this.staleFileTTL = staleFileTTL;
     }
 
 }

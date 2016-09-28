@@ -48,6 +48,7 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean recurseSubDirectories;
     private boolean directUpload;	
     private int scriptExecutionTimeout;
+    private int staleFileTTL;
 
 	public String getUrl() {
 		return url;
@@ -167,20 +168,24 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setRecurseSubDirectories(boolean recurseSubDirectories) {
 		this.recurseSubDirectories = recurseSubDirectories;
 	}
-
     public boolean isDirectUpload() {
         return directUpload;
     }
-
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
     }
-
     @PatternValidation(errorMessage = "Invalid Value for Script Execution Timeout", type = MailBoxConstants.PROPERTY_SCRIPT_EXECUTION_TIMEOUT)
     public int getScriptExecutionTimeout() {
         return scriptExecutionTimeout;
     }
     public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
+    }
+    @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
+    public int getStaleFileTTL() {
+        return staleFileTTL;
+    }
+    public void setStaleFileTTL(int staleFileTTL) {
+        this.staleFileTTL = staleFileTTL;
     }
 }
