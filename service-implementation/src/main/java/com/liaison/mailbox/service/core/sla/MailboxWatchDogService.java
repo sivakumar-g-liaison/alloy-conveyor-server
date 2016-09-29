@@ -164,8 +164,8 @@ public class MailboxWatchDogService {
 					}
 
 					//get the mailbox properties
-					int staleFileTTL = Integer.parseInt(MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties()));
-					
+                    int staleFileTTL = Integer.parseInt(MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties()));
+
 					Map<String, String> mailboxProperties = getMailboxProperties(processor);
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
 					//No need to call the validateCustomerSLA
@@ -273,24 +273,24 @@ public class MailboxWatchDogService {
 		return processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 	}
 	
-	/**
-	 *  Method to validate the expire time.
-	 *
-	 * @param stagedFile
-	 * @param mailboxProperties
-	 * @return boolean
-	 */
-	private boolean validateTTLUnit(StagedFile stagedFile, int ttl) {
+    /**
+     *  Method to validate the expire time.
+     *
+     * @param stagedFile staged file entity
+     * @param ttl ttl value
+     * @return boolean
+     */
+    private boolean validateTTLUnit(StagedFile stagedFile, int ttl) {
 
-		if (0 == ttl) {
-		    LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
-		    ttl = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS,
+        if (0 == ttl) {
+            LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
+            ttl = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS,
                     MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT ));
-		}
+        }
 
-		Timestamp expireTimestamp = getTTLAsTimestamp(ttl, stagedFile.getCreatedDate());
-		return isTimeLimitExceeded(expireTimestamp);
-	}
+        Timestamp expireTimestamp = getTTLAsTimestamp(ttl, stagedFile.getCreatedDate());
+        return isTimeLimitExceeded(expireTimestamp);
+    }
 
 	/**
 	 * Method to convert ttl into TimeStamp value

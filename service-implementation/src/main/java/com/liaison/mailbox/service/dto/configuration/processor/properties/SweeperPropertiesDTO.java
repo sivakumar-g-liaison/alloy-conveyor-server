@@ -40,7 +40,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean sweepSubDirectories;
 	private String contentType;
 	private String sort;
-	private int staleFileTTL;
+    private int staleFileTTL;
 	
 	public String getPipeLineID() {
 		return pipeLineID;

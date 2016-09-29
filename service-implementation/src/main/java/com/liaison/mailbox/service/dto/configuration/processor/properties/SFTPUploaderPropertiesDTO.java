@@ -46,7 +46,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private boolean recurseSubDirectories;
 	private boolean directUpload;
 	private int scriptExecutionTimeout;
-	private int staleFileTTL;
+    private int staleFileTTL;
 	
 	public String getUrl() {
 		return url;
@@ -169,7 +169,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
 		this.scriptExecutionTimeout = scriptExecutionTimeout;
 	}
-	@PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
+    @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
     public int getStaleFileTTL() {
         return staleFileTTL;
     }

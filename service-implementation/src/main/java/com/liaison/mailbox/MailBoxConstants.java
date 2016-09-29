@@ -275,7 +275,7 @@ public interface MailBoxConstants {
 	String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 	String PROPERTY_TENANCY_KEY = "MBX_TENANCY_KEY";
 	String PROPERTY_SCRIPT_EXECUTION_TIMEOUT = "scriptExecutionTimeout";
-	String PROPERTY_STALE_FILE_TTL = "staleFileTTL";
+    String PROPERTY_STALE_FILE_TTL = "staleFileTTL";
 
 	// Properties for sweeper grouping boundary condition
 	String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";

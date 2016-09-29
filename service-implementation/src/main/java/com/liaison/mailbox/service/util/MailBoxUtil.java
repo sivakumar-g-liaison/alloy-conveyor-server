@@ -505,14 +505,14 @@ public class MailBoxUtil {
      * file is considered as expired if the (last modified time + ttl) is before current time
      * 
      * @param lastModified - the last modified time of file which needs to be validated for expiry
-     * @param staleFileTTL 
+     * @param staleFileTTL  ttl for the file in filesystem
      * @return true if file expired otherwise false
      */
     public static boolean isFileExpired(long lastModified, int staleFileTTL) {
     	
         if (0 == staleFileTTL) {
-    		staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
-    												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+            staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP,
+                                                    MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
         }
 		// calculate file validity
 		Calendar cal = Calendar.getInstance();
@@ -665,7 +665,7 @@ public class MailBoxUtil {
      * @return String TTl value
      */
     public static String getStaleFileTTLValue(String json) {
-        
+
         String remotePrcsr = "remoteProcessorProperties";
         
         try {
