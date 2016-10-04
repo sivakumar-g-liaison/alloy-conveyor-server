@@ -10,12 +10,15 @@
 
 package com.liaison.mailbox.rtdm.model;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
@@ -45,6 +48,11 @@ public class ProcessorExecutionState implements Identifiable {
 	private String pguid;
 	private String processorId;
 	private String executionStatus;
+	private String lastExecutionState;
+	private Date lastExecutionDate;
+	private String nodeInUse;
+	private String modifiedBy;
+	private Date modifiedDate;
 
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
@@ -85,6 +93,53 @@ public class ProcessorExecutionState implements Identifiable {
 	@Transient
 	public Class getEntityClass() {
 	    return this.getClass();
+	}
+
+	@Column(name = "LAST_EXEC_STATE", length = 32)
+	public String getLastExecutionState() {
+	    return lastExecutionState;
+	}
+	
+	public void setLastExecutionState(String lastExecutionState) {
+	    this.lastExecutionState = lastExecutionState;
+	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_EXEC_DATE")
+	public Date getLastExecutionDate() {
+	    return lastExecutionDate;
+	}
+	
+	public void setLastExecutionDate(Date lastExecutionDate) {
+	    this.lastExecutionDate = lastExecutionDate;
+	}
+	
+	@Column(name = "NODE_IN_USE", length = 128)
+	public String getNodeInUse() {
+	    return nodeInUse;
+	}
+
+	public void setNodeInUse(String nodeInUse) {
+	    this.nodeInUse = nodeInUse;
+	}
+
+	@Column(name = "MODIFIED_BY", length = 128)
+	public String getModifiedBy() {
+	    return modifiedBy;
+	}
+	
+	public void setModifiedBy(String modifiedBy) {
+	    this.modifiedBy = modifiedBy;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "MODIFIED_DATE", length = 128)
+	public Date getModifiedDate() {
+	    return modifiedDate; 
+	}
+	
+	public void setModifiedDate(Date modifiedDate) {
+	    this.modifiedDate = modifiedDate;
 	}
 
 }

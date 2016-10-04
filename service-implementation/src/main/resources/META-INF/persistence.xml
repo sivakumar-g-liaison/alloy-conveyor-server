@@ -51,6 +51,7 @@
 		<class>com.liaison.mailbox.rtdm.model.FSMTransitionState</class>
 		<class>com.liaison.mailbox.rtdm.model.ProcessorExecutionState</class>
 		<class>com.liaison.mailbox.rtdm.model.StagedFile</class>
+		<class>com.liaison.mailbox.rtdm.model.RuntimeProcessors</class>
 		<properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
 			<property name="hibernate.show_sql" value="false"/>
