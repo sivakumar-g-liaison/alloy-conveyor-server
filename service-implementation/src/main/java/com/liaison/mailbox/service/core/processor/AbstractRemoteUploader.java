@@ -19,7 +19,6 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
@@ -82,19 +81,18 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
 
     @Override
-    public void runProcessor(Object dto, MailboxFSM fsm) {
+    public void runProcessor(Object dto) {
 
         try {
 
             setReqDTO((TriggerProcessorRequestDTO) dto);
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
-                fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
                 setMaxExecutionTimeout(getScriptExecutionTimeout());
                 JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {
                 // FTPSRequest executed through Java
-                executeRequest(getReqDTO().getExecutionId(), fsm);
+                executeRequest(getReqDTO().getExecutionId());
             }
 
         } catch(IOException | IllegalAccessException e) {
@@ -283,7 +281,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      * @param executionId
      * @param fsm
      */
-    protected abstract void executeRequest(String executionId, MailboxFSM fsm);
+    protected abstract void executeRequest(String executionId);
 
     /**
      * get files from staged file db

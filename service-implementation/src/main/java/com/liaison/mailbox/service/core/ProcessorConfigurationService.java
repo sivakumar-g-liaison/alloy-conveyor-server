@@ -38,12 +38,12 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
-import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.model.FSMStateValue;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
+import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
+import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -73,6 +73,7 @@ import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
@@ -82,6 +83,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -190,9 +192,17 @@ public class ProcessorConfigurationService {
 			// persist the processor.
 			configDAO.persist(processor);
 
+			RuntimeProcessorsDAO processorsDAO = new RuntimeProcessorsDAOBase();
+			processorsDAO.addProcessors(processor.getPguid());
+			
 			// persist the processor execution state with status READY
 			ProcessorExecutionStateDAO executionDAO = new ProcessorExecutionStateDAOBase();
-			executionDAO.addProcessorExecutionState(processor.getPguid(), ExecutionState.READY.value());
+			ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
+			RuntimeProcessors processors = processorsDAO.findByProcessorId(processor.getPguid());
+			executionDTO.setPguid(processors.getPguid());
+			executionDTO.setProcessorId(processors.getProcessorId());
+			executionDTO.setExecutionStatus(ExecutionState.READY.value());
+			executionDAO.addProcessorExecutionState(executionDTO);
 
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
@@ -641,7 +651,7 @@ public class ProcessorConfigurationService {
 			timeStamp.setTime(cal.getTime().getTime());
 			timeStamp = new Timestamp(cal.getTime().getTime());
 
-			FSMStateDAO procDAO = new FSMStateDAOBase();
+			/*FSMStateDAO procDAO = new FSMStateDAOBase();
 
 			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
 			boolean isFrmDate = MailBoxUtil.isEmpty(frmDate);
@@ -672,16 +682,17 @@ public class ProcessorConfigurationService {
 			if (isStatus && isFrmDate && isToDate) {
 				listfsmStateVal = procDAO.findAllExecutingProcessors(timeStamp);
 			}
-
+*/
 			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
-			GetExecutingProcessorDTO getExecutingDTO = null;
+			// TODO need to write the logic to get executing processors
+			/*GetExecutingProcessorDTO getExecutingDTO = null;
 			for (FSMStateValue fsmv : listfsmStateVal) {
 
 				getExecutingDTO = new GetExecutingProcessorDTO();
 				getExecutingDTO.copyFromEntity(fsmv);
 				getExecutingProcessorDTOList.add(getExecutingDTO);
-			}
-
+			}*/
+			
 			serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
 
 			if (getExecutingProcessorDTOList == null || getExecutingProcessorDTOList.isEmpty()) {
@@ -695,7 +706,7 @@ public class ProcessorConfigurationService {
 			LOGGER.debug("Exit from getExecutingProcessors.");
 			return serviceResponse;
 
-		} catch (ProcessorManagementFailedException e) {
+		} catch (Exception e) {
 
 			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.EXECUTING_PROCESSORS,
@@ -722,13 +733,8 @@ public class ProcessorConfigurationService {
 				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
 			}
 
-
-			MailboxFSM fsm = new MailboxFSM();
 			LOGGER.info("Interrupt signal received for - " + executionID);
-
-			// persisting the FSMEvent entity
-			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, executionID);
-
+			// TODO Need to write logic for kill processor.
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_SUCCESSFULLY, MailBoxConstants.INTERRUPT_SIGNAL,
 					Messages.SUCCESS));

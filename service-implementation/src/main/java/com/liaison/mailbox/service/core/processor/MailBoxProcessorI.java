@@ -9,8 +9,6 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-
 /**
  * Interface exposes API required for running the processors.
  * 
@@ -18,7 +16,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
  */
 public interface MailBoxProcessorI {
 
-	public void runProcessor(Object object, MailboxFSM fsm);
+	public void runProcessor(Object object);
 
 	public void createLocalPath();
 

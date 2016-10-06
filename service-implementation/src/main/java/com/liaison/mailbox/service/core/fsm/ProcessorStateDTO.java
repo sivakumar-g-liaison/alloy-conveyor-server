@@ -10,15 +10,9 @@
 
 package com.liaison.mailbox.service.core.fsm;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.rtdm.model.FSMState;
-import com.liaison.mailbox.rtdm.model.FSMStateValue;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Data Transfer Object for processorState informations.
@@ -139,7 +133,7 @@ public class ProcessorStateDTO {
 	 *
 	 * @param entity
 	 *         the FSMState
-	 */
+	 *//*
 	public void copyToEntity(FSMState entity) {
 
 		//Constructing the FSMStae
@@ -163,7 +157,7 @@ public class ProcessorStateDTO {
 		values.add(value);
 		entity.setExecutionState(values);
 	}
-
+*/
 	/**
 	 * Copies all the data from processor to dto.
 	 *

@@ -122,6 +122,7 @@ public class ProcessorExecutionConfigurationService {
 			if (ExecutionState.PROCESSING.value().equals(processorExecutionState.getExecutionStatus())) {
 
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+				// TODO set Other properties too.
 				processorDao.updateProcessorExecutionState(processorExecutionState);
 				response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
 						"The processor execution status for processor with id : " + processorId + " is ",

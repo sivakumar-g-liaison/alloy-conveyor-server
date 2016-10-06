@@ -53,6 +53,7 @@ public class ProcessorExecutionState implements Identifiable {
 	private String nodeInUse;
 	private String modifiedBy;
 	private Date modifiedDate;
+	private String executionType;
 
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
@@ -140,6 +141,15 @@ public class ProcessorExecutionState implements Identifiable {
 	
 	public void setModifiedDate(Date modifiedDate) {
 	    this.modifiedDate = modifiedDate;
+	}
+	
+	@Column(name = "EXEC_TYPE", length = 32)
+	public String getExecutionType() {
+	    return executionType;
+	}
+	
+	public void setExecutionType(String executionType) {
+	    this.executionType = executionType;
 	}
 
 }

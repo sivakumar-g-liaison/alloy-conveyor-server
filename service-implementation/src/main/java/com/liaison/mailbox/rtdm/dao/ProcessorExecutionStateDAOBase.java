@@ -25,6 +25,7 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -68,12 +69,15 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 	}
 
 	@Override
-	public void addProcessorExecutionState(String processorId, String executionStatus) {
+	public void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO) {
 		ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
-		prcsrExecution.setPguid(MailBoxUtil.getGUID());
-		prcsrExecution.setProcessorId(processorId);
-		prcsrExecution.setExecutionStatus(executionStatus);
-
+		prcsrExecution.setPguid(executionStateDTO.getPguid());
+		prcsrExecution.setProcessorId(executionStateDTO.getProcessorId());
+		prcsrExecution.setExecutionStatus(executionStateDTO.getExecutionStatus());
+		
+		// TODO set other properties too. We have to update modified_by and date, last exec,. stuffs 
+		//only from execution processor ?
+		
 		persist(prcsrExecution);
         LOGGER.debug("Processor Execution created with status READY initialy");
 	}

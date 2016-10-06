@@ -31,6 +31,7 @@ import javax.xml.bind.JAXBException;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -57,6 +58,8 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.netflix.config.ConfigurationManager;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -653,6 +656,14 @@ public class MailBoxUtil {
                 throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_URL.toUpperCase(), Response.Status.BAD_REQUEST);
             }
         }
+    }
+    
+    /**
+     * To get current execution node
+     * @return node 
+     */
+    public static String getNode() {
+        return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
     }
 
 }

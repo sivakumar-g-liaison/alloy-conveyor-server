@@ -14,8 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
@@ -25,12 +23,10 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -62,9 +58,8 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
     /**
      * Java method to execute the HTTPRequest and write in FS location
      */
-    public void executeRequest(String executionId, MailboxFSM fsm) {
+    public void executeRequest(String executionId) {
 
-        String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
         try {
 
@@ -88,20 +83,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                     return;
                 }
 
-                Date lastCheckTime = new Date();
                 for (File file : files) {
 
-                    // interrupt signal check has to be done only if execution Id is present
-                    if (!StringUtil.isNullOrEmptyAfterTrim(executionId)
-                            && ((new Date().getTime() - lastCheckTime.getTime()) / 1000) > Long.parseLong(constantInterval)) {
-                        if (isThereAnInterruptSignal(executionId, fsm)) {
-                            return;
-                        }
-                        lastCheckTime = new Date();
-                    }
-
                     uploadFile(file);
-
                 }
 
                 if (executionStatus) {

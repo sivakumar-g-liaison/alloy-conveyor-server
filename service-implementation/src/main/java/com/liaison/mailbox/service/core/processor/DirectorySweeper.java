@@ -22,7 +22,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -105,7 +104,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 
 	@Override
-	public void runProcessor(Object dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto) {
         setReqDTO((TriggerProcessorRequestDTO) dto);
         run(getReqDTO().getExecutionId());
 	}

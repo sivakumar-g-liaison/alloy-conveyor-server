@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import org.apache.logging.log4j.LogManager;
@@ -21,11 +20,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -62,7 +59,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
      * @param fsm fsm instance
      */
     @Override
-    protected void executeRequest(String executionId, MailboxFSM fsm) {
+    protected void executeRequest(String executionId) {
 
         G2FTPSClient ftpsRequest = null;
         try {
@@ -97,7 +94,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             changeDirectory(ftpsRequest, remotePath);
             LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-            uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm, subFiles);
+            uploadDirectory(ftpsRequest, path, remotePath, executionId, subFiles);
 
             long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
@@ -123,24 +120,9 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                                 String localParentDir,
                                 String remoteParentDir,
                                 String executionId,
-                                MailboxFSM fsm,
                                 File[] subFiles) throws IOException, IllegalAccessException, LiaisonException {
 
-        Date lastCheckTime = new Date();
-        String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
-
         for (File item : subFiles) {
-
-            //interrupt signal check has to be done only if execution Id is present
-            if (!StringUtil.isNullOrEmptyAfterTrim(executionId)
-                    && ((new Date().getTime() - lastCheckTime.getTime()) / 1000) > Long.parseLong(constantInterval)) {
-
-                if (isThereAnInterruptSignal(executionId, fsm)) {
-                    return;
-                }
-                lastCheckTime = new Date();
-            }
-
             //FTPS
             uploadFile(ftpsRequest, remoteParentDir, item);
         }

@@ -28,20 +28,17 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -875,26 +872,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public void logToLens(String msg, File file, ExecutionState status) {
         throw new RuntimeException("Not Implemented");
-    }
-
-    /**
-     * Checks processor has the interrupt signal
-     *
-     * @param executionId execution id
-     * @param fsm FSM instance
-     * @return true if there is an interrupt signal
-     */
-    protected boolean isThereAnInterruptSignal(String executionId, MailboxFSM fsm) {
-
-        FSMEventDAOBase eventDAO = new FSMEventDAOBase();
-        if(eventDAO.isThereAInterruptSignal(executionId)) {
-
-            LOGGER.debug("The executor with execution id  " + executionId + " is gracefully interrupted");
-            fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
-            fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
-            return true;
-        }
-        return false;
     }
 
     /**

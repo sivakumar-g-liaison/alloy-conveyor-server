@@ -45,11 +45,8 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
-import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
-import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -541,8 +538,9 @@ public class MailboxWatchDogService {
 		if (MailBoxUtil.isEmpty(enableEmailNotification)) {
 			enableEmailNotification = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SLA_EMAIL_NOTIFICATION);					
 		}
+		//todo
 		
-		boolean isEmailNotificationEnabled = Boolean.valueOf(enableEmailNotification);
+		/*boolean isEmailNotificationEnabled = Boolean.valueOf(enableEmailNotification);
 		FSMStateDAO procDAO = new FSMStateDAOBase();
 
 		List<FSMStateValue> listfsmStateVal = null;
@@ -567,7 +565,7 @@ public class MailboxWatchDogService {
 				    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 				}
 			}
-		}
+		}*/
 	}
 	
 	/**

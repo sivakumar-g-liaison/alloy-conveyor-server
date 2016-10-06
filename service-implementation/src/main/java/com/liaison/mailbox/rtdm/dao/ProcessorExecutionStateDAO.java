@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
 /**
  * The dao class for the PROCESSOR_EXECUTION_STATE database table.
@@ -32,7 +33,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
 	ProcessorExecutionState findByProcessorId(String processorId);
 
-	void addProcessorExecutionState(String processorId, String executionStatus);
+	void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO);
 
 	List <String> findNonExecutingProcessors();
 	
