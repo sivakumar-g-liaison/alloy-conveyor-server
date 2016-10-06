@@ -13,6 +13,8 @@ package com.liaison.mailbox.rtdm.model;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -29,31 +31,41 @@ import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
  */
 @Entity
 @Table(name = "PROCESSORS")
-@NamedQueries({ 
-    @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
-            query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
+@NamedQueries({
+        @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
+                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
 })
 public class RuntimeProcessors {
 
     private String pguid;
     private String processorId;
-    
-    @OneToOne(cascade = { CascadeType.ALL})
-    @JoinColumn(name = "PGUID", nullable = false)
+    private ProcessorExecutionState processorExecState;
+
+    @Column(name = "PGUID", length = 32)
+    @Id
     public String getPguid() {
         return pguid;
     }
-    
+
     public void setPguid(String pguid) {
         this.pguid = pguid;
     }
-    
+
     @Column(name = "PROCESSOR_ID", length = 32)
     public String getProcessorId() {
         return processorId;
     }
-    
+
     public void setProcessorId(String processorId) {
         this.processorId = processorId;
+    }
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "processors", cascade = CascadeType.ALL)
+    public ProcessorExecutionState getProcessorExecState() {
+        return processorExecState;
+    }
+
+    public void setProcessorExecState(ProcessorExecutionState processorExecState) {
+        this.processorExecState = processorExecState;
     }
 }

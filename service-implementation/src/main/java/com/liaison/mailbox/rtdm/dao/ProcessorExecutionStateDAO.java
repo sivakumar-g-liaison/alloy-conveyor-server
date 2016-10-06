@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -19,26 +19,26 @@ import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
 /**
  * The dao class for the PROCESSOR_EXECUTION_STATE database table.
- * 
+ *
  * @author OFS
  */
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 
-	String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
-	String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
-	String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
-	String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
-	String PROCESSOR_ID = "processorId";
-	String EXEC_STATUS = "exec_status";
+    String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
+    String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
+    String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
+    String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
+    String PROCESSOR_ID = "processorId";
+    String EXEC_STATUS = "exec_status";
 
-	ProcessorExecutionState findByProcessorId(String processorId);
+    ProcessorExecutionState findByProcessorId(String processorId);
 
-	void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO);
+    void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO);
 
-	List <String> findNonExecutingProcessors();
-	
-	List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
-	
-	int findAllExecutingProcessors();
+    List<String> findNonExecutingProcessors();
+
+    List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+
+    int findAllExecutingProcessors();
 
 }

@@ -10,41 +10,44 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import java.util.Iterator;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
+
+import javax.persistence.EntityManager;
+import java.util.Date;
+import java.util.List;
 
 /**
  * This will fetch the processors details.
  *
  */
-public class RuntimeProcessorsDAOBase extends  GenericDAOBase<RuntimeProcessors> implements RuntimeProcessorsDAO, MailboxRTDMDAO{
+public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> implements RuntimeProcessorsDAO, MailboxRTDMDAO {
 
-    
     public RuntimeProcessorsDAOBase() {
         super(PERSISTENCE_UNIT_NAME);
     }
-    
+
     @Override
+    @SuppressWarnings("unchecked")
     public RuntimeProcessors findByProcessorId(String processorId) {
-        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-        
+        EntityManager entityManager = null;
+
         try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             @SuppressWarnings("unchecked")
-            List<RuntimeProcessors> processors = entityManager.createNamedQuery(FIND_BY_PROCESSOR_ID)
-                .setParameter(PROCESSOR_ID, processorId).getResultList();
-            Iterator<RuntimeProcessors> iter = processors.iterator();
-            
-            while (iter.hasNext()) {
-                return iter.next();
+            List<RuntimeProcessors> processors = entityManager
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .getResultList();
+            if (!processors.isEmpty()) {
+                return processors.get(0);
             }
-            
+
         } finally {
             if (entityManager != null) {
                 entityManager.close();
@@ -54,10 +57,22 @@ public class RuntimeProcessorsDAOBase extends  GenericDAOBase<RuntimeProcessors>
     }
 
     @Override
-    public void addProcessors(String processorId) {
+    public void addProcessor(ProcessorExecutionStateDTO executionStateDTO) {
+
         RuntimeProcessors processors = new RuntimeProcessors();
-        processors.setPguid(MailBoxUtil.getGUID());
-        processors.setProcessorId(processorId);
+        processors.setPguid(UUIDGen.getCustomUUID());
+        processors.setProcessorId(executionStateDTO.getProcessorId());
+
+        ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
+        prcsrExecution.setPguid(processors.getPguid());
+        prcsrExecution.setProcessorId(executionStateDTO.getProcessorId());
+        prcsrExecution.setExecutionStatus(executionStateDTO.getExecutionStatus());
+        prcsrExecution.setModifiedBy(executionStateDTO.getModifiedBy());
+        prcsrExecution.setModifiedDate(new Date());
+        prcsrExecution.setProcessors(processors);
+        processors.setProcessorExecState(prcsrExecution);
+
+        persist(processors);
     }
 
 }

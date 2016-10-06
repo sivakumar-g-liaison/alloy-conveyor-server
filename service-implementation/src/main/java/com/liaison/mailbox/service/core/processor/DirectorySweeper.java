@@ -106,10 +106,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	@Override
 	public void runProcessor(Object dto) {
         setReqDTO((TriggerProcessorRequestDTO) dto);
-        run(getReqDTO().getExecutionId());
+        run();
 	}
 
-	private void run(String executionId) {
+	private void run() {
 
         try {
 
@@ -189,7 +189,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             // retry when in-progress file list is not empty
             if (!activeFiles.isEmpty()) {
-            	run(executionId);
+            	run();
             }
             long endTime = System.currentTimeMillis();
 
@@ -343,9 +343,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Method to sort work tickets based on name/size/date
 	 * 
 	 * @param workTickets
-	 * @param staticProp
+	 * @param sortType
 	 */
-	
     private void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
     
         if (SORT_BY_NAME.equals(sortType)) {

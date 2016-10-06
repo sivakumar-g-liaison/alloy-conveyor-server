@@ -99,9 +99,10 @@ public class ProcessorExecutionConfigurationService {
 	
 	/**
 	 * Method to update the state of executing processor
-	 * @param ProcessorId
+	 *
+	 * @param processorId
 	 */
-	public UpdateProcessorExecutionStateResponseDTO UpdateExecutingProcessor(String processorId) {
+	public UpdateProcessorExecutionStateResponseDTO updateExecutingProcessor(String processorId, String userId) {
 
 		UpdateProcessorExecutionStateResponseDTO response = new UpdateProcessorExecutionStateResponseDTO();
 

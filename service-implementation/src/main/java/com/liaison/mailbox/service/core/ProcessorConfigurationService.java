@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -192,17 +193,14 @@ public class ProcessorConfigurationService {
 			// persist the processor.
 			configDAO.persist(processor);
 
-			RuntimeProcessorsDAO processorsDAO = new RuntimeProcessorsDAOBase();
-			processorsDAO.addProcessors(processor.getPguid());
-			
 			// persist the processor execution state with status READY
-			ProcessorExecutionStateDAO executionDAO = new ProcessorExecutionStateDAOBase();
-			ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
-			RuntimeProcessors processors = processorsDAO.findByProcessorId(processor.getPguid());
-			executionDTO.setPguid(processors.getPguid());
-			executionDTO.setProcessorId(processors.getProcessorId());
-			executionDTO.setExecutionStatus(ExecutionState.READY.value());
-			executionDAO.addProcessorExecutionState(executionDTO);
+            ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
+            executionDTO.setPguid(UUIDGen.getCustomUUID());
+            executionDTO.setProcessorId(processor.getPguid());
+            executionDTO.setExecutionStatus(ExecutionState.READY.value());
+            executionDTO.setModifiedDate(new Date());
+            executionDTO.setModifiedBy(userId);
+            new RuntimeProcessorsDAOBase().addProcessor(executionDTO);
 
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
