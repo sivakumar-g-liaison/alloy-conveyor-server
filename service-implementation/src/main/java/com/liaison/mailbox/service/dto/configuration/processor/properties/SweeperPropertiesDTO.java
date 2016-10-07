@@ -40,6 +40,8 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean sweepSubDirectories;
 	private String contentType;
 	private String sort;
+    private String processMode = "ASYNC";
+
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -122,4 +124,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
         this.sort = sort;
     }
 
+    public String getProcessMode() {
+        return processMode;
+    }
+
+    public void setProcessMode(String processMode) {
+        this.processMode = processMode;
+    }
 }

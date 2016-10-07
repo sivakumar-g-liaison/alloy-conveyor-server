@@ -100,6 +100,7 @@ check.for.interrupt.signal.frequency.in.sec=86400
 
 # Service Broker Sync interface info
 com.liaison.servicebroker.sync.uri=https://at4d-vpsbrt.liaison.dev/service-broker/process/workticket
+com.liaison.servicebroker.async.uri=https://at4d-vpsbasy.liaison.dev/service-broker/process/workticket
 # This is 10meg
 com.liaison.servicebroker.sync.max.request.size=10485760
 

@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 
@@ -51,8 +53,6 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
-	private static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
-	private static final String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
 	private static String SERVICE_BROKER_URI = null;
 	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
 

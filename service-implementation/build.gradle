@@ -87,6 +87,7 @@ allprojects {
 
 apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/publish-service.gradle')
 apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/war.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/consolidate-testresults.gradle')
 
 war {
     baseName = rootProject.name
@@ -494,6 +495,10 @@ task jettyRunSetProperties {
  }
  }*/
 
+project.ext {
+	mergedSuiteName = "G2 Relay Test Results"
+}
+
 test.doFirst {
     logger.info 'Unit Tests'
     description = 'Just unit tests, out of container'
@@ -522,6 +527,8 @@ test.doFirst {
 	exclude '**/HelloWorldResourceTest.class'
     include '**/*Test.class'
 }
+
+test.finalizedBy(consolidateTestResults)
 
 task pingTest {
 	dependsOn 'clean'

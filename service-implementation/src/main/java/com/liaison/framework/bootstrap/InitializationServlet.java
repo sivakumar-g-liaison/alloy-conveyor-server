@@ -10,28 +10,31 @@
 
 package com.liaison.framework.bootstrap;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
-import com.liaison.health.core.management.ThreadBlockedHealthCheck;
-import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.RemoteURLPublicKeyVerifier;
 import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.health.check.file.FileReadDeleteCheck;
 import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
-import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.health.core.management.ThreadBlockedHealthCheck;
+import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
 import com.liaison.mailbox.service.queue.QueueProcessInitializer;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.net.URL;
+
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 
 
 /**
@@ -88,6 +91,19 @@ public class InitializationServlet extends HttpServlet {
 		ACLUtil.setSignatureVerifier(aclSignatureVerifier);
 		logger.info(new DefaultAuditStatement(Status.SUCCEED, "ACL Filter Signature Verifier Set: " + aclSignatureVerifier.getClass().getName(), com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+
+        //Register sb http async host
+        String serviceBrokerUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerUri)) {
+            try {
+
+                URL uri = new URL(serviceBrokerUri);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http sbasync pool", e);
+            }
+        }
 
 	}
 
