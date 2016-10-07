@@ -46,7 +46,10 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -540,32 +543,32 @@ public class MailboxWatchDogService {
 		}
 		//todo
 		
-		/*boolean isEmailNotificationEnabled = Boolean.valueOf(enableEmailNotification);
-		FSMStateDAO procDAO = new FSMStateDAOBase();
+		boolean isEmailNotificationEnabled = Boolean.valueOf(enableEmailNotification);
+		ProcessorExecutionStateDAO procDAO = new ProcessorExecutionStateDAOBase();
 
-		List<FSMStateValue> listfsmStateVal = null;
+		List<ProcessorExecutionState> processorExecutionState = null;
 		
 		LOGGER.debug(constructMessage("checking whether the processor {} is executed with in the specified SLA configuration time"), processor.getProcsrName());
-		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration));
+		processorExecutionState = procDAO.findExecutingProcessorsWithinPeriod(processor.getPguid(), getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration));
 
 		// If the list is empty then the processor is not executed at all during the specified sla time.
-		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
+		if (null == processorExecutionState || processorExecutionState.isEmpty()) {
 		    LOGGER.debug(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
 		    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 			return;
 		}  
 
 		// If the processor is executed during the specified sla time but got failed.
-		if (null != listfsmStateVal && !listfsmStateVal.isEmpty()) {
+		if (null != processorExecutionState && !processorExecutionState.isEmpty()) {
 			
-			for (FSMStateValue fsmStateVal : listfsmStateVal) {
+			for (ProcessorExecutionState fsmStateVal : processorExecutionState) {
 
-				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
+				if (fsmStateVal.getExecutionStatus().equals(ExecutionState.FAILED.value())) {
 				    LOGGER.debug(constructMessage("The processor {} was executed but got failed with in the specified SLA configuration time"), processor.getProcsrName());
 				    notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
 				}
 			}
-		}*/
+		}
 	}
 	
 	/**

@@ -125,8 +125,6 @@ public class ProcessorExecutionConfigurationService {
 
 			if (ExecutionState.PROCESSING.value().equals(processorExecutionState.getExecutionStatus())) {
 
-			    Thread threadToStop = MailBoxUtil.getThreadByName(processorExecutionState.getThreadName());
-			    threadToStop.interrupt();
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				// TODO set Other properties too.
 				processorDao.updateProcessorExecutionState(processorExecutionState);

@@ -18,10 +18,13 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -185,6 +188,32 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             }
         }
         return count;
+    }
+    
+    /**
+     * Method to find the executing processors with the period
+     * @param processorId
+     * @param timeInterval
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public List<ProcessorExecutionState> findExecutingProcessorsWithinPeriod(String processorId, Timestamp timeInterval) {
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
+        try {
+            
+            runningProcessors = entityManager
+                                    .createNamedQuery(FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD)
+                                    .setParameter(PROCESSOR_ID, processorId)
+                                    .setParameter(INTERVAL_IN_HOURS, timeInterval)
+                                    .getResultList();
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return runningProcessors;
+        
     }
 
 }

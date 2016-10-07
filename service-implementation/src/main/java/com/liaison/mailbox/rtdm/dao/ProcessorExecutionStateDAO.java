@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +29,10 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
+    String FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD = "findExecutingProcessorsWithinPeriod";
     String PROCESSOR_ID = "processorId";
     String EXEC_STATUS = "exec_status";
+    String INTERVAL_IN_HOURS = "interval";
 
     ProcessorExecutionState findByProcessorId(String processorId);
 
@@ -40,5 +43,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
 
     int findAllExecutingProcessors();
+
+    List<ProcessorExecutionState> findExecutingProcessorsWithinPeriod(String pguid, Timestamp slaConfigurationAsTimeStamp);
 
 }
