@@ -98,38 +98,19 @@ end;
 /
 
 /**
- * Adding new column "EXEC_TYPE" in the table "PROCESSOR_EXEC_STATE" 
+ * Adding new column "THREAD_NAME" in the table "PROCESSOR_EXEC_STATE" 
  */
 DECLARE
   v_column_exists number := 0;  
 BEGIN
   Select count(*) into v_column_exists
     from all_tab_cols
-    where column_name = 'EXEC_TYPE'
+    where column_name = 'THREAD_NAME'
       and table_name = 'PROCESSOR_EXEC_STATE'
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE ADD EXEC_TYPE VARCHAR2(32)';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE ADD THREAD_NAME VARCHAR2(32)';
   end if;
 end;
 /
-
---Removing PROCESSOR_EXEC_STATE constraint
-DECLARE
-	num_rows integer;
-BEGIN
-	SELECT count(*) INTO num_rows FROM USER_CONSTRAINTS WHERE table_name = 'PROCESSOR_EXEC_STATE' AND constraint_name = 'CK02_PROCESSOR_EXEC_STATE';
-
-	IF num_rows = 1 THEN
-		EXECUTE IMMEDIATE
-			'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP CONSTRAINT CK02_PROCESSOR_EXEC_STATE';
-	END IF;
-END;
-
-/
-
---Adding PROCESSOR_EXEC_STATE constraint
-
-ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE
-ADD CONSTRAINT CK02_PROCESSOR_EXEC_STATE CHECK (EXEC_TYPE IN ('DEFAULT', 'SCRIPT'));

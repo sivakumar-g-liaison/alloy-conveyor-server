@@ -22,7 +22,7 @@ public class ProcessorExecutionStateDTO {
     private String nodeInUse;
     private String modifiedBy;
     private Date modifiedDate;
-    private String executionType;
+    private String threadName;
 
     public String getPguid() {
         return pguid;
@@ -88,12 +88,12 @@ public class ProcessorExecutionStateDTO {
         this.modifiedDate = modifiedDate;
     }
 
-    public String getExecutionType() {
-        return executionType;
+    public String getThreadName() {
+        return threadName;
     }
 
-    public void setExecutionType(String executionType) {
-        this.executionType = executionType;
+    public void setThreadName(String threadName) {
+        this.threadName = threadName;
     }
 
 }

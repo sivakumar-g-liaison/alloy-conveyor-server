@@ -73,13 +73,35 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     $scope.gridOptions = {
     		columnDefs: [{
                 field: 'processorId',
-                width: '45%',
                 displayName: 'Processor Id'
             },
 			{
                 field: 'executionStatus',
-                width: '45%',
                 displayName: 'Status'
+            },
+            {
+            	field: 'threadName',
+            	displayName: 'Thread Name'
+            },
+            {
+            	field: 'modifiedBy',
+            	displayName: 'Modified BY'
+            },
+            {
+            	field: 'modifiedDate',
+            	displayName: 'Modified Date'
+            },
+            {
+            	field: 'lastExecutionState',
+            	displayName: 'Last Execution State'
+            },
+            {
+            	field: 'lastExecutionDate',
+            	displayName: 'Last Execution Date'
+            },
+            {
+            	field: 'nodeInUse',
+            	displayName: 'Node In Use'
             },
             { 
                 displayName: 'Action',

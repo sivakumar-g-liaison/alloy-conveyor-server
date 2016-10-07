@@ -665,5 +665,17 @@ public class MailBoxUtil {
     public static String getNode() {
         return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
     }
+    
+    /**
+     * To get thread by name
+     * @param threadName
+     * @return
+     */
+    public static Thread getThreadByName(String threadName) {
+        for (Thread t : Thread.getAllStackTraces().keySet()) {
+            if (t.getName().equals(threadName)) return t;
+        }
+        return null;
+    }
 
 }

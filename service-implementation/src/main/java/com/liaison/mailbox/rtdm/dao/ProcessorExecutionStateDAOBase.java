@@ -137,10 +137,10 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
+    public List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
 
         EntityManager entityManager = null;
-        List<String> runningProcessors = new ArrayList<String>();
+        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
 
         try {
 

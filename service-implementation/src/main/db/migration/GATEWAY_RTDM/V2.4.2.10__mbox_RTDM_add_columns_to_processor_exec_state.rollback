@@ -102,19 +102,19 @@ end;
 /
 
 /**
- * Drop column "EXEC_TYPE" in the table "PROCESSOR_EXEC_STATE" 
+ * Drop column "THREAD_NAME" in the table "PROCESSOR_EXEC_STATE" 
  */
 DECLARE
   v_column_exists number := 0;  
 BEGIN
   Select count(*) into v_column_exists
     from all_tab_cols
-    where column_name = 'EXEC_TYPE'
+    where column_name = 'THREAD_NAME'
       and table_name = 'PROCESSOR_EXEC_STATE'
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 1) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN EXEC_TYPE';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN THREAD_NAME';
   end if;
 end;
 /

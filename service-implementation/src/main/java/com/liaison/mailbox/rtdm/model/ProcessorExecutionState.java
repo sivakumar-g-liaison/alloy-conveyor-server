@@ -43,7 +43,7 @@ import org.hibernate.annotations.FetchMode;
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_NON_EXECUTING_PROCESSORS,
                 query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus not like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS,
-                query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
+                query = "SELECT executionState FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS_ALL,
                 query = "SELECT count(executionState) FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS)
 })
@@ -59,7 +59,7 @@ public class ProcessorExecutionState implements Identifiable {
     private String nodeInUse;
     private String modifiedBy;
     private Date modifiedDate;
-    private String executionType;
+    private String threadName;
     private RuntimeProcessors processors;
 
     @Id
@@ -137,13 +137,13 @@ public class ProcessorExecutionState implements Identifiable {
         this.modifiedDate = modifiedDate;
     }
 
-    @Column(name = "EXEC_TYPE", length = 32)
-    public String getExecutionType() {
-        return executionType;
+    @Column(name = "THREAD_NAME", length = 32)
+    public String getThreadName() {
+        return threadName;
     }
 
-    public void setExecutionType(String executionType) {
-        this.executionType = executionType;
+    public void setThreadName(String threadName) {
+        this.threadName = threadName;
     }
 
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})

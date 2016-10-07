@@ -37,7 +37,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
     List<String> findNonExecutingProcessors();
 
-    List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+    List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
 
     int findAllExecutingProcessors();
 

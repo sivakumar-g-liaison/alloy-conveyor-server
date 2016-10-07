@@ -595,7 +595,7 @@ public class MailBoxService implements Runnable {
 			String lastExecutionState = processorExecutionState.getExecutionStatus();
 			processorExecutionState.setLastExecutionState(lastExecutionState);
 			processorExecutionState.setLastExecutionDate(new Date());
-			processorExecutionState.setExecutionType(String.valueOf(Thread.currentThread().getName()));
+			processorExecutionState.setThreadName(String.valueOf(Thread.currentThread().getName()));
 			processorExecutionState.setNodeInUse(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
 		}
 		processorExecutionState.setExecutionStatus(state.value());
