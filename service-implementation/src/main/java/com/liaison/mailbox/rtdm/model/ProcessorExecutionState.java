@@ -48,8 +48,8 @@ import org.hibernate.annotations.FetchMode;
                 query = "SELECT count(executionState) FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD,
                 query = "SELECT executionState FROM ProcessorExecutionState executionState"
-                        + "WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID
-                        + "and executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS )
+                        + " WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID
+                        + " AND executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS )
 })
 public class ProcessorExecutionState implements Identifiable {
 
