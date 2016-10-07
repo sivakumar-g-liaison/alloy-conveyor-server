@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.dto.enums.ProcessMode;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -237,6 +238,14 @@ public class GenericValidator {
 				isValidPattern = false;
 	            errorMessage.append(annotationDetails.errorMessage());
 			}
+
+            if (MailBoxConstants.PROPERTY_PROCESS_MODE.equals(annotationDetails.type())) {
+                if ((!ProcessMode.SYNC.name().equalsIgnoreCase(String.valueOf(value))) &&
+                        (!ProcessMode.ASYNC.name().equalsIgnoreCase(String.valueOf(value)))) {
+                    isValidPattern = false;
+                    errorMessage.append(annotationDetails.errorMessage());
+                }
+            }
 		}
 		return isValidPattern;
 
@@ -245,7 +254,7 @@ public class GenericValidator {
 	/**
 	 * Method to validate whether given string is valid retryAttempt value
 	 *
-	 * @param email
+	 * @param value retry attempt value
 	 * @return boolean
 	 */
 	private boolean isValidRetryAttemptValue (Object value) {
@@ -255,7 +264,7 @@ public class GenericValidator {
 	/**
 	 * Method to validate whether given string is valid timeout value
 	 *
-	 * @param connection timeout 
+	 * @param value connection timeout
 	 * @return boolean
 	 */
 	public boolean isBetweenRange (Object value) {
@@ -267,7 +276,7 @@ public class GenericValidator {
 	 * Method to validate whether given string is valid Http connection timeout
 	 * value
 	 *
-	 * @param connectionTimeout
+	 * @param value connectionTimeout
 	 * @return boolean
 	 */
 	public boolean isHttpBetweenRange (Object value) {
@@ -278,7 +287,7 @@ public class GenericValidator {
 	/**
 	 * Method to validate whether given string is valid timeout value
 	 *
-	 * @param email
+	 * @param value script execution timeout
 	 * @return boolean
 	 */
 	private boolean isScriptExecutionBetweenRange (Object value) {
@@ -289,7 +298,7 @@ public class GenericValidator {
 	/**
 	 * Method to validate whether given string is valid number of files
 	 * 
-	 * @param string
+	 * @param value number of file threshold
 	 * @return boolean
 	 */
 	private boolean isValidNumberOfFilesThreshold(String value) {
