@@ -10,7 +10,11 @@
 
 package com.liaison.mailbox.rtdm.model;
 
-import java.util.Date;
+import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,11 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
-import com.liaison.commons.jpa.Identifiable;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import java.util.Date;
 
 /**
  * The persistent class for the PROCESSOR_EXEC_STATE database table.

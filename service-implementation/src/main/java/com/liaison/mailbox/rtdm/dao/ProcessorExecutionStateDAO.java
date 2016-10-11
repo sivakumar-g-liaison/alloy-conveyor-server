@@ -29,7 +29,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
-    String FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD = "findExecutingProcessorsWithinPeriod";
+    String FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD = "ProcessorExecutionState.findExecutingProcessorsWithinPeriod";
     String PROCESSOR_ID = "processorId";
     String EXEC_STATUS = "exec_status";
     String INTERVAL_IN_HOURS = "interval";
