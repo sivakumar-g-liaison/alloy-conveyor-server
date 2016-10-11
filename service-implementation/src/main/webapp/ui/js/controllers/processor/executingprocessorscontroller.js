@@ -89,7 +89,8 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
             },
             {
             	field: 'modifiedDate',
-            	displayName: 'Modified Date'
+            	displayName: 'Modified Date',
+            	cellFilter: "date:'dd-MMM-yy HH:mm:ss'" 
             },
             {
             	field: 'lastExecutionState',
@@ -97,7 +98,8 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
             },
             {
             	field: 'lastExecutionDate',
-            	displayName: 'Last Execution Date'
+            	displayName: 'Last Execution Date',
+            	cellFilter: "date:'dd-MMM-yy HH:mm:ss'" 
             },
             {
             	field: 'nodeInUse',
