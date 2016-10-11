@@ -196,6 +196,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
      * @param timeInterval
      * @return
      */
+    @Override
     @SuppressWarnings("unchecked")
     public List<ProcessorExecutionState> findExecutingProcessorsWithinPeriod(String processorId, Timestamp timeInterval) {
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
