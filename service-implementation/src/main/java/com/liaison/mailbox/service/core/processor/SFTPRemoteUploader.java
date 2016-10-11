@@ -55,7 +55,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      *
      */
     @Override
-    protected void executeRequest(String executionId) {
+    protected void executeRequest() {
 
         G2SFTPClient sftpRequest = null;
         try {
@@ -87,7 +87,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
                 changeDirectory(sftpRequest, remotePath);
                 LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-                uploadDirectory(sftpRequest, path, remotePath, executionId, subFiles);
+                uploadDirectory(sftpRequest, remotePath, subFiles);
             }
 
             long endTime = System.currentTimeMillis();
@@ -110,10 +110,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * Java method to upload the file or folder
      *
      * @param sftpClient sftp client
-     * @param localParentDir local payload location
      * @param remoteParentDir remote location
-     * @param executionId current execution id
-     * @param fsm FSM instance
      * @param files files from local payload location
      * @throws IOException
      * @throws IllegalAccessException
@@ -121,9 +118,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * @throws SftpException
      */
     private void uploadDirectory(G2SFTPClient sftpClient,
-                                 String localParentDir,
                                  String remoteParentDir,
-                                 String executionId,
                                  File[] files)
             throws IOException, IllegalAccessException, LiaisonException, SftpException {
 
@@ -138,7 +133,6 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * Uploads files to remote location
      *
      * @param sftpRequest sftp client
-     * @param localParentDir local payload location
      * @param remoteParentDir remote payload location
      * @param file file to be uploaded
      * @throws IOException

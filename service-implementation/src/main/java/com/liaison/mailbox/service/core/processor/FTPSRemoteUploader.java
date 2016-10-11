@@ -54,12 +54,9 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
     /**
      * Java method to execute the FTPRequest to upload the file or folder
-     *
-     * @param executionId current execution id
-     * @param fsm fsm instance
      */
     @Override
-    protected void executeRequest(String executionId) {
+    protected void executeRequest() {
 
         G2FTPSClient ftpsRequest = null;
         try {
@@ -94,7 +91,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             changeDirectory(ftpsRequest, remotePath);
             LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-            uploadDirectory(ftpsRequest, path, remotePath, executionId, subFiles);
+            uploadDirectory(ftpsRequest, remotePath, subFiles);
 
             long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
@@ -117,9 +114,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
      * @throws LiaisonException
      */
     public void uploadDirectory(G2FTPSClient ftpsRequest,
-                                String localParentDir,
                                 String remoteParentDir,
-                                String executionId,
                                 File[] subFiles) throws IOException, IllegalAccessException, LiaisonException {
 
         for (File item : subFiles) {
@@ -132,7 +127,6 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
      * Upload files to remote location
      *
      * @param ftpsRequest ftps client
-     * @param localParentDir local payload location
      * @param remoteParentDir remote payload location
      * @param file file
      * @throws IOException

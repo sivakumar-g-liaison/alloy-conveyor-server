@@ -44,6 +44,4 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
     int findAllExecutingProcessors();
 
-    List<ProcessorExecutionState> findExecutingProcessorsWithinPeriod(String pguid, Timestamp slaConfigurationAsTimeStamp);
-
 }

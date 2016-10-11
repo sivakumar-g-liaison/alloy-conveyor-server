@@ -190,31 +190,4 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
         return count;
     }
     
-    /**
-     * Method to find the executing processors with the period
-     * @param processorId
-     * @param timeInterval
-     * @return
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<ProcessorExecutionState> findExecutingProcessorsWithinPeriod(String processorId, Timestamp timeInterval) {
-        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
-        try {
-            
-            runningProcessors = entityManager
-                                    .createNamedQuery(FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD)
-                                    .setParameter(PROCESSOR_ID, processorId)
-                                    .setParameter(INTERVAL_IN_HOURS, timeInterval)
-                                    .getResultList();
-        } finally {
-            if (entityManager != null) {
-                entityManager.close();
-            }
-        }
-        return runningProcessors;
-        
-    }
-
 }

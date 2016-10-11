@@ -58,7 +58,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
     /**
      * Java method to execute the HTTPRequest and write in FS location
      */
-    public void executeRequest(String executionId) {
+    public void executeRequest() {
 
 
         try {

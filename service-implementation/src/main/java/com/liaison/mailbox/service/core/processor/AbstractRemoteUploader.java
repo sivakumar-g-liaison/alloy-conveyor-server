@@ -92,7 +92,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {
                 // FTPSRequest executed through Java
-                executeRequest(getReqDTO().getExecutionId());
+                executeRequest();
             }
 
         } catch(IOException | IllegalAccessException e) {
@@ -277,11 +277,8 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     /**
      * executes core business logic
-     *
-     * @param executionId
-     * @param fsm
      */
-    protected abstract void executeRequest(String executionId);
+    protected abstract void executeRequest();
 
     /**
      * get files from staged file db
