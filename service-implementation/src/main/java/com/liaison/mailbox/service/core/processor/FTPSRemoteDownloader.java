@@ -30,7 +30,6 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
@@ -63,7 +62,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
     }
 
     @Override
-    public void runProcessor(Object dto, MailboxFSM fsm) {
+    public void runProcessor(Object dto) {
 
         LOGGER.debug("Entering in invoke.");
         try {
@@ -72,7 +71,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             // FTPSRequest executed through JavaScript
             if (getProperties().isHandOverExecutionToJavaScript()) {
 
-                fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
                 setMaxExecutionTimeout(((FTPDownloaderPropertiesDTO) getProperties()).getScriptExecutionTimeout());
                 JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
             } else {

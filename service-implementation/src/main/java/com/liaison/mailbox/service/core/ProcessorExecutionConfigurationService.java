@@ -58,27 +58,30 @@ public class ProcessorExecutionConfigurationService {
 
 			int totalCount = 0;
 			Map<String, Integer> pageOffsetDetails = null;
-			ExecutingProcessorsDTO processor = null;
-			List<ExecutingProcessorsDTO> searchMailBoxDTOList = new ArrayList<ExecutingProcessorsDTO>();
+			List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
+			List<String> executingProcessorIds = new ArrayList<String>();
 			ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
 
 			// setting the page offset details
 			totalCount = processorDao.findAllExecutingProcessors();
 			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(), searchFilter.getPageSize(),
 					totalCount);
-			List<String> executingProcessors = processorDao.findExecutingProcessors(pageOffsetDetails);
+			List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(pageOffsetDetails);
 
 			if (executingProcessors.size() != 0) {
 
-				for (String processorId : executingProcessors) {
+			    ExecutingProcessorsDTO executingProcessor = null;
+				for (ProcessorExecutionState processorState : executingProcessors) {
 
-					processor = new ExecutingProcessorsDTO(processorId);
-					searchMailBoxDTOList.add(processor);
+					executingProcessorIds.add(processorState.getProcessorId());
+					executingProcessor = new ExecutingProcessorsDTO();
+					executingProcessor.copyFromEntity(processorState);
+					executingProcessorsDTO.add(executingProcessor);
 				}
 				response.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(),
 						Messages.SUCCESS));
-				response.setExecutingProcessorIds(executingProcessors);
-				response.setProcessors(searchMailBoxDTOList);
+				response.setExecutingProcessorIds(executingProcessorIds);
+				response.setProcessors(executingProcessorsDTO);
 				response.setTotalItems(totalCount);
 			} else {
 				response.setResponse(new ResponseDTO(Messages.NO_EXECUTING_PROCESSORS_AVAIL, EXECUTING_PROCESSORS,
@@ -99,9 +102,10 @@ public class ProcessorExecutionConfigurationService {
 	
 	/**
 	 * Method to update the state of executing processor
-	 * @param ProcessorId
+	 *
+	 * @param processorId
 	 */
-	public UpdateProcessorExecutionStateResponseDTO UpdateExecutingProcessor(String processorId) {
+	public UpdateProcessorExecutionStateResponseDTO updateExecutingProcessor(String processorId, String userId) {
 
 		UpdateProcessorExecutionStateResponseDTO response = new UpdateProcessorExecutionStateResponseDTO();
 
@@ -122,6 +126,7 @@ public class ProcessorExecutionConfigurationService {
 			if (ExecutionState.PROCESSING.value().equals(processorExecutionState.getExecutionStatus())) {
 
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+				// TODO set Other properties too.
 				processorDao.updateProcessorExecutionState(processorExecutionState);
 				response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
 						"The processor execution status for processor with id : " + processorId + " is ",

@@ -172,7 +172,22 @@
 	      		"minLength": "",
 	      		"maxLength": ""
 	      	}
-	      }
+	      },
+	      {
+            "name":"processMode",
+            "displayName":"Process Mode",
+            "value":"ASYNC",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"ASYNC",
+            "validationRules":null,
+            "options":[
+               "ASYNC",
+               "SYNC"
+            ]
+         }
       ],
       "folderProperties":[
          {

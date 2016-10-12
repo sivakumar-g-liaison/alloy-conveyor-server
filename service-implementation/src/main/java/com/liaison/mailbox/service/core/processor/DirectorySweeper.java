@@ -13,6 +13,8 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
@@ -22,7 +24,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -35,7 +36,6 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,10 +43,11 @@ import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -62,6 +63,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 
 /**
  * DirectorySweeper
@@ -80,9 +85,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
 	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
 
-	private String pipelineId;
-	private List<Path> activeFiles = new ArrayList<>();
-    protected int totalNumberOfDeletedFiles;
     private static final String STALE_FILE_NOTIFICATION_SUBJECT = "Deleting Stale files in Sweeper";
     private static final String STALE_FILE_NOTIFICATION_EMAIL_FILES = "Files :";
     private static final String STALE_FILE_NOTIFICATION_EMAIL_CONTENT = "Deleting stale files in Sweeper named '%s' from the location '%s'";
@@ -90,9 +92,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private static final Object SORT_BY_NAME = "Name";
     private static final Object SORT_BY_SIZE = "Size";
 
+    private String pipelineId;
+    private List<Path> activeFiles = new ArrayList<>();
+    private SweeperPropertiesDTO staticProp;
+
     public void setPipeLineID(String pipeLineID) {
 		this.pipelineId = pipeLineID;
 	}
+
+    public void setStaticProp(SweeperPropertiesDTO staticProp) {
+        this.staticProp = staticProp;
+    }
 
 	@SuppressWarnings("unused")
 	private DirectorySweeper() {
@@ -105,12 +115,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 
 	@Override
-	public void runProcessor(Object dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto) {
         setReqDTO((TriggerProcessorRequestDTO) dto);
-        run(getReqDTO().getExecutionId());
+        run();
 	}
 
-	private void run(String executionId) {
+	private void run() {
 
         try {
 
@@ -118,7 +128,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             String inputLocation = getPayloadURI();
 
             // retrieve required properties
-            SweeperPropertiesDTO staticProp = (SweeperPropertiesDTO) getProperties();
+            this.setStaticProp((SweeperPropertiesDTO) getProperties());
 
             // Validation of the necessary properties
             if (MailBoxUtil.isEmpty(inputLocation)) {
@@ -133,64 +143,19 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             								? sweepDirectory(inputLocation, staticProp)
             								: retryGenWrkTktForActiveFiles(activeFiles);
 
-            if (!workTickets.isEmpty()) {
+			if (!workTickets.isEmpty()) {
 
-                LOGGER.debug("There are {} files to process", workTickets.size());
-            	// Read from mailbox property - grouping js location
-            	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
-            	
-            	//first corner timestamp
-            	ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
-
-                LOGGER.debug("Persist workticket to spectrum");
-                persistPayloadAndWorkticket(workTickets, staticProp);
-
-            	if (workTicketGroups.isEmpty()) {
-                    LOGGER.debug("The file group is empty");
-            	} else {
-            		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
-
-            			String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
-                        LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-            			postToSweeperQueue(wrkTcktToSbr);
-
-            			// For glass logging
-            			for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
-
-            	            //Fish tag global process id
-            	            ThreadContext.clearMap(); //set new context after clearing
-            	            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
-
-            			    logToLens(wrkTicket, firstCornerTimeStamp);
-            				LOGGER.info(constructMessage("Global PID",
-            				        seperator,
-            				        wrkTicket.getGlobalProcessId(),
-            				        " submitted for file ",
-            				        wrkTicket.getFileName()));
-
-            				String payloadURI = wrkTicket.getPayloadURI();
-        					String filePath = String.valueOf((Object) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
-            				// Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
-            				if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-                                LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
-                				delete(filePath);
-            				} else {
-                                LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
-            				}
-            				LOGGER.info(constructMessage("Global PID",
-            				        seperator,
-            				        wrkTicket.getGlobalProcessId(),
-            				        " deleted the file ",
-            				        wrkTicket.getFileName()));
-            			}
-            		}
-            	}
-            
-            }
+				LOGGER.debug("There are {} files to process", workTickets.size());
+				if (ProcessMode.SYNC.name().equals(staticProp.getProcessMode())) {
+					syncSweeper(workTickets, staticProp);
+				} else {
+					asyncSweeper(workTickets, staticProp);
+				}
+			}
 
             // retry when in-progress file list is not empty
             if (!activeFiles.isEmpty()) {
-            	run(executionId);
+            	run();
             }
             long endTime = System.currentTimeMillis();
 
@@ -205,6 +170,159 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         	ThreadContext.clearMap();
         }
 	}
+
+    /**
+     * Async directory sweeper posts workticket to queue
+     *
+     * @param workTickets worktickets
+     * @param staticProp sweeper property
+     * @throws IllegalAccessException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws JSONException
+     */
+    private void asyncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp)
+            throws IllegalAccessException, IOException, JAXBException, JSONException {
+
+        // Read from mailbox property - grouping js location
+        List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
+
+        //first corner timestamp
+        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+
+        LOGGER.debug("Persist workticket to spectrum");
+        persistPayloadAndWorkticket(workTickets, staticProp);
+
+        if (workTicketGroups.isEmpty()) {
+            LOGGER.debug("The file group is empty");
+        } else {
+
+            for (WorkTicketGroup workTicketGroup : workTicketGroups) {
+
+                String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
+                LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+                postToSweeperQueue(wrkTcktToSbr);
+
+                // For glass logging
+                for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
+
+                    //Fish tag global process id
+                    ThreadContext.clearMap(); //set new context after clearing
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
+
+                    logToLens(wrkTicket, firstCornerTimeStamp);
+                    LOGGER.info(constructMessage("Global PID",
+                            seperator,
+                            wrkTicket.getGlobalProcessId(),
+                            " submitted for file ",
+                            wrkTicket.getFileName()));
+
+                    verifyAndDeletePayload(wrkTicket);
+                }
+            }
+        }
+    }
+
+   /**
+     * sync directory sweeper posts wotkticket to REST endpoint
+     *
+     * @param workTickets worktickets
+     * @param staticProp sweeper properties
+     */
+    private void syncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) {
+
+        //first corner timestamp
+        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+
+        //sort the worktickets
+        sortWorkTicket(workTickets, staticProp.getSort());
+
+        String serviceBrokerUri = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
+        if (MailBoxUtil.isEmpty(serviceBrokerUri)) {
+            throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_ASYNC_URI + "'), cannot process sync");
+        }
+
+        int connectionTimeout = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT);
+
+        try {
+
+            for (WorkTicket workTicket : workTickets) {
+
+                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+                persistPayloadAndWorkticket(staticProp, workTicket);
+                workTicket.setProcessMode(ProcessMode.SYNC);
+
+                logToLens(workTicket, firstCornerTimeStamp);
+                LOGGER.info(constructMessage("Global PID",
+                        seperator,
+                        workTicket.getGlobalProcessId(),
+                        " submitted for file ",
+                        workTicket.getFileName()));
+
+                try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
+
+                    HTTPRequest request = HTTPRequest.post(serviceBrokerUri)
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                            .connectionTimeout(connectionTimeout)
+                            .inputData(JAXBUtility.marshalToJSON(workTicket))
+                            .outputStream(responseStream);
+
+                    // execute request and handle response
+                    HTTPResponse response = request.execute();
+                    if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
+                        throw new RuntimeException("Failed to process the payload in sync sweeper - " + response.getStatusCode());
+                    } else {
+                        verifyAndDeletePayload(workTicket);
+                    }
+
+                } catch (Exception e) {
+
+                    GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+                    glassMessageDTO.setGlobalProcessId(workTicket.getGlobalProcessId());
+                    glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+                    glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+                    glassMessageDTO.setFileName(workTicket.getFileName());
+                    glassMessageDTO.setStatus(ExecutionState.FAILED);
+                    glassMessageDTO.setMessage(e.getMessage());
+                    MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+
+                    throw new RuntimeException(e);
+                }
+            }
+
+        } catch (IOException e) {
+            LOGGER.error(constructMessage("Error occurred in sync sweeper", seperator, e.getMessage()), e);
+            throw new RuntimeException(e);
+        } finally {
+            //Fish tag global process id
+            ThreadContext.clearMap();
+        }
+
+    }
+
+    /**
+     * verifies whether the payload persisted in spectrum or not and deletes it
+     *
+     * @param wrkTicket workticket contains payload uri
+     * @throws IOException
+     */
+    private void verifyAndDeletePayload(WorkTicket wrkTicket) throws IOException {
+
+        String payloadURI = wrkTicket.getPayloadURI();
+        String filePath = String.valueOf((Object) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
+        // Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
+        if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
+            LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath);
+            delete(filePath);
+        } else {
+            LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
+        }
+        LOGGER.info(constructMessage("Global PID",
+                seperator,
+                wrkTicket.getGlobalProcessId(),
+                " deleted the file ",
+                wrkTicket.getFileName()));
+    }
 
 	/**
 	 * Method is used to retrieve all the WorkTickets from the given mailbox.
@@ -343,10 +461,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	/**
 	 * Method to sort work tickets based on name/size/date
 	 * 
-	 * @param workTickets
-	 * @param staticProp
+	 * @param workTickets worktickets
+	 * @param sortType sort type
 	 */
-	
     private void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
     
         if (SORT_BY_NAME.equals(sortType)) {
@@ -382,42 +499,54 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @param staticProp sweeper properties
 	 * @throws IOException
 	 */
-	public void persistPayloadAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
+	private void persistPayloadAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
 
 		LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
 		for (WorkTicket workTicket : workTickets) {
-
-			File payloadFile = new File(workTicket.getPayloadURI());
-
-			Map <String, String> properties = new HashMap <String, String>();
-			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-			if (!ttlMap.isEmpty()) {
-                Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-                workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
-			}
-
-			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
-			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
-			properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-			properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
-			
-			String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
-			properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
-			workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
-			LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
-
-			// persist payload in spectrum
-			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-				FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
-				workTicket.setPayloadURI(metaSnapshot.getURI().toString());
-			}
-			
-			// persist the workticket
-			StorageUtilities.persistWorkTicket(workTicket, properties);
+		    
+			persistPayloadAndWorkticket(staticProp, workTicket);
 		}
 
 		LOGGER.info(constructMessage("Payload and workticket are persisted successfully"));
 	}
+
+    /**
+     * overloaded method to persist the payload and workticket
+     *
+     * @param staticProp staic properties
+     * @param workTicket workticket
+     * @throws IOException
+     */
+    private void persistPayloadAndWorkticket(SweeperPropertiesDTO staticProp, WorkTicket workTicket) throws IOException {
+
+        File payloadFile = new File(workTicket.getPayloadURI());
+
+        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+        if (!ttlMap.isEmpty()) {
+            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+        }
+
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+
+        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
+        LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
+
+        // persist payload in spectrum
+        try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+        }
+
+        // persist the workticket
+        StorageUtilities.persistWorkTicket(workTicket, properties);
+    }
 
 	/**
 	 * Method is used to move the file to the sweeped folder.
@@ -627,7 +756,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
 	 *
      * @param wrkTicket workticket for logging
-	 * @param firstCornerTimeStamp 
+	 * @param firstCornerTimeStamp first corner timestamp
      */
     protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp) {
 

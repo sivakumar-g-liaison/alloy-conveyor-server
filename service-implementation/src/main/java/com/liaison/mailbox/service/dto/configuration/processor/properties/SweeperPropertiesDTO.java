@@ -41,6 +41,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String contentType;
 	private String sort;
     private int staleFileTTL;
+    private String processMode = "ASYNC";
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -130,4 +131,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
         this.staleFileTTL = staleFileTTL;
     }
 
+    public String getProcessMode() {
+        return processMode;
+    }
+
+    public void setProcessMode(String processMode) {
+        this.processMode = processMode;
+    }
 }

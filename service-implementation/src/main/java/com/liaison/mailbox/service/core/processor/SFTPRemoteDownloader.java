@@ -29,9 +29,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
@@ -237,7 +235,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void runProcessor(Object dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
@@ -245,8 +243,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// G2SFTP executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-
 				// Use custom G2JavascriptEngine
 				setMaxExecutionTimeout(((SFTPDownloaderPropertiesDTO) getProperties()).getScriptExecutionTimeout());
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
