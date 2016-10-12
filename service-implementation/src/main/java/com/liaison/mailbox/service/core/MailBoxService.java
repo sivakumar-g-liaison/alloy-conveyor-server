@@ -26,16 +26,12 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -50,6 +46,7 @@ import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,6 +56,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
@@ -129,13 +127,11 @@ public class MailBoxService implements Runnable {
 
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			processorMatchingProfile = new ArrayList<Processor>();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern,
 					shardKey);
 
 			// filter processors which are not running currently
 			ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-			nonExecutingProcessorIds = new ArrayList<String>();
 			nonExecutingProcessorIds = processorExecutionStateDAO.findNonExecutingProcessors();
 
 			nonExecutingProcessorMatchingProfile = new ArrayList<Processor>();
@@ -160,10 +156,6 @@ public class MailBoxService implements Runnable {
 				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
 				message = MailBoxUtil.marshalToJSON(request);
 				messages.add(message);
-				String slaVerificationStatus = (processor instanceof RemoteUploader) ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode() : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
-				addProcessorToFSMState(executionId, processor, profileName, slaVerificationStatus);
-
-
 			}
 
 			LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[messages.size()]));
@@ -192,22 +184,6 @@ public class MailBoxService implements Runnable {
 	}
 
 	/**
-	 * Method to add the initial processor execution statue.
-	 *
-	 * @param executionId
-	 * @param processor
-	 * @param profileName
-	 */
-	private void addProcessorToFSMState(String executionId, Processor processor, String profileName,String slaVerficationStatus) {
-
-		ProcessorStateDTO state = new ProcessorStateDTO();
-		state.setValues(executionId, processor, profileName,ExecutionState.QUEUED,slaVerficationStatus);
-		MailboxFSM fsm = new MailboxFSM();
-		fsm.addState(state);
-
-	}
-
-	/**
 	 * The method executes the processor based on given processor id.
 	 *
 	 * Unique id for processor
@@ -222,7 +198,6 @@ public class MailBoxService implements Runnable {
 		Processor processor = null;
 		ProcessorExecutionState processorExecutionState = null;
 		TriggerProcessorRequestDTO dto = null;
-		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		long actualStartTime = System.currentTimeMillis();
@@ -250,9 +225,6 @@ public class MailBoxService implements Runnable {
 
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
-			ProcessorStateDTO processorQueued = new ProcessorStateDTO();
-			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode());
-			fsm.addDefaultStateTransitionRules(processorQueued);
 
 			// retrieve the processor execution status from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
@@ -266,16 +238,13 @@ public class MailBoxService implements Runnable {
 
 			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processorExecutionState.getExecutionStatus())) {
 
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
 				LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
 				return;
 			}
 
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-
 			if (processorService == null) {
 				LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			}
 
 			MailBox mbx = processor.getMailbox();
@@ -288,18 +257,18 @@ public class MailBoxService implements Runnable {
 
 			LOG.debug("The Processor type is {}", processor.getProcessorType());
 			startTime = System.currentTimeMillis();
-			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
+			updateProcessorExecState(processorExecutionState, ExecutionState.PROCESSING);
 			processorExecutionStateDAO.merge(processorExecutionState);
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
+
 			endTime = System.currentTimeMillis();
 			LOG.debug("Calculating elapsed time for changing processor state to PROCESSING");
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-			processorService.runProcessor(dto, fsm);
+			processorService.runProcessor(dto);
 			startTime = System.currentTimeMillis();
-			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
+			updateProcessorExecState(processorExecutionState, ExecutionState.COMPLETED);
 			processorExecutionStateDAO.merge(processorExecutionState);
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+
 			endTime = System.currentTimeMillis();
 			LOG.debug("Calculating elapsed time for changing processor state to COMPLETED");
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
@@ -325,10 +294,9 @@ public class MailBoxService implements Runnable {
                         processor.getMailbox().getPguid(),
                         e.getMessage(), e);
             }
-		    
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+
 			if (processorExecutionState != null) {
-				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+				updateProcessorExecState(processorExecutionState, ExecutionState.FAILED);
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
 
@@ -350,12 +318,10 @@ public class MailBoxService implements Runnable {
                         e.getMessage(), e);
             }
 
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-
 			// send email to the configured mail id in case of failure
 			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 		}
@@ -379,12 +345,9 @@ public class MailBoxService implements Runnable {
 
 	    WorkTicket workTicket = null;
 	    Processor processor = null;
-        ProcessorExecutionState processorExecutionState = null;
         FileWriter processorService = null;
 
-        MailboxFSM fsm = new MailboxFSM();
         ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 
         TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
         GlassMessage glassMessage = null;
@@ -419,24 +382,6 @@ public class MailBoxService implements Runnable {
             processorType = processor.getProcessorType().name();
             glassMessage.logProcessingStatus(processor.getProcsrProtocol(), "Consumed workticket from queue", processor.getProcessorType().name(), StatusType.RUNNING);
 
-            // determine SLA status
-			String slaVerificationStatus = (processor instanceof RemoteUploader)
-					   ? SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode()
-					   : SLAVerificationStatus.SLA_NOT_VERIFIED.getCode();
-
-            // Initiate FSM Starts
-            // retrieve the processor execution status of corresponding uploader from run-time DB
-            processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
-            ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-            //In the PROFILE_NAME column of fsm state table,'NONE' will be persisted.
-            processorStaged.setValues(MailBoxUtil.getGUID(), processor, DEFAULT_FILE_NAME, ExecutionState.STAGED, slaVerificationStatus);
-            fsm.addState(processorStaged);
-
-            processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
-            processorExecutionStateDAO.merge(processorExecutionState);
-            fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
-            //Initiate FSM Ends
-            
             // check if file Name is available in the payloadTicketRequest if so save the file with the
             // provided file Name if not save with processor Name with Timestamp
             String stagedFileName = MailBoxUtil.isEmpty(workTicket.getFileName()) ? (processor.getProcsrName() + System.nanoTime()) : workTicket.getFileName();
@@ -457,7 +402,7 @@ public class MailBoxService implements Runnable {
                 }
             }
 
-            processorService.runProcessor(workTicket, fsm);
+            processorService.runProcessor(workTicket);
             glassMessage.setOutSize(workTicket.getPayloadSize());
             glassMessage.setOutboundFileName(stagedFileName);
             if (null != workTicket.getAdditionalContextItem(KEY_FILE_PATH)) {
@@ -527,12 +472,6 @@ public class MailBoxService implements Runnable {
                 glassMessage.logProcessingStatus(StatusType.ERROR, msg, FILEWRITER, ExceptionUtils.getStackTrace(e));
             }
             //GLASS LOGGING ENDS//
-
-            fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-            if (processorExecutionState != null) {
-                processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
-                processorExecutionStateDAO.merge(processorExecutionState);
-            }
 
             // send email to the configured mail id in case of failure
             EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
@@ -641,4 +580,24 @@ public class MailBoxService implements Runnable {
 
         return workResult;
     }
+
+	/**
+	 * updates processor execution state
+	 *
+	 * @param processorExecutionState execution state entity
+	 * @param state state to be updated
+	 */
+	private void updateProcessorExecState(ProcessorExecutionState processorExecutionState,
+										  ExecutionState state) {
+
+		if (ExecutionState.PROCESSING.equals(state)) {
+
+			String lastExecutionState = processorExecutionState.getExecutionStatus();
+			processorExecutionState.setLastExecutionState(lastExecutionState);
+			processorExecutionState.setLastExecutionDate(new Date());
+			processorExecutionState.setThreadName(String.valueOf(Thread.currentThread().getName()));
+			processorExecutionState.setNodeInUse(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
+		}
+		processorExecutionState.setExecutionStatus(state.value());
+	}
 }
