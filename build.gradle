@@ -44,12 +44,10 @@ allprojects {
 		}
 
     repositories { 
-        maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
-        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-releases' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
-        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-releases' }
-        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
     }
     
