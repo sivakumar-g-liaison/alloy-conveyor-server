@@ -39,9 +39,8 @@ test {
 buildscript {
 
 	repositories {
-        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
-        maven { url 'http://nexus.liaison.dev/content/repositories/deprecated-thirdparty' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/soapui' }
         maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
 	}
@@ -148,7 +147,7 @@ dependencies {
 
 
 	//common gitlab service
-	compile 'com.liaison:lib_gitlab:1.0.+'
+	compile 'com.liaison:lib_gitlab:1.+'
 
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
@@ -166,7 +165,10 @@ dependencies {
 	// TODO - See that we also depend on "jersey-bundle" inherently
 	// TODO - due to NetFlix... using the bundle is not advised... (remove)
 
-	compile group: "com.liaison", name: "fsm", version: "1.0.2", changing: true
+	compile('com.liaison:fsm:1.0.2') {
+        exclude module: 'commons-lib'
+    }
+
 	// for http mime
 	compile "org.apache.httpcomponents:httpmime:4.3.1"
 	compile 'javax.mail:mail:1.4.6'
@@ -205,16 +207,16 @@ dependencies {
 
 
 	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
-	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
+	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:3.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
 	compile 'com.liaison.commons:lib_message_bus:8.+'
 
-	compile "com.liaison.commons:lib_health_monitor_core:3.+"
-	compile "com.liaison.commons:lib_health_monitor_file:3.+"
-	compile "com.liaison.commons:lib_health_monitor_jdbc:3.+"
-	compile "com.liaison.commons:lib_health_monitor_spectrum:2.+"
-	compile "com.liaison.commons:lib_health_monitor_threadpool:3.+"
+	compile "com.liaison.commons:lib_health_monitor_core:4.+"
+	compile "com.liaison.commons:lib_health_monitor_file:4.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:4.+"
+	compile "com.liaison.commons:lib_health_monitor_fs2:4.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:4.+"
 	
 	// reusable utilities / framework components
 	compile project(':service-framework')
