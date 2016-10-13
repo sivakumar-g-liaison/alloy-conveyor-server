@@ -635,7 +635,11 @@ public class HTTPListenerResource extends AuditedResource {
      * @param e exception
      * @param request http request
      */
-    private void logSyncLENSFailure(ExecutionTimestamp firstCornerTimeStamp, String globalProcessId, WorkTicket workTicket, Exception e, HttpServletRequest request) {
+    private void logSyncLENSFailure(ExecutionTimestamp firstCornerTimeStamp,
+                                    String globalProcessId,
+                                    WorkTicket workTicket,
+                                    Exception e,
+                                    HttpServletRequest request) {
 
         GlassMessage failedMsg = constructGlassMessage(
                 request,
