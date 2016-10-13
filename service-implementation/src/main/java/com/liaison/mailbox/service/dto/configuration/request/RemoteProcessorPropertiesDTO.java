@@ -69,6 +69,7 @@ public class RemoteProcessorPropertiesDTO {
     private boolean recurseSubDirectories;
     private boolean directUpload;
     private int scriptExecutionTimeout;
+    private String processMode = "ASYNC";
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -371,5 +372,13 @@ public class RemoteProcessorPropertiesDTO {
     public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
         this.scriptExecutionTimeout = scriptExecutionTimeout;
     }
-    
+
+    @PatternValidation(errorMessage = "Invalid process mode, only SYNC or ASYNC allowed", type = MailBoxConstants.PROPERTY_PROCESS_MODE)
+    public String getProcessMode() {
+        return processMode;
+    }
+
+    public void setProcessMode(String processMode) {
+        this.processMode = processMode;
+    }
 }

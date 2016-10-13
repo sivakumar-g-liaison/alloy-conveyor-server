@@ -19,7 +19,6 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -56,7 +55,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	}
 
 	@Override
-	public void runProcessor(Object dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto) {
 
 	    WorkTicket workTicket = (WorkTicket) dto;
         GlassMessage glassMessage = null;

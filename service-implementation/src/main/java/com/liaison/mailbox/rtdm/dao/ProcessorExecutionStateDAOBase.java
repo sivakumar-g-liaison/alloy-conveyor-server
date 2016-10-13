@@ -10,164 +10,184 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
+import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
+import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import javax.persistence.EntityManager;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This will fetch the executing processors details.
  *
  * @author OFS
  */
-public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExecutionState> implements ProcessorExecutionStateDAO, MailboxRTDMDAO {
+public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExecutionState> implements ProcessorExecutionStateDAO, MailboxRTDMDAO {
 
-	private static final Logger LOGGER = LogManager.getLogger(ProcessorExecutionStateDAOBase.class);
+    private static final Logger LOGGER = LogManager.getLogger(ProcessorExecutionStateDAOBase.class);
 
-	public ProcessorExecutionStateDAOBase () {
-		super(PERSISTENCE_UNIT_NAME);
-	}
+    public ProcessorExecutionStateDAOBase() {
+        super(PERSISTENCE_UNIT_NAME);
+    }
 
-	public ProcessorExecutionState findByProcessorId(String processorId) {
+    /**
+     * Find processor execution state by processor id
+     *
+     * @param processorId
+     * @return ProcessorExecutionState
+     */
+    public ProcessorExecutionState findByProcessorId(String processorId) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		ProcessorExecutionState processorExecutionState = null;
-		try {
+        EntityManager entityManager = null;
+        ProcessorExecutionState processorExecutionState = null;
+        try {
 
-			@SuppressWarnings("unchecked")
-			List<ProcessorExecutionState> processorExecutionStates = entityManager.createNamedQuery(FIND_BY_PROCESSOR_ID)
-					.setParameter(PROCESSOR_ID, processorId).getResultList();
-			Iterator<ProcessorExecutionState> iter = processorExecutionStates.iterator();
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-			while (iter.hasNext()) {
-				return iter.next();
-			}
+            @SuppressWarnings("unchecked")
+            List<ProcessorExecutionState> processorExecutionStates = entityManager
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .getResultList();
 
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
+            if (!processorExecutionStates.isEmpty()) {
+                processorExecutionState = processorExecutionStates.get(0);
+            }
 
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
 
+        return processorExecutionState;
+    }
 
-		return processorExecutionState;
+    @Override
+    public void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO) {
 
-	}
+        RuntimeProcessors processors = new RuntimeProcessors();
+        processors.setPguid(UUIDGen.getCustomUUID());
+        processors.setProcessorId(executionStateDTO.getProcessorId());
 
-	@Override
-	public void addProcessorExecutionState(String processorId, String executionStatus) {
-		ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
-		prcsrExecution.setPguid(MailBoxUtil.getGUID());
-		prcsrExecution.setProcessorId(processorId);
-		prcsrExecution.setExecutionStatus(executionStatus);
+        ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
+        prcsrExecution.setProcessorId(executionStateDTO.getProcessorId());
+        prcsrExecution.setExecutionStatus(executionStateDTO.getExecutionStatus());
+        prcsrExecution.setModifiedBy(executionStateDTO.getModifiedBy());
+        prcsrExecution.setModifiedDate(new Date());
+        prcsrExecution.setProcessors(processors);
 
-		persist(prcsrExecution);
+        persist(prcsrExecution);
         LOGGER.debug("Processor Execution created with status READY initialy");
-	}
-	
-	/**
-	 * Update the processor execution state with the given status
-	 * 
-	 * @param processorExecutionState - ProcessorExecutionState entity that has to be updated
-	 */
-	public void updateProcessorExecutionState(ProcessorExecutionState processorExecutionState) {
-		merge(processorExecutionState);
-        LOGGER.debug("Processor execution state with id " + processorExecutionState.getPguid()
-				+ " is updated with status " + processorExecutionState.getExecutionStatus() + " for processor id "
-				+ processorExecutionState.getProcessorId());
-	}
+    }
 
-	public List <String> findNonExecutingProcessors() {
+    /**
+     * Update the processor execution state with the given status
+     *
+     * @param processorExecutionState - ProcessorExecutionState entity that has to be updated
+     */
+    public void updateProcessorExecutionState(ProcessorExecutionState processorExecutionState) {
+        merge(processorExecutionState);
+        LOGGER.debug("Processor execution state with id " + processorExecutionState.getProcessorId()
+                + " is updated with status " + processorExecutionState.getExecutionStatus() + " for processor id "
+                + processorExecutionState.getProcessorId());
+    }
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List <String> nonExecutionProcessors = new ArrayList<String>();
+    /**
+     * Returns the processors that aren't running
+     *
+     * @return list of processor guid
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> findNonExecutingProcessors() {
 
-		try {
+        EntityManager entityManager = null;
+        List<String> nonExecutionProcessors = new ArrayList<>();
 
-			List<?> nonExecutingsProcsrs = entityManager.createNamedQuery(FIND_NON_EXECUTING_PROCESSORS)
-					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getResultList();
-			Iterator<?> iter = nonExecutingsProcsrs.iterator();
+        try {
 
-			while (iter.hasNext()) {
-				nonExecutionProcessors.add((String) iter.next());
-			}
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            nonExecutionProcessors = entityManager
+                    .createNamedQuery(FIND_NON_EXECUTING_PROCESSORS)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+                    .getResultList();
 
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-		return nonExecutionProcessors;
-	}
-	
-	/**
-	 * Method to find the executing processors based on page offset
-	 * 
-	 * @param pageOffsetDetails
-	 */
-	@Override
-	public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return nonExecutionProcessors;
+    }
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<String> runningProcessors = new ArrayList<String>();
+    /**
+     * Method to find the executing processors based on page offset
+     *
+     * @param pageOffsetDetails pagination details
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
 
-		try {
+        EntityManager entityManager = null;
+        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
 
-			List<?> executingsProcsrs = entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS)
-					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
-					.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-					.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT)).getResultList();
+        try {
 
-			Iterator<?> iter = executingsProcsrs.iterator();
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            runningProcessors = entityManager
+                    .createNamedQuery(FIND_EXECUTING_PROCESSORS)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+                    .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+                    .getResultList();
 
-			while (iter.hasNext()) {
-				runningProcessors.add((String) iter.next());
-			}
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return runningProcessors;
+    }
 
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-		return runningProcessors;
-	}
+    /**
+     * Method to find the count of all executing processors
+     */
+    @Override
+    public int findAllExecutingProcessors() {
 
-	/**
-	 * Method to find the count of all executing processors
-	 */
-	@Override
-	public int findAllExecutingProcessors() {
+        EntityManager entityManager = null;
+        int count = 0;
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		Long processorsCount = null;
-		int count;
+        try {
 
-		try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            Long processorsCount = (Long) entityManager
+                    .createNamedQuery(FIND_EXECUTING_PROCESSORS_ALL)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+                    .getSingleResult();
 
-			processorsCount = (Long) entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS_ALL)
-					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getSingleResult();
+            count = processorsCount.intValue();
 
-			count = processorsCount.intValue();
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-		return count;
-	}
-
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return count;
+    }
+    
 }

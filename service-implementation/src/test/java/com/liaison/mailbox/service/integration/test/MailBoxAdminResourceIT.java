@@ -29,11 +29,7 @@ import org.testng.annotations.Test;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
-import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -421,59 +417,5 @@ public class MailBoxAdminResourceIT extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 	}
-	
-	/**
-	 * Method to interrupt the execution of running processor.
-	 * 
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
-	 */
-	@Test
-	public void interruptRunningProcessor() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
-		jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/interruptExecutionRequest.json");
-		InterruptExecutionEventRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, InterruptExecutionEventRequestDTO.class);
-
-		String url = getBASE_URL() + "/processoradmin/processor/execution" + "?executionID=" + requestDTO.getFsmEvent().getExecutionID(); 
-		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		InterruptExecutionEventResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, InterruptExecutionEventResponseDTO.class);
-		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
-	}
-	
-	/**
-	 * Method to interrupt the execution of running processor with empty executionID.
-	 * 
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
-	 */
-	@Test
-	public void interruptRunningProcessor_EmptyExecutionID_ShouldFail() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
-		jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/interruptExecutionRequest.json");
-		InterruptExecutionEventRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, InterruptExecutionEventRequestDTO.class);
-
-		FSMEventDTO fsm = new FSMEventDTO();
-		fsm.setExecutionID("");
-		requestDTO.setFsmEvent(fsm);
-		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/processoradmin/processor/execution", HTTP_METHOD.DELETE, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		InterruptExecutionEventResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, InterruptExecutionEventResponseDTO.class);
-		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
-	}
-	
 	
 }

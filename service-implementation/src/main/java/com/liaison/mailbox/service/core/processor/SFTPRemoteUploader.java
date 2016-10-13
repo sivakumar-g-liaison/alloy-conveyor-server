@@ -12,11 +12,9 @@ package com.liaison.mailbox.service.core.processor;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -28,7 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -58,7 +55,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      *
      */
     @Override
-    protected void executeRequest(String executionId, MailboxFSM fsm) {
+    protected void executeRequest() {
 
         G2SFTPClient sftpRequest = null;
         try {
@@ -90,7 +87,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
                 changeDirectory(sftpRequest, remotePath);
                 LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-                uploadDirectory(sftpRequest, path, remotePath, executionId, fsm, subFiles);
+                uploadDirectory(sftpRequest, remotePath, subFiles);
             }
 
             long endTime = System.currentTimeMillis();
@@ -113,10 +110,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * Java method to upload the file or folder
      *
      * @param sftpClient sftp client
-     * @param localParentDir local payload location
      * @param remoteParentDir remote location
-     * @param executionId current execution id
-     * @param fsm FSM instance
      * @param files files from local payload location
      * @throws IOException
      * @throws IllegalAccessException
@@ -124,28 +118,11 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * @throws SftpException
      */
     private void uploadDirectory(G2SFTPClient sftpClient,
-                                 String localParentDir,
                                  String remoteParentDir,
-                                 String executionId,
-                                 MailboxFSM fsm,
                                  File[] files)
             throws IOException, IllegalAccessException, LiaisonException, SftpException {
 
-        Date lastCheckTime = new Date();
-        String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
-
         for (File item : files) {
-
-            //interrupt signal check has to be done only if execution Id is present
-            if (!StringUtil.isNullOrEmptyAfterTrim(executionId)
-                    && ((new Date().getTime() - lastCheckTime.getTime()) / 1000) > Long.parseLong(constantInterval)) {
-
-                if (isThereAnInterruptSignal(executionId, fsm)) {
-                    return;
-                }
-                lastCheckTime = new Date();
-            }
-
             uploadFile(sftpClient, remoteParentDir, item);
 
         }
@@ -156,7 +133,6 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      * Uploads files to remote location
      *
      * @param sftpRequest sftp client
-     * @param localParentDir local payload location
      * @param remoteParentDir remote payload location
      * @param file file to be uploaded
      * @throws IOException

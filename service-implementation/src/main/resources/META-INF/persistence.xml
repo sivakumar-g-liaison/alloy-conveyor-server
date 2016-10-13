@@ -45,12 +45,9 @@
 	<provider>org.hibernate.ejb.HibernatePersistence</provider>
 	<non-jta-data-source>java:comp/env/jdbc/UCPPool-RTDM</non-jta-data-source>
 		<mapping-file>META-INF/orm.xml</mapping-file>
-		<class>com.liaison.mailbox.rtdm.model.FSMEvent</class>
-		<class>com.liaison.mailbox.rtdm.model.FSMState</class>
-		<class>com.liaison.mailbox.rtdm.model.FSMStateValue</class>
-		<class>com.liaison.mailbox.rtdm.model.FSMTransitionState</class>
 		<class>com.liaison.mailbox.rtdm.model.ProcessorExecutionState</class>
 		<class>com.liaison.mailbox.rtdm.model.StagedFile</class>
+		<class>com.liaison.mailbox.rtdm.model.RuntimeProcessors</class>
 		<properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
 			<property name="hibernate.show_sql" value="false"/>

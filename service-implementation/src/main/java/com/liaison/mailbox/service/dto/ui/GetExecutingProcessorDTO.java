@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
-import com.liaison.mailbox.rtdm.model.FSMStateValue;
-
 /**
  * Data Transfer Object that contains the fields required for retrieving the executing processors.
  * 
@@ -59,7 +57,7 @@ public class GetExecutingProcessorDTO {
 		this.profileName = profileName;
 	}
 	
-	public void copyFromEntity(FSMStateValue fsmv) {
+	/*public void copyFromEntity(FSMStateValue fsmv) {
 		
 		this.setExecutionId(fsmv.getFsmState().getExecutionId());
 		this.setProcessorName(fsmv.getFsmState().getProcessorName());
@@ -67,6 +65,6 @@ public class GetExecutingProcessorDTO {
 		this.setProfileName(fsmv.getFsmState().getProfileName());
 		this.setCreatedDate(fsmv.getCreatedDate().toString());
 		
-	}
+	}*/
 		
 }

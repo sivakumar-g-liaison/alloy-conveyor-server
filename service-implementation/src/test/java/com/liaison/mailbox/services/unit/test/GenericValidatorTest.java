@@ -326,4 +326,26 @@ public class GenericValidatorTest {
         
     }
 
+    @Test
+    public void testProcessMode() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setProcessMode("SYNC");
+        validator.validate(propertiesDTO);
+
+    }
+
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testProcessModeFailure() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setProcessMode("SYNCS");
+        validator.validate(propertiesDTO);
+
+    }
+
 }

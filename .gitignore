@@ -105,3 +105,6 @@ service-implementation/src/main/webapp/ui/nbproject/
 /service-implementation/src/main/db/~provision.*
 /service-implementation/src/main/db/log
 classes
+
+# downloaded error pages for WAR
+*/src/main/webapp/ui/error-*.html
