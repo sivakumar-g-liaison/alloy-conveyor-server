@@ -503,7 +503,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 		LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
 		for (WorkTicket workTicket : workTickets) {
-		    
 			persistPayloadAndWorkticket(staticProp, workTicket);
 		}
 

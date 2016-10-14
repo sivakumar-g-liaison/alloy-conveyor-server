@@ -411,7 +411,7 @@ public class Processor implements Identifiable {
      *  @return TTL value
      */
     @Transient
-    public String getStaleFileTTLDays() {
+    public int getStaleFileTTLDays() {
         return MailBoxUtil.getStaleFileTTLValue(getProcsrProperties());
     }
 	

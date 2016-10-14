@@ -687,10 +687,9 @@ public class MailBoxUtil {
      * @param json processor properties json
      * @return String TTl value
      */
-    public static String getStaleFileTTLValue(String json) {
+    public static int getStaleFileTTLValue(String json) {
 
         String remotePrcsr = "remoteProcessorProperties";
-        LOGGER.info("getStaleFileTTLValue json " + json );
         try {
 
             JSONObject obj = null;
@@ -702,11 +701,9 @@ public class MailBoxUtil {
             }
 
             Object o = obj.get(PROPERTY_STALE_FILE_TTL);
-            LOGGER.info("getStaleFileTTLValue object " + (String) o );
-            return (String) o;
+            return (int) o;
         } catch (JSONException e) {
-            LOGGER.error("getStaleFileTTLValue" + e);
-            return null;
+            return 0;
         }
     }
 

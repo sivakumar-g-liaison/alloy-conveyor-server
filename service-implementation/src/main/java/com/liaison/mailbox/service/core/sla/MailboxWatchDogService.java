@@ -164,7 +164,7 @@ public class MailboxWatchDogService {
 					}
 
 					//get the mailbox properties
-                    int staleFileTTL = Integer.parseInt(MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties()));
+                    int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
 
 					Map<String, String> mailboxProperties = getMailboxProperties(processor);
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
