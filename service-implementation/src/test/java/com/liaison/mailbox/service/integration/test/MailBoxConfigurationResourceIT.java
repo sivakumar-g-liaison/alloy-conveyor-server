@@ -28,6 +28,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMail
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,8 +48,6 @@ import java.util.Set;
 public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
     private Logger logger;
-    private String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
-    private String aclManifest = "H4sIAAAAAAAAAI2TXWvbMBSG7wf7D0GXY+1ix02aXE1J3M6kTcAxG2spQ7POipgsGUkxNSX/fXIcmyixYb4w9jnP+Xyl948fBocHgSiAyxzQYDZ4b6zWniogBujSvioX8odecOV5V8Nx4t3MhsFsdHNtbU/o80nQK5e/CY9oFSF2nJ/6cqJAmB6fkilo3e3caVC1BzFh4BUy/ytnhGkprikU6Jy9Y0qbNcmgL9kD6fcfx56XOM85S4lhUjRcg+3bAJRzYv5IlVXIs7O/xtMUQtsw/h4twl/zeLMKY6drJTnMiQaK02oNCymMNV3ktCSVGWHiP3K2bFLW2qJNfI/X0RNOos26k4zscpUgvM2+9CcTHM6DIZ76/nQ88gIvGOO7xQjfTm5H0/AsSzVF3TNaQflIBLFSWckxzZjd4YtL54oVjFs1O8askoGWO5XWjXyh8NctdkK0A8agTdyE9dHVbuHNHAI+XVA5qIxpfdT8oitLFITvoDvaiW+7+vEtSsKHaJsgl94PXk4Nzu/eWRYSdjCgW1AFS2EJOQgKIi0Px8TqZroOiq7pVstV+PMRr+8vDomVISOq7Lx556Vr6PlcyZ72jqwzVXuDms/9Pzn4MJeJBAAA";
 
     /**
      * @throws java.lang.Exception
@@ -74,6 +74,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
         String url = getBASE_URL() + "?sid=" + serviceInstanceId;
         HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+        request.addHeader("acl-manifest", aclManifest);
         request.execute();
         String jsonResponse = getOutput().toString();
         logger.info(jsonResponse);
@@ -194,6 +195,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         // Get the mailbox
         url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid() + "?sid=" + serviceInstanceId;
         request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+        request.addHeader("acl-manifest", aclManifest);
         request.execute();
 
         jsonResponse = getOutput().toString();
@@ -220,6 +222,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
         String url = getBASE_URL() + "?sid=" + serviceInstanceId;
         HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+        request.addHeader("acl-manifest", aclManifest);
         request.execute();
         request.addHeader("acl-manifest", aclManifest);
         String jsonResponse = getOutput().toString();
@@ -827,16 +830,16 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
      * Method to search mailbox with empty mailbox name.
      */
     @Test
-    public void testSearchMailBox_MailboxNameIsEmpty_ShouldFail() throws Exception {
+    public void testSearchMailBox_MailboxNameIsEmpty_ShouldPass() throws Exception {
 
-        String url = getBASE_URL() + "/?name=";
+        String url = getBASE_URL() + "/?name=&disableFilters=true";
         HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
         request.addHeader("acl-manifest", aclManifest);
         request.execute();
         String jsonResponse = getOutput().toString();
         logger.info(jsonResponse);
-        SearchMailBoxDetailedResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
-        Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
+        SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+        Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
     }
 
     /**
@@ -851,8 +854,8 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         request.execute();
         String jsonResponse = getOutput().toString();
         logger.info(jsonResponse);
-        SearchMailBoxDetailedResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxDetailedResponseDTO.class);
-        Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
+        SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+        Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
 
     }
 

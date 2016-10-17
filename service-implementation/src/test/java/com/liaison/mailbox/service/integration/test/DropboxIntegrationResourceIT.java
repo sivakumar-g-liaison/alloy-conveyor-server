@@ -77,7 +77,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		logger = LogManager.getLogger(DropboxIntegrationResourceIT.class);
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testDropboxServices() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//createMailBox
@@ -179,7 +179,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(200, downloadPayloadResponse.getStatusCode());
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testDropboxAuthenticateS_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//authenticate user account with invalid data
@@ -225,7 +225,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testGetTransferProfiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//authenticate user account with invalid data
@@ -253,7 +253,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testDropboxUploadPayload_InvalidId() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//authenticate user account
@@ -298,7 +298,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(jsonResponse, processorMessage);
     }
 
-	@Test
+	@Test(enabled = false)
 	public void testDropboxStagePayload_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//authenticate user account
@@ -327,7 +327,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, stagePayloadRespDTO.getResponse().getStatus());
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testGetStagedFiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
 
 		//authenticate user account with invalid data
@@ -355,7 +355,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testdownloadpayload_InvalidId() throws LiaisonException, IOException, JAXBException {
 
 		//authenticate user account
