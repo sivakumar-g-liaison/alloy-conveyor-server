@@ -1,4 +1,4 @@
-4.9.1-SNAPSHOT
+4.9.1
 -------------------------------
 * GGT-708 - remove deprecated-* repos
 * GMB-869 - We need a single-threaded, synchronous Data Sweeper process
