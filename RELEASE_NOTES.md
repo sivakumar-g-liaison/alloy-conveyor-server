@@ -1,3 +1,7 @@
+4.9.2
+-------------------------------
+* GMB-880 - connection leak in Mailbox search operation
+
 4.9.1
 -------------------------------
 * GGT-708 - remove deprecated-* repos
