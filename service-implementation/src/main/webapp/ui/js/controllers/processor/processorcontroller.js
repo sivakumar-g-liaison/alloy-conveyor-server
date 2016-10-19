@@ -976,7 +976,7 @@ var rest = myApp.controller(
             $scope.addNew = function () {
 
 	            	if ($rootScope.serviceInstanceId == "") {
-						showSaveMessage('Processor creation is not allowed', 'error');
+						showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
 						return;
 					}
                     $scope.formAddPrcsr.$setPristine();

@@ -39,9 +39,10 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> impl
 	@SuppressWarnings("unchecked")
 	public ServiceInstance findById(String servInsId) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
 		try {
 
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			List<ServiceInstance> serviceInsIds = entityManager.createNamedQuery(FIND_BY_SERVICE_INSTANCEID).setParameter(INTANXE_ID, servInsId).getResultList();
 			Iterator<ServiceInstance> iter = serviceInsIds.iterator();
 
@@ -51,7 +52,7 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> impl
 
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+                entityManager.close();
 			}
 		}
 		return null;
