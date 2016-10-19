@@ -180,14 +180,20 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
         Long totalItems = null;
         int count = 0;
- 
+ 		boolean isMatchModeSet = false;
+
         try {
  
             StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MailBox mailbox");
 
             boolean isNameAdded = false;
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-                query.append(" WHERE (lower(mailbox.mbxName) LIKE :").append(MBOX_NAME).append(")");
+				if (!searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_EQUALS) || searchFilter.getMatchMode().isEmpty()) {
+					query.append(" WHERE (lower(mailbox.mbxName) LIKE :").append(MBOX_NAME).append(")");
+				} else {
+					query.append(" WHERE (lower(mailbox.mbxName) = :").append(MBOX_NAME).append(")");
+					isMatchModeSet = true;
+				}
                 isNameAdded = true;
             }
 
@@ -198,7 +204,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             Query jpaQuery = entityManager.createQuery(query.toString());
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-                jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
+				if (!isMatchModeSet) {
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
+				} else {
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName().toLowerCase());
+				}
             }
             if (!searchFilter.isDisableFilters()) {
                 jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);

@@ -17,7 +17,9 @@ package com.liaison.mailbox.service.dto;
  * @author OFS
  */
 public class GenericSearchFilterDTO {
-	
+
+	public static final String MATCH_MODE_EQUALS = "equals";
+
 	private String mbxName;
 	private String serviceInstanceId;
 	private String profileName;
@@ -33,6 +35,7 @@ public class GenericSearchFilterDTO {
 	private String processorType;
 	private String processorName;
 	private String processorGuid;
+	private String matchMode;
 	private boolean isDisableFilters;
 
 	public String getMbxName() {
@@ -163,4 +166,11 @@ public class GenericSearchFilterDTO {
 		this.processorGuid = processorGuid;
 	}
 
+	public String getMatchMode() {
+		return matchMode;
+	}
+
+	public void setMatchMode(String matchMode) {
+		this.matchMode = matchMode;
+	}
 }
