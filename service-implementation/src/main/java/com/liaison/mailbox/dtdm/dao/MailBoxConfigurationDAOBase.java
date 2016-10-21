@@ -180,7 +180,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
         Long totalItems = null;
         int count = 0;
- 		boolean isMatchModeSet = false;
+ 		boolean isMatchModeEquals = !searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE);
 
         try {
  
@@ -188,12 +188,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             boolean isNameAdded = false;
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-				if (!searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_EQUALS) || searchFilter.getMatchMode().isEmpty()) {
-					query.append(" WHERE (lower(mailbox.mbxName) LIKE :").append(MBOX_NAME).append(")");
-				} else {
-					query.append(" WHERE (lower(mailbox.mbxName) = :").append(MBOX_NAME).append(")");
-					isMatchModeSet = true;
-				}
+					query.append(" WHERE (lower(mailbox.mbxName) " + searchFilter.getMatchMode().toUpperCase() + " :").append(MBOX_NAME).append(")");
                 isNameAdded = true;
             }
 
@@ -204,7 +199,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             Query jpaQuery = entityManager.createQuery(query.toString());
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-				if (!isMatchModeSet) {
+				if (!isMatchModeEquals) {
 					jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
 				} else {
 					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName().toLowerCase());

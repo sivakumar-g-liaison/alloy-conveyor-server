@@ -162,11 +162,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortField(sortField);
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
-					if (matchMode == null) {
-						searchFilter.setMatchMode("LIKE");
-					} else {
-						searchFilter.setMatchMode(matchMode);
-					}
+					searchFilter.setMatchMode(matchMode);
 
                     // search the mailbox based on the given query parameters
 					if (Boolean.parseBoolean(maxResponse)) {
