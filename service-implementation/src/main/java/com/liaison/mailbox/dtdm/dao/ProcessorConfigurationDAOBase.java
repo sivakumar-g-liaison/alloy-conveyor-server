@@ -716,8 +716,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		
 		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {		
 			query.append(" inner join processor.mailbox mailbox ");
-//			predicateList.add(" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME);
-			predicateList.add((searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+			predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
 					" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
 					" mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
 		}
@@ -733,7 +732,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             String profileAppender = isFolderAvailable ? " inner join folder.processor folderProcessor inner join folderProcessor.scheduleProfileProcessors schd_prof_processor"
                     : " inner join processor.scheduleProfileProcessors schd_prof_processor";
             query.append(profileAppender).append(" inner join schd_prof_processor.scheduleProfilesRef profile");
-            predicateList.add("LOWER(profile.schProfName) " + searchDTO.getMatchMode() + " :" + PROF_NAME);
+            predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
+					"LOWER(profile.schProfName) " + searchDTO.getMatchMode() + " :" + PROF_NAME :
+					"profile.schProfName " + searchDTO.getMatchMode() + " :" + PROF_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
 			predicateList.add(" LOWER(processor.procsrProtocol) = :" + PROTOCOL);
