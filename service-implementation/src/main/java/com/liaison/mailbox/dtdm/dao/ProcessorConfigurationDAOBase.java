@@ -716,7 +716,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		
 		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {		
 			query.append(" inner join processor.mailbox mailbox ");
-			predicateList.add(" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME);
+//			predicateList.add(" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME);
+			predicateList.add((searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
+					" mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
 			query.append(" inner join processor.folders folder ");
