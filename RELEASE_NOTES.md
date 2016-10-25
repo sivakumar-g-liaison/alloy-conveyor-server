@@ -1,3 +1,7 @@
+4.9.3
+-------------------------------
+* GMB-884 - Failed to execute HTTP request: at4u-vpsbasy.liaison.dev: Name or service not known
+
 4.9.2
 -------------------------------
 * GMB-880 - connection leak in Mailbox search operation
