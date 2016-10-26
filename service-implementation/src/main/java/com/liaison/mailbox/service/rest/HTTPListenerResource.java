@@ -10,35 +10,12 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
@@ -52,7 +29,6 @@ import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAbstractProcessor;
@@ -66,6 +42,29 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID_HEADER;
 import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
@@ -266,33 +265,19 @@ public class HTTPListenerResource extends AuditedResource {
 
                     logger.info("HTTP(S)-SYNC : for the mailbox {} - End", mailboxInfo);
 					return syncResponse;
-				} catch (Exception e) {
+				} catch(Exception e) {
 
-				    String errorMessage = e.getMessage();
-					logger.error(errorMessage, e);
+                    logger.error(e.getMessage(), e);
+                    logSyncLENSFailure(firstCornerTimeStamp, globalProcessId, workTicket, e, request);
 
-                    //GLASS LOGGING - FAILED
-                    GlassMessage failedMsg = constructGlassMessage(
-                            request,
-                            workTicket,
-                            ExecutionState.FAILED,
-                            globalProcessId,
-                            HTTPSYNCPROCESSOR,
-                            Protocol.HTTPSYNCPROCESSOR);
-                    // Log error status
-                    failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage(), MailBoxConstants.HTTPSYNCPROCESSOR, ExceptionUtils.getStackTrace(e));
-                    failedMsg.logFourthCornerTimestamp();
-                    if (null != workTicket) {
-                        failedMsg.logFirstCornerTimestamp(firstCornerTimeStamp);
+                    if (NO_PRIVILEGE.equals(e.getMessage())) {
+                        throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
+                    } else {
+                        if (e instanceof LiaisonAuditableRuntimeException) {
+                            throw e;
+                        }
+                        throw new LiaisonRuntimeException(e.getMessage());
                     }
-                    new TransactionVisibilityClient().logToGlass(failedMsg);
-                    //GLASS LOGGING - FAILED
-
-					if (NO_PRIVILEGE.equals(e.getMessage())) {
-					    throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
-					} else {
-					    throw new LiaisonRuntimeException(e.getMessage());
-					}
                 } finally {
                     ThreadContext.clearMap();
 				}
@@ -454,7 +439,9 @@ public class HTTPListenerResource extends AuditedResource {
 					}
 
 					workTicket.setProcessMode(ProcessMode.ASYNC);
-					asyncProcessor.processWorkTicket(workTicket, glassMessage);
+                    //persists workticket
+                    StorageUtilities.persistWorkTicket(workTicket, httpListenerProperties);
+                    asyncProcessor.processWorkTicket(workTicket, glassMessage);
                     logger.info("HTTP(S)-ASYNC : GlobalPID {}, Posted workticket to Service Broker", globalProcessId);
 
 					logger.info("HTTP(S)-ASYNC : for the mailbox {} - End", mailboxInfo);
@@ -467,29 +454,17 @@ public class HTTPListenerResource extends AuditedResource {
                             .build();
 
 				} catch (Exception e) {
-				    String errorMessage = e.getMessage();
+
+                    String errorMessage = e.getMessage();
                     logger.error(errorMessage, e);
+                    logAsyncLensFailure(globalProcessId, workTicket, e, request);
 
-                    //GLASS LOGGING - FAILED
-                    GlassMessage glassMessage  = constructGlassMessage(
-                            request,
-                            workTicket,
-                            ExecutionState.FAILED,
-                            globalProcessId,
-                            HTTPASYNCPROCESSOR,
-                            Protocol.HTTPASYNCPROCESSOR);
-
-                    glassMessage.logProcessingStatus(
-                            StatusType.ERROR,
-                            "HTTP Async Request Failed: " + e.getMessage(),
-                            MailBoxConstants.HTTPASYNCPROCESSOR,
-                            ExceptionUtils.getStackTrace(e));
-                    new TransactionVisibilityClient().logToGlass(glassMessage);
-                    //GLASS LOGGING - FAILED
-
-                    if (NO_PRIVILEGE.equals(e.getMessage())) {
+                    if (NO_PRIVILEGE.equals(errorMessage)) {
                         throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
                     } else {
+                        if (e instanceof LiaisonAuditableRuntimeException) {
+                            throw e;
+                        }
                         throw new LiaisonRuntimeException(e.getMessage());
                     }
                 } finally {
@@ -505,7 +480,7 @@ public class HTTPListenerResource extends AuditedResource {
 		return process(request, worker);
 	}
 
-	/**
+    /**
 	 * Handles the application/x-www-form-urlencoded requests
 	 *
 	 * @param mailboxId mailbox guid
@@ -557,7 +532,7 @@ public class HTTPListenerResource extends AuditedResource {
 
             authorization(httpListenerProperties, authenticationCredentials, processorType);
         } else {
-            throw new RuntimeException("Authorization Header not available in the Request");
+            throw new MailBoxServicesException("Authorization Header is not available in the Request", Status.UNAUTHORIZED);
         }
     }
 
@@ -649,6 +624,72 @@ public class HTTPListenerResource extends AuditedResource {
         }
 
         return glassMessage;
+    }
+
+    /**
+     * logs lens failure for http sync case
+     *
+     * @param firstCornerTimeStamp first corner timestamp
+     * @param globalProcessId gpid
+     * @param workTicket workticket
+     * @param e exception
+     * @param request http request
+     */
+    private void logSyncLENSFailure(ExecutionTimestamp firstCornerTimeStamp,
+                                    String globalProcessId,
+                                    WorkTicket workTicket,
+                                    Exception e,
+                                    HttpServletRequest request) {
+
+        GlassMessage failedMsg = constructGlassMessage(
+                request,
+                workTicket,
+                ExecutionState.FAILED,
+                globalProcessId,
+                HTTPSYNCPROCESSOR,
+                Protocol.HTTPSYNCPROCESSOR);
+
+        // Log error status
+        failedMsg.logProcessingStatus(
+                StatusType.ERROR,
+                "HTTP Sync Request Failed: " + e.getMessage(),
+                MailBoxConstants.HTTPSYNCPROCESSOR,
+                ExceptionUtils.getStackTrace(e));
+
+        failedMsg.logFourthCornerTimestamp();
+        if (null != workTicket) {
+            failedMsg.logFirstCornerTimestamp(firstCornerTimeStamp);
+        }
+        new TransactionVisibilityClient().logToGlass(failedMsg);
+    }
+
+    /**
+     * logs lens failure for http async case
+     *
+     * @param globalProcessId global process id
+     * @param workTicket workticket
+     * @param e exception
+     * @param request http request
+     */
+    private void logAsyncLensFailure(String globalProcessId,
+                                     WorkTicket workTicket,
+                                     Exception e,
+                                     HttpServletRequest request) {
+
+        GlassMessage glassMessage  = constructGlassMessage(
+                request,
+                workTicket,
+                ExecutionState.FAILED,
+                globalProcessId,
+                HTTPASYNCPROCESSOR,
+                Protocol.HTTPASYNCPROCESSOR);
+
+        glassMessage.logProcessingStatus(
+                StatusType.ERROR,
+                "HTTP Async Request Failed: " + e.getMessage(),
+                MailBoxConstants.HTTPASYNCPROCESSOR,
+                ExceptionUtils.getStackTrace(e));
+        new TransactionVisibilityClient().logToGlass(glassMessage);
     }
 
 }
