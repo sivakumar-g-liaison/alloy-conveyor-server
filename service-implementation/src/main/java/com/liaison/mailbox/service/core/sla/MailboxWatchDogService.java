@@ -48,7 +48,6 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -165,10 +164,12 @@ public class MailboxWatchDogService {
 					}
 
 					//get the mailbox properties
+                    int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
+
 					Map<String, String> mailboxProperties = getMailboxProperties(processor);
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
 					//No need to call the validateCustomerSLA
-					if (validateTTLUnit(stagedFile, mailboxProperties)) {
+					if (validateTTLUnit(stagedFile, staleFileTTL)) {
                         try {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
@@ -269,32 +270,27 @@ public class MailboxWatchDogService {
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL_UNIT);
 		return processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 	}
 	
-	/**
-	 *  Method to validate the expire time.
-	 *
-	 * @param stagedFile
-	 * @param mailboxProperties
-	 * @return boolean
-	 */
-	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) {
+    /**
+     *  Method to validate the expire time.
+     *
+     * @param stagedFile staged file entity
+     * @param ttl ttl value
+     * @return boolean
+     */
+    private boolean validateTTLUnit(StagedFile stagedFile, int ttl) {
 
-		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
-		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
-		if (MailBoxUtil.isEmpty(ttl)) {
+        if (0 == ttl) {
+            LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
+            ttl = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS,
+                    MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT ));
+        }
 
-		    LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
-			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT );
-			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-		}
-
-		Timestamp expireTimestamp = getTTLAsTimestamp(MailBoxUtil.convertTTLIntoDays(ttlUnit, Integer.parseInt(ttl)), stagedFile.getCreatedDate());
-		return isTimeLimitExceeded(expireTimestamp);
-	}
+        Timestamp expireTimestamp = getTTLAsTimestamp(ttl, stagedFile.getCreatedDate());
+        return isTimeLimitExceeded(expireTimestamp);
+    }
 
 	/**
 	 * Method to convert ttl into TimeStamp value

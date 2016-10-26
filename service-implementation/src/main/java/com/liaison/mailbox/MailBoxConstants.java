@@ -275,6 +275,7 @@ public interface MailBoxConstants {
 	String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 	String PROPERTY_TENANCY_KEY = "MBX_TENANCY_KEY";
 	String PROPERTY_SCRIPT_EXECUTION_TIMEOUT = "scriptExecutionTimeout";
+    String PROPERTY_STALE_FILE_TTL = "staleFileTTL";
     String PROPERTY_PROCESS_MODE = "processMode";
 
 	// Properties for sweeper grouping boundary condition
@@ -410,6 +411,11 @@ public interface MailBoxConstants {
 
 	//constant for callback
     String KEY_MESSAGE_CONTEXT_URI = "MESSAGE_CONTEXT_URI";
+    String CALLBACK = "CALLBACK";
+    
+    //Stale file TTL range min and max
+    int STALE_FILE_TTL_RANGE_MAX = 90;
+    int STALE_FILE_TTL_RANGE_MIN = 15;
     String RESUME = "resume";
 
     String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
