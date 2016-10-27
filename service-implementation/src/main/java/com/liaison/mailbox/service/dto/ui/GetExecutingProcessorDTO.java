@@ -57,14 +57,4 @@ public class GetExecutingProcessorDTO {
 		this.profileName = profileName;
 	}
 	
-	/*public void copyFromEntity(FSMStateValue fsmv) {
-		
-		this.setExecutionId(fsmv.getFsmState().getExecutionId());
-		this.setProcessorName(fsmv.getFsmState().getProcessorName());
-		this.setValue(fsmv.getValue());
-		this.setProfileName(fsmv.getFsmState().getProfileName());
-		this.setCreatedDate(fsmv.getCreatedDate().toString());
-		
-	}*/
-		
 }

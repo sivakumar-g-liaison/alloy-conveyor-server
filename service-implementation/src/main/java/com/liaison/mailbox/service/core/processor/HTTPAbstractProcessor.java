@@ -57,22 +57,27 @@ public abstract class HTTPAbstractProcessor {
 
     public void authenticateRequestor(String[] authenticationCredentials) {
 
-        if (authenticationCredentials.length == 2) {
+        try {
 
-            String loginId = authenticationCredentials[0];
-            // encode the password using base64 bcoz UM will expect a base64
-            // encoded token
-            String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
-            // if both username and password is present call UM client to
-            // authenticate
-            UserManagementClient umClient = new UserManagementClient();
-            umClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
-            umClient.authenticate();
-            if (!umClient.isSuccessful()) {
-                throw new MailBoxServicesException(umClient.getMessage(), Response.Status.fromStatusCode(umClient.getResponseStatusCode()));
+            if (authenticationCredentials.length == 2) {
+
+                String loginId = authenticationCredentials[0];
+                // encode the password using base64 bcoz UM will expect a base64
+                // encoded token
+                String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
+                // if both username and password is present call UM client to
+                // authenticate
+                UserManagementClient umClient = new UserManagementClient();
+                umClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
+                umClient.authenticate();
+                if (!umClient.isSuccessful()) {
+                    throw new RuntimeException(umClient.getMessage());
+                }
+            } else {
+                throw new RuntimeException("Invalid Authorization Header");
             }
-        } else {
-            throw new MailBoxServicesException("Invalid Authorization Header", Response.Status.UNAUTHORIZED);
+        } catch (Exception e) {
+            throw new MailBoxServicesException(e.getMessage(), Response.Status.UNAUTHORIZED);
         }
 
     }

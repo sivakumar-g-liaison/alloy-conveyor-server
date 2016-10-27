@@ -166,13 +166,6 @@ public class MailBoxService implements Runnable {
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
 			return serviceResponse;
 
-		} catch (MailBoxServicesException | IOException e) {
-
-			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE,
-					e.getMessage()));
-			return serviceResponse;
-
 		} catch (Exception e) {
 
 			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
