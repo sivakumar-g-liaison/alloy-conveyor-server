@@ -49,7 +49,13 @@ import java.util.Date;
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD,
                 query = "SELECT executionState FROM ProcessorExecutionState executionState"
                         + " WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID
-                        + " AND executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS )
+                        + " AND executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS ),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_PROCESSORS,
+                query = "SELECT executionState FROM ProcessorExecutionState executionState" +
+                        " WHERE executionState.executionStatus = :" + ProcessorExecutionStateDAO.EXEC_STATUS
+                        + " AND executionState.nodeInUse = :" + ProcessorExecutionStateDAO.NODE
+                        + " AND executionState.threadName = :" + ProcessorExecutionStateDAO.THREAD_NAME
+                        + " ORDER BY executionState.lastExecutionDate desc")
 })
 public class ProcessorExecutionState implements Identifiable {
 

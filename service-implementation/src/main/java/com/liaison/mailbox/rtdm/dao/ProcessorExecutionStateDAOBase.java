@@ -189,5 +189,33 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
         }
         return count;
     }
-    
+
+    /**
+     * Finds the processors which matches the given parameters
+     *
+     * @param node       node in use
+     * @param threadName thread name
+     * @return list of processor states
+     */
+    @SuppressWarnings("unchecked")
+    public List<ProcessorExecutionState> findProcessors(String node, String threadName) {
+
+        EntityManager entityManager = null;
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            return entityManager
+                    .createNamedQuery(FIND_PROCESSORS)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+                    .setParameter(NODE, node)
+                    .setParameter(THREAD_NAME, threadName)
+                    .getResultList();
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+
 }

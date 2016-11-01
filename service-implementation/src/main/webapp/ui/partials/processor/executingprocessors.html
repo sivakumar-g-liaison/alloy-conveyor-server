@@ -13,5 +13,27 @@
 		<div class="gridStyle" ng-grid="gridOptions" ng-if="gridLoaded"></div>
 		<br>
 	</div>
-	
+
+    <div class="modal-custom" id="executingProcessorsConfirmationModal" data-keyboard="false" data-backdrop="static"
+         role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The stop processor will send an interrupt the running processor. Are you sure to stop this processor?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal"
+                            ng-click="hideConfirmDialog(executionEntity)">Confirm
+                    </button>
+                    <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

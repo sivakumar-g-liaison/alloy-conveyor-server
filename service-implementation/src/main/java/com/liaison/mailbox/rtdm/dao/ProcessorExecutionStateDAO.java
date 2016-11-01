@@ -26,6 +26,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 
     String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
+    String FIND_PROCESSORS = "ProcessorExecutionState.findProcessors";
     String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
@@ -33,8 +34,19 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String PROCESSOR_ID = "processorId";
     String EXEC_STATUS = "exec_status";
     String INTERVAL_IN_HOURS = "interval";
+    String NODE = "node";
+    String THREAD_NAME = "threadName";
 
     ProcessorExecutionState findByProcessorId(String processorId);
+
+    /**
+     * lists the processors in descending order
+     *
+     * @param node filters by node in use
+     * @param threadName filters by thread name
+     * @return list of processor execution state
+     */
+    List<ProcessorExecutionState> findProcessors(String node, String threadName);
 
     void addProcessorExecutionState(ProcessorExecutionStateDTO executionStateDTO);
 

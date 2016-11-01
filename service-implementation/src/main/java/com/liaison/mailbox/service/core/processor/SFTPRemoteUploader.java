@@ -123,8 +123,12 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             throws IOException, IllegalAccessException, LiaisonException, SftpException {
 
         for (File item : files) {
-            uploadFile(sftpClient, remoteParentDir, item);
 
+            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                LOGGER.warn("The executor is gracefully interrupted.");
+                return;
+            }
+            uploadFile(sftpClient, remoteParentDir, item);
         }
 
     }

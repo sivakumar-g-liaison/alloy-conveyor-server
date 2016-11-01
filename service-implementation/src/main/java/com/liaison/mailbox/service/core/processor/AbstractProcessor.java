@@ -28,8 +28,10 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -981,5 +983,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String getOrganization() {
         return this.getConfigurationInstance().getMailbox().getTenancyKey();
+    }
+
+    /**
+     * This method used to check the interrupt status of a thread.
+     *
+     * @return boolean true if it is interrupted
+     */
+    public boolean isProcessorInterrupted() {
+
+        String processorId = getReqDTO().getProcessorId();
+        ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
+        ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(processorId);
+        return MailBoxUtil.isInterrupted(processorExecutionState.getThreadName());
     }
 }
