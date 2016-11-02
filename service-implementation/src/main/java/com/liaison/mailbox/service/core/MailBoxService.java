@@ -609,7 +609,9 @@ public class MailBoxService implements Runnable {
         try {
 
             TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(topicMessage, TopicMessageDTO.class);
-            new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            }
 
 
         } catch (JAXBException | IOException e) {

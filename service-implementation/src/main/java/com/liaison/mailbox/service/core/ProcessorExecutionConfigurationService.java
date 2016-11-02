@@ -161,10 +161,24 @@ public class ProcessorExecutionConfigurationService {
         if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
             postToTopic(userId, processorExecutionState);
         } else {
-            node = processorExecutionState.getNodeInUse();
-            threadName = processorExecutionState.getThreadName();
+            updateExecutionState(processorId, userId, node, threadName, processorExecutionState);
         }
+        
+    }
 
+    /**
+     * This method updates the processor status
+     * 
+     * @param processorId
+     * @param userId
+     * @param node
+     * @param threadName
+     * @param processorExecutionState
+     */
+    private void updateExecutionState(String processorId, String userId, String node, String threadName, ProcessorExecutionState processorExecutionState) {
+        
+        ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
+        
         if (ExecutionState.PROCESSING.value().equals(processorExecutionState.getExecutionStatus())) {
 
             //fetches the processor by using node and thread name
@@ -221,11 +235,22 @@ public class ProcessorExecutionConfigurationService {
      * @param messageDTO TopicMessageDTO
      */
     public void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
-        this.interruptAndUpdateStatus(
+        
+        ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
+        ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(messageDTO.getProcessorId());
+        if (null == processorExecutionState) {
+            throw new MailBoxConfigurationServicesException(
+                    Messages.PROCESSOR_EXECUTION_STATE_NOT_EXIST,
+                    messageDTO.getProcessorId(),
+                    Response.Status.BAD_REQUEST);
+        }
+        
+        this.updateExecutionState(
                 messageDTO.getProcessorId(),
                 messageDTO.getUserId(),
                 messageDTO.getNodeInUse(),
-                messageDTO.getThreadName());
+                messageDTO.getThreadName(),
+                processorExecutionState);
     }
 
 }
