@@ -11,9 +11,11 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -74,6 +76,7 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 
 /**
  * Utilities for MailBox.
@@ -93,7 +96,7 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_WEEK = 7;
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
-	
+
     private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
@@ -507,12 +510,15 @@ public class MailBoxUtil {
      * file is considered as expired if the (last modified time + ttl) is before current time
      * 
      * @param lastModified - the last modified time of file which needs to be validated for expiry
+     * @param staleFileTTL  ttl for the file in filesystem
      * @return true if file expired otherwise false
      */
-    public static boolean isFileExpired(long lastModified) {
+    public static boolean isFileExpired(long lastModified, int staleFileTTL) {
     	
-		int staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP, 
-												MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+        if (0 == staleFileTTL) {
+            staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP,
+                                                    MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+        }
 		// calculate file validity
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(lastModified);
@@ -659,23 +665,88 @@ public class MailBoxUtil {
     }
     
     /**
+     * Util method to read the stale file TTL value from processor properties
+     * @param json processor properties json
+     * @return String TTl value
+     */
+    public static int getStaleFileTTLValue(String json) {
+
+        String remotePrcsr = "remoteProcessorProperties";
+        try {
+
+            JSONObject obj = null;
+            if (json.contains(remotePrcsr)) {
+                JSONObject innerObj = new JSONObject(json);
+                obj = innerObj.getJSONObject(remotePrcsr);
+            } else {
+                obj = new JSONObject(json);
+            }
+
+            Object o = obj.get(PROPERTY_STALE_FILE_TTL);
+            return (int) o;
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+
+    /**
      * To get current execution node
-     * @return node 
+     *
+     * @return node hostname
      */
     public static String getNode() {
-        return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
+
+        if (MailBoxUtil.isEmpty(ConfigurationManager.getDeploymentContext().getDeploymentServerId())) {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
+        }
     }
-    
+
     /**
      * To get thread by name
-     * @param threadName
-     * @return
+     *
+     * @param threadName thred name
+     * @return Thread
      */
     public static Thread getThreadByName(String threadName) {
+
         for (Thread t : Thread.getAllStackTraces().keySet()) {
             if (t.getName().equals(threadName)) return t;
         }
         return null;
+    }
+
+    /**
+     * To check thread interrupt status.
+     *
+     * @param threadName thread name
+     * @return true if it is interrupted
+     */
+    public static boolean isInterrupted(String threadName) {
+
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            return runningThread.isInterrupted();
+        }
+        return false;
+    }
+
+    /**
+     * To interrupt a thread by name
+     *
+     * @param threadName thread name
+     */
+    public static void interruptThread(String threadName) {
+
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            runningThread.interrupt();
+        }
     }
 
 }

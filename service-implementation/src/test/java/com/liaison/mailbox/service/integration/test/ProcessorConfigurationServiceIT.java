@@ -8,21 +8,6 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONException;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
@@ -46,12 +31,23 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMail
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONException;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
@@ -1067,182 +1063,6 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
 
-    }
-
-    /**
-     * Method Interrupt the execution of running processor with execution ID with valid data.
-     *
-     */
-    @Test
-    public void testInterruptRunningProcessorWithExecId() {
-
-        ProcessorConfigurationService procConfigurationService = new ProcessorConfigurationService();
-        InterruptExecutionEventResponseDTO serviceResponse = procConfigurationService.interruptRunningProcessor("1234");
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
-        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.RECEIVED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.INTERRUPT_SIGNAL)));
-    }
-
-    /**
-     * Method Interrupt the execution of running processor with null value
-     *
-     */
-    @Test
-    public void testInterruptRunningProcessorWithProcessorNull() {
-
-        ProcessorConfigurationService procConfigurationService = new ProcessorConfigurationService();
-        InterruptExecutionEventResponseDTO interruptExecutionEventResponseDTO = procConfigurationService.interruptRunningProcessor(null);
-
-        // Assertion
-        Assert.assertEquals(FAILURE, interruptExecutionEventResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(interruptExecutionEventResponseDTO.getResponse().getMessage().contains(Messages.RECEIVED_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.INTERRUPT_SIGNAL)));
-    }
-
-    /**
-     * Method Get Executing Processors With No Processor Available
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithNoProcessorAvail() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("READY", "2015-09-14 12:48:32", "2015-09-15 12:48:32");
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
-        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_PROCESSORS_AVAIL.value()));
-    }
-
-    /**
-     * Method Get Executing Processors With Invalid Status
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithInvalidStatus() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("ACTIVE", "2015-09-14 12:48:32", "2015-09-15 12:48:32");
-
-        // Assertion
-        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
-        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.INVALID_PROCESSOR_STATUS.value()));
-    }
-
-    /**
-     * Method Get Executing Processors With Empty Status
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyStatus() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("", "2020-09-14 12:48:32", "2015-09-14 12:48:32");
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
-    }
-
-    /**
-     * Method Get Executing Processors With Empty Date
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyDate() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("READY", "", "");
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
-    }
-
-    /**
-     * Method Get Executing Processors With Empty From Date
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyFromDate() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("READY", "", "2016-08-04 12:48:32");
-
-        // Assertion
-        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
-    }
-
-    /**
-     * Method Get Executing Processors With Empty To Date
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyToDate() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("READY", "2016-08-04 12:48:32", "");
-
-        // Assertion
-        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
-    }
-
-    /**
-     * Method Get Executing Processors With Empty Date And Status
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyFromDateToDateAndStatus() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("", "", "");
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
-    }
-
-    /**
-     * Method Get Executing Processors With Empty From Date And Status
-     *
-     */
-    @Test
-    public void testGetExecutingProcessorsWithEmptyFromDateAndStatus() {
-
-        GetExecutingProcessorResponseDTO serviceResponse = null;
-        ProcessorConfigurationService processor = new ProcessorConfigurationService();
-        serviceResponse = new GetExecutingProcessorResponseDTO();
-
-        // get the list processors latest state yyyy-mm-dd hh:mm:ss
-        serviceResponse = processor.getExecutingProcessors("", "", "2016-08-04 12:48:32");
-
-        // Assertion
-        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
     }
 
     /**

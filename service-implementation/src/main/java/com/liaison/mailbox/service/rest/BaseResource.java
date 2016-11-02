@@ -60,6 +60,11 @@ public class BaseResource {
 	public static final String HEADER_USER_ID = "UserId";
     public static final String MAILBOX_ID = "mailboxId";
     public static final String MAILBOX_NAME = "mailboxName";
+    public static final String TYPE = "type";
+    public static final String TRIM_RESPONSE = "trimResponse";
+    public static final String HEADER_GUID = "guid";
+    public static final String SIID = "siid";
+    public static final String MULTIPLE = "MULTIPLE";
 	private static final int MAX_STATUS_CODE = 299;
 
 	protected void auditAttempt(String message) {

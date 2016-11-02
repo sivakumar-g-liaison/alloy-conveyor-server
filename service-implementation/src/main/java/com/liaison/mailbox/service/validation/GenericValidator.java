@@ -222,7 +222,12 @@ public class GenericValidator {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
-			
+
+            if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_STALE_FILE_TTL) && !isStaleTTLBetweenRange(value))) {
+                isValidPattern = false;
+                errorMessage.append(annotationDetails.errorMessage());
+            }
+
 			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS) && !isValidRetryAttemptValue(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
@@ -294,6 +299,17 @@ public class GenericValidator {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return (0 == range) || (range <= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.SCRIPT_EXC_TIMEOUT_RANGE_MIN);
 	}
+	
+    /**
+     *  Method to validate whether given string is valid TTL value
+     *
+     * @param value ttl value
+     * @return
+     */
+    private boolean isStaleTTLBetweenRange(Object value) {
+        int range = Integer.valueOf(value.toString()).intValue();
+        return (0 == range) || (range <= MailBoxConstants.STALE_FILE_TTL_RANGE_MAX  && range >= MailBoxConstants.STALE_FILE_TTL_RANGE_MIN);
+    }
 	
 	/**
 	 * Method to validate whether given string is valid number of files

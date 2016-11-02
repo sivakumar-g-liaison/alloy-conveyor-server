@@ -69,6 +69,7 @@ public class RemoteProcessorPropertiesDTO {
     private boolean recurseSubDirectories;
     private boolean directUpload;
     private int scriptExecutionTimeout;
+    private int staleFileTTL;
     private String processMode = "ASYNC";
 
 	public boolean isDeleteFileAfterSweep() {
@@ -381,4 +382,14 @@ public class RemoteProcessorPropertiesDTO {
     public void setProcessMode(String processMode) {
         this.processMode = processMode;
     }
+    
+    @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
+    public int getStaleFileTTL() {
+        return staleFileTTL;
+    }
+    
+    public void setStaleFileTTL(int staleFileTTL) {
+        this.staleFileTTL = staleFileTTL;
+    }
+    
 }

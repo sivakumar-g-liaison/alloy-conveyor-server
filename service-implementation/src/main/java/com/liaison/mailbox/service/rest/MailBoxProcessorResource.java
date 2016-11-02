@@ -98,6 +98,7 @@ public class MailBoxProcessorResource extends AuditedResource {
 		};
 		worker.actionLabel = "MailBoxProcessorResource.createProcessor()";
 		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
+        worker.queryParams.put(AuditedResource.SIID, serviceInstanceId);
 
 		// hand the delegate to the framework for calling
 		return process(request, worker);

@@ -24,7 +24,7 @@ import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
-import com.liaison.mailbox.service.queue.QueueProcessInitializer;
+import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,7 +57,7 @@ public class InitializationServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-		boolean isDropbox = configuration.getBoolean(QueueProcessInitializer.START_DROPBOX_QUEUE, false);
+		boolean isDropbox = configuration.getBoolean(QueueAndTopicProcessInitializer.START_DROPBOX_QUEUE, false);
         // nfs health check
         // check only if current service is not dropbox
         if(!isDropbox) {
@@ -72,7 +72,7 @@ public class InitializationServlet extends HttpServlet {
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
-        QueueProcessInitializer.initialize();
+        QueueAndTopicProcessInitializer.initialize();
     	DAOUtil.init();
 
 		// db health check

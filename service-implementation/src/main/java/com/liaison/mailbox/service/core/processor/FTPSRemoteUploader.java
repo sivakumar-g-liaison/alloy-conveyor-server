@@ -119,6 +119,10 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         for (File item : subFiles) {
             //FTPS
+            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                LOGGER.warn("The executor is gracefully interrupted");
+                return;
+            }
             uploadFile(ftpsRequest, remoteParentDir, item);
         }
     }
@@ -211,12 +215,10 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
     @Override
     public void cleanup() {
-        if (null != ftpsClient) {
-            try {
-                ftpsClient.disconnect();
-            } catch (LiaisonException e) {
-                LOGGER.error(constructMessage("Failed to close connection"), e);
-            }
+        try {
+            disconnect(ftpsClient);
+        } catch (RuntimeException e) {//handle gracefully for scripts
+            LOGGER.error(constructMessage("Failed to close connection"));
         }
     }
 
