@@ -74,7 +74,8 @@ public class ProcessorSearchResource extends AuditedResource {
 			@QueryParam(value = "protocol") @ApiParam(name = "protocol", required = false, value = "protocol") final String protocol,
 			@QueryParam(value = "prcsrType") @ApiParam(name = "prcsrType", required = false, value = "prcsrType") final String prcsrType,
 			@QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
-			@QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid) {
+			@QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
+			@QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -97,6 +98,8 @@ public class ProcessorSearchResource extends AuditedResource {
 					searchFilter.setProcessorType(prcsrType);
 					searchFilter.setProcessorName(prcsrName);
 					searchFilter.setProcessorGuid(prcsrGuid);
+					searchFilter.setMatchMode(matchMode);
+
 
 					// Get all the processors
 					return processor.searchProcessor(searchFilter);

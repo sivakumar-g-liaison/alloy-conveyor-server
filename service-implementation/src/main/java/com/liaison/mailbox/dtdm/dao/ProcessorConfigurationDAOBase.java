@@ -716,21 +716,25 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		
 		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {		
 			query.append(" inner join processor.mailbox mailbox ");
-			predicateList.add(" LOWER(mailbox.mbxName) like :" + MBX_NAME);
+			predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
+					" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
+					" mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
 			query.append(" inner join processor.folders folder ");
-			predicateList.add(" folder.fldrUri like :" + FOLDER_URI);
+			predicateList.add(" folder.fldrUri " + searchDTO.getMatchMode() + " :" + FOLDER_URI);
 			isFolderAvailable = true;
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getPipelineId())) {
-			predicateList.add(" processor.procsrProperties like :" + PIPELINE_ID);
+			predicateList.add(" processor.procsrProperties " + searchDTO.getMatchMode() + " :" + PIPELINE_ID);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProfileName())) {
             String profileAppender = isFolderAvailable ? " inner join folder.processor folderProcessor inner join folderProcessor.scheduleProfileProcessors schd_prof_processor"
                     : " inner join processor.scheduleProfileProcessors schd_prof_processor";
             query.append(profileAppender).append(" inner join schd_prof_processor.scheduleProfilesRef profile");
-            predicateList.add("LOWER(profile.schProfName) like :" + PROF_NAME);
+            predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
+					"LOWER(profile.schProfName) " + searchDTO.getMatchMode() + " :" + PROF_NAME :
+					"profile.schProfName " + searchDTO.getMatchMode() + " :" + PROF_NAME);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
 			predicateList.add(" LOWER(processor.procsrProtocol) = :" + PROTOCOL);
@@ -755,16 +759,24 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	public Query setParamsForProcessorSearchQuery(GenericSearchFilterDTO searchDTO, Query query) {
 		
         if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
-            query.setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%");
+            query.setParameter(MBX_NAME, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					"%" + searchDTO.getMbxName().toLowerCase() + "%" :
+					searchDTO.getMbxName());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
-            query.setParameter(FOLDER_URI, "%" + searchDTO.getFolderPath() + "%");
+            query.setParameter(FOLDER_URI, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					"%" + searchDTO.getFolderPath() + "%" :
+					searchDTO.getFolderPath());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getPipelineId())) {
-            query.setParameter(PIPELINE_ID, "%" + searchDTO.getPipelineId() + "%");
+            query.setParameter(PIPELINE_ID, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					"%" + searchDTO.getPipelineId() + "%" :
+					searchDTO.getPipelineId());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProfileName())) {
-            query.setParameter(PROF_NAME, "%" + searchDTO.getProfileName().toLowerCase() + "%");
+            query.setParameter(PROF_NAME, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					"%" + searchDTO.getProfileName().toLowerCase() + "%" :
+					searchDTO.getProfileName());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
             query.setParameter(PROTOCOL, searchDTO.getProtocol().toLowerCase());
