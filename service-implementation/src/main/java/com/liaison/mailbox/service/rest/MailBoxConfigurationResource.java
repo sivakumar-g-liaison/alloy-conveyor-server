@@ -137,7 +137,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
 			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId,
 			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters,
-			@QueryParam(value = "maxResponse") @ApiParam(name = "maxResponse", required = false, value = "Maximum Response") final String maxResponse) {
+			@QueryParam(value = "minResponse") @ApiParam(name = "minResponse", required = false, value = "Minimum Response") final String minResponse) {
 
 
 		// create the worker delegate to perform the business logic
@@ -163,12 +163,12 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setDisableFilters(disableFilters);
 
                     // search the mailbox based on the given query parameters
-					if (Boolean.parseBoolean(maxResponse)) {
-					    SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
-					    return serviceResponse;
-					} else {
+					if (Boolean.parseBoolean(minResponse)) {
 					    SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, manifestJson);
 					    serviceResponse.setHitCounter(hitCounter);
+					    return serviceResponse;
+					} else {
+					    SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
 					    return serviceResponse;
 					}
 					
