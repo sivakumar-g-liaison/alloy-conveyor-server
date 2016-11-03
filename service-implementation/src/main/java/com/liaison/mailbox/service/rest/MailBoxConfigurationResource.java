@@ -137,7 +137,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
 			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId,
 			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters,
-			@QueryParam(value = "minResponse") @ApiParam(name = "minResponse", required = false, value = "Minimum Response") final String minResponse) {
+			@QueryParam(value = "minResponse") @ApiParam(name = "minResponse", required = false, value = "Minimum Response") final String minResponse,
+			@QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "Match Mode") final String matchMode) {
 
 
 		// create the worker delegate to perform the business logic
@@ -161,6 +162,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortField(sortField);
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
+					searchFilter.setMatchMode(matchMode);
 
                     // search the mailbox based on the given query parameters
 					if (Boolean.parseBoolean(minResponse)) {

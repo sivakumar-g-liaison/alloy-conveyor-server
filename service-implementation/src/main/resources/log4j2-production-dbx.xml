@@ -133,21 +133,6 @@
         <!-- ############################################################## -->
         <!-- #########          Glass Message General         ############ -->
         <!-- ############################################################## -->
-
-        <!-- Logs ONLY Glass Messages to Spectrum -->
-        <GlassMessageSpectrum name="GlassMessageSpectrumREST"
-                              ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
-                              password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
-                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
-                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}"
-                              ignoreExceptions="false">
-            <GlassMessageJSONLayout compact="true"/>
-            <filters>
-                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
-                              onMismatch="DENY"/>
-            </filters>
-        </GlassMessageSpectrum>
-
         <!-- failover destination -->
         <File name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
               append="true" ignoreExceptions="false">
@@ -157,25 +142,6 @@
                               onMismatch="DENY"/>
             </filters>
         </File>
-
-        <!-- Failover when either GlassMessageSpectrumREST appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncGlassMessageSpectrumRESTWithFailover"
-               blocking="false"
-               bufferSize="${env:GLASS_RING_BUFFER_SIZE}"
-               errorRef="GlassMessageSpectrumFile"
-               ignoreExceptions="false"
-                >
-            <AppenderRef ref="GlassMessageSpectrumREST"/>
-        </Async>
-
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
-            <Failovers>
-                <AppenderRef ref="FinalFailoverLocalFile"/>
-            </Failovers>
-        </Failover>
-
-		
 
         <!-- ############################################################## -->
         <!-- #########             Audit - Syslog              ############ -->
@@ -227,7 +193,7 @@
     <loggers>
         <root level="INFO">
             <appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
-            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
+            <appender-ref ref="GlassMessageSpectrumFile" />
             <appender-ref ref="AuditSyslogAppender" />
 
             <appender-ref ref="LocalLog" />

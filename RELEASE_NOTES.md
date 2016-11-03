@@ -1,6 +1,7 @@
 4.10.0-SNAPSHOT
 ---------------
 * 2.4.1 Code review comments
+* GMB-881 - Change glass sender to glass shipper in log4j properties. All environments
 
 4.9.1
 -------------------------------
