@@ -10,7 +10,7 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import com.google.gson.annotations.SerializedName;
-import com.liaison.mailbox.dtdm.model.FilterMatchMode;
+import com.liaison.mailbox.enums.FilterMatchMode;
 
 import java.io.Serializable;
 import java.util.List;

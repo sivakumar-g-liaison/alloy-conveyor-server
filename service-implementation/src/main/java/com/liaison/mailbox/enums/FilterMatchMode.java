@@ -7,13 +7,9 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.dtdm.model;
-
-import com.google.gson.annotations.SerializedName;
+package com.liaison.mailbox.enums;
 
 public enum FilterMatchMode {
-    @SerializedName("equals")
     EQUALS,
-    @SerializedName("like")
     LIKE
 }
