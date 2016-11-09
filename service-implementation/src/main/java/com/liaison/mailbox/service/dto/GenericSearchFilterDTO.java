@@ -173,6 +173,10 @@ public class GenericSearchFilterDTO {
 	}
 
 	public void setMatchMode(String matchMode) {
+
+		// Force matchMode to lowercase
+		matchMode = matchMode.toLowerCase();
+
 		if (matchMode == null || matchMode.equals(MATCH_MODE_LIKE)) {
 			this.matchMode = MATCH_MODE_LIKE;
 		} else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
