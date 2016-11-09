@@ -28,8 +28,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.google.gson.GsonBuilder;
 import com.liaison.mailbox.dtdm.dao.FilterText;
-import com.liaison.mailbox.dtdm.model.FilterMatchMode;
+import com.liaison.mailbox.enums.FilterMatchMode;
+import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -135,10 +137,9 @@ public abstract class GridService<T> {
 		try {
 
 			if (filterText != null && !filterText.isEmpty()) {
-				/*searchTextObjectList = gson.fromJson(filterText,
-						new TypeToken<Map<String, List<FilterObject>>>() {
-						}.getType());*/
-				filterTextObj = gson.fromJson(filterText, FilterText.class);
+				GsonBuilder builder = new GsonBuilder();
+				builder.registerTypeAdapter(FilterMatchMode.class, new UppercaseEnumAdapter());
+				filterTextObj = builder.create().fromJson(filterText, FilterText.class);
 			}
 
 			if (sortInfo != null && !sortInfo.isEmpty()) {
@@ -354,11 +355,12 @@ public abstract class GridService<T> {
 
 				ParameterExpression<String> parameterExp = criteriaBuilder
 						.parameter(String.class);
-				if (searchTextObjectList.getMatchMode() == null || searchTextObjectList.getMatchMode() == FilterMatchMode.LIKE) {
+				if (searchTextObjectList.getMatchMode() == null || searchTextObjectList.getMatchMode().ordinal() == FilterMatchMode.LIKE.ordinal()) {
 					andPredicatesList.add(criteriaBuilder.like(
 							criteriaBuilder.upper(pathString), parameterExp));
 					holder.put(parameterExp, "%" + entry.getText().toUpperCase() + "%");
-				} else if (searchTextObjectList.getMatchMode() == FilterMatchMode.EQUALS) {
+
+				} else if (FilterMatchMode.EQUALS.ordinal() == searchTextObjectList.getMatchMode().ordinal()) {
 					andPredicatesList.add(criteriaBuilder.equal(pathString, parameterExp));
 					holder.put(parameterExp, entry.getText());
 				}

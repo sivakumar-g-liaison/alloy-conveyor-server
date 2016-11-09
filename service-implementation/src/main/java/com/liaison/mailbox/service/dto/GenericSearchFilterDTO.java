@@ -173,10 +173,14 @@ public class GenericSearchFilterDTO {
 	}
 
 	public void setMatchMode(String matchMode) {
-		if (matchMode == null || matchMode.equals(MATCH_MODE_LIKE)) {
-			this.matchMode = MATCH_MODE_LIKE;
-		} else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
-			this.matchMode = MATCH_MODE_EQUALS_CHR;
-		}
-	}
+
+		// Force matchMode to lowercase
+		matchMode = matchMode.toLowerCase();
+
+        if (matchMode.isEmpty() || matchMode.equals(MATCH_MODE_LIKE)) {
+            this.matchMode = MATCH_MODE_LIKE;
+        } else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
+            this.matchMode = MATCH_MODE_EQUALS_CHR;
+        }
+    }
 }
