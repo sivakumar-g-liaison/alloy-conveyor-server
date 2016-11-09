@@ -745,7 +745,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			predicateList.add(QueryBuilderUtil.constructSqlStringForTypeOperator(list));
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
-			predicateList.add(" LOWER(processor.procsrName) = :" + PRCSR_NAME);
+			if (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) {
+				predicateList.add(" LOWER(processor.procsrName) " + searchDTO.getMatchMode() + " :" + PRCSR_NAME);
+			} else {
+				predicateList.add(" processor.procsrName " + searchDTO.getMatchMode() + " :" + PRCSR_NAME);
+			}
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
 			predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
@@ -782,7 +786,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             query.setParameter(PROTOCOL, searchDTO.getProtocol().toLowerCase());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProcessorName())) {
-            query.setParameter(PRCSR_NAME, searchDTO.getProcessorName().toLowerCase());
+			query.setParameter(PRCSR_NAME, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+					"%" + searchDTO.getProcessorName().toLowerCase() + "%" :
+					searchDTO.getProcessorName());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
             query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());

@@ -177,10 +177,10 @@ public class GenericSearchFilterDTO {
 		// Force matchMode to lowercase
 		matchMode = matchMode.toLowerCase();
 
-		if (matchMode == null || matchMode.equals(MATCH_MODE_LIKE)) {
-			this.matchMode = MATCH_MODE_LIKE;
-		} else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
-			this.matchMode = MATCH_MODE_EQUALS_CHR;
-		}
-	}
+        if (matchMode.isEmpty() || matchMode.equals(MATCH_MODE_LIKE)) {
+            this.matchMode = MATCH_MODE_LIKE;
+        } else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
+            this.matchMode = MATCH_MODE_EQUALS_CHR;
+        }
+    }
 }
