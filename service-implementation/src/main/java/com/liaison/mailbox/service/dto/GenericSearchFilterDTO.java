@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto;
 
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Helper DTO that contains various search filter details.
@@ -179,7 +180,7 @@ public class GenericSearchFilterDTO {
 	        matchMode = matchMode.toLowerCase();
 	    }
 
-        if (matchMode.isEmpty() || matchMode.equals(MATCH_MODE_LIKE)) {
+        if (MailBoxUtil.isEmpty(matchMode) || matchMode.equals(MATCH_MODE_LIKE)) {
             this.matchMode = MATCH_MODE_LIKE;
         } else if (matchMode.equals(MATCH_MODE_EQUALS_STR)) {
             this.matchMode = MATCH_MODE_EQUALS_CHR;
