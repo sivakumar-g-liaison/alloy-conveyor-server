@@ -489,6 +489,7 @@ public class MailboxWatchDogService {
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
+		    
 			try {
 				// sla validation must be done only if both mailbox and processors are active
 				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
@@ -499,6 +500,7 @@ public class MailboxWatchDogService {
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
+					
 					Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 					// check whether sweeper got executed with in the configured sla time
 					checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
