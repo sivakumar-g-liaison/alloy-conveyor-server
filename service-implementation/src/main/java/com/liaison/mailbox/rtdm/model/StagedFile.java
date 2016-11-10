@@ -56,6 +56,7 @@ public class StagedFile implements Identifiable {
 	private Timestamp expirationTime;
 	private Timestamp createdDate;
 	private Timestamp modifiedDate;
+    private String originatingDc;
 	
 	public StagedFile() {
 	}
@@ -201,6 +202,15 @@ public class StagedFile implements Identifiable {
      */
     public void setFailureNotificationCount(Integer failureNotificationCount) {
         this.failureNotificationCount = failureNotificationCount;
+    }
+
+    @Column(name = "ORIGINATING_DC", length = 16)
+    public String getOriginatingDc() {
+        return originatingDc;
+    }
+
+    public void setOriginatingDc(String originatingDc) {
+        this.originatingDc = originatingDc;
     }
 
 	@Override

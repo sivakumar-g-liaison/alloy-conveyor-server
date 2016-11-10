@@ -62,6 +62,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         RuntimeProcessors processors = new RuntimeProcessors();
         processors.setPguid(UUIDGen.getCustomUUID());
         processors.setProcessorId(executionStateDTO.getProcessorId());
+        processors.setOriginatingDc(DATACENTER_NAME);
 
         ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
         prcsrExecution.setPguid(processors.getPguid());
@@ -70,6 +71,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         prcsrExecution.setModifiedBy(executionStateDTO.getModifiedBy());
         prcsrExecution.setModifiedDate(new Date());
         prcsrExecution.setProcessors(processors);
+        prcsrExecution.setOriginatingDc(DATACENTER_NAME);
         processors.setProcessorExecState(prcsrExecution);
 
         persist(processors);
