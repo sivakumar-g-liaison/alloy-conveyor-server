@@ -479,11 +479,11 @@ public class MailboxWatchDogService {
 	 */
 	public void validateMailboxSLARule(String mailboxStatus) {
 
-		LOGGER.debug("Entering into validateMailboxSLARules.");
+		LOGGER.info("Entering into validateMailboxSLARules.");//log level changed
 
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		
-		LOGGER.debug("Retrieving all sweepers");
+		LOGGER.info("Retrieving all sweepers");//log level changed
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(Sweeper.class.getCanonicalName());
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
@@ -495,7 +495,7 @@ public class MailboxWatchDogService {
 				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
 								EntityStatus.ACTIVE.value().equals(procsr.getProcsrStatus())) {
 					
-					LOGGER.debug("Retrieving Mailbox properties");
+					LOGGER.info("Retrieving Mailbox properties");//log level changed
 					List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
