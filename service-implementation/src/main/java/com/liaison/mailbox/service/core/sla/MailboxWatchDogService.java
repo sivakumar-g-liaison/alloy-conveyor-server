@@ -479,28 +479,26 @@ public class MailboxWatchDogService {
 	 */
 	public void validateMailboxSLARule(String mailboxStatus) {
 
-		LOGGER.info("Entering into validateMailboxSLARules.");//log level changed
+		LOGGER.debug("Entering into validateMailboxSLARules.");
 
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		
-		LOGGER.info("Retrieving all sweepers");//log level changed
+		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(Sweeper.class.getCanonicalName());
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
-			
 			try {
 				// sla validation must be done only if both mailbox and processors are active
 				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
 								EntityStatus.ACTIVE.value().equals(procsr.getProcsrStatus())) {
 					
-					LOGGER.info("Retrieving Mailbox properties");//log level changed
+					LOGGER.debug("Retrieving Mailbox properties");
 					List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
-					
 					Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 					// check whether sweeper got executed with in the configured sla time
 					checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
@@ -552,7 +550,8 @@ public class MailboxWatchDogService {
         }
 
         Timestamp timestamp = getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration);
-        if (new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
+        if (null != processorExecutionState.getLastExecutionDate() && 
+                new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
             LOGGER.error(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
             notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
             return;

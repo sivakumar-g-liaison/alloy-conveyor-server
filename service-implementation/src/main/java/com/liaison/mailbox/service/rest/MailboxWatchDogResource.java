@@ -75,7 +75,7 @@ public class MailboxWatchDogResource extends AuditedResource {
 			public Object call() {
 
 				try {
-					LOG.info("Entering into mailbox watchdog resource");//log level changed
+					LOG.debug("Entering into mailbox watchdog resource");
 
 					if (!MailBoxUtil.isEmpty(type) && SWEEPER.equals(type.toLowerCase())) {
 						// validate the sla rules of all mailboxes

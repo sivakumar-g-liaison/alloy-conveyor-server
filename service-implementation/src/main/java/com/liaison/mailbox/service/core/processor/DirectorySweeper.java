@@ -36,6 +36,7 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,14 +48,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -789,14 +794,16 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      */
     public void cleanupStaleFiles() throws MailBoxServicesException, IOException {
 
-        LOGGER.info("Entering cleanupStaleFiles");//new log
         List<String> staleFiles = new ArrayList<>();
         String payloadLocation = getPayloadURI();
 
         //validates sweeper location
         final Path payloadPath = Paths.get(payloadLocation);
-        if (!Files.isDirectory(payloadPath)) {
-            LOGGER.info("Entering payloadPath" + payloadPath);//new log
+        FileSystem fileSystem = FileSystems.getDefault();
+        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
+        PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+        
+        if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 
@@ -817,7 +824,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      */
     public void deleteStaleFiles(Path rootPath, List<String> fileNames) {
 
-        LOGGER.info("Entering deleteStaleFiles");//new log
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
 
             String fileName = null;
@@ -832,11 +838,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
                 int staleFileTTL = ((SweeperPropertiesDTO) getProperties()).getStaleFileTTL();
                 if (!MailBoxUtil.isFileExpired(file.toFile().lastModified(), staleFileTTL)) {
-                    LOGGER.info("deleteStaleFiles file not expired");//new log
                     continue;
                 }
 
-                LOGGER.info("deleteStaleFiles deleting file : " + file.getFileName());//new log
                 Files.deleteIfExists(file);
                 fileNames.add(fileName);
                 LOGGER.info("Stale file {} deleted successfully in sweeper location {} ", fileName, file.toAbsolutePath().toString());
