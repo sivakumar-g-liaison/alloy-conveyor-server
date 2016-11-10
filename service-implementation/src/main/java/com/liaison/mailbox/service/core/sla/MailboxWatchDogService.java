@@ -489,7 +489,7 @@ public class MailboxWatchDogService {
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
-			
+		    
 			try {
 				// sla validation must be done only if both mailbox and processors are active
 				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
@@ -552,7 +552,8 @@ public class MailboxWatchDogService {
         }
 
         Timestamp timestamp = getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration);
-        if (new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
+        if (null != processorExecutionState.getLastExecutionDate() && 
+                new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
             LOGGER.error(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
             notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
             return;
