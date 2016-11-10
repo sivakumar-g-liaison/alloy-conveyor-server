@@ -181,8 +181,9 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             StringBuilder message = new StringBuilder()
                     .append("File ")
                     .append(currentFileName)
-                    .append(" uploaded successfully")
-                    .append(" to remote path ")
+                    .append(" uploaded successfully to ")
+                    .append(getHost(staticProp.getUrl()))
+                    .append(" and the remote path ")
                     .append(remoteParentDir);
 
             // Glass Logging
