@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -56,6 +57,8 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Class which has Dropbox File Transfer related operations.
@@ -352,33 +355,21 @@ public class DropboxFileTransferService {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
-		for (String tenancyKey : tenancyKeys) {
 
-			LOG.debug("DropboxFileTransferService - retrieved tenancy key is %s", tenancyKey);
-			List<String> specificProcessorTypes = new ArrayList<String>();
-			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
+		ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
+		List<ScheduleProfilesRef> scheduleProfiles = profileDAO.fetchTransferProfiles(tenancyKeys);
 
-			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
-			List<ScheduleProfilesRef> scheduleProfiles = profileDAO.findTransferProfilesSpecificProcessorTypeByTenancyKey(
-					tenancyKey, specificProcessorTypes);
+		// constructing transferProfileDTO from scheduleProfiles
+        ProfileDTO transferProfile = null;
+		for (ScheduleProfilesRef profile : scheduleProfiles) {
 
-			// if there are no dropbox processors available for this tenancy key
-			// continue to next one.
-			if (scheduleProfiles.isEmpty()) {
-				LOG.error("There are no transfer profiles available for  tenancykey - {}", tenancyKey);
-				continue;
-			}
-
-			// constructing transferProfileDTO from scheduleProfiles
-			for (ScheduleProfilesRef profile : scheduleProfiles) {
-
-				ProfileDTO transferProfile = new ProfileDTO();
-				transferProfile.copyFromEntity(profile);
-				transferProfiles.add(transferProfile);
-			}
+			transferProfile = new ProfileDTO();
+			transferProfile.copyFromEntity(profile);
+			transferProfiles.add(transferProfile);
 		}
+
 		if (transferProfiles.isEmpty()) {
-			LOG.error("There are no transfer profiles available");
+			LOG.error("There are no transfer profiles available for the tenancy keys " + tenancyKeys.stream().collect(joining(",")));
 		}
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));

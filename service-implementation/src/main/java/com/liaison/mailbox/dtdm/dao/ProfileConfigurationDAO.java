@@ -25,10 +25,13 @@ public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef>
 	String PGUID = "pguid";
 	String GET_ALL = "ScheduleProfilesRef.getAll";
 	String PROF_NAME = "sch_prof_name";
-	String GET_PROFILE_BY_NAME = "ScheduleProfilesRef.getProfileByName";
 	String STATUS = "status";
-	String TENANCY_KEY = "tenancy_key";
-	
+    String TENANCY_KEY = "tenancy_key";
+    String PROCESSOR_TYPE = "processorType";
+
+    String GET_PROFILE_BY_NAME = "ScheduleProfilesRef.getProfileByName";
+    String FIND_PROFILES_BY_TENANCY_KEY = "ScheduleProfilesRef.findProfilesByTenancyKey";
+
     /**
      * Find by profileName.
      * 
@@ -36,14 +39,12 @@ public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef>
      * @return ScheduleProfilesRef
      */
 	ScheduleProfilesRef findProfileByName(String profileName);
-	
+
 	/**
 	 * Method to retrieve profiles by given processor type and tenancykey
 	 * 
-	 * @param tenancyKey tenancy key
-	 * @param specificProcessorTypes processor types
 	 * @return list of scheduleProfilesRef
 	 */
-	List<ScheduleProfilesRef> findTransferProfilesSpecificProcessorTypeByTenancyKey(String tenancyKey, List<String> specificProcessorTypes);
+	List<ScheduleProfilesRef> fetchTransferProfiles(List<String> tenancyKeys);
 	
 }
