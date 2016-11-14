@@ -477,7 +477,7 @@ public class MailboxWatchDogService {
 	 * 					status of mailbox. could be ACTIVE or INACTIVE
 	 * @return boolean
 	 */
-	public void validateMailboxSLARule(String mailboxStatus) {
+	public void validateMailboxSLARule(EntityStatus mailboxStatus) {
 
 		LOGGER.debug("Entering into validateMailboxSLARules.");
 
@@ -485,7 +485,7 @@ public class MailboxWatchDogService {
 		
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
-		processorTypes.add(Sweeper.class.getCanonicalName());
+		processorTypes.add(ProcessorType.SWEEPER.name());
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
@@ -566,50 +566,6 @@ public class MailboxWatchDogService {
         }
     }
 
-    /**
-	 * Method to return a list of canonical names of specific processors
-	 *
-	 * @param type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
-	 * @return list of canonical names of processors of based on the type provided
-	 */
-	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
-
-		List <String> specificProcessors = new ArrayList<String>();
-		switch(type) {
-			case MAILBOX_SLA:
-				specificProcessors.add(Sweeper.class.getCanonicalName());
-				break;
-			case CUSTOMER_SLA:
-				specificProcessors.add(RemoteUploader.class.getCanonicalName());
-				specificProcessors.add(FileWriter.class.getCanonicalName());
-				break;
-
-		}
-
-		return specificProcessors;
-	}
-
-	/**
-	 * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
-	 * associated with given mailbox
-	 *
-	 * @param mailboxId
-	 * @return Processor
-	 */
-	public Processor getSpecificProcessorofMailbox(String mailboxId) {
-
-        LOGGER.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
-		// get processor of type remote uploader of given mailbox id
-		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-		List <Processor> processors = processorDAO.findSpecificProcessorTypesOfMbx(mailboxId, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
-		// always get the first available processor because there
-		// will be either one uploader or file writer available for each mailbox
-		Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
-		return processor;
-
-	}
-
-	
 	/**
 	 * Method to send email to user for all sla violations
 	 * 

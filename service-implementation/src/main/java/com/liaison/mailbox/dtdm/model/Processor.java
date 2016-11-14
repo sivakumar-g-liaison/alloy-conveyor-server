@@ -70,7 +70,28 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                                     + " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
     				query = "select processor from Processor processor"
-    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME)
+    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME),
+    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_TENANCY,
+            query = "select processor from Processor processor" +
+                    " inner join processor.scheduleProfileProcessors schd_prof_processor" +
+                    " inner join schd_prof_processor.scheduleProfilesRef profile" +
+                    " where profile.pguid = :" + ProcessorConfigurationDAO.PROFILE_ID +
+                    " and processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY +
+                    " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " and processor.class = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE),
+    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS,
+            query = "select processor from Processor processor" +
+                    " inner join processor.mailbox mbx" +
+                    " where mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " and processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")"),
+    @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_STATUS,
+            query = "select processor from Processor processor" +
+                    " inner join processor.mailbox mbx" +
+                    " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID +
+                    " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " and processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")")
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {

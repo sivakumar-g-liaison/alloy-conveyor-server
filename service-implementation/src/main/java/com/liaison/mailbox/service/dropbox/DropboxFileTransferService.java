@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -36,7 +35,6 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -186,8 +184,6 @@ public class DropboxFileTransferService {
 		long endTime = 0;
 
 		LOG.debug("The retrieved tenancy key is %s", tenancyKey);
-		List<String> specificProcessorTypes = new ArrayList<String>();
-		specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 
 		// start time to calculate elapsed time for retrieving dropbox
@@ -197,8 +193,7 @@ public class DropboxFileTransferService {
 
 		// retrieve dropbox processors linked to given profile Id and tenancyKey
 		// in manifest
-		List<Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId,
-				tenancyKey, specificProcessorTypes);
+		List<Processor> processors = processorDAO.fetchDropboxProcessorsByProfileAndTenancyKey(profileId, tenancyKey);
 
 		// end time to calculate elapsed time for dropbox processors linked
 		// to given profile Id and tenancyKey in manifest
