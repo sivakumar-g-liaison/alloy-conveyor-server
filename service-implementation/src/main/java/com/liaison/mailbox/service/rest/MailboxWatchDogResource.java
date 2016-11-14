@@ -19,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.liaison.mailbox.enums.EntityStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,6 +38,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+
+import static com.liaison.mailbox.enums.EntityStatus.ACTIVE;
+import static com.liaison.mailbox.enums.EntityStatus.findByCode;
 
 /**
  * This is the gateway to check and update the customer picked up file status in LENS
@@ -78,8 +82,9 @@ public class MailboxWatchDogResource extends AuditedResource {
 					LOG.debug("Entering into mailbox watchdog resource");
 
 					if (!MailBoxUtil.isEmpty(type) && SWEEPER.equals(type.toLowerCase())) {
-						// validate the sla rules of all mailboxes
-						new MailboxWatchDogService().validateMailboxSLARule(mailboxStatus);
+                        // validate the sla rules of all mailboxes
+                        EntityStatus status = MailBoxUtil.isEmpty(mailboxStatus) ? ACTIVE : findByCode(mailboxStatus.toUpperCase());
+                        new MailboxWatchDogService().validateMailboxSLARule(status);
 					} else {
 						// To validate Mailbox sla for all mailboxes
 						new MailboxWatchDogService().pollAndUpdateStatus();
