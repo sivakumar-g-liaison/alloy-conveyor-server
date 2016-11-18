@@ -39,6 +39,7 @@ import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.UserAuthCacheUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
@@ -528,7 +529,7 @@ public class HTTPListenerResource extends AuditedResource {
 
             String processorType = processor instanceof HTTPSyncProcessor ? "SYNC" : "ASYNC";
             logger.info("HTTP(S)-"+ processorType +" : HTTP auth check enabled for the mailbox {}", mailboxInfo);
-            processor.authenticateRequestor(authenticationCredentials);
+            UserAuthCacheUtil.authenticate(basicAuthenticationHeader);
 
             authorization(httpListenerProperties, authenticationCredentials, processorType);
         } else {
