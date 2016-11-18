@@ -16,7 +16,7 @@ import com.liaison.commons.messagebus.topic.TopicTextSendClient;
  */
 public class MailBoxTopicMessageProducer implements AutoCloseable {
 
-    public static final String TOPIC_NAME = "mailboxtopicpool";
+    public static final String TOPIC_NAME = "mailboxProcessorTopic";
     private static SendClient sendClient = new TopicTextSendClient(TOPIC_NAME);
 
     public static SendClient getInstance() {
