@@ -17,4 +17,5 @@ package com.liaison.mailbox.rtdm.dao;
  */
 public interface MailboxRTDMDAO {
 	String PERSISTENCE_UNIT_NAME = "mailbox-rtdm";
+    String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
 }

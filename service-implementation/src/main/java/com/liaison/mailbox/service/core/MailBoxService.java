@@ -28,6 +28,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
@@ -36,7 +37,6 @@ import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
-import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -524,7 +524,7 @@ public class MailBoxService implements Runnable {
         if (!MailBoxUtil.isEmpty(processorId)) {
             processor = processorDAO.findActiveProcessorById(processorId);
         } else {
-            processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+            processor = getProcessorsForMailbox(mailboxId);
         }
 
         //Check the processor is null or not
@@ -615,6 +615,31 @@ public class MailBoxService implements Runnable {
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
+     * associated with given mailbox
+     *
+     * @param mailboxId mailbox guid
+     * @return Processor
+     */
+    private Processor getProcessorsForMailbox(String mailboxId) {
+
+        LOG.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
+
+        List<String> processorTypes = new ArrayList<>();
+        processorTypes.add(ProcessorType.FILEWRITER.name());
+        processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
+
+        // get processor of type remote uploader of given mailbox id
+        ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+        List<Processor> processors = processorDAO.findActiveProcessorsByTypeAndMailbox(mailboxId, processorTypes);
+
+        // always get the first available processor because there
+        // will be either one uploader or file writer available for each mailbox
+        Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
+        return processor;
 
     }
 

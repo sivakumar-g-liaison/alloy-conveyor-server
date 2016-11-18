@@ -53,8 +53,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -794,7 +797,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
         //validates sweeper location
         final Path payloadPath = Paths.get(payloadLocation);
-        if (!Files.isDirectory(payloadPath)) {
+        FileSystem fileSystem = FileSystems.getDefault();
+        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
+        PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+        
+        if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 

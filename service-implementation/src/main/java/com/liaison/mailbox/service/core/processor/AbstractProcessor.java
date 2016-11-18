@@ -88,8 +88,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private static final String FILE_PERMISSION = "rw-rw----";
     private static final String FOLDER_PERMISSION = "rwxrwx---";
     private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
-    private static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
-    private static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
+    protected static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
+    protected static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
     private static final String INBOX = "inbox";
     private static final String OUTBOX = "outbox";
 

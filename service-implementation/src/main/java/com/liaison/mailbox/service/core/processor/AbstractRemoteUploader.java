@@ -13,7 +13,6 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -35,6 +34,8 @@ import javax.ws.rs.core.Response;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,8 @@ import java.util.List;
 public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
-    
+    private static final String HOST_NAME = "default_hostname";
+
     private String fileName;
     private String folderPath;
     private boolean directUpload;
@@ -331,5 +333,23 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      *
      */
     protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
+
+    /**
+     * Reads the host from url for lens logging
+     * Handles the exception gracefully
+     *
+     * @param url url
+     * @return host
+     */
+    protected String getHost(String url) {
+        try {
+            URI uri = new URI(url);
+            return uri.getHost();
+        } catch (URISyntaxException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+
+        return HOST_NAME;
+    }
 
 }

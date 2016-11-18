@@ -142,6 +142,7 @@ war {
 }
 
 war.dependsOn('configureTomcat')
+processResources.dependsOn('setDevProperties')
 
 dependencies {
 

@@ -608,10 +608,10 @@ public class MailBoxUtil {
 
         String pipelineId = null;
         if (HTTPSYNCPROCESSOR.equals(processorType) ||
-                HTTPASYNCPROCESSOR.equals(processorType)) {
-            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
-        } else if (SWEEPER.equals(processorType) ||
+                HTTPASYNCPROCESSOR.equals(processorType) ||
                 DROPBOXPROCESSOR.equals(processorType)) {
+            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
+        } else if (SWEEPER.equals(processorType)) {
             pipelineId = propertiesDTO.getPipeLineID();
         } else {
 			return;
