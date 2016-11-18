@@ -179,6 +179,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             String statusIndicator = staticProp.getFileTransferStatusIndicator();
             for (FTPFile file : files) {
 
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn("The executor is gracefully interrupted");
+                    return;
+                }
+
                 if (file.getName().equals(".") || file.getName().equals("..")) {
                     // skip parent directory and the directory itself
                     continue;

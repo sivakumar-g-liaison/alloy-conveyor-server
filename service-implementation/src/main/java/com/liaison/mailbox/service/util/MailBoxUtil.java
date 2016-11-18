@@ -11,9 +11,11 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -94,7 +96,7 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_WEEK = 7;
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
-	
+
     private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
@@ -663,26 +665,6 @@ public class MailBoxUtil {
     }
     
     /**
-     * To get current execution node
-     * @return node 
-     */
-    public static String getNode() {
-        return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
-    }
-    
-    /**
-     * To get thread by name
-     * @param threadName
-     * @return
-     */
-    public static Thread getThreadByName(String threadName) {
-        for (Thread t : Thread.getAllStackTraces().keySet()) {
-            if (t.getName().equals(threadName)) return t;
-        }
-        return null;
-    }
-
-    /**
      * Util method to read the stale file TTL value from processor properties
      * @param json processor properties json
      * @return String TTl value
@@ -704,6 +686,66 @@ public class MailBoxUtil {
             return (int) o;
         } catch (JSONException e) {
             return 0;
+        }
+    }
+
+    /**
+     * To get current execution node
+     *
+     * @return node hostname
+     */
+    public static String getNode() {
+
+        if (MailBoxUtil.isEmpty(ConfigurationManager.getDeploymentContext().getDeploymentServerId())) {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
+        }
+    }
+
+    /**
+     * To get thread by name
+     *
+     * @param threadName thred name
+     * @return Thread
+     */
+    public static Thread getThreadByName(String threadName) {
+
+        for (Thread t : Thread.getAllStackTraces().keySet()) {
+            if (t.getName().equals(threadName)) return t;
+        }
+        return null;
+    }
+
+    /**
+     * To check thread interrupt status.
+     *
+     * @param threadName thread name
+     * @return true if it is interrupted
+     */
+    public static boolean isInterrupted(String threadName) {
+
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            return runningThread.isInterrupted();
+        }
+        return false;
+    }
+
+    /**
+     * To interrupt a thread by name
+     *
+     * @param threadName thread name
+     */
+    public static void interruptThread(String threadName) {
+
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            runningThread.interrupt();
         }
     }
 

@@ -40,11 +40,13 @@ import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
+import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -82,8 +84,10 @@ public class MailBoxService implements Runnable {
 	
 	public enum QueueMessageType {
 		WORKTICKET,
-		TRIGGERPROFILEREQUEST
+		TRIGGERPROFILEREQUEST,
+        INTERRUPTTHREAD
 	}
+
 	
 	public MailBoxService(String message, QueueMessageType messageType) {
 		this.message = message;
@@ -499,7 +503,9 @@ public class MailBoxService implements Runnable {
 			this.executeProcessor(message);
 		} else if (QueueMessageType.WORKTICKET.equals(this.messageType)) {
 			this.executeFileWriter(message);
-		} else {
+		} else if (QueueMessageType.INTERRUPTTHREAD.equals(this.messageType)){
+            this.interruptThread(message);
+        } else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
 		}
 	}
@@ -593,6 +599,26 @@ public class MailBoxService implements Runnable {
 		}
 		processorExecutionState.setExecutionStatus(state.value());
 	}
+
+    /**
+     * This method is used to kill running threads for the processors which are stopped.
+     *
+     * @param topicMessage topic message dto
+     */
+    public void interruptThread(String topicMessage) {
+
+        try {
+
+            TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(topicMessage, TopicMessageDTO.class);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            }
+
+
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Method to get the processor of type RemoteUploader/fileWriter of Mailbox

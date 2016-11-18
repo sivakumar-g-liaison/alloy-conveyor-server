@@ -119,6 +119,10 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         for (File item : subFiles) {
             //FTPS
+            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                LOGGER.warn("The executor is gracefully interrupted");
+                return;
+            }
             uploadFile(ftpsRequest, remoteParentDir, item);
         }
     }

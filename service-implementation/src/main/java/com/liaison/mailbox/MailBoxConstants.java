@@ -422,4 +422,6 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
 
+    String LOCALHOST = "localhost";
+
 }
