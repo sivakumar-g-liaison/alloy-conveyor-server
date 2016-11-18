@@ -30,7 +30,7 @@ public class MailBoxTopicMessageConsumer implements TopicTextMessageProcessor {
 
         if (message != null) {
             logger.debug("Message received from Topic");
-            AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.KILLTHREAD));
+            AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.INTERRUPTTHREAD));
         }
     }
 }

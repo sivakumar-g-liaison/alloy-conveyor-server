@@ -85,8 +85,9 @@ public class MailBoxService implements Runnable {
 	public enum QueueMessageType {
 		WORKTICKET,
 		TRIGGERPROFILEREQUEST,
-        KILLTHREAD
+        INTERRUPTTHREAD
 	}
+
 	
 	public MailBoxService(String message, QueueMessageType messageType) {
 		this.message = message;
@@ -502,7 +503,7 @@ public class MailBoxService implements Runnable {
 			this.executeProcessor(message);
 		} else if (QueueMessageType.WORKTICKET.equals(this.messageType)) {
 			this.executeFileWriter(message);
-		} else if (QueueMessageType.KILLTHREAD.equals(this.messageType)){
+		} else if (QueueMessageType.INTERRUPTTHREAD.equals(this.messageType)){
             this.interruptThread(message);
         } else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
