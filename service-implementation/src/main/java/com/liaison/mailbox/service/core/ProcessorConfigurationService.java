@@ -85,6 +85,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 /**
  * Class which has Processor configuration related operations.
  *
@@ -153,6 +154,7 @@ public class ProcessorConfigurationService {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceId);
 				serviceInstance.setPguid(MailBoxUtil.getGUID());
+				serviceInstance.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
@@ -204,6 +206,7 @@ public class ProcessorConfigurationService {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());
+				msi.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
@@ -269,6 +272,7 @@ public class ProcessorConfigurationService {
 
                 profileProcessor = new ScheduleProfileProcessor();
                 profileProcessor.setPguid(MailBoxUtil.getGUID());
+                profileProcessor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
                 profileProcessor.setScheduleProfilesRef(profile);
                 profileProcessor.setProcessor(processor);
                 scheduleProfileProcessors.add(profileProcessor);
@@ -597,6 +601,7 @@ public class ProcessorConfigurationService {
 
 		ProcessorProperty processorProperty = new ProcessorProperty();
 		processorProperty.setPguid(MailBoxUtil.getGUID());
+		processorProperty.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 		processorProperty.setProcsrPropName(properties.getName());
 		processorProperty.setProcsrPropValue(properties.getValue());
 		return processorProperty;

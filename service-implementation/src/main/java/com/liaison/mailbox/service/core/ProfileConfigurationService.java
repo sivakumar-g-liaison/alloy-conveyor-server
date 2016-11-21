@@ -77,6 +77,7 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			profileDTO.copyToEntity(profile);
 			profile.setPguid(MailBoxUtil.getGUID());
+			profile.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 
 			// persisting the profile entity
 			configDao.persist(profile);

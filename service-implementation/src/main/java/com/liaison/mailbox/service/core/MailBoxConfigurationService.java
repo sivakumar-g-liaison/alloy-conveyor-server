@@ -136,6 +136,7 @@ public class MailBoxConfigurationService {
 				mailBox.setPguid(mailboxDTO.getGuid());
 			}			
 
+			mailBox.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 			//Mailbox properties
             MailBoxProperty property = null;
             Set<MailBoxProperty> properties = new HashSet<>();
@@ -196,6 +197,7 @@ public class MailBoxConfigurationService {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceID);
 				serviceInstance.setPguid(MailBoxUtil.getGUID());
+				serviceInstance.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
@@ -207,6 +209,7 @@ public class MailBoxConfigurationService {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());
+				msi.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				msi.setServiceInstance(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
