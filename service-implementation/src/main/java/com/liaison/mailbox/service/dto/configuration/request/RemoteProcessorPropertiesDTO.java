@@ -71,6 +71,7 @@ public class RemoteProcessorPropertiesDTO {
     private int scriptExecutionTimeout;
     private int staleFileTTL;
     private String processMode = "ASYNC";
+    private boolean allowEmptyFiles;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -390,6 +391,14 @@ public class RemoteProcessorPropertiesDTO {
     
     public void setStaleFileTTL(int staleFileTTL) {
         this.staleFileTTL = staleFileTTL;
+    }
+    
+    public boolean isAllowEmptyFiles() {
+        return allowEmptyFiles;
+    }
+    
+    public void setAllowEmptyFiles(boolean allowEmptyFiles) {
+        this.allowEmptyFiles = allowEmptyFiles;
     }
     
 }

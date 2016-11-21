@@ -256,6 +256,10 @@ public class TransactionVisibilityClient {
 					visibilityAPI.setOutAgent(message.getOutAgent());
 				}
                 break;
+            case VALIDATION_ERROR :
+                visibilityAPI.setStatus(StatusCode.V);
+                visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+                break;
             default:
                 throw new RuntimeException("Invalid glass message status - " + message.getStatus());
 		}
