@@ -77,6 +77,7 @@ public class MailBox implements Identifiable {
 	private String tenancyKey;
 	private String modifiedBy;
 	private Date modifiedDate;
+	private String originatingDc;
 	
 
 	public MailBox() {
@@ -205,6 +206,15 @@ public class MailBox implements Identifiable {
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
+    
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
 
     /**
 	 * Method to retrieve the given properties form Mailbox

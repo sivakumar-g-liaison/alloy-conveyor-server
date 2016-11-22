@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

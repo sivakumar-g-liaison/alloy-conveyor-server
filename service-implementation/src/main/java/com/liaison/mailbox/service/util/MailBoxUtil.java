@@ -87,7 +87,8 @@ public class MailBoxUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
-
+	//for fetch datacenter name.
+	public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
 	private static final float SECONDS_PER_MIN = 60;

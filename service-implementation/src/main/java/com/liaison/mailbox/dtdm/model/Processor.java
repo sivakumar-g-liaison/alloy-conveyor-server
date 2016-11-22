@@ -117,6 +117,7 @@ public class Processor implements Identifiable {
 	private ServiceInstance serviceInstance;
 	private String modifiedBy;
 	private Date modifiedDate;
+	private String originatingDc;
 
 	private Set<Credential> credentials;
 	private Set<Folder> folders;
@@ -338,6 +339,15 @@ public class Processor implements Identifiable {
 		return scheduleProfileProcessor;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

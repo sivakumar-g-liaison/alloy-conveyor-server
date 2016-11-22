@@ -43,6 +43,7 @@ public class Credential implements Identifiable {
 	private String credsUri;
 	private String credsUsername;
 	private Processor processor;
+	private String originatingDc;
 	
 	
 	public Credential() {
@@ -121,6 +122,15 @@ public class Credential implements Identifiable {
 
 	public void setProcessor(Processor processor) {
 		this.processor = processor;
+	}
+	
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
 	}
 
 	@Override
