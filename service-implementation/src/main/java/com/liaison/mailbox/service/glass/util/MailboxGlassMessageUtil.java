@@ -102,6 +102,8 @@ public class MailboxGlassMessageUtil {
             glassMessage.setOutboundFileName(fileName);
             glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
+        } else if (ExecutionState.VALIDATION_ERROR.equals(status)) {
+            logProcessingStatus(glassMessage, StatusType.ERROR, message);
         }
 
         // TVAPI
