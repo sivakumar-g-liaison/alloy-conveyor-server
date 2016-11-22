@@ -180,7 +180,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             }
             long endTime = System.currentTimeMillis();
 
-            LOGGER.info(constructMessage("Number of files processed {}"), workTicketsToSweep.size());
+            LOGGER.info(constructMessage("Number of files processed {}"), workTicketsToPost.size());
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
         } catch (MailBoxServicesException | IOException | JAXBException | JSONException | IllegalAccessException e) {
@@ -778,7 +778,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 *
      * @param wrkTicket workticket for logging
 	 * @param firstCornerTimeStamp first corner timestamp
-	 * @param executionState 
+	 * @param state Execution Status
      */
     protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state) {
 
