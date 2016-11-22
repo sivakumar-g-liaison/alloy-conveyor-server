@@ -13,14 +13,10 @@ package com.liaison.mailbox.rtdm.model;
 import java.io.IOException;
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -36,7 +32,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 @Entity
 @Table(name = "STAGED_FILE")
-@NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf")
+@NamedQueries({
+        @NamedQuery(name = "StagedFile.findAll",
+                query = "SELECT sf FROM StagedFile sf"),
+        @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
+                query = "select sf from StagedFile sf where (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID + " and sf.stagedFileStatus <>:" + StagedFileDAO.STATUS)
+})
 public class StagedFile implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

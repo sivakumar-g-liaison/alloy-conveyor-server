@@ -42,6 +42,7 @@ import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
@@ -339,9 +340,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * Get the URI to which the mailbox sweeper should be happen
      *
      * @return URI
-     * @throws MailBoxConfigurationServicesException
      */
-    public Properties getMailBoxProperties() throws MailBoxServicesException {
+    public Properties getMailBoxProperties() {
 
         if (mailBoxProperties != null) {
             return mailBoxProperties;
@@ -786,6 +786,41 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         }
     }
 
+    /**
+     * Logs TVAPI status and event message in LENS
+     *
+     * @param message Message String to be logged in LENS event log
+     * @param file java.io.File
+     * @param status Status of the LENS logging
+     */
+    protected void logGlassMessage(String message, RelayFile file, ExecutionState status) {
+
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
+
+        if (null != stagedFile) {
+
+            if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
+                return;
+            }
+
+            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+            glassMessageDTO.setFileName(file.getName());
+            glassMessageDTO.setFilePath(file.getAbsolutePath());
+            glassMessageDTO.setFileLength(file.length());
+            glassMessageDTO.setStatus(status);
+            glassMessageDTO.setMessage(message.toString());
+            glassMessageDTO.setPipelineId(null);
+            glassMessageDTO.setFirstCornerTimeStamp(null);
+
+            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+
+        }
+    }
+
     protected boolean updateStagedFileStatus(ExecutionState status, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
 
         // Log running status
@@ -938,6 +973,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     @Override
     public File[] getFilesToUpload(boolean recurseSubDirs) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public RelayFile[] getRelayFiles(boolean recurseSubDirs) {
         throw new RuntimeException("Not implemented");
     }
 

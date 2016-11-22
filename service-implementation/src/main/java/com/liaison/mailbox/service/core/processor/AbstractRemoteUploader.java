@@ -22,6 +22,7 @@ import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -50,6 +51,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     private String fileName;
     private String folderPath;
+    private String globalProcessId;
     private boolean directUpload;
 
     public String getFileName() {
@@ -74,6 +76,14 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
+    }
+
+    public String getGlobalProcessId() {
+        return globalProcessId;
+    }
+
+    public void setGlobalProcessId(String globalProcessId) {
+        this.globalProcessId = globalProcessId;
     }
 
     public AbstractRemoteUploader() {}
@@ -242,6 +252,35 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
+    public void logToLens(String msg, RelayFile file, ExecutionState status) {
+
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile stagedFile = stagedFileMap.get(file.getAbsolutePath());
+        if (null == stagedFile) {
+
+            stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
+            if (null == stagedFile) {
+                return;
+            }
+        }
+        if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
+            return;
+        }
+
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(file.getName());
+        glassMessageDTO.setFilePath(file.getParent());
+        glassMessageDTO.setFileLength(file.length());
+        glassMessageDTO.setStatus(status);
+        glassMessageDTO.setMessage(msg);
+        glassMessageDTO.setPipelineId(null);
+
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+    }
+
     /**
      * set passive properties for ftps uploader client
      * @param ftpsRequest ftps client
@@ -324,6 +363,53 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
 
         return files.toArray(new File[files.size()]);
+    }
+
+    /**
+     * get files from staged file db
+     *
+     * @param recurseSubDirs boolean to check the recursive sub directories
+     * @return list of files to be uploaded
+     */
+    @Override
+    public RelayFile[] getRelayFiles(boolean recurseSubDirs) {
+
+        RelayFile file = null;
+        StagedFileDAO dao = new StagedFileDAOBase();
+        List<StagedFile> stagedFiles;
+
+        //for javascript direct upload
+        if (getFileName() != null
+                && getFolderPath() != null
+                && isDirectUpload()) {
+
+            RelayFile[] fileArray = new RelayFile[1];
+            StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
+
+            file = new RelayFile();
+            file.copy(stagedFile);
+            fileArray[0] = file;
+
+            return fileArray;
+        }
+
+        //default profile invocation
+        stagedFiles = dao.findStagedFilesForUploader(
+                this.configurationInstance.getPguid(),
+                new File(validateLocalPath()).getPath(),
+                isDirectUpload(),
+                recurseSubDirs);
+
+        List<RelayFile> files = new ArrayList<>();
+        for (StagedFile stagedFile : stagedFiles) {
+
+            file = new RelayFile();
+            file.copy(stagedFile);
+            files.add(file);
+            stagedFileMap.put(file.getAbsolutePath(), stagedFile);
+        }
+
+        return files.toArray(new RelayFile[files.size()]);
     }
     
     /**

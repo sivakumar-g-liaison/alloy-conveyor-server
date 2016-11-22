@@ -478,4 +478,20 @@ public class StorageUtilities {
 			throw new MailBoxServicesException(Messages.PAYLOAD_DOES_NOT_EXIST, Response.Status.BAD_REQUEST);
 		}
 	}
+
+    /**
+     * Reads payload size from the fs2 meta data
+     *
+     * @param messageUri message uri
+     * @return long payload size
+     */
+    public static long getPayloadSize(String messageUri) {
+        FS2MetaSnapshot metaSnapshot = null;
+        try {
+            metaSnapshot = FS2.fetchObject(new URI(messageUri));
+        } catch (FS2Exception | URISyntaxException e) {
+            throw new RuntimeException("Failed to get the meta data.", e);
+        }
+        return metaSnapshot.getPayloadSize();
+    }
 }

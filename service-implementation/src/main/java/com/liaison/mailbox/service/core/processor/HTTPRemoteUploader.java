@@ -182,7 +182,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
     }
 
     @Override
-    public void doDirectUpload(String fileName, String folderPath) {
+    public void doDirectUpload(String fileName, String folderPath, String globalProcessId) {
 
         try {
 

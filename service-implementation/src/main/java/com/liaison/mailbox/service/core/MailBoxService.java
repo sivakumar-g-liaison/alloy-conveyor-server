@@ -554,7 +554,7 @@ public class MailBoxService implements Runnable {
         directUpload = true;
         RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
         String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
-        directUploader.doDirectUpload(workticket.getFileName(), path);
+        directUploader.doDirectUpload(workticket.getFileName(), path, workticket.getGlobalProcessId());
     }
 
     /**

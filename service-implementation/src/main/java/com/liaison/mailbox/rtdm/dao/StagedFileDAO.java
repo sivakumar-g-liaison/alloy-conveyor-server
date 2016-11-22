@@ -26,6 +26,8 @@ import java.util.Map;
 
 public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
+    String FIND_BY_GPID = "StagedFile.findByGpid";
+
     String FILE_NAME = "fileName";
     String GUID = "file_guid";
     String CURRENT_TIME = "current_time";
@@ -62,7 +64,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param gpid global process id
      * @return staged file
      */
-    StagedFile findStagedFile(String gpid);
+    StagedFile findStagedFileByGpid(String gpid);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")

@@ -262,7 +262,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             List<String> statuses = new ArrayList<>();
             statuses.add(EntityStatus.STAGED.name());
-            statuses.add(EntityStatus.ACTIVE.name());
+			statuses.add(EntityStatus.ACTIVE.name());
+			statuses.add(EntityStatus.FAILED.name());
 
             List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE.toString())
                     .setParameter(PROCESSOR_ID, processorId)
@@ -345,29 +346,21 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * Returns staged file
      */
     @Override
-    public StagedFile findStagedFile(String gpid) {
+    public StagedFile findStagedFileByGpid(String gpid) {
 
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-                    .append(" where (sf.globalProcessId) =:")
-                    .append(GLOBAL_PROCESS_ID)
-                    .append(" and sf.stagedFileStatus =:")
-                    .append(STATUS)
-                    .append(")");
-
             List<?> files = entityManager
-                    .createQuery(query.toString())
+                    .createNamedQuery(FIND_BY_GPID)
                     .setParameter(GLOBAL_PROCESS_ID, gpid)
-                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .setParameter(STATUS, EntityStatus.INACTIVE.name())
                     .getResultList();
 
-            Iterator<?> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                return (StagedFile) iterator.next();
+            for (Object file : files) {
+                return (StagedFile) file;
             }
 
         } finally {
