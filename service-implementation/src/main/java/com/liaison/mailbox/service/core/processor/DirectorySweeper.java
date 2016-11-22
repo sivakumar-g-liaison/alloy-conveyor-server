@@ -142,7 +142,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             LOGGER.info(constructMessage("Start run"));           
 
             LOGGER.debug("Is in-progress file list is empty: {}", activeFiles.isEmpty());
-            List<WorkTicket> workTicketsToSweep = new ArrayList<WorkTicket>();
+            List<WorkTicket> workTicketsToPost = new ArrayList<WorkTicket>();
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
             								? sweepDirectory(inputLocation, staticProp)
             								: retryGenWrkTktForActiveFiles(activeFiles);
@@ -159,18 +159,18 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			                String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
 			                delete(filePath);
 			            } else {
-			                workTicketsToSweep.add(workTicket);
+			                workTicketsToPost.add(workTicket);
 			            }
 			        }
 			    } else {
-			        workTicketsToSweep.addAll(workTickets);
+			        workTicketsToPost.addAll(workTickets);
 			    }
 
-				LOGGER.debug("There are {} files to process", workTicketsToSweep.size());
+				LOGGER.debug("There are {} files to process", workTicketsToPost.size());
 				if (ProcessMode.SYNC.name().equals(staticProp.getProcessMode())) {
-					syncSweeper(workTicketsToSweep, staticProp);
+					syncSweeper(workTicketsToPost, staticProp);
 				} else {
-					asyncSweeper(workTicketsToSweep, staticProp);
+					asyncSweeper(workTicketsToPost, staticProp);
 				}
 			}
 
