@@ -230,7 +230,7 @@ dependencies {
 	jdbc "com.oracle.jdbc:ojdbc7:${oracleVersion}"
 
 	//Dependency for UM integration
-	compile "com.liaison.commons.usermanagement:usermanagement-client:4.+"
+	compile "com.liaison.commons.usermanagement:usermanagement-client:4.10.+"
 
 	// Dependency for KeyManager
 	compile('com.liaison.key.management:key-management:3.2.0:grammar') {

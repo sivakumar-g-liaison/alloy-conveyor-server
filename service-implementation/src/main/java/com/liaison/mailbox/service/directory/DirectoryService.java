@@ -20,6 +20,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
 public class DirectoryService {
     
@@ -100,9 +101,9 @@ public class DirectoryService {
      */
     public void executeDirectoryOperation(DirectoryMessageDTO message) throws MailBoxServicesException, IOException {
         
-        if (DirectoryOperationTypes.CREATE.equals(message.getOperType())) {
+        if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
             invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName());
-        } else if (DirectoryOperationTypes.DELETE.equals(message.getOperType())) {
+        } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName());
         } else {
             throw new RuntimeException("Invalid operation");
