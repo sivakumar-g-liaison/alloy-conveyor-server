@@ -50,7 +50,6 @@ import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.netflix.config.ConfigurationManager;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +57,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;

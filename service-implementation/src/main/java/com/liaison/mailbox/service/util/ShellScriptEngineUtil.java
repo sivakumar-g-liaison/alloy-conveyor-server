@@ -15,16 +15,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * 
@@ -35,7 +31,7 @@ public class ShellScriptEngineUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(ShellScriptEngineUtil.class);
 
-	public static void executeShellScript(String scriptPath, String homeFolderPath, String username,String userGroupName) throws  MailBoxServicesException {
+	public static void executeShellScript(String scriptPath, String homeFolderPath, String username,String userGroupName) {
 
 		ByteArrayOutputStream outputStream = null;
 		try {
@@ -71,12 +67,10 @@ public class ShellScriptEngineUtil {
 			} else {
 				LOGGER.error("Script execution failed");
 				LOGGER.error(outputStream.toString());
-				throw new MailBoxServicesException("Account creation failed because script execution got failed", Response.Status.INTERNAL_SERVER_ERROR);
 			}
 
 		} catch (IOException e) {
 			LOGGER.error("script execution failed " + e.getMessage());
-			throw new MailBoxServicesException("Account creation failed because script execution got failed", Response.Status.INTERNAL_SERVER_ERROR);
 		} finally {
 			if (outputStream != null) {
 				try {
@@ -89,7 +83,7 @@ public class ShellScriptEngineUtil {
 
 	}
 	
-   public static void executeDeletionShellScript(String scriptPath, String homeFolderPath) throws  MailBoxServicesException {
+   public static void executeDeletionShellScript(String scriptPath, String homeFolderPath) {
 
         ByteArrayOutputStream outputStream = null;
         try {
@@ -121,12 +115,10 @@ public class ShellScriptEngineUtil {
             } else {
                 LOGGER.error("Deletion Script execution failed");
                 LOGGER.error(outputStream.toString());
-                throw new MailBoxServicesException("Account deletion failed because script execution got failed", Response.Status.INTERNAL_SERVER_ERROR);
             }
 
         } catch (IOException e) {
             LOGGER.error("script execution failed " + e.getMessage());
-            throw new MailBoxServicesException("Account deletion failed because script execution got failed", Response.Status.INTERNAL_SERVER_ERROR);
         } finally {
             if (outputStream != null) {
                 try {

@@ -17,9 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
+import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
 public class DirectoryService {
@@ -32,12 +32,8 @@ public class DirectoryService {
      * @param gatewayType
      * @param username
      * @throws IOException
-     * @throws MailBoxServicesException
      */
-    private void invokeScriptToCreateFolderAndAssignPermission(String gatewayType, String userName) throws IOException, MailBoxServicesException {
-
-        // username should be in lowercase while folder creation
-        userName = userName.toLowerCase();
+    private void invokeScriptToCreateFolderAndAssignPermission(String gatewayType, String userName) throws IOException {
 
         String folderPath = getHomeFolderPath(gatewayType, userName);
         // Invokes script to create folder and assign permissions
@@ -55,15 +51,13 @@ public class DirectoryService {
     * @param gatewayType
     * @param username
     * @throws IOException
-    * @throws MailBoxServicesException
     */
-   private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException, MailBoxServicesException {
+   private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
 
-       userName = userName.toLowerCase();
        // Invokes script to delete home foldess
        // executing the script
        String homeFolderPath = getHomeFolderPath(gatewayType, userName);
-       LOGGER.info("Invokes script to delete user home folders in path",homeFolderPath);
+       LOGGER.info("Invokes script to delete user home folders in path {} for user {}",homeFolderPath, userName);
        String scriptPath = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DELETION_SCRIPT_PATH);
        ShellScriptEngineUtil.executeDeletionShellScript(scriptPath, homeFolderPath);
 
@@ -72,7 +66,7 @@ public class DirectoryService {
     /**
      * Method to get home folder path from the given gatewaytype and userName
      *
-     * @param gatewayType - gateway type of account
+     * @param gatewayType - gateway type of account0
      * @param userName - account userName
      * @return home folder path
      * @throws IOException
@@ -97,14 +91,13 @@ public class DirectoryService {
      * Based on operation type invokes create/delete methods.
      * @param message
      * @throws IOException 
-     * @throws MailBoxServicesException 
      */
-    public void executeDirectoryOperation(DirectoryMessageDTO message) throws MailBoxServicesException, IOException {
+    public void executeDirectoryOperation(DirectoryMessageDTO message) throws IOException {
         
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
-            invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName());
+            invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
-            invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName());
+            invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());
         } else {
             throw new RuntimeException("Invalid operation");
         }
