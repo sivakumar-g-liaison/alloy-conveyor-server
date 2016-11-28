@@ -22,6 +22,12 @@ import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
+/**
+ * This class is used to create and delete directories based on usermanagement information.
+ * 
+ * @author OFS
+ *
+ */
 public class DirectoryService {
     
     private static final Logger LOGGER = LogManager.getLogger(DirectoryService.class);
@@ -54,12 +60,12 @@ public class DirectoryService {
     */
    private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
 
-       // Invokes script to delete home foldess
+       // Invokes script to delete home folders
        // executing the script
        String homeFolderPath = getHomeFolderPath(gatewayType, userName);
        LOGGER.info("Invokes script to delete user home folders in path {} for user {}",homeFolderPath, userName);
        String scriptPath = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DELETION_SCRIPT_PATH);
-       ShellScriptEngineUtil.executeDeletionShellScript(scriptPath, homeFolderPath);
+       ShellScriptEngineUtil.executeDeletionShellScript(scriptPath, homeFolderPath, userName);
 
    }
     
@@ -73,7 +79,7 @@ public class DirectoryService {
      */
     private String getHomeFolderPath(String gatewayType, String userName) throws IOException {
 
-        LOGGER.debug("retrieving home folder path for user {}", userName);
+        LOGGER.debug("Retrieving home folder path for user {}", userName);
         switch (gatewayType) {
 
             case MailBoxConstants.FTP:
@@ -83,12 +89,13 @@ public class DirectoryService {
             case MailBoxConstants.SFTP:
                 return (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SFTP_PATH)) + File.separatorChar + userName;
             default :
-                throw new RuntimeException("undefined gateway type");
+                throw new RuntimeException("Undefined gateway type");
         }
     }
 
     /**
      * Based on operation type invokes create/delete methods.
+     * 
      * @param message
      * @throws IOException 
      */

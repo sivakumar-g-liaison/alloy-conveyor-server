@@ -57,7 +57,7 @@ dependencies {
 	compile 'com.liaison:commons-lib:8.+'
 	
 	//For shell script execution
-	compile "org.apache.commons:commons-exec:1.2"
+	compile "org.apache.commons:commons-exec:1.3"
 
 }
 

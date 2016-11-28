@@ -21,9 +21,9 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 *
 */
 public class UserManagementToRelayDirectoryQueueProcessor implements QueueTextMessageProcessor {
-
-	@Override
-	public void processMessage(String message) {
-		AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.DIRECTORYOPERATION));
-	}
+    
+    @Override
+    public void processMessage(String message) {
+        AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.DIRECTORYOPERATION));
+    }
 }
