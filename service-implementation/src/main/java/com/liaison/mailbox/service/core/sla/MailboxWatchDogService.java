@@ -203,7 +203,7 @@ public class MailboxWatchDogService {
 				GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
 	            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
 	            glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
-	            glassMessageDTO.setProcessProtocol(getProtocol(filePath));
+	            glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
 	            glassMessageDTO.setFileName(fileName);
 	            glassMessageDTO.setFilePath(filePath);
 	            glassMessageDTO.setFileLength(0);
@@ -603,22 +603,4 @@ public class MailboxWatchDogService {
         }
 	}
 
-	/**
-	 * Helper to get protocol from filepath
-	 * 
-	 * @param filePath
-	 * @return
-	 */
-	private String getProtocol(String filePath) {
-
-	    if (filePath.contains(Protocol.FTPS.getCode())) {
-            return Protocol.FTPS.getCode();
-        } else if (filePath.contains(Protocol.SFTP.getCode())) {
-            return Protocol.SFTP.getCode();
-        } else if (filePath.contains(Protocol.FTP.getCode())) {
-            return Protocol.FTP.getCode();
-        } else {
-            return filePath;
-        }
-	}
 }

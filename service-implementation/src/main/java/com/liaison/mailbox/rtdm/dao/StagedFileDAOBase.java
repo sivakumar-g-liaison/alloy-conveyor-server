@@ -25,6 +25,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
@@ -378,6 +379,37 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         return null;
     }
 
+    /**
+     * Returns staged file entries by filename and file path for file writer processor.
+     * 
+     */
+    public StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName) {
+        
+        EntityManager entityManager = null;
+        
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            Query query = entityManager.createQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER.toString());
+            query.setParameter(FILE_PATH, filePath);
+            query.setParameter(FILE_NAME, fileName);
+            query.setParameter(TYPE, ProcessorType.FILEWRITER.getCode());
+            query.setParameter(STATUS, EntityStatus.INACTIVE.value());
+            
+            List<?> files = query.getResultList();
+            Iterator<?> iterator = files.iterator();
+            
+            while (iterator.hasNext()) {
+                return (StagedFile) iterator.next();
+            }
+            
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
+    
     @Override
     public void persist(StagedFile entity) {
         entity.setOriginatingDc(DATACENTER_NAME);

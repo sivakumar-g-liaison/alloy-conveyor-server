@@ -12,7 +12,9 @@ import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.RuntimeProcessResource;
+import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,9 +42,27 @@ public class FileDeleteReplicationResource extends AuditedResource {
     @POST
     public Response handleSyncOneToken(@Context HttpServletRequest request) throws IOException {
 
-        String requestString = getRequestBody(request);
-        logger.info(requestString);
-        return Response.ok().build();
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
+                String requestString;
+                try {
+                    requestString = getRequestBody(request);
+                    logger.info(requestString);
+                    FileDeleteReplicationService deleteService = new FileDeleteReplicationService();
+                    deleteService.inactivateStageFileAndUpldateLens(requestString);
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+                }
+                return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+            }
+        };
+        
+        worker.actionLabel = "FileDeleteReplicationResource.handleSyncOneToken()";
+        
+        // hand the delegate to the framework for calling
+        return process(request, worker);
     }
 
     @Override
