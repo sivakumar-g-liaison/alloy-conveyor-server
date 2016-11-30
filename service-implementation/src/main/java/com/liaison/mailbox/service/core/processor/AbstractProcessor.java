@@ -862,9 +862,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public void updateStagedFileStatus(WorkTicket workticket, String status) {
 
         StagedFileDAOBase dao = new StagedFileDAOBase();
-        String path = workticket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString();
-        StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), path, workticket.getFileName());
-
+        StagedFile stagedFile = dao.findStagedFileByGpid(workticket.getGlobalProcessId());
         if (null != stagedFile) {
 
             stagedFile.setStagedFileStatus(status);
@@ -908,6 +906,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     @Override
     public void logToLens(String msg, File file, ExecutionState status) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    @Override
+    public void logToLens(String msg, RelayFile file, ExecutionState status) {
         throw new RuntimeException("Not Implemented");
     }
 

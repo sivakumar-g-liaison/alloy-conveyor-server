@@ -252,16 +252,13 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
+    @Override
     public void logToLens(String msg, RelayFile file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         StagedFile stagedFile = stagedFileMap.get(file.getAbsolutePath());
         if (null == stagedFile) {
-
             stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
-            if (null == stagedFile) {
-                return;
-            }
         }
         if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
             return;

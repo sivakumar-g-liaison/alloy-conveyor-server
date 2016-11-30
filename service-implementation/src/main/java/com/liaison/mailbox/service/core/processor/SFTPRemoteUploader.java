@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -26,6 +27,7 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -76,18 +78,16 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
             //retrieve required properties
             SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
-            
+
             boolean recursiveSubdirectories = sftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(sftpUploaderStaticProperties.isDirectUpload());
 
             // TODO use processor properties
-            Object[] subFiles = null;
             boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-            if (useFileSystem) {
-                subFiles = getFilesToUpload(recursiveSubdirectories);
-            } else {
-                subFiles = getRelayFiles(recursiveSubdirectories);
-            }
+            Object[] subFiles = (useFileSystem)
+                    ? getFilesToUpload(recursiveSubdirectories)
+                    : getRelayFiles(recursiveSubdirectories);
+
             if (subFiles == null || subFiles.length == 0) {
                 LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
@@ -100,11 +100,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
                 changeDirectory(sftpRequest, remotePath);
                 LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
-                if (subFiles instanceof File[]) {
-                    uploadDirectory(sftpRequest, remotePath, (File[]) subFiles);
-                } else {
-                    uploadDirectory(sftpRequest, remotePath, (RelayFile[]) subFiles);
-                }
+                uploadDirectory(sftpRequest, remotePath, subFiles);
             }
 
             long endTime = System.currentTimeMillis();
@@ -124,34 +120,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
     }
 
     /**
-     * Java method to upload the file or folder
-     *
-     * @param sftpClient sftp client
-     * @param remoteParentDir remote location
-     * @param files files from local payload location
-     * @throws IOException
-     * @throws IllegalAccessException
-     * @throws LiaisonException
-     * @throws SftpException
-     */
-    private void uploadDirectory(G2SFTPClient sftpClient,
-                                 String remoteParentDir,
-                                 File[] files)
-            throws IOException, IllegalAccessException, LiaisonException, SftpException {
-
-        for (File item : files) {
-
-            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
-                LOGGER.warn("The executor is gracefully interrupted.");
-                return;
-            }
-            uploadFile(sftpClient, remoteParentDir, item);
-        }
-
-    }
-
-    /**
-     * Java method to upload the file or folder
+     * Java method to upload the files
      *
      * @param sftpClient sftp client
      * @param remoteParentDir remote location
@@ -162,15 +131,27 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      */
     private void uploadDirectory(G2SFTPClient sftpClient,
                                  String remoteParentDir,
-                                 RelayFile[] files) throws LiaisonException, IllegalAccessException, IOException {
+                                 Object[] files) throws LiaisonException, IllegalAccessException, IOException {
 
-        for (RelayFile item : files) {
+        for (Object file : files) {
 
             if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
                 LOGGER.warn("The executor is gracefully interrupted.");
                 return;
             }
-            uploadFile(sftpClient, remoteParentDir, item);
+
+            //invokes File or RelayFile based on the instance type
+            if (file instanceof File) {
+                uploadFile(sftpClient, remoteParentDir, (File) file);
+            } else {
+
+                try {
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, ((RelayFile) file).getGlobalProcessId());
+                    uploadFile(sftpClient, remoteParentDir, (RelayFile) file);
+                } finally {
+                    ThreadContext.clearMap();
+                }
+            }
         }
 
     }
@@ -186,7 +167,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      */
     private void uploadFile(G2SFTPClient sftpRequest,
                             String remoteParentDir,
-                            File file) throws IOException, LiaisonException, IllegalAccessException {
+                            File file) throws IOException, IllegalAccessException, LiaisonException {
 
         int replyCode;
         String filePath = file.getParent();
@@ -232,34 +213,32 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
             // delete files once successfully uploaded
             deleteFile(file);
-            StringBuilder message = new StringBuilder()
-                    .append("File ")
-                    .append(currentFileName)
-                    .append(" uploaded successfully to ")
-                    .append(getHost(staticProp.getUrl()))
-                    .append(" and the remote path ")
-                    .append(remoteParentDir);
+            String message = "File " +
+                    currentFileName +
+                    " uploaded successfully to " +
+                    getHost(staticProp.getUrl()) +
+                    " and the remote path is " +
+                    remoteParentDir;
 
             // Glass Logging
-            logToLens(message.toString(), file, ExecutionState.COMPLETED);
+            logToLens(message, file, ExecutionState.COMPLETED);
             totalNumberOfProcessedFiles++;
         } else {
 
-            StringBuilder message = new StringBuilder()
-                    .append("Failed to upload file ")
-                    .append(currentFileName)
-                    .append(" from local path ")
-                    .append(filePath)
-                    .append(" to remote path ")
-                    .append(remoteParentDir);
+            String message = "Failed to upload file " +
+                    currentFileName +
+                    " from local path " +
+                    filePath +
+                    " to remote path " +
+                    remoteParentDir;
 
             // Glass Logging
-            logGlassMessage(message.toString(), file, ExecutionState.FAILED);
+            logGlassMessage(message, file, ExecutionState.FAILED);
         }
     }
 
     /**
-     * Uploads files to remote location
+     * Uploads files to remote location and reads from spectrum
      *
      * @param sftpRequest sftp client
      * @param remoteParentDir remote payload location
@@ -269,7 +248,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
      */
     private void uploadFile(G2SFTPClient sftpRequest,
                             String remoteParentDir,
-                            RelayFile file) throws IOException, LiaisonException, IllegalAccessException {
+                            RelayFile file) throws IOException, IllegalAccessException, LiaisonException {
 
         int replyCode;
         String filePath = file.getParent();
@@ -293,8 +272,8 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         try (InputStream inputStream = file.getPayloadInputStream()) {
 
             sftpRequest.changeDirectory(remoteParentDir);
-            LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
-                    currentFileName, filePath, remoteParentDir);
+            LOGGER.info(constructMessage("uploading file from storage {} to remote path {}"),
+                    file.getPayloadUri(), remoteParentDir);
             replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
         }
 
@@ -313,31 +292,27 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                 }
             }
 
-            // delete files once successfully uploaded
-            //deleteFile(file);
-            StringBuilder message = new StringBuilder()
-                    .append("File ")
-                    .append(currentFileName)
-                    .append(" uploaded successfully to ")
-                    .append(getHost(staticProp.getUrl()))
-                    .append(" and the remote path ")
-                    .append(remoteParentDir);
+            String message = "File " +
+                    currentFileName +
+                    " uploaded successfully to " +
+                    getHost(staticProp.getUrl()) +
+                    " and the remote path " +
+                    remoteParentDir;
 
             // Glass Logging
-            logToLens(message.toString(), file, ExecutionState.COMPLETED);
+            logToLens(message, file, ExecutionState.COMPLETED);
             totalNumberOfProcessedFiles++;
         } else {
 
-            StringBuilder message = new StringBuilder()
-                    .append("Failed to upload file ")
-                    .append(currentFileName)
-                    .append(" from local path ")
-                    .append(filePath)
-                    .append(" to remote path ")
-                    .append(remoteParentDir);
+            String message = "Failed to upload file " +
+                    currentFileName +
+                    " from local path " +
+                    filePath +
+                    " to remote path is " +
+                    remoteParentDir;
 
             // Glass Logging
-            logGlassMessage(message.toString(), file, ExecutionState.FAILED);
+            logGlassMessage(message, file, ExecutionState.FAILED);
         }
     }
 
@@ -362,13 +337,15 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         boolean isHandOverExecutionToJavaScript = false;
         int scriptExecutionTimeout;
         try {
-            isHandOverExecutionToJavaScript = ((SFTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+            isHandOverExecutionToJavaScript = getProperties().isHandOverExecutionToJavaScript();
             scriptExecutionTimeout = ((SFTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
 
+        //Settings required for javascript file direct upload
         if (isHandOverExecutionToJavaScript) {
+
             setFileName(fileName);
             setFolderPath(folderPath);
             setGlobalProcessId(globalProcessId);
@@ -405,11 +382,9 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                         StagedFileDAO dao = new StagedFileDAOBase();
                         StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
 
-                        RelayFile dto = new RelayFile();
-                        dto.copy(stagedFile);
-                        uploadFile(sftpRequest,
-                                remotePath,
-                                dto);
+                        RelayFile file = new RelayFile();
+                        file.copy(stagedFile);
+                        uploadFile(sftpRequest, remotePath, file);
                     }
 
                 }

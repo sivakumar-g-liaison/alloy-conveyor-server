@@ -448,7 +448,7 @@ public class MailBoxService implements Runnable {
 
         } catch (Exception e) {
 
-        	LOG.error(e);
+            LOG.error(e.getMessage(), e);
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {

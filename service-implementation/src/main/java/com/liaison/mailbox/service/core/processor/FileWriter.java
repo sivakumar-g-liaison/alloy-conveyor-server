@@ -135,13 +135,13 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message.toString());
              //GLASS LOGGING ENDS//
 
-            stopwatch.stop();
-            LOG.info("Total time taken to process files {}", stopwatch.getTime());
-
         } catch (Exception e) {
             LOG.error("File Staging failed", e);
-             //GLASS LOGGING ENDS//
+            //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
+        } finally {
+            stopwatch.stop();
+            LOG.info("Total time taken to process files {}", stopwatch.getTime());
         }
 
 	}
@@ -320,8 +320,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             if (workTicket.getPayloadSize() == 0 ||  workTicket.getPayloadSize() == -1) {
                 workTicket.setPayloadSize(StorageUtilities.getPayloadSize(workTicket.getPayloadURI()));
             }
-            dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
             workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
+            dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
             return true;
         }
     }
