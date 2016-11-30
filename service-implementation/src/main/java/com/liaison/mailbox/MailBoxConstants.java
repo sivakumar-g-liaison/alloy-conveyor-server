@@ -423,5 +423,26 @@ public interface MailBoxConstants {
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
 
     String LOCALHOST = "localhost";
+    
+    //PERMISSION PATH CONSTANT
+    String PERMISSION_SCRIPT_PATH = "permission.script.path";
+    String SFTP_USER_GROUP_NAME = "sftp.user.group.name";
+    
+    //DELETION SCRIPT PATH CONSTANT
+    String DELETION_SCRIPT_PATH = "deletion.script.path";
+    
+    //HOME PATH CONSTANTS
+    String FTP_PATH="ftp.user.home.path";
+    String FTPS_PATH="ftps.user.home.path";
+    String SFTP_PATH="sftp.user.home.path";
+    String HTTP_PATH="http.user.home.path";
+    String HTTPS_PATH="https.user.home.path";
+    
+    //Gateway types
+    String SFTP = "SFTP";
+    String FTP = "FTP";
+    String FTPS = "FTPS";
+    String HTTP = "HTTP";
+    String HTTPS = "HTTPS";
 
 }

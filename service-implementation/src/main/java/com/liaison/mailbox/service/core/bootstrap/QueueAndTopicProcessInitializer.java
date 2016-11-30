@@ -18,6 +18,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
+import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectoryQueueProcessor;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -74,11 +75,13 @@ public class QueueAndTopicProcessInitializer {
     private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
     private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
     private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
+    private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
 
     public static QueuePooledListenerContainer dropboxQueue;
     public static QueuePooledListenerContainer mailboxProcessorQueue;
     public static QueuePooledListenerContainer mailboxProcessedPayloadQueue;
     public static TopicPooledListenerContainer mailBoxTopicPooledListenerContainer;
+    public static QueuePooledListenerContainer umDirOprsQueue;
 
 
     public static void initialize() {
@@ -118,6 +121,11 @@ public class QueueAndTopicProcessInitializer {
             mailBoxTopicPooledListenerContainer = new TopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
             mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
+            
+            logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
+            umDirOprsQueue = new QueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
+            umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
 
         }
     }

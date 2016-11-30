@@ -37,10 +37,10 @@ import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
+import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
@@ -48,6 +48,7 @@ import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResult
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -85,7 +86,8 @@ public class MailBoxService implements Runnable {
 	public enum QueueMessageType {
 		WORKTICKET,
 		TRIGGERPROFILEREQUEST,
-        INTERRUPTTHREAD
+        INTERRUPTTHREAD,
+        DIRECTORYOPERATION
 	}
 
 	
@@ -505,6 +507,8 @@ public class MailBoxService implements Runnable {
 			this.executeFileWriter(message);
 		} else if (QueueMessageType.INTERRUPTTHREAD.equals(this.messageType)){
             this.interruptThread(message);
+        } else if (QueueMessageType.DIRECTORYOPERATION.equals(this.messageType)) {
+            this.directoryOperation(message);
         } else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
 		}
@@ -615,6 +619,23 @@ public class MailBoxService implements Runnable {
             }
 
 
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * This method is used to create directories for created/updated 
+     * user account by user management.
+     * 
+     * @param message 
+     */
+    public void directoryOperation(String queueMessage) {
+        
+        try {
+            
+            DirectoryMessageDTO message = JAXBUtility.unmarshalFromJSON(queueMessage, DirectoryMessageDTO.class);
+            new DirectoryService().executeDirectoryOperation(message);
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
