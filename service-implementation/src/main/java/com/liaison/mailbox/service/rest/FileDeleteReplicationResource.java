@@ -40,7 +40,7 @@ public class FileDeleteReplicationResource extends AuditedResource {
     private static final Logger logger = LogManager.getLogger(FileDeleteReplicationResource.class);
 
     @POST
-    public Response handleSyncOneToken(@Context HttpServletRequest request) throws IOException {
+    public Response handleFileDeleteReplication(@Context HttpServletRequest request) throws IOException {
 
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
             @Override
@@ -59,7 +59,7 @@ public class FileDeleteReplicationResource extends AuditedResource {
             }
         };
         
-        worker.actionLabel = "FileDeleteReplicationResource.handleSyncOneToken()";
+        worker.actionLabel = "FileDeleteReplicationResource.handleFileDeleteReplication()";
         
         // hand the delegate to the framework for calling
         return process(request, worker);

@@ -10,11 +10,18 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.liaison.commons.logging.LogTags;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -34,27 +41,8 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class FileDeleteReplicationService {
 
     private static final Logger LOGGER = LogManager.getLogger(FileDeleteReplicationService.class);
-    private static final String logPrefix = "FileDeleteReplication ";
-    private static final String seperator = " :";
-    
-    private String uniqueId;
-    
-    private String constructMessage(String... messages) {
-        
-        StringBuilder msgBuf = new StringBuilder()
-            .append(logPrefix)
-            .append(seperator)
-            .append(uniqueId)
-            .append(seperator);
-        for (String str : messages) {
-            msgBuf.append(str).append(seperator);
-        }
-        return msgBuf.toString();
-    }
-    
-    public FileDeleteReplicationService() {
-        uniqueId = MailBoxUtil.getGUID();
-    }
+    private static final String PATH = "path";
+    private static final String USER_UID = "user_uid";
     
     /**
      * Method to in-activate staged file entry and update lens status.
@@ -64,8 +52,9 @@ public class FileDeleteReplicationService {
     public void inactivateStageFileAndUpldateLens(String requestString) {
         
         try {
-            JSONObject innerObj = new JSONObject(requestString);
-            String path = (String) innerObj.get("path");
+            JSONObject reqeustObj = new JSONObject(requestString);
+            String path = (String) reqeustObj.get(PATH);
+            String uId = (String) reqeustObj.get(USER_UID);
             String filePath = path.substring(0, path.lastIndexOf("/"));
             String fileName = path.substring(path.lastIndexOf("/") + 1);
             
@@ -73,6 +62,9 @@ public class FileDeleteReplicationService {
             StagedFile deletedStagedFile= stagedFileDAO.findStagedFilesForFileWriterByFileNameAndPath(filePath, fileName);
             
             if (null != deletedStagedFile) {
+                ThreadContext.clearMap();
+                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, deletedStagedFile.getGPID());
+                
                 deletedStagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
                 deletedStagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
                 stagedFileDAO.merge(deletedStagedFile);
@@ -85,14 +77,43 @@ public class FileDeleteReplicationService {
                 glassMessageDTO.setFilePath(filePath);
                 glassMessageDTO.setFileLength(0);
                 glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                glassMessageDTO.setMessage("File is deleted by the customer");
+                glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + uId);
                 glassMessageDTO.setPipelineId(null);
                 glassMessageDTO.setFirstCornerTimeStamp(null);
                 
                 MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-                LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), deletedStagedFile.getProcessorId(), deletedStagedFile.getFileName(), deletedStagedFile.getFilePath());
+                LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
             } else {
-                LOGGER.info(constructMessage("File {} in location {} is might be deleted by WatchDogService"), fileName, filePath);
+                LOGGER.info("File " + fileName + " in location " + filePath +" is might be deleted by WatchDogService");
+            }
+            
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ThreadContext.clearMap();
+        }
+    }
+    
+    /**
+     * Method to delete file 
+     * 
+     * @param requestString
+     */
+    public void deleteRelicatedFile(String requestString) {
+        
+        try {
+            JSONObject reqeustObj = new JSONObject(requestString);
+            String path = (String) reqeustObj.get(PATH);
+            String filePath = path.substring(0, path.lastIndexOf("/"));
+            String fileName = path.substring(path.lastIndexOf("/") + 1);
+            
+            if (Files.exists(Paths.get(filePath + File.separatorChar + fileName))) {
+                try {
+                    Files.delete(Paths.get(filePath + File.separatorChar + fileName));
+                    LOGGER.warn("File " + fileName +" is deleted in the filePath "+filePath);
+                } catch (IOException e) {
+                    LOGGER.error("Unable to delete file "+ fileName + " in the filePath " + filePath);
+                }
             }
             
         } catch (JSONException e) {

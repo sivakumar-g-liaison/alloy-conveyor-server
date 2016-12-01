@@ -36,6 +36,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
+    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
@@ -122,16 +123,5 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" and sf.filePath =:")
             .append(FILE_PATH)
             .append(" order by sf.createdDate desc");
-    
-    StringBuilder GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = new StringBuilder().append("SELECT sf FROM StagedFile sf")
-            .append(" WHERE sf.filePath =:")
-            .append(FILE_PATH)
-            .append(" AND sf.fileName =:")
-            .append(FILE_NAME)
-            .append(" AND sf.processorType =:")
-            .append(TYPE)
-            .append(" AND sf.stagedFileStatus <>:")
-            .append(STATUS);
-            
 
 }

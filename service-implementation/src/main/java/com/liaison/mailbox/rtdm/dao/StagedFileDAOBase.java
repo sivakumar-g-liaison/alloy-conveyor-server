@@ -30,7 +30,6 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 
@@ -389,13 +388,13 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            Query query = entityManager.createQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER.toString());
-            query.setParameter(FILE_PATH, filePath);
-            query.setParameter(FILE_NAME, fileName);
-            query.setParameter(TYPE, ProcessorType.FILEWRITER.getCode());
-            query.setParameter(STATUS, EntityStatus.INACTIVE.value());
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER)
+                    .setParameter(FILE_PATH, filePath)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(TYPE, ProcessorType.FILEWRITER.getCode())
+                    .setParameter(STATUS, EntityStatus.INACTIVE.value())
+                    .getResultList();
             
-            List<?> files = query.getResultList();
             Iterator<?> iterator = files.iterator();
             
             while (iterator.hasNext()) {
