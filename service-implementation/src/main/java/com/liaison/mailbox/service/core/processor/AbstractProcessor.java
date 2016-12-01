@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -23,7 +23,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
@@ -48,14 +47,12 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -109,7 +106,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     protected Map<String, StagedFile> stagedFileMap = new HashMap<>();
 
-    public AbstractProcessor() {}
+    public AbstractProcessor() {
+    }
 
     public AbstractProcessor(Processor configurationInstance) {
         this.configurationInstance = configurationInstance;
@@ -451,7 +449,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
             // if it is a directory then it will be deleted only if did not contain any files.
             // if the directory is not empty then uploading of files has failed and will not be deleted
-            String [] subFiles = file.list();
+            String[] subFiles = file.list();
             if (null != subFiles && subFiles.length == 0) {
 
                 // The directory should not be the actual payload location configured
@@ -492,7 +490,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @return processedFolderPath The folder path with mount location
      *
      */
-    public String replaceTokensInFolderPath(String folderPath)  {
+    public String replaceTokensInFolderPath(String folderPath) {
 
         String processedFolderPath = null;
 
@@ -668,20 +666,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         FileSystem fileSystem = FileSystems.getDefault();
         String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
         PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
-        if(!pathMatcher.matches(filePathToCreate)){
+        if (!pathMatcher.matches(filePathToCreate)) {
             throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);
         }
 
         //check availability of /data/*/* folder
-        if(!Files.exists(filePathToCreate.subpath(0, 3))){
-            throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
+        if (!Files.exists(filePathToCreate.subpath(0, 3))) {
+            throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY, filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
         }
 
         createFoldersAndAssignProperPermissions(filePathToCreate);
     }
 
     private String getGroupFor(String protocol) {
-        return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
+        return MailBoxUtil.getEnvironmentProperties().getString(protocol + ".group.name");
     }
 
     /**
@@ -699,13 +697,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         //Add period to fileExtension since include/exclude list contains extension with period
         String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
         //check if file is in include list
-        if(null != includeList && !includeList.isEmpty()) {
-            boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
+        if (null != includeList && !includeList.isEmpty()) {
+            boolean fileIncluded = (includeList.contains(fileExtension)) ? true : false;
             return fileIncluded;
         }
 
         //check if file is not in excluded list
-        if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
+        if (null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
             return false;
         }
         return true;
@@ -818,7 +816,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                 .append(fileName)
                 .append(" is overwritten by another process - ")
                 .append(gpid);
-        
+
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(dupGpid);
         glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
@@ -971,12 +969,12 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public void setMaxExecutionTimeout(int executionTimeout) {
         this.scriptExecutionTimeout = executionTimeout;
     }
-    
+
     @Override
     public int getMaxExecutionTimeout() {
         return (int) TimeUnit.MINUTES.toMillis(scriptExecutionTimeout);
     }
-    
+
     @Override
     public String getOrganization() {
         return this.getConfigurationInstance().getMailbox().getTenancyKey();
