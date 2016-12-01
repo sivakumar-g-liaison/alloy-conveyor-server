@@ -149,7 +149,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .append(" INNER JOIN processor.mailbox mailbox")
                     .append(" INNER JOIN processor.serviceInstance si")
                     .append(" WHERE mailbox.pguid = :")
-                    .append(PGUID);
+                    .append(PGUID)
+                    .append(" AND processor.procsrStatus <> :" + STATUS_DELETE);
 
             //SID_CHECK FOR PROCESSOR STATUS
             if (!disableFilter) {
@@ -158,7 +159,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
 
             Query jpaQuery = entityManager.createQuery(query.toString())
-                    .setParameter(PGUID , mbxGuid);
+                    .setParameter(PGUID , mbxGuid)
+                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
             jpaQuery =  (!disableFilter) ? jpaQuery.setParameter(SERV_INST_ID , siid) : jpaQuery ;
             long count = ((Long) jpaQuery.getSingleResult());
 
@@ -199,6 +201,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			List<?> proc = entityManager.createQuery(PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID.toString())
 					.setParameter(PGUID, mbxGuid)
 					.setParameter(SERV_INST_ID, siGuid)
+					.setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -292,6 +295,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             List<Processor> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME_AND_MBX)
                     .setParameter(PGUID,  (MailBoxUtil.isEmpty(mbxGuid) ? "''" : mbxGuid))
                     .setParameter(PRCSR_NAME, (MailBoxUtil.isEmpty(procName) ? "''" : procName))
+                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
                     .getResultList();
 
             if ((proc != null) && (proc.size() > 0)) {
@@ -322,6 +326,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             processors = entityManager.createNamedQuery(FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS)
                     .setParameter(STATUS, mailboxStatus.name())
+                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
                     .setParameter(PROCESSOR_TYPE, processorTypes)
                     .getResultList();
 
@@ -574,9 +579,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 				entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 	            StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 	                    .append(" where LOWER(mbx.mbxName) like :")
-	                    .append(MBX_NAME);
+	                    .append(MBX_NAME)
+	                    .append(" AND mbx.mbxStatus <> :")
+	                    .append(MailBoxConfigurationDAO.STATUS);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%")
+	                    .setParameter(MailBoxConfigurationDAO.STATUS, EntityStatus.DELETED.value())
 	                    .getResultList();	
 
 	            Iterator<?> iter = proc.iterator();
@@ -606,9 +614,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 				entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 	            StringBuilder query = new StringBuilder().append("SELECT proc FROM Processor proc")
 	                    .append(" where LOWER(proc.procsrName) like :")
-	                    .append(PRCSR_NAME);
+	                    .append(PRCSR_NAME)
+	                    .append("AND processor.procsrStatus <> :" + STATUS_DELETE);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(PRCSR_NAME, "%" + searchDTO.getProcessorName().toLowerCase() + "%")
+	                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
 	                    .getResultList();	
 
 	            Iterator<?> iter = proc.iterator();
@@ -705,6 +715,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
 		}
 
+		predicateList.add("  processor.procsrStatus <> :" + STATUS_DELETE);
 		for (int i = 0; i < predicateList.size(); i++) {			
             query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
 		}				
@@ -743,6 +754,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
             query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
         }
+        query.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
 		return query;		
 	}
 
@@ -758,6 +770,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME)
             		.setParameter(PRCSR_NAME, processorName)
+            		.setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
             		.getResultList();
 			Iterator<?> iter = proc.iterator();
 			while (iter.hasNext()) {
