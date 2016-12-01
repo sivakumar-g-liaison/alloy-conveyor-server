@@ -751,76 +751,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         LOGGER.debug("Done setting group");
     }
 
-    /**
-     * Logs TVAPI status and event message in LENS
-     *
-     * @param message Message String to be logged in LENS event log
-     * @param file java.io.File
-     * @param status Status of the LENS logging
-     */
-    protected void logGlassMessage(String message, File file, ExecutionState status) {
-
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
-
-        if (null != stagedFile) {
-
-            if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
-                return;
-            }
-
-            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
-            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-            glassMessageDTO.setFileName(file.getName());
-            glassMessageDTO.setFilePath(file.getPath());
-            glassMessageDTO.setFileLength(file.length());
-            glassMessageDTO.setStatus(status);
-            glassMessageDTO.setMessage(message.toString());
-            glassMessageDTO.setPipelineId(null);
-            glassMessageDTO.setFirstCornerTimeStamp(null);
-            
-            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-                   
-        }
-    }
-
-    /**
-     * Logs TVAPI status and event message in LENS
-     *
-     * @param message Message String to be logged in LENS event log
-     * @param file java.io.File
-     * @param status Status of the LENS logging
-     */
-    protected void logGlassMessage(String message, RelayFile file, ExecutionState status) {
-
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
-
-        if (null != stagedFile) {
-
-            if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
-                return;
-            }
-
-            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
-            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-            glassMessageDTO.setFileName(file.getName());
-            glassMessageDTO.setFilePath(file.getAbsolutePath());
-            glassMessageDTO.setFileLength(file.length());
-            glassMessageDTO.setStatus(status);
-            glassMessageDTO.setMessage(message.toString());
-            glassMessageDTO.setPipelineId(null);
-            glassMessageDTO.setFirstCornerTimeStamp(null);
-
-            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-
-        }
-    }
-
     protected boolean updateStagedFileStatus(ExecutionState status, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
 
         // Log running status
@@ -906,7 +836,31 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     @Override
     public void logToLens(String msg, File file, ExecutionState status) {
-        throw new RuntimeException("Not Implemented");
+
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
+
+        if (null != stagedFile) {
+
+            if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
+                return;
+            }
+
+            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+            glassMessageDTO.setFileName(file.getName());
+            glassMessageDTO.setFilePath(file.getPath());
+            glassMessageDTO.setFileLength(file.length());
+            glassMessageDTO.setStatus(status);
+            glassMessageDTO.setMessage(msg);
+            glassMessageDTO.setPipelineId(null);
+            glassMessageDTO.setFirstCornerTimeStamp(null);
+
+            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+
+        }
     }
 
     @Override

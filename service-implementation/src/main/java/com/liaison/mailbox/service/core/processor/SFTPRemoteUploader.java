@@ -9,13 +9,11 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
@@ -233,7 +231,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                     remoteParentDir;
 
             // Glass Logging
-            logGlassMessage(message, file, ExecutionState.FAILED);
+            logToLens(message, file, ExecutionState.FAILED);
         }
     }
 
@@ -312,7 +310,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                     remoteParentDir;
 
             // Glass Logging
-            logGlassMessage(message, file, ExecutionState.FAILED);
+            logToLens(message, file, ExecutionState.FAILED);
         }
     }
 

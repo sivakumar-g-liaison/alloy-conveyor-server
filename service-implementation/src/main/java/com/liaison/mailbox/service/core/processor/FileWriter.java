@@ -18,8 +18,10 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -147,6 +149,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	}
 
     /**
+     * get payload location from the workticket if it is given or processor configuration
      *
      * @param workTicket workticket
      * @return payload location
@@ -249,7 +252,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 			}
 		} else {
 
-			logGlassMessage(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
+			logToLens(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
 			persistFile(response, file, workTicket, dao);
 			return true;
 		}
@@ -284,9 +287,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     /**
      * Adds an entry to staged file table for the uploader
      *
-     * @param processorPayloadLocation
-     * @param fileName
-     * @param workTicket
+     * @param processorPayloadLocation processor payload location
+     * @param fileName name of the file
+     * @param workTicket workticket received from SB
      * @return true if it staged successfully otherwise false
      */
     private boolean addAnEntryToStagedFile(String processorPayloadLocation, String fileName, WorkTicket workTicket) {
