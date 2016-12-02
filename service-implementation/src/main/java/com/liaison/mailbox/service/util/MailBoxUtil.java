@@ -750,4 +750,22 @@ public class MailBoxUtil {
         }
     }
 
+    /**
+     * Helper to get protocol from filepath
+     * 
+     * @param filePath
+     * @return
+     */
+    public static String getProtocolFromFilePath(String filePath) {
+        
+        if (filePath.contains(Protocol.FTP.getCode())) {
+            return Protocol.FTP.getCode();
+        } else if (filePath.contains(Protocol.FTPS.getCode())) {
+            return Protocol.FTPS.getCode();
+        } else if (filePath.contains(Protocol.SFTP.getCode())) {
+            return Protocol.SFTP.getCode();
+        } else {
+            return filePath;
+        }
+    }
 }

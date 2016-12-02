@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -26,6 +27,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -36,7 +38,15 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 @Entity
 @Table(name = "STAGED_FILE")
-@NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf")
+@NamedQueries({
+    @NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf"),
+    @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER,
+            query = "SELECT sf FROM StagedFile sf"
+                + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
+                + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
+                + " AND sf.processorType =:" + StagedFileDAO.TYPE
+                + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS)
+})
 public class StagedFile implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

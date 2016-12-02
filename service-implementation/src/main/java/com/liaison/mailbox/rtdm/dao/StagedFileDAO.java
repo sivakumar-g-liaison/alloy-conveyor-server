@@ -36,6 +36,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
+    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
@@ -63,6 +64,15 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @return staged file
      */
     StagedFile findStagedFile(String gpid);
+    
+    /**
+     * Returns staged file entries by filename and file path for file writer processor
+     * 
+     * @param filePath
+     * @param fileName
+     * @return
+     */
+    StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
