@@ -104,15 +104,22 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public Properties mailBoxProperties;
     public StaticProcessorPropertiesDTO staticProcessorProperties;
 
+    private boolean directUploadEnabled;
+    private boolean useFileSystem;
+
     protected Map<String, StagedFile> stagedFileMap = new HashMap<>();
 
     public AbstractProcessor() {
     }
 
     public AbstractProcessor(Processor configurationInstance) {
-        this.configurationInstance = configurationInstance;
-    }
 
+        this.configurationInstance = configurationInstance;
+        if (null != configurationInstance.getProcsrProperties()) {
+            setDirectUploadEnabled(MailBoxUtil.isDirectUploadEnabled(configurationInstance.getProcsrProperties()));
+            setUseFileSystem(MailBoxUtil.isUseFileSystemEnabled(configurationInstance.getProcsrProperties()));
+        }
+    }
 
     public Processor getConfigurationInstance() {
         return configurationInstance;
@@ -132,6 +139,22 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     public TriggerProcessorRequestDTO getReqDTO() {
         return this.reqDTO;
+    }
+
+    public boolean isDirectUploadEnabled() {
+        return directUploadEnabled;
+    }
+
+    private void setDirectUploadEnabled(boolean directUploadEnabled) {
+        this.directUploadEnabled = directUploadEnabled;
+    }
+
+    protected boolean canUseFileSystem() {
+        return useFileSystem;
+    }
+
+    public void setUseFileSystem(boolean canUseFileSystem) {
+        this.useFileSystem = canUseFileSystem;
     }
 
     /**

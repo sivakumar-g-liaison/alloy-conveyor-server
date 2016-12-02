@@ -81,8 +81,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             setDirectUpload(sftpUploaderStaticProperties.isDirectUpload());
 
             // TODO use processor properties
-            boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-            Object[] subFiles = (useFileSystem)
+            Object[] subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
 
@@ -369,8 +368,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                             remotePath);
 
                     // TODO use processor properties
-                    boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-                    if (useFileSystem) {
+                    if (this.canUseFileSystem()) {
 
                         uploadFile(sftpRequest,
                                 remotePath,

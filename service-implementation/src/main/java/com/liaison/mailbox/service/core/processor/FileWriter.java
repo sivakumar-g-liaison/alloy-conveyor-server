@@ -78,9 +78,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             String fileName = workTicket.getFileName();
             LOG.info("filename from the workticket - {}", fileName);
 
-            // TODO use processor properties
-            boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-            if (useFileSystem || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
+            if (this.canUseFileSystem() || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
 
                 //get payload from spectrum
                 try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
@@ -246,9 +244,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 				return true;
 			} else {
 
-				StringBuilder message = new StringBuilder();
-				message.append("The file(").append(filename).append(") exists at the location - ").append(targetLocation);
-				throw new MailBoxServicesException(message.toString(), Response.Status.BAD_REQUEST);
+                throw new MailBoxServicesException("The file(" + filename + ") exists at the location - " + targetLocation,
+                        Response.Status.BAD_REQUEST);
 			}
 		} else {
 
@@ -279,8 +276,11 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         //To add more details in staged file
         workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 
-        //Persist the new file deatils
-        dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+        //Persist the new file details
+        dao.persistStagedFile(workTicket,
+                configurationInstance.getPguid(),
+                configurationInstance.getProcessorType().name(),
+                this.isDirectUploadEnabled());
         
     }
 
@@ -311,7 +311,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 dao.merge(stagedFile);
                 logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
 
-                dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+                dao.persistStagedFile(workTicket,
+                        configurationInstance.getPguid(),
+                        configurationInstance.getProcessorType().name(),
+                        this.isDirectUploadEnabled());
                 return true;
             } else {
 
@@ -324,7 +327,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 workTicket.setPayloadSize(StorageUtilities.getPayloadSize(workTicket.getPayloadURI()));
             }
             workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
-            dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+            dao.persistStagedFile(workTicket,
+                    configurationInstance.getPguid(),
+                    configurationInstance.getProcessorType().name(),
+                    this.isDirectUploadEnabled());
             return true;
         }
     }

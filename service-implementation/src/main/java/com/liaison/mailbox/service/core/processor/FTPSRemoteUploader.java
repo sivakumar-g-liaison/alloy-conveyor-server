@@ -79,8 +79,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             setDirectUpload(ftpUploaderStaticProperties.isDirectUpload());
 
             // TODO use processor properties
-            boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-            Object[] subFiles = (useFileSystem)
+            Object[] subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
 
@@ -369,9 +368,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                         folderPath,
                         remotePath);
 
-                // TODO use processor properties
-                boolean useFileSystem = MailBoxUtil.getEnvironmentProperties().getBoolean("com.liaison.processor.use.filesystem", true);
-                if (useFileSystem) {
+                if (this.canUseFileSystem()) {
                     uploadFile(ftpsRequest, remotePath, new File(folderPath + File.separatorChar + fileName));
                 } else {
 

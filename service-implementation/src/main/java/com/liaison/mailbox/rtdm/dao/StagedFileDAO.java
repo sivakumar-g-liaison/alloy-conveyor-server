@@ -49,8 +49,17 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 	List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	void persistStagedFile(WorkTicket workticket, String processorId, String processorType);
 	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
+
+    /**
+     * constructs staged file entity from workticket and persists it
+     *
+     * @param workticket workticket
+     * @param processorId processor guid
+     * @param processorType processor type
+     * @param directUploadEnabled boolean to denote direct upload
+     */
+    void persistStagedFile(WorkTicket workticket, String processorId, String processorType, boolean directUploadEnabled);
 
     /**
      * list staged files by processor id
