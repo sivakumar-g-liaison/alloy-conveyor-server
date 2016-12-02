@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -34,16 +33,11 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
-import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -62,19 +56,14 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
-import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
@@ -84,11 +73,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -97,6 +84,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 /**
  * Class which has Processor configuration related operations.
@@ -166,6 +154,7 @@ public class ProcessorConfigurationService {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceId);
 				serviceInstance.setPguid(MailBoxUtil.getGUID());
+				serviceInstance.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
@@ -217,6 +206,7 @@ public class ProcessorConfigurationService {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());
+				msi.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
@@ -282,6 +272,7 @@ public class ProcessorConfigurationService {
 
                 profileProcessor = new ScheduleProfileProcessor();
                 profileProcessor.setPguid(MailBoxUtil.getGUID());
+                profileProcessor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
                 profileProcessor.setScheduleProfilesRef(profile);
                 profileProcessor.setProcessor(processor);
                 scheduleProfileProcessors.add(profileProcessor);
@@ -610,6 +601,7 @@ public class ProcessorConfigurationService {
 
 		ProcessorProperty processorProperty = new ProcessorProperty();
 		processorProperty.setPguid(MailBoxUtil.getGUID());
+		processorProperty.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 		processorProperty.setProcsrPropName(properties.getName());
 		processorProperty.setProcsrPropValue(properties.getValue());
 		return processorProperty;
@@ -630,126 +622,6 @@ public class ProcessorConfigurationService {
 		}
 	}
 
-	/**
-	 * Get the executing processors
-	 */
-	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) {
-
-		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
-		LOGGER.debug("Entering into getExecutingProcessors.");
-		try {
-
-			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS);
-			Timestamp timeStamp = new Timestamp(new Date().getTime());
-
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(timeStamp);
-			cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
-			timeStamp.setTime(cal.getTime().getTime());
-			timeStamp = new Timestamp(cal.getTime().getTime());
-
-			/*FSMStateDAO procDAO = new FSMStateDAOBase();
-
-			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
-			boolean isFrmDate = MailBoxUtil.isEmpty(frmDate);
-			boolean isToDate = MailBoxUtil.isEmpty(toDate);
-			boolean isStatus = MailBoxUtil.isEmpty(status);
-
-			if ((!isFrmDate && isToDate)
-					|| (isFrmDate && !isToDate)) {
-				throw new ProcessorManagementFailedException(Messages.INVALID_DATE_RANGE);
-			}
-
-			if (!isStatus && ExecutionState.findByCode(status) == null) {
-				throw new ProcessorManagementFailedException(Messages.INVALID_PROCESSOR_STATUS);
-			}
-
-			if (!isStatus && !isFrmDate && !isToDate) {
-				listfsmStateVal = procDAO.findExecutingProcessorsByValueAndDate(status, frmDate, toDate);
-			}
-
-			if (!isStatus && isFrmDate && isToDate) {
-				listfsmStateVal = procDAO.findExecutingProcessorsByValue(status, timeStamp);
-			}
-
-			if (!isFrmDate && !isToDate && isStatus) {
-				listfsmStateVal = procDAO.findExecutingProcessorsByDate(frmDate, toDate);
-			}
-
-			if (isStatus && isFrmDate && isToDate) {
-				listfsmStateVal = procDAO.findAllExecutingProcessors(timeStamp);
-			}
-*/
-			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
-			// TODO need to write the logic to get executing processors
-			/*GetExecutingProcessorDTO getExecutingDTO = null;
-			for (FSMStateValue fsmv : listfsmStateVal) {
-
-				getExecutingDTO = new GetExecutingProcessorDTO();
-				getExecutingDTO.copyFromEntity(fsmv);
-				getExecutingProcessorDTOList.add(getExecutingDTO);
-			}*/
-			
-			serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
-
-			if (getExecutingProcessorDTOList == null || getExecutingProcessorDTOList.isEmpty()) {
-				serviceResponse.setResponse(new ResponseDTO(Messages.NO_PROCESSORS_AVAIL, MailBoxConstants.EXECUTING_PROCESSORS,
-						Messages.SUCCESS));
-			} else {
-				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.EXECUTING_PROCESSORS,
-						Messages.SUCCESS));
-			}
-
-			LOGGER.debug("Exit from getExecutingProcessors.");
-			return serviceResponse;
-
-		} catch (Exception e) {
-
-			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.EXECUTING_PROCESSORS,
-					Messages.FAILURE, e.getMessage()));
-			return serviceResponse;
-		}
-
-	}
-
-	/**
-	 *
-	 * Interrupt the execution of running processor
-	 *
-	 * @param executionID
-	 */
-	public InterruptExecutionEventResponseDTO interruptRunningProcessor(String executionID) {
-
-		LOGGER.debug("Entering into interrupt processor.");
-		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
-
-		try {
-
-			if (StringUtil.isNullOrEmptyAfterTrim(executionID)) {
-				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
-			}
-
-			LOGGER.info("Interrupt signal received for - " + executionID);
-			// TODO Need to write logic for kill processor.
-			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_SUCCESSFULLY, MailBoxConstants.INTERRUPT_SIGNAL,
-					Messages.SUCCESS));
-
-			LOGGER.debug("Exiting from interrupt processor.");
-
-			return serviceResponse;
-		} catch (ProcessorManagementFailedException | MailBoxConfigurationServicesException e) {
-
-			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, MailBoxConstants.INTERRUPT_SIGNAL,
-					Messages.FAILURE, e.getMessage()));
-
-			return serviceResponse;
-		}
-	}
-	
 	/**
 	 * Method to construct processorProperty with name and value
 	 * 

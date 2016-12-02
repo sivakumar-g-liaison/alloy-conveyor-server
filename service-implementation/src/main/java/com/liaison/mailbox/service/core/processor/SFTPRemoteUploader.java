@@ -13,6 +13,7 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
@@ -123,8 +124,12 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             throws IOException, IllegalAccessException, LiaisonException, SftpException {
 
         for (File item : files) {
-            uploadFile(sftpClient, remoteParentDir, item);
 
+            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                LOGGER.warn("The executor is gracefully interrupted.");
+                return;
+            }
+            uploadFile(sftpClient, remoteParentDir, item);
         }
 
     }
@@ -189,9 +194,11 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             StringBuilder message = new StringBuilder()
                     .append("File ")
                     .append(currentFileName)
-                    .append(" uploaded successfully")
-                    .append(" to remote path ")
+                    .append(" uploaded successfully to ")
+                    .append(getHost(staticProp.getUrl()))
+                    .append(" and the remote path ")
                     .append(remoteParentDir);
+
             // Glass Logging
             logToLens(message.toString(), file, ExecutionState.COMPLETED);
             totalNumberOfProcessedFiles++;

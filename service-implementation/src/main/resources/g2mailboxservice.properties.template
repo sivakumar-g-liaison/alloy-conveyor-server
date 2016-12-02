@@ -267,4 +267,18 @@ com.liaison.mailbox.threadpool.corepoolsize=25
 com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
 
 #skips the queue initializer and works as standalone server
-com.liaison.skip.queue=true
+com.liaison.skip.queue=false
+
+#location of shell script which assign permissions to the created Home Directory for machine accounts
+permission.script.path=/secure/tomcat/dev-int/createFolderAndAssignPermissions.sh
+sftp.user.group.name=ext_sftp_users
+
+#location of shell script to delete the created Home Directory for machine accounts
+deletion.script.path=/secure/tomcat/dev-int/deleteHomeFolders.sh
+
+#Home Directory Creation for Machine Accounts
+ftp.user.home.path=/data/ftp
+ftps.user.home.path=/data/ftps
+sftp.user.home.path=/data/sftp
+http.user.home.path=/data/http
+https.user.home.path=/data/https

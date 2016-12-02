@@ -275,6 +275,7 @@ public interface MailBoxConstants {
 	String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 	String PROPERTY_TENANCY_KEY = "MBX_TENANCY_KEY";
 	String PROPERTY_SCRIPT_EXECUTION_TIMEOUT = "scriptExecutionTimeout";
+    String PROPERTY_STALE_FILE_TTL = "staleFileTTL";
     String PROPERTY_PROCESS_MODE = "processMode";
 
 	// Properties for sweeper grouping boundary condition
@@ -410,10 +411,38 @@ public interface MailBoxConstants {
 
 	//constant for callback
     String KEY_MESSAGE_CONTEXT_URI = "MESSAGE_CONTEXT_URI";
+    String CALLBACK = "CALLBACK";
+    
+    //Stale file TTL range min and max
+    int STALE_FILE_TTL_RANGE_MAX = 90;
+    int STALE_FILE_TTL_RANGE_MIN = 15;
     String RESUME = "resume";
 
     String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
+
+    String LOCALHOST = "localhost";
+    
+    //PERMISSION PATH CONSTANT
+    String PERMISSION_SCRIPT_PATH = "permission.script.path";
+    String SFTP_USER_GROUP_NAME = "sftp.user.group.name";
+    
+    //DELETION SCRIPT PATH CONSTANT
+    String DELETION_SCRIPT_PATH = "deletion.script.path";
+    
+    //HOME PATH CONSTANTS
+    String FTP_PATH="ftp.user.home.path";
+    String FTPS_PATH="ftps.user.home.path";
+    String SFTP_PATH="sftp.user.home.path";
+    String HTTP_PATH="http.user.home.path";
+    String HTTPS_PATH="https.user.home.path";
+    
+    //Gateway types
+    String SFTP = "SFTP";
+    String FTP = "FTP";
+    String FTPS = "FTPS";
+    String HTTP = "HTTP";
+    String HTTPS = "HTTPS";
 
 }

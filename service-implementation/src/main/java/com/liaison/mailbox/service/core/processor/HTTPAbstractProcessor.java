@@ -23,7 +23,6 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
-import com.liaison.usermanagement.service.client.UserManagementClient;
 
 /**
  * Base class that provides implementation common to both sync and async processors.
@@ -50,28 +49,6 @@ public abstract class HTTPAbstractProcessor {
 			throw new RuntimeException("Request has content length of " + contentLength
 					+ " which exceeds the configured maximum size of " + maxRequestSize);
 		}
-	}
-
-	public void authenticateRequestor(String[] authenticationCredentials) {
-
-        if (authenticationCredentials.length == 2) {
-
-        	String loginId = authenticationCredentials[0];
-        	// encode the password using base64 bcoz UM will expect a base64
-            // encoded token
-            String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
-            // if both username and password is present call UM client to
-            // authenticate
-        	UserManagementClient UMClient = new UserManagementClient();
-        	UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
-        	UMClient.authenticate();
-        	if (!UMClient.isSuccessful()) {
-        		throw new RuntimeException(UMClient.getMessage());
-        	}
-        } else {
-        	throw new RuntimeException("Authorization Header does not contain UserName and Password");
-        }
-
 	}
 
     public static String[] getAuthenticationCredentials(String basicAuthenticationHeader) {

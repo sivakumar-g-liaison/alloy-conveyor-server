@@ -50,15 +50,16 @@ public class MailboxReadResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxReadResource.class);
 
-	@GET
+
+    @GET
 	@ApiOperation(value = "read an entity", notes = "returns details of an entity", position = 3, response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response readEntity(
 			@Context final HttpServletRequest request,
-			@PathParam(value = "type") final @ApiParam(name = "type", required = true, value = "type") String type,
-			@PathParam(value = "guid") final @ApiParam(name = "guid", required = true, value = "guid") String guid,
-			@QueryParam(value = "trimResponse") final @ApiParam(name = "trimResponse", required = true, value = "trimResponse") String trimResponse) {
+			@PathParam(value = TYPE) final @ApiParam(name = TYPE, required = true, value = TYPE) String type,
+			@PathParam(value = HEADER_GUID) final @ApiParam(name = HEADER_GUID, required = true, value = HEADER_GUID) String guid,
+			@QueryParam(value = TRIM_RESPONSE) final @ApiParam(name = TRIM_RESPONSE, required = true, value = TRIM_RESPONSE) String trimResponse) {
 
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
@@ -80,8 +81,9 @@ public class MailboxReadResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxReadResource.readEntity()";
-		worker.queryParams.put("type", type);
+		worker.queryParams.put(TYPE, type);
 		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
+        worker.queryParams.put(TRIM_RESPONSE, trimResponse);
 
 		// hand the delegate to the framework for calling
 		return process(request, worker);

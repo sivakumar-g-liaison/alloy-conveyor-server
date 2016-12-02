@@ -38,9 +38,7 @@ public abstract class AuditedResource extends BaseResource {
 	// *************************************************
 	// ************ LOGGING STUFF **************
 	private static final Logger logger = LogManager.getLogger(AuditedResource.class);
-	public static final String HEADER_GUID = "guid";
-	public static final String MULTIPLE = "MULTIPLE";
-	
+
 	/**
 	 * This handles auditing around your business logic, then hands the worker off to the KPI instrumented caller.
 	 * 

@@ -93,6 +93,7 @@ public class FolderDTO {
 		folder.setFldrType(foundFolderType.getCode());
 		folder.setFldrUri(this.getFolderURI());
 		folder.setPguid(MailBoxUtil.getGUID());
+		folder.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 	}
 
 	/**

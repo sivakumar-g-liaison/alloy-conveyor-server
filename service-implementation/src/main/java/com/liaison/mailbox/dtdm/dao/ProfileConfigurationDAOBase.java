@@ -10,20 +10,19 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
+import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
-import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.service.util.QueryBuilderUtil;
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Contains the profile fetch informations and  We can retrieve the profile details here.
@@ -69,51 +68,26 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 		return null;
 	}
 
-	@Override
-	public List<ScheduleProfilesRef> findTransferProfilesSpecificProcessorTypeByTenancyKey(String tenancyKey, List<String> specificProcessorTypes) {
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<ScheduleProfilesRef> fetchTransferProfiles(List<String> tenancyKeys) {
 
-			EntityManager entityManager = null;
-			List<ScheduleProfilesRef> processors = new ArrayList<ScheduleProfilesRef>();
+        EntityManager entityManager = null;
+        List<ScheduleProfilesRef> profiles = new ArrayList<ScheduleProfilesRef>();
 
-			try {
-				LOG.debug("Fetching the transfer profiles by specific processor type and tenancyKey starts.");
-
-				entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-				StringBuilder query = new StringBuilder().append("select distinct profile from Processor processor")
-							.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
-							.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-							.append(" inner join processor.mailbox mailbox")
-							.append(" where mailbox.tenancyKey = :")
-							.append(ProfileConfigurationDAO.TENANCY_KEY)
-							.append(" and mailbox.mbxStatus = :")
-							.append(ProfileConfigurationDAO.STATUS)
-							.append(" and processor.procsrStatus = :")
-							.append(ProfileConfigurationDAO.STATUS)
-							.append(" and ( ")
-							.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
-							.append(")");
-
-
-				List<?> proc = entityManager.createQuery(query.toString())
-						.setParameter(ProfileConfigurationDAO.TENANCY_KEY, tenancyKey)
-						.setParameter(ProfileConfigurationDAO.STATUS, EntityStatus.ACTIVE.name())
-						.getResultList();
-
-				Iterator<?> iter = proc.iterator();
-				ScheduleProfilesRef transferProfile;
-				while (iter.hasNext()) {
-
-					transferProfile = (ScheduleProfilesRef) iter.next();
-					processors.add(transferProfile);
-					LOG.debug("Transfer profile -Pguid : "+ transferProfile.getPrimaryKey() +", profileName : "+ transferProfile.getSchProfName());							
-				}
-
-			} finally {
-				if (entityManager != null) {
-					entityManager.close();
-				}
-			}
-			return processors;
-		}
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            profiles = entityManager.createNamedQuery(FIND_PROFILES_BY_TENANCY_KEY)
+                    .setParameter(ProfileConfigurationDAO.TENANCY_KEY, tenancyKeys)
+                    .setParameter(ProfileConfigurationDAO.STATUS, EntityStatus.ACTIVE.name())
+                    .setParameter(PROCESSOR_TYPE, ProcessorType.DROPBOXPROCESSOR.name())
+                    .getResultList();
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return profiles;
+    }
 
 }

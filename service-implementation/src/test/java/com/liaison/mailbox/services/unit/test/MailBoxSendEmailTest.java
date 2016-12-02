@@ -136,8 +136,7 @@ public class MailBoxSendEmailTest extends BaseServiceTest{
         //This will never send a mail since no mailID's in script as well as mailbox
         downloader.sendEmail(scriptMailList, subject, emailBody, type, true);
         Assert.assertNotNull(scriptMailList);
-        Assert.assertTrue(scriptMailList.isEmpty());
-        
+        Assert.assertTrue(scriptMailList.isEmpty());        
     }
     
 }

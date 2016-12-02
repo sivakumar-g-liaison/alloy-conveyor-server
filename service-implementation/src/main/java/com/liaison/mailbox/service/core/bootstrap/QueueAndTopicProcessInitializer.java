@@ -6,11 +6,11 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.queue;
+package com.liaison.mailbox.service.core.bootstrap;
 
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
-import com.liaison.health.check.threadpool.ThreadPoolCheck;
-import com.liaison.health.core.LiaisonHealthCheckRegistry;
+import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
+import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +18,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
+import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectoryQueueProcessor;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -38,9 +39,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author VNagarajan
  *
  */
-public class QueueProcessInitializer {
+public class QueueAndTopicProcessInitializer {
 
-    private static final Logger logger = LogManager.getLogger(QueueProcessInitializer.class);
+    private static final Logger logger = LogManager.getLogger(QueueAndTopicProcessInitializer.class);
     private static DecryptableConfiguration configuration = MailBoxUtil.getEnvironmentProperties();
 
     /**
@@ -73,10 +74,14 @@ public class QueueProcessInitializer {
     private static final String DROPBOX_QUEUE = "dropboxQueue";
     private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
     private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
+    private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
+    private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
 
     public static QueuePooledListenerContainer dropboxQueue;
     public static QueuePooledListenerContainer mailboxProcessorQueue;
     public static QueuePooledListenerContainer mailboxProcessedPayloadQueue;
+    public static TopicPooledListenerContainer mailBoxTopicPooledListenerContainer;
+    public static QueuePooledListenerContainer umDirOprsQueue;
 
 
     public static void initialize() {
@@ -111,6 +116,16 @@ public class QueueProcessInitializer {
             mailboxProcessedPayloadQueue = new QueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
             mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
+
+            logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
+            mailBoxTopicPooledListenerContainer = new TopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
+            mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
+            
+            logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
+            umDirOprsQueue = new QueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
+            umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
 
         }
     }

@@ -23,13 +23,14 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -86,8 +87,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private static final String FILE_PERMISSION = "rw-rw----";
     private static final String FOLDER_PERMISSION = "rwxrwx---";
     private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
-    private static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
-    private static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
+    protected static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
+    protected static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
     private static final String INBOX = "inbox";
     private static final String OUTBOX = "outbox";
 
@@ -981,5 +982,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String getOrganization() {
         return this.getConfigurationInstance().getMailbox().getTenancyKey();
+    }
+
+    /**
+     * This method used to check the interrupt status of a thread.
+     *
+     * @return boolean true if it is interrupted
+     */
+    public boolean isProcessorInterrupted() {
+
+        String processorId = getReqDTO().getProcessorId();
+        ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
+        ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(processorId);
+        return MailBoxUtil.isInterrupted(processorExecutionState.getThreadName());
     }
 }

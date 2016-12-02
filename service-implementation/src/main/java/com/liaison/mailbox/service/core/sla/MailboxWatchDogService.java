@@ -48,7 +48,6 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
@@ -165,10 +164,12 @@ public class MailboxWatchDogService {
 					}
 
 					//get the mailbox properties
+                    int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
+
 					Map<String, String> mailboxProperties = getMailboxProperties(processor);
 					//file is not picked up beyond the configured TTL it should deleted immediately and 
 					//No need to call the validateCustomerSLA
-					if (validateTTLUnit(stagedFile, mailboxProperties)) {
+					if (validateTTLUnit(stagedFile, staleFileTTL)) {
                         try {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
@@ -269,32 +270,27 @@ public class MailboxWatchDogService {
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
 		mailboxPropsToBeRetrieved.add(MailBoxConstants.MAX_NUM_OF_NOTIFICATION_FOR_SLA_VIOLATION);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL);
-		mailboxPropsToBeRetrieved.add(MailBoxConstants.TTL_UNIT);
 		return processor.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 	}
 	
-	/**
-	 *  Method to validate the expire time.
-	 *
-	 * @param stagedFile
-	 * @param mailboxProperties
-	 * @return boolean
-	 */
-	private boolean validateTTLUnit(StagedFile stagedFile, Map<String, String> mailboxProperties) {
+    /**
+     *  Method to validate the expire time.
+     *
+     * @param stagedFile staged file entity
+     * @param ttl ttl value
+     * @return boolean
+     */
+    private boolean validateTTLUnit(StagedFile stagedFile, int ttl) {
 
-		String ttl = mailboxProperties.get(MailBoxConstants.TTL);
-		String ttlUnit = mailboxProperties.get(MailBoxConstants.TTL_UNIT);
-		if (MailBoxUtil.isEmpty(ttl)) {
+        if (0 == ttl) {
+            LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
+            ttl = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS,
+                    MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT ));
+        }
 
-		    LOGGER.debug(constructMessage("ttl is not configured in mailbox, using the default TTL configuration"));
-			ttl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.MAILBOX_PAYLOAD_TTL_DAYS_DEFAULT );
-			ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-		}
-
-		Timestamp expireTimestamp = getTTLAsTimestamp(MailBoxUtil.convertTTLIntoDays(ttlUnit, Integer.parseInt(ttl)), stagedFile.getCreatedDate());
-		return isTimeLimitExceeded(expireTimestamp);
-	}
+        Timestamp expireTimestamp = getTTLAsTimestamp(ttl, stagedFile.getCreatedDate());
+        return isTimeLimitExceeded(expireTimestamp);
+    }
 
 	/**
 	 * Method to convert ttl into TimeStamp value
@@ -481,7 +477,7 @@ public class MailboxWatchDogService {
 	 * 					status of mailbox. could be ACTIVE or INACTIVE
 	 * @return boolean
 	 */
-	public void validateMailboxSLARule(String mailboxStatus) {
+	public void validateMailboxSLARule(EntityStatus mailboxStatus) {
 
 		LOGGER.debug("Entering into validateMailboxSLARules.");
 
@@ -489,11 +485,11 @@ public class MailboxWatchDogService {
 		
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
-		processorTypes.add(Sweeper.class.getCanonicalName());
+		processorTypes.add(ProcessorType.SWEEPER.name());
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 		
 		for (Processor procsr : sweepers) {
-			
+		    
 			try {
 				// sla validation must be done only if both mailbox and processors are active
 				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
@@ -556,7 +552,8 @@ public class MailboxWatchDogService {
         }
 
         Timestamp timestamp = getSLAConfigurationAsTimeStamp(mailboxSLAConfiguration);
-        if (new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
+        if (null != processorExecutionState.getLastExecutionDate() && 
+                new Timestamp(processorExecutionState.getLastExecutionDate().getTime()).before(timestamp)) {
             LOGGER.error(constructMessage("The processor {} was not executed with in the specified SLA configuration time"), processor.getProcsrName());
             notifySLAViolationToUser(processor, mailboxSLAConfiguration, emailAddress, isEmailNotificationEnabled);
             return;
@@ -569,50 +566,6 @@ public class MailboxWatchDogService {
         }
     }
 
-    /**
-	 * Method to return a list of canonical names of specific processors
-	 *
-	 * @param type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
-	 * @return list of canonical names of processors of based on the type provided
-	 */
-	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
-
-		List <String> specificProcessors = new ArrayList<String>();
-		switch(type) {
-			case MAILBOX_SLA:
-				specificProcessors.add(Sweeper.class.getCanonicalName());
-				break;
-			case CUSTOMER_SLA:
-				specificProcessors.add(RemoteUploader.class.getCanonicalName());
-				specificProcessors.add(FileWriter.class.getCanonicalName());
-				break;
-
-		}
-
-		return specificProcessors;
-	}
-
-	/**
-	 * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
-	 * associated with given mailbox
-	 *
-	 * @param mailboxId
-	 * @return Processor
-	 */
-	public Processor getSpecificProcessorofMailbox(String mailboxId) {
-
-        LOGGER.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
-		// get processor of type remote uploader of given mailbox id
-		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-		List <Processor> processors = processorDAO.findSpecificProcessorTypesOfMbx(mailboxId, getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
-		// always get the first available processor because there
-		// will be either one uploader or file writer available for each mailbox
-		Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
-		return processor;
-
-	}
-
-	
 	/**
 	 * Method to send email to user for all sla violations
 	 * 

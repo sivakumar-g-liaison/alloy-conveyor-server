@@ -4,7 +4,23 @@
     "displayName":"FILEWRITER",
     "protocol":"",
     "handOverExecutionToJavaScript":false,
-    "staticProperties": [       
+    "staticProperties": [   
+    	 {
+	      	"name": "staleFileTTL",
+	      	"displayName": "Stale File TTL",
+	      	"type": "textarea",
+	      	"value": "",
+	      	"readOnly": false,
+	      	"mandatory": false,
+	      	"dynamic": false,
+	      	"valueProvided":false,
+	      	"defaultValue":"15",
+	      	"validationRules": {
+	      		"pattern": "\/^(1[5-9]|[2-8][0-9]|90)$\/",
+	      		"minLength": "",
+	      		"maxLength": ""
+	      	}
+	      }
     ],
     "folderProperties":[
 		  {

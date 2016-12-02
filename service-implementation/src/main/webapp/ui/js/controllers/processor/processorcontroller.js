@@ -976,7 +976,7 @@ var rest = myApp.controller(
             $scope.addNew = function () {
 
 	            	if ($rootScope.serviceInstanceId == "") {
-						showSaveMessage('Processor creation is not allowed', 'error');
+						showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
 						return;
 					}
                     $scope.formAddPrcsr.$setPristine();
@@ -1141,7 +1141,8 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeDropbox = false;
 					$scope.isProcessorTypeFileWriter = true;
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];					
-				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {				  
+				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {
+				      $scope.separateProperties(data.processorDefinition.staticProperties);				  
 					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});

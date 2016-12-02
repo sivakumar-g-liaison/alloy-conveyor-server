@@ -28,6 +28,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
@@ -36,7 +37,7 @@ import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
-import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
+import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -45,7 +46,9 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
+import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -82,8 +85,11 @@ public class MailBoxService implements Runnable {
 	
 	public enum QueueMessageType {
 		WORKTICKET,
-		TRIGGERPROFILEREQUEST
+		TRIGGERPROFILEREQUEST,
+        INTERRUPTTHREAD,
+        DIRECTORYOPERATION
 	}
+
 	
 	public MailBoxService(String message, QueueMessageType messageType) {
 		this.message = message;
@@ -164,13 +170,6 @@ public class MailBoxService implements Runnable {
 			}
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
-			return serviceResponse;
-
-		} catch (MailBoxServicesException | IOException e) {
-
-			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE,
-					e.getMessage()));
 			return serviceResponse;
 
 		} catch (Exception e) {
@@ -506,7 +505,11 @@ public class MailBoxService implements Runnable {
 			this.executeProcessor(message);
 		} else if (QueueMessageType.WORKTICKET.equals(this.messageType)) {
 			this.executeFileWriter(message);
-		} else {
+		} else if (QueueMessageType.INTERRUPTTHREAD.equals(this.messageType)){
+            this.interruptThread(message);
+        } else if (QueueMessageType.DIRECTORYOPERATION.equals(this.messageType)) {
+            this.directoryOperation(message);
+        } else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
 		}
 	}
@@ -526,7 +529,7 @@ public class MailBoxService implements Runnable {
         if (!MailBoxUtil.isEmpty(processorId)) {
             processor = processorDAO.findActiveProcessorById(processorId);
         } else {
-            processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+            processor = getProcessorsForMailbox(mailboxId);
         }
 
         //Check the processor is null or not
@@ -600,4 +603,68 @@ public class MailBoxService implements Runnable {
 		}
 		processorExecutionState.setExecutionStatus(state.value());
 	}
+
+    /**
+     * This method is used to kill running threads for the processors which are stopped.
+     *
+     * @param topicMessage topic message dto
+     */
+    public void interruptThread(String topicMessage) {
+
+        try {
+
+            TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(topicMessage, TopicMessageDTO.class);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            }
+
+
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * This method is used to create directories for created/updated 
+     * user account by user management.
+     * 
+     * @param message 
+     */
+    public void directoryOperation(String queueMessage) {
+        
+        try {
+            
+            DirectoryMessageDTO message = JAXBUtility.unmarshalFromJSON(queueMessage, DirectoryMessageDTO.class);
+            new DirectoryService().executeDirectoryOperation(message);
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
+     * associated with given mailbox
+     *
+     * @param mailboxId mailbox guid
+     * @return Processor
+     */
+    private Processor getProcessorsForMailbox(String mailboxId) {
+
+        LOG.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
+
+        List<String> processorTypes = new ArrayList<>();
+        processorTypes.add(ProcessorType.FILEWRITER.name());
+        processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
+
+        // get processor of type remote uploader of given mailbox id
+        ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+        List<Processor> processors = processorDAO.findActiveProcessorsByTypeAndMailbox(mailboxId, processorTypes);
+
+        // always get the first available processor because there
+        // will be either one uploader or file writer available for each mailbox
+        Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
+        return processor;
+
+    }
+
 }

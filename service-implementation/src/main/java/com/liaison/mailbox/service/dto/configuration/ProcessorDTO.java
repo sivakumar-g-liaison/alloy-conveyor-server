@@ -248,6 +248,7 @@ public class ProcessorDTO {
 
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
+                processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
             }
             // Set the protocol
             Protocol protocol = Protocol.findByName(this.getProtocol());
@@ -299,6 +300,7 @@ public class ProcessorDTO {
     			folderDTO.copyToEntity(folder);
     			folder.setProcessor(processor);
     			folder.setPguid(MailBoxUtil.getGUID());
+    			folder.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
     			folders.add(folder);
     		}
 
@@ -322,6 +324,7 @@ public class ProcessorDTO {
     			credential = new Credential();
     			credentialDTO.copyToEntity(credential);
     			credential.setPguid(MailBoxUtil.getGUID());
+    			credential.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
     			credential.setProcessor(processor);
     			credentialList.add(credential);
     		}

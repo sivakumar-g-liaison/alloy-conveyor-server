@@ -26,7 +26,6 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * Performs mailbox fetch operations. 
@@ -37,7 +36,11 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
 public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		implements MailBoxConfigurationDAO, MailboxDTDMDAO  {
 
-	public MailBoxConfigurationDAOBase() {
+    private static final String NAME = "name";
+    private static final String DESCRIPTION = "description";
+    private static final String STATUS = "status";
+
+    public MailBoxConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 
 	}
@@ -45,8 +48,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	/**
 	 * Fetches the count of all MailBoxes from  MAILBOX database table by given mailbox name, profile name and service instance ids.
 	 *
-	 * @param mbxName
-	 * @param profName
+	 * @param searchFilter
+	 * @param tenancyKeys
 	 * @return count of mailbox retrieved
 	 */
 	@Override
@@ -55,9 +58,10 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		Long totalItems = null;
 		int count = 0;
 
-		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager em = null;
 		try {
 
+            em = DAOUtil.getEntityManager(persistenceUnitName);
             String mbxName = searchFilter.getMbxName();
             String profName = searchFilter.getProfileName();
             StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MailBox mailbox")
@@ -88,7 +92,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		} finally {
 			if (em != null) {
-				em.clear();
+                em.close();
 			}
 		}
 		return count;
@@ -97,8 +101,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	/**
 	 * Fetches all MailBox from  MAILBOX database table by given mailbox name, profile name and service instance ids.
 	 *
-	 * @param mbxName
-	 * @param profName
+	 * @param searchFilter
+	 * @param tenancyKeys
+     * @param pageOffsetDetails
 	 * @return list of mailbox
 	 */
 	@SuppressWarnings("unchecked")
@@ -107,18 +112,17 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		List<MailBox> mailBoxes = null;
 		List<String> tenancyKeysLowerCase = null;
-		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager em = null;
 		try {
-			
-			String sortDirection = searchFilter.getSortDirection();
-			String sortField=searchFilter.getSortField();
+
+            em = DAOUtil.getEntityManager(persistenceUnitName);
 			String mbxName=searchFilter.getMbxName();
 			String profName=searchFilter.getProfileName();
 			StringBuilder query = new StringBuilder().append("SELECT distinct mbx FROM MailBox mbx")
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile");
-			
+
 			if (searchFilter.isDisableFilters()) {
 				query.append(" where LOWER(mbx.mbxName) like :")
 				     .append(MBOX_NAME)					 
@@ -134,60 +138,71 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				 	 .append(" and profile.schProfName like :")
 				 	 .append(SCHD_PROF_NAME);
 			}
-			if (!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
-				sortDirection = sortDirection.toUpperCase();
-				switch (sortField.toLowerCase()) {
-					case "name":
-						query.append(" order by mbx.mbxName " + sortDirection);
-						break;
-					case "description":
-						query.append(" order by mbx.mbxDesc " + sortDirection);
-						break;
-					case "status":
-						query.append(" order by mbx.mbxStatus " + sortDirection);
-						break;
-				}
-			} else {
-				query.append(" order by mbx.mbxName");
-			}
-			mailBoxes = em
-					.createQuery(query.toString())
-					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
-					.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
-					.setFirstResult( pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-					.setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
-					.getResultList();
+            setSortOptions(searchFilter.getSortDirection(), searchFilter.getSortField(), query);
+            Query jpaQuery = em.createQuery(query.toString())
+                    .setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%");
+            if (!searchFilter.isDisableFilters()) {
+                jpaQuery.setParameter(TENANCY_KEYS, tenancyKeysLowerCase);
+            }
+
+            mailBoxes = jpaQuery.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+                    .getResultList();
 
 		} finally {
 			if (em != null) {
-				em.clear();
+                em.close();
 			}
 		}
 		return mailBoxes;
 	}
 
-	/**
+    private void setSortOptions(String sortDirection, String sortField, StringBuilder query) {
+
+        if (!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+
+            sortDirection = sortDirection.toUpperCase();
+            switch (sortField.toLowerCase()) {
+                case NAME:
+                    query.append(" order by mbx.mbxName " + sortDirection);
+                    break;
+                case DESCRIPTION:
+                    query.append(" order by mbx.mbxDesc " + sortDirection);
+                    break;
+                case STATUS:
+                    query.append(" order by mbx.mbxStatus " + sortDirection);
+                    break;
+            }
+        } else {
+            query.append(" order by mbx.mbxName");
+        }
+    }
+
+    /**
 	 * Fetches the count of all  MailBoxes from  MAILBOX database table by given mailbox name.
 	 *
-	 * @param mbxName
+	 * @param searchFilter
+     * @param tenancyKeys
 	 * @return count of mailboxes retrieved
 	 */
 	@Override
 	public int getMailboxCountByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys) {
 		 
-        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
         Long totalItems = null;
         int count = 0;
- 
+ 		boolean isMatchModeEquals = !searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE);
+
         try {
- 
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             StringBuilder query = new StringBuilder().append("SELECT count(mailbox.pguid) FROM MailBox mailbox");
 
             boolean isNameAdded = false;
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-                query.append(" WHERE (lower(mailbox.mbxName) LIKE :").append(MBOX_NAME).append(")");
+					query.append(" WHERE (lower(mailbox.mbxName) " + searchFilter.getMatchMode().toUpperCase() + " :").append(MBOX_NAME).append(")");
                 isNameAdded = true;
             }
 
@@ -198,7 +213,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             Query jpaQuery = entityManager.createQuery(query.toString());
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-                jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
+				if (!isMatchModeEquals) {
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
+				} else {
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName().toLowerCase());
+				}
             }
             if (!searchFilter.isDisableFilters()) {
                 jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);
@@ -219,19 +238,22 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	/**
 	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
 	 *
-	 * @param mbxName
+	 * @param searchFilter
+     * @param tenancyKeys
+     * @param pageOffsetDetails
 	 * @return list of mailbox
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<MailBox> findByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys, Map <String, Integer> pageOffsetDetails) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
 		List<MailBox> mailboxList = null;
 		List<String> tenancyKeysLowerCase = null;
 
 		try {
 
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx");
 			
 			 if (searchFilter.isDisableFilters()){
@@ -247,28 +269,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(TENANCY_KEYS)
 					.append(")");
 			 }
-					
-			String sortDirection = searchFilter.getSortDirection();
-			String sortField=searchFilter.getSortField();
 
-			if (!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
-				sortDirection=sortDirection.toUpperCase();
-				switch (sortField.toLowerCase()) {
-					case "name":
-						query.append(" order by mbx.mbxName " + sortDirection);
-						break;
-					case "description":
-						query.append(" order by mbx.mbxDesc " + sortDirection);
-						break;
-					case "status":
-						query.append(" order by mbx.mbxStatus " + sortDirection);
-						break;
-				}
-			} else {
-				query.append(" order by mbx.mbxName");
-			}
-			
-			if (searchFilter.isDisableFilters() ) {	
+			String sortDirection = searchFilter.getSortDirection();
+            setSortOptions(sortDirection, searchFilter.getSortField(), query);
+
+            if (searchFilter.isDisableFilters() ) {
 				if (MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
 					mailboxList = entityManager.createQuery(query.toString())					
 							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
@@ -310,12 +315,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	@Override
 	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
 		List<MailBox> mailboxList = null;
 		MailBox appEntity = null;
 
 		try {
 
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			mailboxList = entityManager.createNamedQuery(FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME)
 					.setParameter(MBOX_NAME,  (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.setParameter(TENANCY_KEYS, (MailBoxUtil.isEmpty(tenancyKeyName) ? "''" : tenancyKeyName))
@@ -340,10 +346,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	public List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys) {
 		
 		List <String> linkedMailboxIds = new ArrayList<String>();
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
 		
 		try {
-			
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
 							.append(" where mailbox.tenancyKey in (:")
 							.append(TENANCY_KEYS)
@@ -374,12 +381,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	@Override
 	public MailBox getMailboxByName(String mbxName) {
 		
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        EntityManager entityManager = null;
 		List<MailBox> mailboxList = null;
 		MailBox appEntity = null;
 
 		try {
 
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			mailboxList = entityManager.createNamedQuery(GET_MBX_BY_NAME)
 					.setParameter(MBOX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.getResultList();

@@ -49,7 +49,7 @@ public class ProfileOperationDelegate extends OperationDelegate {
 
 		} finally {
 			if (em != null) {
-				em.clear();
+                em.close();
 			}
 		}
 		return profileList;

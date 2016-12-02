@@ -1,6 +1,27 @@
-4.9.1-SNAPSHOT
+4.11.0-SNAPSHOT
+---------------
+
+4.10.0
+---------------
+* 2.4.1 Code review comments
+* GMB-881 - Change glass sender to glass shipper in log4j properties. All environments
+
+4.9.1
 -------------------------------
-* GGT-708 remove deprecated-* repos
+* GGT-708 - remove deprecated-* repos
+* GMB-869 - We need a single-threaded, synchronous Data Sweeper process
+* GMB-870 - HTTP response status code should not be 500 in case of authentication problem
+* GMB-864 -	Need an ability to receive notification on successful file upload
+* GMB-711 - Processor read returns wrong folder properties
+* GMB-803 - Read/list mailbox returns entity with different fields
+* GMB-612 - Mailbox:Application is very slow when the user tries to a create/revise processor for all protocols
+* GMB-854 - Mailbox should not log Authorization headers
+* GMB-866 - Do not use System.out
+* GMB-860 - Audit Resource is missing user information
+* GMB-862 - FTPS Uploader : 'Unsupported recod version unknown-48.48' exception occurs when the user trying to upload a File
+* GMB-863 - Default values for processor static properties are not set while creating using Migrator.
+* GMB-867 - Relay runtime data model updates
+* GMB-875 - Implementation of synchronous Data Sweeper process
 
 4.9.0
 -------------------------------

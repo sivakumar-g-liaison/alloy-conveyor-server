@@ -14,6 +14,8 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 import java.util.List;
@@ -30,7 +32,10 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
 	String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
 	String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
-	String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
+    String FIND_PROCESSOR_BY_PROFILE_AND_TENANCY = "Processor.findProcessorByProfileAndTenancy";
+    String FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS = "Processor.findProcessorsByType";
+    String FIND_PROCESSORS_BY_TYPE_AND_STATUS = "Processor.findProcessorsByTypeAndStatus";
+    String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
 
 	String PROF_NAME = "sch_prof_name";
 	String MBX_NAME = "mbx_name";
@@ -45,8 +50,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FOLDER_URI = "folder_uri";
 	String PROTOCOL = "protocol";
 	String PIPELINE_ID = "pipeline_id";
-	String MBX_ID = "mbx_id";
 
+	String MBX_ID = "mbx_id";
 	/**
 	 * Constants for getProcessor Class
 	 */
@@ -56,8 +61,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FILEWRITER_CLASS = "filewriter";
 	String REMOTE_UPLAODER_CLASS = "remoteuploader";
 	String REMOTE_DOWNLAODER_CLASS = "remotedownloader";
-	String DROPBOX_PRCSR_CLASS = "dropboxprocessor";
 
+	String DROPBOX_PRCSR_CLASS = "dropboxprocessor";
 	/**
 	 * Sorting constants
 	 */
@@ -107,29 +112,28 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieves all active processors of specific types of given mailbox 
 	 * 
 	 * @param mbxGuid mailbox guid
-	 * @param specificProcessorTypes - A List of Canonical Names of different types of processor class.
+	 * @param processorTypes - A List of Canonical Names of different types of processor class.
 	 * @return list of specific types of processors
 	 */
-	List<Processor> findSpecificProcessorTypesOfMbx(String mbxGuid, List<String> specificProcessorTypes);
+	List<Processor> findActiveProcessorsByTypeAndMailbox(String mbxGuid, List<String> processorTypes);
 	
 	/**
 	 * Retrieves specific type of processors based on the given profile id and Tenancy key
 	 * 
 	 * @param profileId - Pguid of linked profile
 	 * @param tenancyKey - tenancykey of mailbox of the processor
-	 * @param specificProcessorTypes A List of Canonical Names of different types of processor class.
 	 * @return list of specific types of processors based on profile id and tenancykey
 	 */
-	List<Processor> findProcessorsOfSpecificTypeByProfileAndTenancyKey(String profileId, String tenancyKey, List<String> specificProcessorTypes);
+	List<Processor> fetchDropboxProcessorsByProfileAndTenancyKey(String profileId, String tenancyKey);
 	
 	/**
 	 * Retrieves all processors of given types and mailbox status
 	 * 
-	 * @param specificProcessorTypes processor types
+	 * @param processorTypes processor types
 	 * @param mailboxStatus status mailbox status
 	 * @return list of processors
 	 */
-	List<Processor> findProcessorsByType(List<String> specificProcessorTypes, String mailboxStatus);
+	List<Processor> findProcessorsByType(List<String> processorTypes, EntityStatus mailboxStatus);
 
 	/**
 	 * Retrieves list of all active processors

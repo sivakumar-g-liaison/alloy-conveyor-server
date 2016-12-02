@@ -378,4 +378,9 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         return null;
     }
 
+    @Override
+    public void persist(StagedFile entity) {
+        entity.setOriginatingDc(DATACENTER_NAME);
+        super.persist(entity);
+    }
 }

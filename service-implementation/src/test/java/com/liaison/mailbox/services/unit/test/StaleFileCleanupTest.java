@@ -25,10 +25,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
+import com.liaison.mailbox.dtdm.model.Processor;
 
 public class StaleFileCleanupTest  extends BaseServiceTest {
 	
@@ -59,9 +61,10 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
     @Test
     public void testStaleFileCleanup() throws IOException {
     	
-        Sweeper sweeper = new Sweeper();
+        Processor sweeper = new Sweeper();
         sweeper.setProcsrName("TestSweeper");
         sweeper.setProcsrStatus("ACTIVE");
+        sweeper.setProcsrProperties(ServiceUtils.readFileFromClassPath("requests/processor/sweeper.json"));
         DirectorySweeper sweeperProcsr = new DirectorySweeper(sweeper);
         
         String fileName = payloadLocation + File.separator + "testFile";

@@ -96,8 +96,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             ftpsRequest.connect();
             ftpsRequest.login();
             long startTime = 0;
-            //GMB-345
-            //ftpsRequest.enableDataChannelEncryption();
 
             // retrieve required properties
             FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
@@ -180,6 +178,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             String statusIndicator = staticProp.getFileTransferStatusIndicator();
             for (FTPFile file : files) {
+
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn("The executor is gracefully interrupted");
+                    return;
+                }
 
                 if (file.getName().equals(".") || file.getName().equals("..")) {
                     // skip parent directory and the directory itself
@@ -269,12 +272,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     @Override
     public void cleanup() {
-        if (null != ftpsClient) {
-            try {
-                ftpsClient.disconnect();
-            } catch (LiaisonException e) {
-                LOGGER.error(constructMessage("Failed to close connection"));
-            }
+        try {
+            disconnect(ftpsClient);
+        } catch (RuntimeException e) {//handle gracefully for scripts
+            LOGGER.error(constructMessage("Failed to close connection"));
         }
     }
 
