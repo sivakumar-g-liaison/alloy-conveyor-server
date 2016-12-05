@@ -80,7 +80,6 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             boolean recursiveSubdirectories = sftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(sftpUploaderStaticProperties.isDirectUpload());
 
-            // TODO use processor properties
             Object[] subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
@@ -367,7 +366,6 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                             folderPath,
                             remotePath);
 
-                    // TODO use processor properties
                     if (this.canUseFileSystem()) {
 
                         uploadFile(sftpRequest,

@@ -78,7 +78,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String name = "Purchase.txt";
 		Path target = Paths.get(inbox + File.separator + name);
 		Files.createFile(target);
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         try {
 

@@ -78,7 +78,6 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             boolean recursiveSubdirectories = ftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(ftpUploaderStaticProperties.isDirectUpload());
 
-            // TODO use processor properties
             Object[] subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
