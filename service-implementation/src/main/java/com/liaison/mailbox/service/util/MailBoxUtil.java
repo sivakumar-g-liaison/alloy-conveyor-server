@@ -68,6 +68,7 @@ import org.codehaus.jettison.json.JSONObject;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
+import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
 import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
 import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
@@ -574,32 +575,75 @@ public class MailBoxUtil {
 
     /**
      * Util method to read the direct upload value from processor properties
+     *
      * @param json processor properties json
      * @return boolean
      */
     public static boolean isDirectUploadEnabled(String json) {
 
-		String remotePrcsr = "remoteProcessorProperties";
-
         try {
-
-			JSONObject obj = null;
-			if (json.contains(remotePrcsr)) {
-				JSONObject innerObj = new JSONObject(json);
-				obj = innerObj.getJSONObject(remotePrcsr);
-			} else {
-				obj = new JSONObject(json);
-			}
-
-            Object o = obj.get(DIRECT_UPLOAD);
-            return Boolean.TRUE.equals(o);
+            Object obj = getJSONObject(json, DIRECT_UPLOAD);
+            return Boolean.TRUE.equals(obj);
         } catch (JSONException e) {
             return false;
         }
-
     }
 
     /**
+     * Util method to read the direct upload value from processor properties
+     *
+     * @param json processor properties json
+     * @return boolean true by default, false if it is overridden in UI
+     */
+    public static boolean isUseFileSystemEnabled(String json) {
+
+        try {
+            Object obj = getJSONObject(json, USE_FILE_SYSTEM);
+            return Boolean.TRUE.equals(obj);
+        } catch (JSONException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Util method to read the stale file TTL value from processor properties
+     *
+     * @param json processor properties json
+     * @return String TTl value
+     */
+    public static int getStaleFileTTLValue(String json) {
+
+        try {
+            Object o = getJSONObject(json, PROPERTY_STALE_FILE_TTL);
+            return (int) o;
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Reads a value from processor properties
+     *
+     * @param json processor properties
+     * @param key  key to read a value
+     * @return value
+     * @throws JSONException
+     */
+    private static Object getJSONObject(String json, String key) throws JSONException {
+
+        String remotePrcsr = "remoteProcessorProperties";
+        JSONObject obj = null;
+        if (json.contains(remotePrcsr)) {
+            JSONObject innerObj = new JSONObject(json);
+            obj = innerObj.getJSONObject(remotePrcsr);
+        } else {
+            obj = new JSONObject(json);
+        }
+
+        return obj.get(key);
+    }
+
+	/**
      * validates pipeline id
      *
      * @param processorType processor type and
@@ -665,31 +709,6 @@ public class MailBoxUtil {
         }
     }
     
-    /**
-     * Util method to read the stale file TTL value from processor properties
-     * @param json processor properties json
-     * @return String TTl value
-     */
-    public static int getStaleFileTTLValue(String json) {
-
-        String remotePrcsr = "remoteProcessorProperties";
-        try {
-
-            JSONObject obj = null;
-            if (json.contains(remotePrcsr)) {
-                JSONObject innerObj = new JSONObject(json);
-                obj = innerObj.getJSONObject(remotePrcsr);
-            } else {
-                obj = new JSONObject(json);
-            }
-
-            Object o = obj.get(PROPERTY_STALE_FILE_TTL);
-            return (int) o;
-        } catch (JSONException e) {
-            return 0;
-        }
-    }
-
     /**
      * To get current execution node
      *

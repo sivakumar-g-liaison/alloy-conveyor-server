@@ -143,6 +143,7 @@ public interface MailBoxConstants {
 	String KEY_OVERWRITE = "overwrite";
 	String KEY_FILE_PATH = "path";
 	String DIRECT_UPLOAD = "directUpload";
+    String USE_FILE_SYSTEM = "useFileSystem";
 	String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
 	String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	String KEY_TARGET_DIRECTORY = "targetDirectory";

@@ -23,7 +23,6 @@ import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -62,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
@@ -394,12 +392,11 @@ public class MailBoxService implements Runnable {
                     mbx.getPguid());
 
             //sets the direct upload details in workticet and it would be used to set the STAGED_FILE status
-            if (processor instanceof RemoteUploader) {
-                directUploadEnabled = MailBoxUtil.isDirectUploadEnabled(processor.getProcsrProperties());
-                if (directUploadEnabled) {
+/*            if (processor instanceof RemoteUploader) {
+                if (processorService.isDirectUploadEnabled()) {
                     workTicket.setAdditionalContext(DIRECT_UPLOAD, directUploadEnabled);
                 }
-            }
+            }*/
 
             processorService.runProcessor(workTicket);
             glassMessage.setOutSize(workTicket.getPayloadSize());
@@ -420,7 +417,7 @@ public class MailBoxService implements Runnable {
             	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
 
                 //file writer to kick of an uploader
-                if (directUploadEnabled) {
+                if (processorService.isDirectUploadEnabled()) {
                     directUpload(processor, workTicket);
                 }
 
@@ -448,7 +445,7 @@ public class MailBoxService implements Runnable {
 
         } catch (Exception e) {
 
-        	LOG.error(e);
+            LOG.error(e.getMessage(), e);
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {
@@ -558,7 +555,7 @@ public class MailBoxService implements Runnable {
         directUpload = true;
         RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
         String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
-        directUploader.doDirectUpload(workticket.getFileName(), path);
+        directUploader.doDirectUpload(workticket.getFileName(), path, workticket.getGlobalProcessId());
     }
 
     /**
@@ -628,7 +625,7 @@ public class MailBoxService implements Runnable {
      * This method is used to create directories for created/updated 
      * user account by user management.
      * 
-     * @param message 
+     * @param queueMessage message from GUM
      */
     public void directoryOperation(String queueMessage) {
         

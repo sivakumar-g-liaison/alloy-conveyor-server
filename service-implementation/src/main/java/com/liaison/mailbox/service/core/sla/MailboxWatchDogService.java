@@ -190,7 +190,7 @@ public class MailboxWatchDogService {
 				LOGGER.debug(constructMessage("File {} does not exist at the location {}"), fileName, filePath);
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
-				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
+				/*if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 
                     if (!isFileExist) {
 
@@ -198,7 +198,7 @@ public class MailboxWatchDogService {
 		                LOGGER.warn(constructMessage("{} : File {} is not present but staged file entity is active."), stagedFile.getProcessorId(), stagedFile.getFileName());
 				    }
 					continue;
-				}
+				}*/
 
 				GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
 	            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
