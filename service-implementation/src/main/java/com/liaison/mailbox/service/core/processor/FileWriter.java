@@ -116,7 +116,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 writeStatus = addAnEntryToStagedFile(processorPayloadLocation, fileName, workTicket);
 
                 if (writeStatus) {
-                    LOG.info("Payload is successfully staged to {}", processorPayloadLocation);
+                    LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", processorPayloadLocation);
                 } else {
                     //To avoid staged file entry
                     LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
@@ -311,18 +311,19 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 dao.merge(stagedFile);
                 logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
 
+                workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
                 dao.persistStagedFile(workTicket,
                         configurationInstance.getPguid(),
                         configurationInstance.getProcessorType().name(),
                         this.isDirectUploadEnabled());
                 return true;
             } else {
-
                 throw new MailBoxServicesException("The file(" + fileName + ") exists at the location - " + processorPayloadLocation,
                         Response.Status.BAD_REQUEST);
             }
 
         } else {
+
             if (workTicket.getPayloadSize() == 0 ||  workTicket.getPayloadSize() == -1) {
                 workTicket.setPayloadSize(StorageUtilities.getPayloadSize(workTicket.getPayloadURI()));
             }

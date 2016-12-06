@@ -106,8 +106,8 @@ public class RelayFile {
      *
      * @throws IOException io errors
      */
-    public void delete() throws IOException {
-        Files.deleteIfExists(file.toPath());
+    public boolean delete() throws IOException {
+        return Files.deleteIfExists(file.toPath());
     }
 
     public void copy(StagedFile stagedFile) {
