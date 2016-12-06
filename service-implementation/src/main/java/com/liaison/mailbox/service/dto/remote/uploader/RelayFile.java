@@ -12,7 +12,9 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 /**
  * Created by VNagarajan on 11/22/2016.
@@ -20,7 +22,6 @@ import java.io.InputStream;
 public class RelayFile {
 
     private File file;
-    private InputStream payloadInputStream;
     private String name;
     private String payloadUri;
     private String globalProcessId;
@@ -60,7 +61,7 @@ public class RelayFile {
         return payloadUri;
     }
 
-    public void setPayloadUri(String payloadUri) {
+    private void setPayloadUri(String payloadUri) {
         this.payloadUri = payloadUri;
     }
 
@@ -98,6 +99,15 @@ public class RelayFile {
 
     public long length() {
         return this.size;
+    }
+
+    /**
+     * api to delete the file written by filewriter
+     *
+     * @throws IOException io errors
+     */
+    public void delete() throws IOException {
+        Files.deleteIfExists(file.toPath());
     }
 
     public void copy(StagedFile stagedFile) {
