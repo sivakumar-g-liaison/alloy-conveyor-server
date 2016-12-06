@@ -119,7 +119,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", processorPayloadLocation);
                 } else {
                     //To avoid staged file entry
-                    LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
+                    LOG.info("File {} already exists at STAGED_FILE with location {} and should not be overwritten", fileName, processorPayloadLocation);
                     workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
 
@@ -127,7 +127,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             //GLASS LOGGING BEGINS//
             StringBuilder message = new StringBuilder()
-                    .append(writeStatus ? "Payload written at target location : " : "File already exists at ")
+                    .append(writeStatus ? "Payload written at target location : " : "File already exists at STAGED_FILE - ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
                     .append(fileName);
