@@ -49,6 +49,7 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     private boolean directUpload;	
     private int scriptExecutionTimeout;
     private int staleFileTTL;
+    private boolean useFileSystem = true;
 
 	public String getUrl() {
 		return url;
@@ -56,7 +57,6 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-
 	public int getPort() {
 		return port;
 	}
@@ -187,5 +187,11 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     }
     public void setStaleFileTTL(int staleFileTTL) {
         this.staleFileTTL = staleFileTTL;
+    }
+    public boolean isUseFileSystem() {
+        return useFileSystem;
+    }
+    public void setUseFileSystem(boolean useFileSystem) {
+        this.useFileSystem = useFileSystem;
     }
 }
