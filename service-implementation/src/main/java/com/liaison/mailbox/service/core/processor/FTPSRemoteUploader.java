@@ -343,6 +343,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             setFileName(fileName);
             setFolderPath(folderPath);
+            setGlobalProcessId(globalProcessId);
             setMaxExecutionTimeout(scriptExecutionTimeout);
             JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
         } else {
