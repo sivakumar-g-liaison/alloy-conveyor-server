@@ -1057,6 +1057,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
         GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
 
         // Assertion
@@ -1073,6 +1074,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("MBX_TEST");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
         GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
 
         // Assertion
