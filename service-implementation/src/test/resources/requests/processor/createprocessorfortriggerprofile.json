@@ -1,6 +1,18 @@
 {
   "addProcessorToMailBoxRequest": {
-    "processorLegacy": {
+    "processor": {
+      "guid": "",
+      "name": "google testremote downloader",
+      "type": "REMOTEDOWNLOADER",
+      "javaScriptURI": "",
+      "description": "",
+      "status": "ACTIVE",
+      "protocol": "HTTP",
+      "linkedMailboxId": "A7E007C90A0A01C80ABA010F2155EBF7",
+      "linkedProfiles": [
+      ]
+    }
+    ,"processorLegacy": {
       "guid": "",
       "name": "google testremote downloader",
       "type": "REMOTEDOWNLOADER",

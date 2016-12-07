@@ -70,7 +70,7 @@ public class UserAuthCacheUtilIT {
         }
     }
     
-    @Test
+    @Test(enabled = false)
     public void testAuthenticateExecutionTime() {
     	
         Parallel.For(0, 1000, new Parallel.Action<Long>() {

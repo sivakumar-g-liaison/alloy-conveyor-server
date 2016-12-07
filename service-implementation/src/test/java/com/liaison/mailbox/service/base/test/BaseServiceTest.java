@@ -437,5 +437,35 @@ public abstract class BaseServiceTest {
         profileDTO.setName("PROFILE_TEST" + uniqueValue);
 		return profileDTO;
     }
+    
+    /**
+     * Method to construct folder properties.
+     *
+     * @param processorProperties
+     * @param payloadLocation
+     * @param targetLocation
+     * @return ProcessorPropertyUITemplateDTO
+     */
+    public static ProcessorPropertyUITemplateDTO constructFolderProperties(
+            ProcessorPropertyUITemplateDTO processorProperties, String payloadLocation, String targetLocation) {
+
+        // constructing folderDTO
+        List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
+        ProcessorFolderPropertyDTO payloadFolderPropertyDto = new ProcessorFolderPropertyDTO();
+        ProcessorFolderPropertyDTO responseFolderPropertyDto = new ProcessorFolderPropertyDTO();
+
+        payloadFolderPropertyDto.setFolderType("PAYLOAD_LOCATION");
+        payloadFolderPropertyDto.setFolderURI(targetLocation + System.nanoTime());
+        payloadFolderPropertyDto.setFolderDesc("Payload Location");
+        folderList.add(payloadFolderPropertyDto);
+
+        responseFolderPropertyDto.setFolderType("RESPONSE_LOCATION");
+        responseFolderPropertyDto.setFolderURI(payloadLocation + System.nanoTime());
+        responseFolderPropertyDto.setFolderDesc("Response Location");
+        folderList.add(responseFolderPropertyDto);
+
+        processorProperties.setFolderProperties(folderList);
+        return processorProperties;
+    }
 
 }

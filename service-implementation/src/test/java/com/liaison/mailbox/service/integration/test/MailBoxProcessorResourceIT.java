@@ -27,7 +27,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
@@ -40,7 +39,6 @@ import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
@@ -864,7 +862,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         // create processor with valid folder pattern
         AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
                 "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
-        addProcessorDTO.getProcessor().setCreateConfiguredLocation(true);
+        addProcessorDTO.getProcessor().setCreateConfiguredLocation(false);
         jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
         String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "?sid=" + serviceInstanceId;
@@ -1040,37 +1038,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
             addProcessorDTO.setProcessor(processorDTO);
             return addProcessorDTO;
         }
-    }
-
-    /**
-     * Method to construct folder properties.
-     *
-     * @param processorProperties
-     * @param payloadLocation
-     * @param targetLocation
-     * @return ProcessorPropertyUITemplateDTO
-     */
-    private ProcessorPropertyUITemplateDTO constructFolderProperties(
-            ProcessorPropertyUITemplateDTO processorProperties, String payloadLocation, String targetLocation) {
-
-        // constructing folderDTO
-        List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
-        ProcessorFolderPropertyDTO payloadFolderPropertyDto = new ProcessorFolderPropertyDTO();
-        ProcessorFolderPropertyDTO responseFolderPropertyDto = new ProcessorFolderPropertyDTO();
-
-        payloadFolderPropertyDto.setFolderType("PAYLOAD_LOCATION");
-        payloadFolderPropertyDto.setFolderURI(targetLocation + System.nanoTime());
-        payloadFolderPropertyDto.setFolderDesc("Payload Location");
-        folderList.add(payloadFolderPropertyDto);
-
-        responseFolderPropertyDto.setFolderType("RESPONSE_LOCATION");
-        responseFolderPropertyDto.setFolderURI(payloadLocation + System.nanoTime());
-        responseFolderPropertyDto.setFolderDesc("Response Location");
-        folderList.add(responseFolderPropertyDto);
-
-        processorProperties.setFolderProperties(folderList);
-        return processorProperties;
-    }
+    }    
 
     /**
      * Method to add profile.
