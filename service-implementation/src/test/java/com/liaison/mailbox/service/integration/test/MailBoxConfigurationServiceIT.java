@@ -616,7 +616,6 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-        mbxDTO.setGuid("dummy");
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
@@ -757,7 +756,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
-
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
         SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
@@ -774,7 +773,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-        searchFilter.setProfileName("test");
+        searchFilter.setProfileName("test");        
 
         SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
 
@@ -793,7 +792,8 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
-
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        
         SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
