@@ -832,7 +832,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
     @Test
     public void testSearchMailBox_MailboxNameIsEmpty_ShouldPass() throws Exception {
 
-        String url = getBASE_URL() + "/?name=&disableFilters=true";
+        String url = getBASE_URL() + "/?name=null&disableFilters=true";
         HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
         request.addHeader("acl-manifest", aclManifest);
         request.execute();
@@ -848,7 +848,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
     @Test
     public void testSearchMailBox_ProfileNameIsEmpty_ShouldFail() throws Exception {
 
-        String url = getBASE_URL() + "/?name=&profile=";
+        String url = getBASE_URL() + "/?name=null&profile=";
         HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
         request.addHeader("acl-manifest", aclManifest);
         request.execute();
