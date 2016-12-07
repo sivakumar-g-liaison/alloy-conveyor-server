@@ -73,7 +73,7 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
     public void setUp() throws Exception {
         logger = LogManager.getLogger(KeyManagerIntegrationServiceIT.class);
         System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "ci");
+        System.setProperty("archaius.deployment.environment", "test");
     }
 
     /**
