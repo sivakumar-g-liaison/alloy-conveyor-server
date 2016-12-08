@@ -380,20 +380,19 @@ var rest = myApp.controller(
                         $scope.availableProperties.push(property);
                     }
 				}
-                if ($scope.processor.protocol.value !== 'FILEWRITER') {
-                	$scope.propertiesAddedToProcessor.push({
-                    	
-                        "name":"",
-                        "displayName" : "",
-                        "value":"",
-                        "type":"textarea",
-                        "readOnly":"",
-                        "mandatory":false,
-                        "dynamic":false,
-                        "valueProvided":false,
-                        "validationRules": {}
-                     });               	
-                }
+				
+            	$scope.propertiesAddedToProcessor.push({
+                	
+                    "name":"",
+                    "displayName" : "",
+                    "value":"",
+                    "type":"textarea",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": {}
+                 });               	
                 
                 for (var i = 0; i < $scope.folderProperties.length; i++) {				     
 					 var property = $scope.folderProperties[i];
