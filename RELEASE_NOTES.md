@@ -1,5 +1,6 @@
 4.11.0-SNAPSHOT
 ---------------
+* GGT-1220 : Enable BOSS in DEV and QA
 
 4.10.2
 ---------------
