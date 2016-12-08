@@ -42,7 +42,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String sort;
     private int staleFileTTL;
     private String processMode = "ASYNC";
-    private boolean allowEmptyFiles;
+    private boolean allowEmptyFiles = true;
 	
 	public String getPipeLineID() {
 		return pipeLineID;

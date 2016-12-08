@@ -161,7 +161,7 @@ public class ProcessorExecutionConfigurationService {
         if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
             postToTopic(userId, processorExecutionState);
         } else {
-            updateExecutionState(processorId, userId, node, threadName, processorExecutionState);
+            updateExecutionState(processorId, userId, processorExecutionState);
         }
         
     }
@@ -171,13 +171,15 @@ public class ProcessorExecutionConfigurationService {
      * 
      * @param processorId
      * @param userId
-     * @param node
-     * @param threadName
      * @param processorExecutionState
      */
-    private void updateExecutionState(String processorId, String userId, String node, String threadName, ProcessorExecutionState processorExecutionState) {
+    private void updateExecutionState(String processorId, String userId, ProcessorExecutionState processorExecutionState) {
         
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
+
+        String node = processorExecutionState.getNodeInUse();
+        String threadName = processorExecutionState.getThreadName();
+
         
         if (ExecutionState.PROCESSING.value().equals(processorExecutionState.getExecutionStatus())) {
 
@@ -235,7 +237,7 @@ public class ProcessorExecutionConfigurationService {
      * @param messageDTO TopicMessageDTO
      */
     public void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
-        
+
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
         ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(messageDTO.getProcessorId());
         if (null == processorExecutionState) {
@@ -248,8 +250,6 @@ public class ProcessorExecutionConfigurationService {
         this.updateExecutionState(
                 messageDTO.getProcessorId(),
                 messageDTO.getUserId(),
-                messageDTO.getNodeInUse(),
-                messageDTO.getThreadName(),
                 processorExecutionState);
     }
 

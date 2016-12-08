@@ -17,8 +17,11 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -75,56 +78,56 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             String fileName = workTicket.getFileName();
             LOG.info("filename from the workticket - {}", fileName);
 
-            //get payload from spectrum
-            try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
+            if (this.canUseFileSystem() || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
 
-                if (null == payload) {
-                    LOG.error("Failed to retrieve payload from spectrum");
-                    throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
+                //get payload from spectrum
+                try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
+
+                    if (null == payload) {
+                        LOG.error("Failed to retrieve payload from spectrum");
+                        throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
+                    }
+
+                    processorPayloadLocation = getPayloadLocation(workTicket);
+                    if (null == processorPayloadLocation) {
+                        LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
+                        throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
+                    }
+
+                    // write the payload retrieved from spectrum to the configured location of processor
+                    LOG.info("Started writing payload to {} and the filename is {}", processorPayloadLocation, fileName);
+                    writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
+                    if (writeStatus) {
+                        LOG.info("Payload is successfully written to {}", processorPayloadLocation);
+                    } else {
+
+                        LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
+                        //To avoid staged file entry
+                        workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
+                    }
+
                 }
 
-                //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
-                //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
-                //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
-                String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
-                if (MailBoxUtil.isEmpty(targetDirectory)) {
-                	processorPayloadLocation = getFileWriteLocation();
-                	createPathIfNotAvailable(processorPayloadLocation);
-                } else {
+            } else {
 
-                	String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
-                	if (!MailBoxUtil.isEmpty(mode)
-                			&& MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
-                		createPathIfNotAvailable(targetDirectory);
-                		processorPayloadLocation = targetDirectory;
-                	} else {
-                		processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
-                		createPathIfNotAvailable(processorPayloadLocation);
-                	}
-                }
+                //do remote uploader operation
+                processorPayloadLocation = getPayloadLocation(workTicket);
+                LOG.info("Started staging payload in staged file table and payload location {} and the filename is {}", processorPayloadLocation, fileName);
+                writeStatus = addAnEntryToStagedFile(processorPayloadLocation, fileName, workTicket);
 
-                if (null == processorPayloadLocation) {
-                    LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
-                    throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
-                }
-                LOG.info("Started writing payload to {} and the filename is {}", processorPayloadLocation, fileName);
-
-                // write the payload retrieved from spectrum to the configured location of processor
-                writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
                 if (writeStatus) {
-                	LOG.info("Payload is successfully written to {}", processorPayloadLocation);
+                    LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", processorPayloadLocation);
                 } else {
-
-                	LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
-                	//To avoid staged file entry
-                	workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
+                    //To avoid staged file entry
+                    LOG.info("File {} already exists at STAGED_FILE with location {} and should not be overwritten", fileName, processorPayloadLocation);
+                    workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
 
             }
 
             //GLASS LOGGING BEGINS//
             StringBuilder message = new StringBuilder()
-                    .append(writeStatus ? "Payload written at target location : " : "File already exists at ")
+                    .append(writeStatus ? "Payload written at target location : " : "File already exists at STAGED_FILE - ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
                     .append(fileName);
@@ -132,18 +135,50 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message.toString());
              //GLASS LOGGING ENDS//
 
-            stopwatch.stop();
-            LOG.info("Total time taken to process files {}", stopwatch.getTime());
-
         } catch (Exception e) {
             LOG.error("File Staging failed", e);
-             //GLASS LOGGING ENDS//
+            //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
+        } finally {
+            stopwatch.stop();
+            LOG.info("Total time taken to process files {}", stopwatch.getTime());
         }
 
 	}
 
-	/**
+    /**
+     * get payload location from the workticket if it is given or processor configuration
+     *
+     * @param workTicket workticket
+     * @return payload location
+     * @throws IOException
+     */
+    private String getPayloadLocation(WorkTicket workTicket) throws IOException {
+
+        //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
+        //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
+        //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
+        String processorPayloadLocation;
+        String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
+        if (MailBoxUtil.isEmpty(targetDirectory)) {
+            processorPayloadLocation = getFileWriteLocation();
+            createPathIfNotAvailable(processorPayloadLocation);
+        } else {
+
+            String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
+            if (!MailBoxUtil.isEmpty(mode)
+                    && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
+                createPathIfNotAvailable(targetDirectory);
+                processorPayloadLocation = targetDirectory;
+            } else {
+                processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
+                createPathIfNotAvailable(processorPayloadLocation);
+            }
+        }
+        return processorPayloadLocation;
+    }
+
+    /**
 	 * This Method create local folders if not available.
 	 *
 	 * * @param processorDTO it have details of processor
@@ -181,7 +216,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @return true if it is successfully written the file to the location, otherwise false
 	 * @throws IOException
 	 */
-	public boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException {
+	private boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException {
 
 		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
 		StagedFileDAOBase dao = new StagedFileDAOBase();
@@ -209,13 +244,12 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 				return true;
 			} else {
 
-				StringBuilder message = new StringBuilder();
-				message.append("The file(").append(filename).append(") exists at the location - ").append(targetLocation);
-				throw new MailBoxServicesException(message.toString(), Response.Status.BAD_REQUEST);
+                throw new MailBoxServicesException("The file(" + filename + ") exists at the location - " + targetLocation,
+                        Response.Status.BAD_REQUEST);
 			}
 		} else {
 
-			logGlassMessage(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
+			logToLens(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
 			persistFile(response, file, workTicket, dao);
 			return true;
 		}
@@ -242,9 +276,64 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         //To add more details in staged file
         workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
 
-        //Persist the new file deatils
-        dao.persistStagedFile(workTicket, configurationInstance.getPguid(), configurationInstance.getProcessorType().name());
+        //Persist the new file details
+        dao.persistStagedFile(workTicket,
+                configurationInstance.getPguid(),
+                configurationInstance.getProcessorType().name(),
+                this.isDirectUploadEnabled());
         
+    }
+
+    /**
+     * Adds an entry to staged file table for the uploader
+     *
+     * @param processorPayloadLocation processor payload location
+     * @param fileName name of the file
+     * @param workTicket workticket received from SB
+     * @return true if it staged successfully otherwise false
+     */
+    private boolean addAnEntryToStagedFile(String processorPayloadLocation, String fileName, WorkTicket workTicket) {
+
+        StagedFileDAOBase dao = new StagedFileDAOBase();
+        String isOverwrite = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase();
+        File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+
+        StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), fileName);
+        if (null != stagedFile) {
+
+            if (MailBoxConstants.OVERWRITE_FALSE.equals(isOverwrite)) {
+                workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
+                return false;
+            } else if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
+
+                //In-activate the old entity
+                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
+                dao.merge(stagedFile);
+                logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
+
+                workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
+                dao.persistStagedFile(workTicket,
+                        configurationInstance.getPguid(),
+                        configurationInstance.getProcessorType().name(),
+                        this.isDirectUploadEnabled());
+                return true;
+            } else {
+                throw new MailBoxServicesException("The file(" + fileName + ") exists at the location - " + processorPayloadLocation,
+                        Response.Status.BAD_REQUEST);
+            }
+
+        } else {
+
+            if (workTicket.getPayloadSize() == 0 ||  workTicket.getPayloadSize() == -1) {
+                workTicket.setPayloadSize(StorageUtilities.getPayloadSize(workTicket.getPayloadURI()));
+            }
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
+            dao.persistStagedFile(workTicket,
+                    configurationInstance.getPguid(),
+                    configurationInstance.getProcessorType().name(),
+                    this.isDirectUploadEnabled());
+            return true;
+        }
     }
 
 }

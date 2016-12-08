@@ -275,6 +275,21 @@
 	      		"minLength": "",
 	      		"maxLength": ""
 	      	}
+	      },
+	      {
+	      	"name": "useFileSystem",
+	      	"displayName":"Use File System",
+	      	"type":"select",
+	      	"value":"true",
+	      	"mandatory":true,
+	      	"dynamic":false,
+	      	"valueProvided":false,
+	      	"defaultValue":"true",
+	      	"validationRules":null,
+	      	"options":[
+	      		"false",
+	      		"true"
+	      	]
 	      }
       ],
       "folderProperties":[

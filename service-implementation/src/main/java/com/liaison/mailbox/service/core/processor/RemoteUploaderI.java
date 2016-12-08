@@ -24,6 +24,6 @@ public interface RemoteUploaderI {
      *
      * @param fileName file name to be uploaded
      */
-    void doDirectUpload(String fileName, String folderPath);
+    void doDirectUpload(String fileName, String folderPath, String globalProcessId);
 
 }

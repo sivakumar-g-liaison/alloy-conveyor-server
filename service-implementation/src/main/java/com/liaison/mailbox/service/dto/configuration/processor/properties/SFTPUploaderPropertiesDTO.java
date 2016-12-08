@@ -47,6 +47,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private boolean directUpload;
 	private int scriptExecutionTimeout;
     private int staleFileTTL;
+    private boolean useFileSystem = true;
 	
 	public String getUrl() {
 		return url;
@@ -54,7 +55,6 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-
 	public int getPort() {
 		return port;
 	}
@@ -154,11 +154,9 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	public void setRecurseSubDirectories(boolean recurseSubDirectories) {
 		this.recurseSubDirectories = recurseSubDirectories;
 	}
-
     public boolean isDirectUpload() {
         return directUpload;
     }
-
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
     }
@@ -175,6 +173,12 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
     }
     public void setStaleFileTTL(int staleFileTTL) {
         this.staleFileTTL = staleFileTTL;
+    }
+    public boolean isUseFileSystem() {
+        return useFileSystem;
+    }
+    public void setUseFileSystem(boolean useFileSystem) {
+        this.useFileSystem = useFileSystem;
     }
 
 }

@@ -10,15 +10,6 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -31,7 +22,13 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This will fetch the Staged file details. 
@@ -219,7 +216,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	}
 
     @Override
-    public void persistStagedFile(WorkTicket workticket, String processorId, String processorType) {
+    public void persistStagedFile(WorkTicket workticket,
+                                  String processorId,
+                                  String processorType,
+                                  boolean directUploadEnabled) {
 
         EntityManager entityManager = null;
         StagedFile stagedFileEntity = null;
@@ -233,7 +233,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         	stagedFileDto.setProcessorId(processorId);
         	stagedFileDto.setProcessorType(processorType);
 
-			if (null != workticket.getAdditionalContextItem(DIRECT_UPLOAD)) {
+			if (directUploadEnabled) {
 				stagedFileDto.setStatus(EntityStatus.STAGED.value());
 			}
 
@@ -262,7 +262,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             List<String> statuses = new ArrayList<>();
             statuses.add(EntityStatus.STAGED.name());
-            statuses.add(EntityStatus.ACTIVE.name());
+			statuses.add(EntityStatus.ACTIVE.name());
+			statuses.add(EntityStatus.FAILED.name());
 
             List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE.toString())
                     .setParameter(PROCESSOR_ID, processorId)
@@ -345,29 +346,21 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * Returns staged file
      */
     @Override
-    public StagedFile findStagedFile(String gpid) {
+    public StagedFile findStagedFileByGpid(String gpid) {
 
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-                    .append(" where (sf.globalProcessId) =:")
-                    .append(GLOBAL_PROCESS_ID)
-                    .append(" and sf.stagedFileStatus =:")
-                    .append(STATUS)
-                    .append(")");
-
             List<?> files = entityManager
-                    .createQuery(query.toString())
+                    .createNamedQuery(FIND_BY_GPID)
                     .setParameter(GLOBAL_PROCESS_ID, gpid)
-                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .setParameter(STATUS, EntityStatus.INACTIVE.name())
                     .getResultList();
 
-            Iterator<?> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                return (StagedFile) iterator.next();
+            for (Object file : files) {
+                return (StagedFile) file;
             }
 
         } finally {
