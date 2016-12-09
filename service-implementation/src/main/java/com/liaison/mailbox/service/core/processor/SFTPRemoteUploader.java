@@ -211,9 +211,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             deleteFile(file);
             String message = "File " +
                     currentFileName +
-                    " uploaded successfully to " +
-                    getHost(staticProp.getUrl()) +
-                    " and the remote path is " +
+                    " uploaded successfully to the remote path " +
                     remoteParentDir;
 
             // Glass Logging
@@ -290,9 +288,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
             String message = "File " +
                     currentFileName +
-                    " uploaded successfully to " +
-                    getHost(staticProp.getUrl()) +
-                    " and the remote path " +
+                    " uploaded successfully to the remote path " +
                     remoteParentDir;
 
             // Glass Logging

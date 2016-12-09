@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
@@ -39,8 +40,8 @@ import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.util.UserAuthCacheUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.UserAuthCacheUtil;
 import com.liaison.mailbox.service.util.UserManifestCacheUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import org.apache.commons.lang.StringUtils;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID_HEADER;
+import static com.liaison.mailbox.MailBoxConstants.HTTP_REMOTE_ADDRESS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
@@ -616,12 +618,23 @@ public class HTTPListenerResource extends AuditedResource {
             glassMessage.setStatus(ExecutionState.PROCESSING);
             glassMessage.setInAgent(GatewayType.REST);
             glassMessage.setInSize((long) request.getContentLength());
+
+            //sets sender Ip
+            glassMessage.setSenderIp(getRemoteAddress(request));
         } else if (ExecutionState.COMPLETED.equals(state)) {
+
             glassMessage.setStatus(ExecutionState.COMPLETED);
             glassMessage.setOutAgent(GatewayType.REST);
+
+            //sets receiver Ip
+            glassMessage.setReceiverIp(getRemoteAddress(request));
         } else if (ExecutionState.FAILED.equals(state)) {
+
             glassMessage.setStatus(ExecutionState.FAILED);
             glassMessage.setOutAgent(GatewayType.REST);
+
+            //sets receiver Ip
+            glassMessage.setReceiverIp(getRemoteAddress(request));
         }
 
         return glassMessage;
@@ -649,6 +662,10 @@ public class HTTPListenerResource extends AuditedResource {
                 globalProcessId,
                 HTTPSYNCPROCESSOR,
                 Protocol.HTTPSYNCPROCESSOR);
+
+        //sets sender and receiver ip
+        failedMsg.setSenderIp(getRemoteAddress(request));
+        failedMsg.setReceiverIp(getRemoteAddress(request));
 
         // Log error status
         failedMsg.logProcessingStatus(
@@ -684,6 +701,9 @@ public class HTTPListenerResource extends AuditedResource {
                 globalProcessId,
                 HTTPASYNCPROCESSOR,
                 Protocol.HTTPASYNCPROCESSOR);
+
+        //sets sender and receiver ip
+        glassMessage.setSenderIp(getRemoteAddress(request));
 
         glassMessage.logProcessingStatus(
                 StatusType.ERROR,
