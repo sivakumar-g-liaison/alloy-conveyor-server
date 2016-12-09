@@ -468,7 +468,7 @@ public class MailboxWatchDogService {
 	
 	/**
 	 * Iterate all Mailboxes and check whether Mailbox satisfies the SLA Rules
-	 * 
+	 *
 	 * @Param mailboxStatus
 	 * 					status of mailbox. could be ACTIVE or INACTIVE
 	 * @return boolean
@@ -478,29 +478,31 @@ public class MailboxWatchDogService {
 		LOGGER.debug("Entering into validateMailboxSLARules.");
 
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		
+
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(ProcessorType.SWEEPER.name());
+
+		//fetches the sweeper based on mailbox and processor status
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
-		
+
 		for (Processor procsr : sweepers) {
-		    
+
 			try {
 				// sla validation must be done only if both mailbox and processors are active
-				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
-								EntityStatus.ACTIVE.value().equals(procsr.getProcsrStatus())) {
-					
+				if (EntityStatus.ACTIVE.equals(mailboxStatus)) {
+
 					LOGGER.debug("Retrieving Mailbox properties");
 					List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
-					
+
 					Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 					// check whether sweeper got executed with in the configured sla time
 					checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
 				}
+
 				// check sweeper location for stale file cleanup
 				DirectorySweeper directorySweeper = (DirectorySweeper) MailBoxProcessorFactory.getInstance(procsr);
 				directorySweeper.cleanupStaleFiles();

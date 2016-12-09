@@ -422,4 +422,18 @@ public class BaseResource {
 		}
 
 	}
+
+    /**
+     * gets remote address from the http request
+     *
+     * @param request http request
+     * @return ip address
+     */
+    protected String getRemoteAddress(HttpServletRequest request) {
+        String ipAddress = request.getHeader(com.google.common.net.HttpHeaders.X_FORWARDED_FOR);
+        if (null == ipAddress) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
+    }
 }
