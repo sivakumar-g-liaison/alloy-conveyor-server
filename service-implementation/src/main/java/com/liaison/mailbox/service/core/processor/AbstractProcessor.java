@@ -79,6 +79,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static com.liaison.mailbox.MailBoxConstants.FTP;
 import static com.liaison.mailbox.MailBoxConstants.FTPS;
 import static com.liaison.mailbox.MailBoxConstants.HTTP;
 import static com.liaison.mailbox.MailBoxConstants.HTTPS;
@@ -1041,6 +1042,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                 case SFTP:
                     url = ((SFTPUploaderPropertiesDTO) getProperties()).getUrl();
                     break;
+                case FTP:
                 case FTPS:
                     url = ((FTPUploaderPropertiesDTO) getProperties()).getUrl();
                     break;
