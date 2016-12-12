@@ -40,6 +40,8 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
@@ -1040,11 +1042,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                     url = ((SFTPUploaderPropertiesDTO) getProperties()).getUrl();
                     break;
                 case FTPS:
-                    url = ((SFTPUploaderPropertiesDTO) getProperties()).getUrl();
+                    url = ((FTPUploaderPropertiesDTO) getProperties()).getUrl();
                     break;
                 case HTTP:
                 case HTTPS:
-                    url = ((SFTPUploaderPropertiesDTO) getProperties()).getUrl();
+                    url = ((HTTPUploaderPropertiesDTO) getProperties()).getUrl();
                     break;
                 default:
                     return null;
