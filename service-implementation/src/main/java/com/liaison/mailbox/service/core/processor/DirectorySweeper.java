@@ -20,7 +20,10 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -847,8 +850,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         FileSystem fileSystem = FileSystems.getDefault();
         String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
         PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
-        
+
         if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
+
+            //inactivate the mailboxes which doesn't have valid directory
+            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+            configurationInstance.setProcsrStatus(EntityStatus.INACTIVE.name());
+            configurationInstance.setModifiedBy("WatchDog Service");
+            configurationInstance.setModifiedDate(new Date());
+            dao.merge(configurationInstance);
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 

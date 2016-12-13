@@ -40,6 +40,9 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -56,6 +59,7 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -74,6 +78,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import static com.liaison.mailbox.MailBoxConstants.FTP;
+import static com.liaison.mailbox.MailBoxConstants.FTPS;
+import static com.liaison.mailbox.MailBoxConstants.HTTP;
+import static com.liaison.mailbox.MailBoxConstants.HTTPS;
+import static com.liaison.mailbox.MailBoxConstants.SFTP;
 
 /**
  * Base processor type for all type of processors.
@@ -195,11 +205,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      *
      * @return StaticProcessorPropertiesDTO
      * @throws IOException
-     * @throws SecurityException
-     * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    public StaticProcessorPropertiesDTO getProperties() throws IllegalArgumentException, IllegalAccessException, IOException {
+    public StaticProcessorPropertiesDTO getProperties() throws IOException, IllegalAccessException {
 
         if (null == staticProcessorProperties) {
             staticProcessorProperties = ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(configurationInstance.getProcsrProperties(), configurationInstance);
@@ -879,6 +887,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             glassMessageDTO.setPipelineId(null);
             glassMessageDTO.setFirstCornerTimeStamp(null);
 
+            //sets receiver ip
+            glassMessageDTO.setReceiverIp(getHost());
+
             MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
 
         }
@@ -1014,5 +1025,40 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
         ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(processorId);
         return MailBoxUtil.isInterrupted(processorExecutionState.getThreadName());
+    }
+
+    /**
+     * Reads the host from url for lens logging
+     * Handles the exception gracefully
+     *
+     * @return host
+     */
+    protected String getHost() {
+
+        try {
+
+            String url;
+            switch (configurationInstance.getProcsrProtocol().toUpperCase()) {
+                case SFTP:
+                    url = ((SFTPUploaderPropertiesDTO) getProperties()).getUrl();
+                    break;
+                case FTP:
+                case FTPS:
+                    url = ((FTPUploaderPropertiesDTO) getProperties()).getUrl();
+                    break;
+                case HTTP:
+                case HTTPS:
+                    url = ((HTTPUploaderPropertiesDTO) getProperties()).getUrl();
+                    break;
+                default:
+                    return null;
+            }
+
+            URI uri = new URI(url);
+            return uri.getHost();
+        } catch (URISyntaxException | IllegalAccessException | IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return null;
     }
 }
