@@ -77,8 +77,7 @@ public class MailBoxProcessorResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			public Object call() {
 
 				String requestString;
 				try {
