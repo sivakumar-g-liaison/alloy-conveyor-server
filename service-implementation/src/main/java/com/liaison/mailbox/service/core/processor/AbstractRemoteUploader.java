@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -29,6 +30,7 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -327,7 +329,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 files.add(file);
                 stagedFileMap.put(file.getAbsolutePath(), stagedFile);
             } else {
-                LOGGER.warn("The file {} is not available in the local payload location", file.getName());
+                LOGGER.warn("The file {} is not available in the local payload location and gpid is {}", file.getName(), stagedFile.getGlobalProcessId());
             }
         }
 
