@@ -285,6 +285,8 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             // Renames the uploaded file to original extension once the fileStatusIndicator is given by User
             renameFile(ftpsRequest, statusIndicator, currentFileName, uploadingFileName);
 
+            //deletes the file if it is staged using file system
+            file.delete();
             String message = "File " +
                     currentFileName +
                     " uploaded successfully to the remote path " +

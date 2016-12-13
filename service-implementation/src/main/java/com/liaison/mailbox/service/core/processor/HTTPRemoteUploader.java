@@ -217,6 +217,8 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
             } else {
 
+                //deletes the file if it is staged using file system
+                file.delete();
                 String msg = "File " +
                         file.getName() +
                         " uploaded successfully";
