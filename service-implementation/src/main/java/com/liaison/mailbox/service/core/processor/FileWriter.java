@@ -78,6 +78,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             String fileName = workTicket.getFileName();
             LOG.info("filename from the workticket - {}", fileName);
 
+            String message = "";
             if (this.canUseFileSystem() || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
 
                 //get payload from spectrum
@@ -108,6 +109,11 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 }
 
+                message = (writeStatus ? "Payload written at target location : " : "File already exists at the location - ")
+                        + processorPayloadLocation
+                        + File.separatorChar
+                        + fileName;
+
             } else {
 
                 //do remote uploader operation
@@ -123,17 +129,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
 
+                message = (writeStatus ? "Added an entry in STAGED FILE for the file - " : "File already exists in STAGED_FILE - ")
+                        + processorPayloadLocation
+                        + File.separatorChar
+                        + fileName;
             }
 
             //GLASS LOGGING BEGINS//
-            StringBuilder message = new StringBuilder()
-                    .append(writeStatus ? "Payload written at target location : " : "File already exists at STAGED_FILE - ")
-                    .append(processorPayloadLocation)
-                    .append(File.separatorChar)
-                    .append(fileName);
-
-            MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message.toString());
-             //GLASS LOGGING ENDS//
+            MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
+            //GLASS LOGGING ENDS//
 
         } catch (Exception e) {
             LOG.error("File Staging failed", e);
