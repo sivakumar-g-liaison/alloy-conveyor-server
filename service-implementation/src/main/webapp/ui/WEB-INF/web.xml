@@ -367,20 +367,6 @@
         <url-pattern>/config/mailbox/processoradmin/processor/status</url-pattern>
     </filter-mapping>
     
-    <!-- ProcessorAdminResource -->
-    <filter>
-        <filter-name>processorAdminFilter</filter-name>
-        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
-        <init-param>
-            <param-name>name-prefix</param-name>
-            <param-value>/config/mailbox/processoradmin/processor/execution</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>processorAdminFilter</filter-name>
-        <url-pattern>/config/mailbox/processoradmin/processor/execution</url-pattern>
-    </filter-mapping>
-    
     <!-- ProcessorSearchResource -->
     <filter>
         <filter-name>processorSearchFilter</filter-name>

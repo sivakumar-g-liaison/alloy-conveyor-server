@@ -25,7 +25,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.liaison.mailbox.service.integration.test.Parallel;
+import com.liaison.mailbox.service.base.test.Parallel;
 import com.liaison.mailbox.service.util.UserAuthCacheUtil;
 
 /**
@@ -70,7 +70,7 @@ public class UserAuthCacheUtilIT {
         }
     }
     
-    @Test
+    @Test(enabled = false)
     public void testAuthenticateExecutionTime() {
     	
         Parallel.For(0, 1000, new Parallel.Action<Long>() {

@@ -8,8 +8,6 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -37,7 +35,6 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -54,12 +51,13 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
     private String serviceInstanceId = "5D9C3B487184426E9F9629EFEE7C5913";
     private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
     private final String dummyValue = "dummy";
+
     /**
      * @throws java.lang.Exception
      */
     @BeforeMethod
     public void setUp() throws Exception {
-    	System.setProperty("com.liaison.secure.properties.path", "invalid");
+        System.setProperty("com.liaison.secure.properties.path", "invalid");
         System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
         System.setProperty("archaius.deployment.environment", "test");
         InitInitialDualDBContext.init();
@@ -67,24 +65,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with valid data.
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testCreateandReadProcessorUsingPguid()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testCreateAndReadProcessorUsingPguid() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -115,24 +98,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with valid data.
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateandReadProcessorUsingInvalidPguid()
-            throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testCreateAndReadProcessorUsingInvalidPguid() throws Exception {
 
         // Get the processor
         GetProcessorResponseDTO procGetResponseDTO = new ProcessorConfigurationService().getProcessor("Invalid", false);
@@ -144,24 +112,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with empty service instance Id.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorwithEmptyServiceInstanceId()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorWithEmptyServiceInstanceId() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -186,24 +139,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with Wrong LinkedMailId.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorwithWrongLinkedMailId()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorwithWrongLinkedMailId() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -228,24 +166,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with processor null.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorWithProcessorNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorWithProcessorNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -261,7 +184,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         procRequestDTO.setProcessor(null);
-        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, "unknown");
 
 
         // Assertion
@@ -272,24 +195,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with wrong processor name.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorWithProcessorWithWrongProcessorName()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorWithProcessorWithWrongProcessorName() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -321,24 +229,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with ServiceInstanceId Null.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorWithServiceInstanceIdNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorWithServiceInstanceIdNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -369,24 +262,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method constructs Processor with ProcessorService Null.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testCreateProcessorWithProcessorServiceNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testCreateProcessorWithProcessorServiceNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -418,24 +296,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method get Processor with invalid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReadProcessorNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReadProcessorNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -463,24 +326,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Deactivate Processor with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testDeactivateProcessor()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testDeactivateProcessor() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -490,7 +338,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         MailBoxConfigurationService service = new MailBoxConfigurationService();
         AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
 
-        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        Assert.assertEquals(response.getResponse().getStatus(), SUCCESS);
 
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
@@ -516,24 +364,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Deactivate Processor will Fail when passing invalid Processor Guid.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testDeactivateProcessorWithProcessorNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testDeactivateProcessorWithProcessorNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -569,24 +402,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Deactivate Processor will Fail.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testDeactivateProcessorFail()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testDeactivateProcessorFail() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -622,24 +440,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessor()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessor() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -673,24 +476,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with Invalid LinkedMailId.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithInvalidLinkedMailId()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithInvalidLinkedMailId() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -727,24 +515,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with invalid Processor guid.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithInvalidProcessorGuid()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithInvalidProcessorGuid() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -781,24 +554,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with Processor null.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithProcessorNull()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithProcessorNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -835,24 +593,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with Processor Status invalid.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithNullProcessorValue()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithNullProcessorValue() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -888,24 +631,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with Processor Status invalid.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithCreateConfiguredLocation()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithCreateConfiguredLocation() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -941,24 +669,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Revise Processor with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithLinkedProfilesWrongNames()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithLinkedProfilesWrongNames() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -995,33 +708,18 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         profiles.add(requestProfileDTO.getProfile().getName() + "X");
         revProcRequestDTO.getProcessor().setLinkedProfiles(profiles);
 
-        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO,response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
         // Assertion
         Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.PROFILE_NAME_DOES_NOT_EXIST.value().replaceAll("%s",requestProfileDTO.getProfile().getName().toString() + "X")));
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.PROFILE_NAME_DOES_NOT_EXIST.value().replaceAll("%s", requestProfileDTO.getProfile().getName() + "X")));
     }
 
     /**
      * Method Revise Processor with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-    public void testReviseProcessorWithLinkedProfiles()
-            throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
-            IOException, SymmetricAlgorithmException, SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    public void testReviseProcessorWithLinkedProfiles() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1064,9 +762,10 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
 
     }
-
+    
     /**
      * Method Get Http Listener Properties
+     *
      * @throws JsonMappingException
      * @throws JsonParseException
      * @throws IOException
@@ -1076,10 +775,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      * @throws IllegalArgumentException
      * @throws SecurityException
      * @throws NoSuchFieldException
-     *
      */
     @Test
-    public void testGetHttpListenerPropertiesByMailboxName() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testGetHttpListenerPropertiesByMailboxName() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1101,7 +799,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
-        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(mbxDTO.getName(), ProcessorType.HTTPASYNCPROCESSOR, false);
+        Map<String, String> httpListenerProperties = procsrService.getHttpListenerProperties(mbxDTO.getName(), ProcessorType.HTTPASYNCPROCESSOR, false);
 
         // Assertion
         Assert.assertEquals("false", httpListenerProperties.get("lensVisibility"));
@@ -1112,10 +810,10 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Get Http Listener Properties With Empty From Date And Status
+     *
      * @throws IOException
      * @throws JAXBException
      * @throws MailBoxConfigurationServicesException
-     *
      */
     @Test
     public void testGetHttpListenerPropertiesByMailboxNameWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
@@ -1140,13 +838,13 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Get Http Listener Properties With Other than HttpProcessor
+     *
      * @throws IOException
      * @throws JAXBException
      * @throws MailBoxConfigurationServicesException
-     *
      */
     @Test
-    public void testGetHttpListenerPropertiesByMailboxNameWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
+    public void testGetHttpListenerPropertiesByMailboxNameWithNotAHttpProcessor() throws MailBoxConfigurationServicesException, IOException, JAXBException {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1175,7 +873,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
     }
 
     @Test
-    public void testGetHttpListenerPropertiesByMailboxId() throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void testGetHttpListenerPropertiesByMailboxId() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1197,7 +895,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
-        Map<String, String> httpListenerProperties =  procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
+        Map<String, String> httpListenerProperties = procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
 
         // Assertion
         Assert.assertEquals("false", httpListenerProperties.get("lensVisibility"));
@@ -1208,13 +906,13 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Get Http Listener Properties With Empty From Date And Status
+     *
      * @throws IOException
      * @throws JAXBException
      * @throws MailBoxConfigurationServicesException
-     *
      */
     @Test
-    public void testGetHttpListenerPropertiesByMailboxIdWithProcessorNull() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+    public void testGetHttpListenerPropertiesByMailboxIdWithProcessorNull() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1236,13 +934,13 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Get Http Listener Properties With Other than HttpProcessor
+     *
      * @throws IOException
      * @throws JAXBException
      * @throws MailBoxConfigurationServicesException
-     *
      */
     @Test
-    public void testGetHttpListenerPropertiesByMailboxIdWithNotAHttpProcessor() throws MailBoxConfigurationServicesException,  IOException, JAXBException {
+    public void testGetHttpListenerPropertiesByMailboxIdWithNotAHttpProcessor() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1272,16 +970,16 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search MailBox by name
-     * @throws IOException 
-     * @throws JAXBException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     * @throws MailBoxConfigurationServicesException 
      *
+     * @throws IOException
+     * @throws JAXBException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @throws MailBoxConfigurationServicesException
      */
     @Test
     public void testGetMailBoxNames() {
-    	
+
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
@@ -1294,10 +992,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search MailBox by unavailable name
-     *
      */
     @Test
-    public void testgetMailBoxNamesWithUnavailableName()  {
+    public void testGetMailBoxNamesWithUnavailableName() {
 
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -1311,20 +1008,19 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search Profile by name
-     *
      */
     @Test
-    public void testgetProfileNames() {
+    public void testGetProfileNames() {
 
-    	//Adding a profile
-		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
-		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
-		requestDTO.setProfile(profileDTO);
+        //Adding a profile
+        AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
+        ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+        requestDTO.setProfile(profileDTO);
 
-		ProfileConfigurationService service = new ProfileConfigurationService();
-		AddProfileResponseDTO response = service.createProfile(requestDTO);
+        ProfileConfigurationService service = new ProfileConfigurationService();
+        AddProfileResponseDTO response = service.createProfile(requestDTO);
 
-		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -1338,10 +1034,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search Profile by unavailable name
-     *
      */
     @Test
-    public void testgetProfileNamesWithUnavailableName() {
+    public void testGetProfileNamesWithUnavailableName() {
 
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -1355,20 +1050,14 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search Processor by name
-     * @throws JAXBException
-     * @throws IOException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     *
      */
     @Test
-    public void testSearchProcessor() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
+    public void testSearchProcessor() throws Exception {
 
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
         GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
 
         // Assertion
@@ -1378,47 +1067,26 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method Search Processor by unavailable name
-     * @throws JAXBException
-     * @throws IOException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     *
      */
     @Test
-    public void testSearchProcessorWithUnavailableMbxName() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
+    public void testSearchProcessorWithUnavailableMbxName() throws Exception {
 
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("MBX_TEST");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
         GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
 
         // Assertion
         Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
         Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
     }
-    
+
     /**
      * Method to test read processor by valid Pguid
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testReadProcessorByPguid()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testReadProcessorByPguid() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1434,7 +1102,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
-        
+
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         // Get the processor by guid
@@ -1448,27 +1116,12 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
 
     }
-    
+
     /**
      * Method to test read processor by valid Pguid
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testReadProcessorByName()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testReadProcessorByName() throws Exception {
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -1484,7 +1137,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
-        
+
         Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
 
         // Get the processor by Name
@@ -1494,31 +1147,16 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
         List<ProcessorDTO> retrievedProcessors = procGetResponseDTO.getProcessors();
         for (ProcessorDTO proc : retrievedProcessors) {
-        	Assert.assertEquals(procRequestDTO.getProcessor().getName(), proc.getName());
+            Assert.assertEquals(procRequestDTO.getProcessor().getName(), proc.getName());
         }
 
     }
-    
+
     /**
      * Method to test read processor by invalid Pguid/Name
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testReadProcessorByInvalidPguidOrName()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testReadProcessorByInvalidPguidOrName() throws Exception {
 
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         // Get the processor by Name
@@ -1529,24 +1167,9 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test read processor by invalid Pguid/Name
-     * @throws MailBoxConfigurationServicesException
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws SymmetricAlgorithmException
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
      */
     @Test
-	public void testReadProcessorByPguidOrNameAsNull()
-			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
-			IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testReadProcessorByPguidOrNameAsNull() throws Exception {
 
         ProcessorConfigurationService procService = new ProcessorConfigurationService();
         // Get the processor by Name
