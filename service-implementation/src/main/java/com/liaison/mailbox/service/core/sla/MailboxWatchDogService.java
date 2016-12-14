@@ -150,24 +150,19 @@ public class MailboxWatchDogService {
 					continue;
 				}
 
-				boolean isFileExist = false;
-				if (Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS)) {
+                // get the processor from processor Id
+                processor = processors.computeIfAbsent(stagedFile.getProcessorId()
+                        , k -> config.find(Processor.class, stagedFile.getProcessorId()));
 
-				    isFileExist = true;
-				    LOGGER.debug(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
+                //get the mailbox properties
+                int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
 
-					// get the processor from processor Id
-					processor = processors.get(stagedFile.getProcessorId());
-					if (null == processor) {
-						processor = config.find(Processor.class, stagedFile.getProcessorId());
-						processors.put(stagedFile.getProcessorId(), processor);
-					}
+                boolean isFileExist = Files.exists(Paths.get(filePath + File.separatorChar + fileName), LinkOption.NOFOLLOW_LINKS);
+                if (isFileExist) {
 
-					//get the mailbox properties
-                    int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
+                    LOGGER.debug(constructMessage("File {} is exists at the location {}. so doing customer sla validation"), fileName, filePath);
 
-					Map<String, String> mailboxProperties = getMailboxProperties(processor);
-					//file is not picked up beyond the configured TTL it should deleted immediately and 
+					//file is not picked up beyond the configured TTL it should deleted immediately and
 					//No need to call the validateCustomerSLA
 					if (validateTTLUnit(stagedFile, staleFileTTL)) {
                         try {
@@ -182,7 +177,7 @@ public class MailboxWatchDogService {
 					}
 
 					//Check SLA and send notification to the user
-					validateCustomerSLA(stagedFile, processor, mailboxProperties);
+					validateCustomerSLA(stagedFile, processor);
 					updatedNotificationCountList.add(stagedFile);
 					continue;
 				}
@@ -190,20 +185,19 @@ public class MailboxWatchDogService {
 				LOGGER.debug(constructMessage("File {} does not exist at the location {}"), fileName, filePath);
 				// if the processor type is uploader then Lens updation should not happen
 				// even if the file does not exist as the lens updation is already taken care by the corresponding uploader
-				if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
+                if (ProcessorType.REMOTEUPLOADER.getCode().equals(stagedFile.getProcessorType())) {
 
-                    if (!isFileExist) {
-
-		                inactiveStagedFile(stagedFile, updatedStatusList);
-		                LOGGER.warn(constructMessage("{} : File {} is not present but staged file entity is active."), stagedFile.getProcessorId(), stagedFile.getFileName());
-				    }
-					continue;
-				}
+                    if (validateTTLUnit(stagedFile, staleFileTTL)) {
+                        inactiveStagedFile(stagedFile, updatedStatusList);
+                        LOGGER.warn(constructMessage("{} : File {} is not present but staged file entry exceeded and it is active."), stagedFile.getProcessorId(), stagedFile.getFileName());
+                    }
+                    continue;
+                }
 
 				GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
 	            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
 	            glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
-	            glassMessageDTO.setProcessProtocol(getProtocol(filePath));
+	            glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
 	            glassMessageDTO.setFileName(fileName);
 	            glassMessageDTO.setFilePath(filePath);
 	            glassMessageDTO.setFileLength(0);
@@ -211,7 +205,7 @@ public class MailboxWatchDogService {
 	            glassMessageDTO.setMessage("File is picked up by the customer or another process");
 	            glassMessageDTO.setPipelineId(null);
 	            glassMessageDTO.setFirstCornerTimeStamp(null);
-	            
+
                 MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
                 LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
                 inactiveStagedFile(stagedFile, updatedStatusList);
@@ -229,12 +223,12 @@ public class MailboxWatchDogService {
 
 			tx.commit();
 
-		} catch (Exception e) {
-			if (tx.isActive()) {
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
                 tx.rollback();
             }
             throw new RuntimeException(e);
-		} finally {
+        } finally {
             if (em != null) {
                 em.close();
             }
@@ -316,8 +310,10 @@ public class MailboxWatchDogService {
 	 * @param stagedFile - staged file entity which contains details of when staging occurs 
 	 * 					   and the related processor and mailbox details 
 	 */
-	private void validateCustomerSLA(StagedFile stagedFile, Processor processor, Map<String, String> mailboxProperties) {		
-		
+	private void validateCustomerSLA(StagedFile stagedFile, Processor processor) {
+
+        Map<String, String> mailboxProperties = getMailboxProperties(processor);
+
 		String customerSLAConfiguration = mailboxProperties.get(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX);
 		String emailAddress = mailboxProperties.get(MailBoxConstants.MBX_RCVR_PROPERTY);
 		String enableEmailNotification = mailboxProperties.get(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
@@ -472,7 +468,7 @@ public class MailboxWatchDogService {
 	
 	/**
 	 * Iterate all Mailboxes and check whether Mailbox satisfies the SLA Rules
-	 * 
+	 *
 	 * @Param mailboxStatus
 	 * 					status of mailbox. could be ACTIVE or INACTIVE
 	 * @return boolean
@@ -482,29 +478,31 @@ public class MailboxWatchDogService {
 		LOGGER.debug("Entering into validateMailboxSLARules.");
 
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		
+
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(ProcessorType.SWEEPER.name());
+
+		//fetches the sweeper based on mailbox and processor status
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
-		
+
 		for (Processor procsr : sweepers) {
-		    
+
 			try {
 				// sla validation must be done only if both mailbox and processors are active
-				if (EntityStatus.ACTIVE.value().equals(procsr.getMailbox().getMbxStatus()) && 
-								EntityStatus.ACTIVE.value().equals(procsr.getProcsrStatus())) {
-					
+				if (EntityStatus.ACTIVE.equals(mailboxStatus)) {
+
 					LOGGER.debug("Retrieving Mailbox properties");
 					List <String> mailboxPropsToBeRetrieved = new ArrayList<>();
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.MBX_RCVR_PROPERTY);
 					mailboxPropsToBeRetrieved.add(MailBoxConstants.EMAIL_NOTIFICATION_FOR_SLA_VIOLATION);
-					
+
 					Map <String, String> mailboxProperties = procsr.retrieveMailboxProperties(mailboxPropsToBeRetrieved);
 					// check whether sweeper got executed with in the configured sla time
 					checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, mailboxProperties);
 				}
+
 				// check sweeper location for stale file cleanup
 				DirectorySweeper directorySweeper = (DirectorySweeper) MailBoxProcessorFactory.getInstance(procsr);
 				directorySweeper.cleanupStaleFiles();
@@ -603,22 +601,4 @@ public class MailboxWatchDogService {
         }
 	}
 
-	/**
-	 * Helper to get protocol from filepath
-	 * 
-	 * @param filePath
-	 * @return
-	 */
-	private String getProtocol(String filePath) {
-
-	    if (filePath.contains(Protocol.FTPS.getCode())) {
-            return Protocol.FTPS.getCode();
-        } else if (filePath.contains(Protocol.SFTP.getCode())) {
-            return Protocol.SFTP.getCode();
-        } else if (filePath.contains(Protocol.FTP.getCode())) {
-            return Protocol.FTP.getCode();
-        } else {
-            return filePath;
-        }
-	}
 }

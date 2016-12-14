@@ -10,11 +10,6 @@
 
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.MapItemType;
 import com.liaison.commons.message.glass.dom.StatusCode;
@@ -24,6 +19,10 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Java wrapper client for logging messages in LENS.
@@ -156,6 +155,14 @@ public class TransactionVisibilityClient {
             item.setKey(OUTBOUND_FILE_NAME);
             item.setValue(message.getOutboundFileName());
             visibilityAPI.getAdditionalInformation().add(item);
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getSenderIp())) {
+            GlassMessageUtil.logSenderAddress(visibilityAPI, message.getSenderIp());
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getReceiverIp())) {
+            GlassMessageUtil.logReceiverAddress(visibilityAPI, message.getReceiverIp());
         }
 
 		if (message.getCategory() != null && !message.getCategory().equals("")) {

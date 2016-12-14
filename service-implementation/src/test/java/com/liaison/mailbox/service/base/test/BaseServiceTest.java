@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import com.liaison.commons.exception.LiaisonException;
@@ -70,8 +71,10 @@ public abstract class BaseServiceTest {
 	public String spectrumUri = "fs2://secure@dev-int/mailbox/payload/1.0/21F9B154FB54495A855EAC63E1CDC69B";
 	public String response = "response";
 
-	@BeforeMethod
-	public void initialSetUp() throws FileNotFoundException, IOException {
+    protected String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
+
+	@BeforeClass
+	public void initialSetUp() throws IOException {
 
 		if (BASE_URL == null) {
 
@@ -433,6 +436,36 @@ public abstract class BaseServiceTest {
     	ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setName("PROFILE_TEST" + uniqueValue);
 		return profileDTO;
+    }
+    
+    /**
+     * Method to construct folder properties.
+     *
+     * @param processorProperties
+     * @param payloadLocation
+     * @param targetLocation
+     * @return ProcessorPropertyUITemplateDTO
+     */
+    public static ProcessorPropertyUITemplateDTO constructFolderProperties(
+            ProcessorPropertyUITemplateDTO processorProperties, String payloadLocation, String targetLocation) {
+
+        // constructing folderDTO
+        List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
+        ProcessorFolderPropertyDTO payloadFolderPropertyDto = new ProcessorFolderPropertyDTO();
+        ProcessorFolderPropertyDTO responseFolderPropertyDto = new ProcessorFolderPropertyDTO();
+
+        payloadFolderPropertyDto.setFolderType("PAYLOAD_LOCATION");
+        payloadFolderPropertyDto.setFolderURI(targetLocation + System.nanoTime());
+        payloadFolderPropertyDto.setFolderDesc("Payload Location");
+        folderList.add(payloadFolderPropertyDto);
+
+        responseFolderPropertyDto.setFolderType("RESPONSE_LOCATION");
+        responseFolderPropertyDto.setFolderURI(payloadLocation + System.nanoTime());
+        responseFolderPropertyDto.setFolderDesc("Response Location");
+        folderList.add(responseFolderPropertyDto);
+
+        processorProperties.setFolderProperties(folderList);
+        return processorProperties;
     }
 
 }

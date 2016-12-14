@@ -326,7 +326,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             processors = entityManager.createNamedQuery(FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS)
                     .setParameter(STATUS, mailboxStatus.name())
-                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
                     .setParameter(PROCESSOR_TYPE, processorTypes)
                     .getResultList();
 

@@ -20,7 +20,10 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -211,14 +214,20 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         //first corner timestamp
         ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
-        LOGGER.debug("Persist workticket to spectrum");
-        persistPayloadAndWorkticket(workTickets, staticProp);
-
         if (workTicketGroups.isEmpty()) {
             LOGGER.debug("The file group is empty");
         } else {
 
             for (WorkTicketGroup workTicketGroup : workTicketGroups) {
+
+                //Interrupt signal for async sweeper
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
+                    return;
+                }
+
+                LOGGER.debug("Persist workticket from workticket group to spectrum");
+                persistPayloadAndWorkticket(workTicketGroup.getWorkTicketGroup(), staticProp);
 
                 String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
                 LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
@@ -228,17 +237,21 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
 
                     //Fish tag global process id
-                    ThreadContext.clearMap(); //set new context after clearing
-                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
+                    try {
+                        ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-                    logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING);
-                    LOGGER.info(constructMessage("Global PID",
-                            seperator,
-                            wrkTicket.getGlobalProcessId(),
-                            " submitted for file ",
-                            wrkTicket.getFileName()));
+                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING);
+                        LOGGER.info(constructMessage("Global PID",
+                                seperator,
+                                wrkTicket.getGlobalProcessId(),
+                                " submitted for file ",
+                                wrkTicket.getFileName()));
 
-                    verifyAndDeletePayload(wrkTicket);
+                        verifyAndDeletePayload(wrkTicket);
+                    } finally {
+                        ThreadContext.clearMap();
+                    }
+
                 }
             }
         }
@@ -268,6 +281,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         try {
 
             for (WorkTicket workTicket : workTickets) {
+
+                //Interrupt signal for sync sweeper
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn("The executor is gracefully interrupted.");
+                    return;
+                }
 
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
                 persistPayloadAndWorkticket(staticProp, workTicket);
@@ -831,8 +850,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         FileSystem fileSystem = FileSystems.getDefault();
         String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
         PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
-        
+
         if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
+
+            //inactivate the mailboxes which doesn't have valid directory
+            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+            configurationInstance.setProcsrStatus(EntityStatus.INACTIVE.name());
+            configurationInstance.setModifiedBy("WatchDog Service");
+            configurationInstance.setModifiedDate(new Date());
+            dao.merge(configurationInstance);
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 

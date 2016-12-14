@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -22,16 +23,16 @@ import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -40,16 +41,21 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.FTPS;
+import static com.liaison.mailbox.MailBoxConstants.HTTP;
+import static com.liaison.mailbox.MailBoxConstants.HTTPS;
+import static com.liaison.mailbox.MailBoxConstants.SFTP;
+
 /**
  * Created by VNagarajan on 6/3/2016.
  */
 public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
-    private static final String HOST_NAME = "default_hostname";
 
     private String fileName;
     private String folderPath;
+    private String globalProcessId;
     private boolean directUpload;
 
     public String getFileName() {
@@ -74,6 +80,14 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     public void setDirectUpload(boolean directUpload) {
         this.directUpload = directUpload;
+    }
+
+    public String getGlobalProcessId() {
+        return globalProcessId;
+    }
+
+    public void setGlobalProcessId(String globalProcessId) {
+        this.globalProcessId = globalProcessId;
     }
 
     public AbstractRemoteUploader() {}
@@ -210,18 +224,12 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
 
     @Override
-    public void logToLens(String msg, File file, ExecutionState status) {
+    public void logToLens(String msg, RelayFile file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         StagedFile stagedFile = stagedFileMap.get(file.getAbsolutePath());
         if (null == stagedFile) {
-
-            stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(),
-                    file.getParent(),
-                    file.getName());
-            if (null == stagedFile) {
-                return;
-            }
+            stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
         }
         if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
             return;
@@ -232,13 +240,15 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(file.getName());
-        glassMessageDTO.setFilePath(file.getPath());
+        glassMessageDTO.setFilePath(file.getParent());
         glassMessageDTO.setFileLength(file.length());
         glassMessageDTO.setStatus(status);
         glassMessageDTO.setMessage(msg);
         glassMessageDTO.setPipelineId(null);
-        glassMessageDTO.setFirstCornerTimeStamp(null);
-        
+
+        //sets receiver ip
+        glassMessageDTO.setReceiverIp(getHost());
+
         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
@@ -319,11 +329,58 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 files.add(file);
                 stagedFileMap.put(file.getAbsolutePath(), stagedFile);
             } else {
-                LOGGER.warn("The file {} is not available in the local payload location", file.getName());
+                LOGGER.warn("The file {} is not available in the local payload location and gpid is {}", file.getName(), stagedFile.getGlobalProcessId());
             }
         }
 
         return files.toArray(new File[files.size()]);
+    }
+
+    /**
+     * get files from staged file db
+     *
+     * @param recurseSubDirs boolean to check the recursive sub directories
+     * @return list of files to be uploaded
+     */
+    @Override
+    public RelayFile[] getRelayFiles(boolean recurseSubDirs) {
+
+        RelayFile file = null;
+        StagedFileDAO dao = new StagedFileDAOBase();
+        List<StagedFile> stagedFiles;
+
+        //for javascript direct upload
+        if (getFileName() != null
+                && getFolderPath() != null
+                && isDirectUpload()) {
+
+            RelayFile[] fileArray = new RelayFile[1];
+            StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
+
+            file = new RelayFile();
+            file.copy(stagedFile);
+            fileArray[0] = file;
+
+            return fileArray;
+        }
+
+        //default profile invocation
+        stagedFiles = dao.findStagedFilesForUploader(
+                this.configurationInstance.getPguid(),
+                new File(validateLocalPath()).getPath(),
+                isDirectUpload(),
+                recurseSubDirs);
+
+        List<RelayFile> files = new ArrayList<>();
+        for (StagedFile stagedFile : stagedFiles) {
+
+            file = new RelayFile();
+            file.copy(stagedFile);
+            files.add(file);
+            stagedFileMap.put(file.getAbsolutePath(), stagedFile);
+        }
+
+        return files.toArray(new RelayFile[files.size()]);
     }
     
     /**
@@ -333,23 +390,5 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      *
      */
     protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
-
-    /**
-     * Reads the host from url for lens logging
-     * Handles the exception gracefully
-     *
-     * @param url url
-     * @return host
-     */
-    protected String getHost(String url) {
-        try {
-            URI uri = new URI(url);
-            return uri.getHost();
-        } catch (URISyntaxException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-
-        return HOST_NAME;
-    }
 
 }

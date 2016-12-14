@@ -9,23 +9,28 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
@@ -66,13 +71,17 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             //validates the remote path
             String remotePath = validateRemotePath();
-            
+
             // retrieve required properties
             FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
-            
+
             boolean recursiveSubdirectories = ftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(ftpUploaderStaticProperties.isDirectUpload());
-            File[] subFiles = getFilesToUpload(recursiveSubdirectories);
+
+            Object[] subFiles = (this.canUseFileSystem())
+                    ? getFilesToUpload(recursiveSubdirectories)
+                    : getRelayFiles(recursiveSubdirectories);
+
             if (subFiles == null || subFiles.length == 0) {
                 LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
                 return;
@@ -113,17 +122,31 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
      * @throws IllegalAccessException
      * @throws LiaisonException
      */
-    public void uploadDirectory(G2FTPSClient ftpsRequest,
+    private void uploadDirectory(G2FTPSClient ftpsRequest,
                                 String remoteParentDir,
-                                File[] subFiles) throws IOException, IllegalAccessException, LiaisonException {
+                                Object[] files)
+            throws IOException, IllegalAccessException, LiaisonException {
 
-        for (File item : subFiles) {
+        for (Object file : files) {
+
             //FTPS
             if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
                 LOGGER.warn("The executor is gracefully interrupted");
                 return;
             }
-            uploadFile(ftpsRequest, remoteParentDir, item);
+
+            if (file instanceof File) {
+                uploadFile(ftpsRequest, remoteParentDir, (File) file);
+            } else {
+
+                try {
+                    RelayFile relayFile = ((RelayFile) file);
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, relayFile.getGlobalProcessId());
+                    uploadFile(ftpsRequest, remoteParentDir, relayFile);
+                } finally {
+                    ThreadContext.clearMap();
+                }
+            }
         }
     }
 
@@ -160,7 +183,6 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         // upload file
         try (InputStream inputStream = new FileInputStream(file)) {
-            ftpsRequest.changeDirectory(remoteParentDir);
             LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
                     currentFileName, filePath, remoteParentDir);
             replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
@@ -172,39 +194,118 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
             LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
             // Renames the uploaded file to original extension once the fileStatusIndicator is given by User
-            if (!MailBoxUtil.isEmpty(statusIndicator)) {
-                int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);
-                if (renameStatus == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
-                    LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
-                } else {
-                    LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
-                }
-            }
+            renameFile(ftpsRequest, statusIndicator, currentFileName, uploadingFileName);
 
             deleteFile(file);
-            StringBuilder message = new StringBuilder()
-                    .append("File ")
-                    .append(currentFileName)
-                    .append(" uploaded successfully to ")
-                    .append(getHost(staticProp.getUrl()))
-                    .append(" and the remote path ")
-                    .append(remoteParentDir);
+            String message = "File " +
+                    currentFileName +
+                    " uploaded successfully to the remote path " +
+                    remoteParentDir;
 
             // Glass Logging
-            logToLens(message.toString(), file, ExecutionState.COMPLETED);
+            logToLens(message, file, ExecutionState.COMPLETED);
             totalNumberOfProcessedFiles++;
         } else {
 
-            StringBuilder message = new StringBuilder()
-                    .append("Failed to upload file ")
-                    .append(currentFileName)
-                    .append(" from local path ")
-                    .append(filePath)
-                    .append(" to remote path ")
-                    .append(remoteParentDir);
+            String message = "Failed to upload file " +
+                    currentFileName +
+                    " from local path " +
+                    filePath +
+                    " to remote path " +
+                    remoteParentDir;
 
             // Glass Logging
-            logToLens(message.toString(), file, ExecutionState.FAILED);
+            logToLens(message, file, ExecutionState.FAILED);
+        }
+    }
+
+    /**
+     * Renames the file once it is uploaded successfully
+     *
+     * @param ftpsRequest ftp request
+     * @param statusIndicator status indicator .prg or .tst etc
+     * @param currentFileName source filename
+     * @param uploadingFileName target filename
+     * @throws LiaisonException
+     */
+    private void renameFile(G2FTPSClient ftpsRequest, String statusIndicator, String currentFileName, String uploadingFileName) throws LiaisonException {
+
+        if (!MailBoxUtil.isEmpty(statusIndicator)) {
+            int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);
+            if (renameStatus == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
+                LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
+            } else {
+                LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
+            }
+        }
+    }
+
+    /**
+     * Upload files to remote location
+     *
+     * @param ftpsRequest ftps client
+     * @param remoteParentDir remote payload location
+     * @param file file
+     * @throws IOException
+     * @throws LiaisonException
+     * @throws IllegalAccessException
+     */
+    private void uploadFile(G2FTPSClient ftpsRequest, String remoteParentDir, RelayFile file)
+            throws IOException, IllegalAccessException, LiaisonException {
+
+        int replyCode;
+        String filePath = file.getParent();
+        FTPUploaderPropertiesDTO staticProp = (FTPUploaderPropertiesDTO) getProperties();
+        String statusIndicator = staticProp.getFileTransferStatusIndicator();
+        String currentFileName = file.getName();
+
+        // Check if the file to be uploaded is included or not excluded file must not be uploaded
+        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                currentFileName,
+                staticProp.getExcludedFiles())) {
+            return;
+        }
+
+        //add status indicator if specified to indicate that uploading is in progress
+        String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator))
+                ? currentFileName + "." + statusIndicator
+                : currentFileName;
+
+        // upload file
+        try (InputStream inputStream = file.getPayloadInputStream()) {
+            LOGGER.info(constructMessage("uploading file from storage {} to remote path {}"), file.getPayloadUri(), remoteParentDir);
+            replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
+        }
+
+        // Check whether the file is uploaded successfully
+        if (replyCode == MailBoxConstants.CLOSING_DATA_CONNECTION
+                || replyCode == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
+
+            LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
+            // Renames the uploaded file to original extension once the fileStatusIndicator is given by User
+            renameFile(ftpsRequest, statusIndicator, currentFileName, uploadingFileName);
+
+            //deletes the file if it is staged using file system
+            file.delete();
+            String message = "File " +
+                    currentFileName +
+                    " uploaded successfully to the remote path " +
+                    remoteParentDir;
+
+            // Glass Logging
+            logToLens(message, file, ExecutionState.COMPLETED);
+            totalNumberOfProcessedFiles++;
+        } else {
+
+            String message = "Failed to upload file " +
+                    currentFileName +
+                    " from local path " +
+                    filePath +
+                    " to remote path " +
+                    remoteParentDir;
+
+            // Glass Logging
+            logToLens(message, file, ExecutionState.FAILED);
         }
     }
 
@@ -224,21 +325,23 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
     }
 
     @Override
-    public void doDirectUpload(String fileName, String folderPath) {
+    public void doDirectUpload(String fileName, String folderPath, String globalProcessId) {
 
         setDirectUpload(true);
         boolean isHandOverExecutionToJavaScript = false;
         int scriptExecutionTimeout ;
         try {
-            isHandOverExecutionToJavaScript = ((FTPUploaderPropertiesDTO) getProperties()).isHandOverExecutionToJavaScript();
+            isHandOverExecutionToJavaScript = (getProperties()).isHandOverExecutionToJavaScript();
             scriptExecutionTimeout = ((FTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
         } catch (IllegalArgumentException | IllegalAccessException | IOException e) {
             throw new RuntimeException(e);
         }
 
         if (isHandOverExecutionToJavaScript) {
+
             setFileName(fileName);
             setFolderPath(folderPath);
+            setGlobalProcessId(globalProcessId);
             setMaxExecutionTimeout(scriptExecutionTimeout);
             JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
         } else {
@@ -262,7 +365,18 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                         fileName,
                         folderPath,
                         remotePath);
-                uploadFile(ftpsRequest, remotePath, new File(folderPath + File.separatorChar + fileName));
+
+                if (this.canUseFileSystem()) {
+                    uploadFile(ftpsRequest, remotePath, new File(folderPath + File.separatorChar + fileName));
+                } else {
+
+                    StagedFileDAO dao = new StagedFileDAOBase();
+                    StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
+
+                    RelayFile file = new RelayFile();
+                    file.copy(stagedFile);
+                    uploadFile(ftpsRequest, remotePath, file);
+                }
 
             } catch (Exception e) {
                 LOGGER.error(constructMessage("Error occurred during direct upload", seperator, e.getMessage()), e);

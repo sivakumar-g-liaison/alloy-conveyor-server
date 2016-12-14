@@ -26,6 +26,8 @@ import java.util.Map;
 
 public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
+    String FIND_BY_GPID = "StagedFile.findByGpid";
+
     String FILE_NAME = "fileName";
     String GUID = "file_guid";
     String CURRENT_TIME = "current_time";
@@ -36,6 +38,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
+    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
 
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
@@ -46,8 +49,17 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 	List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	void persistStagedFile(WorkTicket workticket, String processorId, String processorType);
 	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
+
+    /**
+     * constructs staged file entity from workticket and persists it
+     *
+     * @param workticket workticket
+     * @param processorId processor guid
+     * @param processorType processor type
+     * @param directUploadEnabled boolean to denote direct upload
+     */
+    void persistStagedFile(WorkTicket workticket, String processorId, String processorType, boolean directUploadEnabled);
 
     /**
      * list staged files by processor id
@@ -62,7 +74,16 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param gpid global process id
      * @return staged file
      */
-    StagedFile findStagedFile(String gpid);
+    StagedFile findStagedFileByGpid(String gpid);
+
+    /**
+     * Returns staged file entries by filename and file path for file writer processor
+     *
+     * @param filePath file path
+     * @param fileName name
+     * @return staged file
+     */
+    StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")

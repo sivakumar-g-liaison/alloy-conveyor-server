@@ -26,15 +26,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.liaison.mailbox.service.integration.test;
+package com.liaison.mailbox.service.base.test;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;

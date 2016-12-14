@@ -7,7 +7,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.integration.test;
+package com.liaison.mailbox.service.unit.test;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.UUIDGen;
@@ -78,7 +78,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String name = "Purchase.txt";
 		Path target = Paths.get(inbox + File.separator + name);
 		Files.createFile(target);
-        Thread.sleep(2000);
+        Thread.sleep(5000);
 
         try {
 

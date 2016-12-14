@@ -40,7 +40,7 @@ public class MailBoxWatchDogServiceIT extends BaseServiceTest {
 	 * @throws Exception 
 	 * 
 	 */
-	@Test(enabled=false)
+	@Test
 	public void testMailBoxWatchDog() throws Exception {
 		MailboxWatchDogService service = new MailboxWatchDogService();
 		service.pollAndUpdateStatus();
