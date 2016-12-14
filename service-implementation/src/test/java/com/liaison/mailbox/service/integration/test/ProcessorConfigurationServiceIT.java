@@ -9,11 +9,13 @@
 package com.liaison.mailbox.service.integration.test;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -31,8 +33,10 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcesso
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
@@ -40,6 +44,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -1176,5 +1181,245 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(null, false);
         // Assertion
         Assert.assertEquals(FAILURE, procGetResponseDTO.getResponse().getStatus());
+    }
+    
+    /**
+     * Test method to delete the processor
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    @Test
+    public void testDeleteProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Get the processor
+        Assert.assertNotNull(procResponseDTO);
+        Assert.assertNotNull(procResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+        
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertNotNull(procGetResponseDTO);
+        Assert.assertNotNull(procGetResponseDTO.getResponse());
+        Assert.assertEquals(procResponseDTO.getProcessor().getGuId(), procGetResponseDTO.getProcessor().getGuid());
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        revProcRequestDTO.getProcessor().setStatus(EntityStatus.DELETED.value());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+    
+    /**
+     * Test method to delete and read the deleted processor
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    @Test
+    public void testReadDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Get the processor
+        Assert.assertNotNull(procResponseDTO);
+        Assert.assertNotNull(procResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+        
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertNotNull(procGetResponseDTO);
+        Assert.assertNotNull(procGetResponseDTO.getResponse());
+        Assert.assertEquals(procResponseDTO.getProcessor().getGuId(), procGetResponseDTO.getProcessor().getGuid());
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        revProcRequestDTO.getProcessor().setStatus(EntityStatus.DELETED.value());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        
+        //Getting the deleted processor
+        GetProcessorResponseDTO procDeletedGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procReviseResponseDTO.getProcessor().getGuId());
+        
+        Assert.assertEquals(FAILURE, procDeletedGetResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(procDeletedGetResponseDTO.getResponse().getMessage().contains(Messages.PROCESSOR_DOES_NOT_EXIST.value().replaceAll("%s", procReviseResponseDTO.getProcessor().getGuId())));
+    }
+    
+    /**
+     * Test method to delete and list the deleted processor
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    @Test
+    public void testListDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
+    	
+    	// Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Get the processor
+        Assert.assertNotNull(procResponseDTO);
+        Assert.assertNotNull(procResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+        
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertNotNull(procGetResponseDTO);
+        Assert.assertNotNull(procGetResponseDTO.getResponse());
+        Assert.assertEquals(procResponseDTO.getProcessor().getGuId(), procGetResponseDTO.getProcessor().getGuid());
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        revProcRequestDTO.getProcessor().setStatus(EntityStatus.DELETED.value());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName(requestDTO.getMailBox().getName());
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_STR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getTotalItems() == 0);
+    }
+    
+    /**
+     * Test method to trigger the profile which added in the deleted processor
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    @Test
+    public void testTriggerProfileForDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        
+        // Adding a profile
+        AddProfileRequestDTO requestProfileDTO = new AddProfileRequestDTO();
+        ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+        requestProfileDTO.setProfile(profileDTO);
+
+        ProfileConfigurationService profConfigservice = new ProfileConfigurationService();
+        profConfigservice.createProfile(requestProfileDTO);
+        Set<String> profiles = new HashSet<String>();
+        profiles.add(requestProfileDTO.getProfile().getName());
+        procRequestDTO.getProcessor().setLinkedProfiles(profiles);
+        
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Get the processor
+        Assert.assertNotNull(procResponseDTO);
+        Assert.assertNotNull(procResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+        
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertNotNull(procGetResponseDTO);
+        Assert.assertNotNull(procGetResponseDTO.getResponse());
+        Assert.assertEquals(procResponseDTO.getProcessor().getGuId(), procGetResponseDTO.getProcessor().getGuid());
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        revProcRequestDTO.getProcessor().setStatus(EntityStatus.DELETED.value());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        
+        // Triggering the profile attached only to the deleted processor
+        MailBoxService triggerProfileService = new MailBoxService();
+        TriggerProfileResponseDTO triggerResponseDTO = triggerProfileService.triggerProfile(profileDTO.getName(), "", "");
+        
+        // Assertion
+        Assert.assertEquals(FAILURE, triggerResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(triggerResponseDTO.getResponse().getMessage().contains(Messages.NO_PROC_CONFIG_PROFILE.value()));
     }
 }

@@ -38,6 +38,7 @@ public enum Messages {
 	PWD_INVALID("The given secret guid does not exist in the key management system."),
 	PWD_ENCODE_INVALID("The secret from key management system is not base64 encoded."),
 	PROCESSOR_PROFILE_NOT_ALLOWED("Profile is not allowed for processor type %s"),
+	MBX_NON_DELETED_PROCESSOR("There are active processors avaialble for the Mailbox"),
 
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),

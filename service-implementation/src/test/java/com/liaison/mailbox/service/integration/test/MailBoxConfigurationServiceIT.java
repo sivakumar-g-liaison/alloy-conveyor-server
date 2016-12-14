@@ -29,13 +29,17 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -914,5 +918,203 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         // Assertion
         Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
     }
+    
+    /**
+     * Test method to delete the mailbox.
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testDeleteMailBox() throws JAXBException, IOException {
 
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+        
+        // Assertion
+        Assert.assertNotNull(getResponseDTO);
+        Assert.assertNotNull(getResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setStatus(EntityStatus.DELETED.value());
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(reviseResponse);
+        Assert.assertNotNull(reviseResponse.getResponse());
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+    }
+    
+    /**
+     * Test method to delete the mailbox with processor
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    @Test
+    public void testDeleteMailboxWithProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getName(), procGetResponseDTO.getProcessor().getName());
+        Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
+        Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertNotNull(getResponseDTO);
+        Assert.assertNotNull(getResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setStatus(EntityStatus.DELETED.value());
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true, mbxDTO.getModifiedBy());
+        
+        Assert.assertNull(reviseResponse.getMailBox());
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+        Assert.assertTrue(reviseResponse.getResponse().getMessage().contains(Messages.MBX_NON_DELETED_PROCESSOR.value()));
+    }
+
+    /**
+     * Test method to read the deleted mailbox
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testReadDeletedMailbox() throws JAXBException, IOException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+        
+        // Assertion
+        Assert.assertNotNull(getResponseDTO);
+        Assert.assertNotNull(getResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setStatus(EntityStatus.DELETED.value());
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(reviseResponse);
+        Assert.assertNotNull(reviseResponse.getResponse());
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+        
+        GetMailBoxResponseDTO readMailboxDTO = service.readMailbox(response.getMailBox().getGuid());
+        
+        Assert.assertNotNull(readMailboxDTO);
+        Assert.assertNull(readMailboxDTO.getMailBox());
+        Assert.assertEquals(FAILURE, readMailboxDTO.getResponse().getStatus());
+    }
+    
+    /**
+     * Test method to list the deleted mailbox
+     * 
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testListDeletedMailbox() throws JAXBException, IOException {
+    	
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(response);
+        Assert.assertNotNull(response.getResponse());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+        
+        // Assertion
+        Assert.assertNotNull(getResponseDTO);
+        Assert.assertNotNull(getResponseDTO.getResponse());
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setStatus(EntityStatus.DELETED.value());
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest, true, mbxDTO.getModifiedBy());
+
+        Assert.assertNotNull(reviseResponse);
+        Assert.assertNotNull(reviseResponse.getResponse());
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+        
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName(requestDTO.getMailBox().getName());
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_STR);
+
+        SearchMailBoxDetailedResponseDTO serviceResponse = service.searchMailBox(searchFilter, aclManifest);
+
+        int count = 0;
+        Assert.assertNotNull(serviceResponse);
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getTotalItems() == count);
+        Assert.assertTrue(serviceResponse.getMailBox().size() == count);
+    }
 }

@@ -61,7 +61,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                             + " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
                             + ProcessorConfigurationDAO.PGUID 
                             + " and processor.procsrName like :" 
-                            + ProcessorConfigurationDAO.PRCSR_NAME),
+                            + ProcessorConfigurationDAO.PRCSR_NAME
+                            + " and processor.procsrStatus <> :"
+                            + ProcessorConfigurationDAO.STATUS_DELETE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
                             query = "select processor from Processor processor"
                                     + " inner join processor.mailbox mbx"
@@ -70,7 +72,8 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                                     + " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
     				query = "select processor from Processor processor"
-    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME),
+    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME
+    						+ " and processor.procsrStatus <> :" + ProcessorConfigurationDAO.STATUS_DELETE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_TENANCY,
             query = "select processor from Processor processor" +
                     " inner join processor.scheduleProfileProcessors schd_prof_processor" +
