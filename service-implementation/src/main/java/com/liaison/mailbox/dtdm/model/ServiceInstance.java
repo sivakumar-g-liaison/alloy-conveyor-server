@@ -40,6 +40,7 @@ public class ServiceInstance implements Identifiable {
 	private String pguid;
 	private String name;
 	private List<MailboxServiceInstance> mailboxServiceInstances;
+	private String originatingDc;
 	
 	public ServiceInstance() {
 	}
@@ -73,6 +74,15 @@ public class ServiceInstance implements Identifiable {
 		this.name = name;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

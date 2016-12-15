@@ -38,8 +38,9 @@ public class Folder implements Identifiable {
 	private String pguid;
 	private String fldrDesc;
 	private String fldrType;
-	private String fldrUri;
+	private String fldrUri;	
 	private Processor processor;
+	private String originatingDc;
 
 	public Folder() {
 	}
@@ -92,6 +93,15 @@ public class Folder implements Identifiable {
 		this.processor = processor;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

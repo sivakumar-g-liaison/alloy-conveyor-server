@@ -135,6 +135,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 		try {
 			if (isCreate) {
 				processor.setPguid(MailBoxUtil.getGUID());
+				processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 			}
 
@@ -167,6 +168,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 				folderDTO.copyToEntity(folder);
 
 				folder.setPguid(MailBoxUtil.getGUID());
+				folder.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				folder.setProcessor(processor);
 				folders.add(folder);
 			}
@@ -187,6 +189,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 				credential = new Credential();
 				credentialDTO.copyToEntity(credential);
 				credential.setPguid(MailBoxUtil.getGUID());
+				credential.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				credential.setProcessor(processor);
 				credentialList.add(credential);
 			}

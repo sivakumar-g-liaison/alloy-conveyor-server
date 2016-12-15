@@ -1,8 +1,8 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -10,182 +10,191 @@
 
 package com.liaison.mailbox.rtdm.model;
 
-import java.io.IOException;
-import java.sql.Timestamp;
+import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-
-import com.liaison.commons.jpa.Identifiable;
-import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import java.sql.Timestamp;
 
 /**
  * The persistent class for the STAGED_FILES database table.
- * 
+ *
  *  @author OFS
  */
 @Entity
 @Table(name = "STAGED_FILE")
-@NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf")
+@NamedQueries({
+        @NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf"),
+        @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER,
+                query = "SELECT sf FROM StagedFile sf"
+                        + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
+                        + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
+                        + " AND sf.processorType =:" + StagedFileDAO.TYPE
+                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS),
+        @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
+                query = "select sf from StagedFile sf"
+                        + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
+                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS)
+})
 public class StagedFile implements Identifiable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String pguid;
-	private String fileSize;
-	private String mailboxId;
-	private String processorId;
-	private String globalProcessId;
-	private String processorType;
-	private String fileName;
-	private String filePath;
-	private String spectrumUri;
-	private String fileMetaData;
+    private String pguid;
+    private String fileSize;
+    private String mailboxId;
+    private String processorId;
+    private String globalProcessId;
+    private String processorType;
+    private String fileName;
+    private String filePath;
+    private String spectrumUri;
+    private String fileMetaData;
     private Integer failureNotificationCount;
-	private String stagedFileStatus;
-	private Timestamp expirationTime;
-	private Timestamp createdDate;
-	private Timestamp modifiedDate;
-	
-	public StagedFile() {
-	}
+    private String stagedFileStatus;
+    private Timestamp expirationTime;
+    private Timestamp createdDate;
+    private Timestamp modifiedDate;
+    private String originatingDc;
 
-	@Id
-	@Column(unique = true, nullable = false, length = 32)
-	public String getPguid() {
-		return this.pguid;
-	}
+    public StagedFile() {
+    }
 
-	public void setPguid(String pguid) {
-		this.pguid = pguid;
-	}
+    @Id
+    @Column(unique = true, nullable = false, length = 32)
+    public String getPguid() {
+        return this.pguid;
+    }
 
-	@Column(name = "FILE_SIZE", length = 256)
-	public String getFileSize() {
-		return fileSize;
-	}
+    public void setPguid(String pguid) {
+        this.pguid = pguid;
+    }
 
-	public void setFileSize(String fileSize) {
-		this.fileSize = fileSize;
-	}
+    @Column(name = "FILE_SIZE", length = 256)
+    public String getFileSize() {
+        return fileSize;
+    }
 
-	@Column(name = "MAILBOX_GUID", nullable = false, length = 32)
-	public String getMailboxId() {
-		return mailboxId;
-	}
+    public void setFileSize(String fileSize) {
+        this.fileSize = fileSize;
+    }
 
-	public void setMailboxId(String mailboxId) {
-		this.mailboxId = mailboxId;
-	}
+    @Column(name = "MAILBOX_GUID", nullable = false, length = 32)
+    public String getMailboxId() {
+        return mailboxId;
+    }
 
-	@Column(name = "PROCESSOR_GUID", length = 32)
-	public String getProcessorId() {
-		return processorId;
-	}
+    public void setMailboxId(String mailboxId) {
+        this.mailboxId = mailboxId;
+    }
 
-	public void setProcessorId(String processorId) {
-		this.processorId = processorId;
-	}
+    @Column(name = "PROCESSOR_GUID", length = 32)
+    public String getProcessorId() {
+        return processorId;
+    }
 
-	@Column(name = "GLOBAL_PROCESS_ID", length = 32)
-	public String getGlobalProcessId() {
-		return globalProcessId;
-	}
+    public void setProcessorId(String processorId) {
+        this.processorId = processorId;
+    }
 
-	public void setGlobalProcessId(String globalProcessId) {
-		this.globalProcessId = globalProcessId;
-	}
+    @Column(name = "GLOBAL_PROCESS_ID", length = 32)
+    public String getGlobalProcessId() {
+        return globalProcessId;
+    }
 
-	@Column(name = "PROCESSOR_TYPE", length = 128)
-	public String getProcessorType() {
-		return processorType;
-	}
+    public void setGlobalProcessId(String globalProcessId) {
+        this.globalProcessId = globalProcessId;
+    }
 
-	public void setProcessorType(String processorType) {
-		this.processorType = processorType;
-	}
+    @Column(name = "PROCESSOR_TYPE", length = 128)
+    public String getProcessorType() {
+        return processorType;
+    }
 
-	@Column(name = "FILE_NAME", length = 512)
-	public String getFileName() {
-		return fileName;
-	}
+    public void setProcessorType(String processorType) {
+        this.processorType = processorType;
+    }
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
+    @Column(name = "FILE_NAME", length = 512)
+    public String getFileName() {
+        return fileName;
+    }
 
-	@Column(name = "FILE_PATH", length = 512)
-	public String getFilePath() {
-		return filePath;
-	}
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
-	}
+    @Column(name = "FILE_PATH", length = 512)
+    public String getFilePath() {
+        return filePath;
+    }
 
-	@Column(name = "SPECTRUM_URI", length = 512)
-	public String getSpectrumUri() {
-		return spectrumUri;
-	}
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
-	public void setSpectrumUri(String spectrumUri) {
-		this.spectrumUri = spectrumUri;
-	}
-	
-	@Column(name = "META", length = 512)
-	public String getFileMetaData() {
-		return fileMetaData;
-	}
+    @Column(name = "SPECTRUM_URI", length = 512)
+    public String getSpectrumUri() {
+        return spectrumUri;
+    }
 
-	public void setFileMetaData(String fileMetaData) {
-		this.fileMetaData = fileMetaData;
-	}
-	
-	@Column(name = "STATUS", nullable = false, length = 16)
-	public String getStagedFileStatus() {
-		return stagedFileStatus;
-	}
+    public void setSpectrumUri(String spectrumUri) {
+        this.spectrumUri = spectrumUri;
+    }
 
-	public void setStagedFileStatus(String stagedFileStatus) {
-		this.stagedFileStatus = stagedFileStatus;
-	}
-	
-	@Column(name = "AVAILABLE_UNTIL", nullable =false)
-	public Timestamp getExpirationTime() {
-		return expirationTime;
-	}
+    @Column(name = "META", length = 512)
+    public String getFileMetaData() {
+        return fileMetaData;
+    }
 
-	public void setExpirationTime(Timestamp timeToLive) {
-		this.expirationTime = timeToLive;
-	}
+    public void setFileMetaData(String fileMetaData) {
+        this.fileMetaData = fileMetaData;
+    }
 
-	@Column(name = "CREATED_DATE")
-	public Timestamp getCreatedDate() {
-		return createdDate;
-	}
+    @Column(name = "STATUS", nullable = false, length = 16)
+    public String getStagedFileStatus() {
+        return stagedFileStatus;
+    }
 
-	public void setCreatedDate(Timestamp createdDate) {
-		this.createdDate = createdDate;
-	}
+    public void setStagedFileStatus(String stagedFileStatus) {
+        this.stagedFileStatus = stagedFileStatus;
+    }
 
-	@Column(name = "MODIFIED_DATE")
-	public Timestamp getModifiedDate() {
-		return modifiedDate;
-	}
+    @Column(name = "AVAILABLE_UNTIL", nullable = false)
+    public Timestamp getExpirationTime() {
+        return expirationTime;
+    }
 
-	public void setModifiedDate(Timestamp modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
+    public void setExpirationTime(Timestamp timeToLive) {
+        this.expirationTime = timeToLive;
+    }
+
+    @Column(name = "CREATED_DATE")
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    @Column(name = "MODIFIED_DATE")
+    public Timestamp getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Timestamp modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
 
     /**
      * @return the failureNotificationCount
@@ -203,82 +212,82 @@ public class StagedFile implements Identifiable {
         this.failureNotificationCount = failureNotificationCount;
     }
 
-	@Override
-	@Transient
-	public Object getPrimaryKey() {
-		return getPguid();
-	}
+    @Column(name = "ORIGINATING_DC", length = 16)
+    public String getOriginatingDc() {
+        return originatingDc;
+    }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	@Transient
-	public Class getEntityClass() {
-		return this.getClass();
-	}
+    public void setOriginatingDc(String originatingDc) {
+        this.originatingDc = originatingDc;
+    }
+
+    @Override
+    @Transient
+    public Object getPrimaryKey() {
+        return getPguid();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    @Transient
+    public Class getEntityClass() {
+        return this.getClass();
+    }
 
     /**
      * Copies all data from entity to DTO except PGUID.
-     * 
-     * @param stagedFileDTO
-     *            The StagedFile DTO
-     * @param copyAll
-     *            - boolean
-     * @throws IOException
-     * @throws JAXBException
+     *
+     * @param stagedFileDto The StagedFile DTO
+     * @param copyAll boolean
      */
-	public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) {
+    public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) {
 
-		// if copyAll is false, mailboxguid and spectrum uri will not be set in StagedFileDTO
-		if (copyAll) {
-			stagedFileDto.setMailboxGuid(this.getMailboxId());
-			stagedFileDto.setSpectrumUri(this.getSpectrumUri());
-		}	
-		stagedFileDto.setId(this.getPguid());
-		stagedFileDto.setName(this.getFileName());
-		stagedFileDto.setPath(this.getFilePath());
-		stagedFileDto.setFileSize(this.getFileSize());
-		stagedFileDto.setMeta(this.getFileMetaData());
-		stagedFileDto.setStatus(this.getStagedFileStatus());
-		stagedFileDto.setExpirationTime(this.getExpirationTime() == null ? "" : this.getExpirationTime().toString());
-	}
+        // if copyAll is false, mailboxguid and spectrum uri will not be set in StagedFileDTO
+        if (copyAll) {
+            stagedFileDto.setMailboxGuid(this.getMailboxId());
+            stagedFileDto.setSpectrumUri(this.getSpectrumUri());
+        }
+        stagedFileDto.setId(this.getPguid());
+        stagedFileDto.setName(this.getFileName());
+        stagedFileDto.setPath(this.getFilePath());
+        stagedFileDto.setFileSize(this.getFileSize());
+        stagedFileDto.setMeta(this.getFileMetaData());
+        stagedFileDto.setStatus(this.getStagedFileStatus());
+        stagedFileDto.setExpirationTime(this.getExpirationTime() == null ? "" : this.getExpirationTime().toString());
+    }
 
-	/**
-	 * Copies required data from DTO to Entity
-	 * 
-	 * @param stagedFileDTO
-	 * 			The StagedFileDTO
-	 * @param boolean isCreate
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 * @throws JsonMappingException 
-	 * @throws JsonGenerationException 
-	 */
-	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
+    /**
+     * Copies required data from DTO to Entity
+     *
+     * @param stagedFileDto The StagedFileDTO
+     * @param isCreate
+     */
+    public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {
 
-		Timestamp timestamp = MailBoxUtil.getTimestamp();
-		if (isCreate) {
-			this.setPguid(MailBoxUtil.getGUID());
-			this.setCreatedDate(timestamp);
-		}
-		this.setFileName(stagedFileDto.getName());
-		this.setFilePath(stagedFileDto.getPath());
-		this.setFileSize(stagedFileDto.getFileSize());
-		this.setMailboxId(stagedFileDto.getMailboxGuid());
-		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
-		this.setFileMetaData(stagedFileDto.getMeta());
-		EntityStatus status = MailBoxUtil.isEmpty(stagedFileDto.getStatus())
-									? EntityStatus.ACTIVE
-									: EntityStatus.findByCode(stagedFileDto.getStatus());
-		this.setStagedFileStatus(status.name());
-		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
-		this.setProcessorId(stagedFileDto.getProcessorId());
-		this.setProcessorType(stagedFileDto.getProcessorType());
-		this.setModifiedDate(timestamp);
+        Timestamp timestamp = MailBoxUtil.getTimestamp();
+        if (isCreate) {
+            this.setPguid(MailBoxUtil.getGUID());
+            this.setCreatedDate(timestamp);
+        }
+        this.setFileName(stagedFileDto.getName());
+        this.setFilePath(stagedFileDto.getPath());
+        this.setFileSize(stagedFileDto.getFileSize());
+        this.setMailboxId(stagedFileDto.getMailboxGuid());
+        this.setSpectrumUri(stagedFileDto.getSpectrumUri());
+        this.setFileMetaData(stagedFileDto.getMeta());
+        EntityStatus status = MailBoxUtil.isEmpty(stagedFileDto.getStatus())
+                ? EntityStatus.ACTIVE
+                : EntityStatus.findByCode(stagedFileDto.getStatus());
+        this.setStagedFileStatus(status.name());
+        this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
+        this.setProcessorId(stagedFileDto.getProcessorId());
+        this.setProcessorType(stagedFileDto.getProcessorType());
+        this.setModifiedDate(timestamp);
         this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
-	}
+    }
 
-	@Transient
-	public String getGPID() {
-		return ("NOT AVAILABLE".equals(this.getGlobalProcessId()) ? this.getPguid() : this.getGlobalProcessId());
-	}
+    @Transient
+    public String getGPID() {
+        return ("NOT AVAILABLE".equals(this.getGlobalProcessId()) ? this.getPguid() : this.getGlobalProcessId());
+    }
 }

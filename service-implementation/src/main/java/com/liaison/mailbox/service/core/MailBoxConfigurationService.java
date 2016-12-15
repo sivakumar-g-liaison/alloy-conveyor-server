@@ -136,6 +136,7 @@ public class MailBoxConfigurationService {
 				mailBox.setPguid(mailboxDTO.getGuid());
 			}			
 
+			mailBox.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 			//Mailbox properties
             MailBoxProperty property = null;
             Set<MailBoxProperty> properties = new HashSet<>();
@@ -196,6 +197,7 @@ public class MailBoxConfigurationService {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceID);
 				serviceInstance.setPguid(MailBoxUtil.getGUID());
+				serviceInstance.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
@@ -207,6 +209,7 @@ public class MailBoxConfigurationService {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtil.getGUID());
+				msi.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 				msi.setServiceInstance(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
@@ -243,11 +246,11 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 
 			MailBox mailBox = configDao.find(MailBox.class, guid);
-			if (mailBox == null) {
+			if (mailBox == null || EntityStatus.DELETED.value().equals(mailBox.getMbxStatus())) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid,
 						Response.Status.BAD_REQUEST);
 			}
-
+			
 			// retrieve the actual tenancykey Display Name from TenancyKeys
 			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
 
@@ -339,6 +342,14 @@ public class MailBoxConfigurationService {
 			if (retrievedMailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
+			
+			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+			
+			if (EntityStatus.DELETED.value().equals(mailboxDTO.getStatus()) && 
+					dao.isMailboxHasProcessor(guid, serviceInstanceId, true)) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_NON_DELETED_PROCESSOR, MAILBOX,
+						Response.Status.PRECONDITION_FAILED);
+			}
 
 			if (!mailboxDTO.getName().equals(retrievedMailBox.getMbxName())) {
 				// Getting the mailbox.
@@ -375,6 +386,10 @@ public class MailBoxConfigurationService {
 
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
+			
+            if (EntityStatus.DELETED.value().equals(mailboxDTO.getStatus())) {
+                retrievedMailBox.setMbxName(mailboxDTO.getName() + MailBoxUtil.getTimestamp().toString());
+            }
 
 			// retrieve the actual tenancykey guids from DTO
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
@@ -752,6 +767,9 @@ public class MailBoxConfigurationService {
 					throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MAILBOX,
 							Response.Status.BAD_REQUEST);
 				}
+			} else if (EntityStatus.DELETED.value().equals(mailBox.getMbxStatus())) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MAILBOX,
+						Response.Status.BAD_REQUEST);
 			}
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();

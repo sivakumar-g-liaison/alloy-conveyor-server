@@ -53,9 +53,7 @@ public class TypeaheadResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			
 			@Override
-			public Object call() throws NoSuchFieldException,
-					SecurityException, IllegalArgumentException,
-					IllegalAccessException {
+			public Object call() {
 
 				ProcessorConfigurationService processor = new ProcessorConfigurationService();
 				GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();

@@ -133,11 +133,17 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
 
-	//  load initial Processor Data
+	// load initial Processor Data
     $rootScope.initialProcessorData;
     $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
         $rootScope.initialProcessorData = data;
-    }); 
+    });
+    
+    //  load edit Processor Data
+    $rootScope.editProcessorData;
+    $rootScope.restService.get('data/editProcessorDetails.json', function (data) {
+    	$rootScope.editProcessorData = data;
+    });
 
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");

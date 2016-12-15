@@ -25,9 +25,9 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.enums.FilterMatchMode;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import org.hibernate.criterion.MatchMode;
 
 /**
  * Performs mailbox fetch operations. 
@@ -73,7 +73,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                     .append(" WHERE (lower(mailbox.mbxName) LIKE :")
                     .append(MBOX_NAME).append(")")
                     .append(" AND (scheduleprof.schProfName LIKE :")
-                    .append(SCHD_PROF_NAME).append(")");
+                    .append(SCHD_PROF_NAME).append(")")
+                    .append(" and mailbox.mbxStatus <> :")
+                    .append(STATUS);
 
             //Set Tenancy Key when filter isn't disabled
             if (!searchFilter.isDisableFilters()) {
@@ -82,7 +84,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             Query jpaQuery = em.createQuery(query.toString())
                     .setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%");
+                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+                    .setParameter(STATUS, EntityStatus.DELETED.value());
 
             //Set Tenancy Key when filter isn't disabled
             if (!searchFilter.isDisableFilters()) {
@@ -141,10 +144,15 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				 	 .append(SCHD_PROF_NAME);
 			}
 
+            // appended to check mailbox status is not in deleted state
+            query.append(" and mbx.mbxStatus <> :")
+                 .append(STATUS);
+
             setSortOptions(searchFilter.getSortDirection(), searchFilter.getSortField(), query);
             Query jpaQuery = em.createQuery(query.toString())
                     .setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%");
+                    .setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+                    .setParameter(STATUS, EntityStatus.DELETED.value());
             if (!searchFilter.isDisableFilters()) {
                 jpaQuery.setParameter(TENANCY_KEYS, tenancyKeysLowerCase);
             }
@@ -208,10 +216,16 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 isNameAdded = true;
             }
 
+            boolean isDisableFiltersAdded = true;
             if (!searchFilter.isDisableFilters()) {
                 query.append(isNameAdded ?  " AND" : " WHERE");
                 query.append(" (mailbox.tenancyKey IN (:" + TENANCY_KEYS + "))");
+                isDisableFiltersAdded = false;
             }
+
+            // Needs to append AND keyword if already a condition exists and check mailbox status is not in deleted state
+            query.append((isNameAdded || !isDisableFiltersAdded) ?  " AND" : " WHERE" );
+            query.append(" mailbox.mbxStatus <> :" + MailBoxConfigurationDAO.STATUS);
 
             Query jpaQuery = entityManager.createQuery(query.toString());
             if (!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
@@ -224,6 +238,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             if (!searchFilter.isDisableFilters()) {
                 jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);
             }
+            jpaQuery.setParameter(MailBoxConfigurationDAO.STATUS, EntityStatus.DELETED.value());
 
             totalItems = ((Long) jpaQuery.getSingleResult());
             count = totalItems.intValue();
@@ -258,14 +273,18 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx");
 			
-			 if (searchFilter.isDisableFilters()){
+			 if (searchFilter.isDisableFilters()) {
 				 if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
 				     if (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) {
                          query.append(" where LOWER(mbx.mbxName) like :")
-                                 .append(MBOX_NAME);
-                     } else {
+                                 .append(MBOX_NAME)
+                                 .append(" AND ");
+                     } else if (searchFilter.getMatchMode().equals(FilterMatchMode.EQUALS.name().toLowerCase())) {
                          query.append(" where LOWER(mbx.mbxName) = :")
-                                 .append(MBOX_NAME);
+                                 .append(MBOX_NAME)
+                                 .append(" AND ");
+                     } else {
+                         query.append(" WHERE ");
                      }
 				 }
 			 } else {
@@ -274,9 +293,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				 	.append(MBOX_NAME)
 				 	.append(" and LOWER(mbx.tenancyKey) IN (:")
 					.append(TENANCY_KEYS)
-					.append(")");
+					.append(")")
+					.append(" AND ");
 			 }
 
+			query.append(" mbx.mbxStatus <> :" + MailBoxConfigurationDAO.STATUS);
 			String sortDirection = searchFilter.getSortDirection();
             setSortOptions(sortDirection, searchFilter.getSortField(), query);
 
@@ -285,10 +306,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					mailboxList = entityManager.createQuery(query.toString())					
 							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+							.setParameter(STATUS, EntityStatus.DELETED.value())
 							.getResultList();
 				 } else {
 					 mailboxList = entityManager.createQuery(query.toString())
 							.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+							.setParameter(STATUS, EntityStatus.DELETED.value())
 							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
 							.getResultList();
@@ -297,6 +320,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				mailboxList = entityManager.createQuery(query.toString())
 						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
 						.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
+						.setParameter(STATUS, EntityStatus.DELETED.value())
 						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 						.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
 						.getResultList();
@@ -332,6 +356,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			mailboxList = entityManager.createNamedQuery(FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME)
 					.setParameter(MBOX_NAME,  (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.setParameter(TENANCY_KEYS, (MailBoxUtil.isEmpty(tenancyKeyName) ? "''" : tenancyKeyName))
+					.setParameter(STATUS, EntityStatus.DELETED.value())
 					.getResultList();
 
 			if ((mailboxList == null) || (mailboxList.size() == 0)) {
@@ -361,9 +386,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
 							.append(" where mailbox.tenancyKey in (:")
 							.append(TENANCY_KEYS)
-			                .append(")");
+			                .append(")")
+			                .append(" and mbx.mbxStatus <> :"+ MailBoxConfigurationDAO.STATUS);
 			List<?> mailboxIds = entityManager.createQuery(query.toString())
-			            .setParameter(TENANCY_KEYS, tenancyKeys)    
+			            .setParameter(TENANCY_KEYS, tenancyKeys)
+			            .setParameter(STATUS, EntityStatus.DELETED.value())
 			            .getResultList();
 			
 			Iterator<?> iter = mailboxIds.iterator();
@@ -397,6 +424,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			mailboxList = entityManager.createNamedQuery(GET_MBX_BY_NAME)
 					.setParameter(MBOX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
+					.setParameter(STATUS, EntityStatus.DELETED.value())
 					.getResultList();
 
 			if ((mailboxList == null) || (mailboxList.size() == 0)) {

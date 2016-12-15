@@ -143,6 +143,7 @@ public interface MailBoxConstants {
 	String KEY_OVERWRITE = "overwrite";
 	String KEY_FILE_PATH = "path";
 	String DIRECT_UPLOAD = "directUpload";
+    String USE_FILE_SYSTEM = "useFileSystem";
 	String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
 	String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	String KEY_TARGET_DIRECTORY = "targetDirectory";
@@ -421,5 +422,28 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
+
+    String LOCALHOST = "localhost";
+    
+    //PERMISSION PATH CONSTANT
+    String PERMISSION_SCRIPT_PATH = "permission.script.path";
+    String SFTP_USER_GROUP_NAME = "sftp.user.group.name";
+    
+    //DELETION SCRIPT PATH CONSTANT
+    String DELETION_SCRIPT_PATH = "deletion.script.path";
+    
+    //HOME PATH CONSTANTS
+    String FTP_PATH="ftp.user.home.path";
+    String FTPS_PATH="ftps.user.home.path";
+    String SFTP_PATH="sftp.user.home.path";
+    String HTTP_PATH="http.user.home.path";
+    String HTTPS_PATH="https.user.home.path";
+    
+    //Gateway types
+    String SFTP = "SFTP";
+    String FTP = "FTP";
+    String FTPS = "FTPS";
+    String HTTP = "HTTP";
+    String HTTPS = "HTTPS";
 
 }

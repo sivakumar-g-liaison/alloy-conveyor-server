@@ -35,7 +35,6 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -56,6 +55,8 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Class which has Dropbox File Transfer related operations.
@@ -183,8 +184,6 @@ public class DropboxFileTransferService {
 		long endTime = 0;
 
 		LOG.debug("The retrieved tenancy key is %s", tenancyKey);
-		List<String> specificProcessorTypes = new ArrayList<String>();
-		specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 
 		// start time to calculate elapsed time for retrieving dropbox
@@ -194,8 +193,7 @@ public class DropboxFileTransferService {
 
 		// retrieve dropbox processors linked to given profile Id and tenancyKey
 		// in manifest
-		List<Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId,
-				tenancyKey, specificProcessorTypes);
+		List<Processor> processors = processorDAO.fetchDropboxProcessorsByProfileAndTenancyKey(profileId, tenancyKey);
 
 		// end time to calculate elapsed time for dropbox processors linked
 		// to given profile Id and tenancyKey in manifest
@@ -352,33 +350,21 @@ public class DropboxFileTransferService {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
-		for (String tenancyKey : tenancyKeys) {
 
-			LOG.debug("DropboxFileTransferService - retrieved tenancy key is %s", tenancyKey);
-			List<String> specificProcessorTypes = new ArrayList<String>();
-			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
+		ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
+		List<ScheduleProfilesRef> scheduleProfiles = profileDAO.fetchTransferProfiles(tenancyKeys);
 
-			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
-			List<ScheduleProfilesRef> scheduleProfiles = profileDAO.findTransferProfilesSpecificProcessorTypeByTenancyKey(
-					tenancyKey, specificProcessorTypes);
+		// constructing transferProfileDTO from scheduleProfiles
+        ProfileDTO transferProfile = null;
+		for (ScheduleProfilesRef profile : scheduleProfiles) {
 
-			// if there are no dropbox processors available for this tenancy key
-			// continue to next one.
-			if (scheduleProfiles.isEmpty()) {
-				LOG.error("There are no transfer profiles available for  tenancykey - {}", tenancyKey);
-				continue;
-			}
-
-			// constructing transferProfileDTO from scheduleProfiles
-			for (ScheduleProfilesRef profile : scheduleProfiles) {
-
-				ProfileDTO transferProfile = new ProfileDTO();
-				transferProfile.copyFromEntity(profile);
-				transferProfiles.add(transferProfile);
-			}
+			transferProfile = new ProfileDTO();
+			transferProfile.copyFromEntity(profile);
+			transferProfiles.add(transferProfile);
 		}
+
 		if (transferProfiles.isEmpty()) {
-			LOG.error("There are no transfer profiles available");
+			LOG.error("There are no transfer profiles available for the tenancy keys " + tenancyKeys.stream().collect(joining(",")));
 		}
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));

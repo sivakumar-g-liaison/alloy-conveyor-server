@@ -23,11 +23,11 @@ import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
@@ -36,7 +36,7 @@ import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.processor.RemoteUploaderI;
-import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
+import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -45,7 +45,9 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
+import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
@@ -82,8 +83,11 @@ public class MailBoxService implements Runnable {
 	
 	public enum QueueMessageType {
 		WORKTICKET,
-		TRIGGERPROFILEREQUEST
+		TRIGGERPROFILEREQUEST,
+        INTERRUPTTHREAD,
+        DIRECTORYOPERATION
 	}
+
 	
 	public MailBoxService(String message, QueueMessageType messageType) {
 		this.message = message;
@@ -388,12 +392,11 @@ public class MailBoxService implements Runnable {
                     mbx.getPguid());
 
             //sets the direct upload details in workticet and it would be used to set the STAGED_FILE status
-            if (processor instanceof RemoteUploader) {
-                directUploadEnabled = MailBoxUtil.isDirectUploadEnabled(processor.getProcsrProperties());
-                if (directUploadEnabled) {
+/*            if (processor instanceof RemoteUploader) {
+                if (processorService.isDirectUploadEnabled()) {
                     workTicket.setAdditionalContext(DIRECT_UPLOAD, directUploadEnabled);
                 }
-            }
+            }*/
 
             processorService.runProcessor(workTicket);
             glassMessage.setOutSize(workTicket.getPayloadSize());
@@ -414,7 +417,7 @@ public class MailBoxService implements Runnable {
             	EmailNotifier.sendEmail(processor, emailSubject, emailBody, true);
 
                 //file writer to kick of an uploader
-                if (directUploadEnabled) {
+                if (processorService.isDirectUploadEnabled()) {
                     directUpload(processor, workTicket);
                 }
 
@@ -442,7 +445,7 @@ public class MailBoxService implements Runnable {
 
         } catch (Exception e) {
 
-        	LOG.error(e);
+            LOG.error(e.getMessage(), e);
             if (processor == null) {
                 LOG.error("File Staging failed", e);
             } else {
@@ -499,7 +502,11 @@ public class MailBoxService implements Runnable {
 			this.executeProcessor(message);
 		} else if (QueueMessageType.WORKTICKET.equals(this.messageType)) {
 			this.executeFileWriter(message);
-		} else {
+		} else if (QueueMessageType.INTERRUPTTHREAD.equals(this.messageType)){
+            this.interruptThread(message);
+        } else if (QueueMessageType.DIRECTORYOPERATION.equals(this.messageType)) {
+            this.directoryOperation(message);
+        } else {
 			throw new RuntimeException(String.format("Cannot process Message from Queue %s", message));
 		}
 	}
@@ -519,7 +526,7 @@ public class MailBoxService implements Runnable {
         if (!MailBoxUtil.isEmpty(processorId)) {
             processor = processorDAO.findActiveProcessorById(processorId);
         } else {
-            processor = new MailboxWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+            processor = getProcessorsForMailbox(mailboxId);
         }
 
         //Check the processor is null or not
@@ -548,7 +555,7 @@ public class MailBoxService implements Runnable {
         directUpload = true;
         RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
         String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
-        directUploader.doDirectUpload(workticket.getFileName(), path);
+        directUploader.doDirectUpload(workticket.getFileName(), path, workticket.getGlobalProcessId());
     }
 
     /**
@@ -593,4 +600,68 @@ public class MailBoxService implements Runnable {
 		}
 		processorExecutionState.setExecutionStatus(state.value());
 	}
+
+    /**
+     * This method is used to kill running threads for the processors which are stopped.
+     *
+     * @param topicMessage topic message dto
+     */
+    public void interruptThread(String topicMessage) {
+
+        try {
+
+            TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(topicMessage, TopicMessageDTO.class);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            }
+
+
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * This method is used to create directories for created/updated 
+     * user account by user management.
+     * 
+     * @param queueMessage message from GUM
+     */
+    public void directoryOperation(String queueMessage) {
+        
+        try {
+            
+            DirectoryMessageDTO message = JAXBUtility.unmarshalFromJSON(queueMessage, DirectoryMessageDTO.class);
+            new DirectoryService().executeDirectoryOperation(message);
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Method to get the processor of type RemoteUploader/fileWriter of Mailbox
+     * associated with given mailbox
+     *
+     * @param mailboxId mailbox guid
+     * @return Processor
+     */
+    private Processor getProcessorsForMailbox(String mailboxId) {
+
+        LOG.debug("Retrieving processors of type uploader or filewriter for mailbox {}", mailboxId);
+
+        List<String> processorTypes = new ArrayList<>();
+        processorTypes.add(ProcessorType.FILEWRITER.name());
+        processorTypes.add(ProcessorType.REMOTEUPLOADER.name());
+
+        // get processor of type remote uploader of given mailbox id
+        ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+        List<Processor> processors = processorDAO.findActiveProcessorsByTypeAndMailbox(mailboxId, processorTypes);
+
+        // always get the first available processor because there
+        // will be either one uploader or file writer available for each mailbox
+        Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
+        return processor;
+
+    }
+
 }

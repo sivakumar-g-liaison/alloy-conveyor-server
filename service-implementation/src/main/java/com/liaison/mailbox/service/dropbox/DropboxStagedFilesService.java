@@ -68,8 +68,8 @@ public class DropboxStagedFilesService {
 	/**
 	 * Method to retrieve all staged files of the mailboxes linked to tenancy keys available in the manifest
 	 *
-	 * @param request
-	 * @param aclManifest
+	 * @param searchFilter search filters
+	 * @param aclManifestJson manifest JSON
 	 * @return list of StagedFiles
 	 * @throws IOException
 	 * @throws JAXBException
@@ -311,6 +311,11 @@ public class DropboxStagedFilesService {
 	private void sendEmail(MailBox mailbox, String emailSubject, String emailBody) {
 		
 		List <String> emailAddressList = mailbox.getEmailAddress();
+        if (null == emailAddressList || emailAddressList.isEmpty()) {
+            LOG.info("Email address is not configured in the mailbox");
+            return;
+        }
+
 		EmailInfoDTO emailInfo = new EmailInfoDTO(mailbox.getMbxName(), null, null, emailAddressList, emailSubject, emailBody, true, true);
 		EmailNotifier.sendEmail(emailInfo);
 	}

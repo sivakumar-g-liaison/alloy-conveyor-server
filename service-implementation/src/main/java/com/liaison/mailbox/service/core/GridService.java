@@ -125,7 +125,6 @@ public abstract class GridService<T> {
 			final String pageSize) {
 
 		LOGGER.debug("Entering into getGridItems.");
-//		Map<String, List<FilterObject>> searchTextObjectList = new HashMap<>();
 		FilterText filterTextObj = new FilterText();
 		Map<String, Object> sortInfoMap = new HashMap<>();
 

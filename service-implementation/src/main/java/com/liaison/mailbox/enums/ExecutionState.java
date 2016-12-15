@@ -29,8 +29,9 @@ public enum ExecutionState {
 	DUPLICATE("DUPLICATE", "File isn't staged because duplicate file exists at the target location"),
 	HANDED_TO_JS("HANDED_TO_JS","Processor Execution Handed over to JS"),
 	INTERRUPTED("INTERRUPTED","Processor is gracefully Interrupted"),
-	SKIPPED("SKIPPED","Processor is already running so skipped execution");
-
+	SKIPPED("SKIPPED","Processor is already running so skipped execution"),
+	VALIDATION_ERROR("VALIDATION_ERROR","Validation failed");
+	
 	private String value;
 	private String notes;
 

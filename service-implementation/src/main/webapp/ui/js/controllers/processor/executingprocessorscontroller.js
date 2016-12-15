@@ -109,7 +109,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
                 displayName: 'Action',
                 width: '10%',
                 sortable: false,
-                cellTemplate: '<div style="margin-left: 30px"><button class="btn btn-default btn-xs" title="Stop Processor" ng-click="updateStatusForProcessor(row.entity)">\n\
+                cellTemplate: '<div style="margin-left: 30px"><button class="btn btn-default btn-xs" title="Stop Processor" ng-click="confirmDialog(row.entity)">\n\
 					   		   <i class="glyphicon glyphicon-stop glyphicon-white"></i></button></div>'
            }
         ],
@@ -166,6 +166,17 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     }
 	
 	$scope.getExecutingProcessors();
-	
+
+    $scope.hideConfirmDialog = function (entity) {
+        $('#executingProcessorsConfirmationModal').modal('hide');
+        $scope.updateStatusForProcessor(entity);
+    }
+
+    $scope.executionEntity = '';
+    $scope.confirmDialog = function (entity) {
+        $scope.executionEntity = entity;
+        $('#executingProcessorsConfirmationModal').modal('show');
+    }
+
 }
 ]);

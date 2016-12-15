@@ -40,6 +40,7 @@ public class ScheduleProfileProcessor implements Identifiable {
 	private String pguid;
 	private Processor processor;
 	private ScheduleProfilesRef scheduleProfilesRef;
+	private String originatingDc;
 
 	public ScheduleProfileProcessor() {
 	}
@@ -77,6 +78,15 @@ public class ScheduleProfileProcessor implements Identifiable {
 		this.scheduleProfilesRef = scheduleProfilesRef;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

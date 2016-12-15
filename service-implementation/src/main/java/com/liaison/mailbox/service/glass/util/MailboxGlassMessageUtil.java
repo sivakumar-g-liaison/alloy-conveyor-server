@@ -63,10 +63,16 @@ public class MailboxGlassMessageUtil {
         glassMessage.setProtocol(processProtocol);
         glassMessage.setStatus(status);
 
+        //sets receiver ip
+        if (null != glassMessageDTO.getReceiverIp()) {
+            glassMessage.setReceiverIp(glassMessageDTO.getReceiverIp());
+        }
+
         if (ExecutionState.COMPLETED.equals(status)) {
 
             glassMessage.setOutAgent(processProtocol);
             glassMessage.setOutSize(fileLength);
+            glassMessage.logFourthCornerTimestamp();
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
@@ -102,6 +108,8 @@ public class MailboxGlassMessageUtil {
             glassMessage.setOutboundFileName(fileName);
             glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
+        } else if (ExecutionState.VALIDATION_ERROR.equals(status)) {
+            logProcessingStatus(glassMessage, StatusType.ERROR, message);
         }
 
         // TVAPI

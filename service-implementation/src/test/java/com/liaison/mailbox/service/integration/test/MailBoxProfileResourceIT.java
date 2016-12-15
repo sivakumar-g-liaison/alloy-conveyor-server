@@ -39,7 +39,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * 
  * @author OFS
  */
-public class MailBoxProfileServiceTest extends BaseServiceTest {
+public class MailBoxProfileResourceIT extends BaseServiceTest {
 
 	private Logger logger;
 	private HTTPRequest request;
@@ -49,24 +49,14 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 		//super.initialSetUp();
-		logger = LogManager.getLogger(MailBoxProfileServiceTest.class);
+		logger = LogManager.getLogger(MailBoxProfileResourceIT.class);
 	}
     
 	/**
 	 * Method to test Profile.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testCreateProfile() throws JsonGenerationException, JsonMappingException, JsonParseException,
-			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testCreateProfile() throws Exception {
 
 		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
@@ -74,19 +64,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
     
 	/**
 	 * Method to test profile with profile name as null.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testCreateProfile_WithNullasProfileName() throws JsonGenerationException, JsonMappingException,
-			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testCreateProfile_WithNullasProfileName() throws Exception {
 
 		AddProfileResponseDTO profileResponseDTO = addProfile(null);
 		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
@@ -94,19 +74,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
     
 	/**
 	 * Method to test profile with duplicate data. 
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testCreateProfile_WithDuplicates() throws JsonGenerationException, JsonMappingException, JsonParseException,
-			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testCreateProfile_WithDuplicates() throws Exception {
 
 		addProfile("OnceIn15Mins");
 		AddProfileResponseDTO dupProfileResponseDTO = addProfile("OnceIn15Mins");
@@ -115,19 +85,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
     
 	/**
 	 * Method to test profile with profile name as empty.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testCreateProfile_WithProfileNameEmpty() throws JsonGenerationException, JsonMappingException,
-			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testCreateProfile_WithProfileNameEmpty() throws Exception {
 
 		AddProfileResponseDTO profileResponseDTO = addProfile("");
 		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
@@ -135,19 +95,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
     
 	/**
 	 * Method to test profile with invalid profile name.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testCreateProfile_WithProfileNameAsSpecialCharacter() throws JsonGenerationException, JsonMappingException,
-			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testCreateProfile_WithProfileNameAsSpecialCharacter() throws Exception {
 
 		AddProfileResponseDTO profileResponseDTO = addProfile(System.nanoTime() + "#$%^%&@");
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
@@ -155,19 +105,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	
 	/**
 	 * Method to test readProfile.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test
-	public void testReadProfile() throws JsonGenerationException, JsonMappingException,
-	        JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testReadProfile() throws Exception {
 		
 		//add profile
 	    AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
@@ -186,19 +126,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	
 	/**
 	 * Method to test search profile With valid profile name.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test(enabled=false)
-	public void testSearchProfile() throws JsonGenerationException, JsonMappingException,
-            JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testSearchProfile() throws Exception {
 		
 		//add profile
 		ProfileDTO profile = new ProfileDTO();
@@ -223,19 +153,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	
 	/**
 	 * Method to test search profile with profile name as null.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test(enabled=false)
-	public void testSearchProfile_WithNullasProfileName() throws JsonGenerationException, JsonMappingException,
-			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testSearchProfile_WithNullasProfileName() throws Exception {
 
 		GetProfileResponseDTO getProfileResponseDTO = searchProfile(null);
 	    Assert.assertEquals(FAILURE, getProfileResponseDTO.getResponse().getStatus());
@@ -243,19 +163,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
     
 	/**
 	 * Method to test search profile with invalid profile name.
-	 * 
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws JAXBException
-	 * @throws IOException
-	 * @throws LiaisonException
 	 */
 	@Test(enabled=false)
-	public void testSearchProfile_InvalidProfileName() throws JsonGenerationException, JsonMappingException,
-			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	public void testSearchProfile_InvalidProfileName() throws Exception {
 
 		GetProfileResponseDTO getProfileResponseDTO = searchProfile(System.nanoTime() + "INVALID_PROFILE_NAME");
 	    Assert.assertEquals(FAILURE, getProfileResponseDTO.getResponse().getStatus());
@@ -266,17 +176,8 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	 * 
 	 * @param profileName
 	 * @return AddProfileResponseDTO
-	 * @throws JAXBException
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws LiaisonException
-	 * @throws JsonParseException
 	 */
-	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
-			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+	private AddProfileResponseDTO addProfile(String profileName) throws Exception {
 
 		ProfileDTO profile = new ProfileDTO();
 		profile.setName(profileName);
@@ -299,8 +200,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	 * @return GetProfileResponseDTO
 	 * @throws Exception
 	 */
-	private GetProfileResponseDTO searchProfile(String profileName) throws JsonGenerationException, JsonMappingException,
-            JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+	private GetProfileResponseDTO searchProfile(String profileName) throws Exception {
 		
 		String filterText = "{filterText:[{field:name,text:" + profileName + "}]}";
 	    String url = getBASE_URL() + "/profile?filterText=" + filterText;
