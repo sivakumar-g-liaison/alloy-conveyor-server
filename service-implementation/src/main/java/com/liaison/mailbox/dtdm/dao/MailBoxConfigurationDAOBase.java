@@ -380,7 +380,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 							.append(" where mailbox.tenancyKey in (:")
 							.append(TENANCY_KEYS)
 			                .append(")")
-			                .append(" and mbx.mbxStatus <> :"+ MailBoxConfigurationDAO.STATUS);
+			                .append(" and mailbox.mbxStatus <> :"+ MailBoxConfigurationDAO.STATUS);
 			List<?> mailboxIds = entityManager.createQuery(query.toString())
 			            .setParameter(TENANCY_KEYS, tenancyKeys)
 			            .setParameter(STATUS, EntityStatus.DELETED.value())
