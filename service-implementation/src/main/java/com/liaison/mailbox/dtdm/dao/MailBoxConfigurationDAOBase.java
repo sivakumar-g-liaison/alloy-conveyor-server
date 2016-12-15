@@ -24,8 +24,10 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.hibernate.criterion.MatchMode;
 
 /**
  * Performs mailbox fetch operations. 
@@ -258,8 +260,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			
 			 if (searchFilter.isDisableFilters()){
 				 if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-					 query.append(" where LOWER(mbx.mbxName) like :")
-					 	  .append(MBOX_NAME);
+				     if (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) {
+                         query.append(" where LOWER(mbx.mbxName) like :")
+                                 .append(MBOX_NAME);
+                     } else {
+                         query.append(" where LOWER(mbx.mbxName) = :")
+                                 .append(MBOX_NAME);
+                     }
 				 }
 			 } else {
 			     tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
