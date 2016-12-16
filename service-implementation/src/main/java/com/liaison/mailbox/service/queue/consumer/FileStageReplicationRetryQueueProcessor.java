@@ -11,7 +11,7 @@
 package com.liaison.mailbox.service.queue.consumer;
 
 import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
-import com.liaison.mailbox.service.directory.DirectoryService;
+import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
 /**
@@ -19,10 +19,10 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 * @author OFS
 *
 */
-public class UserManagementToRelayDirectoryQueueProcessor implements QueueTextMessageProcessor {
+public class FileStageReplicationRetryQueueProcessor implements QueueTextMessageProcessor {
     
     @Override
     public void processMessage(String message) {
-        AsyncProcessThreadPool.getExecutorService().submit(new DirectoryService(message));
+        AsyncProcessThreadPool.getExecutorService().submit(new FileStageReplicationService(message));
     }
 }

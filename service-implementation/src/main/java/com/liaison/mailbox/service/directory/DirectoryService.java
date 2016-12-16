@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.directory;
 import java.io.IOException;
 import java.io.File;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.mailbox.service.core.MailBoxService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,21 +24,47 @@ import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
+import javax.xml.bind.JAXBException;
+
 /**
  * This class is used to create and delete directories based on usermanagement information.
  * 
  * @author OFS
  *
  */
-public class DirectoryService {
-    
+public class DirectoryService implements Runnable {
+
     private static final Logger LOGGER = LogManager.getLogger(DirectoryService.class);
+
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public DirectoryService(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void run() {
+        try {
+            DirectoryMessageDTO directoryMessageDTO = JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class);
+            executeDirectoryOperation(directoryMessageDTO);
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Invokes the shell script to create folder and assign permissions to the created folder.
      *
-     * @param gatewayType
-     * @param username
+     * @param gatewayType gateway type
+     * @param userName username
      * @throws IOException
      */
     private void invokeScriptToCreateFolderAndAssignPermission(String gatewayType, String userName) throws IOException {
@@ -54,8 +82,8 @@ public class DirectoryService {
     /**
     * Invokes the shell script to delete folder.
     *
-    * @param gatewayType
-    * @param username
+    * @param gatewayType gateway type
+    * @param userName username
     * @throws IOException
     */
    private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
@@ -96,7 +124,7 @@ public class DirectoryService {
     /**
      * Based on operation type invokes create/delete methods.
      * 
-     * @param message
+     * @param message message from the queue
      * @throws IOException 
      */
     public void executeDirectoryOperation(DirectoryMessageDTO message) throws IOException {

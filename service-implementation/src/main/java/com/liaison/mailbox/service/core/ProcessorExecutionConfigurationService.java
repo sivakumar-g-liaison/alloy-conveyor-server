@@ -27,6 +27,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.topic.producer.MailBoxTopicMessageProducer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,11 +44,43 @@ import java.util.Map;
  *
  */
 
-public class ProcessorExecutionConfigurationService {
+public class ProcessorExecutionConfigurationService implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
     private static final String EXECUTING_PROCESSORS = "running processors";
+
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public ProcessorExecutionConfigurationService() {
+        super();
+    }
+
+    public ProcessorExecutionConfigurationService(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void run() {
+
+        try {
+
+            TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(getMessage(), TopicMessageDTO.class);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+            }
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Method to get the executing processors

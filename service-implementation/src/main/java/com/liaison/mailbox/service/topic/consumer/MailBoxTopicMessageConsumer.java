@@ -9,8 +9,7 @@
 package com.liaison.mailbox.service.topic.consumer;
 
 import com.liaison.commons.messagebus.topic.TopicTextMessageProcessor;
-import com.liaison.mailbox.service.core.MailBoxService;
-import com.liaison.mailbox.service.core.MailBoxService.QueueMessageType;
+import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +29,7 @@ public class MailBoxTopicMessageConsumer implements TopicTextMessageProcessor {
 
         if (message != null) {
             logger.debug("Message received from Topic");
-            AsyncProcessThreadPool.getExecutorService().submit(new MailBoxService(message, QueueMessageType.INTERRUPTTHREAD));
+            AsyncProcessThreadPool.getExecutorService().submit(new ProcessorExecutionConfigurationService(message));
         }
     }
 }

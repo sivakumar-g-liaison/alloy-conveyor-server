@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.core.bootstrap;
 
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
+import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueueProcessor;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,13 +77,7 @@ public class QueueAndTopicProcessInitializer {
     private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
     private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
     private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
-
-    public static QueuePooledListenerContainer dropboxQueue;
-    public static QueuePooledListenerContainer mailboxProcessorQueue;
-    public static QueuePooledListenerContainer mailboxProcessedPayloadQueue;
-    public static TopicPooledListenerContainer mailBoxTopicPooledListenerContainer;
-    public static QueuePooledListenerContainer umDirOprsQueue;
-
+    private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
 
     public static void initialize() {
 
@@ -100,7 +95,7 @@ public class QueueAndTopicProcessInitializer {
 
             // Initialize the dropbox queue
             logger.info("Starting Dropbox Queue Listener");
-            dropboxQueue = new QueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
+            QueuePooledListenerContainer dropboxQueue = new QueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
             dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started Dropbox Queue Listener");
 
@@ -108,24 +103,29 @@ public class QueueAndTopicProcessInitializer {
 
             // Initialize processor queue and processedPayload queue
             logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
-            mailboxProcessorQueue = new QueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
+            QueuePooledListenerContainer mailboxProcessorQueue = new QueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
             mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
 
             logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-            mailboxProcessedPayloadQueue = new QueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
+            QueuePooledListenerContainer mailboxProcessedPayloadQueue = new QueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
             mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
 
             logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-            mailBoxTopicPooledListenerContainer = new TopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
+            TopicPooledListenerContainer mailBoxTopicPooledListenerContainer = new TopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
             mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
             
             logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-            umDirOprsQueue = new QueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
+            QueuePooledListenerContainer umDirOprsQueue = new QueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
             umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
+
+            logger.info("Starting FILE_STAGE_REPLICATON_RETRY Listener");
+            QueuePooledListenerContainer fileStageReplicationQueue = new QueuePooledListenerContainer(FileStageReplicationRetryQueueProcessor.class, FILE_STAGE_REPLICATON_RETRY);
+            fileStageReplicationQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+            logger.info("Started FILE_STAGE_REPLICATON_RETRY Listener");
 
         }
     }
