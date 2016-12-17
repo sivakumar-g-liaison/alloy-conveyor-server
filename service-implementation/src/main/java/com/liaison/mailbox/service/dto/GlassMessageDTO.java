@@ -25,6 +25,8 @@ public class GlassMessageDTO {
     private String message;
     private String pipelineId;
     private ExecutionTimestamp firstCornerTimeStamp;
+    private String senderIp;
+    private String receiverIp;
     
     public String getGlobalProcessId() {
         return globalProcessId;
@@ -86,5 +88,20 @@ public class GlassMessageDTO {
     public void setFirstCornerTimeStamp(ExecutionTimestamp firstCornerTimeStamp) {
         this.firstCornerTimeStamp = firstCornerTimeStamp;
     }
-    
+
+    public String getSenderIp() {
+        return senderIp;
+    }
+
+    public void setSenderIp(String senderIp) {
+        this.senderIp = senderIp;
+    }
+
+    public String getReceiverIp() {
+        return receiverIp;
+    }
+
+    public void setReceiverIp(String receiverIp) {
+        this.receiverIp = receiverIp;
+    }
 }

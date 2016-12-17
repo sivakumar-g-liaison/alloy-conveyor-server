@@ -447,7 +447,6 @@ test.doFirst {
     }
     exclude '**/DropboxIntegrationServiceTest.class'
     exclude '**/KeyManagerIntegrationServiceTest.class'
-    exclude '**/MailBoxConfigurationServiceTest.class'
     exclude '**/MailBoxProcessorServiceTest.class'
     exclude '**/StorageUtilitiesTest.class'
     exclude '**/JavaScriptEngineUtilTest.class'
@@ -456,8 +455,6 @@ test.doFirst {
     exclude '**/MailBoxProfileServiceTest.class'
     exclude '**/MailBoxAdminServiceTest.class'
     exclude '**/RemoteProcessorTest.class'
-	exclude '**/FS2ResourceTest.class'
-	exclude '**/HelloWorldResourceTest.class'
     include '**/*Test.class'
 }
 
@@ -494,6 +491,36 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     sourceSets.test.runtimeClasspath += files("${projectDir}/src/main/resources")
 
     ignoreFailures true
+
+}
+
+def isTomcatRunning = false
+gradle.taskGraph.beforeTask { Task task ->
+	if (task.name.equals('integrationTest')) {
+		if (!isTomcatRunning) {
+			println('Configuring and starting Tomcat...')
+			// The "cargoRunLocal.dependsOn('configureTomcat')" gets skipped here because it is inside "project.afterEvaluate"
+			// so we are explicitly configuring Tomcat for in container testing
+			configureTomcat.execute()
+			cargoStartLocal.execute()
+			isTomcatRunning = true
+		}
+	}
+}
+
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (task.name.equals('integrationTest')) {
+		// if containerTestSuite is in the task graph, then
+		if (isTomcatRunning && (task.name.equals('containerTestSuite'))) {
+			logger.info 'Stopping Tomcat server'
+			try {
+				cargoStopLocal.execute()
+				isTomcatRunning = false
+			} catch (Throwable t) {
+				println('Tomcat Stop failure...continuing...')
+			}
+		}
+	}
 }
 
 def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"

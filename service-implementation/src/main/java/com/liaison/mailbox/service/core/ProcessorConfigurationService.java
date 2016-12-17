@@ -338,7 +338,7 @@ public class ProcessorConfigurationService {
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
 
-			if (processor == null) {
+			if (processor == null || EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
 				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid,
 						Response.Status.BAD_REQUEST);
 			}
@@ -425,6 +425,7 @@ public class ProcessorConfigurationService {
         EntityTransaction tx = null;
 		LOGGER.debug("Entering into revising processor.");
 		ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
+		boolean isDelete = false;
 
 		try {
 
@@ -446,6 +447,10 @@ public class ProcessorConfigurationService {
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
+
+            if (EntityStatus.DELETED.value().equals(processorDTO.getStatus())) {
+                isDelete = true;
+            }
 
 			// validates the processor type
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
@@ -500,10 +505,14 @@ public class ProcessorConfigurationService {
 			// create local folders if not available
 			if (processorDTO.isCreateConfiguredLocation()) {
 				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-				if (processorService != null) {
+				if (processorService != null && !isDelete) {
 					processorService.createLocalPath();
 				}
 			}
+
+            if (isDelete) {
+                processor.setProcsrName(processorDTO.getName() + MailBoxUtil.getTimestamp().toString());
+            }
 
             processor.setModifiedBy(userId);
             processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
@@ -1039,6 +1048,9 @@ public class ProcessorConfigurationService {
 			// if read by guid fails try to read processor by given name
 			if (null == processor) {
 				processors = config.findProcessorsByName(processorGuid);
+			} else if (EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROCESSOR,
+						Response.Status.BAD_REQUEST);
 			}
 
 			if (processor == null && processors.isEmpty()) {

@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -27,12 +28,11 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -41,13 +41,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.FTPS;
+import static com.liaison.mailbox.MailBoxConstants.HTTP;
+import static com.liaison.mailbox.MailBoxConstants.HTTPS;
+import static com.liaison.mailbox.MailBoxConstants.SFTP;
+
 /**
  * Created by VNagarajan on 6/3/2016.
  */
 public abstract class AbstractRemoteUploader extends AbstractProcessor implements RemoteUploaderI {
 
     private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteUploader.class);
-    private static final String HOST_NAME = "default_hostname";
 
     private String fileName;
     private String folderPath;
@@ -242,6 +246,9 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         glassMessageDTO.setMessage(msg);
         glassMessageDTO.setPipelineId(null);
 
+        //sets receiver ip
+        glassMessageDTO.setReceiverIp(getHost());
+
         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
@@ -322,7 +329,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 files.add(file);
                 stagedFileMap.put(file.getAbsolutePath(), stagedFile);
             } else {
-                LOGGER.warn("The file {} is not available in the local payload location", file.getName());
+                LOGGER.warn("The file {} is not available in the local payload location and gpid is {}", file.getName(), stagedFile.getGlobalProcessId());
             }
         }
 
@@ -383,23 +390,5 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      *
      */
     protected abstract int getScriptExecutionTimeout() throws IOException, IllegalAccessException;
-
-    /**
-     * Reads the host from url for lens logging
-     * Handles the exception gracefully
-     *
-     * @param url url
-     * @return host
-     */
-    protected String getHost(String url) {
-        try {
-            URI uri = new URI(url);
-            return uri.getHost();
-        } catch (URISyntaxException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-
-        return HOST_NAME;
-    }
 
 }

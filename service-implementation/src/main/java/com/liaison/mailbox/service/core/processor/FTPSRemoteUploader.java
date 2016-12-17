@@ -199,9 +199,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             deleteFile(file);
             String message = "File " +
                     currentFileName +
-                    " uploaded successfully to " +
-                    getHost(staticProp.getUrl()) +
-                    " and the remote path " +
+                    " uploaded successfully to the remote path " +
                     remoteParentDir;
 
             // Glass Logging
@@ -287,11 +285,11 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             // Renames the uploaded file to original extension once the fileStatusIndicator is given by User
             renameFile(ftpsRequest, statusIndicator, currentFileName, uploadingFileName);
 
+            //deletes the file if it is staged using file system
+            file.delete();
             String message = "File " +
                     currentFileName +
-                    " uploaded successfully to " +
-                    getHost(staticProp.getUrl()) +
-                    " and the remote path is " +
+                    " uploaded successfully to the remote path " +
                     remoteParentDir;
 
             // Glass Logging

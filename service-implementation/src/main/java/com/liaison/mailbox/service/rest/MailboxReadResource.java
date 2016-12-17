@@ -64,7 +64,7 @@ public class MailboxReadResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
 			@Override
-			public Object call() throws Exception {
+			public Object call() {
 
 				LOG.info("The requested type is {}", type);
 				switch (type.toLowerCase()) {

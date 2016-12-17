@@ -40,6 +40,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String PROF_NAME = "sch_prof_name";
 	String MBX_NAME = "mbx_name";
 	String STATUS = "status";
+	String STATUS_DELETE = "status_delete";
 	String SHARD_KEY = "shard_key";
 	String PGUID = "pguid";
 	String SERV_INST_ID = "proc_serv_inst_id";
@@ -265,6 +266,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 			.append(" inner join prcsr.serviceInstance si")
 			.append(" where si.name like :")
 			.append(SERV_INST_ID)
+			.append(" and processor.procsrStatus <> :")
+			.append(ProcessorConfigurationDAO.STATUS_DELETE)
 			.append(")");
 
 }

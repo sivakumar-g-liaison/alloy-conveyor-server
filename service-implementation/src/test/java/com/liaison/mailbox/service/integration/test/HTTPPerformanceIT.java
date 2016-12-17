@@ -8,6 +8,7 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
+import com.liaison.mailbox.service.base.test.Parallel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.logging.log4j.LogManager;

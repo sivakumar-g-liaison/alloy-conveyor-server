@@ -59,9 +59,9 @@
                     </div>
 					<div class="form-group processor_adjustMarginBottom">
                         <label>
-                            {{initialProcessorData.supportedStatus.displayName}}
+                            {{processorData.supportedStatus.displayName}}
                         </label>
-                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.key for e in initialProcessorData.supportedStatus.options" class="form-control">
+                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.key for e in processorData.supportedStatus.options" class="form-control">
                         </select>
 
                     </div>					
@@ -102,9 +102,9 @@
                     <div class="form-group">
 						<br>
                         <label>
-                         {{initialProcessorData.supportedProcessors.displayName}}
+                         {{processorData.supportedProcessors.displayName}}
                         </label>
-                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control">
+                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.key group by type.type for type in processorData.supportedProcessors.options | orderBy:'key'" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -112,16 +112,16 @@
                     <div class="form-group">
 						<br>
                         <label>
-                            {{initialProcessorData.supportedProtocols.displayName}}
+                            {{processorData.supportedProtocols.displayName}}
                         </label>
-                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in processorData.supportedProtocols.options" class="form-control">
                         </select>
                     </div>
                 </div>
             </div>            			
             <div class="row form-group">
 			    <div class="col-sm-6 col-md-6 processor_adjustPaddingTop">
-				 <span>{{initialProcessorData.supportedJavaScriptCheckBox.displayName}}
+				 <span>{{processorData.supportedJavaScriptCheckBox.displayName}}
 				 <input type="checkbox" ng-model="isJavaScriptExecution" id="mbx_procsr_javascript" ng-click="onChangeJavaScriptExecutor()">
 				</span>
 				</div>

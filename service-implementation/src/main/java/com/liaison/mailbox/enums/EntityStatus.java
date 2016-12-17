@@ -22,7 +22,8 @@ public enum EntityStatus {
     ACTIVE("ACTIVE"),
     INACTIVE("INACTIVE"),
     STAGED("STAGED"),
-    FAILED("FAILED");
+    FAILED("FAILED"),
+    DELETED("DELETED");
 
 	private String value;
 

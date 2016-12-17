@@ -101,7 +101,9 @@ public class GlassMessage {
 	private String inboundFileName;
 	private String outboundFileName;
 	private String mailboxName;
-	private boolean arrivalTime;
+    private String senderIp;
+    private String receiverIp;
+    private boolean arrivalTime;
 
 
 	public String getTransferProfileName() {
@@ -384,7 +386,23 @@ public class GlassMessage {
 		this.arrivalTime = arrivalTime;
 	}
 
-	private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
+    public String getSenderIp() {
+        return senderIp;
+    }
+
+    public void setSenderIp(String senderIp) {
+        this.senderIp = senderIp;
+    }
+
+    public String getReceiverIp() {
+        return receiverIp;
+    }
+
+    public void setReceiverIp(String receiverIp) {
+        this.receiverIp = receiverIp;
+    }
+
+    private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
 
 		TimeStampAPI timeStampAPI = new TimeStampAPI();
 		timeStampAPI.setProcessId(getProcessId());
@@ -398,7 +416,7 @@ public class GlassMessage {
 
 	/**
 	 * Method to construct the Activity Status API.
-	 * 
+	 *
 	 * @param statusType
 	 * @param message
 	 * @param processorType
@@ -407,7 +425,7 @@ public class GlassMessage {
 	 * @return ActivityStatusAPI
 	 */
 	private ActivityStatusAPI constructActivityStatusAPI(StatusType statusType, String message, String processorType, String techDescription, String processorProtocol) {
-		
+
 		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
