@@ -49,6 +49,8 @@ import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
+import static com.liaison.mailbox.MailBoxConstants.PAGING_COUNT;
+
 /**
  * Class which has Dropbox related operations.
  *
@@ -111,9 +113,17 @@ public class DropboxStagedFilesService {
 		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
 		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, searchFilter.getStagedFileName(),
 				searchFilter.getStatus());
-		pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(), searchFilter.getPageSize(),
-				totalCount);
-		serviceResponse.setTotalItems(totalCount);
+        pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(
+                searchFilter.getPage(),
+                searchFilter.getPageSize(),
+                totalCount);
+
+        //Invalid Page validation - GWUD-130
+        if (pageOffsetDetails.get(PAGING_COUNT) < 0) {
+            throw new MailBoxServicesException("Invalid Page Number", Response.Status.BAD_REQUEST);
+        }
+
+        serviceResponse.setTotalItems(totalCount);
 		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, searchFilter,
 				pageOffsetDetails);
 
