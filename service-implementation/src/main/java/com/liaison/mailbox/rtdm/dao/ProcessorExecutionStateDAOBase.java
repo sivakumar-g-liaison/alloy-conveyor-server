@@ -15,14 +15,22 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.netflix.config.ConfigurationManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
+import javax.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +81,73 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
         }
 
         return processorExecutionState;
+    }
+
+    /**
+     * Find processor execution state by processor id
+     *
+     * @param processorId processor guid
+     * @return ProcessorExecutionState
+     */
+    public ProcessorExecutionState findByProcessorIdAndUpdateStatus(String processorId) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            long startTime = System.currentTimeMillis();
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            // explicitly begin txn to acquire a pessimistic_write lock
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            ProcessorExecutionState processorExecutionState = entityManager
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID_AND_NOT_PROCESSING, ProcessorExecutionState.class)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
+                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                    .getSingleResult();
+
+            //update the processing status
+            String lastExecutionState = processorExecutionState.getExecutionStatus();
+            processorExecutionState.setLastExecutionState(lastExecutionState);
+            processorExecutionState.setLastExecutionDate(new Date());
+            processorExecutionState.setThreadName(String.valueOf(Thread.currentThread().getName()));
+            processorExecutionState.setNodeInUse(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
+            processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.name());
+            long endTime = System.currentTimeMillis();
+
+            //commit the transaction
+            entityManager.merge(processorExecutionState);
+            entityManager.flush();
+            tx.commit();
+
+            LOGGER.debug("Calculating elapsed time for changing processor state to PROCESSING");
+            MailBoxUtil.calculateElapsedTime(startTime, endTime);
+
+            return processorExecutionState;
+
+        } catch (NoResultException e) {
+
+            //rollback when no results found
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+
+            // Indicates processor is already running or not available in the runtime table
+            String msg = MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId;
+            throw new MailBoxServicesException(msg, Response.Status.NOT_ACCEPTABLE);
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
     }
 
     @Override

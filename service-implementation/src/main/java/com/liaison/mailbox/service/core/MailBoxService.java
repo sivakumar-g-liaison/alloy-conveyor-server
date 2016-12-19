@@ -54,6 +54,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import javax.persistence.LockModeType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -224,20 +225,7 @@ public class MailBoxService implements Runnable {
 			processor = processorDAO.find(Processor.class, processorId);
 
 			// retrieve the processor execution status from run-time DB
-			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
-
-			if (null == processorExecutionState) {
-				LOG.info("Processor Execution state is not available in run time DB for processor {}",
-						processor.getPguid());
-				throw new MailBoxServicesException(Messages.INVALID_PROCESSOR_EXECUTION_STATUS,
-						Response.Status.CONFLICT);
-			}
-
-			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processorExecutionState.getExecutionStatus())) {
-
-				LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
-				return;
-			}
+            processorExecutionState = processorExecutionStateDAO.findByProcessorIdAndUpdateStatus(processor.getPguid());
 
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			if (processorService == null) {
@@ -253,14 +241,6 @@ public class MailBoxService implements Runnable {
                     mbx.getPguid());
 
 			LOG.debug("The Processor type is {}", processor.getProcessorType());
-			startTime = System.currentTimeMillis();
-			updateProcessorExecState(processorExecutionState, ExecutionState.PROCESSING);
-			processorExecutionStateDAO.merge(processorExecutionState);
-
-			endTime = System.currentTimeMillis();
-			LOG.debug("Calculating elapsed time for changing processor state to PROCESSING");
-			MailBoxUtil.calculateElapsedTime(startTime, endTime);
-
 			processorService.runProcessor(dto);
 			startTime = System.currentTimeMillis();
 			updateProcessorExecState(processorExecutionState, ExecutionState.COMPLETED);

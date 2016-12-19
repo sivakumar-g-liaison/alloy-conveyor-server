@@ -18,6 +18,8 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
+import javax.persistence.LockModeType;
+
 /**
  * The dao class for the PROCESSOR_EXECUTION_STATE database table.
  *
@@ -26,6 +28,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 
     String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
+    String FIND_BY_PROCESSOR_ID_AND_NOT_PROCESSING = "ProcessorExecutionState.findIdleProcessorByProcessorId";
     String FIND_PROCESSORS = "ProcessorExecutionState.findProcessors";
     String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
@@ -38,6 +41,16 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String THREAD_NAME = "threadName";
 
     ProcessorExecutionState findByProcessorId(String processorId);
+
+    /**
+     * finds processor execution state by processor guid and updates the status to PROCESSING if it is not already running
+     * <p>
+     * It is using 'PESSIMISTIC_WRITE' to lock the processor entity during update
+     *
+     * @param processorId the processor guid
+     * @return processor execution state
+     */
+    ProcessorExecutionState findByProcessorIdAndUpdateStatus(String processorId);
 
     /**
      * lists the processors in descending order
