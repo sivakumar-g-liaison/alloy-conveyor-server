@@ -1,0 +1,71 @@
+<div class="container fade-in">
+    <div class="addmailboxform-row">
+        <h3 id="title" class="ng-binding">Relay Conveyor</h3>
+        <hr/>
+        <br/>
+    </div>
+
+	   <div class="form-inline">
+	       <div class = "form-group">
+	          <div class="gridStyle" ng-grid="gridOptions"></div>
+	       </div>
+	   </div>
+	   
+	   <form id="fileInfoModalForm" name="form.fileInfoModalForm" novalidate>
+	       <div class="modal-custom fade" id="fileInfoModal">
+	           <div class="modal-dialog">
+	               <div class="modal-content">
+	                   <div class="modal-header">
+	                       <button class="close" data-dismiss="modal" aria-hidden="true"
+	                               id="close-btn-update-modal" ng-click="cancelInfo()">&times;</button>
+	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Details</h4>
+	                   </div>
+	                   <div class="modal-body">
+	                       <div class="row">
+	                           <b>File name:</b> {{selectedFile.name}} <br><br>
+	                           <b>File size:</b> {{selectedFile.fileSize}} <br><br>
+	                           <b>File path:</b> {{selectedFile.path}} <br><br>
+	                           <b>Global process id:</b> {{selectedFile.globalProcessId}} <br><br>
+	                           <b>Mailbox id:</b> {{selectedFile.mailboxGuid}} <br><br>
+	                           <b>Processor type:</b> {{selectedFile.processorType}} <br><br>
+	                           <b>Spectrum URI:</b> <p>{{selectedFile.spectrumUri}}</p><br>
+	                           <b>Meta:</b> {{selectedFile.meta}} <br><br>
+	                           <b>Status:</b> {{selectedFile.status}} <br><br>
+	                           <b>Created on:</b> {{selectedFile.createdDate}} <br><br>
+	                           <b>Modified on:</b> {{selectedFile.modifiedDate}} <br><br>
+	                       </div>
+	                   </div>
+	                   <div class="modal-footer">
+	                       <a class="btn btn-default" id="fileInfoModalCancelBtn"
+	                       ng-click="cancelInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
+	                   </div>
+	               </div>
+	           </div>
+	       </div>
+	   </form>
+	   
+	   <form id="fileUpdateModalForm" name="fileUpdateModalForm" novalidate>
+	       <div class="modal-custom fade" id="fileUpdateModal">
+	           <div class="modal-dialog">
+	               <div class="modal-content">
+	                   <div class="modal-header">
+	                       <button class="close" data-dismiss="modal" aria-hidden="true"
+	                               id="close-btn-update-modal" ng-click="cancelUpdate()">&times;</button>
+	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Inactivate</h4>
+	                   </div>
+	                   <div class="modal-body">
+	                       <div class="row">
+	                           Do you really need to inactivate the staged file - {{selectedFileToUpdate.name}} ?
+	                       </div>
+	                   </div>
+	                   <div class="modal-footer">
+	                       <a class="btn btn-danger" id="reviseProfileModalSaveBtn"
+	                       ng-click="deactivateStagedFile(selectedFileToUpdate.id)">Inactivate</a>
+	                       <a class="btn btn-default" id="fileInfoModalCancelBtn"
+	                       ng-click="cancelInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
+	                   </div>
+	               </div>
+	           </div>
+	       </div>
+	   </form>
+</div>

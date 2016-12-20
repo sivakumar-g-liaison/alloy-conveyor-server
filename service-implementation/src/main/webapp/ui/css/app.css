@@ -626,3 +626,7 @@ input::-moz-focus-inner {
 #mbx-procsr-name {
 	text-overflow: ellipsis;
 }
+
+.modal-body p {
+	word-wrap: break-word;
+}

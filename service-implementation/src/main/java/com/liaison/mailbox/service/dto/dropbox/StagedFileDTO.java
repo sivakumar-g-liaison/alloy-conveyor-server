@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.dto.dropbox;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 
 /**
  * Data Transfer Object that contains the staged file details.
@@ -162,6 +163,29 @@ public class StagedFileDTO {
 
 	public void setGlobalProcessId(String globalProcessId) {
 		this.globalProcessId = globalProcessId;
+	}
+
+	/**
+	 * Copies the file details from file to dto.
+	 * 
+	 * @param file
+	 */
+	public void copyFromEntity(StagedFile file) {
+
+		this.setCreatedDate(file.getCreatedDate().toString());
+		this.setGlobalProcessId(file.getGlobalProcessId());
+		this.setMailboxGuid(file.getMailboxId());
+		this.setName(file.getFileName());
+		this.setPath(file.getFilePath());
+		this.setMeta(file.getFileMetaData());
+		this.setProcessorId(file.getProcessorId());
+		this.setFileSize(file.getFileSize());
+		this.setStatus(file.getStagedFileStatus());
+		this.setModifiedDate(file.getModifiedDate().toString());
+		this.setProcessorType(file.getProcessorType());
+		this.setSpectrumUri(file.getSpectrumUri());
+		this.setExpirationTime(file.getExpirationTime().toString());
+		this.setId(file.getPguid());
 	}
 
 }

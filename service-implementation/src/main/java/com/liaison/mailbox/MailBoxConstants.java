@@ -101,6 +101,7 @@ public interface MailBoxConstants {
 	String ROLE_NAME = "MailboxAdmin";
 	
 	String MAILBOX_ID = "mailboxId";
+	String GLOBAL_PROCESS_ID = "globalProcessId";
 
 	// properties used to configure sla rules of an mailbox
 	String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
