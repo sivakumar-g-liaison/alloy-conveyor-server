@@ -1,6 +1,7 @@
 4.12.0-SNAPSHOT
 ---------------
 * GWUD-130 - Conveyor errs, when a page that doesn't exist is requested.
+* Removed Spectrum FS2 configs from Staging environment
 
 4.11.0
 ---------------
