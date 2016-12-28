@@ -18,13 +18,15 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'myApp.copyToClipboard',
+    'myApp.directives',
     'ngGrid', // angular grid
     'ngSanitize', // for html-bind in ckeditor
     'ui.ace', // ace code editor
     'ui.bootstrap', // jquery ui bootstrap
     'ngRoute',
     'angularTreeview', // for tree view
-    'BlockUI'
+    'BlockUI',
+    'daterangepickerapp'
 ]);
 var filters = angular.module('myApp.filters', []);
 var directives = angular.module('myApp.directives', []);
@@ -79,6 +81,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
         $routeProvider.when('/profiles/trigger', {
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
+        });
+        $routeProvider.when('/mailbox/getStagedFiles', {
+            templateUrl: 'partials/processor/stagedfiles.html',
+            controller: 'StagedFilesCntrlr'
         });
         // by default, redirect to site root
         $routeProvider.otherwise({
@@ -137,7 +143,17 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     $rootScope.initialProcessorData;
     $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
         $rootScope.initialProcessorData = data;
-    });
+    }); 
+    
+    $rootScope.languageFormatData = {
+        'dateRangePattern':'',
+        'locale':''
+    };
+    $rootScope.restService.get('../language/userLocale')
+        .success(function(data) {
+            $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
+            $rootScope.languageFormatData.locale = data.TreeMap.locale;
+        });
     
     //  load edit Processor Data
     $rootScope.editProcessorData;

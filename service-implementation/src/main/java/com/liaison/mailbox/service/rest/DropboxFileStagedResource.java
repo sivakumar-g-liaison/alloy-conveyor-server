@@ -183,9 +183,6 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 					return builder.build();
 
-				} catch (MailBoxServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
