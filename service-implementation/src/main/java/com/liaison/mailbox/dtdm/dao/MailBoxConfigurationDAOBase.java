@@ -232,7 +232,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				if (!isMatchModeEquals) {
 					jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
 				} else {
-					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName().toLowerCase());
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName());
 				}
             }
             if (!searchFilter.isDisableFilters()) {
@@ -279,8 +279,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                          query.append(" where LOWER(mbx.mbxName) like :")
                                  .append(MBOX_NAME)
                                  .append(" AND ");
-                     } else if (searchFilter.getMatchMode().equals(FilterMatchMode.EQUALS.name().toLowerCase())) {
-                         query.append(" where LOWER(mbx.mbxName) = :")
+                     } else if (searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR)) {
+                         query.append(" where mbx.mbxName = :")
                                  .append(MBOX_NAME)
                                  .append(" AND ");
                      } else {
@@ -310,7 +310,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 							.getResultList();
 				 } else {
 					 mailboxList = entityManager.createQuery(query.toString())
-							.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+							.setParameter(MBOX_NAME, (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) ?
+									"%" + searchFilter.getMbxName().toLowerCase() + "%" :
+							searchFilter.getMbxName())
 							.setParameter(STATUS, EntityStatus.DELETED.value())
 							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
@@ -318,7 +320,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				 }
 			} else {			
 				mailboxList = entityManager.createQuery(query.toString())
-						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+						.setParameter(MBOX_NAME, (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) ?
+								"%" + searchFilter.getMbxName().toLowerCase() + "%" :
+								searchFilter.getMbxName())
 						.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
 						.setParameter(STATUS, EntityStatus.DELETED.value())
 						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
