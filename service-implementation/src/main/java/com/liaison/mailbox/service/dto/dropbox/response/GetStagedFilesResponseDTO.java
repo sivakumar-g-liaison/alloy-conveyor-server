@@ -12,6 +12,8 @@ package com.liaison.mailbox.service.dto.dropbox.response;
 
 import java.util.List;
 
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 
@@ -20,6 +22,7 @@ import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
  *
  * @author OFS
  */
+@JsonRootName("getStagedFilesResponse")
 public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 
 	/**

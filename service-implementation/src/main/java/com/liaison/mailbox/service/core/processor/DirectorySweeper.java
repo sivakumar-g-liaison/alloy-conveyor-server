@@ -86,7 +86,7 @@ import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_
 
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
-	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
+    private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 	private static final String PROCESS = "process";
 	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
 	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
@@ -97,6 +97,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final Object SORT_BY_NAME = "Name";
     private static final Object SORT_BY_SIZE = "Size";
+    private static final String WATCH_DOG_SERVICE = "WatchDog Service";
 
     private String pipelineId;
     private List<Path> activeFiles = new ArrayList<>();
@@ -856,7 +857,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             //inactivate the mailboxes which doesn't have valid directory
             ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
             configurationInstance.setProcsrStatus(EntityStatus.INACTIVE.name());
-            configurationInstance.setModifiedBy("WatchDog Service");
+            configurationInstance.setModifiedBy(WATCH_DOG_SERVICE);
             configurationInstance.setModifiedDate(new Date());
             dao.merge(configurationInstance);
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
