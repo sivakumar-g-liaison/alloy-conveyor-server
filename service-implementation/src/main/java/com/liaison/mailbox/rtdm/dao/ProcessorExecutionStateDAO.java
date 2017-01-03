@@ -35,10 +35,27 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
     String FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD = "ProcessorExecutionState.findExecutingProcessorsWithinPeriod";
     String PROCESSOR_ID = "processorId";
+    String PGUID = "pguid";
     String EXEC_STATUS = "exec_status";
     String INTERVAL_IN_HOURS = "interval";
     String NODE = "node";
     String THREAD_NAME = "threadName";
+    String LAST_EXECUTION_STATE = "lastExecutionState";
+    String LAST_EXECUTION_DATE = "lastExecutionDate";
+    String NODE_IN_USE = "nodeInUse";
+
+    String GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE = "SELECT PGUID, EXEC_STATUS FROM PROCESSOR_EXEC_STATE STATE"
+            + " WHERE STATE.PROCESSOR_ID =:" + PROCESSOR_ID
+            + " AND STATE.EXEC_STATUS <>:" + EXEC_STATUS
+            + " FOR UPDATE";
+
+    String UPDATE_PROCESSOR_EXECUTION_STATE = "UPDATE PROCESSOR_EXEC_STATE" +
+            " SET EXEC_STATUS = 'PROCESSING'" +
+            " , LAST_EXEC_STATE =:" + LAST_EXECUTION_STATE +
+            " , LAST_EXEC_DATE = SYSTIMESTAMP" +
+            " , THREAD_NAME =:" + THREAD_NAME +
+            " , NODE_IN_USE =:" + NODE_IN_USE +
+            " WHERE PGUID =:" + PGUID;
 
     ProcessorExecutionState findByProcessorId(String processorId);
 

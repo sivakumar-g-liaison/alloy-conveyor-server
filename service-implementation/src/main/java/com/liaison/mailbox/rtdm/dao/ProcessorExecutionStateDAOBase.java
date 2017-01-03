@@ -84,7 +84,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     }
 
     /**
-     * Find processor execution state by processor id
+     * Find processor execution state by processor id and updates PROCESSING status
      *
      * @param processorId processor guid
      * @return ProcessorExecutionState
@@ -102,32 +102,28 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             tx = entityManager.getTransaction();
             tx.begin();
 
-            ProcessorExecutionState processorExecutionState = entityManager
-                    .createNamedQuery(FIND_BY_PROCESSOR_ID_AND_NOT_PROCESSING, ProcessorExecutionState.class)
+            Object[] results = (Object[]) entityManager
+                    .createNativeQuery(GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE)
                     .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
-                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                     .getSingleResult();
 
             //update the processing status
-            String lastExecutionState = processorExecutionState.getExecutionStatus();
-            processorExecutionState.setLastExecutionState(lastExecutionState);
-            processorExecutionState.setLastExecutionDate(new Date());
-            processorExecutionState.setThreadName(String.valueOf(Thread.currentThread().getName()));
-            processorExecutionState.setNodeInUse(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
-            processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.name());
-            long endTime = System.currentTimeMillis();
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE)
+                    .setParameter(PGUID, results[0])
+                    .setParameter(LAST_EXECUTION_STATE, results[1])
+                    .setParameter(THREAD_NAME, String.valueOf(Thread.currentThread().getName()))
+                    .setParameter(NODE_IN_USE, ConfigurationManager.getDeploymentContext().getDeploymentServerId())
+                    .executeUpdate();
 
             //commit the transaction
-            entityManager.merge(processorExecutionState);
             entityManager.flush();
             tx.commit();
 
-            LOGGER.debug("Calculating elapsed time for changing processor state to PROCESSING");
+            long endTime = System.currentTimeMillis();
             MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-            return processorExecutionState;
-
+            return entityManager.find(ProcessorExecutionState.class, results[0]);
         } catch (NoResultException e) {
 
             //rollback when no results found
