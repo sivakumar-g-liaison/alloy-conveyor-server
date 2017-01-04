@@ -24,6 +24,7 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -231,14 +232,14 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				if (!isMatchModeEquals) {
 					jpaQuery = jpaQuery.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%");
 				} else {
-					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName().toLowerCase());
+					jpaQuery = jpaQuery.setParameter(MBOX_NAME, searchFilter.getMbxName());
 				}
             }
             if (!searchFilter.isDisableFilters()) {
                 jpaQuery = jpaQuery.setParameter(TENANCY_KEYS, tenancyKeys);
             }
             jpaQuery.setParameter(MailBoxConfigurationDAO.STATUS, EntityStatus.DELETED.value());
-            
+
             totalItems = ((Long) jpaQuery.getSingleResult());
             count = totalItems.intValue();
 
@@ -274,13 +275,19 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			
 			 if (searchFilter.isDisableFilters()) {
 				 if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
-					 query.append(" where LOWER(mbx.mbxName) like :")
-					 	  .append(MBOX_NAME)
-					 	  .append(" AND ");
-				 } else {
-					 query.append(" WHERE ");
-                 }
-             } else {
+				     if (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) {
+                         query.append(" where LOWER(mbx.mbxName) like :")
+                                 .append(MBOX_NAME)
+                                 .append(" AND ");
+                     } else if (searchFilter.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR)) {
+                         query.append(" where mbx.mbxName = :")
+                                 .append(MBOX_NAME)
+                                 .append(" AND ");
+                     } else {
+                         query.append(" WHERE ");
+                     }
+				 }
+			 } else {
 			     tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
 				 query.append(" where LOWER(mbx.mbxName) like :")
 				 	.append(MBOX_NAME)
@@ -289,7 +296,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(")")
 					.append(" AND ");
 			 }
-			 
+
 			query.append(" mbx.mbxStatus <> :" + MailBoxConfigurationDAO.STATUS);
 			String sortDirection = searchFilter.getSortDirection();
             setSortOptions(sortDirection, searchFilter.getSortField(), query);
@@ -303,7 +310,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 							.getResultList();
 				 } else {
 					 mailboxList = entityManager.createQuery(query.toString())
-							.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+							.setParameter(MBOX_NAME, (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) ?
+									"%" + searchFilter.getMbxName().toLowerCase() + "%" :
+							searchFilter.getMbxName())
 							.setParameter(STATUS, EntityStatus.DELETED.value())
 							.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 							.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
@@ -311,7 +320,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				 }
 			} else {			
 				mailboxList = entityManager.createQuery(query.toString())
-						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+						.setParameter(MBOX_NAME, (searchFilter.getMatchMode().equals(FilterMatchMode.LIKE.name().toLowerCase())) ?
+								"%" + searchFilter.getMbxName().toLowerCase() + "%" :
+								searchFilter.getMbxName())
 						.setParameter(TENANCY_KEYS, tenancyKeysLowerCase)
 						.setParameter(STATUS, EntityStatus.DELETED.value())
 						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
