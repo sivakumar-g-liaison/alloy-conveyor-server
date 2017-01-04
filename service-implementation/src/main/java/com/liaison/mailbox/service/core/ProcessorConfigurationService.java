@@ -135,7 +135,14 @@ public class ProcessorConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST, MailBoxConstants.MAILBOX_PROCESSOR,
 						Response.Status.CONFLICT);
 			}
-			
+
+			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
+			MailBox retrievedMailBox = mailBoxConfigDAO.find(MailBox.class, mailBoxGuid);
+			if (null == retrievedMailBox || EntityStatus.DELETED.value().equals(retrievedMailBox.getMbxStatus())) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,
+						mailBoxGuid, Response.Status.BAD_REQUEST);
+			}
+
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
             if ((ProcessorType.FILEWRITER.equals(foundProcessorType) 
                     || ProcessorType.HTTPSYNCPROCESSOR.equals(foundProcessorType) 
@@ -195,7 +202,6 @@ public class ProcessorConfigurationService {
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
 			int count = msiDao.getMailboxServiceInstanceCount(processor.getMailbox().getPguid(), serviceInstance.getPguid());
 
-			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
 			if (null == mailBox) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,
@@ -525,7 +531,12 @@ public class ProcessorConfigurationService {
 
 			// response message construction
 			ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+			if (EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
+				serviceResponse.setResponse(new ResponseDTO(Messages.DELETED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+			} else {
+				serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+			}
+
 			serviceResponse.setProcessor(dto);
 
 		} catch (MailBoxConfigurationServicesException e) {
