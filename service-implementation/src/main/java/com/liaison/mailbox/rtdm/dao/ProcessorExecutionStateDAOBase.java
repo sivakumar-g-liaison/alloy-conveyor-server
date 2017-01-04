@@ -102,11 +102,44 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             tx = entityManager.getTransaction();
             tx.begin();
 
-            Object[] results = (Object[]) entityManager
-                    .createNativeQuery(GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE)
-                    .setParameter(PROCESSOR_ID, processorId)
-                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
-                    .getSingleResult();
+            Object[] results = null;
+            try {
+                results = (Object[]) entityManager
+                        .createNativeQuery(GET_PROCESSOR_EXECUTION_STATE)
+                        .setParameter(PROCESSOR_ID, processorId)
+                        .getSingleResult();
+                if (ExecutionState.PROCESSING.name().equals(results[1])) {
+                    String msg = MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId;
+                    throw new MailBoxServicesException(msg, Response.Status.NOT_ACCEPTABLE);
+                }
+            } catch (NoResultException e) {
+
+                //Entry is missing in PROCESSOR_EXECUTION_STATE
+                RuntimeProcessorsDAOBase daoBase = new RuntimeProcessorsDAOBase();
+                RuntimeProcessors processors = daoBase.findByProcessorId(processorId);
+
+                ProcessorExecutionState prcsrExecution = new ProcessorExecutionState();
+                prcsrExecution.setPguid(processors.getPguid());
+                prcsrExecution.setProcessorId(processorId);
+                prcsrExecution.setExecutionStatus(ExecutionState.READY.name());
+                prcsrExecution.setModifiedDate(new Date());
+                prcsrExecution.setProcessors(processors);
+                prcsrExecution.setOriginatingDc(DATACENTER_NAME);
+                processors.setProcessorExecState(prcsrExecution);
+
+                //insert the processor_exec_state
+                entityManager.merge(prcsrExecution);
+                entityManager.flush();
+            }
+
+            //select the newly created record
+            if (null == results) {
+                results = (Object[]) entityManager
+                        .createNativeQuery(GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE)
+                        .setParameter(PROCESSOR_ID, processorId)
+                        .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
+                        .getSingleResult();
+            }
 
             //update the processing status
             entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE_VALUES)

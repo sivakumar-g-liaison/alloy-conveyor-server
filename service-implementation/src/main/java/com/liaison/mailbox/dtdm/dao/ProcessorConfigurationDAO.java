@@ -78,9 +78,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 *
 	 * @param profileName    The profile name.
 	 * @param mbxNamePattern The MailBox name pattern to exclude
-	 * @return The list of processors.
+	 * @return The list of processor guids
 	 */
-	List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
+	List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
 	/**
      * Checks the mailbox has the processor or not.

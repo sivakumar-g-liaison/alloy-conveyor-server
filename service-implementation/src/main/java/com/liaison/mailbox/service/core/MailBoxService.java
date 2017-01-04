@@ -14,6 +14,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -30,6 +31,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.FileWriter;
@@ -61,12 +63,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
 import static com.liaison.mailbox.MailBoxConstants.RESUME;
+import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
 
 
 /**
@@ -78,7 +82,8 @@ public class MailBoxService implements Runnable {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
 	private static final String DEFAULT_FILE_NAME = "NONE";
-	private String message;
+    private static final String PROFILE_NAME = "Profile Name";
+    private String message;
     private boolean directUpload = false;
 	private QueueMessageType messageType;
 	
@@ -94,92 +99,71 @@ public class MailBoxService implements Runnable {
 		this.message = message;
 		this.messageType = messageType;
 	}
-	
-	public MailBoxService() {
 
-	}
+    public MailBoxService() {
+    }
 
-	/**
-	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes the processor.
-	 *
-	 * @param profileName The name of the profile to trigger
-	 * @param mailboxNamePattern The mailbox name pattern to exclude
-	 * @return The trigger profile response DTO
-	 */
-	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern, String shardKey) {
+    /**
+     * The method gets the list of processors from the given profile, mailboxNamePattern and invokes the processor.
+     *
+     * @param profileName        The name of the profile to trigger
+     * @param mailboxNamePattern The mailbox name pattern to exclude
+     * @return The trigger profile response DTO
+     */
+    public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern, String shardKey) {
 
-		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
-		List<Processor> processorMatchingProfile = null;
-		List<String> nonExecutingProcessorIds = null;
-		List<Processor> nonExecutingProcessorMatchingProfile = null;
+        TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
+        List<String> processorMatchingProfile = null;
+        List<String> nonExecutingProcessorMatchingProfile = null;
 
-		try {
+        try {
 
-			// validates mandatory value.
-			if (MailBoxUtil.isEmpty(profileName)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Name",
-						Response.Status.CONFLICT);
-			}
-			LOG.debug("The given profile name is {}", profileName);
+            // validates mandatory value.
+            if (MailBoxUtil.isEmpty(profileName)) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, PROFILE_NAME, Response.Status.CONFLICT);
+            }
+            LOG.debug("The given profile name is {}", profileName);
 
-			// Profile validation
-			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
-			ScheduleProfilesRef profile = profileDAO.findProfileByName(profileName);
-			if (null == profile) {
-				throw new MailBoxServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
-						Response.Status.CONFLICT);
-			}
+            // Profile validation
+            ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
+            ScheduleProfilesRef profile = profileDAO.findProfileByName(profileName);
+            if (null == profile) {
+                throw new MailBoxServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName, Response.Status.CONFLICT);
+            }
 
-			// finding the matching processors for the given profile
-			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern,
-					shardKey);
+            // finding the matching processors for the given profile
+            ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+            processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
 
-			// filter processors which are not running currently
-			ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-			nonExecutingProcessorIds = processorExecutionStateDAO.findNonExecutingProcessors();
+            //find non running processors
+            nonExecutingProcessorMatchingProfile = new RuntimeProcessorsDAOBase().findNonRunningProcessors(processorMatchingProfile);
+            if (nonExecutingProcessorMatchingProfile == null || nonExecutingProcessorMatchingProfile.isEmpty()) {
+                throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
+            }
 
-			nonExecutingProcessorMatchingProfile = new ArrayList<Processor>();
-			for (Processor procsr : processorMatchingProfile) {
+            List<String> messages = new ArrayList<>();
+            TriggerProcessorRequestDTO request = null;
+            for (String processorId : nonExecutingProcessorMatchingProfile) {
+                request = new TriggerProcessorRequestDTO(getGUID(), processorId, profileName);
+                messages.add(MailBoxUtil.marshalToJSON(request));
+            }
 
-				if (nonExecutingProcessorIds.contains(procsr.getPguid())) {
-					nonExecutingProcessorMatchingProfile.add(procsr);
-				}
-			}
+            LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[messages.size()]));
+            for (String message : messages) {
+                ProcessorSendQueue.getInstance().sendMessage(message);
+            }
 
-			if (nonExecutingProcessorMatchingProfile == null || nonExecutingProcessorMatchingProfile.isEmpty()) {
-				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
-			}
+            serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));
+            return serviceResponse;
 
-			List<String> messages = new ArrayList<String>();
-			TriggerProcessorRequestDTO request = null;
-			String executionId = null;
-			String message = null;
-			for (Processor processor : nonExecutingProcessorMatchingProfile) {
+        } catch (Exception e) {
 
-				executionId = MailBoxUtil.getGUID();
-				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
-				message = MailBoxUtil.marshalToJSON(request);
-				messages.add(message);
-			}
+            LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+            return serviceResponse;
+        }
 
-			LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[messages.size()]));
-			for (String singleMessage : messages) {
-				ProcessorSendQueue.getInstance().sendMessage(singleMessage);
-			}
-
-			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
-			return serviceResponse;
-
-		} catch (Exception e) {
-
-			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE,
-					e.getMessage()));
-			return serviceResponse;
-		}
-
-	}
+    }
 
 	/**
 	 * The method executes the processor based on given processor id.
