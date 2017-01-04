@@ -286,7 +286,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                      } else {
                          query.append(" WHERE ");
                      }
-				 }
+                 } else {
+                     query.append(" WHERE ");
+                 }
 			 } else {
 			     tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
 				 query.append(" where LOWER(mbx.mbxName) like :")
