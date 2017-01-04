@@ -134,6 +134,9 @@ public class MailBoxService implements Runnable {
             // finding the matching processors for the given profile
             ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
             processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
+            if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
+                throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
+            }
 
             //find non running processors
             nonExecutingProcessorMatchingProfile = new RuntimeProcessorsDAOBase().findNonRunningProcessors(processorMatchingProfile);
