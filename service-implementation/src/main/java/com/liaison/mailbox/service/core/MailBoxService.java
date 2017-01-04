@@ -194,10 +194,12 @@ public class MailBoxService implements Runnable {
 	    String processorId = null;
 	    String executionId = null;
 		Processor processor = null;
-		ProcessorExecutionState processorExecutionState = null;
+        Object[] results = null;
 		TriggerProcessorRequestDTO dto = null;
+
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+
 		long actualStartTime = System.currentTimeMillis();
 		long startTime = 0;
 		long endTime = 0;
@@ -225,7 +227,7 @@ public class MailBoxService implements Runnable {
 			processor = processorDAO.find(Processor.class, processorId);
 
 			// retrieve the processor execution status from run-time DB
-            processorExecutionState = processorExecutionStateDAO.findByProcessorIdAndUpdateStatus(processor.getPguid());
+            results = processorExecutionStateDAO.findByProcessorIdAndUpdateStatus(processor.getPguid());
 
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			if (processorService == null) {
@@ -243,8 +245,7 @@ public class MailBoxService implements Runnable {
 			LOG.debug("The Processor type is {}", processor.getProcessorType());
 			processorService.runProcessor(dto);
 			startTime = System.currentTimeMillis();
-			updateProcessorExecState(processorExecutionState, ExecutionState.COMPLETED);
-			processorExecutionStateDAO.merge(processorExecutionState);
+            processorExecutionStateDAO.updateProcessorExecutionState(String.valueOf(results[0]), ExecutionState.COMPLETED.name());
 
 			endTime = System.currentTimeMillis();
 			LOG.debug("Calculating elapsed time for changing processor state to COMPLETED");
@@ -257,29 +258,6 @@ public class MailBoxService implements Runnable {
                     mbx.getMbxName(),
                     mbx.getPguid());
 			LOG.debug("Total Time taken is {} ", (actualStartTime - endTime));
-
-		} catch (MailBoxServicesException e) {
-
-		    if (processor == null) {
-                LOG.error("Processor execution failed", e);
-            } else {
-                LOG.error("CronJob : {} : {} : {} : {} : {} : Processor execution failed : {}",
-                        dto.getProfileName(),
-                        processor.getProcessorType().name(),
-                        processor.getProcsrName(),
-                        processor.getMailbox().getMbxName(),
-                        processor.getMailbox().getPguid(),
-                        e.getMessage(), e);
-            }
-
-			if (processorExecutionState != null) {
-				updateProcessorExecState(processorExecutionState, ExecutionState.FAILED);
-				processorExecutionStateDAO.merge(processorExecutionState);
-			}
-
-			// send email to the configured mail id in case of failure
-			String emailSubject = EmailNotifier.constructSubject(processor, false);
-			EmailNotifier.sendEmail(processor, emailSubject, e);
 
 		} catch (Exception e) {
 
@@ -295,12 +273,12 @@ public class MailBoxService implements Runnable {
                         e.getMessage(), e);
             }
 
-			if (processorExecutionState != null) {
-				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
-				processorExecutionStateDAO.merge(processorExecutionState);
-			}
+            if (results != null) {
+                processorExecutionStateDAO.updateProcessorExecutionState(String.valueOf(results[0]), ExecutionState.FAILED.name());
+            }
 			// send email to the configured mail id in case of failure
 			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
+
 		}
 		LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");
 
@@ -560,26 +538,6 @@ public class MailBoxService implements Runnable {
 
         return workResult;
     }
-
-	/**
-	 * updates processor execution state
-	 *
-	 * @param processorExecutionState execution state entity
-	 * @param state state to be updated
-	 */
-	private void updateProcessorExecState(ProcessorExecutionState processorExecutionState,
-										  ExecutionState state) {
-
-		if (ExecutionState.PROCESSING.equals(state)) {
-
-			String lastExecutionState = processorExecutionState.getExecutionStatus();
-			processorExecutionState.setLastExecutionState(lastExecutionState);
-			processorExecutionState.setLastExecutionDate(new Date());
-			processorExecutionState.setThreadName(String.valueOf(Thread.currentThread().getName()));
-			processorExecutionState.setNodeInUse(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
-		}
-		processorExecutionState.setExecutionStatus(state.value());
-	}
 
     /**
      * This method is used to kill running threads for the processors which are stopped.

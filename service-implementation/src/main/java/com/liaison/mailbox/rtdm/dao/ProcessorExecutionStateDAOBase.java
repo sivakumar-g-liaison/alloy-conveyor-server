@@ -89,7 +89,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
      * @param processorId processor guid
      * @return ProcessorExecutionState
      */
-    public ProcessorExecutionState findByProcessorIdAndUpdateStatus(String processorId) {
+    public Object[] findByProcessorIdAndUpdateStatus(String processorId) {
 
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -109,8 +109,9 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                     .getSingleResult();
 
             //update the processing status
-            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE)
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE_VALUES)
                     .setParameter(PGUID, results[0])
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
                     .setParameter(LAST_EXECUTION_STATE, results[1])
                     .setParameter(THREAD_NAME, String.valueOf(Thread.currentThread().getName()))
                     .setParameter(NODE_IN_USE, ConfigurationManager.getDeploymentContext().getDeploymentServerId())
@@ -123,7 +124,8 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             long endTime = System.currentTimeMillis();
             MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-            return entityManager.find(ProcessorExecutionState.class, results[0]);
+            results[1] = ExecutionState.PROCESSING.name();
+            return results;
         } catch (NoResultException e) {
 
             //rollback when no results found
@@ -140,6 +142,45 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             }
             throw e;
         } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+
+    @Override
+    public void updateProcessorExecutionState(String pguid, String status) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            long startTime = System.currentTimeMillis();
+
+            //update the processing status
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            // explicitly begin txn
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE)
+                    .setParameter(PGUID, pguid)
+                    .setParameter(EXEC_STATUS, status)
+                    .executeUpdate();
+
+            //commits the transaction
+            tx.commit();
+
+            long endTime = System.currentTimeMillis();
+            MailBoxUtil.calculateElapsedTime(startTime, endTime);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        }  finally {
             if (entityManager != null) {
                 entityManager.close();
             }

@@ -49,12 +49,16 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
             + " AND STATE.EXEC_STATUS <>:" + EXEC_STATUS
             + " FOR UPDATE";
 
-    String UPDATE_PROCESSOR_EXECUTION_STATE = "UPDATE PROCESSOR_EXEC_STATE" +
-            " SET EXEC_STATUS = 'PROCESSING'" +
+    String UPDATE_PROCESSOR_EXECUTION_STATE_VALUES = "UPDATE PROCESSOR_EXEC_STATE" +
+            " SET EXEC_STATUS =:" + EXEC_STATUS +
             " , LAST_EXEC_STATE =:" + LAST_EXECUTION_STATE +
             " , LAST_EXEC_DATE = SYSTIMESTAMP" +
             " , THREAD_NAME =:" + THREAD_NAME +
             " , NODE_IN_USE =:" + NODE_IN_USE +
+            " WHERE PGUID =:" + PGUID;
+
+    String UPDATE_PROCESSOR_EXECUTION_STATE = "UPDATE PROCESSOR_EXEC_STATE" +
+            " SET EXEC_STATUS =:" + EXEC_STATUS +
             " WHERE PGUID =:" + PGUID;
 
     ProcessorExecutionState findByProcessorId(String processorId);
@@ -65,9 +69,17 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
      * It is using 'PESSIMISTIC_WRITE' to lock the processor entity during update
      *
      * @param processorId the processor guid
-     * @return processor execution state
+     * @return processor execution state pguid and status
      */
-    ProcessorExecutionState findByProcessorIdAndUpdateStatus(String processorId);
+    Object[] findByProcessorIdAndUpdateStatus(String processorId);
+
+    /**
+     * Updates processor execution state details
+     *
+     * @param pguid ProcessorExecutionState guid
+     * @param status status to be updated
+     */
+    void updateProcessorExecutionState(String pguid, String status);
 
     /**
      * lists the processors in descending order
