@@ -447,4 +447,5 @@ public interface MailBoxConstants {
     String HTTP = "HTTP";
     String HTTPS = "HTTPS";
 
+    String PROCESSOR_IS_ALREDAY_RUNNING = "The processor is already in progress or Processor Execution state is not available in run time DB for processor ";
 }

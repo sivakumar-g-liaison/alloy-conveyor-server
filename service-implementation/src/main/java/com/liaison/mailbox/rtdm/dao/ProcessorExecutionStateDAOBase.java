@@ -15,14 +15,22 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.netflix.config.ConfigurationManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
+import javax.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +81,110 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
         }
 
         return processorExecutionState;
+    }
+
+    /**
+     * Find processor execution state by processor id and updates PROCESSING status
+     *
+     * @param processorId processor guid
+     * @return ProcessorExecutionState
+     */
+    public Object[] findByProcessorIdAndUpdateStatus(String processorId) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            long startTime = System.currentTimeMillis();
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            // explicitly begin txn to acquire a pessimistic_write lock
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            Object[] results = (Object[]) entityManager
+                    .createNativeQuery(GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
+                    .getSingleResult();
+
+            //update the processing status
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE_VALUES)
+                    .setParameter(PGUID, results[0])
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
+                    .setParameter(LAST_EXECUTION_STATE, results[1])
+                    .setParameter(THREAD_NAME, String.valueOf(Thread.currentThread().getName()))
+                    .setParameter(NODE_IN_USE, ConfigurationManager.getDeploymentContext().getDeploymentServerId())
+                    .executeUpdate();
+
+            //commit the transaction
+            entityManager.flush();
+            tx.commit();
+
+            long endTime = System.currentTimeMillis();
+            MailBoxUtil.calculateElapsedTime(startTime, endTime);
+
+            results[1] = ExecutionState.PROCESSING.name();
+            return results;
+        } catch (NoResultException e) {
+
+            //rollback when no results found
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+
+            // Indicates processor is already running or not available in the runtime table
+            String msg = MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId;
+            throw new MailBoxServicesException(msg, Response.Status.NOT_ACCEPTABLE);
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+
+    @Override
+    public void updateProcessorExecutionState(String pguid, String status) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            long startTime = System.currentTimeMillis();
+
+            //update the processing status
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            // explicitly begin txn
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE)
+                    .setParameter(PGUID, pguid)
+                    .setParameter(EXEC_STATUS, status)
+                    .executeUpdate();
+
+            //commits the transaction
+            tx.commit();
+
+            long endTime = System.currentTimeMillis();
+            MailBoxUtil.calculateElapsedTime(startTime, endTime);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        }  finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
     }
 
     @Override
