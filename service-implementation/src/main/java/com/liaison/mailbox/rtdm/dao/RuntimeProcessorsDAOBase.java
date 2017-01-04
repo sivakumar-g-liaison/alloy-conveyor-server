@@ -13,13 +13,17 @@ package com.liaison.mailbox.rtdm.dao;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This will fetch the processors details.
@@ -54,6 +58,40 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
             }
         }
         return null;
+    }
+
+    @Override
+    public List<String> findNonRunningProcessors(List<String> processorIds) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            //update the processing status
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            // explicitly begin txn
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            @SuppressWarnings("unchecked")
+            List<String> resultList = entityManager.createNativeQuery(FIND_NON_RUNNING_PROCESSORS)
+                    .setParameter(PROCESSOR_ID, processorIds)
+                    .getResultList();
+
+            //commits the transaction
+            tx.commit();
+            return resultList;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        }  finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
     }
 
     @Override

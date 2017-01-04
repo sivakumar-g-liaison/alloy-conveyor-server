@@ -67,14 +67,14 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return The list of processors.
 	 */
 	@Override
-	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey) {
+	public List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey) {
 
 		EntityManager entityManager = null;
 
 		try {
 
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+			StringBuilder query = new StringBuilder().append("select processor.pguid from Processor processor")
 					.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" inner join processor.mailbox mailbox")
@@ -105,16 +105,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 				processorQuery.setParameter(SHARD_KEY, shardKey);
 			}
 
-			List<?> proc = processorQuery.getResultList();
-			List<Processor> processors = new ArrayList<Processor>();
-
-			Iterator<?> iter = proc.iterator();
-			Processor processor;
-			while (iter.hasNext()) {
-				processor = (Processor) iter.next();
-				processors.add(processor);
-			}
-
+            @SuppressWarnings("unchecked")
+            List<String> processors = processorQuery.getResultList();
 			return processors;
 		} finally {
 			if (entityManager != null) {

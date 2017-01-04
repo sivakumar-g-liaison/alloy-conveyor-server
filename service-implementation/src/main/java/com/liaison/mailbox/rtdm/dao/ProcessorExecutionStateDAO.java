@@ -49,6 +49,10 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
             + " AND STATE.EXEC_STATUS <>:" + EXEC_STATUS
             + " FOR UPDATE";
 
+    String GET_PROCESSOR_EXECUTION_STATE = "SELECT PGUID, EXEC_STATUS FROM PROCESSOR_EXEC_STATE STATE"
+            + " WHERE STATE.PROCESSOR_ID =:" + PROCESSOR_ID
+            + " FOR UPDATE";
+
     String UPDATE_PROCESSOR_EXECUTION_STATE_VALUES = "UPDATE PROCESSOR_EXEC_STATE" +
             " SET EXEC_STATUS =:" + EXEC_STATUS +
             " , LAST_EXEC_STATE =:" + LAST_EXECUTION_STATE +
