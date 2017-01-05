@@ -99,13 +99,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             // retrieve required properties
             FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
-            boolean binary = ftpDownloaderStaticProperties.isBinary();
-            boolean passive = ftpDownloaderStaticProperties.isPassive();
-
-            if (ftpDownloaderStaticProperties != null) {
-                ftpsRequest.setBinary(binary);
-                ftpsRequest.setPassive(passive);
-            }
+            ftpsRequest.setBinary(ftpDownloaderStaticProperties.isBinary());
+            ftpsRequest.setPassive(ftpDownloaderStaticProperties.isPassive());
 
             LOGGER.info(constructMessage("Start run"));
             startTime = System.currentTimeMillis();
