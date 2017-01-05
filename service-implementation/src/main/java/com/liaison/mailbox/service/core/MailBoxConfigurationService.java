@@ -412,11 +412,11 @@ public class MailBoxConfigurationService {
 			tx.commit();
 
 			// response message construction
-			if (EntityStatus.DELETED.value().equals(retrievedMailBox.getMbxStatus())) {
-				serviceResponse.setResponse(new ResponseDTO(Messages.DELETED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
-			} else {
-				serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
-			}
+            if (EntityStatus.DELETED.value().equals(retrievedMailBox.getMbxStatus())) {
+                serviceResponse.setResponse(new ResponseDTO(Messages.DELETED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+            } else {
+                serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+            }
 
 			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(retrievedMailBox.getPrimaryKey())));
 			LOG.debug("Exit from revise mailbox.");

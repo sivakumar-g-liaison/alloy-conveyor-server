@@ -136,12 +136,12 @@ public class ProcessorConfigurationService {
 						Response.Status.CONFLICT);
 			}
 
-			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
-			MailBox retrievedMailBox = mailBoxConfigDAO.find(MailBox.class, mailBoxGuid);
-			if (null == retrievedMailBox || EntityStatus.DELETED.value().equals(retrievedMailBox.getMbxStatus())) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,
-						mailBoxGuid, Response.Status.BAD_REQUEST);
-			}
+            MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
+            MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, mailBoxGuid);
+            if (null == mailBox || EntityStatus.DELETED.value().equals(mailBox.getMbxStatus())) {
+                throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,
+                        mailBoxGuid, Response.Status.BAD_REQUEST);
+            }
 
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
             if ((ProcessorType.FILEWRITER.equals(foundProcessorType) 
@@ -177,8 +177,8 @@ public class ProcessorConfigurationService {
 				}
 			}
 
-			createMailBoxAndProcessorLink(serviceRequest, null, processor);
-
+            //Creates link between mailbox and processor.
+            processor.setMailbox(mailBox);
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
 
 			// adding service instance id
@@ -201,12 +201,6 @@ public class ProcessorConfigurationService {
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
 			int count = msiDao.getMailboxServiceInstanceCount(processor.getMailbox().getPguid(), serviceInstance.getPguid());
-
-			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
-			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,
-						processor.getMailbox().getPguid(), Response.Status.BAD_REQUEST);
-			}
 
 			if (count == 0) {
 				// Creates relationship mailbox and service instance id
@@ -531,11 +525,11 @@ public class ProcessorConfigurationService {
 
 			// response message construction
 			ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
-			if (EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
-				serviceResponse.setResponse(new ResponseDTO(Messages.DELETED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
-			} else {
-				serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
-			}
+            if (EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
+                serviceResponse.setResponse(new ResponseDTO(Messages.DELETED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+            } else {
+                serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+            }
 
 			serviceResponse.setProcessor(dto);
 
