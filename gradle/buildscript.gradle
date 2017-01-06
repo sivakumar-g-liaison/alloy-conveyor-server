@@ -25,6 +25,6 @@ dependencies {
     classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.+'
     classpath 'com.kageiit:url-cache-plugin:1.+'
 
-	classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.1'
+    classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.1'
     classpath 'org.owasp:dependency-check-gradle:1.+'
 }
