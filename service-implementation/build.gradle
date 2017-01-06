@@ -76,9 +76,9 @@ allprojects {
 	 }
 }
 
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/publish-service.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/war.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/consolidate-testresults.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/publish-service.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/war.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/consolidate-testresults.gradle')
 
 war {
     baseName = rootProject.name

@@ -17,29 +17,11 @@ def installPath = file("$rootDir/install").getCanonicalPath()
 def installTomcat = "$installPath/tomcat"
 
 configurations {
-    deployJre
     deployTomcat
 }
 
 dependencies {
-    deployJre    "com.oracle.java:jre:${javaRelease}:linux-x64"
     deployTomcat "org.apache.tomcat:tomcat:${tomcatVersion}@zip"
-}
-
-// stage JRE in the installer path
-// =======================================================================
-//TODO write original file name into jre.version.txt
-task stageJRE(description: "Fetches and stages JRE for bundler", group: "Production Bundler") {
-    outputs.files("$installPath/jre")
-    doFirst {
-        copy {
-            from(tarTree(configurations.deployJre.fileCollection { dep -> dep.name == 'jre' }.singleFile))
-            into "$installPath"
-        }
-        ant.move(toDir: "$installPath/jre", overwrite: true) {
-            fileset(dir: "$installPath/jre${javaVersion}")
-        }
-    }
 }
 
 // stage Tomcat in the installer path
