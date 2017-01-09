@@ -65,9 +65,10 @@ public class BaseResource {
     public static final String HEADER_GUID = "guid";
     public static final String SIID = "siid";
     public static final String MULTIPLE = "MULTIPLE";
-	private static final int MAX_STATUS_CODE = 299;
+    private static final int MAX_STATUS_CODE = 299;
+	protected static final String HARD_DELETE = "hardDelete";
 
-	protected void auditAttempt(String message) {
+    protected void auditAttempt(String message) {
 
 		AuditStatement auditStatement = new DefaultAuditStatement(Status.ATTEMPT, message, PCIV20Requirement.PCI10_2_5,
 				PCIV20Requirement.PCI10_2_2);
