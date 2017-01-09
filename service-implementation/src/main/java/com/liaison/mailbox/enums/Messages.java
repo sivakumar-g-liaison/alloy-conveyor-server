@@ -50,6 +50,7 @@ public enum Messages {
 	CREATED_SUCCESSFULLY("%s created successfully."),
 	RECEIVED_SUCCESSFULLY("%s received successfully."),
 	REVISED_SUCCESSFULLY("%s revised successfully."),
+	DELETED_SUCCESSFULLY("%s deleted successfully."),
 	READ_SUCCESSFUL("%s read successfully."),
 	SEARCH_SUCCESSFUL("%s searched successfully."),
 	DEACTIVATION_SUCCESSFUL("%s deactivated successfully."),

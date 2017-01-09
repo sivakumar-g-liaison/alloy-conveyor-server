@@ -406,13 +406,24 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
     			showSaveMessage("Mailbox creation is not allowed, and it is allowed when it traverses from a task", 'error');
     			return;
     		}
+            if ($scope.status.id === "DELETED") {
+                $('#confirmMailboxDelete').modal('show');
+            } else {
+                $scope.confirmMailboxSave();
+            }
+        };
+
+        $scope.confirmMailboxSave = function() {
             fromAddProcsr = false;
             $scope.saveForm();
             $scope.valueSelectedinSelectionBox.value = '';
-		    $scope.showAddNew.value = false ;      
+            $scope.showAddNew.value = false ;
         };
-        
-       
+
+        $scope.closeconfirmMailboxDelete = function() {
+            $('#confirmMailboxDelete').modal('hide');
+        };
+
         // Property grid
 
         $scope.valueSelectedinSelectionBox = {

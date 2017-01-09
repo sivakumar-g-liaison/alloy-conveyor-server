@@ -240,13 +240,20 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(STATUS)
 						.append(" and processor.procsrStatus = :")
 						.append(STATUS);
-			}
+            } else {
+                query.append(" and mbx.mbxStatus <> :")
+                     .append(STATUS_DELETE)
+                     .append(" and processor.procsrStatus <> :")
+                     .append(STATUS_DELETE);
+            }
 
 			Query processorQuery = entityManager.createQuery(query.toString())
 												.setParameter(PGUID, mbxGuid);
 			if (activeEntityRequired) {
 				processorQuery.setParameter(STATUS, EntityStatus.ACTIVE.value());
-			}		
+            } else {
+                processorQuery.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
+            }
 			
 			List<?> proc = processorQuery.getResultList();
 			Iterator<?> iter = proc.iterator();

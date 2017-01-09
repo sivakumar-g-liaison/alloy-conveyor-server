@@ -523,6 +523,8 @@ var rest = myApp.controller(
                             );
                 	    } else {
                 	    	showSaveMessage(data.getProcessorResponse.response.message, 'error');
+                	    	$scope.readAllProcessors();
+                	    	$scope.addNew();
                 	    }
                     }
                 );
@@ -593,12 +595,23 @@ var rest = myApp.controller(
             		showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
         			return;
         		}
+                if ($scope.status.value === "DELETED") {
+                    $("#confirmProcessorDelete").modal('show');
+                } else {
+                    $scope.confirmProcessorSave();
+                }
+            };
+
+            $scope.closeConfirmProcessorDelete = function () {
+                $("#confirmProcessorDelete").modal('hide');
+            }
+
+            $scope.confirmProcessorSave = function () {
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
                 $scope.showAddNewComponent.value=false;
-               
-            };
-			
+            }
+
             $scope.saveProcessor = function () {		    
 			
 				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
@@ -997,7 +1010,7 @@ var rest = myApp.controller(
 			}
             $scope.addNew = function () {
 
-	            	if ($rootScope.serviceInstanceId == "") {
+	            	if ($rootScope.serviceInstanceId == "" && !$scope.isEdit) {
 						showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
 						return;
 					}
