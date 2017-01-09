@@ -1231,7 +1231,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.DELETED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
     }
     
     /**
@@ -1282,7 +1282,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.DELETED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
         
         //Getting the deleted processor
         GetProcessorResponseDTO procDeletedGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procReviseResponseDTO.getProcessor().getGuId());
@@ -1339,7 +1339,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.DELETED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
         
         ProcessorConfigurationService processor = new ProcessorConfigurationService();
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -1412,7 +1412,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         // Assertion
         Assert.assertEquals(SUCCESS, procReviseResponseDTO.getResponse().getStatus());
-        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.REVISED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(procReviseResponseDTO.getResponse().getMessage().contains(Messages.DELETED_SUCCESSFULLY.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
         
         // Triggering the profile attached only to the deleted processor
         MailBoxService triggerProfileService = new MailBoxService();
