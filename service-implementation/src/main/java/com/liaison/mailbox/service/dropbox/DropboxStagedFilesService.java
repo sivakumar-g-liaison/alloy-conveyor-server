@@ -9,18 +9,6 @@
  */
 package com.liaison.mailbox.service.dropbox;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -47,7 +35,16 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.validation.GenericValidator;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.PAGING_COUNT;
 
@@ -56,16 +53,12 @@ import static com.liaison.mailbox.MailBoxConstants.PAGING_COUNT;
  *
  * @author OFS
  */
-public class DropboxStagedFilesService {
+public class DropboxStagedFilesService extends DropboxBaseService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFilesService.class);
 
-	public static final String STAGED_FILES = "Staged Files";
+	private static final String STAGED_FILES = "Staged Files";
 	public static final String STAGED_FILE = "Staged File";
-	private static String NEW_LINE = "\n\n";
-	private static final String CONVEYOR = "Liaison Conveyor URL";
-	private static String SEPARATOR = ": ";
-	private static String PROPERTY_CONVEYOR_URL = "com.liaison.dropbox.conveyorUrl";
 
 	/**
 	 * Method to retrieve all staged files of the mailboxes linked to tenancy keys available in the manifest
@@ -87,32 +80,14 @@ public class DropboxStagedFilesService {
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
 		List<StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
 
-		LOG.info("Retrieving tenancy keys from acl-manifest");
-
-		// retrieve the tenancy key from acl manifest
-		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
-		if (tenancyKeys.isEmpty()) {
-			LOG.error("Retrieval of tenancy key from acl manifest failed");
-			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
-		}
-
-		LOG.debug("The retrieved tenancykey values are {}", tenancyKeys);
-
-		// retrieve corresponding mailboxes of the available tenancyKeys.
-		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
-		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
-		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeys);
-
-		if (mailboxIds.isEmpty()) {
-			LOG.error("There are no mailboxes linked to the tenancyKeys");
-			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys",
-					Response.Status.NOT_FOUND);
-		}
+        List<String> mailboxIds = validateAndGetMailboxes(aclManifestJson);
 
 		// retrieve searched staged files of mailboxes.
-		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
-		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, searchFilter.getStagedFileName(),
-				searchFilter.getStatus());
+        StagedFileDAO stagedFileDao = new StagedFileDAOBase();
+        totalCount = stagedFileDao.getStagedFilesCountByName(
+                mailboxIds,
+                searchFilter.getStagedFileName(),
+                searchFilter.getStatus());
         pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(
                 searchFilter.getPage(),
                 searchFilter.getPageSize(),
@@ -124,8 +99,10 @@ public class DropboxStagedFilesService {
         }
 
         serviceResponse.setTotalItems(totalCount);
-		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, searchFilter,
-				pageOffsetDetails);
+        List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(
+                mailboxIds,
+                searchFilter,
+                pageOffsetDetails);
 
 		if (stagedFiles.isEmpty()) {
 			LOG.info("There are no staged files available for linked mailboxes");
@@ -257,91 +234,42 @@ public class DropboxStagedFilesService {
 		}
 	}
 
-	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid)
+	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid, boolean hardDelete)
 			throws IOException, JAXBException {
 
 		LOG.debug("Entering into drop staged files service.");
 
-		LOG.info("Retrieving tenancy keys from acl-manifest");
-		// retrieve the tenancy key from acl manifest
-		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
-		if (tenancyKeys.isEmpty()) {
-			LOG.error("Retrieval of tenancy key from acl manifest failed");
-			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
-		}
-
-		LOG.debug("The retrieved tenancykey values are {}", tenancyKeys);
-
-		// retrieve corresponding mailboxes of the available tenancyKeys.
-		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
-		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
-		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeys);
-
-		if (mailboxIds.isEmpty()) {
-			LOG.error("There are no mailboxes linked to the tenancyKeys");
-			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys",
-					Response.Status.NOT_FOUND);
-		}
+        List<String> mailboxIds = validateAndGetMailboxes(aclManifest);
 
 		DropBoxUnStagedFileResponseDTO dropBoxUnStagedResponse = new DropBoxUnStagedFileResponseDTO();
 		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-		// validation the ResponseDTO
-		GenericValidator validator = new GenericValidator();
-		validator.validate(dropBoxUnStagedResponse);
 
 		// Find the staged file based on given GUID and mailboxIds
 		List<StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfMailboxesBasedonGUID(mailboxIds, guid);
-
 		if (stagedFiles.isEmpty()) {
 			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, guid,
 					Response.Status.BAD_REQUEST);
 		}
 
-		// UnStaging the stagedFile by changing its status to INACTIVE
 		StagedFile unStagingFile = stagedFiles.get(0);
-		unStagingFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-		stagedFileDAO.merge(unStagingFile);
+        if (hardDelete) {
+            //hard deleting the staged file entity
+            stagedFileDAO.remove(unStagingFile);
+        } else {
+            // UnStaging the stagedFile by changing its status to INACTIVE
+            unStagingFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+            stagedFileDAO.merge(unStagingFile);
+        }
 
 		// Setting the necessary details to the response
 		dropBoxUnStagedResponse.setGUID(guid);
-		dropBoxUnStagedResponse.setResponse(new ResponseDTO(Messages.DELETE_ONDEMAND_SUCCESSFUL, STAGED_FILE,
+		dropBoxUnStagedResponse.setResponse(new ResponseDTO(
+                (hardDelete) ? Messages.STAGED_FILE_DELETE_SUCCESSFUL : Messages.DELETE_ONDEMAND_SUCCESSFUL,
+                STAGED_FILE,
 				Messages.SUCCESS));
 		LOG.debug("Exit from drop staged files service.");
 
 		return dropBoxUnStagedResponse;
 	}
-	
-	/**
-	 * Method to send email once file is staged successfully
-	 * 
-	 * @param mailbox - mailbox
-	 * @param emailSubject - email subject
-	 * @param emailBody - email Body
-	 */
-	private void sendEmail(MailBox mailbox, String emailSubject, String emailBody) {
-		
-		List <String> emailAddressList = mailbox.getEmailAddress();
-        if (null == emailAddressList || emailAddressList.isEmpty()) {
-            LOG.info("Email address is not configured in the mailbox");
-            return;
-        }
 
-		EmailInfoDTO emailInfo = new EmailInfoDTO(mailbox.getMbxName(), null, null, emailAddressList, emailSubject, emailBody, true, true);
-		EmailNotifier.sendEmail(emailInfo);
-	}
-	
-	private String constructEmailBody(String fileName) {
-		
-		StringBuilder emailContentBuilder = new StringBuilder()	
-												.append("Please login to Liaison Conveyor to download your file");
-		if (!MailBoxUtil.isEmpty(fileName)) {
-			emailContentBuilder.append(" '").append(fileName).append("'");
-		}
-		emailContentBuilder.append(NEW_LINE)
-						   .append(CONVEYOR)
-						   .append(SEPARATOR)
-						   .append(MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_CONVEYOR_URL));
-        return emailContentBuilder.toString();
-		
-	}
 }

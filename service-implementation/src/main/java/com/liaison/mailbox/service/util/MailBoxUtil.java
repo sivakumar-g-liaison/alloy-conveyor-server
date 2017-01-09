@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -228,25 +229,28 @@ public class MailBoxUtil {
 		return tenancyKeys;
 	}
 
-	public static List<String> getTenancyKeyGuids(String aclManifestJson)
-			throws IOException {
+    /**
+     *  Gets tenancy keys from the manfiest
+     *
+     * @param aclManifestJson manifest details
+     * @return list of tenancy key
+     * @throws IOException
+     */
+    public static List<String> getTenancyKeyGuids(String aclManifestJson)
+            throws IOException {
 
-		List<String> tenancyKeyGuids = new ArrayList<String>();
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-
-		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-			tenancyKeyGuids.add(rbac.getDomainInternalName());
-		}
-		return tenancyKeyGuids;
-
-	}
+        return gemClient.getDomainsFromACLManifest(aclManifestJson)
+                .stream()
+                .map(RoleBasedAccessControl::getDomainInternalName)
+                .collect(Collectors.toList());
+    }
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
 	 *
-	 * @param tenancyKeyGuid
-	 * @param tenancyKeys
-	 * @return
+	 * @param aclManifestJson manifest details
+	 * @param tenancyKeyGuid tenancy key guid
+	 * @return tenancy key name(org name)
 	 * @throws IOException
 	 */
 	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid)
