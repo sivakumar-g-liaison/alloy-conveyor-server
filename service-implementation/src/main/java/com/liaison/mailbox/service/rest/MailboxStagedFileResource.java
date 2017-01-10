@@ -80,13 +80,13 @@ public class MailboxStagedFileResource extends AuditedResource {
     }
 	
     /**
-     * REST method to update staged files status to inactive.
+     * REST method to update staged files status to failed.
      * 
      * @return Response Object
     */
     @PUT
     @Path("/{pguid}")
-    @ApiOperation(value = "staged files status update", notes = "staged files status update from failed to inactive", 
+    @ApiOperation(value = "staged files status update", notes = "staged files status update from staged to failed", 
     position = 2,
     response = com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
