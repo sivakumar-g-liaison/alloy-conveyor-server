@@ -116,9 +116,9 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
 
-                if (EntityStatus.FAILED.value().equals(file.getStagedFileStatus())) {
+                if (EntityStatus.STAGED.value().equals(file.getStagedFileStatus())) {
 	
-                    file.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                    file.setStagedFileStatus(EntityStatus.FAILED.value());
                     file.setModifiedDate(MailBoxUtil.getTimestamp());
 
                     // updating the file with inactive status
