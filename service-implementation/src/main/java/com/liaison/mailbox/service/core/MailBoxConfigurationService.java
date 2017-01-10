@@ -66,8 +66,8 @@ import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.HTTPClientUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -106,17 +106,11 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
 						Response.Status.BAD_REQUEST);
 			}
-			String sbBasUrl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SERVICE_BROKER_BASE_URL);
-			String url = sbBasUrl+"read/edm/ServiceInstance/" + serviceInstanceId;
-			try {
-			    String response = HTTPClientUtil.getHTTPResponseInString(LOG, url, null);
-			    if (MailBoxUtil.isEmpty(response)) {
-			        throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
-			                Response.Status.BAD_REQUEST);
-			    }
-            } catch (Exception e) {
-                throw new RuntimeException(MailBoxConstants.MAILBOX + "Client HTTP GET request failed, "+e.getMessage());
-            }
+			String response = ServiceBrokerUtil.getEntity("ServiceIstance", serviceInstanceId);
+			
+			if (MailBoxUtil.isEmpty(response)) { 
+			    // Throw
+			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
