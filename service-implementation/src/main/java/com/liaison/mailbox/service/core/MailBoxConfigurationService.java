@@ -106,10 +106,12 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
 						Response.Status.BAD_REQUEST);
 			}
+			
 			String response = ServiceBrokerUtil.getEntity("ServiceIstance", serviceInstanceId);
 			
 			if (MailBoxUtil.isEmpty(response)) { 
-			    // Throw
+			    throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_IS_INVALID,
+			            Response.Status.BAD_REQUEST);
 			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
