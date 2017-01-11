@@ -77,7 +77,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
-		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, "3A7D4AE638B14113818651F92E67FD16", aclManifest, mbxDTO.getModifiedBy());
 
 		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
