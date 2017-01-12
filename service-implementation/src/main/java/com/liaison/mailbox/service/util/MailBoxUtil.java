@@ -67,9 +67,11 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
 import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
+import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
 import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
@@ -668,6 +670,10 @@ public class MailBoxUtil {
 
         if (isEmpty(pipelineId)) {
             throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
+        }
+
+        if (isEmpty(ServiceBrokerUtil.getEntity(PIPELINE, pipelineId))) {
+            throw new MailBoxConfigurationServicesException(ID_IS_INVALID, PIPELINE, Response.Status.BAD_REQUEST);
         }
     }
 
