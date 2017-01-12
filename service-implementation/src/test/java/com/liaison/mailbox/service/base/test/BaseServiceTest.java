@@ -67,7 +67,7 @@ public abstract class BaseServiceTest {
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
 	public String tenancyKey = "G2_DEV_INT_MONIKER";
-	public String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
+	public String serviceInstanceId = "3A7D4AE638B14113818651F92E67FD16";
 	public String spectrumUri = "fs2://secure@dev-int/mailbox/payload/1.0/21F9B154FB54495A855EAC63E1CDC69B";
 	public String response = "response";
 

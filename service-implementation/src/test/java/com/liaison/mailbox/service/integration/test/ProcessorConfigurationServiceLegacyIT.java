@@ -60,7 +60,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
 
-    private String serviceInstanceId = "5D9C3B487184426E9F9629EFEE7C5913";
     private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
     private String ftpURL = "ftp://10.146.18.10:21";
     private String ftpsURL = "ftps://10.146.18.15:21";
@@ -224,6 +223,38 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         GetProcessorResponseDTO processorReadResponse = processorService.getProcessor(processorResponse.getProcessor().getGuId(), false);
         assertRemoteProcessorStaticCheck("includeFiles", processorLegacy.getRemoteProcessorProperties().getIncludeFiles(), processorReadResponse);
         assertRemoteProcessorStaticCheck("excludeFiles", processorLegacy.getRemoteProcessorProperties().getExcludeFiles(), processorReadResponse);
+
+    }
+
+    /**
+     * Method to create sweeper processor with valid data.
+     *
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testCreateSweeperProcessorWithInvalidPipelineId() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+
+        // Adding Mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mailboxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        String mailboxId = response.getMailBox().getGuid();
+
+        // Adding Processor
+        AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorLegacyDTO processorLegacy = constructLegacyProcessorDTO(ProcessorType.SWEEPER.getCode(), Protocol.SWEEPER.name(), EntityStatus.ACTIVE.value());
+        processorLegacy.getRemoteProcessorProperties().setPipeLineID("INVALID");
+        processorLegacy.setLinkedMailboxId(mailboxId);
+        processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
+        ProcessorConfigurationService processorService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
+        Assert.assertEquals(FAILURE, processorResponse.getResponse().getStatus());
 
     }
 
@@ -715,7 +746,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
                 break;
             case "sweeper":
                 legacyProperties.setDeleteFileAfterSweep(true);
-                legacyProperties.setPipeLineID("pipeline" + System.currentTimeMillis());
+                legacyProperties.setPipeLineID("E074B40BB4B74431AEDBA186D26CF3DC");
                 legacyProperties.setIncludeFiles(includeFiles);
                 legacyProperties.setExcludeFiles(excludeFiles);
         }

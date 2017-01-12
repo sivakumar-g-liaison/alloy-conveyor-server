@@ -46,11 +46,11 @@ public final class HTTPClientUtil {
 	 * 
 	 * @param httpURL - web content URL. The URL protocol should be in http protocol.
 	 * @return String - web content in text format
-	 * @throws MalformedURLException
+	 * @throws IOException
 	 * @throws LiaisonException
 	 */
 	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers)
-			throws MalformedURLException, LiaisonException, IOException {
+			throws IOException, LiaisonException {
 
 		try (OutputStream output = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 

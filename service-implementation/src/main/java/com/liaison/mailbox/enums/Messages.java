@@ -127,6 +127,9 @@ public enum Messages {
 
     //retrieving service instance id from query parameter
     SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter."),
+    
+    //validating service instance Id
+    ID_IS_INVALID("%s ID is not available in service broker."),
 
     // Mailbox Expectation Management
     MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
