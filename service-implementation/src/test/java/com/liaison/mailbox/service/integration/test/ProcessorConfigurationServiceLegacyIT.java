@@ -232,7 +232,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
      * @throws JAXBException
      * @throws IOException
      */
-    @Test
+    @Test(expectedExceptions = java.lang.RuntimeException.class)
     public void testCreateSweeperProcessorWithInvalidPipelineId() throws MailBoxConfigurationServicesException, JAXBException, IOException {
 
         // Adding Mailbox
@@ -253,8 +253,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacy.setLinkedMailboxId(mailboxId);
         processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
         ProcessorConfigurationService processorService = new ProcessorConfigurationService();
-        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
-        Assert.assertEquals(FAILURE, processorResponse.getResponse().getStatus());
+        processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
 
     }
 
