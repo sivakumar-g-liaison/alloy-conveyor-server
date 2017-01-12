@@ -325,6 +325,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
                     glassMessageDTO.setFileName(workTicket.getFileName());
                     glassMessageDTO.setStatus(ExecutionState.FAILED);
+                    glassMessageDTO.setPipelineId(workTicket.getPipelineId());
                     glassMessageDTO.setMessage(e.getMessage());
                     MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
 

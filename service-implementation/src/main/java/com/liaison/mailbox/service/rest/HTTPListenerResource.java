@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
@@ -69,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID_HEADER;
-import static com.liaison.mailbox.MailBoxConstants.HTTP_REMOTE_ADDRESS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
@@ -149,6 +147,7 @@ public class HTTPListenerResource extends AuditedResource {
 
                 //GlobalProcess ID
                 String globalProcessId = UUIDGen.getCustomUUID();
+                String pipelineId = null;
 
                 // Fish tag global process id
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -176,15 +175,15 @@ public class HTTPListenerResource extends AuditedResource {
 				logger.info("HTTP(S)-SYNC : for the mailbox {} - Start", mailboxInfo);
 				try {
 
-					HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
-					syncProcessor.validateRequestSize(request.getContentLength());
-
-					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
+                    HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
+                    Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
 							mailboxInfo,
 							HTTPSYNCPROCESSOR,
 							isMailboxIdAvailable);
+                    pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
 
-					// authentication should happen only if the property "Http Listner Auth Check Required" is true
+                    syncProcessor.validateRequestSize(request.getContentLength());
+                    // authentication should happen only if the property "Http Listener Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
 							mailboxInfo);
 
@@ -210,7 +209,8 @@ public class HTTPListenerResource extends AuditedResource {
                             ExecutionState.PROCESSING,
                             globalProcessId,
                             HTTPSYNCPROCESSOR,
-                            Protocol.HTTPSYNCPROCESSOR);
+                            Protocol.HTTPSYNCPROCESSOR,
+                            pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
@@ -253,7 +253,8 @@ public class HTTPListenerResource extends AuditedResource {
 								ExecutionState.COMPLETED,
 								globalProcessId,
 								HTTPSYNCPROCESSOR,
-								Protocol.HTTPSYNCPROCESSOR);
+                                Protocol.HTTPSYNCPROCESSOR,
+                                pipelineId);
                         successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
 
                         //set outbound size
@@ -271,7 +272,7 @@ public class HTTPListenerResource extends AuditedResource {
 				} catch(Exception e) {
 
                     logger.error(e.getMessage(), e);
-                    logSyncLENSFailure(firstCornerTimeStamp, globalProcessId, workTicket, e, request);
+                    logSyncLENSFailure(firstCornerTimeStamp, globalProcessId, workTicket, e, request, pipelineId);
 
                     if (NO_PRIVILEGE.equals(e.getMessage())) {
                         throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
@@ -362,6 +363,7 @@ public class HTTPListenerResource extends AuditedResource {
 
                 //globalProcessId
                 String globalProcessId = UUIDGen.getCustomUUID();
+                String pipelineId = null;
 
                 //Fix for GMB-502
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -387,10 +389,11 @@ public class HTTPListenerResource extends AuditedResource {
 
 				try {
 				    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
-					asyncProcessor.validateRequestSize(request.getContentLength());
 
-					Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
+                    Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
 							mailboxInfo, ProcessorType.HTTPASYNCPROCESSOR, isMailboxIdAvailable);
+                    pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
+                    asyncProcessor.validateRequestSize(request.getContentLength());
 
 					// authentication should happen only if the property "Http Listener Auth Check Required" is true
 					logger.info("HTTP(S)-ASYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
@@ -417,7 +420,8 @@ public class HTTPListenerResource extends AuditedResource {
                             ExecutionState.PROCESSING,
                             globalProcessId,
                             HTTPASYNCPROCESSOR,
-                            Protocol.HTTPASYNCPROCESSOR);
+                            Protocol.HTTPASYNCPROCESSOR,
+                            pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
@@ -460,7 +464,7 @@ public class HTTPListenerResource extends AuditedResource {
 
                     String errorMessage = e.getMessage();
                     logger.error(errorMessage, e);
-                    logAsyncLensFailure(globalProcessId, workTicket, e, request);
+                    logAsyncLensFailure(globalProcessId, workTicket, e, request, pipelineId);
 
                     if (NO_PRIVILEGE.equals(errorMessage)) {
                         throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
@@ -593,7 +597,8 @@ public class HTTPListenerResource extends AuditedResource {
             final ExecutionState state,
             final String globalProcessId,
             final ProcessorType type,
-            final Protocol protocol) {
+            final Protocol protocol,
+            final String pipelineId) {
 
         GlassMessage glassMessage = new GlassMessage();
         glassMessage.setCategory(type);
@@ -614,13 +619,14 @@ public class HTTPListenerResource extends AuditedResource {
 
         if (ExecutionState.PROCESSING.equals(state)) {
 
-            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
+            glassMessage.setInboundPipelineId(pipelineId);
             glassMessage.setStatus(ExecutionState.PROCESSING);
             glassMessage.setInAgent(GatewayType.REST);
             glassMessage.setInSize((long) request.getContentLength());
 
             //sets sender Ip
             glassMessage.setSenderIp(getRemoteAddress(request));
+            glassMessage.setOrganizationDetails(pipelineId);
         } else if (ExecutionState.COMPLETED.equals(state)) {
 
             glassMessage.setStatus(ExecutionState.COMPLETED);
@@ -635,6 +641,9 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets receiver Ip
             glassMessage.setReceiverIp(getRemoteAddress(request));
+            if (!MailBoxUtil.isEmpty(pipelineId)) {
+                glassMessage.setOrganizationDetails(pipelineId);
+            }
         }
 
         return glassMessage;
@@ -648,12 +657,14 @@ public class HTTPListenerResource extends AuditedResource {
      * @param workTicket workticket
      * @param e exception
      * @param request http request
+     * @param pipelineId pipeline tied with the processor
      */
     private void logSyncLENSFailure(ExecutionTimestamp firstCornerTimeStamp,
                                     String globalProcessId,
                                     WorkTicket workTicket,
                                     Exception e,
-                                    HttpServletRequest request) {
+                                    HttpServletRequest request,
+                                    String pipelineId) {
 
         GlassMessage failedMsg = constructGlassMessage(
                 request,
@@ -661,7 +672,8 @@ public class HTTPListenerResource extends AuditedResource {
                 ExecutionState.FAILED,
                 globalProcessId,
                 HTTPSYNCPROCESSOR,
-                Protocol.HTTPSYNCPROCESSOR);
+                Protocol.HTTPSYNCPROCESSOR,
+                pipelineId);
 
         //sets sender and receiver ip
         failedMsg.setSenderIp(getRemoteAddress(request));
@@ -688,11 +700,13 @@ public class HTTPListenerResource extends AuditedResource {
      * @param workTicket workticket
      * @param e exception
      * @param request http request
+     * @param pipelineId pipeline guid
      */
     private void logAsyncLensFailure(String globalProcessId,
                                      WorkTicket workTicket,
                                      Exception e,
-                                     HttpServletRequest request) {
+                                     HttpServletRequest request,
+                                     String pipelineId) {
 
         GlassMessage glassMessage  = constructGlassMessage(
                 request,
@@ -700,7 +714,8 @@ public class HTTPListenerResource extends AuditedResource {
                 ExecutionState.FAILED,
                 globalProcessId,
                 HTTPASYNCPROCESSOR,
-                Protocol.HTTPASYNCPROCESSOR);
+                Protocol.HTTPASYNCPROCESSOR,
+                pipelineId);
 
         //sets sender and receiver ip
         glassMessage.setSenderIp(getRemoteAddress(request));

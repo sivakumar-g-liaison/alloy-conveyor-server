@@ -12,6 +12,7 @@ import java.util.Date;
 
 import com.liaison.commons.message.glass.dom.Status;
 
+import com.liaison.mailbox.dtdm.model.Processor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,6 +76,10 @@ public class MailboxGlassMessageUtil {
             glassMessage.logFourthCornerTimestamp();
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
+
+            if (ProcessorType.SWEEPER.equals(processorType)) {
+                glassMessage.setOrganizationDetails(pipelineId);
+            }
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         } else if (ExecutionState.DUPLICATE.equals(status)) {
             glassMessage.setOutAgent(processProtocol);
@@ -109,6 +114,7 @@ public class MailboxGlassMessageUtil {
             glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
         } else if (ExecutionState.VALIDATION_ERROR.equals(status)) {
+            glassMessage.setOrganizationDetails(pipelineId);
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         }
 
