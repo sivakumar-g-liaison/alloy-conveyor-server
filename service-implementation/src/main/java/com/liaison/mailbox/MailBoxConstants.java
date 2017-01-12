@@ -450,4 +450,5 @@ public interface MailBoxConstants {
     String PROCESSOR_IS_ALREDAY_RUNNING = "The processor is already in progress or Processor Execution state is not available in run time DB for processor ";
     
     String SERVICE_BROKER_BASE_URL = "com.liaison.servicebroker.api.baseUrl";
+    String SERVICE_INSTANCE = "ServiceInstance";
 }

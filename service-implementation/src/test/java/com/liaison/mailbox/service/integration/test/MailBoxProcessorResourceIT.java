@@ -63,7 +63,6 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
 
     private Logger logger = LogManager.getLogger(MailBoxProcessorResourceIT.class);;
     private AddMailBoxResponseDTO responseDTO;
-    private final String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 
     /**
      * @throws java.lang.Exception

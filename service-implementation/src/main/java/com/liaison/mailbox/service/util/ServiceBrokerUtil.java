@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -22,25 +22,23 @@ import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 
 /**
  * This class is used to access service broker entities
- * @author ofs
- *
  */
 public class ServiceBrokerUtil {
-    
-    private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationService.class);
+
+    private static final Logger LOG = LogManager.getLogger(ServiceBrokerUtil.class);
 
     /**
      * This method is used to retrieve entities from service broker
-     * 
-     * @param type
-     * @param pguid
-     * @return
+     *
+     * @param type servic broker entity type
+     * @param pguid pguid of the enityt
+     * @return entity
      */
-    public static String getEntity(String type , String pguid) {
+    public static String getEntity(String type, String pguid) {
 
         try {
 
-            String sbBasUrl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SERVICE_BROKER_BASE_URL);           
+            String sbBasUrl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SERVICE_BROKER_BASE_URL);
             String url = sbBasUrl + "read/edm/" + type + "/" + pguid;
             GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
             Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
@@ -48,6 +46,6 @@ public class ServiceBrokerUtil {
 
         } catch (Exception e) {
             throw new RuntimeException(MailBoxConstants.MAILBOX + "Client HTTP GET request failed, " + e.getMessage());
-        }     
+        }
     }
 }
