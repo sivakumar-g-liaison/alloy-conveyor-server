@@ -130,14 +130,11 @@ liaison.acl.packages=com.liaison.fakepath
 usermanagement.url.authenticate = https://at4d-vpusrmg.liaison.dev/usermanagement/rest/usermanagement/authenticate
 
 #BOOTSTRAP PROPERTIES
-bootstrap.server.url=sftp://at4d-vpboot.liaison.dev:22
-bootstrap.server.username=lsvlmbox01d
-bootstrap.client.enablehostchecking=false
-bootstrap.client.knownhost.filepath=/G2/source-code/mailbox/service-implementation/src/main/resources/bootstrap/known_hosts
-bootstrap.client.privatekey.filepath=/G2/source-code/mailbox/service-implementation/src/main/resources/bootstrap/mbxbootstrapprikey.pem
-bootstrap.client.privatekey.passphrase.filepath=/secure/tomcat/.ssh/passphrase
-bootstrap.remote.keypair.passphrase.filepath=mbx-bootstrap/mbxsignkeypwd.file
-bootstrap.remote.keypair.filepath=mbx-bootstrap/signandverifykeystore.jks
+bootstrap.keypair.location=local
+bootstrap.client.privatekey.classpath.url=/bootstrap/mbxbootstrapprikey.pem
+bootstrap.client.privatekey.passphrase.classpath.url=/bootstrap/passphrase
+bootstrap.client.keypair.passphrase.classpath.url=/bootstrap/mbxsignkeypwd.file
+bootstrap.client.keypair.classpath.url=/bootstrap/signandverifykeystore.jks
 
 #Processor HTTP sync/async URL
 processor.sync.url.display.prefix =   https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/sync?
@@ -179,7 +176,7 @@ mailbox.sla.time.configuration.unit=MINUTES
 #############################################################
 
 # Storage Identifiers
-fs2.storage.identifiers=secure@dev-int,unsecure@dev-int,secure@dev-int-boss,unsecure@dev-int-boss
+fs2.storage.identifiers=secure@dev-int,unsecure@dev-int
 
 # The default location has to be one of the locations above
 # The default should always be the closest instance
@@ -191,7 +188,7 @@ fs2.storage.secure@dev-int.type=SPECTRUM
 fs2.storage.secure@dev-int.ip=at4d-vpspectrum.liaison.dev
 fs2.storage.secure@dev-int.port=443
 fs2.storage.secure@dev-int.username=g2devlab
-fs2.storage.secure@dev-int.password=Herne3Omena56Siili
+fs2.storage.secure@dev-int.password=Green7Bird
 fs2.storage.secure@dev-int.source=G2_MBX
 fs2.storage.secure@dev-int.spaceName=g2-dev-ls
 fs2.storage.secure@dev-int.dataDefinition=Payload
@@ -205,7 +202,7 @@ fs2.storage.unsecure@dev-int.type=SPECTRUM
 fs2.storage.unsecure@dev-int.ip=at4d-vpspectrum.liaison.dev
 fs2.storage.unsecure@dev-int.port=443
 fs2.storage.unsecure@dev-int.username=g2devlab
-fs2.storage.unsecure@dev-int.password=Herne3Omena56Siili
+fs2.storage.unsecure@dev-int.password=Green7Bird
 fs2.storage.unsecure@dev-int.source=G2_MBX
 fs2.storage.unsecure@dev-int.spaceName=g2-dev-ls
 fs2.storage.unsecure@dev-int.dataDefinition=Payload
@@ -267,7 +264,7 @@ com.liaison.mailbox.threadpool.corepoolsize=25
 com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
 
 #skips the queue initializer and works as standalone server
-com.liaison.skip.queue=false
+com.liaison.skip.queue=true
 
 #location of shell script which assign permissions to the created Home Directory for machine accounts
 permission.script.path=/secure/tomcat/dev-int/createFolderAndAssignPermissions.sh

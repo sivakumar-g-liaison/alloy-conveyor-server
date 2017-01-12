@@ -38,6 +38,7 @@ import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -621,6 +622,7 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets sender Ip
             glassMessage.setSenderIp(getRemoteAddress(request));
+            MailboxGlassMessageUtil.logOrganizationDetails(glassMessage, workTicket.getPipelineId());
         } else if (ExecutionState.COMPLETED.equals(state)) {
 
             glassMessage.setStatus(ExecutionState.COMPLETED);
@@ -635,6 +637,7 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets receiver Ip
             glassMessage.setReceiverIp(getRemoteAddress(request));
+            MailboxGlassMessageUtil.logOrganizationDetails(glassMessage, workTicket.getPipelineId());
         }
 
         return glassMessage;

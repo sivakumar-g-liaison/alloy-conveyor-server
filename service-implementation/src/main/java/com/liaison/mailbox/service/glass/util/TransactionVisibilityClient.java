@@ -51,6 +51,8 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
+	private static final String ORGANIZATION_ID = "organization-id";
+	private static final String ORGANIZATION_NAME = "organization-name";
 
 	private TransactionVisibilityAPI visibilityAPI;
 
@@ -156,6 +158,20 @@ public class TransactionVisibilityClient {
             item.setValue(message.getOutboundFileName());
             visibilityAPI.getAdditionalInformation().add(item);
         }
+		
+		if (!MailBoxUtil.isEmpty(message.getOrganizationName())) {
+		    item = new MapItemType();
+		    item.setKey(ORGANIZATION_NAME);
+		    item.setValue(message.getOrganizationName());
+		    visibilityAPI.getAdditionalInformation().add(item);
+		}
+		
+		if (!MailBoxUtil.isEmpty(message.getOrganizationID())) {
+		    item = new MapItemType();
+		    item.setKey(ORGANIZATION_ID);
+		    item.setValue(message.getOrganizationID());
+		    visibilityAPI.getAdditionalInformation().add(item);
+		}
 
         if (!MailBoxUtil.isEmpty(message.getSenderIp())) {
             GlassMessageUtil.logSenderAddress(visibilityAPI, message.getSenderIp());

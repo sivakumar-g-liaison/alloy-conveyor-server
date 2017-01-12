@@ -104,6 +104,8 @@ public class GlassMessage {
     private String senderIp;
     private String receiverIp;
     private boolean arrivalTime;
+    private String organizationName;
+    private String organizationID;
 
 
 	public String getTransferProfileName() {
@@ -400,6 +402,22 @@ public class GlassMessage {
 
     public void setReceiverIp(String receiverIp) {
         this.receiverIp = receiverIp;
+    }
+    
+    public String getOrganizationName() {
+        return organizationName;
+    }
+    
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
+    
+    public String getOrganizationID() {
+        return organizationID;
+    }
+    
+    public void setOrganizationID(String organizationID) {
+        this.organizationID = organizationID;
     }
 
     private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
