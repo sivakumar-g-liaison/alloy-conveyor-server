@@ -27,7 +27,7 @@ import com.liaison.mailbox.service.dto.OrganizationDTO;
  * This class is used to access service broker entities
  */
 public class ServiceBrokerUtil {
-    
+
     private static final Logger LOG = LogManager.getLogger(ServiceBrokerUtil.class);
 
     /**
@@ -41,7 +41,7 @@ public class ServiceBrokerUtil {
 
         try {
 
-            String sbBasUrl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SERVICE_BROKER_BASE_URL);  
+            String sbBasUrl = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SERVICE_BROKER_BASE_URL);
             String url = sbBasUrl + "read/edm/" + type + "/" + pguid;
             GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
             Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");

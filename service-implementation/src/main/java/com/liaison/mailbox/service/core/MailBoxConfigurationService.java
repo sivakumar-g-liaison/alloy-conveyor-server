@@ -67,6 +67,7 @@ import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -105,6 +106,12 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
 						Response.Status.BAD_REQUEST);
 			}
+
+            String response = ServiceBrokerUtil.getEntity(MailBoxConstants.SERVICE_INSTANCE, serviceInstanceId);
+            if (MailBoxUtil.isEmpty(response)) {
+                throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_IS_INVALID,
+                        Response.Status.BAD_REQUEST);
+            }
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {

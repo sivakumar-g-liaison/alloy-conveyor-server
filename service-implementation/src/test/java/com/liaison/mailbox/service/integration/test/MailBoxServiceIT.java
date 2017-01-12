@@ -65,7 +65,6 @@ public class MailBoxServiceIT extends BaseServiceTest {
 	public void testTriggerProfile() throws Exception {
 
 		// Add the Mailbox
-		String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
@@ -74,7 +73,7 @@ public class MailBoxServiceIT extends BaseServiceTest {
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 
-		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		String url = getBASE_URL() + "?sid=" + serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
