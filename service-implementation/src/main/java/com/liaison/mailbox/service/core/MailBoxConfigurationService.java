@@ -70,6 +70,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_INSTANCE;
+import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
+
 /**
  * Class which has mailbox configuration related operations.
  *
@@ -107,12 +110,6 @@ public class MailBoxConfigurationService {
 						Response.Status.BAD_REQUEST);
 			}
 
-            String response = ServiceBrokerUtil.getEntity(MailBoxConstants.SERVICE_INSTANCE, serviceInstanceId);
-            if (MailBoxUtil.isEmpty(response)) {
-                throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_IS_INVALID,
-                        Response.Status.BAD_REQUEST);
-            }
-
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
@@ -127,8 +124,18 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST, MAILBOX,
 						Response.Status.CONFLICT);
 			}
-			// validation
-			GenericValidator validator = new GenericValidator();
+
+            // service instance id validation
+            String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
+            if (MailBoxUtil.isEmpty(response)) {
+                throw new MailBoxConfigurationServicesException(
+                        ID_IS_INVALID,
+                        SERVICE_INSTANCE,
+                        Response.Status.BAD_REQUEST);
+            }
+
+            // validation
+            GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
 				validator.validate(property);
