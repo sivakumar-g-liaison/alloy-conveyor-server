@@ -9,21 +9,19 @@
 
 package com.liaison.mailbox.service.util;
 
+import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
+import com.liaison.commons.util.client.http.HTTPResponse;
+import org.apache.logging.log4j.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.commons.util.client.http.HTTPResponse;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 
