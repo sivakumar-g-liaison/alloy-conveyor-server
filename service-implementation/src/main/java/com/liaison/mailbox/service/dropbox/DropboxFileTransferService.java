@@ -18,6 +18,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.gem.service.dto.OrganizationDTO;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,6 +58,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.UPLOAD_META;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -298,7 +301,8 @@ public class DropboxFileTransferService {
             glassMessage.setInSize(workTicket.getPayloadSize());
             glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
-    		WorkTicketUtil.postWrkTcktToQ(workTicket);
+            setDefaultOrganization(workTicket);
+            WorkTicketUtil.postWrkTcktToQ(workTicket);
 
     		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
     						"GLOBAL PID",
@@ -328,7 +332,7 @@ public class DropboxFileTransferService {
 	    }
 	}
 
-	/**
+    /**
 	 *
 	 * @param aclManifest
 	 * @return
@@ -374,4 +378,18 @@ public class DropboxFileTransferService {
 
 		return serviceResponse;
 	}
+
+    /**
+     *  sets default organization
+     * @param workTicket workticket
+     */
+    private void setDefaultOrganization(WorkTicket workTicket) {
+
+        //set default organization
+        String meta = workTicket.getHeader(UPLOAD_META);
+        workTicket.removeHeader(UPLOAD_META);
+        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(workTicket.getPipelineId());
+        meta += ";organization=" + org.getName();
+        workTicket.addHeader(UPLOAD_META, meta);
+    }
 }
