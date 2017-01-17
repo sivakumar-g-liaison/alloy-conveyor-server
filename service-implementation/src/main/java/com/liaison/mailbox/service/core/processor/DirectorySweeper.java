@@ -159,12 +159,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			            
 			            if (isPayloadValid(workTicket)) {
 
+			                workTicketsToPost.add(workTicket);
+			            } else {
 			                LOGGER.warn(constructMessage("The file {} is empty and empty files not allowed"), workTicket.getFileName());
 			                logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR);
 			                String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
 			                delete(filePath);
-			            } else {
-			                workTicketsToPost.add(workTicket);
 			            }
 			        }
 			    } else {
