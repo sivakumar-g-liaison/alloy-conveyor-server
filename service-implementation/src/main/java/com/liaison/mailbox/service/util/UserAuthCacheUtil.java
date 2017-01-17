@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.mailbox.service.core.MailboxStagedFileService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +89,7 @@ public class UserAuthCacheUtil {
     		                umClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
     		                umClient.authenticate();
     		                if (!umClient.isSuccessful()) {
-    		                    throw new RuntimeException(umClient.getMessage());
+    		                    throw new MailBoxServicesException(umClient.getMessage(), Response.Status.UNAUTHORIZED);
     		                }
     		                return umClient.getAuthenticationToken();
             			}
@@ -101,7 +102,7 @@ public class UserAuthCacheUtil {
     /**
      * Helper method to authenticate the given token
      * 
-     * @param token
+     * @param token basic auth header
      */
     public static String authenticate(String token) {
 
@@ -113,8 +114,8 @@ public class UserAuthCacheUtil {
     			logger.debug("User authentication successfull");
     		}
     		return authenticationCache.get(token);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+			throw new MailBoxServicesException(e.getMessage(), Response.Status.UNAUTHORIZED);
         }
     }
 }
