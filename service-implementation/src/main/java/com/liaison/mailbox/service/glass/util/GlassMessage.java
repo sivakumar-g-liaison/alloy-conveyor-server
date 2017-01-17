@@ -576,8 +576,5 @@ public class GlassMessage {
         OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
         this.setSenderId(org.getPguid());
         this.setSenderName(org.getName());
-        this.setReceiverId(org.getPguid());
-        this.setReceiverName(org.getName());
-
     }
 }

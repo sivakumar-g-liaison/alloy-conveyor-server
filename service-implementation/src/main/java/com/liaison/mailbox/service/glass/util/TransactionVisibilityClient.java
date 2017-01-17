@@ -202,11 +202,6 @@ public class TransactionVisibilityClient {
             visibilityAPI.setSenderName(message.getSenderName());
         }
 
-        if (message.getReceiverId() != null && message.getReceiverName() != null) {
-            visibilityAPI.setReceiverId(message.getSenderId());
-            visibilityAPI.setReceiverName(message.getSenderName());
-        }
-
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
 		        message.getGlobalPId(), visibilityAPI.getId());

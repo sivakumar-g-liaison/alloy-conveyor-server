@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,6 +57,19 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
+import static com.liaison.mailbox.MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME;
+import static com.liaison.mailbox.MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS;
+import static com.liaison.mailbox.MailBoxConstants.DROPBOX_SERVICE_NAME;
+import static com.liaison.mailbox.MailBoxConstants.KEY_SERVICE_INSTANCE_ID;
+import static com.liaison.mailbox.MailBoxConstants.KEY_TENANCY_KEY;
+import static com.liaison.mailbox.MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID;
+import static com.liaison.mailbox.MailBoxConstants.KEY_WORKTICKET_TENANCYKEY;
+import static com.liaison.mailbox.MailBoxConstants.LOGIN_ID;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_ID;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_LENS_VISIBILITY;
+import static com.liaison.mailbox.MailBoxConstants.STORAGE_IDENTIFIER_TYPE;
+import static com.liaison.mailbox.MailBoxConstants.VALUE_FOR_DEFAULT_TTL;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -209,6 +223,7 @@ public class DropboxFileTransferService {
 
 	    GlassMessage glassMessage = null;
 	    TransactionVisibilityClient transactionVisibilityClient = null;
+        String pipeLineId = null;
 	    try {
 
 	        //LENS LOGGING
@@ -231,42 +246,41 @@ public class DropboxFileTransferService {
 
     		DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(
     				processor.getProcsrProperties(), processor);
-    		String pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
+            pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
     		boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
     		String mailboxPguid = processor.getMailbox().getPguid();
+            String processorPguid = processor.getPguid();
     		String serviceInstanceId = processor.getServiceInstance().getName();
     		boolean lensVisibility = dropboxProcessorStaticProperties.isLensVisibility();
 
-    		Map<String, String> properties = new HashMap<String, String>();
-    		properties.put(MailBoxConstants.LOGIN_ID, fileTransferDTO.getLoginId());
-    		properties.put(MailBoxConstants.KEY_TENANCY_KEY, fileTransferDTO.getTenancyKey());
-    		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
-    		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
-			properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
+            Map<String, String> properties = new HashMap<String, String>();
+            properties.put(LOGIN_ID, fileTransferDTO.getLoginId());
+            properties.put(KEY_TENANCY_KEY, fileTransferDTO.getTenancyKey());
+            properties.put(PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+            properties.put(PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
+            properties.put(STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
 
-    		workTicket.setPipelineId(pipeLineId);
-    		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
-    		workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-    		workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME,
-    				fileTransferDTO.getTransferProfileName());
-    		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY, fileTransferDTO.getTenancyKey());
-    		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID, processor.getPguid());
+            workTicket.setPipelineId(pipeLineId);
+            workTicket.setAdditionalContext(MAILBOX_ID, mailboxPguid);
+            workTicket.setAdditionalContext(KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
+            workTicket.setAdditionalContext(DBX_WORK_TICKET_PROFILE_NAME, fileTransferDTO.getTransferProfileName());
+            workTicket.setAdditionalContext(KEY_WORKTICKET_TENANCYKEY, fileTransferDTO.getTenancyKey());
+            workTicket.setAdditionalContext(KEY_WORKTICKET_PROCESSOR_ID, processorPguid);
 
     		// set ttl value from mailbox property or else from property file
-    		String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
-    				MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
-    		String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-
-    		Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
-            if (!ttlMap.isEmpty()) {
-    			ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
-    			ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
-    		}
-
-    		Integer ttlNumber = Integer.parseInt(ttl);
-    		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
+            setTTLDays(processor, workTicket);
     		workTicket.setFileName(fileTransferDTO.getFileName());
     		workTicket.setProcessMode(ProcessMode.ASYNC);
+
+            // set the glass message details once workTicket construction is complete with all details
+            glassMessage.setMailboxId(mailboxPguid);
+            glassMessage.setProcessorId(processorPguid);
+            glassMessage.setTenancyKey(fileTransferDTO.getTenancyKey());
+            glassMessage.setServiceInstandId(serviceInstanceId);
+            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
+            glassMessage.setInSize(workTicket.getPayloadSize());
+            glassMessage.setTransferProfileName(fileTransferDTO.getTransferProfileName());
+            glassMessage.setOrganizationDetails(workTicket.getPipelineId());
 
     		// start time to calculate elapsed time for storing payload in spectrum
     		startTime = System.currentTimeMillis();
@@ -282,21 +296,12 @@ public class DropboxFileTransferService {
             glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
             // Log running status
-            glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload", MailBoxConstants.DROPBOXPROCESSOR);
+            glassMessage.logProcessingStatus(StatusType.RUNNING, DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload", MailBoxConstants.DROPBOXPROCESSOR);
 
     		// end time to calculate elapsed time for storing payload in spectrum
     		endTime = System.currentTimeMillis();
     		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
     		MailBoxUtil.calculateElapsedTime(startTime, endTime);
-
-    		// set the glassmessage details once workTicket construction is complete with all details
-            glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
-            glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
-            glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
-            glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
-            glassMessage.setInSize(workTicket.getPayloadSize());
-            glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
     		WorkTicketUtil.postWrkTcktToQ(workTicket);
 
@@ -316,19 +321,20 @@ public class DropboxFileTransferService {
             // log time stamp before posting to queue
             glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 	    } catch (Exception e) {
+
 	        LOG.error(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(), e.getMessage()), e);
 	        // Log error status
-	        // DO NOT THROW ERROR TVAPI FROM GATEWAY BCS IT ISN"T USEFUL
-	        /*if (null != glassMessage) {
-    	        glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload failed due to error : " + e.getMessage());
+	        if (null != glassMessage) {
+	            String errorMessage = DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload failed due to error : " + e.getMessage();
+	            glassMessage.logProcessingStatus(StatusType.ERROR, errorMessage, MailBoxConstants.DROPBOXPROCESSOR, e.getMessage());
     	        glassMessage.setStatus(ExecutionState.FAILED);
     	        new TransactionVisibilityClient().logToGlass(glassMessage);
-	        }*/
+	        }
 	        throw e;
 	    }
 	}
 
-	/**
+    /**
 	 *
 	 * @param aclManifest
 	 * @return
@@ -374,4 +380,24 @@ public class DropboxFileTransferService {
 
 		return serviceResponse;
 	}
+
+    /**
+     * converts TTL to days and set it in workticket
+     *
+     * @param processor processor entity
+     * @param workTicket workticket dto
+     */
+    private void setTTLDays(Processor processor, WorkTicket workTicket) {
+
+        String ttl = configuration.getString(DROPBOX_PAYLOAD_TTL_DAYS, VALUE_FOR_DEFAULT_TTL);
+        String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
+        Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
+        if (!ttlMap.isEmpty()) {
+            ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
+            ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
+        }
+
+        Integer ttlNumber = Integer.parseInt(ttl);
+        workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
+    }
 }
