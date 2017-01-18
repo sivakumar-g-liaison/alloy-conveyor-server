@@ -642,13 +642,9 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets receiver Ip
             glassMessage.setReceiverIp(getRemoteAddress(request));
-<<<<<<< HEAD
-            MailboxGlassMessageUtil.logOrganizationDetails(glassMessage, workTicket.getPipelineId());
-=======
             if (!MailBoxUtil.isEmpty(pipelineId)) {
                 glassMessage.setOrganizationDetails(pipelineId);
             }
->>>>>>> origin/develop
         }
 
         return glassMessage;

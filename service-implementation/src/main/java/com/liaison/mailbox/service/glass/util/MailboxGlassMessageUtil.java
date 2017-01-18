@@ -26,9 +26,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
-import com.liaison.mailbox.service.dto.OrganizationDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.OrganizationCacheUtil;
 
 /**
  * Util for GlassMessage
@@ -83,9 +81,6 @@ public class MailboxGlassMessageUtil {
                 glassMessage.setOrganizationDetails(pipelineId);
             }
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
-            if (ProcessorType.SWEEPER.equals(processorType)) {
-                logOrganizationDetails(glassMessage, pipelineId);
-            }
         } else if (ExecutionState.DUPLICATE.equals(status)) {
             glassMessage.setOutAgent(processProtocol);
             glassMessage.setOutboundFileName(fileName);
@@ -181,17 +176,5 @@ public class MailboxGlassMessageUtil {
         activityStatusAPI.getStatuses().add(status);
 
         logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
-    }
-
-    /**
-     * To log organization details in glass message
-     * @param glassMessage
-     * @param pipelineId
-     */
-    public static void logOrganizationDetails(GlassMessage glassMessage, String pipelineId) {
-        
-        OrganizationDTO dto = OrganizationCacheUtil.getOrganizationByPipelineId(pipelineId);
-        glassMessage.setOrganizationID(dto.getId());
-        glassMessage.setOrganizationName(dto.getName());
     }
 }
