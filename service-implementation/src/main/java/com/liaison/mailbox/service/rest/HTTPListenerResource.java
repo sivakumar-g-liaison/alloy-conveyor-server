@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
@@ -19,7 +18,6 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
@@ -59,6 +57,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -70,7 +69,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID_HEADER;
-import static com.liaison.mailbox.MailBoxConstants.HTTP_REMOTE_ADDRESS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_IN_SECONDS;
 import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
@@ -92,8 +90,10 @@ public class HTTPListenerResource extends AuditedResource {
 
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	private static final String NO_PRIVILEGE = "You do not have sufficient privilege to invoke the service";
+    private static final String HTTP_ASYNC_REQUEST_FAILED = "HTTP Async Request Failed: ";
+    private static final String HTTP_SYNC_REQUEST_FAILED = "HTTP Sync Request Failed: ";
 
-	private Map<String, List<String>> formValues = null;
+    private Map<String, List<String>> formValues = null;
 
 	public Map<String, List<String>> getFormValues() {
 		return formValues;
@@ -150,6 +150,7 @@ public class HTTPListenerResource extends AuditedResource {
 
                 //GlobalProcess ID
                 String globalProcessId = UUIDGen.getCustomUUID();
+                String pipelineId = null;
 
                 // Fish tag global process id
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -177,15 +178,15 @@ public class HTTPListenerResource extends AuditedResource {
 				logger.info("HTTP(S)-SYNC : for the mailbox {} - Start", mailboxInfo);
 				try {
 
-					HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
-					syncProcessor.validateRequestSize(request.getContentLength());
-
-					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
+                    HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
+                    Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
 							mailboxInfo,
 							HTTPSYNCPROCESSOR,
 							isMailboxIdAvailable);
+                    pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
 
-					// authentication should happen only if the property "Http Listner Auth Check Required" is true
+                    syncProcessor.validateRequestSize(request.getContentLength());
+                    // authentication should happen only if the property "Http Listener Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
 							mailboxInfo);
 
@@ -211,7 +212,8 @@ public class HTTPListenerResource extends AuditedResource {
                             ExecutionState.PROCESSING,
                             globalProcessId,
                             HTTPSYNCPROCESSOR,
-                            Protocol.HTTPSYNCPROCESSOR);
+                            Protocol.HTTPSYNCPROCESSOR,
+                            pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
@@ -254,7 +256,8 @@ public class HTTPListenerResource extends AuditedResource {
 								ExecutionState.COMPLETED,
 								globalProcessId,
 								HTTPSYNCPROCESSOR,
-								Protocol.HTTPSYNCPROCESSOR);
+                                Protocol.HTTPSYNCPROCESSOR,
+                                pipelineId);
                         successMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success", MailBoxConstants.HTTPSYNCPROCESSOR);
 
                         //set outbound size
@@ -269,19 +272,19 @@ public class HTTPListenerResource extends AuditedResource {
 
                     logger.info("HTTP(S)-SYNC : for the mailbox {} - End", mailboxInfo);
 					return syncResponse;
-				} catch(Exception e) {
+				} catch(Throwable t) {
 
-                    logger.error(e.getMessage(), e);
-                    logSyncLENSFailure(firstCornerTimeStamp, globalProcessId, workTicket, e, request);
+                    logger.error(t.getMessage(), t);
+                    return logLensFailure(globalProcessId,
+                            ProcessorType.HTTPSYNCPROCESSOR,
+                            Protocol.HTTPSYNCPROCESSOR,
+                            workTicket,
+                            t,
+                            request,
+                            pipelineId,
+                            isMailboxIdAvailable,
+                            mailboxInfo);
 
-                    if (NO_PRIVILEGE.equals(e.getMessage())) {
-                        throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
-                    } else {
-                        if (e instanceof LiaisonAuditableRuntimeException) {
-                            throw e;
-                        }
-                        throw new LiaisonRuntimeException(e.getMessage());
-                    }
                 } finally {
                     ThreadContext.clearMap();
 				}
@@ -363,6 +366,7 @@ public class HTTPListenerResource extends AuditedResource {
 
                 //globalProcessId
                 String globalProcessId = UUIDGen.getCustomUUID();
+                String pipelineId = null;
 
                 //Fix for GMB-502
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -388,10 +392,11 @@ public class HTTPListenerResource extends AuditedResource {
 
 				try {
 				    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
-					asyncProcessor.validateRequestSize(request.getContentLength());
 
-					Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
+                    Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
 							mailboxInfo, ProcessorType.HTTPASYNCPROCESSOR, isMailboxIdAvailable);
+                    pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
+                    asyncProcessor.validateRequestSize(request.getContentLength());
 
 					// authentication should happen only if the property "Http Listener Auth Check Required" is true
 					logger.info("HTTP(S)-ASYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
@@ -418,7 +423,8 @@ public class HTTPListenerResource extends AuditedResource {
                             ExecutionState.PROCESSING,
                             globalProcessId,
                             HTTPASYNCPROCESSOR,
-                            Protocol.HTTPASYNCPROCESSOR);
+                            Protocol.HTTPASYNCPROCESSOR,
+                            pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
@@ -457,20 +463,18 @@ public class HTTPListenerResource extends AuditedResource {
                             .entity(String.format("Payload accepted as process ID '%s'", globalProcessId))
                             .build();
 
-				} catch (Exception e) {
+				} catch (Throwable e) {
 
-                    String errorMessage = e.getMessage();
-                    logger.error(errorMessage, e);
-                    logAsyncLensFailure(globalProcessId, workTicket, e, request);
-
-                    if (NO_PRIVILEGE.equals(errorMessage)) {
-                        throw new MailBoxServicesException(NO_PRIVILEGE, Response.Status.FORBIDDEN);
-                    } else {
-                        if (e instanceof LiaisonAuditableRuntimeException) {
-                            throw e;
-                        }
-                        throw new LiaisonRuntimeException(e.getMessage());
-                    }
+                    logger.error(e.getMessage(), e);
+                    return logLensFailure(globalProcessId,
+                            ProcessorType.HTTPASYNCPROCESSOR,
+                            Protocol.HTTPASYNCPROCESSOR,
+                            workTicket,
+                            e,
+                            request,
+                            pipelineId,
+                            isMailboxIdAvailable,
+                            mailboxInfo);
                 } finally {
                     ThreadContext.clearMap();
 				}
@@ -594,7 +598,8 @@ public class HTTPListenerResource extends AuditedResource {
             final ExecutionState state,
             final String globalProcessId,
             final ProcessorType type,
-            final Protocol protocol) {
+            final Protocol protocol,
+            final String pipelineId) {
 
         GlassMessage glassMessage = new GlassMessage();
         glassMessage.setCategory(type);
@@ -615,14 +620,14 @@ public class HTTPListenerResource extends AuditedResource {
 
         if (ExecutionState.PROCESSING.equals(state)) {
 
-            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
+            glassMessage.setInboundPipelineId(pipelineId);
             glassMessage.setStatus(ExecutionState.PROCESSING);
             glassMessage.setInAgent(GatewayType.REST);
             glassMessage.setInSize((long) request.getContentLength());
 
             //sets sender Ip
             glassMessage.setSenderIp(getRemoteAddress(request));
-            MailboxGlassMessageUtil.logOrganizationDetails(glassMessage, workTicket.getPipelineId());
+            glassMessage.setOrganizationDetails(pipelineId);
         } else if (ExecutionState.COMPLETED.equals(state)) {
 
             glassMessage.setStatus(ExecutionState.COMPLETED);
@@ -637,83 +642,94 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets receiver Ip
             glassMessage.setReceiverIp(getRemoteAddress(request));
+<<<<<<< HEAD
             MailboxGlassMessageUtil.logOrganizationDetails(glassMessage, workTicket.getPipelineId());
+=======
+            if (!MailBoxUtil.isEmpty(pipelineId)) {
+                glassMessage.setOrganizationDetails(pipelineId);
+            }
+>>>>>>> origin/develop
         }
 
         return glassMessage;
     }
 
     /**
-     * logs lens failure for http sync case
-     *
-     * @param firstCornerTimeStamp first corner timestamp
-     * @param globalProcessId gpid
-     * @param workTicket workticket
-     * @param e exception
-     * @param request http request
-     */
-    private void logSyncLENSFailure(ExecutionTimestamp firstCornerTimeStamp,
-                                    String globalProcessId,
-                                    WorkTicket workTicket,
-                                    Exception e,
-                                    HttpServletRequest request) {
-
-        GlassMessage failedMsg = constructGlassMessage(
-                request,
-                workTicket,
-                ExecutionState.FAILED,
-                globalProcessId,
-                HTTPSYNCPROCESSOR,
-                Protocol.HTTPSYNCPROCESSOR);
-
-        //sets sender and receiver ip
-        failedMsg.setSenderIp(getRemoteAddress(request));
-        failedMsg.setReceiverIp(getRemoteAddress(request));
-
-        // Log error status
-        failedMsg.logProcessingStatus(
-                StatusType.ERROR,
-                "HTTP Sync Request Failed: " + e.getMessage(),
-                MailBoxConstants.HTTPSYNCPROCESSOR,
-                ExceptionUtils.getStackTrace(e));
-
-        failedMsg.logFourthCornerTimestamp();
-        if (null != workTicket) {
-            failedMsg.logFirstCornerTimestamp(firstCornerTimeStamp);
-        }
-        new TransactionVisibilityClient().logToGlass(failedMsg);
-    }
-
-    /**
-     * logs lens failure for http async case
+     * logs lens failure for http case
      *
      * @param globalProcessId global process id
+     * @param processorType processor type
+     * @param protocol protocol
      * @param workTicket workticket
      * @param e exception
      * @param request http request
+     * @param pipelineId pipeline id
+     * @param isMailboxIdAvailable boolean true if mailbox id available otherwise false
+     * @param mailboxInfo mailbox details(name or pguid)
      */
-    private void logAsyncLensFailure(String globalProcessId,
-                                     WorkTicket workTicket,
-                                     Exception e,
-                                     HttpServletRequest request) {
+    private Response logLensFailure(String globalProcessId,
+                                    ProcessorType processorType,
+                                    Protocol protocol,
+                                    WorkTicket workTicket,
+                                    Throwable e,
+                                    HttpServletRequest request,
+                                    String pipelineId,
+                                    boolean isMailboxIdAvailable,
+                                    String mailboxInfo) {
 
         GlassMessage glassMessage  = constructGlassMessage(
                 request,
                 workTicket,
                 ExecutionState.FAILED,
                 globalProcessId,
-                HTTPASYNCPROCESSOR,
-                Protocol.HTTPASYNCPROCESSOR);
+                processorType,
+                protocol,
+                pipelineId);
 
         //sets sender and receiver ip
         glassMessage.setSenderIp(getRemoteAddress(request));
+        if (ProcessorType.HTTPSYNCPROCESSOR.equals(processorType)) {
+            glassMessage.setReceiverIp(getRemoteAddress(request));
+        }
 
+        //sets mailbox details
+        if (isMailboxIdAvailable) {
+            glassMessage.setMailboxId(mailboxInfo);
+        } else {
+            glassMessage.setMailboxName(mailboxInfo);
+        }
+
+        //logs activity msg
         glassMessage.logProcessingStatus(
                 StatusType.ERROR,
-                "HTTP Async Request Failed: " + e.getMessage(),
-                MailBoxConstants.HTTPASYNCPROCESSOR,
+                (ProcessorType.HTTPSYNCPROCESSOR.equals(processorType)
+                        ? HTTP_ASYNC_REQUEST_FAILED + e.getMessage()
+                        : HTTP_SYNC_REQUEST_FAILED + e.getMessage()),
+                processorType.name(),
                 ExceptionUtils.getStackTrace(e));
+
+        //logs tvpi status as failed
         new TransactionVisibilityClient().logToGlass(glassMessage);
+
+        Status responseStatus = Status.INTERNAL_SERVER_ERROR;
+        String responseMessage = e.getMessage();
+        if (NO_PRIVILEGE.equals(responseMessage)) {
+            responseStatus = Response.Status.FORBIDDEN;
+            responseMessage = NO_PRIVILEGE;
+        } else {
+            if (e instanceof LiaisonAuditableRuntimeException) {
+                responseStatus = ((LiaisonAuditableRuntimeException) e).getResponseStatus();
+            }
+        }
+
+        //http response
+        return Response
+                .status(responseStatus)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                .header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, globalProcessId)
+                .entity(responseMessage)
+                .build();
+
     }
 
 }
