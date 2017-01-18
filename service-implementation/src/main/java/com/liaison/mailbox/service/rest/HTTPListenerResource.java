@@ -36,7 +36,6 @@ import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
-import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;

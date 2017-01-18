@@ -177,4 +177,5 @@ public class MailboxGlassMessageUtil {
 
         logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
     }
+
 }
