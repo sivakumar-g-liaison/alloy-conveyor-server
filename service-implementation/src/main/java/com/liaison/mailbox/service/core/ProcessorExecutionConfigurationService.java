@@ -72,25 +72,27 @@ public class ProcessorExecutionConfigurationService {
                     totalCount);
             List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(pageOffsetDetails);
 
-            if (executingProcessors.size() != 0) {
+            if (executingProcessors.size() == 0) {
 
-                ExecutingProcessorsDTO executingProcessor = null;
-                for (ProcessorExecutionState processorState : executingProcessors) {
-
-                    executingProcessorIds.add(processorState.getProcessorId());
-                    executingProcessor = new ExecutingProcessorsDTO();
-                    executingProcessor.copyFromEntity(processorState);
-                    executingProcessorsDTO.add(executingProcessor);
-                }
-                response.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(),
-                        Messages.SUCCESS));
-                response.setExecutingProcessorIds(executingProcessorIds);
-                response.setProcessors(executingProcessorsDTO);
-                response.setTotalItems(totalCount);
-            } else {
                 response.setResponse(new ResponseDTO(Messages.NO_EXECUTING_PROCESSORS_AVAIL, EXECUTING_PROCESSORS,
-                        Messages.FAILURE));
+                        Messages.SUCCESS));
+                response.setProcessors(executingProcessorsDTO);
+                return response;
             }
+            
+            ExecutingProcessorsDTO executingProcessor = null;
+            for (ProcessorExecutionState processorState : executingProcessors) {
+                
+                executingProcessorIds.add(processorState.getProcessorId());
+                executingProcessor = new ExecutingProcessorsDTO();
+                executingProcessor.copyFromEntity(processorState);
+                executingProcessorsDTO.add(executingProcessor);
+            }
+            response.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(),
+                    Messages.SUCCESS));
+            response.setExecutingProcessorIds(executingProcessorIds);
+            response.setProcessors(executingProcessorsDTO);
+            response.setTotalItems(totalCount);
 
             return response;
 
