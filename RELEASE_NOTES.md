@@ -1,5 +1,6 @@
 4.13.0-SNAPSHOT
 ---------------
+* GGT-1236, GGT-1209 add appenv and archaius properties layers
 
 4.12.0
 ---------------
