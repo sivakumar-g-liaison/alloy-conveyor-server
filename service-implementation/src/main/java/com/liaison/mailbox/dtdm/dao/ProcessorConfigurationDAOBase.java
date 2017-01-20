@@ -613,7 +613,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	            StringBuilder query = new StringBuilder().append("SELECT proc FROM Processor proc")
 	                    .append(" where LOWER(proc.procsrName) like :")
 	                    .append(PRCSR_NAME)
-	                    .append("AND processor.procsrStatus <> :" + STATUS_DELETE);
+	                    .append(" AND proc.procsrStatus <> :" + STATUS_DELETE);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(PRCSR_NAME, "%" + searchDTO.getProcessorName().toLowerCase() + "%")
 	                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())

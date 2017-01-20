@@ -332,6 +332,9 @@ cargo {
 
 		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
 		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+		jvmArgs += " -Darchaius.deployment.stack=${deployStack}"
+		jvmArgs += " -Darchaius.deployment.region=${deployRegion}"
+		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
         jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
 		jvmArgs += " -Dhttps.protocols=TLSv1.2"
 
@@ -423,6 +426,9 @@ task jettyRunSetProperties {
 	// use the default port of the ws-backend-simulation module
 	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
 	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+	System.setProperty('archaius.deployment.stack', "${deployStack}")
+	System.setProperty('archaius.deployment.region', "${deployRegion}")
+	System.setProperty('archaius.deployment.datacenter', "${deployDatacenter}")
 	// we only use jettyRun in dev... might as well output log4j debug
 	System.setProperty('log4j.debug', 'true')
 

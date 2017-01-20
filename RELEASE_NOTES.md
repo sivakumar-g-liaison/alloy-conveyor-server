@@ -1,7 +1,19 @@
-4.12.0-SNAPSHOT
+4.13.0-SNAPSHOT
+---------------
+* GGT-1236, GGT-1209 add appenv and archaius properties layers
+
+4.12.0
 ---------------
 * GWUD-130 - Conveyor errs, when a page that doesn't exist is requested.
 * Removed Spectrum FS2 configs from Staging environment
+
+4.11.2
+---------------
+* test case failure fix
+
+4.11.1
+---------------
+* Rebuilding to pickup new common-lib
 
 4.11.0
 ---------------
