@@ -303,18 +303,9 @@ public class DropboxFileTransferService {
     		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
     		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-    		// set the glassmessage details once workTicket construction is complete with all details
-            glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
-            glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
-            glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
-            glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-            glassMessage.setInboundPipelineId(workTicket.getPipelineId());
-            glassMessage.setInSize(workTicket.getPayloadSize());
-            glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
-
+            //sets default organization in the meta data
             setDefaultOrganization(workTicket);
             WorkTicketUtil.postWrkTcktToQ(workTicket);
-
 
     		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
     						"GLOBAL PID",
@@ -393,7 +384,8 @@ public class DropboxFileTransferService {
 	}
 
     /**
-     *  sets default organization
+     * sets default organization
+     *
      * @param workTicket workticket
      */
     private void setDefaultOrganization(WorkTicket workTicket) {
@@ -409,21 +401,21 @@ public class DropboxFileTransferService {
     /**
      * converts TTL to days and set it in workticket
      *
-     * @param processor processor entity
+     * @param processor  processor entity
      * @param workTicket workticket dto
      */
     private void setTTLDays(Processor processor, WorkTicket workTicket) {
 
-		String ttl = configuration.getString(DROPBOX_PAYLOAD_TTL_DAYS, VALUE_FOR_DEFAULT_TTL);
-		String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-		Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
-		if (!ttlMap.isEmpty()) {
-			ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
-			ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
-		}
+        String ttl = configuration.getString(DROPBOX_PAYLOAD_TTL_DAYS, VALUE_FOR_DEFAULT_TTL);
+        String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
+        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
+        if (!ttlMap.isEmpty()) {
+            ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
+            ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
+        }
 
-		Integer ttlNumber = Integer.parseInt(ttl);
-		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
-	}
+        Integer ttlNumber = Integer.parseInt(ttl);
+        workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
+    }
 
 }
