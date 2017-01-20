@@ -28,6 +28,14 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             currentPage: 1
         };
 
+        $scope.fileStatus = [
+            "ACTIVE",
+            "INACTIVE",
+            "STAGED",
+            "FAILED",
+            "DELETED"
+        ];
+
         if ($rootScope.languageFormatData.dateRangePattern != undefined) {
             daterangepickerappConfig.dateFormat = $rootScope.languageFormatData.dateRangePattern;
             $scope.dateFormat = daterangepickerappConfig.dateFormat;
@@ -91,7 +99,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             init: function(scope, grid) {
                 filterBarPlugin.scope = scope;
                 filterBarPlugin.grid = grid;
-                filterWatch = scope.$watch('columns[0].filterText + columns[1].filterText + columns[2].filterText + columns[3].filterText + columns[4].filterText', function(newVal, oldVal) {
+                filterWatch = scope.$watch('columns[0].filterText + columns[1].filterText + columns[2].filterText + columns[3].filterText + columns[4].filterText + columns[5].filterText', function(newVal, oldVal) {
                     var colsEmpty = true;
                     var searchQuery = [];
                     angular.forEach(filterBarPlugin.scope.columns, function(col) {
@@ -151,6 +159,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
                 field: 'status',
                 displayName: 'Status',
                 width: '10%',
+                headerCellTemplate:'partials/filterStatusComboBoxHeaderTemplate.html'
             }, {
                 displayName: 'Action',
                 width: '10%',
@@ -203,6 +212,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
                     if (!$scope.$$phase) {
                         $scope.$apply();
                     }
+                    $scope.gridLoaded = true;
                 }, {pageSize: pageSize, page: page, filterText: filterText, sortInfo: sortInfo}
             );
         };
@@ -223,8 +233,8 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
 
         $scope.openUpdateModal = function(entity) {
             $scope.selectedFileToUpdate = angular.copy(entity);
-            if ($scope.selectedFileToUpdate.status != 'FAILED') {
-                showSaveMessage("Staged file must be in failed status to inactivate the file", 'warning');
+            if ($scope.selectedFileToUpdate.status != 'STAGED') {
+                showSaveMessage("Staged file must be in STAGED status to update the file", 'warning');
             } else {
                 $('#fileUpdateModal').modal('show');
             }
@@ -240,11 +250,11 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             $scope.restService.put(url + '/' + pguid, '',
                 function(data, status) {
                     if (status == 200) {
-                        showSaveMessage("Staged file inactivated successfully", 'success');
+                        showSaveMessage("Staged file updated successfully", 'success');
                         $scope.loadStagedFiles();
                         $scope.updateModelHide();
                     } else {
-                        showSaveMessage("Failed to inactivate the Staged file ", 'error');
+                        showSaveMessage("Failed to update the Staged file ", 'error');
                         $scope.updateModelHide();
                     }
                 }

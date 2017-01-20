@@ -11,7 +11,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     };
     
 	$scope.getExecutingProcessors = function () {
-	
+    $rootScope.gridLoaded = false;
 	$scope.restService.get($scope.base_url +'/processoradmin/processor/status',
                 function (data, status) {
             	    if (status === 200 || status === 400) {

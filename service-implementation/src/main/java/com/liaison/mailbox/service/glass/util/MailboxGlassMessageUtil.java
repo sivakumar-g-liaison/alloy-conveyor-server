@@ -89,6 +89,7 @@ public class MailboxGlassMessageUtil {
 
             if (ProcessorType.SWEEPER.equals(processorType)) {
                 glassMessage.setInAgent(glassMessageDTO.getFilePath());
+                glassMessage.setOrganizationDetails(pipelineId);
             } else {
                 glassMessage.setInAgent(processProtocol);
             }

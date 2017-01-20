@@ -630,3 +630,11 @@ input::-moz-focus-inner {
 .modal-body p {
 	word-wrap: break-word;
 }
+
+.status_select_style {
+  	position: absolute;
+  	top: 30px;
+  	bottom: 30px;
+  	left: 5px;
+  	bottom: 0;
+}

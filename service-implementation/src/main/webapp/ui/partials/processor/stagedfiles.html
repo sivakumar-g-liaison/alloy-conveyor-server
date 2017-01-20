@@ -1,6 +1,6 @@
 <div class="container fade-in">
     <div class="addmailboxform-row">
-        <h3 id="title" class="ng-binding">Relay Conveyor</h3>
+        <h3 id="title" class="ng-binding">Staged Files</h3>
         <hr/>
         <br/>
     </div>
@@ -10,7 +10,13 @@
 	          <div class="gridStyle" ng-grid="gridOptions"></div>
 	       </div>
 	   </div>
-	   
+
+	   <!-- Loading image will be shown until grid is loaded -->
+       <div class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">
+            <h4>Loading Staged Files...</h4>
+            <img height="96px" src="img/spinner.gif" />
+       </div>
+
 	   <form id="fileInfoModalForm" name="form.fileInfoModalForm" novalidate>
 	       <div class="modal-custom fade" id="fileInfoModal">
 	           <div class="modal-dialog">
@@ -51,16 +57,17 @@
 	                   <div class="modal-header">
 	                       <button class="close" data-dismiss="modal" aria-hidden="true"
 	                               id="close-btn-update-modal" ng-click="cancelUpdate()">&times;</button>
-	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Inactivate</h4>
+	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Update</h4>
 	                   </div>
 	                   <div class="modal-body">
 	                       <div class="row">
-	                           Do you really need to inactivate the staged file - {{selectedFileToUpdate.name}} ?
+	                           Do you really need to update the staged file - {{selectedFileToUpdate.name}}
+	                           status to FAILED ?
 	                       </div>
 	                   </div>
 	                   <div class="modal-footer">
-	                       <a class="btn btn-danger" id="reviseProfileModalSaveBtn"
-	                       ng-click="deactivateStagedFile(selectedFileToUpdate.id)">Inactivate</a>
+	                       <a class="btn btn-primary" id="reviseProfileModalSaveBtn"
+	                       ng-click="deactivateStagedFile(selectedFileToUpdate.id)">Update</a>
 	                       <a class="btn btn-default" id="fileInfoModalCancelBtn"
 	                       ng-click="cancelInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
 	                   </div>

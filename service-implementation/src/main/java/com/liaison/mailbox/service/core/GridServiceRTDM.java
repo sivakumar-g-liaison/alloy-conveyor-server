@@ -342,6 +342,8 @@ public abstract class GridServiceRTDM<T> {
                     pathString = request.get(FILE_NAME);
                 } else if (MAILBOX_GUID.equals(field)) {
                     pathString = request.get(MailBoxConstants.KEY_MAILBOX_ID);
+                } else if (FILE_STATUS.equals(field)) {
+                    pathString = request.get(STATUS);
                 } else {
                     pathString = request.get(field);
                 }
@@ -349,7 +351,8 @@ public abstract class GridServiceRTDM<T> {
                 ParameterExpression<String> parameterExp = criteriaBuilder.parameter(String.class);
                 if (MailBoxConstants.GLOBAL_PROCESS_ID.equals(field)
                         || MailBoxConstants.KEY_PROCESSOR_ID.equals(field)
-                        || MAILBOX_GUID.equals(field)) {
+                        || MAILBOX_GUID.equals(field)
+                        || FILE_STATUS.equals(field)) {
                     andPredicatesList.add(criteriaBuilder.equal(pathString, parameterExp));
                     holder.put(parameterExp, entry.getText());
                 } else if (CREATED_DATE.equals(field)) {
