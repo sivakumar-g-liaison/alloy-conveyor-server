@@ -9,21 +9,6 @@
  */
 package com.liaison.mailbox.service.dropbox;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
-import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
@@ -31,6 +16,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.gem.service.dto.OrganizationDTO;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -55,7 +41,20 @@ import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
+import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS;
@@ -69,6 +68,7 @@ import static com.liaison.mailbox.MailBoxConstants.MAILBOX_ID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_LENS_VISIBILITY;
 import static com.liaison.mailbox.MailBoxConstants.STORAGE_IDENTIFIER_TYPE;
+import static com.liaison.mailbox.MailBoxConstants.UPLOAD_META;
 import static com.liaison.mailbox.MailBoxConstants.VALUE_FOR_DEFAULT_TTL;
 import static java.util.stream.Collectors.joining;
 
@@ -303,7 +303,9 @@ public class DropboxFileTransferService {
     		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
     		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-    		WorkTicketUtil.postWrkTcktToQ(workTicket);
+            //sets default organization in the meta data
+            setDefaultOrganization(workTicket);
+            WorkTicketUtil.postWrkTcktToQ(workTicket);
 
     		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
     						"GLOBAL PID",
@@ -382,16 +384,31 @@ public class DropboxFileTransferService {
 	}
 
     /**
+     * sets default organization
+     *
+     * @param workTicket workticket
+     */
+    private void setDefaultOrganization(WorkTicket workTicket) {
+
+        //set default organization
+        String meta = workTicket.getHeader(UPLOAD_META);
+        workTicket.removeHeader(UPLOAD_META);
+        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(workTicket.getPipelineId());
+        meta += ";organization=" + org.getName();
+        workTicket.addHeader(UPLOAD_META, meta);
+    }
+
+    /**
      * converts TTL to days and set it in workticket
      *
-     * @param processor processor entity
+     * @param processor  processor entity
      * @param workTicket workticket dto
      */
     private void setTTLDays(Processor processor, WorkTicket workTicket) {
 
         String ttl = configuration.getString(DROPBOX_PAYLOAD_TTL_DAYS, VALUE_FOR_DEFAULT_TTL);
         String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-        Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
+        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
         if (!ttlMap.isEmpty()) {
             ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
             ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
@@ -400,4 +417,5 @@ public class DropboxFileTransferService {
         Integer ttlNumber = Integer.parseInt(ttl);
         workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
     }
+
 }
