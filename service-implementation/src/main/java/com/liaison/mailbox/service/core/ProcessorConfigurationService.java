@@ -94,7 +94,6 @@ import java.util.stream.Collectors;
 public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
-	private static final String PROCESSOR = "Processor";
 
 	/**
 	 * Creates processor for the mailbox.
@@ -851,7 +850,9 @@ public class ProcessorConfigurationService {
 
 			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
 			if (null == processors || processors.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
+			    serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+			    serviceResponse.setProcessors(prsDTO);
+			    return serviceResponse;
 			}
 
 			ProcessorDTO processorDTO = null;
@@ -1054,12 +1055,12 @@ public class ProcessorConfigurationService {
 			if (null == processor) {
 				processors = config.findProcessorsByName(processorGuid);
 			} else if (EntityStatus.DELETED.value().equals(processor.getProcsrStatus())) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROCESSOR,
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR,
 						Response.Status.BAD_REQUEST);
 			}
 
 			if (processor == null && processors.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROCESSOR,
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR,
 						Response.Status.BAD_REQUEST);
 			}
 			
