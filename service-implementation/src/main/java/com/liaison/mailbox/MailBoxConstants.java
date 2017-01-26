@@ -292,6 +292,7 @@ public interface MailBoxConstants {
 
 	String PAGING_OFFSET = "pagingoffset";
 	String PAGING_COUNT = "pagingcount";
+    String PAGE_VALUE = "pageValue";
 
 	String PORT_PROPERTY = "port";
 

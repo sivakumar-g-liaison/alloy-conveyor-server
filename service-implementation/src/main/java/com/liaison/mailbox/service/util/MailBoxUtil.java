@@ -308,6 +308,8 @@ public class MailBoxUtil {
 		} else {
 			pageValue = 1;
 		}
+        pageParameters.put(MailBoxConstants.PAGE_VALUE, pageValue);
+
 		if (pageSize != null && !pageSize.isEmpty()) {
 			pageSizeValue = Integer.parseInt(pageSize);
 			if (pageSizeValue < 0) {
