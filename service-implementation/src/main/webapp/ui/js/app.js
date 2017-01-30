@@ -149,11 +149,13 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
         'dateRangePattern':'',
         'locale':''
     };
-    $rootScope.restService.get('../language/userLocale')
-        .success(function(data) {
-            $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
-            $rootScope.languageFormatData.locale = data.TreeMap.locale;
-        });
+    $rootScope.restService.get('../language/userLocale',
+        function(data, status) {
+        	if (status === 200) {
+                $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
+                $rootScope.languageFormatData.locale = data.TreeMap.locale;
+        	}
+    });   
     
     //  load edit Processor Data
     $rootScope.editProcessorData;
