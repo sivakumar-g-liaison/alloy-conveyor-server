@@ -394,7 +394,7 @@ public class DropboxFileTransferService {
         String meta = workTicket.getHeader(UPLOAD_META);
         workTicket.removeHeader(UPLOAD_META);
         OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(workTicket.getPipelineId());
-        meta += ";organization=" + org.getName();
+        meta += ";defaultOrganization=" + org.getName();
         workTicket.addHeader(UPLOAD_META, meta);
     }
 
