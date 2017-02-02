@@ -177,6 +177,7 @@ public enum Messages {
     PAYLOAD_PERSIST_ERROR("Failed to persist the payload in fs2 storage due to error."),
     PAYLOAD_READ_ERROR("Failed to retrieve payload from fs2 storage due to error"),
     PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from fs2 storage due to error"),
+    META_DATA_READ_ERROR("Failed to retrieve meta data from fs2 storage due to error"),
     PAYLOAD_DOES_NOT_EXIST("Payload is not available in spectrum."),
 
     //referred in ProcessorAdminDetailsResource
