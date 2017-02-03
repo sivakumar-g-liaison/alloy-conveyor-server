@@ -766,6 +766,30 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
     }
+    
+    /**
+     * Method to search mailbox by match mode like with valid scenario. 
+     */
+    @Test
+    public void testSearchMailBoxWithMatchModes() throws Exception {
+        
+        // search the mailbox from the given details
+        MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+        
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("MBX_TEST");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_LIKE);
+        SearchMailBoxDetailedResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+        
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_STR);
+        serviceResponse = mailbox.searchMailBox(searchFilter, aclManifest);
+        
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertEquals(serviceResponse.getResponse().getMessage(), Messages.SEARCH_SUCCESSFUL.value().replaceAll("%s", "Mailbox"));
+    }
 
     /**
      * Method Search MailBox with Valid Profile name.
@@ -797,7 +821,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setMbxName("MBX_TEST");
         searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
-        
+        searchFilter.setMinResponse(true);
         SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
@@ -815,6 +839,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 
         GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
         searchFilter.setProfileName("test");
+        searchFilter.setMinResponse(true);
 
         SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBoxUIResponse(searchFilter, aclManifest);
 
