@@ -10,31 +10,25 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
+import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
+import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
+import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -46,29 +40,35 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-
-import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
-import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.gem.service.client.GEMACLClient;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.netflix.config.ConfigurationManager;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
 import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
@@ -80,7 +80,6 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
-import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 
 /**
  * Utilities for MailBox.
@@ -799,4 +798,16 @@ public class MailBoxUtil {
             return filePath;
         }
     }
+
+    /**
+     * Constructs expiration date of the payload based on created date and TTL
+     *
+     * @param meta fs2 meta data
+     * @return timestamp of the expiration date
+     */
+    public static Timestamp getExpirationDate(FS2MetaSnapshot meta) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(meta.getCreatedOn().toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime.plusSeconds(meta.getTTL()));
+    }
+
 }

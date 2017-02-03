@@ -14,6 +14,7 @@ import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.Column;
@@ -279,7 +280,10 @@ public class StagedFile implements Identifiable {
                 ? EntityStatus.ACTIVE
                 : EntityStatus.findByCode(stagedFileDto.getStatus());
         this.setStagedFileStatus(status.name());
-        this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
+
+        //reads TTL from spectrum meta data
+        this.setExpirationTime(MailBoxUtil.getExpirationDate(StorageUtilities.getMetaData(stagedFileDto.getSpectrumUri())));
+
         this.setProcessorId(stagedFileDto.getProcessorId());
         this.setProcessorType(stagedFileDto.getProcessorType());
         this.setModifiedDate(timestamp);
