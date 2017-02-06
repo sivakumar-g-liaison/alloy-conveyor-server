@@ -38,6 +38,7 @@ public class GenericSearchFilterDTO {
 	private String processorGuid;
 	private String matchMode;
 	private boolean isDisableFilters;
+	private boolean isMinResponse;
 
 	public String getMbxName() {
 		return mbxName;
@@ -169,6 +170,14 @@ public class GenericSearchFilterDTO {
 
 	public String getMatchMode() {
 		return matchMode;
+	}
+	
+	public boolean isMinResponse() {
+	    return isMinResponse;
+	}
+	
+	public void setMinResponse(boolean isMinResponse) {
+	    this.isMinResponse = isMinResponse;
 	}
 
 	public void setMatchMode(String matchMode) {
