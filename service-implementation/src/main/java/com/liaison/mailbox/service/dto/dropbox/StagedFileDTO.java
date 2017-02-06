@@ -49,7 +49,6 @@ public class StagedFileDTO {
 		this.setSpectrumUri(workTicket.getPayloadURI());
 		this.setMeta(workTicket.getHeader(MailBoxConstants.UPLOAD_META));
 		this.setStatus(EntityStatus.ACTIVE.value());
-		this.setExpirationTime(workTicket.getHeader(MailBoxConstants.FS2_OPTIONS_TTL));
 		this.setGlobalProcessId(workTicket.getGlobalProcessId());
 	}
 
