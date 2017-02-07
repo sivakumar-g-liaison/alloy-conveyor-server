@@ -163,6 +163,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setSortDirection(sortDirection);
 					searchFilter.setDisableFilters(disableFilters);
 					searchFilter.setMatchMode(matchMode);
+					searchFilter.setMinResponse(Boolean.parseBoolean(minResponse));
 
                     // search the mailbox based on the given query parameters
 					if (Boolean.parseBoolean(minResponse)) {
