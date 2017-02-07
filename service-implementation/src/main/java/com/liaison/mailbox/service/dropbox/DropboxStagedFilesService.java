@@ -111,10 +111,11 @@ public class DropboxStagedFilesService extends DropboxBaseService {
 			LOG.info("There are no staged files available for linked mailboxes");
 		}
 
+		StagedFileDTO stagedFileDTO;
 		for (StagedFile stagedFile : stagedFiles) {
 
-			StagedFileDTO stagedFileDTO = new StagedFileDTO();
-			stagedFile.copyToDto(stagedFileDTO, false);
+			stagedFileDTO = new StagedFileDTO();
+			stagedFileDTO.copyFromEntity(stagedFile);
 			stagedFileDTOs.add(stagedFileDTO);
 		}
 
