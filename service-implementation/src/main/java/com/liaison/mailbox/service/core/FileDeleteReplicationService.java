@@ -10,17 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
 import com.liaison.commons.logging.LogTags;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -31,6 +20,16 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * class which has file delete replication activities
@@ -49,7 +48,7 @@ public class FileDeleteReplicationService {
      * 
      * @param requestString
      */
-    public void inactivateStageFileAndUpldateLens(String requestString) {
+    public void inactivateStageFileAndUpdateLens(String requestString) {
         
         try {
             JSONObject reqeustObj = new JSONObject(requestString);
@@ -99,7 +98,7 @@ public class FileDeleteReplicationService {
      * 
      * @param requestString
      */
-    public void deleteRelicatedFile(String requestString) {
+    public void deleteReplicatedFile(String requestString) {
         
         try {
             JSONObject reqeustObj = new JSONObject(requestString);

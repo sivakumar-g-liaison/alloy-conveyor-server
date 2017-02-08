@@ -50,10 +50,9 @@ public class FileDeleteReplicationResource extends AuditedResource {
                     requestString = getRequestBody(request);
                     logger.info(requestString);
                     FileDeleteReplicationService deleteService = new FileDeleteReplicationService();
-                    deleteService.inactivateStageFileAndUpldateLens(requestString);
+                    deleteService.inactivateStageFileAndUpdateLens(requestString);
                 } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
                 }
                 return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
             }
