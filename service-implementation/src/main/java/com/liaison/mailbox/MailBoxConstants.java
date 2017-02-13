@@ -176,6 +176,9 @@ public interface MailBoxConstants {
 	String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
 	String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
+	
+	// Property to decide whether the application is deployed as dropbox or not
+	String DEPLOY_AS_DROPBOX = "com.liaison.deployAsDropbox";
 
 	String MAILBOX = "MailBox";
 	String PROCESSOR_STATUS = "Processor Status";

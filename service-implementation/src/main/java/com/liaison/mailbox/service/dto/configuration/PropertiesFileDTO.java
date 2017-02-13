@@ -27,7 +27,8 @@ public class PropertiesFileDTO {
 	private String fsmEventCheckIntervalInSeconds;
 	private String processorSyncUrlDisplayPrefix;
 	private String processorAsyncUrlDisplayPrefix;
-	private String defaultScriptTemplateName;	
+	private String defaultScriptTemplateName;
+	private boolean deployAsDropbox;
 	
 	public String getProcessorSyncUrlDisplayPrefix() {
 		return processorSyncUrlDisplayPrefix;
@@ -59,5 +60,11 @@ public class PropertiesFileDTO {
 	}
 	public void setListJobsIntervalInHours(String listJobsIntervalInHours) {
 		this.listJobsIntervalInHours = listJobsIntervalInHours;
+	}
+	public boolean isDeployAsDropbox() {
+	    return deployAsDropbox;
+	}
+	public void setDeployAsDropbox(boolean deployAsDropbox) {
+	    this.deployAsDropbox = deployAsDropbox;
 	}
 }
