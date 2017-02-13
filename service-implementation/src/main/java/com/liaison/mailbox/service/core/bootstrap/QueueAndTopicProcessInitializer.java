@@ -12,7 +12,6 @@ import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
