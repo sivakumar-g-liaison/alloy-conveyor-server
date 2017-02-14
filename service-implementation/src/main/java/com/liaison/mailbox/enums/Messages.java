@@ -39,7 +39,7 @@ public enum Messages {
     PROCESSOR_PROFILE_NOT_ALLOWED("Profile is not allowed for processor type %s"),
     MBX_NON_DELETED_PROCESSOR("There are active processors available for the Mailbox"),
 
-    // COMMON MESSAGES
+    // generic messages
     CREATE_OPERATION_FAILED("%s creation failed."),
     REVISE_OPERATION_FAILED("%s revise operation failed."),
     READ_OPERATION_FAILED("Failed to retrieve the %s."),
@@ -72,7 +72,7 @@ public enum Messages {
     PROPERTY_DUPLICATE_ERROR("Property name should always be unique"),
     INVALID_CONNECTION_TIMEOUT("Invalid value for timeout"),
 
-    // TRIGGER PROFILE USECASE
+    // trigger profile use case
     PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
     NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile or the only processor configured is already running."),
     TRG_PROF_FAILURE("Error triggering the profile %s ."),
@@ -86,61 +86,61 @@ public enum Messages {
     PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
     PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),
 
-    // CREATE CONFIGURED LOCATION
+    // create configured location
     LOCAL_FOLDERS_CREATION_FAILED("Local folder %s creation failed."),
     HOME_FOLDER_DOESNT_EXIST_ALREADY("The local folder %s must exist before creating custom folders."),
     FOLDER_DOESNT_MATCH_PATTERN("Application can create folders only if it matches the pattern %s ."),
 
-    // INVALID ENUM
+    // invalid enum
     ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
 
-    // MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
+    // mbx guid does not match with the given processor
     PROC_DOES_NOT_BELONG_TO_MBX("The given processor does not belong to given mailbox."),
 
     ERROR_MSG("Validation failed with the following error(s):"),
     VALIDATOR_ERROR_MSG("Error in validator, object cannot be null."),
 
-    // HTTP SERVER LISTENER
+    // http server listener
     EMPTY_VALUE("The given %s is empty."),
     PERSIST_SUCCESS("%s persisted successfully."),
     PERSIST_FAILURE("Failed to persist the %s."),
 
-    // User Account Messages
+    // user account messages
     INVALID_ACC_REQUEST("The input request is invalid."),
     ACC_DOES_NOT_EXIST("User Account with the given id %s does not exist."),
     DATA_PREPOPULATE("Data populated successfully"),
 
-    // KMS Messages
+    // kms messages
     SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed"),
 
-    //getting java properties
+    // getting java properties
     READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
     READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
 
-    //retrieving tenancy key from acl manifest
+    // retrieving tenancy key from acl manifest
     TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
     TENANCY_KEY_MISMATCH("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox."),
     ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the request header."),
 
     READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 
-    //retrieving service instance id from query parameter
+    // retrieving service instance id from query parameter
     SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter."),
-    
-    //validating service instance Id
+
+    // validating service instance Id
     ID_IS_INVALID("%s ID is not available in service broker."),
 
-    // Mailbox Expectation Management
+    // mailbox expectation management
     MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
     MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are "),
     UPLOADER_OR_FILEWRITER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader or filewriter"),
     FAILED_TO_VALIDATE_SLA("Failed to validate sla of %s"),
     PROFILE_NOT_CONFIGURED("The profile is not configured."),
 
-    // runtime DB changes
+    // runtime db changes
     INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid"),
 
-    // Manifest validation
+    // manifest validation
     DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
 
     LOCATION_NOT_CONFIGURED("The %s location is not configured or empty."),
@@ -152,7 +152,8 @@ public enum Messages {
     AUTHENTICATION_FAILURE("Failed to authenticate user."),
     AUTH_AND_GET_ACL_FAILURE("Failed to authenticate and get user ACL"),
     AUTHENTICATION_SUCCESS("User authenticated successfully."),
-    // DropBox Processor
+
+    // dropbox processor
     CONTENT_QUEUED_FOR_TRANSFER_SUCCESSFUL("Content queued for transfer successfully."),
     CONTENT_QUEUED_FOR_TRANSFER_FAILED("Content queued for transfer got failed."),
     STAGED_FILEID_DOES_NOT_EXIST("Staged file with the given id %s does not exist."),
@@ -179,7 +180,7 @@ public enum Messages {
     META_DATA_READ_ERROR("Failed to retrieve meta data from fs2 storage due to error"),
     PAYLOAD_DOES_NOT_EXIST("Payload is not available in spectrum."),
 
-    //referred in ProcessorAdminDetailsResource
+    // referred in processor admin details resource
     PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
     PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
     PROCESSOR_EXECUTION_STATE_NOT_PROCESSING("The status for the given processor id %s is not updated since the execution is not in 'Processing' state."),

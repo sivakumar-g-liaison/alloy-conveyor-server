@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 
 /**
- * Created by VNagarajan on 11/22/2016.
+ * Wrapper class of staged file entity which reads the file from storage instead of disk
  */
 public class RelayFile {
 

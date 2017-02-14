@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.util.unit.test;
+package com.liaison.mailbox.service.integration.test;
 
 import java.util.Collections;
 import java.util.List;
