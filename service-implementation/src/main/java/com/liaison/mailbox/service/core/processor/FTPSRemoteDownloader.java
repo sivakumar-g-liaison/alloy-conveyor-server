@@ -244,6 +244,9 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
                 } else {
 
+                    if (!staticProp.isIncludeSubDirectories()) {
+                        continue;
+                    }
                     String localDir = localFileDir + File.separatorChar + currentFileName;
                     String remotePath = dirToList + File.separatorChar + currentFileName;
                     File directory = new File(localDir);

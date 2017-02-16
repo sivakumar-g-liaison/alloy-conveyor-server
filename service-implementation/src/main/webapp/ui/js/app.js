@@ -174,7 +174,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 		globalTrustStoreGroupId: "",
 		processorSyncUrlDisplayPrefix: "",
 		processorAsyncUrlDisplayPrefix: "",
-		defaultScriptTemplateName: ""	
+		defaultScriptTemplateName: "",
+		deployAsDropbox:false	
 	};
 	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
 		function (data, status) {
@@ -184,6 +185,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 				$rootScope.javaProperties.processorSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSyncUrlDisplayPrefix;
 				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
 				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
+				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
 				
 			} else {
 				return;

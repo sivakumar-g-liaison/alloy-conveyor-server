@@ -185,6 +185,15 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             totalServerItems: 'totalServerItems',
         };
 
+		$scope.gridOptions.columnDefs[3].visible = isShowProcessorIdColumn();
+		function isShowProcessorIdColumn() {
+			if ($scope.javaProperties.deployAsDropbox) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		
         // Loading the profile details
         $scope.loadStagedFiles = function() {
             setTimeout(function() {
