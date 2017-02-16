@@ -33,7 +33,7 @@
 	                           <b>File path:</b> {{selectedFile.path}} <br><br>
 	                           <b>Global process id:</b> {{selectedFile.globalProcessId}} <br><br>
 	                           <b>Mailbox id:</b> {{selectedFile.mailboxGuid}} <br><br>
-	                           <b>Processor type:</b> {{selectedFile.processorType}} <br><br>
+	                           <div ng-hide="javaProperties.deployAsDropbox"><b>Processor type:</b> {{selectedFile.processorType}} <br><br></div>
 	                           <b>Spectrum URI:</b> <p>{{selectedFile.spectrumUri}}</p><br>
 	                           <b>Meta:</b> <p>{{selectedFile.meta}}</p> <br><br>
 	                           <b>Status:</b> {{selectedFile.status}} <br><br>

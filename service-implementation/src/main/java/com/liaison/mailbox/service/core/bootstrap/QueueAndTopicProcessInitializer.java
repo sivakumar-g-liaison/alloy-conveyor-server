@@ -10,6 +10,7 @@ package com.liaison.mailbox.service.core.bootstrap;
 
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,12 +44,6 @@ public class QueueAndTopicProcessInitializer {
 
     private static final Logger logger = LogManager.getLogger(QueueAndTopicProcessInitializer.class);
     private static DecryptableConfiguration configuration = MailBoxUtil.getEnvironmentProperties();
-
-    /**
-     * Property to decide whether application should initialize dropbox queue or
-     * not
-     */
-    public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
 
     /**
      * Property to decide whether to initialize queue processors or not
@@ -96,7 +91,7 @@ public class QueueAndTopicProcessInitializer {
             return;
         }
 
-        if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
+        if (configuration.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false)) {
 
             // Initialize the dropbox queue
             logger.info("Starting Dropbox Queue Listener");

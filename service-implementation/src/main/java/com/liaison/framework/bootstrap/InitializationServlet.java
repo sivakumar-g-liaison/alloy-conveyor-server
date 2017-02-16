@@ -24,6 +24,7 @@ import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +58,7 @@ public class InitializationServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-		boolean isDropbox = configuration.getBoolean(QueueAndTopicProcessInitializer.START_DROPBOX_QUEUE, false);
+		boolean isDropbox = configuration.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false);
         // nfs health check
         // check only if current service is not dropbox
         if(!isDropbox) {
