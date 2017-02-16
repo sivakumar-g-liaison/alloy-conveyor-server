@@ -1,5 +1,5 @@
 <div class="container fade-in">
-    <div class="addmailboxform-row">
+    <div class="form-row">
         <h3 id="title" class="ng-binding">Staged Files</h3>
         <hr/>
         <br/>
@@ -9,6 +9,10 @@
 	       <div class = "form-group">
 	          <div class="gridStyle" ng-grid="gridOptions"></div>
 	       </div>
+	       <div class="form-row"></div>
+           <button id="stafedFileUpdateId" class="btn btn-primary pull-right" ng-click="reviseStagedFileModal()">
+               update
+           </button>
 	   </div>
 
 	   <!-- Loading image will be shown until grid is loaded -->
@@ -75,4 +79,34 @@
 	           </div>
 	       </div>
 	   </form>
+	   
+      <!--Modal for bulk delete operation -->
+      <div class="modal fade" id="updateSelectedFilesModal">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <button  type="button" class="close" id="updateButtonModal"
+                          ng-click="cancelSelectedFiles()">&times;</button>
+                      <h4 draggable-modal class="modal-title" id="confirmUpdateFileId">Confirm Staged File Update</h4>
+                  </div>
+              <div class="modal-body modal-body-enable-overflow">
+                    Do you really need to update the selected staged files status<br>
+                    to FAILED ?<br>
+                    <span ng-repeat="name in stagedFileName">
+                    {{name}}<font ng-show="!$last">,</font>
+                    </span>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="btnCancelFileModal"
+                          ng-click="cancelSelectedFiles()">Cancel
+                  </button>
+                  <button type="button" class="btn btn-primary" id="btnUpdateFileModal"
+                          ng-click="updateSelectedFiles()">Update
+                  </button>
+              </div>
+          </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
 </div>

@@ -12,6 +12,8 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
 
         var url = $scope.base_url + "/stagedFiles";
 
+        $scope.files = [];
+
         $scope.filterOptions = {
             filterText: [],
             useExternalFilter: true
@@ -35,6 +37,14 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             "FAILED",
             "DELETED"
         ];
+
+        $scope.reviseRequest = {
+            reviseStagedFileRequest: {
+                guids: []
+            }
+        };
+
+        $scope.stagedFileName = [];
 
         if ($rootScope.languageFormatData.dateRangePattern != undefined) {
             daterangepickerappConfig.dateFormat = $rootScope.languageFormatData.dateRangePattern;
@@ -89,7 +99,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
 
             if (!valid) {
                 $scope.pagingOptions.currentPage = oldVal;
-                $scope.notifier.notify('error', 'Invalid input value. Page ' + oldVal + ' is shown.');
+                showSaveMessage('error', 'Invalid input value. Page ' + oldVal + ' is shown.');
             }
             return valid;
         }
@@ -162,7 +172,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
                 headerCellTemplate:'partials/filterStatusComboBoxHeaderTemplate.html'
             }, {
                 displayName: 'Action',
-                width: '10%',
+                width: '12%',
                 sortable: false,
                 cellTemplate: 'partials/staged-file-action-template.html'
             }],
@@ -193,20 +203,45 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             }, 100);
         };
 
+        $scope.setStagedFileData = function() {
+            setTimeout(function() {
+                if ($scope.reviseRequest.reviseStagedFileRequest.guids.length > 0) {
+                    for (var i = 0; i < $scope.files.length; i++) {
+                        if ($scope.reviseRequest.reviseStagedFileRequest.guids.
+                                indexOf($scope.files[i].id) != -1) {
+                            $scope.files[i].value = true;
+                        } else {
+                            $scope.files[i].value = false;
+                        }
+                    } 
+                } else {
+                    for (var i = 0; i < $scope.files.length; i++) {
+                        $scope.files[i].value = false;
+                    }
+                }
+
+           	 $scope.stagedFiles = $scope.files;
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+           }, 100);
+        }
+
         $scope.getPagedDataAsync = function(url, pageSize, page, filterText, sortInfo) {
 
             $scope.restService.get(url,
                 function(data) {
                     if (data) {
-                        $scope.stagedFiles = data.getStagedFilesResponse.stagedFiles;
+                        $scope.files = data.getStagedFilesResponse.stagedFiles;
                         $scope.totalServerItems = data.getStagedFilesResponse.totalItems;
+                        $scope.setStagedFileData();
                         showSaveMessage("Staged files retrieved successfully ", 'success');
                     } else {
                         $scope.stagedFiles = [];
                         $scope.totalServerItems = 0;
                     }
 
-                    if ($scope.stagedFiles.length === 0) {
+                    if ($scope.files.length === 0) {
                         showSaveMessage("No Results Found ", 'warning');
                     }
                     if (!$scope.$$phase) {
@@ -263,6 +298,60 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
 
         $scope.updateModelHide = function() {
             $('#fileUpdateModal').modal('hide');
+        }
+
+        $scope.selectStagedFile = function(entity) {
+
+            var filesToUpdate = angular.copy(entity);
+            var filePosition = $scope.reviseRequest.reviseStagedFileRequest.guids.indexOf(filesToUpdate.id);
+            var fileNamePos = $scope.stagedFileName.indexOf(filesToUpdate.name);
+
+            if (true == filesToUpdate.value) {
+                if (filePosition == -1) {
+                    $scope.reviseRequest.reviseStagedFileRequest.guids.push(filesToUpdate.id)
+                    $scope.stagedFileName.push(filesToUpdate.name)
+                }
+            } else {
+                if (filePosition != -1) {
+                    $scope.reviseRequest.reviseStagedFileRequest.guids.splice(filePosition, 1);
+                }
+
+                if (fileNamePos != -1) {
+                    $scope.stagedFileName.splice(fileNamePos, 1);
+                }
+            }
+        };
+
+        $scope.reviseStagedFileModal = function() {
+            if ($scope.reviseRequest.reviseStagedFileRequest.guids.length == 0) {
+                showSaveMessage('No files are selected to update', 'warning');
+            } else {
+                $('#updateSelectedFilesModal').modal('show');
+            }
+        };
+
+        $scope.cancelSelectedFiles = function() {
+            $('#updateSelectedFilesModal').modal('hide');
+        }
+
+        $scope.updateSelectedFiles = function() {
+
+            $scope.restService.put("../mailbox/stagedFiles/revise", $filter('json')($scope.reviseRequest), function() {})
+                .success(function(data, status) {
+                    if (status == 200) {
+                        showSaveMessage('Staged files updated successfully', 'success');
+                        $scope.reviseRequest.reviseStagedFileRequest.guids = [];
+                        $scope.stagedFileName = [];
+                        $scope.loadStagedFiles();
+                        $('#updateSelectedFilesModal').modal('hide');
+                    } else {
+                        showSaveMessage('error', data);
+                        $('#updateSelectedFilesModal').modal('hide');
+                    }
+                })
+                .error(function(data, status) {
+                    showSaveMessage('error', data);
+                })
         }
     }
 ]);

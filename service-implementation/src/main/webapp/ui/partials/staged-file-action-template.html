@@ -9,4 +9,10 @@
             class="btn btn-default btn-xs" ng-disabled="(row.entity.status != 'STAGED')" ng-click="openUpdateModal(row.entity)">
         <i class="glyphicon glyphicon-pencil"></i>
     </button>
+    &nbsp;|&nbsp;
+    <button id="selectFile{{row.rowIndex}}" tooltip-placement="right" tooltip="Select"
+            class="btn btn-default btn-xs" ng-disabled="(row.entity.status != 'STAGED')" tooltip-append-to-body="true">
+        <input type="checkbox" id="selectStagedFile{{row.rowIndex + 1}}" ng-model="row.entity.value" 
+        ng-change="selectStagedFile(row.entity)" style="margin-top: 3px;"/>
+    </button>
 </div>

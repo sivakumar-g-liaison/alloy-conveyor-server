@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +29,7 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseStagedFileRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -40,9 +43,10 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
 
     private static final Logger LOG = LogManager.getLogger(MailboxStagedFileService.class);
     private static final String STAGED_FILE = "Staged files";
-    private static final String STAGED_FILE_MESSAGE = "Staged file must be in failed status to inactivate the file";
+    private static final String STAGED_FILE_MESSAGE = "Staged file must be in staged status to inactivate the file";
     private static final String STAGED_FILE_NOT_EXISTS = "Staged file does not exists in the system";
-	
+    private static final String STAGED_FILE_UPDATE_MESSAGE = "Staged files updated successfully";
+
     /**
      * Method to list the staged files
      * 
@@ -139,4 +143,48 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
         }
         return Response.ok().entity(file.getPguid()).build();
     }
+
+    /**
+     *  Method to deactivate the bulk staged files
+     * 
+     * @param requestDTO
+     * @return response
+     */
+    public Response deactivateBulkStagedFiles(ReviseStagedFileRequestDTO requestDTO) {
+
+        LOG.debug("Entering into deactivate bulk StagedFiles.");
+        EntityManager em = null;
+        EntityTransaction tx = null;
+
+        try {
+
+            List<String> guids = requestDTO.getGuids();
+            if (MailBoxUtil.isEmptyList(guids)) {
+                throw new RuntimeException(Messages.INVALID_REQUEST.value());
+            }
+
+            em = DAOUtil.getEntityManager(MailboxRTDMDAO.PERSISTENCE_UNIT_NAME);
+            tx = em.getTransaction();
+            tx.begin();
+
+            Query q = em.createNativeQuery("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1 WHERE PGUID IN (?2) AND STATUS = 'STAGED'");
+            q.setParameter(1, MailBoxUtil.getTimestamp());
+            q.setParameter(2, guids);
+
+            //Update the selected files
+            q.executeUpdate();
+            tx.commit();
+        } catch (Exception e) {
+
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            if (null != em) {
+                em.close();
+            }
+        }
+        return Response.ok().entity(STAGED_FILE_UPDATE_MESSAGE).build();
+     }
 }
