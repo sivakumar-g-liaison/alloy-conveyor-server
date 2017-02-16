@@ -73,6 +73,7 @@ public class RemoteProcessorPropertiesDTO {
     private String processMode = "ASYNC";
     private boolean allowEmptyFiles = true;
     private boolean useFileSystem = true;
+    private boolean includeSubDirectories;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -408,6 +409,14 @@ public class RemoteProcessorPropertiesDTO {
     
     public void setUseFileSystem(boolean useFileSystem) {
         this.useFileSystem = useFileSystem;
+    }
+    
+    public boolean isIncludeSubDirectories() {
+        return includeSubDirectories;
+    }
+    
+    public void setIncludeSubDirectories(boolean includeSubDirectories) {
+        this.includeSubDirectories = includeSubDirectories;
     }
     
 }
