@@ -1,6 +1,14 @@
 4.13.0-SNAPSHOT
 ---------------
 * GGT-1236, GGT-1209 add appenv and archaius properties layers
+* GMB-944 - Dropbox : Files-Staged Files : Pro
+* GMB-945 - Files-Staged Files : In Show Details Pop up screen meta information doesn't fit in the Popup details
+* GMB-932 - Remote Downloader should download directories based on the property
+* GMB-915 - Mailbox list/read operation ignores serviceInstance defined in search criteria
+* GMB-902 - Staging a file to Dropbox throws a NumberFormatException.
+* GMB-943 - Sort transfer profiles in mailbox processor screen.
+* GWUD-128 - Provide a default sender organization.
+* GMB-934 - "callback is not a function error" is received in Relay application.
 
 4.12.0
 ---------------
