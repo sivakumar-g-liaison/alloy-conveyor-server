@@ -8,14 +8,10 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.util.unit.test;
+package com.liaison.mailbox.service.integration.test;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 import javax.script.ScriptException;
 
@@ -27,17 +23,14 @@ import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.liaison.commons.scripting.javascript.JavascriptExecutor;
-import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
-
 /**
  * 
  * @author OFS
  *
  */
-public class JavaScriptEngineUtilTest {
+public class JavaScriptEngineUtilIT {
 	
-	private static final Logger logger = LogManager.getLogger(JavaScriptEngineUtilTest.class);
+	private static final Logger logger = LogManager.getLogger(JavaScriptEngineUtilIT.class);
 	
 	/**
 	 * Method to test execute JavaScript.
@@ -48,9 +41,6 @@ public class JavaScriptEngineUtilTest {
 	@Test
 	public void testExecuteJavaScript() {
 		
-		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "dev-int");
-
 		String testJs = "gitlab:/processor-scripts/sample_unit_test.js";
 		URI myUri = null;
 		try {
@@ -65,9 +55,6 @@ public class JavaScriptEngineUtilTest {
 	@Test
 	public void testExecuteJavaScriptSweeper() {
 
-		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "dev-int");
-
 		String testJs = "gitlab:/processor-scripts/sweeper_unit_test.js";
 		Object returnValue = JavaScriptExecutorUtil.executeJavaScript(testJs, "process", 4, 5);
 		Assert.assertEquals(returnValue, 20);
@@ -75,9 +62,6 @@ public class JavaScriptEngineUtilTest {
 
     @Test
     public void testExecuteJavaScripteFailure() {
-
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "dev-int");
 
         String testJs = "gitlab:/processor-scripts/sample_unit_test_failure.js";
         URI myUri = null;

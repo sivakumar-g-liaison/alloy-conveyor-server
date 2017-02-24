@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.unit.test;
+package com.liaison.mailbox.service.unit.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,16 +41,6 @@ public class ProcessorLegacyDTOTest {
 	private final static String VALID_TRUSTSTORE = "4463C90421854F23876C11A7A39FA41F";
 	
 	private final static String INVALID_GUID = "1B639D47BB734094AE7B26B122C00282";
-	
-	/**
-	 * @throws Exception
-	 */
-	@BeforeMethod
-	public void setUp() throws Exception {
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "dev-int");
-	}
 	
 	/**
 	 * Test method to validate the userId and Password.

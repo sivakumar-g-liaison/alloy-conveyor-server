@@ -52,9 +52,6 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-/**
- * @author OFS
- */
 public class MailBoxProcessorResourceIT extends BaseServiceTest {
 
     private String jsonResponse;
@@ -69,23 +66,12 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
      */
     @BeforeClass
     public void setUp() throws Exception {
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-
         // Adding the mailbox
         responseDTO = createMailBox();
     }
 
     /**
      * Method to test mailbox processor.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
      */
     @Test
     public void testCreateProcessorToMailBox() throws Exception {
@@ -807,8 +793,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         jsonResponse = getOutput().toString();
         GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
-        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-        Assert.assertEquals(EntityStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
     }
 
     /**

@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.unit.test;
+package com.liaison.mailbox.service.unit.test;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;

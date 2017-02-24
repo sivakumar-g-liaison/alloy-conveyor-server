@@ -13,7 +13,9 @@ package com.liaison.mailbox.service.dto.configuration;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -217,5 +219,19 @@ public class MailBoxDTO implements Serializable {
 			this.getProcessors().add(prcsrDTO);
 		}
 
-	}	
+	}
+
+    public Set<MailBoxProperty> getPropertyEntities(MailBox mailbox) {
+
+        MailBoxProperty property = null;
+        Set<MailBoxProperty> properties = new HashSet<>();
+        for (PropertyDTO propertyDTO : this.getProperties()) {
+
+            property = new MailBoxProperty();
+            property.setMailbox(mailbox);
+            propertyDTO.copyToEntity(property, true);
+            properties.add(property);
+        }
+        return properties;
+    }
 }

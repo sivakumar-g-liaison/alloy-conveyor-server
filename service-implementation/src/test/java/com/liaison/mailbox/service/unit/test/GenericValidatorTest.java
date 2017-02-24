@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.unit.test;
+package com.liaison.mailbox.service.unit.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,16 +34,6 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  */
 public class GenericValidatorTest {
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeMethod
-	public void setUp() throws Exception {
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-	}
-    
 	/**
 	 * Method to validate mailbox with wrong status.
 	 * 

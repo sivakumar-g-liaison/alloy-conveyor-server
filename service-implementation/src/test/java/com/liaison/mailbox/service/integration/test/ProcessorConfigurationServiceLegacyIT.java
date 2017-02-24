@@ -10,20 +10,6 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.bind.JAXBException;
-
-import com.liaison.commons.jaxb.JAXBUtility;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
@@ -52,6 +38,15 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -60,7 +55,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
 
-    private String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
     private String ftpURL = "ftp://10.146.18.10:21";
     private String ftpsURL = "ftps://10.146.18.15:21";
     private String sftpURL = "sftp://10.146.18.20:22";
@@ -82,17 +76,6 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
     private boolean createFolderInRemote = true;
 
     /**
-     * @throws java.lang.Exception
-     */
-    @BeforeMethod
-    public void setUp() throws Exception {
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-        InitInitialDualDBContext.init();
-    }
-
-    /**
      * Method constructs Processor with valid data.
      * @throws Exception
      */
@@ -105,7 +88,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
@@ -154,7 +137,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -206,7 +189,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -241,7 +224,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -271,7 +254,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -389,7 +372,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -424,7 +407,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -458,7 +441,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -491,7 +474,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -524,7 +507,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -557,7 +540,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -590,7 +573,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -623,7 +606,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -656,7 +639,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();
@@ -689,7 +672,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         requestDTO.setMailBox(mailboxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mailboxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
 
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         String mailboxId = response.getMailBox().getGuid();

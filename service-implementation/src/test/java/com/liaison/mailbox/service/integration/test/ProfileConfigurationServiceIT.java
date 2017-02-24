@@ -41,17 +41,6 @@ public class ProfileConfigurationServiceIT extends BaseServiceTest {
 	private static final String PAGE_SIZE = "25";
 	
 	/**
-	 * @throws Exception
-	 */
-	@BeforeMethod
-	public void setUp() throws Exception {
-		System.setProperty("com.liaison.secure.properties.path", "invalid");
-		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "test");
-		InitInitialDualDBContext.init();
-	}
-	
-	/**
 	 * Method to create a new profile.
 	 */
 	@Test

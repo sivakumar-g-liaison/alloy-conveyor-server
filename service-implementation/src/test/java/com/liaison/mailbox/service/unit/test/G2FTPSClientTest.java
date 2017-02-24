@@ -7,7 +7,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.services.unit.test;
+package com.liaison.mailbox.service.unit.test;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

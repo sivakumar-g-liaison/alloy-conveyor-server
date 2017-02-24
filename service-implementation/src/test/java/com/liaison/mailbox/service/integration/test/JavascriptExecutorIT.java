@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.executor.javascript.unit.test;
+package com.liaison.mailbox.service.integration.test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,16 +31,12 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
  * @author VNagarajan
  *
  */
-public class JavascriptExecutorTest {
+public class JavascriptExecutorIT {
 
 	public ProcessorJavascriptI processorService;
 
 	@BeforeClass
 	public void createProcessor() {
-
-		System.setProperty("com.liaison.secure.properties.path", "invalid");
-		System.setProperty("archaius.deployment.applicationId", "scripting");
-		System.setProperty("archaius.deployment.environment", "test");
 
 		MailBox mailbox = new MailBox();
 		mailbox.setTenancyKey("JUNIT");
@@ -87,10 +83,6 @@ public class JavascriptExecutorTest {
 
     @Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
     public void testExecutor_Timeout() throws URISyntaxException {
-
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "scripting");
-        System.setProperty("archaius.deployment.environment", "test");
 
 		((AbstractProcessor) processorService).setMaxExecutionTimeout(1);
         String scriptRelativePath = "processor-scripts/veera/timeout_test.js";

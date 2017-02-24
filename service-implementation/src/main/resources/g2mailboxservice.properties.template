@@ -14,7 +14,7 @@ com.netflix.karyon.eureka.disable=true
 # config time database connectivity properties
 com.liaison.dtdm.DB_DRIVER=oracle.jdbc.OracleDriver
 com.liaison.dtdm.DB_URL=jdbc:oracle:thin:@(description=(address=(protocol=TCP)(host=lsildb23d.liaison.dev)(port= 1521))(connect_data=(service_name=G2DEV1.liaison.dev)))
-com.liaison.dtdm.DB_USER=DEV1_GATEWAY_DTDM_APPL
+com.liaison.dtdm.DB_USER=JEN_GATEWAY_DTDM_APPL
 com.liaison.dtdm.DB_PASSWORD=12345678
 com.liaison.dtdm.DB_MINPOOLSIZE=30
 com.liaison.dtdm.DB_MAXPOOLSIZE=100
@@ -28,7 +28,7 @@ com.liaison.initializationQuery=SELECT * FROM DUAL
 # runtime database connectivity properties
 com.liaison.rtdm.DB_DRIVER=oracle.jdbc.OracleDriver
 com.liaison.rtdm.DB_URL=jdbc:oracle:thin:@(description=(address=(protocol=TCP)(host=lsildb23d.liaison.dev)(port= 1521))(connect_data=(service_name=G2DEV1.liaison.dev)))
-com.liaison.rtdm.DB_USER=DEV1_GATEWAY_RTDM_APPL
+com.liaison.rtdm.DB_USER=JEN_GATEWAY_RTDM_APPL
 com.liaison.rtdm.DB_PASSWORD=12345678
 com.liaison.rtdm.DB_MINPOOLSIZE=30
 com.liaison.rtdm.DB_MAXPOOLSIZE=100
@@ -42,14 +42,11 @@ com.liaison.persistenceUnitName.rtdm=mailbox-rtdm
 
 #///###########################\\\#
 ######## QUEUE Properties #########
-
 java.naming.provider.url=jnp://localhost:1199,jnp://localhost:1199
-
 #\\\###########################///#
 #\\\###########################///#
 
 ######################################################## PROCESSOR CONFIGURATIONS############################################################
-
 #G2 JS Engine Configurations
 scripting.compile.cache.max.size=0
 scripting.compile.cache.expire.timeout=5
@@ -131,17 +128,17 @@ usermanagement.url.authenticate = https://at4d-vpusrmg.liaison.dev/usermanagemen
 
 #BOOTSTRAP PROPERTIES
 bootstrap.keypair.location=local
-bootstrap.client.privatekey.classpath.url=/bootstrap/mbxbootstrapprikey.pem
-bootstrap.client.privatekey.passphrase.classpath.url=/bootstrap/passphrase
-bootstrap.client.keypair.passphrase.classpath.url=/bootstrap/mbxsignkeypwd.file
-bootstrap.client.keypair.classpath.url=/bootstrap/signandverifykeystore.jks
+bootstrap.client.privatekey.classpath.url=bootstrap/mbxbootstrapprikey.pem
+bootstrap.client.privatekey.passphrase.classpath.url=bootstrap/passphrase
+bootstrap.client.keypair.passphrase.classpath.url=bootstrap/mbxsignkeypwd.file
+bootstrap.client.keypair.classpath.url=bootstrap/signandverifykeystore.jks
 
 #Processor HTTP sync/async URL
-processor.sync.url.display.prefix =   https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/sync?
-processor.async.url.display.prefix =  https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/async?
+processor.sync.url.display.prefix=https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/sync?
+processor.async.url.display.prefix=https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/async?
 
 #GEM Integration
-com.liaison.acl.manifest.url = https://at4d-vpacl.liaison.dev/globalenterprisemanager/rest/v1/gem/verifyAndGetManifest
+com.liaison.acl.manifest.url=https://at4d-vpacl.liaison.dev/globalenterprisemanager/rest/v1/gem/verifyAndGetManifest
 
 #Properties required for Manifest request generation
 com.liaison.acl.request.runtime.platform.name=G2
@@ -281,4 +278,4 @@ http.user.home.path=/data/http
 https.user.home.path=/data/https
 
 #service broker base url
-com.liaison.servicebroker.api.baseUrl=https://at4d-vpsbrt.liaison.dev/service-broker/
+com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/service-broker/

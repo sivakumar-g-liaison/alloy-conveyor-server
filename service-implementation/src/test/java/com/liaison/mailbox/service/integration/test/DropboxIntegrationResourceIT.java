@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -67,419 +67,402 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class DropboxIntegrationResourceIT extends BaseServiceTest {
 
-	private Logger logger;
-	private String jsonResponse;
-	private String jsonRequest;
-	private HTTPRequest request;
+    private Logger logger = LogManager.getLogger(DropboxIntegrationResourceIT.class);
+    private String jsonResponse;
+    private String jsonRequest;
+    private HTTPRequest request;
 
-	@BeforeClass
-	public void setUp() throws Exception {
-		logger = LogManager.getLogger(DropboxIntegrationResourceIT.class);
-	}
+    @Test(enabled = false)
+    public void testDropboxServices() throws Exception {
 
-	@Test(enabled = false)
-	public void testDropboxServices() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
+        //createMailBox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
+        String url = getBASE_URL() + "?sid=" + serviceInstanceId;
+        request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        AddMailBoxResponseDTO mailboxResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+        Assert.assertEquals(SUCCESS, mailboxResponseDTO.getResponse().getStatus());
 
-		//createMailBox
-		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
-		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-		requestDTO.setMailBox(mbxDTO);
-		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
-		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		AddMailBoxResponseDTO mailboxResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, mailboxResponseDTO.getResponse().getStatus());
+        //create Profile
+        String profileName = "once" + System.currentTimeMillis();
+        AddProfileResponseDTO profileResponseDTO = addProfile(profileName);
+        Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
-		//create Profile
-		String profileName = "once" + System.currentTimeMillis();
-		AddProfileResponseDTO profileResponseDTO = addProfile(profileName);
-		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+        //createProcesser
+        AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+                "RESPONSE_LOCATION", "Sample", "ACTIVE", "DROPBOXPROCESSOR", "Dummy_DESCRIPTION", false, "DROPBOXPROCESSOR", profileName, mailboxResponseDTO.getMailBox().getGuid());
+        jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
+        String addProcessor = "/" + mailboxResponseDTO.getMailBox().getGuid() + "/processor" + "?sid=" + serviceInstanceId;
+        request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
+                AddProcessorToMailboxResponseDTO.class);
+        Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
-		//createProcesser
-		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "Sample", "ACTIVE", "DROPBOXPROCESSOR" ,"Dummy_DESCRIPTION", false, "DROPBOXPROCESSOR", profileName, mailboxResponseDTO.getMailBox().getGuid());
-		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
-		String addProcessor = "/" + mailboxResponseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
-		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
-				AddProcessorToMailboxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
 
-		//authenticate user account
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
-		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+        //get transfer profiles
+        String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
+        request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        GetTransferProfilesResponseDTO getTransferProfilesRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetTransferProfilesResponseDTO.class);
+        Assert.assertEquals(SUCCESS, getTransferProfilesRespDTO.getResponse().getStatus());
 
-		//get transfer profiles
-		String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
-		request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		GetTransferProfilesResponseDTO getTransferProfilesRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetTransferProfilesResponseDTO.class);
-		Assert.assertEquals(SUCCESS, getTransferProfilesRespDTO.getResponse().getStatus());
+        //upload payload
+        String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId=" + profileResponseDTO.getProfile().getGuId();
+        request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxTransferContentResponseDTO uploadPayloadResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxTransferContentResponseDTO.class);
+        Assert.assertEquals(SUCCESS, uploadPayloadResponseDTO.getResponse().getStatus());
 
-		//upload payload
-		String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+profileResponseDTO.getProfile().getGuId();
-		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DropboxTransferContentResponseDTO uploadPayloadResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxTransferContentResponseDTO.class);
-		Assert.assertEquals(SUCCESS, uploadPayloadResponseDTO.getResponse().getStatus());
+        //stage payload
+        StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq(mailboxResponseDTO.getMailBox().getGuid());
+        String stagePayloadReqBody = MailBoxUtil.marshalToJSON(stagePayloadReq);
+        String stagePayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles";
+        request = constructHTTPRequest(stagePayloadURL, HTTP_METHOD.POST, stagePayloadReqBody, logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
+        Assert.assertEquals(SUCCESS, stagePayloadRespDTO.getResponse().getStatus());
 
-		//stage payload
-		StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq(mailboxResponseDTO.getMailBox().getGuid());
-		String stagePayloadReqBody = MailBoxUtil.marshalToJSON(stagePayloadReq);
-		String stagePayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles";
-		request = constructHTTPRequest(stagePayloadURL, HTTP_METHOD.POST, stagePayloadReqBody, logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
-		Assert.assertEquals(SUCCESS, stagePayloadRespDTO.getResponse().getStatus());
+        //getStaged files
+        String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
+        request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        GetStagedFilesResponseDTO getStagedFilesResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetStagedFilesResponseDTO.class);
+        Assert.assertEquals(SUCCESS, getStagedFilesResponseDTO.getResponse().getStatus());
 
-		//getStaged files
-		String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
-		request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		GetStagedFilesResponseDTO getStagedFilesResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetStagedFilesResponseDTO.class);
-		Assert.assertEquals(SUCCESS, getStagedFilesResponseDTO.getResponse().getStatus());
-
-		//download payload
-		String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stagePayloadRespDTO.getStagedFile().getGuid();
-		request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		HTTPResponse downloadPayloadResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(200, downloadPayloadResponse.getStatusCode());
-	}
-
-	@Test(enabled = false)
-	public void testDropboxAuthenticateS_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-
-		//authenticate user account with invalid data
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
-		reqDTO.setPassword("PASSWORD"+System.currentTimeMillis()+"@liaison.dev");
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
-		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
-
-		//authenticate user account with EmptyDta
-		reqDTO = constructAuthenticationRequest();
-		reqDTO.setLoginId("");
-		reqDTO.setPassword("");
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
-		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
-
-		//authenticate user account with null
-		reqDTO = constructAuthenticationRequest();
-		reqDTO.setLoginId(null);
-		reqDTO.setPassword(null);
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
-		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
-	}
-
-	@Test(enabled = false)
-	public void testGetTransferProfiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-
-		//authenticate user account with invalid data
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
-		reqDTO.setPassword("PASSWORD"+System.currentTimeMillis()+"@liaison.dev");
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
-		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
-
-		//get transfer profiles with invalid authResponse
-		String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
-		request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
-	}
-
-	@Test(enabled = false)
-	public void testDropboxUploadPayload_InvalidId() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-
-		//authenticate user account
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
-		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
-
-		//upload payload with invalid profile pguid
-		String processorMessage = "There are no Dropbox Processor available";
-		String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+"123456789";
-		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, processorMessage);
-		//upload payload with empty profile pguid
-		uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+"";
-		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, processorMessage);
-
-		//upload payload with null profile pguid
-		uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+null;
-		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, processorMessage);
+        //download payload
+        String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stagePayloadRespDTO.getStagedFile().getGuid();
+        request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        HTTPResponse downloadPayloadResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(200, downloadPayloadResponse.getStatusCode());
     }
 
-	@Test(enabled = false)
-	public void testDropboxStagePayload_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
+    @Test(enabled = false)
+    public void testDropboxAuthenticateS_InvalidData() throws Exception {
 
-		//authenticate user account
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
-		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+        //authenticate user account with invalid data
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        reqDTO.setLoginId("USERID" + System.currentTimeMillis() + "@liaison.dev");
+        reqDTO.setPassword("PASSWORD" + System.currentTimeMillis() + "@liaison.dev");
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxResponseTest.class);
+        Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
+        Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 
-		//stage payload with null stageFile
-		StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq("MailBox"+System.currentTimeMillis());
-		stagePayloadReq.setStagedFile(null);
-		String stagePayloadReqBody = MailBoxUtil.marshalToJSON(stagePayloadReq);
-		String stagePayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles";
-		request = constructHTTPRequest(stagePayloadURL, HTTP_METHOD.POST, stagePayloadReqBody, logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
-		Assert.assertEquals(FAILURE, stagePayloadRespDTO.getResponse().getStatus());
-	}
+        //authenticate user account with EmptyDta
+        reqDTO = constructAuthenticationRequest();
+        reqDTO.setLoginId("");
+        reqDTO.setPassword("");
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxResponseTest.class);
+        Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
+        Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 
-	@Test(enabled = false)
-	public void testGetStagedFiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
+        //authenticate user account with null
+        reqDTO = constructAuthenticationRequest();
+        reqDTO.setLoginId(null);
+        reqDTO.setPassword(null);
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxResponseTest.class);
+        Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
+        Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+    }
 
-		//authenticate user account with invalid data
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
-		reqDTO.setPassword("PASSWORD"+System.currentTimeMillis()+"@liaison.dev");
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
-		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+    @Test(enabled = false)
+    public void testGetTransferProfiles_InvalidAuthResponse() throws Exception {
 
-		//getStaged files with invalid authResponse
-		String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
-		request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
-	}
+        //authenticate user account with invalid data
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        reqDTO.setLoginId("USERID" + System.currentTimeMillis() + "@liaison.dev");
+        reqDTO.setPassword("PASSWORD" + System.currentTimeMillis() + "@liaison.dev");
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxResponseTest.class);
+        Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
+        Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 
-	@Test(enabled = false)
-	public void testdownloadpayload_InvalidId() throws LiaisonException, IOException, JAXBException {
+        //get transfer profiles with invalid authResponse
+        String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
+        request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
+    }
 
-		//authenticate user account
-		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
-		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
-		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
-		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
-		HTTPResponse authResponse = request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
-		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+    @Test(enabled = false)
+    public void testDropboxUploadPayload_InvalidId() throws Exception {
 
-		//download payload with invalid Staged file id
-		String stageFileId = "123456789";
-		String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stageFileId;
-		request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", stageFileId));
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
 
-		//download payload with null Staged file id
-	    downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + null;
-		request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
-		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
-		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", "null"));
-	}
+        //upload payload with invalid profile pguid
+        String processorMessage = "There are no Dropbox Processor available";
+        String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId=" + "123456789";
+        request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, processorMessage);
+        //upload payload with empty profile pguid
+        uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId=" + "";
+        request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, processorMessage);
 
-	private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
-			String processorType, String processorDescription, boolean isRevise, String protocolType, String profileName, String mailboxPguid) throws JsonParseException,
-			JsonMappingException,
-			JsonGenerationException,
-			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+        //upload payload with null profile pguid
+        uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId=" + null;
+        request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, processorMessage);
+    }
 
-		ProcessorDTO processorDTO = new ProcessorDTO();
+    @Test(enabled = false)
+    public void testDropboxStagePayload_InvalidData() throws Exception {
 
-		List<ProcessorCredentialPropertyDTO> credetnialList = new ArrayList<ProcessorCredentialPropertyDTO>();
-		processorDTO.getProcessorPropertiesInTemplateJson().setCredentialProperties(credetnialList);
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
 
-		List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
-		processorDTO.setProcessorPropertiesInTemplateJson(new ProcessorPropertyUITemplateDTO());
-		processorDTO.getProcessorPropertiesInTemplateJson().setFolderProperties(folderList);
-		processorDTO.setStatus(processorStatus);
-		processorDTO.setName(System.currentTimeMillis() + "");
-		processorDTO.setDescription(processorDescription);
+        //stage payload with null stageFile
+        StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq("MailBox" + System.currentTimeMillis());
+        stagePayloadReq.setStagedFile(null);
+        String stagePayloadReqBody = MailBoxUtil.marshalToJSON(stagePayloadReq);
+        String stagePayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles";
+        request = constructHTTPRequest(stagePayloadURL, HTTP_METHOD.POST, stagePayloadReqBody, logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
+        Assert.assertEquals(FAILURE, stagePayloadRespDTO.getResponse().getStatus());
+    }
 
-		processorDTO.setType(processorType);
-		processorDTO.setProtocol(protocolType);
-		processorDTO.setLinkedMailboxId(mailboxPguid);
+    @Test(enabled = false)
+    public void testGetStagedFiles_InvalidAuthResponse() throws Exception {
 
-		Set<String> profiles = new HashSet<>();
-		profiles.add(profileName);
-		processorDTO.setLinkedProfiles(profiles);
+        //authenticate user account with invalid data
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        reqDTO.setLoginId("USERID" + System.currentTimeMillis() + "@liaison.dev");
+        reqDTO.setPassword("PASSWORD" + System.currentTimeMillis() + "@liaison.dev");
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxResponseTest.class);
+        Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
+        Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 
-		if (isRevise) {
-			ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
-			reviseDTO.setProcessor(processorDTO);
-			return reviseDTO;
-		} else {
-			AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
-			addProcessorDTO.setProcessor(processorDTO);
-			return addProcessorDTO;
-		}
-	}
+        //getStaged files with invalid authResponse
+        String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
+        request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
+    }
 
-	/**
-	 * Method to constructs profile.
-	 *
-	 * @param profileName
-	 * @return AddProfileResponseDTO
-	 * @throws JAXBException
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
-	 * @throws LiaisonException
-	 * @throws JsonParseException
-	 */
-	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
-			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+    @Test(enabled = false)
+    public void testdownloadpayload_InvalidId() throws LiaisonException, IOException, JAXBException {
 
-		ProfileDTO profile = new ProfileDTO();
-		profile.setName(profileName);
-		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
-		profileRequstDTO.setProfile(profile);
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
 
-		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
+        //download payload with invalid Staged file id
+        String stageFileId = "123456789";
+        String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stageFileId;
+        request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", stageFileId));
 
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+        //download payload with null Staged file id
+        downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + null;
+        request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", "null"));
+    }
 
-		return profileResponseDTO;
-	}
+    private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
+                                       String processorType, String processorDescription, boolean isRevise, String protocolType, String profileName, String mailboxPguid) throws Exception {
 
-	private StagePayloadRequestDTO constructStagePayloadReq (String mbxGuid) {
+        ProcessorDTO processorDTO = new ProcessorDTO();
 
-		StagePayloadRequestDTO req = new StagePayloadRequestDTO();
-		StagedFileDTO stagedFile = new StagedFileDTO();
-		stagedFile.setFileSize("200");
-		stagedFile.setMailboxGuid(mbxGuid);
-		stagedFile.setName("someName");
-		stagedFile.setPath("somePath");
-		stagedFile.setSpectrumUri(spectrumUri);
+        List<ProcessorCredentialPropertyDTO> credetnialList = new ArrayList<ProcessorCredentialPropertyDTO>();
+        processorDTO.getProcessorPropertiesInTemplateJson().setCredentialProperties(credetnialList);
 
-		req.setStagedFile(stagedFile);
+        List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
+        processorDTO.setProcessorPropertiesInTemplateJson(new ProcessorPropertyUITemplateDTO());
+        processorDTO.getProcessorPropertiesInTemplateJson().setFolderProperties(folderList);
+        processorDTO.setStatus(processorStatus);
+        processorDTO.setName(System.currentTimeMillis() + "");
+        processorDTO.setDescription(processorDescription);
 
-		return req;
-	}
+        processorDTO.setType(processorType);
+        processorDTO.setProtocol(protocolType);
+        processorDTO.setLinkedMailboxId(mailboxPguid);
 
-	private DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest() {
-		DropboxAuthAndGetManifestRequestDTO dto = new DropboxAuthAndGetManifestRequestDTO();
-		dto.setLoginId(USER_ID);
-		dto.setPassword(PASSWORD);
-		return dto;
-	}
+        Set<String> profiles = new HashSet<>();
+        profiles.add(profileName);
+        processorDTO.setLinkedProfiles(profiles);
+
+        if (isRevise) {
+            ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
+            reviseDTO.setProcessor(processorDTO);
+            return reviseDTO;
+        } else {
+            AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
+            addProcessorDTO.setProcessor(processorDTO);
+            return addProcessorDTO;
+        }
+    }
+
+    /**
+     * Method to constructs profile.
+     *
+     * @param profileName
+     * @return AddProfileResponseDTO
+     */
+    private AddProfileResponseDTO addProfile(String profileName) throws Exception {
+
+        ProfileDTO profile = new ProfileDTO();
+        profile.setName(profileName);
+        AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+        profileRequstDTO.setProfile(profile);
+
+        jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
+        request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+
+        AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+
+        return profileResponseDTO;
+    }
+
+    private StagePayloadRequestDTO constructStagePayloadReq(String mbxGuid) {
+
+        StagePayloadRequestDTO req = new StagePayloadRequestDTO();
+        StagedFileDTO stagedFile = new StagedFileDTO();
+        stagedFile.setFileSize("200");
+        stagedFile.setMailboxGuid(mbxGuid);
+        stagedFile.setName("someName");
+        stagedFile.setPath("somePath");
+        stagedFile.setSpectrumUri(spectrumUri);
+
+        req.setStagedFile(stagedFile);
+
+        return req;
+    }
+
+    private DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest() {
+        DropboxAuthAndGetManifestRequestDTO dto = new DropboxAuthAndGetManifestRequestDTO();
+        dto.setLoginId(USER_ID);
+        dto.setPassword(PASSWORD);
+        return dto;
+    }
 }
