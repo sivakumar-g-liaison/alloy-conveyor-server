@@ -488,4 +488,21 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return appEntity;
 	}
+
+    @Override
+    public MailBox find(Class<MailBox> entityClass, Object primaryKey) {
+
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        try {
+            MailBox entity = DAOUtil.find(entityClass, primaryKey, entityManager);
+            if (entity != null && EntityStatus.DELETED.name().equals(entity.getMbxStatus())) {
+                entity = null;
+            }
+            return entity;
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
 }

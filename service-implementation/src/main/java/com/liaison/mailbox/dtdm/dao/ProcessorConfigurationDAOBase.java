@@ -833,4 +833,21 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return results;
 	}
+
+    @Override
+    public Processor find(Class<Processor> entityClass, Object primaryKey) {
+
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        try {
+            Processor entity = DAOUtil.find(entityClass, primaryKey, entityManager);
+            if (entity != null && EntityStatus.DELETED.name().equals(entity.getProcsrStatus())) {
+                entity = null;
+            }
+            return entity;
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
 }

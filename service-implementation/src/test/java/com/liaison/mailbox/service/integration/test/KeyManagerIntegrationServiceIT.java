@@ -10,20 +10,13 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.bind.JAXBException;
-
+import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.util.HTTPClientUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -38,20 +31,18 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.util.HTTPClientUtil;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Test class to test mailbox configuration service.
@@ -60,36 +51,17 @@ import com.liaison.mailbox.service.util.HTTPClientUtil;
  */
 public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
-    private Logger logger;
+    private Logger logger = LogManager.getLogger(KeyManagerIntegrationServiceIT.class);
     private String jsonResponse;
     private String jsonRequest;
     private HTTPRequest request;
     private G2SFTPClient sftpRequest;
 
     /**
-     * @throws java.lang.Exception
-     */
-    @BeforeClass
-    public void setUp() throws Exception {
-        logger = LogManager.getLogger(KeyManagerIntegrationServiceIT.class);
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-    }
-
-    /**
      * Method constructs TrustStore.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
      */
-
     @Test
-    public void testCreateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException {
+    public void testCreateTrustStore() throws Exception {
 
         // Adding the mailbox
         jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
@@ -113,17 +85,9 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test upload public key with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
      */
     @Test
-    public void testUploadPublicKey() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException {
+    public void testUploadPublicKey() throws Exception {
 
         // Adding the mailbox
         jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
@@ -147,19 +111,11 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test upload trustStore with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
      */
 
     @Deprecated
     @Test
-    public void testUpdateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException {
+    public void testUpdateTrustStore() throws Exception {
 
         // Adding the mailbox
         jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
@@ -177,19 +133,10 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test fetch trustStore with valid data.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws com.liaison.commons.exception.LiaisonException
      */
     @Deprecated
     @Test
-    public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
+    public void testFetchTrustStore() throws Exception {
 
         // Get the mailbox
         String url = getKMS_BASE_URL() + "/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
@@ -202,21 +149,8 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test httpsTrustStore.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
-     * @throws KeyStoreException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws com.liaison.commons.exception.LiaisonException
      */
-
-    public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-            JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
+    public void testHttpsTrustStore() throws Exception {
 
         String url = "https://10.0.24.76:19443/g2mailboxservice/rest/v1/mailbox/profile";
 
@@ -247,15 +181,9 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
 
     /**
      * Method to test SFTP With SSH Keypair.
-     *
-     * @throws IOException
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws LiaisonException
-     * @throws com.liaison.commons.exception.LiaisonException
      */
-    @Test
-    public void testSFTPWithSSHKeypair() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exception.LiaisonException {
+    @Test(enabled = false)
+    public void testSFTPWithSSHKeypair() throws Exception {
         //InputStream is = null;
         byte[] privateKeyBytes = null;
 
@@ -298,7 +226,7 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
      * @throws com.liaison.commons.exception.LiaisonException
      */
     @Test(enabled = false)
-    public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws LiaisonException, IOException, JSONException {
+    public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws Exception {
         //InputStream is = null;
         byte[] privateKeyBytes = null;
 

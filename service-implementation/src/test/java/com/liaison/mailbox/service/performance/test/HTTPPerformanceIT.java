@@ -6,7 +6,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.integration.test;
+package com.liaison.mailbox.service.performance.test;
 
 import com.liaison.mailbox.service.base.test.Parallel;
 import org.apache.commons.codec.binary.Base64;

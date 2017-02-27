@@ -41,13 +41,12 @@ import java.util.Set;
  * @author OFS
  *
  */
-public class RemoteProcessorTest extends BaseServiceTest {
+public class RemoteProcessorIT extends BaseServiceTest {
 
-    private static String responseLocation;
+    private String responseLocation;
 
     @BeforeMethod
-
-    public static void setUp() throws Exception {
+    public void setUp() throws Exception {
         responseLocation = System.getProperty("java.io.tmpdir")
                 + File.separator + "sample";
         Files.deleteIfExists(Paths.get(responseLocation));
@@ -279,11 +278,11 @@ public class RemoteProcessorTest extends BaseServiceTest {
     }
 
     @AfterMethod
-    public static void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         deleteFolder(Paths.get(responseLocation));
     }
 
-    public static void deleteFolder(Path folder) {
+    private void deleteFolder(Path folder) {
 
         File[] files = folder.toFile().listFiles();
         if (files != null) { // some JVMs return null for empty dirs

@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
  * @author OFS
  */
 @JsonRootName("response")
-public class DrpboxResponseTest {
+public class DropboxResponseTest {
 	
 	String message;
 	String status;

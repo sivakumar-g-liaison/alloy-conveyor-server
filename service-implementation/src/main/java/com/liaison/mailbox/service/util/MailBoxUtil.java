@@ -810,4 +810,27 @@ public class MailBoxUtil {
         return Timestamp.valueOf(localDateTime.plusSeconds(meta.getTTL()));
     }
 
+    /**
+     * This method is used to concatenate a unique system timestamp to the end
+     * of the name in order to make it unique during logical delete. If the the
+     * new name is longer than the field length, the original string is trimmed
+     * at the original string is trimmed at the end first and then the timestamp
+     * is appended to fit.
+     *
+     * @param str field value
+     * @param fieldLength field length
+     * @return String
+     */
+    public static String generateName(final String str, final int fieldLength) {
+
+        String strTimestamp = new Timestamp(System.currentTimeMillis()).toString();
+        final int totalLength = str.length() + 1 + strTimestamp.length();
+
+        if (totalLength > fieldLength) {
+            return str.substring(0, str.length() - (totalLength - fieldLength)) + "." + strTimestamp;
+        } else {
+            return str + "." + strTimestamp;
+
+        }
+    }
 }
