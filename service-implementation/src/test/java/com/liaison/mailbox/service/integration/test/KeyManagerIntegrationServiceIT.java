@@ -182,7 +182,7 @@ public class KeyManagerIntegrationServiceIT extends BaseServiceTest {
     /**
      * Method to test SFTP With SSH Keypair.
      */
-    @Test
+    @Test(enabled = false)
     public void testSFTPWithSSHKeypair() throws Exception {
         //InputStream is = null;
         byte[] privateKeyBytes = null;
