@@ -27,6 +27,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.topic.producer.MailBoxTopicMessageProducer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * class which contains processor execution configuration information.
@@ -79,7 +81,7 @@ public class ProcessorExecutionConfigurationService {
                 response.setProcessors(executingProcessorsDTO);
                 return response;
             }
-            
+
             ExecutingProcessorsDTO executingProcessor = null;
             for (ProcessorExecutionState processorState : executingProcessors) {
                 
@@ -104,6 +106,37 @@ public class ProcessorExecutionConfigurationService {
             return response;
         }
 
+    }
+    
+    /**
+     * Method to find the executing processor with time interval.
+     * 
+     * @param timeUnit
+     * @param value
+     * @return executing processors
+     */
+    public List<ExecutingProcessorsDTO> findExecutingProcessors(TimeUnit timeUnit, int value) {
+        
+        List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
+        ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
+        
+        try {
+            
+            List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(timeUnit, value);
+            
+            ExecutingProcessorsDTO executingProcessor = null;
+            for (ProcessorExecutionState processorState : executingProcessors) {
+                
+                executingProcessor = new ExecutingProcessorsDTO();
+                executingProcessor.copyFromEntity(processorState);
+                executingProcessorsDTO.add(executingProcessor);
+            }
+            
+        } catch (MailBoxConfigurationServicesException e) {
+            LOG.error(Messages.SEARCH_OPERATION_FAILED.name(), e);
+        }
+        
+        return executingProcessorsDTO;
     }
 
     /**
@@ -253,6 +286,15 @@ public class ProcessorExecutionConfigurationService {
                 messageDTO.getProcessorId(),
                 messageDTO.getUserId(),
                 processorExecutionState);
+    }
+    
+    /**
+     * Method to update the processor state from "PROCESSING" to "FAILED" on starting the server.
+     * 
+     */
+    public static void updateExecutionStateOnInit() {
+        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+        processorExecutionStateDAO.updateProcessorExecutionStateOnInitServlet(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
     }
 
 }

@@ -86,13 +86,13 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
 /*            {
             	field: 'modifiedBy',
             	displayName: 'Modified BY'
-            },
+            },*/
             {
             	field: 'modifiedDate',
-            	displayName: 'Modified Date',
+            	displayName: 'Triggered Date',
             	cellFilter: "date:'dd-MMM-yy HH:mm:ss'" 
             },
-            {
+           /* {
             	field: 'lastExecutionState',
             	displayName: 'Last Execution State'
             },
@@ -109,8 +109,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
                 displayName: 'Action',
                 width: '10%',
                 sortable: false,
-                cellTemplate: '<div style="margin-left: 30px"><button class="btn btn-default btn-xs" title="Stop Processor" ng-click="confirmDialog(row.entity)">\n\
-					   		   <i class="glyphicon glyphicon-stop glyphicon-white"></i></button></div>'
+                cellTemplate: '<div style="margin-left: 30px"><button class="btn btn-default btn-xs" ng-click="confirmDialog(row.entity)" tooltip = "Stop Processor" tooltip-placement="left" tooltip-append-to-body="true">\n\<i class="glyphicon glyphicon-stop glyphicon-white"></i></button>&nbsp;&nbsp;<button class="btn btn-default btn-xs" title="" ng-click="showExecutingProcessorDialog(row.entity)" tooltip = "Show Details" tooltip-placement="right" tooltip-append-to-body="true"><i class="glyphicon glyphicon-info-sign glyphicon-white"></i></button></div>'
            }
         ],
         data: 'processors',
@@ -177,6 +176,29 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         $scope.executionEntity = entity;
         $('#executingProcessorsConfirmationModal').modal('show');
     }
+    
+    $scope.showExecutingProcessorDialog = function(entity) {
+        $scope.getProcessorDetails(entity);
+        $('#executingProcessorInfoModal').modal('show');
+    }
 
+    $scope.cancelExecutingProcessorInfo = function(entity) {
+        $('#executingProcessorInfoModal').modal('hide');
+    }
+
+    $scope.getProcessorDetails = function(entity) {
+        $scope.restService.get($scope.base_url + "/" + null + "/processor/" + entity.processorId,
+            function(data, status) {
+                if (status === 200 || status === 400) {
+                    if (data.getProcessorResponse.response.status == 'success') {
+                        $scope.currentEntity = data.getProcessorResponse.processor;
+                    } else {
+                        showSaveMessage(data.getProcessorResponse.response.message, 'warning');
+                    }
+                } else {
+                    showSaveMessage(data.getProcessorResponse.response.message, 'error');
+                }
+            });
+    }
 }
 ]);

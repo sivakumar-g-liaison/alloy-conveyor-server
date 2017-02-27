@@ -1120,6 +1120,42 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
 
     }
+    
+    /**
+     * Method to test read processor by processor guid and mailbox guid as null/empty
+     * @throws Exception
+     */
+    @Test
+    public void testReadProcessorByPguidAndMailBoxGuidNull() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+        
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+        
+        // Get the processor by guid and mailbox guid as null
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(null, procResponseDTO.getProcessor().getGuId());
+        
+        // Assertion
+        Assert.assertEquals(SUCCESS, procGetResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getName(), procGetResponseDTO.getProcessor().getName());
+        Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
+        Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
+        Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        
+    }
 
     /**
      * Method to test read processor by valid Pguid
