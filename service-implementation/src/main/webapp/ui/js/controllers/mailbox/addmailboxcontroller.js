@@ -59,8 +59,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             {"name":"Inactive","id":"INACTIVE"}];
         
         $scope.editEnumStats = [{"name":"Active","id":"ACTIVE"},
-            {"name":"Inactive","id":"INACTIVE"},
-            {"name":"Delete","id":"DELETED"}];
+            {"name":"Inactive","id":"INACTIVE"}];
         
         $scope.enumstats = $scope.initEnumStats;
         
@@ -287,30 +286,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         if (status === 200 || status === 400) {
                              $scope.isMailBoxSaved = true;
                             if (fromAddProcsr) {
-                            	if ($scope.editReq.reviseMailBoxRequest.mailBox.status === "DELETED") {
-                            		$location.$$search = {};
-                            		
-                            	    if (data.reviseMailBoxResponse.response.status === 'success') {
-                            		    showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
-                            		    $location.path('/mailbox/addMailBox');
-                            	    } else {
-                            		    showSaveMessage(data.reviseMailBoxResponse.response.message, 'error');
-                            		    $location.path('/mailbox/addMailBox').search('mailBoxId', $scope.mailBoxId);
-                            		    $scope.load();
-                            	    }
-                            	    $scope.isMailBoxSaved = false;
-                                } else {
-                                    $location.$$search = {};
-                                    $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
-                                }
-                            	
+                                $location.$$search = {};
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
+
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
-                                if ($scope.editReq.reviseMailBoxRequest.mailBox.status === "DELETED") {
-                                	$location.$$search = {};
-                                	$location.path('/mailbox/addMailBox');
-                                	$scope.isMailBoxSaved = false;
-                                }
                             } else {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'error');
                                 $scope.isMailBoxSaved = false;
@@ -406,11 +386,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
     			showSaveMessage("Mailbox creation is not allowed, and it is allowed when it traverses from a task", 'error');
     			return;
     		}
-            if ($scope.status.id === "DELETED") {
-                $('#confirmMailboxDelete').modal('show');
-            } else {
-                $scope.confirmMailboxSave();
-            }
+            $scope.confirmMailboxSave();
         };
 
         $scope.confirmMailboxSave = function() {

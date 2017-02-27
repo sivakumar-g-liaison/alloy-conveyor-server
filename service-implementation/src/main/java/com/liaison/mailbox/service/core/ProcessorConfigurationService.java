@@ -366,7 +366,7 @@ public class ProcessorConfigurationService {
 
         try {
 
-            LOGGER.debug("Deactivate guid is {} ", processorGuid);
+            LOGGER.info("The processor guid to delete is {} and requested by the user {} ", processorGuid, userId);
 
             ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
             Processor retrievedProcessor = config.find(Processor.class, processorGuid);

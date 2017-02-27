@@ -112,11 +112,11 @@
 					<button id="mbx-search-delete" type="button" class="close" data-dismiss="modal" aria-hidden="true">
 						<i class="glyphicon glyphicon-remove-sign" ng-click="closeDelete()"> </i>
 					</button>
-					<h4 class="modal-title">Deactivate</h4>
+					<h4 class="modal-title">Confirm Processor Delete</h4>
 				</div>
-				<div class="modal-body">Do you really want to deactivate {{key.name}}?</div>
+				<div class="modal-body">Do you really want to delete the processor {{key.name}}?</div>
 				<div class="modal-footer">
-					<button id="deleteModalDeleteButton" class="btn btn-primary" ng-click="deactivateProcessor()">Deactivate</button>
+					<button id="deleteModalDeleteButton" class="btn btn-danger" ng-click="deactivateProcessor()">Delete</button>
 					<button id="deleteModalCancelButton" class="btn btn-primary cancel" ng-click="closeDelete()">Cancel</button>
 				</div>
 			</div>
