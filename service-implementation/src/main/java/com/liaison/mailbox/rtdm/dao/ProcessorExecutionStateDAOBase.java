@@ -227,7 +227,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
      * @param node
      */
     @Override
-    public void updateProcessorExecutionStateOnInitServlet(String node) {
+    public void updateStuckProcessorsExecutionState(String node) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -359,7 +359,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     public List<ProcessorExecutionState> findExecutingProcessors(TimeUnit timeUnit, int value) {
         
         EntityManager entityManager = null;
-        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
+        List<ProcessorExecutionState> runningProcessors = new ArrayList<>();
         
         try {
             

@@ -54,6 +54,11 @@ public class MailboxServiceInstance implements Identifiable {
 	public MailboxServiceInstance() {
 	}
 
+    public MailboxServiceInstance(String pguid, String originatingDc) {
+        this.pguid = pguid;
+        this.originatingDc = originatingDc;
+    }
+
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {

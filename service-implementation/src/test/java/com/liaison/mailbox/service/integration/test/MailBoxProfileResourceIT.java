@@ -36,21 +36,13 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class which tests the mailbox profile operations.
- * 
- * @author OFS
  */
 public class MailBoxProfileResourceIT extends BaseServiceTest {
 
-	private Logger logger;
+	private Logger logger = LogManager.getLogger(MailBoxProfileResourceIT.class);
 	private HTTPRequest request;
 	private String jsonRequest;
 	private String jsonResponse;
-    
-	@BeforeMethod
-	public void setUp() throws Exception {
-		//super.initialSetUp();
-		logger = LogManager.getLogger(MailBoxProfileResourceIT.class);
-	}
     
 	/**
 	 * Method to test Profile.

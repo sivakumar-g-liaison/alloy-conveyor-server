@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -46,6 +47,8 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Valida
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 
+import javax.naming.NamingException;
+
 /**
  * Base Test class for initial setup and cleanup.
  *
@@ -74,24 +77,33 @@ public abstract class BaseServiceTest {
     protected String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
 
 	@BeforeClass
-	public void initialSetUp() throws IOException {
+	public void initialSetUp() throws SQLException, NamingException, ClassNotFoundException {
 
 		if (BASE_URL == null) {
 
 			Properties prop = new Properties();
-			String properties = ServiceUtils.readFileFromClassPath("config.properties");
-			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
-			prop.load(is);
+            try (InputStream is = new ByteArrayInputStream(ServiceUtils.readFileFromClassPath("config.properties").getBytes("UTF-8"))) {
 
-			setBASE_URL(prop.getProperty("BASE_URL"));
-			setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
-			setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
-			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
-            System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
-            //System.setProperty("com.liaison.secure.properties.path", prop.getProperty("SECURE_URL"));
-			// close the stream
-			is.close();
-		}
+                prop.load(is);
+
+                setBASE_URL(prop.getProperty("BASE_URL"));
+                setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
+                setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
+                System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
+                System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
+                System.setProperty("com.liaison.secure.properties.path", "invalid");
+            } catch (Exception e) {
+
+                setBASE_URL("http://localhost:8989/g2mailboxservice/config/mailbox");
+                setKMS_BASE_URL("http://lsvlkms01d.liaison.dev:8989/key-management");
+                setBASE_URL_DROPBOX("http://localhost:9095/g2mailboxservice/config/dropbox");
+                System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+                System.setProperty("archaius.deployment.environment", "dev");
+                System.setProperty("com.liaison.secure.properties.path", "invalid");
+            }
+        }
+
+        InitInitialDualDBContext.init();
 
 	}
 

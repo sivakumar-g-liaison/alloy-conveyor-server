@@ -75,6 +75,8 @@ public class InitializationServlet extends HttpServlet {
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
     	DAOUtil.init();
+    	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
+    	// Update the status from "PROCESSING" to "FAILED" for the current node.
     	ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
     	QueueAndTopicProcessInitializer.initialize();
 

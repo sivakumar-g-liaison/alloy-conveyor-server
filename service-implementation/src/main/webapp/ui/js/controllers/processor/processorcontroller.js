@@ -595,11 +595,7 @@ var rest = myApp.controller(
             		showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
         			return;
         		}
-                if ($scope.status.value === "DELETED") {
-                    $("#confirmProcessorDelete").modal('show');
-                } else {
-                    $scope.confirmProcessorSave();
-                }
+                $scope.confirmProcessorSave();
             };
 
             $scope.closeConfirmProcessorDelete = function () {
@@ -922,18 +918,13 @@ var rest = myApp.controller(
 					function (data, status) {
 						if (status === 200 || status === 400) {
 							if (data.reviseProcessorResponse.response.status === 'success') {
-								if ($scope.status.value === 'DELETED') {
-									$scope.addNew();
-									showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
-								} else {
-									$scope.editProcessor($scope.processor.guid, false);
-									if($scope.isFileSelected)  $scope.isFileSelected = false;
-									$scope.isPrivateKeySelected = false;
-									$scope.isPublicKeySelected = false;
-									showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
-								}
 
-							} else {	
+                                $scope.editProcessor($scope.processor.guid, false);
+                                if($scope.isFileSelected)  $scope.isFileSelected = false;
+                                $scope.isPrivateKeySelected = false;
+                                $scope.isPublicKeySelected = false;
+                                showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
+							} else {
 								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');	
 								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
 							    $scope.clearCredentialProps();														

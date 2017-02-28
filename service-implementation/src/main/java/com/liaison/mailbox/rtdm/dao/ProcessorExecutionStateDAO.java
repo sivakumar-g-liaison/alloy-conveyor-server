@@ -98,7 +98,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
      * 
      * @param node
      */
-    void updateProcessorExecutionStateOnInitServlet(String node);
+    void updateStuckProcessorsExecutionState(String node);
 
     /**
      * lists the processors in descending order

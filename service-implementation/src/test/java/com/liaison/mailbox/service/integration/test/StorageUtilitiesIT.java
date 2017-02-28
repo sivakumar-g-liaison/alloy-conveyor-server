@@ -47,9 +47,6 @@ public class StorageUtilitiesIT {
     @Test
     public void testWriteAndReadUnsecurePayload() throws IOException {
 
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-
         String exampleString = "This is the sample string";
         InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
 
@@ -76,9 +73,6 @@ public class StorageUtilitiesIT {
 
     @Test
     public void testWriteAndReadUnsecurePayloadInBOSS() throws IOException {
-
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
 
         String exampleString = "This is the sample string";
         InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
@@ -108,8 +102,6 @@ public class StorageUtilitiesIT {
     @Test(enabled = false)
     public void testReadPayload() throws Exception {
 
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
         String payloadURI = "fs2://unsecure@dev-int/SERVICE_BROKER/dropboxadmin@liaison.dev/B4535568ACA745E59C984169B5B5C5E0.B4535568ACA745E59C984169B5B5C5E0_35010B085CE74611B35964598D028ADD";
         try (InputStream is = StorageUtilities.retrievePayload(payloadURI)) {
 
@@ -131,9 +123,6 @@ public class StorageUtilitiesIT {
 
     @Test(enabled = false)
     public void testWriteAndReadSecurePayload() throws IOException {
-
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
 
         String exampleString = "This is the sample string";
         InputStream stream = new ByteArrayInputStream(exampleString.getBytes(StandardCharsets.UTF_8));
@@ -158,9 +147,6 @@ public class StorageUtilitiesIT {
 
     @Test(enabled = false)
     public void testWriteAndReadSecurePayload_LocalPayload() throws IOException {
-
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
 
         File file = new File("\\opt\\100mbfile.txt");
         InputStream stream = new FileInputStream(file);

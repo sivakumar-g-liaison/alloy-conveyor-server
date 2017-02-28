@@ -89,10 +89,6 @@
 		{
 		   "key":"Inactive",
 		   "value":"INACTIVE"
-		},
-		{
-		   "key":"Delete",
-		   "value":"DELETED"
 		}
 	 ]
   }  

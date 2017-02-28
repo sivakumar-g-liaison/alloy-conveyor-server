@@ -150,10 +150,26 @@ var rest = myApp.controller(
         // calls the rest deactivate service
         $scope.deactivateProcessor = function () {
 
-            $scope.restService.delete($scope.base_url + '/' + $scope.key.linkedMailboxId + '/processor/' + $scope.key.guid , function (data, status) {								  
-                $scope.readAllProcessors();
+            $scope.block.blockUI();
+            $scope.restService.delete($scope.base_url + '/' + $scope.key.linkedMailboxId + '/processor/' + $scope.key.guid,
+                function (data, status) {
+                    if (status === 200) {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        showSaveMessage(data.deActivateProcessorResponse.response.message, 'success');
+                        $scope.readAllProcessors();
+                    } else {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        if (data.deActivateProcessorResponse) {
+                            showSaveMessage(data.deActivateProcessorResponse.response.message, 'error');
+                        } else {
+                            showSaveMessage("Failed to delete processor", 'error');
+                        }
+                    }
             });
-            $scope.closeDelete();
         };
 
         // Close the modal
@@ -221,15 +237,10 @@ var rest = myApp.controller(
             return valid;
         }		
 			// Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
-        <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
+        $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button class="btn btn-default btn-xs" ng-disabled="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
-        <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
-        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal" tooltip = "Deactivate" tooltip-placement="right" tooltip-append-to-body="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal" tooltip = "Delete" tooltip-placement="right" tooltip-append-to-body="true">\n\
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
 		
 		$scope.cellToolTip = {
 			overflow: 'visible'

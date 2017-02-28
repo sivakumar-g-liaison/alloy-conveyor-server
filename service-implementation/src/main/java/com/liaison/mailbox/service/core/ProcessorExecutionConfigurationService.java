@@ -294,7 +294,7 @@ public class ProcessorExecutionConfigurationService {
      */
     public static void updateExecutionStateOnInit() {
         ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-        processorExecutionStateDAO.updateProcessorExecutionStateOnInitServlet(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
+        processorExecutionStateDAO.updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
     }
 
 }

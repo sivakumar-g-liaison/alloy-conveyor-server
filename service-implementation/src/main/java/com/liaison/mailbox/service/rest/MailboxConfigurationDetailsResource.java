@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -48,9 +48,11 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+import static com.liaison.mailbox.MailBoxConstants.ACL_MANIFEST_HEADER;
+
 /**
  * This is the gateway for the mailbox configuration services.
- * 
+ *
  * @author OFS
  */
 @AppConfigurationResource
@@ -58,150 +60,137 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/mailbox/{id}", description = "Gateway for the mailbox configuration services.")
 public class MailboxConfigurationDetailsResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(MailboxConfigurationDetailsResource.class);
+    private static final Logger LOG = LogManager.getLogger(MailboxConfigurationDetailsResource.class);
 
-	/**
-	 * REST method to update existing mailbox.
-	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@PUT
-	@ApiOperation(value = "Update Mailbox", notes = "update details of existing mailbox", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
-	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response reviseMailBox(
-			@Context final HttpServletRequest request,
-			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
-			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId,
-			@QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint) {
+    /**
+     * REST method to update existing mailbox.
+     *
+     * @param request HttpServletRequest, injected with context annotation
+     * @return Response Object
+     */
+    @PUT
+    @ApiOperation(value = "Update Mailbox", notes = "update details of existing mailbox", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body")})
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response reviseMailBox(
+            @Context final HttpServletRequest request,
+            @PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+            @QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId,
+            @QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
 
-				String requestString;
-				try {
-					requestString = getRequestBody(request);
-					ReviseMailBoxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
-							ReviseMailBoxRequestDTO.class);
+                String requestString;
+                try {
+                    requestString = getRequestBody(request);
+                    ReviseMailBoxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+                            ReviseMailBoxRequestDTO.class);
 
-					// retrieving acl manifest from header
-					LOG.debug("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					// updates existing mailbox
-					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					final String userId = getUserIdFromHeader(request);
-					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson, addConstraint, userId);
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+                    // updates existing mailbox
+                    MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+                    final String userId = getUserIdFromHeader(request);
+                    return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, addConstraint, userId);
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
 
-			}
-		};
-		worker.actionLabel = "MailboxConfigurationDetailsResource.reviseMailBox()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
+            }
+        };
+        worker.actionLabel = "MailboxConfigurationDetailsResource.reviseMailBox()";
+        worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-	/**
-	 * REST method to delete a mailbox.
-	 * 
-	 * @param guid The id of the mailbox
-	 * 
-	 * @return Response Object
-	 */
-	@DELETE
-	@ApiOperation(value = "Delete Mailbox", notes = "delete a mailbox", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response deactivateMailBox(@Context final HttpServletRequest request,
-			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
+    /**
+     * REST method to delete a mailbox.
+     *
+     * @param guid The id of the mailbox
+     *
+     * @return Response Object
+     */
+    @DELETE
+    @ApiOperation(value = "Delete Mailbox", notes = "delete a mailbox", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response deactivateMailBox(@Context final HttpServletRequest request,
+                                      @PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
 
-				try {
-					// retrieving acl manifest from header
-					LOG.debug("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					// deactivates existing mailbox
-					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					final String userId = getUserIdFromHeader(request);
-					return mailbox.deactivateMailBox(guid, manifestJson, userId);
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+                // deactivates existing mailbox
+                MailBoxConfigurationService service = new MailBoxConfigurationService();
+                final String userId = getUserIdFromHeader(request);
+                return service.deactivateMailBox(guid, userId);
 
-			}
-		};
-		worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
+            }
+        };
+        worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
+        worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
+        // hand the delegate to the framework for calling
+        return process(request, worker);
 
-	}
+    }
 
-	/**
-	 * REST method to retrieve a mailbox details.
-	 * 
-	 * @param guid The id of the mailbox
-	 * @return Response Object
-	 */
-	@GET
-	@ApiOperation(value = "Mailbox Details", notes = "returns details of a valid mailbox", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response readMailBox(
-			@Context final HttpServletRequest request,
-			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
-			@QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint,
-			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
+    /**
+     * REST method to retrieve a mailbox details.
+     *
+     * @param guid The id of the mailbox
+     * @return Response Object
+     */
+    @GET
+    @ApiOperation(value = "Mailbox Details", notes = "returns details of a valid mailbox", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response readMailBox(
+            @Context final HttpServletRequest request,
+            @PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+            @QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint,
+            @QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
 
-				try {
-					// retrieving acl manifest from header
-					LOG.debug("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					// deactivates existing mailbox
-					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.getMailBox(guid, addConstraint, serviceInstanceId, manifestJson);
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+                try {
+                    // retrieving acl manifest from header
+                    LOG.debug("Retrieving acl manifest json from request header");
+                    String manifestJson = request.getHeader(ACL_MANIFEST_HEADER);
+                    // deactivates existing mailbox
+                    MailBoxConfigurationService service = new MailBoxConfigurationService();
+                    return service.getMailBox(guid, addConstraint, serviceInstanceId, manifestJson);
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
 
-			}
-		};
-		worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
+            }
+        };
+        worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
+        worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
+        // hand the delegate to the framework for calling
+        return process(request, worker);
 
-	}
+    }
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

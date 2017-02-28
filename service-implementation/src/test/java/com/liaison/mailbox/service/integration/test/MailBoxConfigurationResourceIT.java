@@ -36,82 +36,21 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Test class to test mailbox configuration service.
- *
- * @author veerasamyn
  */
 public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
-    private Logger logger;
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @BeforeMethod
-    public void setUp() throws Exception {
-        logger = LogManager.getLogger(MailBoxConfigurationResourceIT.class);
-    }
+    private Logger logger = LogManager.getLogger(MailBoxConfigurationResourceIT.class);
 
     /**
      * Method constructs MailBox with valid data.
      */
     @Test
-    public void testCreateMailBox() throws Exception {
-
-        // Adding the mailbox
-        String jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-        AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
-
-        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-        requestDTO.setMailBox(mbxDTO);
-
-        jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-
-        String url = getBASE_URL() + "?sid=" + serviceInstanceId;
-        HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
-        request.addHeader("acl-manifest", aclManifest);
-        request.execute();
-        String jsonResponse = getOutput().toString();
-        logger.info(jsonResponse);
-
-        AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
-        Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
-
-        // Get the mailbox
-        url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid() + "?sid=" + serviceInstanceId;
-        request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
-        request.addHeader("acl-manifest", aclManifest);
-        request.execute();
-
-        jsonResponse = getOutput().toString();
-        logger.info(jsonResponse);
-
-        GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
-
-        // Assertion
-        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-        Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
-        Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
-        Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
-        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
-
-        Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
-                getResponseDTO.getMailBox().getProperties().get(0).getName());
-        Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getValue(),
-                getResponseDTO.getMailBox().getProperties().get(0).getValue());
-
-    }
-
-    /**
-     * Method to test mailbox with valid data.
-     */
-    @Test
-    public void testGetMailBox() throws Exception {
+    public void testCreateAndGetMailBox() throws Exception {
 
         // Adding the mailbox
         String jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
@@ -202,7 +141,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         logger.info(jsonResponse);
 
         GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
-        Assert.assertEquals(EntityStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 
     }
 

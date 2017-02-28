@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.services.unit.test;
+package com.liaison.mailbox.service.unit.test;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,9 +45,6 @@ public class StaleFileCleanupTest  extends BaseServiceTest {
     @BeforeMethod
     public void setUp() throws Exception {
     	
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
         System.setProperty("com.liaison.mailbox.sweeper.stalefile.ttl", "30");
         InitInitialDualDBContext.init();
         payloadLocation = System.getProperty(TMP_DIR) + File.separator + PAYLOAD;
