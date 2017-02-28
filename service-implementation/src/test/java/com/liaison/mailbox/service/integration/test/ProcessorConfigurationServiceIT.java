@@ -1120,7 +1120,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
         
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest, mbxDTO.getModifiedBy());
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
         
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
         
