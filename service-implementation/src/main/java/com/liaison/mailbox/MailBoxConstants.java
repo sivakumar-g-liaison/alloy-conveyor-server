@@ -456,4 +456,7 @@ public interface MailBoxConstants {
     String SERVICE_BROKER_BASE_URL = "com.liaison.servicebroker.api.baseUrl";
     String SERVICE_INSTANCE = "ServiceInstance";
     String PIPELINE = "Pipeline";
+    String STUCK_PROCESSORS_IN_RELAY = "Stuck Processors in Relay";
+    String MAILBOX_STUCK_PROCESSOR_TIME_UNIT = "com.liaison.mailbox.stuck.processor.time.unit";
+    String MAILBOX_STUCK_PROCESSOR_TIME_VALUE = "com.liaison.mailbox.stuck.processor.time.value";
 }

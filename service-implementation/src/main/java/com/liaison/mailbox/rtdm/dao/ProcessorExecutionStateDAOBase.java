@@ -166,9 +166,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                 tx.rollback();
             }
 
-            // Indicates processor is already running or not available in the runtime table
-            String msg = MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId;
-            throw new MailBoxServicesException(msg, Response.Status.NOT_ACCEPTABLE);
+            return null;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();

@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -41,6 +42,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.liaison.mailbox.MailBoxConstants.ERROR_RECEIVER;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_UNIT;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_VALUE;
+import static com.liaison.mailbox.MailBoxConstants.STUCK_PROCESSORS_IN_RELAY;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentProperties;
 
 /**
@@ -117,18 +122,19 @@ public class ProcessorExecutionConfigurationService {
      */
     public void notifyStuckProcessors() {
 
-        TimeUnit timeUnit = TimeUnit.valueOf(getEnvironmentProperties().getString("com.liaison.mailbox.stuck.processor.time.unit", TimeUnit.HOURS.name()));
-        int value = getEnvironmentProperties().getInt("com.liaison.mailbox.stuck.processor.time.value", 1);
+        TimeUnit timeUnit = TimeUnit.valueOf(getEnvironmentProperties().getString(MAILBOX_STUCK_PROCESSOR_TIME_UNIT, TimeUnit.HOURS.name()));
+        int value = getEnvironmentProperties().getInt(MAILBOX_STUCK_PROCESSOR_TIME_VALUE, 1);
 
         try {
 
             ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
             List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(timeUnit, value);
-            if (null == executingProcessors) {
+            if (null == executingProcessors || executingProcessors.isEmpty()) {
                 //no processors stuck in the processing state
                 return;
             }
 
+            //body construction
             StringBuilder emailBody = new StringBuilder();
             emailBody.append("The following processors are in PROCESSING state more than ");
             emailBody.append(value);
@@ -137,8 +143,9 @@ public class ProcessorExecutionConfigurationService {
             emailBody.append("\n\n");
             emailBody.append("Processor GUID                 ");
             emailBody.append("----");
-            emailBody.append("Node        ");
+            emailBody.append("Last Running Node              ");
             emailBody.append("\n");
+
             for (ProcessorExecutionState processorState : executingProcessors) {
 
                 emailBody.append(processorState.getPguid());
@@ -150,10 +157,12 @@ public class ProcessorExecutionConfigurationService {
             //email config
             EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
             emailInfoDTO.setEmailBody(emailBody.toString());
-            emailInfoDTO.setSubject("Stuck Processors in Relay");
+            emailInfoDTO.setSubject(STUCK_PROCESSORS_IN_RELAY);
             List<String> email = new ArrayList<>();
-            email.add(getEnvironmentProperties().getString("com.liaison.mailbox.error.receiver"));
+            email.add(getEnvironmentProperties().getString(ERROR_RECEIVER));
             emailInfoDTO.setToEmailAddrList(email);
+
+            //sends email
             EmailNotifier.sendEmail(emailInfoDTO);
 
         } catch (Exception e) {
