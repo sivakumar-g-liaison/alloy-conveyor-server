@@ -18,6 +18,8 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.service.core.email.EmailInfoDTO;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ExecutingProcessorsDTO;
@@ -38,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentProperties;
 
 /**
  * class which contains processor execution configuration information.
@@ -109,34 +113,53 @@ public class ProcessorExecutionConfigurationService {
     }
     
     /**
-     * Method to find the executing processor with time interval.
-     * 
-     * @param timeUnit
-     * @param value
-     * @return executing processors
+     * finds stuck processors and notify it
      */
-    public List<ExecutingProcessorsDTO> findExecutingProcessors(TimeUnit timeUnit, int value) {
-        
-        List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
-        ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
-        
+    public void notifyStuckProcessors() {
+
+        TimeUnit timeUnit = TimeUnit.valueOf(getEnvironmentProperties().getString("com.liaison.mailbox.stuck.processor.time.unit", TimeUnit.HOURS.name()));
+        int value = getEnvironmentProperties().getInt("com.liaison.mailbox.stuck.processor.time.value", 1);
+
         try {
-            
+
+            ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
             List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(timeUnit, value);
-            
-            ExecutingProcessorsDTO executingProcessor = null;
-            for (ProcessorExecutionState processorState : executingProcessors) {
-                
-                executingProcessor = new ExecutingProcessorsDTO();
-                executingProcessor.copyFromEntity(processorState);
-                executingProcessorsDTO.add(executingProcessor);
+            if (null == executingProcessors) {
+                //no processors stuck in the processing state
+                return;
             }
-            
-        } catch (MailBoxConfigurationServicesException e) {
-            LOG.error(Messages.SEARCH_OPERATION_FAILED.name(), e);
+
+            StringBuilder emailBody = new StringBuilder();
+            emailBody.append("The following processors are in PROCESSING state more than ");
+            emailBody.append(value);
+            emailBody.append(" ");
+            emailBody.append(timeUnit.name());
+            emailBody.append("\n\n");
+            emailBody.append("Processor GUID                 ");
+            emailBody.append("----");
+            emailBody.append("Node        ");
+            emailBody.append("\n");
+            for (ProcessorExecutionState processorState : executingProcessors) {
+
+                emailBody.append(processorState.getPguid());
+                emailBody.append("----");
+                emailBody.append(processorState.getNodeInUse());
+                emailBody.append("\n");
+            }
+
+            //email config
+            EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
+            emailInfoDTO.setEmailBody(emailBody.toString());
+            emailInfoDTO.setSubject("Stuck Processors in Relay");
+            List<String> email = new ArrayList<>();
+            email.add(getEnvironmentProperties().getString("com.liaison.mailbox.error.receiver"));
+            emailInfoDTO.setToEmailAddrList(email);
+            EmailNotifier.sendEmail(emailInfoDTO);
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
-        
-        return executingProcessorsDTO;
+
     }
 
     /**

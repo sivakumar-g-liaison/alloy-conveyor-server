@@ -327,12 +327,11 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     public List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
 
         EntityManager entityManager = null;
-        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            runningProcessors = entityManager
+            return entityManager
                     .createNamedQuery(FIND_EXECUTING_PROCESSORS)
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
                     .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
@@ -344,13 +343,12 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                 entityManager.close();
             }
         }
-        return runningProcessors;
     }
     
     /**
      * Method to get executing processors based on time unit value.
      * 
-     * @param timeunit
+     * @param timeUnit
      * @param value
      * @return runningProcessorsList
      */
@@ -359,10 +357,10 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     public List<ProcessorExecutionState> findExecutingProcessors(TimeUnit timeUnit, int value) {
         
         EntityManager entityManager = null;
-        List<ProcessorExecutionState> runningProcessors = new ArrayList<>();
+        List<ProcessorExecutionState> runningProcessors;
         
         try {
-            
+
             Date date = new Date(System.currentTimeMillis() - timeUnit.toMillis(value));
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             runningProcessors = entityManager

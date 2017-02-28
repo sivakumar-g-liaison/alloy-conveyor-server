@@ -77,7 +77,7 @@ public class InitializationServlet extends HttpServlet {
     	DAOUtil.init();
     	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
     	// Update the status from "PROCESSING" to "FAILED" for the current node.
-    	ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
+        //ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
     	QueueAndTopicProcessInitializer.initialize();
 
 		// db health check
