@@ -146,7 +146,7 @@ public class MailBoxConfigurationService {
 				mailBox.setPguid(mailboxDTO.getGuid());
 			}			
 
-			mailBox.setOriginatingDc(DATACENTER_NAME);
+            mailBox.setOriginatingDc(DATACENTER_NAME);
             //Mailbox properties
             Set<MailBoxProperty> properties = mailboxDTO.getPropertyEntities(mailBox);
             mailBox.getMailboxProperties().addAll(properties);
