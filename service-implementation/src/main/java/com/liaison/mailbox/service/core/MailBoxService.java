@@ -263,8 +263,10 @@ public class MailBoxService implements Runnable {
             if (results != null) {
                 processorExecutionStateDAO.updateProcessorExecutionState(String.valueOf(results[0]), ExecutionState.FAILED.name());
             }
-			// send email to the configured mail id in case of failure
-			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
+
+            //Creates lots of noise if the processor tied up with more than one profile
+            //send email to the configured mail id in case of failure
+            //EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
 		}
 		LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");
