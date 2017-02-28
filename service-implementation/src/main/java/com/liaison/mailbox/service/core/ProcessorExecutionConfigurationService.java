@@ -139,7 +139,7 @@ public class ProcessorExecutionConfigurationService {
             emailBody.append("The following processors are in PROCESSING state more than ");
             emailBody.append(value);
             emailBody.append(" ");
-            emailBody.append(timeUnit.name());
+            emailBody.append(timeUnit.name().toLowerCase());
             emailBody.append("\n\n");
             emailBody.append("Processor GUID                 ");
             emailBody.append("----");
