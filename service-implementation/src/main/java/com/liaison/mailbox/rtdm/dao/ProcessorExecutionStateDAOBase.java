@@ -15,7 +15,6 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
@@ -28,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
 
@@ -36,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This will fetch the executing processors details.
@@ -148,6 +147,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                     .setParameter(LAST_EXECUTION_STATE, results[1])
                     .setParameter(THREAD_NAME, String.valueOf(Thread.currentThread().getName()))
                     .setParameter(NODE_IN_USE, ConfigurationManager.getDeploymentContext().getDeploymentServerId())
+                    .setParameter(MODIFIED_DATE, new Date())
                     .executeUpdate();
 
             //commit the transaction
@@ -166,9 +166,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                 tx.rollback();
             }
 
-            // Indicates processor is already running or not available in the runtime table
-            String msg = MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId;
-            throw new MailBoxServicesException(msg, Response.Status.NOT_ACCEPTABLE);
+            return null;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -213,8 +211,48 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                 tx.rollback();
             }
             throw e;
-        }  finally {
+        } finally {
             if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+    
+    /**
+     * Updates processor execution state for the current node on server start.
+     * Upldate all "PROCESSING" state processors to "FAILED"
+     * 
+     * @param node
+     */
+    @Override
+    public void updateStuckProcessorsExecutionState(String node) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            long startTime = System.currentTimeMillis();
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE_ON_INIT)
+                    .setParameter(NODE_IN_USE, node)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.name())
+                    .setParameter(NEW_EXEC_STATUS, ExecutionState.FAILED.name())
+                    .executeUpdate();
+            
+            tx.commit();
+            
+            MailBoxUtil.calculateElapsedTime(startTime, System.currentTimeMillis());
+            
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
                 entityManager.close();
             }
         }
@@ -287,12 +325,11 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     public List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
 
         EntityManager entityManager = null;
-        List<ProcessorExecutionState> runningProcessors = new ArrayList<ProcessorExecutionState>();
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            runningProcessors = entityManager
+            return entityManager
                     .createNamedQuery(FIND_EXECUTING_PROCESSORS)
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
                     .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
@@ -301,6 +338,36 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
 
         } finally {
             if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+    
+    /**
+     * Method to get executing processors based on time unit value.
+     * 
+     * @param timeUnit
+     * @param value
+     * @return runningProcessorsList
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ProcessorExecutionState> findExecutingProcessors(TimeUnit timeUnit, int value) {
+        
+        EntityManager entityManager = null;
+        List<ProcessorExecutionState> runningProcessors;
+        
+        try {
+
+            Date date = new Date(System.currentTimeMillis() - timeUnit.toMillis(value));
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            runningProcessors = entityManager
+                    .createNamedQuery(FIND_EXECUTING_PROCESSOR_WITH_TRIGGERED_PERIOD)
+                    .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+                    .setParameter(MODIFIED_DATE, date)
+                    .getResultList();
+        } finally {
+            if (null != entityManager) {
                 entityManager.close();
             }
         }

@@ -25,6 +25,7 @@ import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
@@ -73,8 +74,11 @@ public class InitializationServlet extends HttpServlet {
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
-        QueueAndTopicProcessInitializer.initialize();
     	DAOUtil.init();
+    	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
+    	// Update the status from "PROCESSING" to "FAILED" for the current node.
+        ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
+        QueueAndTopicProcessInitializer.initialize();
 
 		// db health check
 		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",

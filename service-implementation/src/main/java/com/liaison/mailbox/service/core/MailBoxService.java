@@ -215,6 +215,11 @@ public class MailBoxService implements Runnable {
 
 			// retrieve the processor execution status from run-time DB
             results = processorExecutionStateDAO.findByProcessorIdAndUpdateStatus(processor.getPguid());
+            if (null == results) {
+                // Indicates processor is already running or not available in the runtime table
+                LOG.warn(MailBoxConstants.PROCESSOR_IS_ALREDAY_RUNNING + processorId);
+                return;
+            }
 
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			if (processorService == null) {
@@ -263,8 +268,9 @@ public class MailBoxService implements Runnable {
             if (results != null) {
                 processorExecutionStateDAO.updateProcessorExecutionState(String.valueOf(results[0]), ExecutionState.FAILED.name());
             }
-			// send email to the configured mail id in case of failure
-			EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
+
+            //send email to the configured mail id in case of failure
+            EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
 		}
 		LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");

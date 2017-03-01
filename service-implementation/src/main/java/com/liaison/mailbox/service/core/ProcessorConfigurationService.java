@@ -335,7 +335,10 @@ public class ProcessorConfigurationService {
 			}
 
 			// validates the given processor is belongs to given mailbox
-			validateProcessorBelongToMbx(mailBoxGuid, processor);
+			if (!MailBoxUtil.isEmpty(mailBoxGuid)) {
+			    validateProcessorBelongToMbx(mailBoxGuid, processor);
+			}
+
 			ProcessorDTO dto = new ProcessorDTO();
 			dto.copyFromEntity(processor, true);
 

@@ -10,15 +10,14 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
-
-import javax.persistence.LockModeType;
 
 /**
  * The dao class for the PROCESSOR_EXECUTION_STATE database table.
@@ -34,15 +33,18 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
     String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
     String FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD = "ProcessorExecutionState.findExecutingProcessorsWithinPeriod";
+    String FIND_EXECUTING_PROCESSOR_WITH_TRIGGERED_PERIOD = "ProcessorExecutionState.findExecutingProcessorsWithTriggeredPeriod";
     String PROCESSOR_ID = "processorId";
     String PGUID = "pguid";
     String EXEC_STATUS = "exec_status";
+    String NEW_EXEC_STATUS = "new_exec_status";
     String INTERVAL_IN_HOURS = "interval";
     String NODE = "node";
     String THREAD_NAME = "threadName";
     String LAST_EXECUTION_STATE = "lastExecutionState";
     String LAST_EXECUTION_DATE = "lastExecutionDate";
     String NODE_IN_USE = "nodeInUse";
+    String MODIFIED_DATE = "modifiedDate";
 
     String GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE = "SELECT PGUID, EXEC_STATUS FROM PROCESSOR_EXEC_STATE STATE"
             + " WHERE STATE.PROCESSOR_ID =:" + PROCESSOR_ID
@@ -59,11 +61,16 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
             " , LAST_EXEC_DATE = SYSTIMESTAMP" +
             " , THREAD_NAME =:" + THREAD_NAME +
             " , NODE_IN_USE =:" + NODE_IN_USE +
+            " , MODIFIED_DATE =:" + MODIFIED_DATE +
             " WHERE PGUID =:" + PGUID;
 
     String UPDATE_PROCESSOR_EXECUTION_STATE = "UPDATE PROCESSOR_EXEC_STATE" +
             " SET EXEC_STATUS =:" + EXEC_STATUS +
             " WHERE PGUID =:" + PGUID;
+    String UPDATE_PROCESSOR_EXECUTION_STATE_ON_INIT = "UPDATE PROCESSOR_EXEC_STATE" +
+            " SET EXEC_STATUS =:" + NEW_EXEC_STATUS +
+            " WHERE NODE_IN_USE =:" + NODE_IN_USE +
+            " AND EXEC_STATUS =:" + EXEC_STATUS;
 
     ProcessorExecutionState findByProcessorId(String processorId);
 
@@ -84,6 +91,14 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
      * @param status status to be updated
      */
     void updateProcessorExecutionState(String pguid, String status);
+    
+    /**
+     * Updates processor execution state for the current node on server start.
+     * Upldate all "PROCESSING" state processors to "FAILED"
+     * 
+     * @param node
+     */
+    void updateStuckProcessorsExecutionState(String node);
 
     /**
      * lists the processors in descending order
@@ -99,6 +114,15 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     List<String> findNonExecutingProcessors();
 
     List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+    
+    /**
+     * Method to find the executing processor for the period of time.
+     * 
+     * @param timeUnit
+     * @param value
+     * @return list of processors in "PROCESSING" state
+     */
+    List<ProcessorExecutionState> findExecutingProcessors(TimeUnit timeUnit, int value);
 
     int findAllExecutingProcessors();
 

@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -88,12 +89,11 @@ public class MailboxWatchDogResource extends AuditedResource {
 					} else {
 						// To validate Mailbox sla for all mailboxes
 						new MailboxWatchDogService().pollAndUpdateStatus();
+                        new ProcessorExecutionConfigurationService().notifyStuckProcessors();
 					}
 					return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Failed to validate SLA." + e.getMessage());
-
+					throw new LiaisonRuntimeException("Failed to validate SLA." + e.getMessage(), e);
 				}
 
 			}
