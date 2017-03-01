@@ -187,7 +187,8 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     }
 
     $scope.getProcessorDetails = function(entity) {
-        $scope.restService.get($scope.base_url + "/" + null + "/processor/" + entity.processorId,
+    	var emptyMailBoxId = " ";
+        $scope.restService.get($scope.base_url + "/" + emptyMailBoxId +"/processor/" + entity.processorId,
             function(data, status) {
                 if (status === 200 || status === 400) {
                     if (data.getProcessorResponse.response.status == 'success') {
