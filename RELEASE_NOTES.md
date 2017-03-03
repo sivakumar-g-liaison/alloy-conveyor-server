@@ -1,4 +1,4 @@
-4.13.0-SNAPSHOT
+4.13.0
 ---------------
 * GGT-1236, GGT-1209 add appenv and archaius properties layers
 * GMB-944 - Dropbox : Files-Staged Files : Pro
