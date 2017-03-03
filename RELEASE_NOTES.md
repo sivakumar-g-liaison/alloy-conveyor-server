@@ -9,6 +9,9 @@
 * GMB-943 - Sort transfer profiles in mailbox processor screen.
 * GWUD-128 - Provide a default sender organization.
 * GMB-934 - "callback is not a function error" is received in Relay application.
+* GMB-949 - Processor Execution Screen Improvements
+* GMB-942 - org.hibernate.exception.GenericJDBCException: could not inspect JDBC autocommit mode - Added sql for validation
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception 
 
 4.12.0
 ---------------

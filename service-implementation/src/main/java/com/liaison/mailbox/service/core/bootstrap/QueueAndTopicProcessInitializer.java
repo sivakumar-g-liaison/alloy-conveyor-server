@@ -11,6 +11,8 @@ package com.liaison.mailbox.service.core.bootstrap;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
+import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +58,7 @@ public class QueueAndTopicProcessInitializer {
     private static final int DEFAULT_THREAD_COUNT = configuration.getInt("com.liaison.queue.processor.default.thread.count", 10);
 
     /**
-     * Properties required for Mininum headrool
+     * Properties required for Minimum headroom
      */
     private static final String PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = "com.liaison.queue.process.pool.availability.min.headroom";
     private static final int DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = DEFAULT_THREAD_COUNT;
@@ -95,7 +97,7 @@ public class QueueAndTopicProcessInitializer {
 
             // Initialize the dropbox queue
             logger.info("Starting Dropbox Queue Listener");
-            dropboxQueue = new QueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
+            dropboxQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
             dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started Dropbox Queue Listener");
 
@@ -103,22 +105,22 @@ public class QueueAndTopicProcessInitializer {
 
             // Initialize processor queue and processedPayload queue
             logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
-            mailboxProcessorQueue = new QueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
+            mailboxProcessorQueue = new MailboxQueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
             mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
 
             logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-            mailboxProcessedPayloadQueue = new QueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
+            mailboxProcessedPayloadQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
             mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
 
             logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-            mailBoxTopicPooledListenerContainer = new TopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
+            mailBoxTopicPooledListenerContainer = new MailBoxTopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
             mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
             
             logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-            umDirOprsQueue = new QueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
+            umDirOprsQueue = new MailboxQueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
             umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
 
