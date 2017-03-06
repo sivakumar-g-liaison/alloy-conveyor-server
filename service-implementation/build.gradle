@@ -44,7 +44,7 @@ buildscript {
 		// Flyway Plugin
 		// License: Apache v2
         classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
-		classpath "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+		classpath "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
 
 		// SOAP UI
 		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
@@ -172,8 +172,8 @@ dependencies {
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
-	compile 'com.oracle.jdbc:ucp:${oracleVersion}'
+	runtime "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
+	compile "com.oracle.jdbc:g2ucp:12.2.0.1"
 
 	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
 	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
@@ -201,7 +201,7 @@ dependencies {
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
-	jdbc "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+	jdbc "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
 
 	//Dependency for UM integration
 	compile "com.liaison.commons.usermanagement:usermanagement-client:4.+"

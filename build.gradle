@@ -56,6 +56,8 @@ allprojects {
 
             //REJECT karyon admin due to compliance reasons
             all*.exclude group: 'com.netflix.karyon', module: 'karyon-admin'
+            all*.exclude group: 'com.oracle.jdbc', module: 'ojdbc7'
+            all*.exclude group: 'com.oracle.jdbc', module: 'ucp'
 
               // Most of the time this is a bad idea with little upside:   // check for updates every build
               //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
