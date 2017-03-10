@@ -44,7 +44,7 @@ buildscript {
 		// Flyway Plugin
 		// License: Apache v2
         classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
-		classpath "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
+		classpath "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
 
 		// SOAP UI
 		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
@@ -172,8 +172,8 @@ dependencies {
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
-	compile "com.oracle.jdbc:g2ucp:12.2.0.1"
+	runtime "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
+	compile "com.oracle.jdbc:g2ucp:${oracleVersion}"
 
 	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
 	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
@@ -201,7 +201,7 @@ dependencies {
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
-	jdbc "com.oracle.jdbc:g2ojdbc8:12.2.0.1"
+	jdbc "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
 
 	//Dependency for UM integration
 	compile "com.liaison.commons.usermanagement:usermanagement-client:4.+"
@@ -477,9 +477,6 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     logger.info 'Integration Tests'
     useTestNG()
     include '**/*IT.class'
-
-    // workaround for Java7 and Cobutura/Emma instrumentation problem
-    jvmArgs += "-XX:-UseSplitVerifier"
 
     jvmArgs += "-Darchaius.deployment.applicationId=${project.war.baseName}"
     jvmArgs += "-Darchaius.deployment.environment=${deployEnvironment}"
