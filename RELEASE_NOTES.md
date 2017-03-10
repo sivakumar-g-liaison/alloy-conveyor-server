@@ -1,3 +1,7 @@
+4.13.1
+---------------
+* GMB-946 - Analyze why there are more timer threads.
+
 4.13.0
 ---------------
 * GGT-1236, GGT-1209 add appenv and archaius properties layers
