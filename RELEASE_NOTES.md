@@ -1,5 +1,7 @@
 4.14.0-SNAPSHOT
 ---------------
+* GMB-946 - Analyze why there are more timer threads.
+* GMB-947 - Relay errors to LENS Metadata.
 
 4.13.0
 ---------------
