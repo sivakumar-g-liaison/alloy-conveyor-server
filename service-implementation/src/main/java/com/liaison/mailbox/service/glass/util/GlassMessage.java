@@ -109,6 +109,7 @@ public class GlassMessage {
     private String senderIp;
     private String receiverIp;
     private boolean arrivalTime;
+    private String adminErrorDetails;
 
 
 	public String getTransferProfileName() {
@@ -520,7 +521,8 @@ public class GlassMessage {
 	}
 
 	/**
-	 * Method to log the errors and technical description in ActivityStatusAPI 
+	 * Method to log the errors and technical description in ActivityStatusAPI
+	 * and to log error details (tech description) in meta data.
 	 * 
 	 * @param statusType
 	 * @param message
@@ -531,6 +533,7 @@ public class GlassMessage {
 		
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, techDescription, null);
+		this.setAdminErrorDetails(techDescription);
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
 	}
 
@@ -576,5 +579,13 @@ public class GlassMessage {
         OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
         this.setSenderId(org.getPguid());
         this.setSenderName(org.getName());
+    }
+    
+    public String getAdminErrorDetails() {
+        return adminErrorDetails;
+    }
+    
+    public void setAdminErrorDetails(String adminErrorDetails) {
+        this.adminErrorDetails = adminErrorDetails;
     }
 }

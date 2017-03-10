@@ -1,3 +1,7 @@
+4.13.2
+---------------
+* GMB-947 - Relay errors to LENS Metadata.
+
 4.13.1
 ---------------
 * GMB-946 - Analyze why there are more timer threads.
