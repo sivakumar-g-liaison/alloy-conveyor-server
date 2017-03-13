@@ -68,7 +68,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
                                     @QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
                                     @QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName,
-                                    @QueryParam(value = "mbxPguid") @ApiParam(name = "mbxPguid", required = false, value = "mbxPguid") final String mbxPguid,
+                                    @QueryParam(value = "mbxGuid") @ApiParam(name = "mbxGuid", required = false, value = "mbxGuid") final String mbxGuid,
                                     @QueryParam(value = "pipelineId") @ApiParam(name = "pipelineId", required = false, value = "pipelineId") final String pipelineId,
                                     @QueryParam(value = "folderPath") @ApiParam(name = "folderPath", required = false, value = "folderPath") final String folderPath,
                                     @QueryParam(value = "profileName") @ApiParam(name = "profileName", required = false, value = "profileName") final String profileName,
@@ -91,7 +91,7 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setSortField(sortField);
                 searchFilter.setSortDirection(sortDirection);
                 searchFilter.setMbxName(mbxName);
-                searchFilter.setMbxPguid(mbxPguid);
+                searchFilter.setMbxGuid(mbxGuid);
                 searchFilter.setPipelineId(pipelineId);
                 searchFilter.setFolderPath(folderPath);
                 searchFilter.setProfileName(profileName);

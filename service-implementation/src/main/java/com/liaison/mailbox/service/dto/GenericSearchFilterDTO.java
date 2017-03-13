@@ -21,7 +21,7 @@ public class GenericSearchFilterDTO {
 	public static final String MATCH_MODE_EQUALS_STR = "equals";
 	public static final String MATCH_MODE_LIKE = "like";
 	
-	private String mbxPguid;
+	private String mbxGuid;
 	private String mbxName;
 	private String serviceInstanceId;
 	private String profileName;
@@ -42,12 +42,12 @@ public class GenericSearchFilterDTO {
 	private boolean isDisableFilters;
 	private boolean isMinResponse;
 	
-	public String getMbxPguid() {
-	    return mbxPguid;
+	public String getMbxGuid() {
+	    return mbxGuid;
 	}
 
-	public void setMbxPguid(String mbxPguid) {
-	    this.mbxPguid = mbxPguid;
+	public void setMbxGuid(String mbxGuid) {
+	    this.mbxGuid = mbxGuid;
 	}
 
 	public String getMbxName() {

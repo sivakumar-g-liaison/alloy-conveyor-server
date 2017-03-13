@@ -11,15 +11,15 @@
                     <label for="name"> Processor Id </label>
                     <input id="prcsrguid" type="text" ng-model="prcsrGuid"
                            class="form-control"
-                           name="prcsrguid"/>	
+                           name="prcsrguid"/>
                 </div>
-                <div class="col-md-4 search-padding-left">
+                <div class="col-md-4">
                     <label for="name"> Mailbox Id </label>
                     <input id="mailboxguid" type="text" ng-model="mailboxId"
                            class="form-control"
                            name="mailboxguid"/>
                 </div>
-                <div class="col-md-4 search-padding-left">
+                <div class="col-md-4">
                     <label for="name"> Pipeline Id </label>
                     <input id="pipeLine" type="text" ng-model="PrcsrPipelineId"
                            class="form-control"
@@ -43,20 +43,20 @@
                         <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
                     </div>
                 </div>
-                <div class="col-md-3 search-padding-left">
+                <div class="col-md-3">
                     <label for="name"> Processor Type </label>
                     <select id="processortype" ng-model="processorType" ng-change="resetProcessorType(processorType)" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control textPattern_width_1">
                         <option value="">-- select--</option>
                     </select>
                 </div>
-                <div class="col-md-3 search-padding-left">
+                <div class="col-md-3">
                     <label for="name"> Protocol </label>
                     <select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control textPattern_width_1">
                         <option value="">-- select--</option>
                     </select>
                 </div>
-                <div class="col-md-3 search-padding-left">
-                    <label for="name"> Folder Path </label> 
+                <div class="col-md-3">
+                    <label for="name"> Folder Path </label>
                     <input id="folderpath" type="text" ng-model="folderPath" ng-pattern="folderPathPattern"
                        class="form-control"
                        name="folderpath"/>
@@ -67,7 +67,7 @@
             </div>
             <div class="row search-form-bottom">
                 <div class="col-md-3">
-                    <label for="name"> Mailbox Name  </label> 
+                    <label for="name"> Mailbox Name  </label>
                     <input id="mbxname" type="text" ng-model="mailBoxName"
                            placeholder="Mailbox Name"
                            typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
@@ -82,7 +82,7 @@
                         <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
                     </div>
                 </div>
-                <div class="col-md-3 search-padding-left">
+                <div class="col-md-3">
                     <label for="name"> Profile </label>
                     <input id="profilename" type="text" ng-model="profileName"
                            placeholder="Profile"
@@ -98,7 +98,7 @@
                         <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
                     </div>
                 </div>
-                <div class="col-md-3 search-padding-left">
+                <div class="col-md-3">
                     <label for="name"> Script Name </label>
                     <input id="scriptname" type="text" ng-model="scriptName"
                            class="form-control"

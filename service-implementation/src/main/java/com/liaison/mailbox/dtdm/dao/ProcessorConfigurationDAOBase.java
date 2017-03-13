@@ -672,7 +672,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		List<String> predicateList = new ArrayList<String>();
 		boolean isFolderAvailable = false;
 		
-		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName()) || !MailBoxUtil.isEmpty(searchDTO.getMbxPguid())) {		
+		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName()) || !MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {		
 		    query.append(" inner join processor.mailbox mailbox ");
 		    
 		    if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
@@ -680,7 +680,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		                " LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
 		                    " mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
 		        } 
-		    if (!MailBoxUtil.isEmpty(searchDTO.getMbxPguid())) {
+		    if (!MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {
 		        predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
 		                " LOWER(mailbox.pguid) " + searchDTO.getMatchMode() + " :" + MBX_ID :
 		                    " mailbox.pguid " + searchDTO.getMatchMode() + " :" + MBX_ID);
@@ -736,10 +736,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					"%" + searchDTO.getMbxName().toLowerCase() + "%" :
 					searchDTO.getMbxName());
         }
-        if (!MailBoxUtil.isEmpty(searchDTO.getMbxPguid())) {
+        if (!MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {
             query.setParameter(MBX_ID, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
-                    "%" + searchDTO.getMbxPguid().toLowerCase() + "%" :
-                    searchDTO.getMbxPguid());
+                    "%" + searchDTO.getMbxGuid().toLowerCase() + "%" :
+                    searchDTO.getMbxGuid());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
             query.setParameter(FOLDER_URI, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?

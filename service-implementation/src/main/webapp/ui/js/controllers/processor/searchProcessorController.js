@@ -72,7 +72,7 @@ var rest = myApp.controller(
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
                     },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-                    	mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid, mbxPguid:$scope.mailboxId, scriptName:$scope.scriptName}				
+                    	mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid, mbxGuid:$scope.mailboxId, scriptName:$scope.scriptName}				
                 );				
             };
         $scope.readAllProcessors();
