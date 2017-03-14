@@ -33,12 +33,13 @@ public class HTTPListenerHelperDTO {
 	private String ttlValue;
 	private String ttlUnit;
 	private Set<ProcessorProperty> dynamicProperties;
+	private String procsrStatus;
 	
 	public HTTPListenerHelperDTO(String processorId, String procsrProtocol,
 			String procsrType, String procsrPropertyJson,
 			String serviceInstanceId, String mbxId, String mbxName,
 			String tenancyKey, String ttlValue, String ttlUnit,
-			Set<ProcessorProperty> dynamicProperties) {
+			Set<ProcessorProperty> dynamicProperties, String procsrStatus) {
 
 		this.processorId = processorId;
 		this.procsrProtocol = procsrProtocol;
@@ -51,6 +52,7 @@ public class HTTPListenerHelperDTO {
 		this.ttlValue = ttlValue;
 		this.ttlUnit = ttlUnit;
 		this.dynamicProperties = dynamicProperties;
+		this.procsrStatus = procsrStatus;
 	}
 	public String getProcessorId() {
 		return processorId;
@@ -117,5 +119,11 @@ public class HTTPListenerHelperDTO {
 	}
 	public void setDynamicProperties(Set<ProcessorProperty> dynamicProperties) {
 		this.dynamicProperties = dynamicProperties;
+	}
+	public String getProcsrStatus() {
+	    return procsrStatus;
+	}
+	public void setprocsrStatus(String procsrStatus) {
+	    this.procsrStatus = procsrStatus;
 	}
 }

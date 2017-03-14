@@ -152,6 +152,7 @@ public interface MailBoxConstants {
 	String KEY_MAILBOX_NAME = "mailboxName";
 	String STORAGE_IDENTIFIER_TYPE = "Storage Type";
 	String CONNECTION_TIMEOUT = "connectionTimeout";
+	String PROCSR_STATUS = "procsrStatus";
 
 	String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 

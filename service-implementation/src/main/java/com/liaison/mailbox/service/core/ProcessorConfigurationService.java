@@ -655,6 +655,7 @@ public class ProcessorConfigurationService {
 			String tenancyKey = (String) obj[9];
 			String mbxPropName = (String) obj[10];
 			String mbxPropValue = (String) obj[11];
+			String procsrStatus = (String) obj[12];
 			
 			// if the details are already available handle the processorProperty and mbx property alone
 			HTTPListenerHelperDTO helperDTO = httpListenerDetails.get(processorId);
@@ -700,7 +701,7 @@ public class ProcessorConfigurationService {
 				}
 				// if the details are not already available construct a new helperDTO
 				helperDTO = new HTTPListenerHelperDTO(processorId, protocol, procsrType, propertiesJson, 
-														serviceInstanceId, mbxId, mbxName, tenancyKey, ttlValue, ttlUnit, dynamicProperties);
+														serviceInstanceId, mbxId, mbxName, tenancyKey, ttlValue, ttlUnit, dynamicProperties, procsrStatus);
 				httpListenerDetails.put(processorId, helperDTO);
 			}
 		}
@@ -739,6 +740,7 @@ public class ProcessorConfigurationService {
 			httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
 			httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
 			httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
+			httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
 			if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
 				Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
 				httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));

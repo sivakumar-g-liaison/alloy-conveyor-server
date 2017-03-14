@@ -893,6 +893,45 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals("false", httpListenerProperties.get("httpListenerAuthCheckRequired"));
         Assert.assertEquals(serviceInstanceId, httpListenerProperties.get("SERVICE_INSTANCE_ID"));
     }
+    
+    /**
+     * Test method to get http listener properties for inactive processor and check the processor status.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testGetHttpListenerPropertiesByMailboxIdForInactiveProcessor() throws Exception {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
+                mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseHTTPAsyncProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        revProcRequestDTO.getProcessor().setStatus(EntityStatus.INACTIVE.value());
+        procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        Map<String, String> httpListenerProperties = procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
+
+        // Assertion
+        Assert.assertEquals(revProcRequestDTO.getProcessor().getStatus(), httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS));
+    }
 
     /**
      * Method Get Http Listener Properties With Empty From Date And Status
