@@ -200,6 +200,7 @@ public class MailBoxConfigurationService {
             // Creates relationship mailbox and service instance id
             MailboxServiceInstance msi = new MailboxServiceInstance(MailBoxUtil.getGUID(), DATACENTER_NAME);
             msi.setServiceInstance(serviceInstance);
+            msi.setMailbox(mailbox);
             mbxServiceInstances.add(msi);
             mailbox.setMailboxServiceInstances(mbxServiceInstances);
         }
@@ -461,8 +462,7 @@ public class MailBoxConfigurationService {
 		try {
 			
 			// Getting mailbox
-			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			List<MailBox> mailboxes = new ArrayList<MailBox>();
+            List<MailBox> mailboxes = new ArrayList<>();
 
             List<String> tenancyKeyGuids = getTenancyKeyGuids(searchFilter, aclManifestJson);
             List<MailBox> retrievedMailBoxes = new ArrayList<>();
@@ -472,7 +472,7 @@ public class MailBoxConfigurationService {
 			serviceResponse.setTotalItems(totalCount);
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
-			List<MailBoxDTO> mailBoxDTOList = new ArrayList<MailBoxDTO>();
+            List<MailBoxDTO> mailBoxDTOList = new ArrayList<>();
 			MailBoxDTO mailBoxDTO = null;
 
 			String tenancyKeyDisplayName;
@@ -482,7 +482,11 @@ public class MailBoxConfigurationService {
 
 				processors = processorDao.findProcessorByMbx(mbx.getPguid(), false);
 	            mbx.setMailboxProcessors(processors);
-	            tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
+                if (!MailBoxUtil.isEmpty(aclManifestJson)) {
+                    tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
+                } else {
+                    tenancyKeyDisplayName = mbx.getTenancyKey();
+                }
 
                 mailBoxDTO = new MailBoxDTO();
                 mailBoxDTO.copyFromEntity(mbx);
