@@ -1,6 +1,7 @@
 4.13.2
 ---------------
 * GMB-947 - Relay errors to LENS Metadata.
+* GC-367 - Relay listing issue with configurator
 
 4.13.1
 ---------------
