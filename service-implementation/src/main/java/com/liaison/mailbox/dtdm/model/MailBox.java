@@ -173,7 +173,7 @@ public class MailBox implements Identifiable {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@Fetch(FetchMode.JOIN)
 	public Set<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
