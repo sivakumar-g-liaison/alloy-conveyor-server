@@ -13,7 +13,6 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -25,6 +24,7 @@ import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -39,7 +39,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
@@ -931,6 +930,50 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
         // Assertion
         Assert.assertEquals(revProcRequestDTO.getProcessor().getStatus(), httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS));
+    }
+    
+    /**
+     * Test method to get http listener properties for inactive mailbox and check the processor status.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testGetHttpListenerPropertiesByMailboxIdForInactiveMailBox() throws Exception {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructHttpProcessorDTO(response.getMailBox().getGuid(),
+                mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, procResponseDTO.getResponse().getStatus());
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName(mbxDTO.getName());
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid(response.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "dummy" + System.currentTimeMillis(), true, mbxDTO.getModifiedBy());
+
+        ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+        Map<String, String> httpListenerProperties = procsrService.getHttpListenerProperties(response.getMailBox().getGuid(), ProcessorType.HTTPASYNCPROCESSOR, true);
+
+        // Assertion
+        Assert.assertEquals(reviseRequestDTO.getMailBox().getStatus(), httpListenerProperties.get(MailBoxConstants.MAILBOX_STATUS));
     }
 
     /**

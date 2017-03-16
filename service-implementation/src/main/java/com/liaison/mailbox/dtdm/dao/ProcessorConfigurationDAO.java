@@ -229,11 +229,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mailboxName, String processorType);
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
-		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
+		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
 		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
 		.append(" SI.SERVICE_INSTANCE_ID,")
-		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE,")
-		.append(" P.STATUS AS PROCSR_STATUS")
+		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, M.STATUS AS MBX_STATUS,")
+		.append(" MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
 		.append(" FROM PROCESSOR P")
 		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
 		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
@@ -242,14 +242,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" WHERE P.TYPE = ? AND")
 		.append(" M.PGUID = ? AND")
 		.append(" P.STATUS <> 'DELETED' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+		.append(" M.STATUS <> 'DELETED' ");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
-		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
+		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
 		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
 		.append(" SI.SERVICE_INSTANCE_ID,")
-		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE,")
-		.append(" P.STATUS AS PROCSR_STATUS")
+		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, M.STATUS AS MBX_STATUS,")
+		.append(" MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
 		.append(" FROM PROCESSOR P")
 		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
 		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
@@ -258,7 +258,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" WHERE P.TYPE = ? AND")
 		.append(" LOWER(M.NAME) = ? AND")
 		.append(" P.STATUS <> 'DELETED' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+		.append(" M.STATUS <> 'DELETED' ");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID = new StringBuilder().append("select processor from Processor processor")
 			.append(" inner join processor.mailbox mbx")

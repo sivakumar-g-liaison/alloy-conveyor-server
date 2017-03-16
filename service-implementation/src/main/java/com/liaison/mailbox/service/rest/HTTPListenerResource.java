@@ -186,9 +186,14 @@ public class HTTPListenerResource extends AuditedResource {
 							isMailboxIdAvailable);
                     pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
 
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.MAILBOX_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, MailBoxConstants.MAILBOX,
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
                     if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS))) {
-                        throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, ProcessorType.HTTPASYNCPROCESSOR.getCode(),
-                                Response.Status.NOT_FOUND);
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, ProcessorType.HTTPSYNCPROCESSOR.getCode(),
+                                Response.Status.BAD_REQUEST);
                     }
                     
                     syncProcessor.validateRequestSize(request.getContentLength());
@@ -403,9 +408,14 @@ public class HTTPListenerResource extends AuditedResource {
 							mailboxInfo, ProcessorType.HTTPASYNCPROCESSOR, isMailboxIdAvailable);
                     pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
                     
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.MAILBOX_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, MailBoxConstants.MAILBOX,
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
                     if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS))) {
-                        throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, ProcessorType.HTTPASYNCPROCESSOR.getCode(),
-                                Response.Status.NOT_FOUND);
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, ProcessorType.HTTPASYNCPROCESSOR.getCode(),
+                                Response.Status.BAD_REQUEST);
                     }
                     
                     asyncProcessor.validateRequestSize(request.getContentLength());
