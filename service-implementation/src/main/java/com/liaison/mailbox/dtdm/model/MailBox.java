@@ -220,7 +220,7 @@ public class MailBox implements Identifiable {
 		this.originatingDc = originatingDc;
 	}
 	
-    @Column(name = "GATEWAY_TYPE", nullable = false, length = 32)
+    @Column(name = "GTYPE", nullable = false, length = 32)
     public String getGatewayType() {
         return gatewayType;
     }
