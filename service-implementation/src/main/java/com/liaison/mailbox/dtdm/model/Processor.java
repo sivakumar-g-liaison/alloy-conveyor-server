@@ -122,6 +122,7 @@ public class Processor implements Identifiable {
 	private String modifiedBy;
 	private Date modifiedDate;
 	private String originatingDc;
+    private String gatewayType;
 
 	private Set<Credential> credentials;
 	private Set<Folder> folders;
@@ -351,6 +352,15 @@ public class Processor implements Identifiable {
 	public void setOriginatingDc(String originatingDc) {
 		this.originatingDc = originatingDc;
 	}
+	
+    @Column(name = "GATEWAY_TYPE", nullable = false, length = 32)
+    public String getGatewayType() {
+        return gatewayType; 
+    }
+    
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
 	
 	@Override
 	@Transient

@@ -66,6 +66,7 @@ public class StagedFile implements Identifiable {
     private Timestamp createdDate;
     private Timestamp modifiedDate;
     private String originatingDc;
+    private String gatewayType;
 
     public StagedFile() {
     }
@@ -220,6 +221,15 @@ public class StagedFile implements Identifiable {
 
     public void setOriginatingDc(String originatingDc) {
         this.originatingDc = originatingDc;
+    }
+    
+    @Column(name = "GATEWAY_TYPE", nullable = false, length = 32)
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
     }
 
     @Override

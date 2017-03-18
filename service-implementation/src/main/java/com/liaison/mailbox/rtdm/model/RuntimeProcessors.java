@@ -41,6 +41,7 @@ public class RuntimeProcessors {
     private String processorId;
     private ProcessorExecutionState processorExecState;
     private String originatingDc;
+    private String gatewayType;
 
     @Column(name = "PGUID", length = 32)
     @Id
@@ -77,5 +78,14 @@ public class RuntimeProcessors {
 
     public void setOriginatingDc(String originatingDc) {
         this.originatingDc = originatingDc;
+    }
+    
+    @Column(name = "GATEWAY_TYPE", nullable = false, length = 32)
+    public String getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
     }
 }

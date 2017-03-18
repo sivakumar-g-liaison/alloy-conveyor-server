@@ -81,8 +81,8 @@ public class MailBox implements Identifiable {
 	private String tenancyKey;
 	private String modifiedBy;
 	private Date modifiedDate;
-	private String originatingDc;
-	
+    private String originatingDc;
+    private String gatewayType;
 
 	public MailBox() {
 	}
@@ -219,6 +219,15 @@ public class MailBox implements Identifiable {
 	public void setOriginatingDc(String originatingDc) {
 		this.originatingDc = originatingDc;
 	}
+	
+    @Column(name = "GATEWAY_TYPE", nullable = false, length = 32)
+    public String getGatewayType() {
+        return gatewayType;
+    }
+    
+    public void setGatewayType(String gatewayType) {
+        this.gatewayType = gatewayType;
+    }
 
     /**
 	 * Method to retrieve the given properties form Mailbox
