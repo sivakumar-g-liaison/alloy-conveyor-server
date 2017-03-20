@@ -7,37 +7,37 @@
 -- with Liaison Technologies.
 --
 /**
- * Adding new column "GTYPE" in the table "PROCESSORS"
+ * Adding new column "CLUSTER_TYPE" in the table "PROCESSORS"
  */
 DECLARE
   v_column_exists number := 0;
 BEGIN
   Select count(*) into v_column_exists
     from all_tab_cols
-    where column_name = 'GTYPE'
+    where column_name = 'CLUSTER_TYPE'
       and table_name = 'PROCESSORS'
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSORS ADD GTYPE VARCHAR2(32) DEFAULT ''SECURE'' NOT NULL';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSORS ADD CLUSTER_TYPE VARCHAR2(32) DEFAULT ''SECURE'' NOT NULL';
   end if;
 end;
 /
 
 /**
- * Adding new column "GTYPE" in the table "STAGED_FILE"
+ * Adding new column "CLUSTER_TYPE" in the table "STAGED_FILE"
  */
 DECLARE
   v_column_exists number := 0;
 BEGIN
   Select count(*) into v_column_exists
     from all_tab_cols
-    where column_name = 'GTYPE'
+    where column_name = 'CLUSTER_TYPE'
       and table_name = 'STAGED_FILE'
       and owner = 'GATEWAY_OWNR';
 
   if (v_column_exists = 0) then
-      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD GTYPE VARCHAR2(32) DEFAULT ''SECURE'' NOT NULL';
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.STAGED_FILE ADD CLUSTER_TYPE VARCHAR2(32) DEFAULT ''SECURE'' NOT NULL';
   end if;
 end;
 /

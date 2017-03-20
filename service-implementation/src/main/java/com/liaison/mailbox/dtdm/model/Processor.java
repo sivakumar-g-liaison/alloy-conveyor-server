@@ -362,14 +362,14 @@ public class Processor implements Identifiable {
 		this.originatingDc = originatingDc;
 	}
 	
-    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
-    public String getClusterType() {
-        return clusterType; 
-    }
-    
-    public void setClusterType(String clusterType) {
-        this.clusterType = clusterType;
-    }
+	@Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+	public String getClusterType() {
+	    return clusterType;
+	}
+	
+	public void setClusterType(String clusterType) {
+	    this.clusterType = clusterType;
+	}
 	
 	@Override
 	@Transient

@@ -177,7 +177,7 @@ public interface MailBoxConstants {
 	String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
 	String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
 	
-	// Property to decide whether the application is deployed "MAILBOX", "LOWSECURE-MAILBOX" or "DROPBOX"
+	// Property to decide whether the application is deployed "RELAY", "LOWSECURE-RELAY" or "CONVEYOR"
 	String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
 
 	String MAILBOX = "MailBox";
