@@ -27,7 +27,9 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAbstractProcessor;
@@ -184,6 +186,16 @@ public class HTTPListenerResource extends AuditedResource {
 							isMailboxIdAvailable);
                     pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
 
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.MAILBOX_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, MailBoxConstants.MAILBOX,
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, ProcessorType.HTTPSYNCPROCESSOR.getCode(),
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
                     syncProcessor.validateRequestSize(request.getContentLength());
                     // authentication should happen only if the property "Http Listener Auth Check Required" is true
 					logger.info("HTTP(S)-SYNC : Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
@@ -395,6 +407,17 @@ public class HTTPListenerResource extends AuditedResource {
                     Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
 							mailboxInfo, ProcessorType.HTTPASYNCPROCESSOR, isMailboxIdAvailable);
                     pipelineId = WorkTicketUtil.retrievePipelineId(httpListenerProperties);
+                    
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.MAILBOX_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, MailBoxConstants.MAILBOX,
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
+                    if (EntityStatus.INACTIVE.value().equals(httpListenerProperties.get(MailBoxConstants.PROCSR_STATUS))) {
+                        throw new MailBoxServicesException(Messages.INACTIVE_ENTITY, ProcessorType.HTTPASYNCPROCESSOR.getCode(),
+                                Response.Status.BAD_REQUEST);
+                    }
+                    
                     asyncProcessor.validateRequestSize(request.getContentLength());
 
 					// authentication should happen only if the property "Http Listener Auth Check Required" is true

@@ -2,6 +2,7 @@
 ---------------
 * GMB-946 - Analyze why there are more timer threads.
 * GMB-947 - Relay errors to LENS Metadata.
+* GMB-954 - Query back to service broker to determine the sender name when creating a process.
 
 4.13.0
 ---------------

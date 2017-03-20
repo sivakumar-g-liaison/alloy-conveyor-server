@@ -149,6 +149,9 @@ public enum Messages {
     //sync and async process
     MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this mailbox."),
 
+    //Inactive mailbox/processor
+    INACTIVE_ENTITY("%s is in-active in the system."),
+    
     AUTHENTICATION_SUCCESSFULL("%s authenticated successfully."),
     AUTHENTICATION_FAILURE("Failed to authenticate user."),
     AUTH_AND_GET_ACL_FAILURE("Failed to authenticate and get user ACL"),

@@ -261,6 +261,22 @@ public abstract class BaseServiceTest {
         return procRequestDTO;
     }
 
+    /**
+     * To construct http asycn processor property for revice operation.
+     * @param guid
+     * @param mbxDTO
+     * @return
+     * @throws IOException
+     */
+    public ReviseProcessorRequestDTO constructReviseHTTPAsyncProcessorDTO(String guid, MailBoxDTO mbxDTO) throws IOException {
+
+        ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
+        ProcessorDTO procDTO = setHttpProcessorDTO(guid, mbxDTO);
+        constructHttpProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
 	/**
      * Construct dummy mailbox DTO for testing.
      *
