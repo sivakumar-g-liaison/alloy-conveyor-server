@@ -353,7 +353,7 @@ public class Processor implements Identifiable {
 		this.originatingDc = originatingDc;
 	}
 	
-    @Column(name = "GTYPE", nullable = false, length = 32)
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
     public String getGatewayType() {
         return gatewayType; 
     }
