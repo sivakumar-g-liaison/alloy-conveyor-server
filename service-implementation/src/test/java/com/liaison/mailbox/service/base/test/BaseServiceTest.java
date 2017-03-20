@@ -303,6 +303,7 @@ public abstract class BaseServiceTest {
         procDTO.setType("REMOTEDOWNLOADER");
         procDTO.setProtocol("FTP");
         procDTO.setModifiedBy("unknown-user");
+        procDTO.setJavaScriptURI("ftp://test:6060");
         return procDTO;
     }
 

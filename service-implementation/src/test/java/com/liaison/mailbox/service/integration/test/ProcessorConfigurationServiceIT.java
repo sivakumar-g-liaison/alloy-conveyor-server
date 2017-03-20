@@ -36,13 +36,16 @@ import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorRes
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1528,5 +1531,163 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         // Assertion
         Assert.assertEquals(FAILURE, triggerResponseDTO.getResponse().getStatus());
         Assert.assertTrue(triggerResponseDTO.getResponse().getMessage().contains(Messages.NO_PROC_CONFIG_PROFILE.value()));
+    }
+
+    /**
+     * Method to search processor by mailbox guid
+     */
+    @Test
+    public void testSearcProcessorByMbxPguid() throws Exception {
+        
+        // create the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        // Adding mailbox to processor
+        List<ProcessorDTO> processors = new ArrayList<>();
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        //search processor by filter
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxGuid(response.getMailBox().getGuid());
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+        
+        Assert.assertEquals(serviceResponse.getProcessors().size(), processors.size());
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+
+     /**
+     * Method to search processor by unavailable mailbox guid
+     */
+    @Test
+    public void testSearchProcessorWithUnavailableMbxPguid() throws Exception {
+        
+        // create the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        // Adding mailbox to processor
+        List<ProcessorDTO> processors = new ArrayList<>();
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        //search processor by filter
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxGuid(response.getMailBox().getGuid() + "1");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+        
+        Assert.assertEquals(0, serviceResponse.getProcessors().size());
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+    
+    /**
+     * Method to search processor by script name
+     */
+    @Test
+    public void testSearcProcessorByScriptName() throws Exception {
+        
+        // create the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        // Adding mailbox to processor
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+
+        //search processor by filter
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setScriptName(procGetResponseDTO.getProcessor().getJavaScriptURI());
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+    
+    /**
+     * Method to search processor by unavailable script name
+     */
+    @Test
+    public void testSearchProcessorWithUnavailableScriptName() throws Exception {
+        
+        // create the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        // Adding mailbox to processor
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        
+        //search processor by filter
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setScriptName(procGetResponseDTO.getProcessor().getJavaScriptURI() + "1");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+        
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
     }
 }

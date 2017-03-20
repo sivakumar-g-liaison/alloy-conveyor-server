@@ -21,9 +21,11 @@ var rest = myApp.controller(
 		$scope.mailBoxName = null;
 		$scope.procName = null;
 		$scope.prcsrGuid = null;
-		
+		$scope.mailboxId = null;
+		$scope.scriptName =null;
+
 		// Profiles loads initially
-        $scope.profiles = [];
+		$scope.profiles = [];
         
         $scope.isProcessorTypeSweeper = false;
 		$scope.isProcessorTypeHTTPListener = false;
@@ -70,12 +72,12 @@ var rest = myApp.controller(
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
                     },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-					   mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid}				
+                    	mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid, mbxGuid:$scope.mailboxId, scriptName:$scope.scriptName}				
                 );				
             };
-			$scope.readAllProcessors();
-			
-	$scope.clearAllFilters = function(){
+        $scope.readAllProcessors();
+
+        $scope.clearAllFilters = function() {
 		$scope.mailBoxName = null;
 		$scope.PrcsrPipelineId = null;
 		$scope.folderPath = null;
@@ -84,8 +86,10 @@ var rest = myApp.controller(
 		$scope.processorType = null;
 		$scope.procName = null;
 		$scope.prcsrGuid = null;
+		$scope.mailboxId = null;
+		$scope.scriptName = null;
 	}
-			
+
 	// Get Mailbox names for Typeahead display		
 	$scope.getMailboxNames = function(choice) {
         var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
