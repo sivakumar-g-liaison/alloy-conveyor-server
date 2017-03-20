@@ -24,6 +24,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import java.sql.Timestamp;
 
 /**
@@ -66,7 +67,7 @@ public class StagedFile implements Identifiable {
     private Timestamp createdDate;
     private Timestamp modifiedDate;
     private String originatingDc;
-    private String gatewayType;
+    private String clusterType;
 
     public StagedFile() {
     }
@@ -224,12 +225,12 @@ public class StagedFile implements Identifiable {
     }
     
     @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
-    public String getGatewayType() {
-        return gatewayType;
+    public String getClusterType() {
+        return clusterType;
     }
-
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
+    
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 
     @Override

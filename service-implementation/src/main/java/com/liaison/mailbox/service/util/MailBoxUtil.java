@@ -842,18 +842,20 @@ public class MailBoxUtil {
     /**
      * This method returns the cluster type based on deployment type.
      * 
-     * @return
+     * @return clusterType
      */
     public static String getClusterType () {
         
-        if (null != clusterType) {
-            String depType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-            if (DeploymentType.LOWSECURE_RELAY.equals(depType)) {
+        if (null == clusterType) {
+            
+            clusterType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+            if (DeploymentType.LOWSECURE_RELAY.getValue().equals(clusterType)) {
                 clusterType = "LOWSECURE ";
             } else {
                 clusterType = "SECURE";
             }
         }
+        
         return clusterType;
     }
 }

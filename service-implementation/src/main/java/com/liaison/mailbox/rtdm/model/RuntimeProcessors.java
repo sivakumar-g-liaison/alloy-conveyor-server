@@ -41,7 +41,7 @@ public class RuntimeProcessors {
     private String processorId;
     private ProcessorExecutionState processorExecState;
     private String originatingDc;
-    private String gatewayType;
+    private String clusterType;
 
     @Column(name = "PGUID", length = 32)
     @Id
@@ -81,11 +81,11 @@ public class RuntimeProcessors {
     }
     
     @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
-    public String getGatewayType() {
-        return gatewayType;
+    public String getClusterType() {
+        return clusterType;
     }
-
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
+    
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 }

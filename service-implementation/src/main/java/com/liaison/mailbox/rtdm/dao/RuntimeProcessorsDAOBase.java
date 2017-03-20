@@ -111,6 +111,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         prcsrExecution.setProcessors(processors);
         prcsrExecution.setOriginatingDc(DATACENTER_NAME);
         processors.setProcessorExecState(prcsrExecution);
+        processors.setClusterType(MailBoxUtil.getClusterType());
 
         persist(processors);
     }
