@@ -29,11 +29,13 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -852,4 +854,78 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getProcessorIdByName(String processorName) {
+
+        EntityManager entityManager = null;
+        List<String> results = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results = entityManager.createNativeQuery(PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME.toString())
+                          .setParameter(1, processorName)
+                          .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return results;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName) {
+
+        EntityManager entityManager = null;
+        List<String> results = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results = entityManager.createNativeQuery(PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME_AND_MBX_NAME.toString())
+                          .setParameter(1, processorName)
+                          .setParameter(2, mailboxName)
+                          .getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return results;
+	}
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public String getProcessorNameByPguid(String pguid) {
+
+        EntityManager entityManager = null;
+        List<String> results = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results = entityManager.createNativeQuery(PROCESSOR_NAME_RETRIEVAL_BY_PROCESSOR_ID.toString())
+                          .setParameter(1, pguid)
+                          .getResultList();
+
+            if (null != results && !results.isEmpty()) {
+                return results.get(0);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return null;
+	}
 }
