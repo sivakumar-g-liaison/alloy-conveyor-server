@@ -54,48 +54,57 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 @Table(name = "PROCESSOR")
 @NamedQueries({
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
-                    query = "select processor from Processor processor"
-                            + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),
+                    query = "SELECT processor FROM Processor processor"
+                            + " WHERE processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+                            + " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
-                    query = "SELECT processor from Processor processor"
-                            + " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
+                    query = "SELECT processor FROM Processor processor"
+                            + " INNER JOIN processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
                             + ProcessorConfigurationDAO.PGUID 
-                            + " and processor.procsrName like :" 
+                            + " AND processor.procsrName LIKE :" 
                             + ProcessorConfigurationDAO.PRCSR_NAME
-                            + " and processor.procsrStatus <> :"
-                            + ProcessorConfigurationDAO.STATUS_DELETE),
+                            + " AND processor.procsrStatus <> :"
+                            + ProcessorConfigurationDAO.STATUS_DELETE
+                            + " AND processor.clusterType =:"
+                            + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
-                            query = "select processor from Processor processor"
-                                    + " inner join processor.mailbox mbx"
-                                    + " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                                    + " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID
-                                    + " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS),
+                            query = "SELECT processor FROM Processor processor"
+                                    + " INNER JOIN processor.mailbox mbx"
+                                    + " WHERE processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+                                    + " AND processor.pguid = :" + ProcessorConfigurationDAO.PGUID
+                                    + " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
+                                    + " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
+                                    + " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
-    				query = "select processor from Processor processor"
-    						+ " where processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME
-    						+ " and processor.procsrStatus <> :" + ProcessorConfigurationDAO.STATUS_DELETE),
+    				query = "SELECT processor FROM Processor processor"
+    						+ " WHERE processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME
+    						+ " AND processor.procsrStatus <> :" + ProcessorConfigurationDAO.STATUS_DELETE
+    						+ " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_TENANCY,
-            query = "select processor from Processor processor" +
-                    " inner join processor.scheduleProfileProcessors schd_prof_processor" +
-                    " inner join schd_prof_processor.scheduleProfilesRef profile" +
-                    " where profile.pguid = :" + ProcessorConfigurationDAO.PROFILE_ID +
-                    " and processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY +
-                    " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.class = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE),
+            query = "SELECT processor FROM Processor processor" +
+                    " INNER JOIN processor.scheduleProfileProcessors schd_prof_processor" +
+                    " INNER JOIN schd_prof_processor.scheduleProfilesRef profile" +
+                    " WHERE profile.pguid = :" + ProcessorConfigurationDAO.PROFILE_ID +
+                    " AND processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY +
+                    " AND processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.class = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE +
+                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS,
-            query = "select processor from Processor processor" +
-                    " inner join processor.mailbox mbx" +
-                    " where mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")"),
+            query = "SELECT processor FROM Processor processor" +
+                    " INNER JOIN processor.mailbox mbx" +
+                    " WHERE mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
+                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_STATUS,
-            query = "select processor from Processor processor" +
-                    " inner join processor.mailbox mbx" +
-                    " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID +
-                    " and mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
-                    " and processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")")
+            query = "SELECT processor FROM Processor processor" +
+                    " INNER JOIN processor.mailbox mbx" +
+                    " WHERE mbx.pguid = :" + ProcessorConfigurationDAO.PGUID +
+                    " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
+                    " AND processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
+                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
@@ -122,7 +131,7 @@ public class Processor implements Identifiable {
 	private String modifiedBy;
 	private Date modifiedDate;
 	private String originatingDc;
-    private String gatewayType;
+	private String clusterType;
 
 	private Set<Credential> credentials;
 	private Set<Folder> folders;
@@ -353,13 +362,13 @@ public class Processor implements Identifiable {
 		this.originatingDc = originatingDc;
 	}
 	
-    @Column(name = "GTYPE", nullable = false, length = 32)
-    public String getGatewayType() {
-        return gatewayType; 
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+    public String getClusterType() {
+        return clusterType; 
     }
     
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 	
 	@Override

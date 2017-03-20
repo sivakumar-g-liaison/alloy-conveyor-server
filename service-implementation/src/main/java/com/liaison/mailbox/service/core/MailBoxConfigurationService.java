@@ -29,6 +29,7 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -51,15 +52,15 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -156,6 +157,8 @@ public class MailBoxConfigurationService {
 
 			mailBox.setModifiedBy(userId);
 			mailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
+			
+			mailBox.setClusterType(MailBoxUtil.getClusterType());
 
 			// persisting the mailbox entity
 			configDao.persist(mailBox);
@@ -664,7 +667,10 @@ public class MailBoxConfigurationService {
 			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
 			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
 			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
-			dto.setDeployAsDropbox(config.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false));
+			
+			String deploymentType = MailBoxUtil.getEnvironmentProperties()
+			        .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+			dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR.getValue()));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,

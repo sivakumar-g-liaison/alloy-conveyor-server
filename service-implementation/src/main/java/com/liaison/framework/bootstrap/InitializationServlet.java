@@ -25,15 +25,18 @@ import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+
 import java.net.URL;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
@@ -59,10 +62,10 @@ public class InitializationServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-		boolean isDropbox = configuration.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false);
+        String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         // nfs health check
         // check only if current service is not dropbox
-        if(!isDropbox) {
+        if(!deploymentType.equals(DeploymentType.CONVEYOR.getValue())) {
             String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
             if(serviceNfsMount != null) {
                 for(String mount : serviceNfsMount) {

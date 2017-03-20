@@ -15,7 +15,6 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 import java.util.List;
@@ -51,6 +50,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FOLDER_URI = "folder_uri";
 	String PROTOCOL = "protocol";
 	String PIPELINE_ID = "pipeline_id";
+	String CLUSTER_TYPE = "clusterType";
 
 	String MBX_ID = "mbx_id";
 	/**
@@ -241,7 +241,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" WHERE P.TYPE = ? AND")
 		.append(" M.PGUID = ? AND")
 		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+		.append(" M.STATUS = 'ACTIVE' ")
+		.append(" P.CLUSTER_TYPE = ? AND")
+		.append(" M.CLUSTER_TYPE = ?");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
 		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
@@ -256,7 +258,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" WHERE P.TYPE = ? AND")
 		.append(" LOWER(M.NAME) = ? AND")
 		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+		.append(" M.STATUS = 'ACTIVE' AND")
+		.append(" P.CLUSTER_TYPE = ? AND")
+		.append(" M.CLUSTER_TYPE = ?");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID = new StringBuilder().append("select processor from Processor processor")
 			.append(" inner join processor.mailbox mbx")
@@ -268,6 +272,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 			.append(SERV_INST_ID)
 			.append(" and processor.procsrStatus <> :")
 			.append(ProcessorConfigurationDAO.STATUS_DELETE)
+			.append(" AND processor.clusterType =:")
+			.append(CLUSTER_TYPE)
 			.append(")");
 
 }

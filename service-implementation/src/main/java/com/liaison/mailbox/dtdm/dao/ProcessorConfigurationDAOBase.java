@@ -42,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.stream.Collectors.joining;
-
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
  *
@@ -52,6 +50,7 @@ import static java.util.stream.Collectors.joining;
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailboxDTDMDAO {
 
 	private static final Logger LOG = LogManager.getLogger(ProcessorConfigurationDAOBase.class);
+	
 
 	public ProcessorConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
@@ -74,28 +73,31 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		try {
 
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-			StringBuilder query = new StringBuilder().append("select processor.pguid from Processor processor")
-					.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
-					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" inner join processor.mailbox mailbox")
-					.append(" where profile.schProfName like :")
+			StringBuilder query = new StringBuilder().append("SELECT processor.pguid FROM Processor processor")
+					.append(" INNER JOIN processor.scheduleProfileProcessors schd_prof_processor")
+					.append(" INNER JOIN schd_prof_processor.scheduleProfilesRef profile")
+					.append(" INNER JOIN processor.mailbox mailbox")
+					.append(" WHERE profile.schProfName LIKE :")
 					.append(PROF_NAME)
-					.append(" and mailbox.mbxStatus = :")
+					.append(" AND mailbox.mbxStatus = :")
 					.append(STATUS)
-					.append(" and processor.procsrStatus = :")
-					.append(STATUS);
+					.append(" AND processor.procsrStatus = :")
+					.append(STATUS)
+					.append(" AND processor.clusterType =:")
+					.append(CLUSTER_TYPE);
 
 			if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
-				query.append(" and mailbox.mbxName not like :").append(MBX_NAME);
+				query.append(" AND mailbox.mbxName NOT LIKE :").append(MBX_NAME);
 			}
 
 			if (!MailBoxUtil.isEmpty(shardKey)) {
-				query.append(" and mailbox.shardKey like :").append(SHARD_KEY);
+				query.append(" AND mailbox.shardKey LIKE :").append(SHARD_KEY);
 			}
 
 			Query processorQuery = entityManager.createQuery(query.toString())
 					.setParameter(PROF_NAME, profileName)
-					.setParameter(STATUS, EntityStatus.ACTIVE.value());
+					.setParameter(STATUS, EntityStatus.ACTIVE.value())
+					.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType());
 
 			if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
 				processorQuery.setParameter(MBX_NAME, mbxNamePattern);
@@ -142,7 +144,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .append(" INNER JOIN processor.serviceInstance si")
                     .append(" WHERE mailbox.pguid = :")
                     .append(PGUID)
-                    .append(" AND processor.procsrStatus <> :" + STATUS_DELETE);
+                    .append(" AND processor.procsrStatus <> :" + STATUS_DELETE)
+                    .append(" AND processor.clusterType =:" + CLUSTER_TYPE);
 
             //SID_CHECK FOR PROCESSOR STATUS
             if (!disableFilter) {
@@ -152,7 +155,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             Query jpaQuery = entityManager.createQuery(query.toString())
                     .setParameter(PGUID , mbxGuid)
-                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
+                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
+                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType());
             jpaQuery =  (!disableFilter) ? jpaQuery.setParameter(SERV_INST_ID , siid) : jpaQuery ;
             long count = ((Long) jpaQuery.getSingleResult());
 
@@ -194,6 +198,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					.setParameter(PGUID, mbxGuid)
 					.setParameter(SERV_INST_ID, siGuid)
 					.setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
+					.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -231,21 +236,24 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			LOG.debug("Fetching the processor count starts.");
 
-			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox mbx")
-					.append(" where mbx.pguid = :")
+			StringBuilder query = new StringBuilder().append("SELECT processor FROM Processor processor")
+					.append(" INNER JOIN processor.mailbox mbx")
+					.append(" WHERE mbx.pguid = :")
 					.append(PGUID);
 			if (activeEntityRequired) {
-				query.append(" and mbx.mbxStatus = :")
+				query.append(" AND mbx.mbxStatus = :")
 						.append(STATUS)
-						.append(" and processor.procsrStatus = :")
+						.append(" AND processor.procsrStatus = :")
 						.append(STATUS);
             } else {
-                query.append(" and mbx.mbxStatus <> :")
+                query.append(" AND mbx.mbxStatus <> :")
                      .append(STATUS_DELETE)
-                     .append(" and processor.procsrStatus <> :")
+                     .append(" AND processor.procsrStatus <> :")
                      .append(STATUS_DELETE);
             }
+			query.append(" AND processor.clusterType =:")
+			    .append(CLUSTER_TYPE);
+			        
 
 			Query processorQuery = entityManager.createQuery(query.toString())
 												.setParameter(PGUID, mbxGuid);
@@ -254,6 +262,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             } else {
                 processorQuery.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
             }
+			processorQuery.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType());
 			
 			List<?> proc = processorQuery.getResultList();
 			Iterator<?> iter = proc.iterator();
@@ -295,6 +304,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(PGUID,  (MailBoxUtil.isEmpty(mbxGuid) ? "''" : mbxGuid))
                     .setParameter(PRCSR_NAME, (MailBoxUtil.isEmpty(procName) ? "''" : procName))
                     .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
+                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
                     .getResultList();
 
             if ((proc != null) && (proc.size() > 0)) {
@@ -326,6 +336,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             processors = entityManager.createNamedQuery(FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS)
                     .setParameter(STATUS, mailboxStatus.name())
                     .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
                     .getResultList();
 
         } finally {
@@ -354,6 +365,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(ProcessorConfigurationDAO.TENANCY_KEY, tenancyKey)
                     .setParameter(PROCESSOR_TYPE, ProcessorType.DROPBOXPROCESSOR.name())
                     .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
                     .getResultList();
 
         } finally {
@@ -379,6 +391,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(PGUID, mbxGuid)
                     .setParameter(STATUS, EntityStatus.ACTIVE.name())
                     .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
                     .getResultList();
 
 		} finally {
@@ -399,6 +412,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 			List <?> proc = entityManager.createNamedQuery(FIND_ALL_ACTIVE_PROCESSORS)
 								.setParameter(STATUS, EntityStatus.ACTIVE.value())
+								.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
 								.getResultList();
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
@@ -526,6 +540,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			List <Processor> proc = entityManager.createNamedQuery(FIND_ACTIVE_PROCESSOR_BY_ID)
 								.setParameter(STATUS, EntityStatus.ACTIVE.value())
 								.setParameter(PGUID, id)
+								.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
 								.getResultList();
 			return (proc.isEmpty()) ? null : proc.get(0);
 			
@@ -579,10 +594,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	                    .append(" where LOWER(mbx.mbxName) like :")
 	                    .append(MBX_NAME)
 	                    .append(" AND mbx.mbxStatus <> :")
-	                    .append(MailBoxConfigurationDAO.STATUS);
+	                    .append(MailBoxConfigurationDAO.STATUS)
+	                    .append(" AND mbx.clusterType =:")
+	                    .append(CLUSTER_TYPE);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%")
 	                    .setParameter(MailBoxConfigurationDAO.STATUS, EntityStatus.DELETED.value())
+	                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
 	                    .getResultList();	
 
 	            Iterator<?> iter = proc.iterator();
@@ -613,10 +631,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	            StringBuilder query = new StringBuilder().append("SELECT proc FROM Processor proc")
 	                    .append(" where LOWER(proc.procsrName) like :")
 	                    .append(PRCSR_NAME)
-	                    .append(" AND proc.procsrStatus <> :" + STATUS_DELETE);
+	                    .append(" AND proc.procsrStatus <> :" + STATUS_DELETE)
+	                    .append(" AND proc.clusterType =:" + CLUSTER_TYPE);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(PRCSR_NAME, "%" + searchDTO.getProcessorName().toLowerCase() + "%")
 	                    .setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
+	                    .setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
 	                    .getResultList();	
 
 	            Iterator<?> iter = proc.iterator();
@@ -714,6 +734,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 		predicateList.add("  processor.procsrStatus <> :" + STATUS_DELETE);
+		predicateList.add(" processor.clusterType =:" + CLUSTER_TYPE);
 		for (int i = 0; i < predicateList.size(); i++) {			
             query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
 		}				
@@ -753,6 +774,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
         }
         query.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
+        query.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType());
 		return query;		
 	}
 
@@ -769,6 +791,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME)
             		.setParameter(PRCSR_NAME, processorName)
             		.setParameter(STATUS_DELETE, EntityStatus.DELETED.value())
+            		.setParameter(CLUSTER_TYPE, MailBoxUtil.getClusterType())
             		.getResultList();
 			Iterator<?> iter = proc.iterator();
 			while (iter.hasNext()) {
@@ -799,6 +822,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			results = entityManager.createNativeQuery(PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY.toString())
 						  .setParameter(1, processorType)
 						  .setParameter(2, (MailBoxUtil.isEmpty(mbxId) ? "''" : mbxId))
+						  .setParameter(3, MailBoxUtil.getClusterType())
+						  .setParameter(4, MailBoxUtil.getClusterType())
 						  .getResultList();
 
 		} finally {
@@ -824,6 +849,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			results = entityManager.createNativeQuery(PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY.toString())
 						  .setParameter(1, processorType)
 						  .setParameter(2, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName.toLowerCase()))
+						  .setParameter(3, MailBoxUtil.getClusterType())
+						  .setParameter(4, MailBoxUtil.getClusterType())
 						  .getResultList();
 		} finally {
 			if (entityManager != null) {
@@ -843,6 +870,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             Processor entity = DAOUtil.find(entityClass, primaryKey, entityManager);
             if (entity != null && EntityStatus.DELETED.name().equals(entity.getProcsrStatus())) {
+                entity = null;
+            }
+            if (entity != null && !MailBoxUtil.getClusterType().equals(entity.getClusterType())) {
                 entity = null;
             }
             return entity;

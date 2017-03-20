@@ -11,9 +11,11 @@ package com.liaison.mailbox.service.core.bootstrap;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
 import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,6 +82,7 @@ public class QueueAndTopicProcessInitializer {
     public static TopicPooledListenerContainer mailBoxTopicPooledListenerContainer;
     public static QueuePooledListenerContainer umDirOprsQueue;
 
+    //To do Add low secure items
 
     public static void initialize() {
 
@@ -93,7 +96,9 @@ public class QueueAndTopicProcessInitializer {
             return;
         }
 
-        if (configuration.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false)) {
+        String deploymentType = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        
+        if (deploymentType.equals(DeploymentType.CONVEYOR.getValue())) {
 
             // Initialize the dropbox queue
             logger.info("Starting Dropbox Queue Listener");
@@ -101,7 +106,7 @@ public class QueueAndTopicProcessInitializer {
             dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started Dropbox Queue Listener");
 
-        } else {
+        } else if (deploymentType.equals(DeploymentType.RELAY.getValue())){
 
             // Initialize processor queue and processedPayload queue
             logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
@@ -124,6 +129,8 @@ public class QueueAndTopicProcessInitializer {
             umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
             logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
 
+        } else {
+            // Initialize low secure processor queue and processedPayload queue
         }
     }
 

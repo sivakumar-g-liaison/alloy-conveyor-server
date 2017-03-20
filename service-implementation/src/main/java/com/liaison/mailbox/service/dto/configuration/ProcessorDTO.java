@@ -82,6 +82,7 @@ public class ProcessorDTO {
 	private String mailboxStatus;
 	private String modifiedBy;
 	private String modifiedDate;
+	private String clusterType;
 	private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
 	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
 	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
@@ -230,6 +231,14 @@ public class ProcessorDTO {
 
     public void setModifiedDate(String modifiedDate) {
         this.modifiedDate = modifiedDate;
+    }
+    
+    public String getClusterType() {
+        return clusterType;
+    }
+    
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 
     /**

@@ -20,6 +20,7 @@ import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
@@ -29,6 +30,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -45,6 +47,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -100,6 +103,8 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_WEEK = 7;
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
+	
+	private static String deploymentType = null;
 
     private static GEMACLClient gemClient = new GEMACLClient();
 
@@ -832,5 +837,23 @@ public class MailBoxUtil {
             return str + "." + strTimestamp;
 
         }
+    }
+    
+    /**
+     * This method returns the cluster type based on deployment type.
+     * 
+     * @return
+     */
+    public static String getClusterType () {
+        
+        if (null != deploymentType) {
+            String depType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+            if (DeploymentType.LOWSECURE_RELAY.equals(depType)) {
+                deploymentType = "LOWSECURE ";
+            } else {
+                deploymentType = "SECURE";
+            }
+        }
+        return deploymentType;
     }
 }

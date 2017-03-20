@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -66,13 +65,10 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;

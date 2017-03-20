@@ -58,6 +58,7 @@ public class MailBoxDTO implements Serializable {
 	private String tenancyKeyDisplayName;
 	private String modifiedBy;
 	private String modifiedDate;
+	private String clusterType;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -162,6 +163,14 @@ public class MailBoxDTO implements Serializable {
     public void setModifiedDate(String modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
+    
+    public String getClusterType() {
+        return clusterType;
+    }
+    
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
 
     /**
 	 * Copies all data from DTO to entity except PGUID.
@@ -197,6 +206,8 @@ public class MailBoxDTO implements Serializable {
 
 		this.setShardKey(mailBox.getShardKey());
 		this.setTenancyKey(mailBox.getTenancyKey());
+		
+		this.setClusterType(mailBox.getClusterType());
 		
 		this.setModifiedBy(mailBox.getModifiedBy());
 		if (null != mailBox.getModifiedDate()) {

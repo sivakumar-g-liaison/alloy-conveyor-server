@@ -55,15 +55,17 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
 					+ " AND profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 					+ " order by mbx.mbxName"),
-    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx from MailBox mbx "
+    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx FROM MailBox mbx "
 			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
-			        + " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
-			        + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
+			        + " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
+			        + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS
+			        + " AND mbx.clusterType =:" + MailBoxConfigurationDAO.CLUSTER_TYPE),
 	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
 	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 
-			query = "select mbx from MailBox mbx"
-					+ " where mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME
-					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS)
+			query = "SELECT mbx FROM MailBox mbx"
+					+ " WHERE mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME
+					+ " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
+					+ " AND mbx.clusterType =:" + MailBoxConfigurationDAO.CLUSTER_TYPE)
 })
 
 public class MailBox implements Identifiable {
@@ -82,7 +84,7 @@ public class MailBox implements Identifiable {
 	private String modifiedBy;
 	private Date modifiedDate;
     private String originatingDc;
-    private String gatewayType;
+    private String clusterType;
 
 	public MailBox() {
 	}
@@ -220,13 +222,13 @@ public class MailBox implements Identifiable {
 		this.originatingDc = originatingDc;
 	}
 	
-    @Column(name = "GTYPE", nullable = false, length = 32)
-    public String getGatewayType() {
-        return gatewayType;
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+    public String getClusterType() {
+        return clusterType;
     }
     
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 
     /**
