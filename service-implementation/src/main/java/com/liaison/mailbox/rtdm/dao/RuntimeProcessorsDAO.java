@@ -11,7 +11,7 @@
 package com.liaison.mailbox.rtdm.dao;
 
 import com.liaison.commons.jpa.GenericDAO;
-import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
@@ -29,6 +29,7 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
     String FIND_NON_RUNNING_PROCESSORS = "SELECT P.PROCESSOR_ID FROM PROCESSORS P"
             + " LEFT JOIN PROCESSOR_EXEC_STATE STATE ON P.PROCESSOR_ID = STATE.PROCESSOR_ID"
             + " WHERE P.PROCESSOR_ID IN (:" + PROCESSOR_ID + ")"
+            + " AND P.CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE
             + " AND (STATE.PGUID IS NULL OR STATE.EXEC_STATUS != 'PROCESSING')";
 
     RuntimeProcessors findByProcessorId(String processorId);

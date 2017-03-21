@@ -15,12 +15,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 
 
@@ -33,7 +33,8 @@ import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 @Table(name = "PROCESSORS")
 @NamedQueries({
         @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
-                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
+                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID
+                + " AND processors.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 public class RuntimeProcessors {
 
