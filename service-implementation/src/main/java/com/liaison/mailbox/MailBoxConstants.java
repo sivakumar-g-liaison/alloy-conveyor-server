@@ -459,4 +459,7 @@ public interface MailBoxConstants {
     String STUCK_PROCESSORS_IN_RELAY = "Stuck Processors in Relay";
     String MAILBOX_STUCK_PROCESSOR_TIME_UNIT = "com.liaison.mailbox.stuck.processor.time.unit";
     String MAILBOX_STUCK_PROCESSOR_TIME_VALUE = "com.liaison.mailbox.stuck.processor.time.value";
+    
+    //Cluster type
+    String CLUSTER_TYPE = "clusterType";
 }

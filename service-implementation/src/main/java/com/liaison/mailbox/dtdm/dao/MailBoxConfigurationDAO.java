@@ -33,8 +33,7 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	String FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
 	String GET_MBX_BY_NAME = "MailBox.getMailboxByName";
 	String STATUS = "status";
-	String CLUSTER_TYPE = "clusterType";
-
+  
 	/**
 	 * retrieve number of mailboxes that linked with profile
 	 *

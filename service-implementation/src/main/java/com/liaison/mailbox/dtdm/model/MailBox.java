@@ -59,13 +59,13 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
 			        + " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
 			        + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS
-			        + " AND mbx.clusterType =:" + MailBoxConfigurationDAO.CLUSTER_TYPE),
+			        + " AND mbx.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
 	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
 	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 
 			query = "SELECT mbx FROM MailBox mbx"
 					+ " WHERE mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME
 					+ " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
-					+ " AND mbx.clusterType =:" + MailBoxConfigurationDAO.CLUSTER_TYPE)
+					+ " AND mbx.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 
 public class MailBox implements Identifiable {

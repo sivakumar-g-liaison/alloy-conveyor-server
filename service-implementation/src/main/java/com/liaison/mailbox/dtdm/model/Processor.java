@@ -56,7 +56,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
                     query = "SELECT processor FROM Processor processor"
                             + " WHERE processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                            + " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
+                            + " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
                     query = "SELECT processor FROM Processor processor"
                             + " INNER JOIN processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
@@ -66,7 +66,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                             + " AND processor.procsrStatus <> :"
                             + ProcessorConfigurationDAO.STATUS_DELETE
                             + " AND processor.clusterType =:"
-                            + ProcessorConfigurationDAO.CLUSTER_TYPE),
+                            + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
                             query = "SELECT processor FROM Processor processor"
                                     + " INNER JOIN processor.mailbox mbx"
@@ -74,12 +74,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                                     + " AND processor.pguid = :" + ProcessorConfigurationDAO.PGUID
                                     + " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
                                     + " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
-                                    + " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
+                                    + " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME, 
     				query = "SELECT processor FROM Processor processor"
     						+ " WHERE processor.procsrName = :" + ProcessorConfigurationDAO.PRCSR_NAME
     						+ " AND processor.procsrStatus <> :" + ProcessorConfigurationDAO.STATUS_DELETE
-    						+ " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
+    						+ " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_TENANCY,
             query = "SELECT processor FROM Processor processor" +
                     " INNER JOIN processor.scheduleProfileProcessors schd_prof_processor" +
@@ -89,14 +89,14 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                     " AND processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.class = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE +
-                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
+                    " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS,
             query = "SELECT processor FROM Processor processor" +
                     " INNER JOIN processor.mailbox mbx" +
                     " WHERE mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.class in (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
-                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE),
+                    " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_TYPE_AND_STATUS,
             query = "SELECT processor FROM Processor processor" +
                     " INNER JOIN processor.mailbox mbx" +
@@ -104,7 +104,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                     " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
-                    " AND processor.clusterType =:" + ProcessorConfigurationDAO.CLUSTER_TYPE)
+                    " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {

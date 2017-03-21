@@ -11,6 +11,7 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
@@ -50,10 +51,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FOLDER_URI = "folder_uri";
 	String PROTOCOL = "protocol";
 	String PIPELINE_ID = "pipeline_id";
-	String CLUSTER_TYPE = "clusterType";
-
-	String MBX_ID = "mbx_id";
-	/**
+    String MBX_ID = "mbx_id";
+    
+    /**
 	 * Constants for getProcessor Class
 	 */
 	String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
@@ -273,7 +273,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 			.append(" and processor.procsrStatus <> :")
 			.append(ProcessorConfigurationDAO.STATUS_DELETE)
 			.append(" AND processor.clusterType =:")
-			.append(CLUSTER_TYPE)
+			.append(MailBoxConstants.CLUSTER_TYPE)
 			.append(")");
 
 }
