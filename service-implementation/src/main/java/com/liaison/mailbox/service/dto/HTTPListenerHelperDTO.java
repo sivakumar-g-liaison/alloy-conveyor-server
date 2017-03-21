@@ -26,17 +26,19 @@ public class HTTPListenerHelperDTO {
 	private String procsrProtocol;
 	private String procsrType;
 	private String procsrPropertyJson;
+	private String procsrStatus;
 	private String serviceInstanceId;
 	private String mbxId;
 	private String mbxName;
+	private String mbxStatus;
 	private String tenancyKey;
 	private String ttlValue;
 	private String ttlUnit;
 	private Set<ProcessorProperty> dynamicProperties;
 	
 	public HTTPListenerHelperDTO(String processorId, String procsrProtocol,
-			String procsrType, String procsrPropertyJson,
-			String serviceInstanceId, String mbxId, String mbxName,
+			String procsrType, String procsrPropertyJson, String procsrStatus,
+			String serviceInstanceId, String mbxId, String mbxName, String mbxStatus,
 			String tenancyKey, String ttlValue, String ttlUnit,
 			Set<ProcessorProperty> dynamicProperties) {
 
@@ -44,9 +46,11 @@ public class HTTPListenerHelperDTO {
 		this.procsrProtocol = procsrProtocol;
 		this.procsrType = procsrType;
 		this.procsrPropertyJson = procsrPropertyJson;
+		this.procsrStatus = procsrStatus;
 		this.serviceInstanceId = serviceInstanceId;
 		this.mbxId = mbxId;
 		this.mbxName = mbxName;
+		this.mbxStatus = mbxStatus;
 		this.tenancyKey = tenancyKey;
 		this.ttlValue = ttlValue;
 		this.ttlUnit = ttlUnit;
@@ -76,6 +80,12 @@ public class HTTPListenerHelperDTO {
 	public void setProcsrPropertyJson(String procsrPropertyJson) {
 		this.procsrPropertyJson = procsrPropertyJson;
 	}
+	public String getProcsrStatus() {
+	    return procsrStatus;
+	}
+	public void setProcsrStatus(String procsrStatus) {
+	    this.procsrStatus = procsrStatus;
+	}
 	public String getServiceInstanceId() {
 		return serviceInstanceId;
 	}
@@ -93,6 +103,12 @@ public class HTTPListenerHelperDTO {
 	}
 	public void setMbxName(String mbxName) {
 		this.mbxName = mbxName;
+	}
+	public String getMbxStatus() {
+	    return mbxStatus;
+	}
+	public void setMbxStatus(String mbxStatus) {
+	    this.mbxStatus = mbxStatus;
 	}
 	public String getTenancyKey() {
 		return tenancyKey;

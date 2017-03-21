@@ -68,6 +68,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
                                     @QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
                                     @QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName,
+                                    @QueryParam(value = "mbxGuid") @ApiParam(name = "mbxGuid", required = false, value = "mbxGuid") final String mbxGuid,
                                     @QueryParam(value = "pipelineId") @ApiParam(name = "pipelineId", required = false, value = "pipelineId") final String pipelineId,
                                     @QueryParam(value = "folderPath") @ApiParam(name = "folderPath", required = false, value = "folderPath") final String folderPath,
                                     @QueryParam(value = "profileName") @ApiParam(name = "profileName", required = false, value = "profileName") final String profileName,
@@ -75,6 +76,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "prcsrType") @ApiParam(name = "prcsrType", required = false, value = "prcsrType") final String prcsrType,
                                     @QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
                                     @QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
+                                    @QueryParam(value = "scriptName") @ApiParam(name = "scriptName", required = false, value = "scriptName") final String scriptName,
                                     @QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
 
         // create the worker delegate to perform the business logic
@@ -89,6 +91,7 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setSortField(sortField);
                 searchFilter.setSortDirection(sortDirection);
                 searchFilter.setMbxName(mbxName);
+                searchFilter.setMbxGuid(mbxGuid);
                 searchFilter.setPipelineId(pipelineId);
                 searchFilter.setFolderPath(folderPath);
                 searchFilter.setProfileName(profileName);
@@ -96,8 +99,8 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setProcessorType(prcsrType);
                 searchFilter.setProcessorName(prcsrName);
                 searchFilter.setProcessorGuid(prcsrGuid);
+                searchFilter.setScriptName(scriptName);
                 searchFilter.setMatchMode(matchMode);
-
 
                 // Get all the processors
                 return processor.searchProcessor(searchFilter);

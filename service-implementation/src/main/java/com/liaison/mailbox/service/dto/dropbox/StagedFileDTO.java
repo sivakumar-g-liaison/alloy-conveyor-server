@@ -35,6 +35,7 @@ public class StagedFileDTO {
 	private String expirationTime;
 	private String createdDate;
 	private String modifiedDate;
+	private String clusterType;
 
 	public StagedFileDTO() {
 	}
@@ -162,6 +163,14 @@ public class StagedFileDTO {
 
 	public void setGlobalProcessId(String globalProcessId) {
 		this.globalProcessId = globalProcessId;
+	}
+	
+	public String getClusterType() {
+	    return clusterType;
+	}
+	
+	public void setClusterType(String clusterType) {
+	    this.clusterType = clusterType;
 	}
 
 	/**

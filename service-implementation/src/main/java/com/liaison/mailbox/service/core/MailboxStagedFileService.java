@@ -119,6 +119,10 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
                 if (null == file) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
+                
+                if (!MailBoxUtil.getClusterType().equals(file.getClusterType())) {
+                    throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
+                }
 
                 if (EntityStatus.STAGED.value().equals(file.getStagedFileStatus())) {
 	
@@ -167,9 +171,15 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             tx = em.getTransaction();
             tx.begin();
 
-            Query q = em.createNativeQuery("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1 WHERE PGUID IN (?2) AND STATUS = 'STAGED'");
+            StringBuilder STAGED_FILE_BULK_UPDATE = new StringBuilder().append("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1")
+                    .append(" WHERE PGUID IN (?2)")
+                    .append(" AND STATUS = 'STAGED'")
+                    .append(" AND CLUSTER_TYPE = ?3");
+            
+            Query q = em.createNativeQuery(STAGED_FILE_BULK_UPDATE.toString());
             q.setParameter(1, MailBoxUtil.getTimestamp());
             q.setParameter(2, guids);
+            q.setParameter(3, MailBoxUtil.getClusterType());
 
             //Update the selected files
             q.executeUpdate();

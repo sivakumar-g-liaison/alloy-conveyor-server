@@ -12,6 +12,7 @@ package com.liaison.mailbox.rtdm.dao;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
@@ -93,7 +94,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" )")
             .append(" and sf.stagedFileStatus IN (:")
             .append(STATUS)
-            .append("))");
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -103,6 +107,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" )")
             .append(" and sf.stagedFileStatus != :")
             .append(STATUS)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
@@ -112,7 +118,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_PATH)
             .append(" and sf.stagedFileStatus IN (:")
             .append(StagedFileDAO.STATUS)
-            .append("))");
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) =:")
@@ -121,6 +130,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_PATH)
             .append(" and sf.stagedFileStatus !=:")
             .append(StagedFileDAO.STATUS)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(")");
 
     StringBuilder FIND_STAGED_FILE = new StringBuilder()
@@ -133,6 +144,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_NAME)
             .append(" and sf.filePath =:")
             .append(FILE_PATH)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(" order by sf.createdDate desc");
 
 }

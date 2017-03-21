@@ -692,11 +692,19 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		List<String> predicateList = new ArrayList<String>();
 		boolean isFolderAvailable = false;
 		
-		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {		
-			query.append(" inner join processor.mailbox mailbox ");
-			predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
-					" LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
-					" mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
+		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName()) || !MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {		
+		    query.append(" inner join processor.mailbox mailbox ");
+		    
+		    if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
+		        predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
+		                " LOWER(mailbox.mbxName) " + searchDTO.getMatchMode() + " :" + MBX_NAME :
+		                    " mailbox.mbxName " + searchDTO.getMatchMode() + " :" + MBX_NAME);
+		        } 
+		    if (!MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {
+		        predicateList.add(searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE) ?
+		                " LOWER(mailbox.pguid) " + searchDTO.getMatchMode() + " :" + MBX_ID :
+		                    " mailbox.pguid " + searchDTO.getMatchMode() + " :" + MBX_ID);
+		    }
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
 			query.append(" inner join processor.folders folder ");
@@ -732,11 +740,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
 			predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
 		}
-
-		predicateList.add("  processor.procsrStatus <> :" + STATUS_DELETE);
+		if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
+		    predicateList.add(" LOWER(processor.javaScriptUri) = :" + SCRIPT_NAME);
+		}
+		predicateList.add("processor.procsrStatus <> :" + STATUS_DELETE);
 		predicateList.add(" processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE);
-		for (int i = 0; i < predicateList.size(); i++) {			
-            query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
+		for (int i = 0; i < predicateList.size(); i++) {
+		    query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
 		}				
 	}
 
@@ -746,6 +756,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             query.setParameter(MBX_NAME, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
 					"%" + searchDTO.getMbxName().toLowerCase() + "%" :
 					searchDTO.getMbxName());
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getMbxGuid())) {
+            query.setParameter(MBX_ID, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
+                    "%" + searchDTO.getMbxGuid().toLowerCase() + "%" :
+                    searchDTO.getMbxGuid());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
             query.setParameter(FOLDER_URI, (searchDTO.getMatchMode().equals(GenericSearchFilterDTO.MATCH_MODE_LIKE)) ?
@@ -772,6 +787,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProcessorGuid())) {
             query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
+            query.setParameter(SCRIPT_NAME, searchDTO.getScriptName().toLowerCase());
         }
         query.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
         query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType());
