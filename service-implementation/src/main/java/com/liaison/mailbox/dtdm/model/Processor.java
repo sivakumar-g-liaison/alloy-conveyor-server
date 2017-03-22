@@ -41,6 +41,7 @@ import org.hibernate.annotations.IndexColumn;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -104,7 +105,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                     " AND mbx.mbxStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS +
                     " AND processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
-                    " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
+                    " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
+    @NamedQuery(name = ProcessorConfigurationDAO.GET_CLUSTER_TYPE_BY_PROCESSOR_GUID,
+            query = "SELECT processor FROM Processor processor" +
+                    " WHERE processor.pguid =:" +  ProcessorConfigurationDAO.PGUID)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {

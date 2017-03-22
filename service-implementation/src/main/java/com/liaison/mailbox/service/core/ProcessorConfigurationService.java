@@ -1074,4 +1074,15 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
+
+	/**
+	 * Method to get the cluster type of the processor based on processor id
+	 * 
+	 * @param processorId
+	 * @return clusterType
+	 */
+	public String getClusterType(String processorId) {
+	    String clusterType = "";
+	    return clusterType;
+	}
 }

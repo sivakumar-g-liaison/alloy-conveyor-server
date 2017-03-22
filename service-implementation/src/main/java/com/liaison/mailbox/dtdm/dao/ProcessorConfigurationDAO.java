@@ -36,6 +36,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS = "Processor.findProcessorsByType";
     String FIND_PROCESSORS_BY_TYPE_AND_STATUS = "Processor.findProcessorsByTypeAndStatus";
     String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
+    String GET_CLUSTER_TYPE_BY_PROCESSOR_GUID = "Processor.getClusterType";
 
 	String PROF_NAME = "sch_prof_name";
 	String MBX_NAME = "mbx_name";
@@ -228,6 +229,13 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processors
 	 */
 	List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mailboxName, String processorType);
+	
+	/**
+	 * Retrieve cluster type based on processorId. 
+	 * @param processorId
+	 * @return
+	 */
+	String getClusterType(String processorId);
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
 		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
@@ -243,7 +251,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" WHERE P.TYPE = ? AND")
 		.append(" M.PGUID = ? AND")
 		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' ")
+		.append(" M.STATUS = 'ACTIVE' AND")
 		.append(" P.CLUSTER_TYPE = ? AND")
 		.append(" M.CLUSTER_TYPE = ?");
 

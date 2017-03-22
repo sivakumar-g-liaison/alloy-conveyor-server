@@ -29,11 +29,13 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -899,5 +901,34 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public String getClusterType(String mailboxId) {
+        
+        EntityManager entityManager = null;
+        List<String> clusterTypes;
+        String clusterType = null;
+        
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            clusterTypes = entityManager.createNamedQuery(GET_CLUSTER_TYPE_BY_PROCESSOR_GUID)
+                    .setParameter(PGUID, MailBoxUtil.getClusterType())
+                    .getResultList();
+            
+            if ((clusterTypes == null) || (clusterTypes.size() == 0)) {
+                return null;
+            }
+            
+            clusterType = clusterTypes.get(0);
+            
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return clusterType;
     }
 }

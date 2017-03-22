@@ -33,6 +33,7 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	String FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
 	String GET_MBX_BY_NAME = "MailBox.getMailboxByName";
 	String STATUS = "status";
+	String GET_CLUSTER_TYPE_BY_MAILBOX_GUID = "MailBox.getClusterType";
   
 	/**
 	 * retrieve number of mailboxes that linked with profile
@@ -95,4 +96,11 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	 * @return mailbox entity
 	 */
 	MailBox getMailboxByName(String name);
+	
+	/**
+	 * Retrieve cluster type based mailbox id. 
+	 * @param mailboxId
+	 * @return
+	 */
+	String getClusterType(String mailboxId);
 }

@@ -747,5 +747,15 @@ public class MailBoxConfigurationService {
 		}
 
 	}
+	
+	/**
+	 * Method to get the cluster type of the mailbox based on mailbox id.
+	 * @param mailboxId
+	 * @return
+	 */
+	public String getClusterType(String mailboxId) {
+	    String clusterType = "";
+	    return clusterType;
+	}
 
 }
