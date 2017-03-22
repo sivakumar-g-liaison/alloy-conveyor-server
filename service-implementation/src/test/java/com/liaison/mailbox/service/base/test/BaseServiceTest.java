@@ -11,7 +11,6 @@ package com.liaison.mailbox.service.base.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,7 +24,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -46,7 +44,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import javax.naming.NamingException;
 
 /**
@@ -230,6 +228,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setTenancyKey(tenancyKey);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setModifiedBy("unknown-user");
+			mailBoxDTO.setClusterType(MailBoxUtil.getClusterType());
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -332,6 +331,7 @@ public abstract class BaseServiceTest {
         procDTO.setStatus("ACTIVE");
         procDTO.setType("HTTPASYNCPROCESSOR");
         procDTO.setProtocol("HTTP");
+        procDTO.setClusterType(MailBoxUtil.getClusterType());
         return procDTO;
     }
 
