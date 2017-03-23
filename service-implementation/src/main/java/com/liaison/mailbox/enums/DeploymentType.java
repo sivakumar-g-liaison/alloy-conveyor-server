@@ -19,7 +19,7 @@ package com.liaison.mailbox.enums;
 public enum DeploymentType {
 
 	RELAY("RELAY"),
-	LOWSECURE_RELAY("LOWSECURE-RELAY"),
+	LOW_SECURE_RELAY("LOW_SECURE_RELAY"),
 	CONVEYOR("CONVEYOR");
 
 	private String value;

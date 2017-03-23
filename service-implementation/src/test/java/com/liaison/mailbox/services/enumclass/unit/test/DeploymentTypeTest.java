@@ -18,14 +18,14 @@ import com.liaison.mailbox.enums.DeploymentType;
 public class DeploymentTypeTest {
 
     String RELAY = "RELAY";
-    String LOWSECURE_RELAY = "LOWSECURE-RELAY";
+    String LOW_SECURE_RELAY = "LOW_SECURE_RELAY";
     String CONVEYOR = "CONVEYOR";
 
     @Test
     public void testDeploymentType() {
 
         Assert.assertEquals(RELAY, DeploymentType.RELAY.getValue());
-        Assert.assertEquals(LOWSECURE_RELAY, DeploymentType.LOWSECURE_RELAY.getValue());
+        Assert.assertEquals(LOW_SECURE_RELAY, DeploymentType.LOW_SECURE_RELAY.getValue());
         Assert.assertEquals(CONVEYOR, DeploymentType.CONVEYOR.getValue());
     }
 
@@ -33,7 +33,7 @@ public class DeploymentTypeTest {
     public void testDeploymentType_NotNull() {
 
         Assert.assertNotNull(DeploymentType.RELAY.getValue());
-        Assert.assertNotNull(DeploymentType.LOWSECURE_RELAY.getValue());
+        Assert.assertNotNull(DeploymentType.LOW_SECURE_RELAY.getValue());
         Assert.assertNotNull(DeploymentType.CONVEYOR.getValue());
     }
 }

@@ -849,7 +849,7 @@ public class MailBoxUtil {
         if (null == clusterType) {
             
             clusterType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-            if (DeploymentType.LOWSECURE_RELAY.getValue().equals(clusterType)) {
+            if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(clusterType)) {
                 clusterType = "LOWSECURE ";
             } else {
                 clusterType = "SECURE";
