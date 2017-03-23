@@ -65,7 +65,7 @@ public class InitializationServlet extends HttpServlet {
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         // nfs health check
         // check only if current service is not dropbox
-        if(!deploymentType.equals(DeploymentType.CONVEYOR.getValue())) {
+        if (!DeploymentType.CONVEYOR_SERVER.getValue().equals(deploymentType)) {
             String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
             if(serviceNfsMount != null) {
                 for(String mount : serviceNfsMount) {

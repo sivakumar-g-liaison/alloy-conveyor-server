@@ -41,6 +41,7 @@ import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
@@ -157,8 +158,7 @@ public class MailBoxConfigurationService {
 
 			mailBox.setModifiedBy(userId);
 			mailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
-			
-			mailBox.setClusterType(MailBoxUtil.getClusterType());
+			mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
 			// persisting the mailbox entity
 			configDao.persist(mailBox);
@@ -670,7 +670,7 @@ public class MailBoxConfigurationService {
 			
 			String deploymentType = MailBoxUtil.getEnvironmentProperties()
 			        .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-			dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR.getValue()));
+			dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR_SERVER.getValue()));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
@@ -750,12 +750,40 @@ public class MailBoxConfigurationService {
 	
 	/**
 	 * Method to get the cluster type of the mailbox based on mailbox id.
+	 * 
 	 * @param mailboxId
-	 * @return
+	 * @return clusterTypeResponseDTO
 	 */
-	public String getClusterType(String mailboxId) {
-	    String clusterType = "";
-	    return clusterType;
+	public ClusterTypeResponseDTO getClusterType(String mailboxId) {
+	    
+	    LOG.debug("Entering into getClusterType.");
+	    LOG.info("The retrieve mailbox id is {} ", mailboxId);
+	    
+	    ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
+	    String clusterType = null;
+	    
+	    if (null == mailboxId) {
+	        throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id",
+	                Response.Status.BAD_REQUEST);
+	    }
+	    
+	    try {
+	        
+	        MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+	        clusterType = configDao.getClusterType(mailboxId);
+	        
+	        if (null == clusterType) {
+	            throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, "Maibox Id",
+	                    Response.Status.BAD_REQUEST);
+	        }
+	        clusterTypeResponseDTO.setClusterType(clusterType);
+	        return clusterTypeResponseDTO;
+	        
+	    } catch (MailBoxConfigurationServicesException e) {
+	        clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+	                e.getMessage()));
+	        return clusterTypeResponseDTO;
+	    }
 	}
 
 }

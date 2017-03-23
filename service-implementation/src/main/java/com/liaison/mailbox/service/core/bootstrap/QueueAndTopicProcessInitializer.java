@@ -96,9 +96,9 @@ public class QueueAndTopicProcessInitializer {
             return;
         }
 
-        String deploymentType = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         
-        if (deploymentType.equals(DeploymentType.CONVEYOR.getValue())) {
+        if (deploymentType.equals(DeploymentType.CONVEYOR_SERVER.getValue())) {
 
             // Initialize the dropbox queue
             logger.info("Starting Dropbox Queue Listener");

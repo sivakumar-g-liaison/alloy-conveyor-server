@@ -14,18 +14,17 @@ package com.liaison.mailbox.enums;
 /**
  * Contains the list of deployment type.
  *
- * @author OFS
  */
 public enum DeploymentType {
 
 	RELAY("RELAY"),
-	LOWSECURE_RELAY("LOWSECURE-RELAY"),
-	CONVEYOR("CONVEYOR");
+	LOWSECURE_RELAY("LOWSECURE_RELAY"),
+	CONVEYOR_SERVER("CONVEYOR_SERVER");
 
 	private String value;
 
-	private DeploymentType(String status) {
-		this.setValue(status);
+	private DeploymentType(String value) {
+		this.setValue(value);
 	}
 
 	public String getValue() {
