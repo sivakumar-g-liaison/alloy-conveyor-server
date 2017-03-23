@@ -54,21 +54,22 @@ import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_
  */
 public class InitializationServlet extends HttpServlet {
 
-	private static final long serialVersionUID = -8418412083748649428L;
-	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
+    private static final long serialVersionUID = -8418412083748649428L;
+    private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
-	public static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+    private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
 
     public void init(ServletConfig config) throws ServletException {
 
         DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+
         // nfs health check
         // check only if current service is not dropbox
         if (!DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
             String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
-            if(serviceNfsMount != null) {
-                for(String mount : serviceNfsMount) {
+            if (serviceNfsMount != null) {
+                for (String mount : serviceNfsMount) {
                     LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
                             new FileReadDeleteCheck(mount));
                 }
@@ -81,6 +82,8 @@ public class InitializationServlet extends HttpServlet {
     	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
     	// Update the status from "PROCESSING" to "FAILED" for the current node.
         ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
+
+        //QUEUE and TOPIC consumers initialization
         QueueAndTopicProcessInitializer.initialize();
 
 		// db health check
