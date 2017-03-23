@@ -26,7 +26,7 @@ public class DeploymentTypeTest {
 
         Assert.assertEquals(RELAY, DeploymentType.RELAY.getValue());
         Assert.assertEquals(LOWSECURE_RELAY, DeploymentType.LOWSECURE_RELAY.getValue());
-        Assert.assertEquals(CONVEYOR, DeploymentType.CONVEYOR.getValue());
+        Assert.assertEquals(CONVEYOR, DeploymentType.CONVEYOR_SERVER.getValue());
     }
 
     @Test
@@ -34,6 +34,6 @@ public class DeploymentTypeTest {
 
         Assert.assertNotNull(DeploymentType.RELAY.getValue());
         Assert.assertNotNull(DeploymentType.LOWSECURE_RELAY.getValue());
-        Assert.assertNotNull(DeploymentType.CONVEYOR.getValue());
+        Assert.assertNotNull(DeploymentType.CONVEYOR_SERVER.getValue());
     }
 }

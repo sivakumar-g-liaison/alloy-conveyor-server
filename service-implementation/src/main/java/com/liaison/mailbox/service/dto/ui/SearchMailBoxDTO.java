@@ -151,7 +151,6 @@ public class SearchMailBoxDTO {
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
-		
 		this.setClusterType(mailBox.getClusterType());
 
 		PropertyDTO propertyDTO = null;
