@@ -104,8 +104,6 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
 	
-	private static String clusterType = null;
-
     private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
@@ -848,10 +846,10 @@ public class MailBoxUtil {
         if (null == CLUSTER_TYPE) {
             
             CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-            if (DeploymentType.LOWSECURE_RELAY.getValue().equals(clusterType)) {
-                CLUSTER_TYPE = "LOWSECURE ";
+            if (DeploymentType.LOWSECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
+                CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
             } else {
-                CLUSTER_TYPE = "SECURE";
+                CLUSTER_TYPE = MailBoxConstants.SECURE;
             }
         }
     }
