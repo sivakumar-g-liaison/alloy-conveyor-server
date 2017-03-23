@@ -30,7 +30,6 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -47,7 +46,6 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -192,21 +190,20 @@ public class MailBoxUtil {
 		return CONFIGURATION;
 	}
 
-	/**
-	 * Method to get the current timestmp to insert into database.
-	 *
-	 * @return
-	 */
-	public static Timestamp getTimestamp() {
-
-		Date d = new Date();
-		return new Timestamp(d.getTime());
-	}
+    /**
+     * Method to get the current timestmp to insert into database.
+     *
+     * @return
+     */
+    public static Timestamp getTimestamp() {
+        Date d = new Date();
+        return new Timestamp(d.getTime());
+    }
 
 	/**
 	 * Method to get all tenancy keys from acl manifest Json
 	 *
-	 * @param String - aclManifestJson
+	 * @param aclManifestJson
 	 * @return list of tenancy keys
 	 * @throws IOException
 	 */
@@ -285,7 +282,6 @@ public class MailBoxUtil {
 	 *
 	 * @param startTime
 	 * @param endTime
-	 * @param taskToCalulateElapsedTime
 	 */
 	public static void calculateElapsedTime(long startTime, long endTime) {
 
@@ -456,10 +452,7 @@ public class MailBoxUtil {
     /**
      * Checks whether a file is modified with in the given time limit
      *
-     * @param timelimit
-     *            to check the file is modified with in the given time limit
-     * @param file
-     *            File object
+     * @param file File object
      * @return true if it is updated with in the given time limit, false otherwise
      */
     public static boolean validateLastModifiedTolerance(Path file) {
@@ -470,15 +463,12 @@ public class MailBoxUtil {
         long lastmo = file.toFile().lastModified();
 
         LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
-        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
+        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo) / 1000));
 
-        if (((system - lastmo)/1000) < timelimit) {
-            return true;
-        }
-        return false;
+        return ((system - lastmo) / 1000) < timelimit;
     }
-    
-    /**
+
+	/**
      * Method to construct the valid URL
      * 
      * @param propertiesDTO
@@ -491,13 +481,13 @@ public class MailBoxUtil {
         String scheme = uri.getScheme();
         if (propertiesDTO.getPort() == 0 && (uri.getPort() == -1 || uri.getPort() == 0)) {
             
-            if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+            if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
-            } else if (Protocol.SFTP.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.SFTP.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.SFTP_PORT);
-            } else if (Protocol.HTTP.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.HTTP.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTP_PORT);
-            } else if (Protocol.HTTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.HTTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
             } 
             propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
@@ -545,25 +535,23 @@ public class MailBoxUtil {
 		return fileValidity.before(currentTimestamp) ;
     }
 
-	/**
-	 * Method to get the storage type
-	 * 
-	 * @param dynamicProperties
-	 * @return storageType
-	 */
-	public static String getStorageType(Set<ProcessorProperty> dynamicProperties) {
-		
-		String storageType = null;
-		Iterator<ProcessorProperty> iterator = dynamicProperties.iterator();
-		while (iterator.hasNext()) {
-			ProcessorProperty property = iterator.next();
-			if (MailBoxConstants.STORAGE_IDENTIFIER_TYPE.equals(property.getProcsrPropName())) {
-				storageType = property.getProcsrPropValue();
-				break;
-			}
-		}
-		return storageType;
-	}
+    /**
+     * Method to get the storage type
+     *
+     * @param dynamicProperties
+     * @return storageType
+     */
+    public static String getStorageType(Set<ProcessorProperty> dynamicProperties) {
+
+        String storageType = null;
+        for (ProcessorProperty property : dynamicProperties) {
+            if (MailBoxConstants.STORAGE_IDENTIFIER_TYPE.equals(property.getProcsrPropName())) {
+                storageType = property.getProcsrPropValue();
+                break;
+            }
+        }
+        return storageType;
+    }
 
     /**
      * http success code validation
@@ -749,7 +737,7 @@ public class MailBoxUtil {
      * @param threadName thred name
      * @return Thread
      */
-    public static Thread getThreadByName(String threadName) {
+    private static Thread getThreadByName(String threadName) {
 
         for (Thread t : Thread.getAllStackTraces().keySet()) {
             if (t.getName().equals(threadName)) return t;
@@ -764,12 +752,8 @@ public class MailBoxUtil {
      * @return true if it is interrupted
      */
     public static boolean isInterrupted(String threadName) {
-
         Thread runningThread = getThreadByName(threadName);
-        if (null != runningThread) {
-            return runningThread.isInterrupted();
-        }
-        return false;
+        return null != runningThread && runningThread.isInterrupted();
     }
 
     /**
@@ -838,24 +822,22 @@ public class MailBoxUtil {
 
         }
     }
-    
+
     /**
-     * This method returns the cluster type based on deployment type.
-     * 
-     * @return clusterType
+     * Initialize the cluster type.
      */
-    public static String getClusterType () {
-        
-        if (null == clusterType) {
-            
-            clusterType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-            if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(clusterType)) {
-                clusterType = "LOWSECURE ";
-            } else {
-                clusterType = "SECURE";
-            }
-        }
-        
-        return clusterType;
-    }
+    public static String CLUSTER_TYPE;
+
+    static {
+
+		if (null == CLUSTER_TYPE) {
+
+			CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+			if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
+				CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
+			} else {
+				CLUSTER_TYPE = MailBoxConstants.SECURE;
+			}
+		}
+	}
 }
