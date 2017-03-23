@@ -302,7 +302,7 @@ public class StagedFile implements Identifiable {
         this.setProcessorType(stagedFileDto.getProcessorType());
         this.setModifiedDate(timestamp);
         this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
-        this.setClusterType(MailBoxUtil.getClusterType());
+        this.setClusterType(MailBoxUtil.CLUSTER_TYPE);
     }
 
     @Transient

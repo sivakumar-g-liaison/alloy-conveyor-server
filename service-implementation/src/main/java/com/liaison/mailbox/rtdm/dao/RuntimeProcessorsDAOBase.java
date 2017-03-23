@@ -47,7 +47,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
             List<RuntimeProcessors> processors = entityManager
                     .createNamedQuery(FIND_BY_PROCESSOR_ID)
                     .setParameter(PROCESSOR_ID, processorId)
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
             if (!processors.isEmpty()) {
                 return processors.get(0);
@@ -78,7 +78,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
             @SuppressWarnings("unchecked")
             List<String> resultList = entityManager.createNativeQuery(FIND_NON_RUNNING_PROCESSORS)
                     .setParameter(PROCESSOR_ID, processorIds)
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
             //commits the transaction
@@ -113,7 +113,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         prcsrExecution.setProcessors(processors);
         prcsrExecution.setOriginatingDc(DATACENTER_NAME);
         processors.setProcessorExecState(prcsrExecution);
-        processors.setClusterType(MailBoxUtil.getClusterType());
+        processors.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         persist(processors);
     }

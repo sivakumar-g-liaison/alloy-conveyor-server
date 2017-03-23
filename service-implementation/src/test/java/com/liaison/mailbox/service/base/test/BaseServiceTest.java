@@ -228,7 +228,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setTenancyKey(tenancyKey);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setModifiedBy("unknown-user");
-			mailBoxDTO.setClusterType(MailBoxUtil.getClusterType());
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -331,7 +331,7 @@ public abstract class BaseServiceTest {
         procDTO.setStatus("ACTIVE");
         procDTO.setType("HTTPASYNCPROCESSOR");
         procDTO.setProtocol("HTTP");
-        procDTO.setClusterType(MailBoxUtil.getClusterType());
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 

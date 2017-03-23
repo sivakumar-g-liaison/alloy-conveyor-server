@@ -53,6 +53,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
@@ -63,12 +64,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -177,9 +180,7 @@ public class ProcessorConfigurationService {
 
 			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
-
-			processor.setClusterType(MailBoxUtil.getClusterType());
-			
+			processor.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 			processor.setModifiedBy(userId);
             processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			// persist the processor.
@@ -1075,14 +1076,44 @@ public class ProcessorConfigurationService {
 		}
 	}
 
-	/**
-	 * Method to get the cluster type of the processor based on processor id
-	 * 
-	 * @param processorId
-	 * @return clusterType
-	 */
-	public String getClusterType(String processorId) {
-	    String clusterType = "";
-	    return clusterType;
-	}
+    /**
+     * Method to get the cluster type of the mailbox based on processor id.
+     * 
+     * @param Processor Id
+     * @return clusterTypeResponseDTO
+     */
+    public ClusterTypeResponseDTO getClusterType(String processorId) {
+        
+        LOGGER.debug("Entering into getClusterType.");
+        LOGGER.info("The retrieve processor id is {} ", processorId);
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
+        String clusterType = null;
+        
+        if (null == processorId) {
+            throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id",
+                    Response.Status.BAD_REQUEST);
+        }
+        
+        try {
+            
+            ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
+            clusterType = configDao.getClusterType(processorId);
+            
+            if (null == clusterType) {
+                throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MailBoxConstants.CLUSTER_TYPE,
+                        Response.Status.BAD_REQUEST);
+            }
+            clusterTypeResponseDTO.setClusterType(clusterType);
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
+            return clusterTypeResponseDTO;
+            
+        } catch (MailBoxConfigurationServicesException e) {
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
+                    MailBoxConstants.CLUSTER_TYPE,
+                    Messages.FAILURE,
+                    e.getMessage()));
+            return clusterTypeResponseDTO;
+        }
+    }
 }

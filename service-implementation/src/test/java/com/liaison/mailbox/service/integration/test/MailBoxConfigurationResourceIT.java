@@ -87,7 +87,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
         Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
-        Assert.assertEquals(MailBoxUtil.getClusterType(), getResponseDTO.getMailBox().getClusterType());
+        Assert.assertEquals(MailBoxUtil.CLUSTER_TYPE, getResponseDTO.getMailBox().getClusterType());
 
         Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
                 getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -203,7 +203,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
         Assert.assertEquals(mbxDTO.getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
-        Assert.assertEquals(MailBoxUtil.getClusterType(), getResponseDTO.getMailBox().getClusterType());
+        Assert.assertEquals(MailBoxUtil.CLUSTER_TYPE, getResponseDTO.getMailBox().getClusterType());
 
         Assert.assertEquals(mbxDTO.getProperties().get(0).getName(),
                 getResponseDTO.getMailBox().getProperties().get(0).getName());

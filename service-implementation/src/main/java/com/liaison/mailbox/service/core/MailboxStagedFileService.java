@@ -120,7 +120,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
                 
-                if (!MailBoxUtil.getClusterType().equals(file.getClusterType())) {
+                if (!MailBoxUtil.CLUSTER_TYPE.equals(file.getClusterType())) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
 
@@ -179,7 +179,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             Query q = em.createNativeQuery(STAGED_FILE_BULK_UPDATE.toString());
             q.setParameter(1, MailBoxUtil.getTimestamp());
             q.setParameter(2, guids);
-            q.setParameter(3, MailBoxUtil.getClusterType());
+            q.setParameter(3, MailBoxUtil.CLUSTER_TYPE);
 
             //Update the selected files
             q.executeUpdate();

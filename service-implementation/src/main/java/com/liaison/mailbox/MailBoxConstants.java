@@ -464,4 +464,6 @@ public interface MailBoxConstants {
     
     //Cluster type
     String CLUSTER_TYPE = "clusterType";
+    String SECURE = "SECURE";
+    String LOWSECURE = "LOWSECURE";
 }

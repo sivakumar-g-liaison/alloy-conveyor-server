@@ -270,7 +270,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(STATUS, statuses)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(FILE_PATH, targetLocation)
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
             return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
@@ -327,7 +327,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             }
 
             query.setParameter(PROCESSOR_ID, processorId);
-            query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType());
+            query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
             
             List<?> files = query.getResultList();
             Iterator<?> iterator = files.iterator();
@@ -359,7 +359,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .createNamedQuery(FIND_BY_GPID)
                     .setParameter(GLOBAL_PROCESS_ID, gpid)
                     .setParameter(STATUS, EntityStatus.INACTIVE.name())
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
             for (Object file : files) {
@@ -389,7 +389,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(TYPE, ProcessorType.FILEWRITER.getCode())
                     .setParameter(STATUS, EntityStatus.INACTIVE.value())
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
             
             Iterator<?> iterator = files.iterator();

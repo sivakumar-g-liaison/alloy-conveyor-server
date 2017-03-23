@@ -108,7 +108,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%"));
             predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
             predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.getClusterType()));
+            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.CLUSTER_TYPE));
             
             if (!searchFilter.isDisableFilters()) {
                 predicates.add(fromMailBox.get(TENANCY_KEY).in(tenancyKeys));
@@ -175,7 +175,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%"));
 			predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
 			predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-			predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.getClusterType()));
+			predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.CLUSTER_TYPE));
 			
 			if (!searchFilter.isDisableFilters()) {
 			    tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
@@ -285,7 +285,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             }
 
             predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.getClusterType()));
+            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.CLUSTER_TYPE));
             
             if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
                 predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));
@@ -356,7 +356,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             }
 
             predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.getClusterType()));
+            predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), MailBoxUtil.CLUSTER_TYPE));
 
             if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
                 predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));
@@ -404,7 +404,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.setParameter(MBOX_NAME,  (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.setParameter(TENANCY_KEYS, (MailBoxUtil.isEmpty(tenancyKeyName) ? "''" : tenancyKeyName))
 					.setParameter(STATUS, EntityStatus.DELETED.value())
-					.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+					.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
 					.getResultList();
 
 			if ((mailboxList == null) || (mailboxList.size() == 0)) {
@@ -440,7 +440,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			List<?> mailboxIds = entityManager.createQuery(query.toString())
 			            .setParameter(TENANCY_KEYS, tenancyKeys)
 			            .setParameter(STATUS, EntityStatus.DELETED.value())
-			            .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+			            .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
 			            .getResultList();
 
             for (Object mailboxId1 : mailboxIds) {
@@ -473,7 +473,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			mailboxList = entityManager.createNamedQuery(GET_MBX_BY_NAME)
 					.setParameter(MBOX_NAME, (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
 					.setParameter(STATUS, EntityStatus.DELETED.value())
-					.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterType())
+					.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
 					.getResultList();
 
 			if ((mailboxList == null) || (mailboxList.size() == 0)) {
@@ -501,7 +501,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             if (entity != null && EntityStatus.DELETED.name().equals(entity.getMbxStatus())) {
                 entity = null;
             }
-            if (entity != null && !MailBoxUtil.getClusterType().equals(entity.getClusterType())) {
+            if (entity != null && !MailBoxUtil.CLUSTER_TYPE.equals(entity.getClusterType())) {
                 entity = null;
             }
             return entity;
@@ -512,26 +512,18 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public String getClusterType(String mailboxId) {
         
         EntityManager entityManager = null;
-        List<String> clusterTypes;
         String clusterType = null;
         
         try {
             
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            clusterTypes = entityManager.createNamedQuery(GET_CLUSTER_TYPE_BY_MAILBOX_GUID)
-                    .setParameter(PGUID, MailBoxUtil.getClusterType())
-                    .getResultList();
-            
-            if ((clusterTypes == null) || (clusterTypes.size() == 0)) {
-                return null;
-            }
-            
-            clusterType = clusterTypes.get(0);
+            clusterType = (String) entityManager.createNamedQuery(GET_CLUSTER_TYPE_BY_MAILBOX_GUID)
+                    .setParameter(PGUID, mailboxId)
+                    .getSingleResult();
             
         } finally {
             if (entityManager != null) {

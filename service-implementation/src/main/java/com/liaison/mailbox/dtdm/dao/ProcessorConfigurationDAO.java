@@ -52,10 +52,10 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FOLDER_URI = "folder_uri";
 	String PROTOCOL = "protocol";
 	String PIPELINE_ID = "pipeline_id";
-    String MBX_ID = "mbx_id";
-    String SCRIPT_NAME ="script_name";
-    
-    /**
+	String MBX_ID = "mbx_id";
+	String SCRIPT_NAME ="script_name";
+
+	/**
 	 * Constants for getProcessor Class
 	 */
 	String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
