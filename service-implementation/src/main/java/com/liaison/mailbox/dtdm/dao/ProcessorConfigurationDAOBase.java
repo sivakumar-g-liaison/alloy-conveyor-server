@@ -52,7 +52,6 @@ import java.util.Set;
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailboxDTDMDAO {
 
 	private static final Logger LOG = LogManager.getLogger(ProcessorConfigurationDAOBase.class);
-	
 
 	public ProcessorConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);

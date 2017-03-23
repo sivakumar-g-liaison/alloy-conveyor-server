@@ -1101,15 +1101,16 @@ public class ProcessorConfigurationService {
             clusterType = configDao.getClusterType(processorId);
             
             if (null == clusterType) {
-                throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, "Processor Id",
+                throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MailBoxConstants.CLUSTER_TYPE,
                         Response.Status.BAD_REQUEST);
             }
             clusterTypeResponseDTO.setClusterType(clusterType);
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
             return clusterTypeResponseDTO;
             
         } catch (MailBoxConfigurationServicesException e) {
             clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
-                    MailBoxConstants.MAILBOX_PROCESSOR,
+                    MailBoxConstants.CLUSTER_TYPE,
                     Messages.FAILURE,
                     e.getMessage()));
             return clusterTypeResponseDTO;
