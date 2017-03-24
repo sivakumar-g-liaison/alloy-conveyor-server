@@ -1,6 +1,61 @@
-4.10.0-SNAPSHOT
+4.14.0-SNAPSHOT
+---------------
+* GMB-946 - Analyze why there are more timer threads.
+* GMB-947 - Relay errors to LENS Metadata.
+* GMB-954 - Query back to service broker to determine the sender name when creating a process.
+
+4.13.0
+---------------
+* GGT-1236, GGT-1209 add appenv and archaius properties layers
+* GMB-944 - Dropbox : Files-Staged Files : Pro
+* GMB-945 - Files-Staged Files : In Show Details Pop up screen meta information doesn't fit in the Popup details
+* GMB-932 - Remote Downloader should download directories based on the property
+* GMB-915 - Mailbox list/read operation ignores serviceInstance defined in search criteria
+* GMB-902 - Staging a file to Dropbox throws a NumberFormatException.
+* GMB-943 - Sort transfer profiles in mailbox processor screen.
+* GWUD-128 - Provide a default sender organization.
+* GMB-934 - "callback is not a function error" is received in Relay application.
+* GMB-949 - Processor Execution Screen Improvements
+* GMB-942 - org.hibernate.exception.GenericJDBCException: could not inspect JDBC autocommit mode - Added sql for validation
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception 
+
+4.12.0
+---------------
+* GWUD-130 - Conveyor errs, when a page that doesn't exist is requested.
+* Removed Spectrum FS2 configs from Staging environment
+
+4.11.2
+---------------
+* test case failure fix
+
+4.11.1
+---------------
+* Rebuilding to pickup new common-lib
+
+4.11.0
+---------------
+* GGT-1220 : Enable BOSS in DEV and QA
+
+4.10.2
+---------------
+* Gitlab Server Update
+
+4.10.1
+---------------
+* update property
+
+4.10.0
 ---------------
 * 2.4.1 Code review comments
+* GMB-881 - Change glass sender to glass shipper in log4j properties. All environments
+
+4.9.3
+-------------------------------
+* GMB-884 - Failed to execute HTTP request: at4u-vpsbasy.liaison.dev: Name or service not known
+
+4.9.2
+-------------------------------
+* GMB-880 - connection leak in Mailbox search operation
 
 4.9.1
 -------------------------------

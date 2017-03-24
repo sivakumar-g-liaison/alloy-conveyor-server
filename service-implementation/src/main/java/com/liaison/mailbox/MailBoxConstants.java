@@ -101,6 +101,7 @@ public interface MailBoxConstants {
 	String ROLE_NAME = "MailboxAdmin";
 	
 	String MAILBOX_ID = "mailboxId";
+	String GLOBAL_PROCESS_ID = "globalProcessId";
 
 	// properties used to configure sla rules of an mailbox
 	String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
@@ -143,6 +144,7 @@ public interface MailBoxConstants {
 	String KEY_OVERWRITE = "overwrite";
 	String KEY_FILE_PATH = "path";
 	String DIRECT_UPLOAD = "directUpload";
+    String USE_FILE_SYSTEM = "useFileSystem";
 	String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
 	String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 	String KEY_TARGET_DIRECTORY = "targetDirectory";
@@ -150,6 +152,8 @@ public interface MailBoxConstants {
 	String KEY_MAILBOX_NAME = "mailboxName";
 	String STORAGE_IDENTIFIER_TYPE = "Storage Type";
 	String CONNECTION_TIMEOUT = "connectionTimeout";
+	String PROCSR_STATUS = "procsrStatus";
+	String MAILBOX_STATUS = "mbxStatus";
 
 	String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
@@ -174,6 +178,9 @@ public interface MailBoxConstants {
 	String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
 	String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
+	
+	// Property to decide whether the application is deployed as dropbox or not
+	String DEPLOY_AS_DROPBOX = "com.liaison.deployAsDropbox";
 
 	String MAILBOX = "MailBox";
 	String PROCESSOR_STATUS = "Processor Status";
@@ -291,6 +298,7 @@ public interface MailBoxConstants {
 
 	String PAGING_OFFSET = "pagingoffset";
 	String PAGING_COUNT = "pagingcount";
+    String PAGE_VALUE = "pageValue";
 
 	String PORT_PROPERTY = "port";
 
@@ -422,4 +430,35 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
 
+    String LOCALHOST = "localhost";
+    
+    //PERMISSION PATH CONSTANT
+    String PERMISSION_SCRIPT_PATH = "permission.script.path";
+    String SFTP_USER_GROUP_NAME = "sftp.user.group.name";
+    
+    //DELETION SCRIPT PATH CONSTANT
+    String DELETION_SCRIPT_PATH = "deletion.script.path";
+    
+    //HOME PATH CONSTANTS
+    String FTP_PATH="ftp.user.home.path";
+    String FTPS_PATH="ftps.user.home.path";
+    String SFTP_PATH="sftp.user.home.path";
+    String HTTP_PATH="http.user.home.path";
+    String HTTPS_PATH="https.user.home.path";
+    
+    //Gateway types
+    String SFTP = "SFTP";
+    String FTP = "FTP";
+    String FTPS = "FTPS";
+    String HTTP = "HTTP";
+    String HTTPS = "HTTPS";
+
+    String PROCESSOR_IS_ALREDAY_RUNNING = "The processor is already in progress or Processor Execution state is not available in run time DB for processor ";
+
+    String SERVICE_BROKER_BASE_URL = "com.liaison.servicebroker.api.baseUrl";
+    String SERVICE_INSTANCE = "ServiceInstance";
+    String PIPELINE = "Pipeline";
+    String STUCK_PROCESSORS_IN_RELAY = "Stuck Processors in Relay";
+    String MAILBOX_STUCK_PROCESSOR_TIME_UNIT = "com.liaison.mailbox.stuck.processor.time.unit";
+    String MAILBOX_STUCK_PROCESSOR_TIME_VALUE = "com.liaison.mailbox.stuck.processor.time.value";
 }

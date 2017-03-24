@@ -10,24 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -65,6 +47,24 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
@@ -79,7 +79,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFileDownloadResource.class);
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
-	@GET
+    @GET
 	@ApiOperation(value = "download staged file", notes = "download staged file", position = 1)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response downloadStagedFile(
@@ -221,7 +221,9 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response deleteStagedFile(
 			@Context final HttpServletRequest serviceRequest,
-			@PathParam(value = "stagedFileId") @ApiParam(name = "stagedFileId", required = true, value = "staged file id") final String stagedFileId) {
+			@PathParam(value = "stagedFileId") @ApiParam(name = "stagedFileId", required = true, value = "staged file id") final String stagedFileId,
+            @QueryParam(value = HARD_DELETE) @ApiParam(name = HARD_DELETE, required = false, value = "boolean to hard delete the staged file entity") final String hardDelete) {
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -259,13 +261,14 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 					}
 
-					DropBoxUnStagedFileResponseDTO dropBoxUnStagedFileResponseDTO = stagedFileService.getDroppedStagedFileResponse(
-							manifestResponse.getManifest(), stagedFileId);
+                    DropBoxUnStagedFileResponseDTO dropBoxUnStagedFileResponseDTO = stagedFileService.getDroppedStagedFileResponse(
+                            manifestResponse.getManifest(),
+                            stagedFileId,
+                            Boolean.parseBoolean(hardDelete));
 
-					String responseBody = MailBoxUtil.marshalToJSON(dropBoxUnStagedFileResponseDTO);
-
-					// response message construction
-					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
+                    // response message construction
+                    String responseBody = MailBoxUtil.marshalToJSON(dropBoxUnStagedFileResponseDTO);
+                    ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {
@@ -280,6 +283,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 		worker.actionLabel = "DropboxFileTransferResource.deleteStagedFile()";
 		//Added the guid
 		worker.queryParams.put(AuditedResource.HEADER_GUID, stagedFileId);
+        worker.queryParams.put(AuditedResource.HARD_DELETE, hardDelete);
 
 		// hand the delegate to the framework for calling
 		return process(serviceRequest, worker);

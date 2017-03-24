@@ -49,12 +49,15 @@ dependencies {
     compile 'javax.servlet:javax.servlet-api:3.1.0'
 
     // Oracle OJDBC
-    compile 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
-    compile 'com.oracle.jdbc:ucp:${oracleVersion}'
+    compile "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
+    compile "com.oracle.jdbc:g2ucp:${oracleVersion}"
 
     // Liaison code
     // commons-lib dependencies
 	compile 'com.liaison:commons-lib:8.+'
+	
+	//For shell script execution
+	compile "org.apache.commons:commons-exec:1.3"
 
 }
 

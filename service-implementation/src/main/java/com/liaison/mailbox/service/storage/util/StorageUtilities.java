@@ -446,10 +446,8 @@ public class StorageUtilities {
 	 *
 	 * @param payloadURL Payload URL
 	 * @return FS2ObjectHeaders
-	 * @throws MailBoxServicesException
 	 */
-	public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL)
-			throws MailBoxServicesException {
+    public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL) {
 
 		try {
 			URI payloadURI = new URI(payloadURL);
@@ -460,17 +458,32 @@ public class StorageUtilities {
 			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
-	
-	/**
+
+    /**
+     * A helper method to retrieve fs2 meta data
+     *
+     * @param payloadURL Payload URL
+     * @return FS2MetaSnapshot fs2 meta data
+     */
+    public static FS2MetaSnapshot getMetaData(String payloadURL) {
+
+        try {
+            URI payloadURI = new URI(payloadURL);
+            return FS2.fetchObject(payloadURI);
+        } catch (URISyntaxException | FS2Exception e) {
+            LOGGER.error(Messages.META_DATA_READ_ERROR, e);
+            throw new MailBoxServicesException(Messages.META_DATA_READ_ERROR, Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
 	 * Method to check whether the payload exists at given path
 	 * 
 	 * @param path - path of payload 
 	 * @return true if payload exists otherwise false
-	 * @throws FS2Exception
-	 * @throws URISyntaxException
 	 */
 	public static boolean isPayloadExists(String path) {
-		
+
 		try {
 			return FS2.exists(new URI(path));
 		} catch (URISyntaxException | FS2Exception e) {
@@ -478,4 +491,20 @@ public class StorageUtilities {
 			throw new MailBoxServicesException(Messages.PAYLOAD_DOES_NOT_EXIST, Response.Status.BAD_REQUEST);
 		}
 	}
+
+    /**
+     * Reads payload size from the fs2 meta data
+     *
+     * @param messageUri message uri
+     * @return long payload size
+     */
+    public static long getPayloadSize(String messageUri) {
+        FS2MetaSnapshot metaSnapshot = null;
+        try {
+            metaSnapshot = FS2.fetchObject(new URI(messageUri));
+        } catch (FS2Exception | URISyntaxException e) {
+            throw new RuntimeException("Failed to get the meta data.", e);
+        }
+        return metaSnapshot.getPayloadSize();
+    }
 }

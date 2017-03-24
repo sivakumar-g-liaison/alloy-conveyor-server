@@ -122,12 +122,28 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // calls the rest deactivate service
         $scope.deactivateMailBox = function () {
 
-            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid, function (data, status) {
-                // alert(data.deactivateMailBoxResponse.response.message); TODO
-				// modal dialog
-                $scope.search();
+            $scope.block.blockUI();
+            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid,
+
+                function (data, status) {
+                    if (status === 200) {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        showSaveMessage(data.deactivateMailBoxResponse.response.message, 'success');
+                        $scope.search();
+                    } else {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        if (data.deactivateMailBoxResponse) {
+                            showSaveMessage(data.deactivateMailBoxResponse.response.message, 'error');
+                        } else {
+                            showSaveMessage("Failed to delete mailbox", 'error');
+                        }
+                    }
             });
-            $scope.closeDelete();
+
         };
 
         // Close the modal
@@ -194,6 +210,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 				disableFiltr = true;
 			}
 			
+			var minRespond = true;
             $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
             	if (status === 200 || status === 400) {
@@ -218,7 +235,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                     }
                     $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
-                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr}
+                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr, minResponse:minRespond}
             );
         };
 
@@ -278,15 +295,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             return valid;
         }
         // Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
-        <div ng-switch-when="INACTIVE" style="cursor: default;"><button id="btnEditInActive" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
-        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button id="btnDelInActive" class="btn btn-default btn-xs" ng-disabled="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
-        <div ng-switch-default><button id="btnEdit" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        $scope.editableInPopup = '<button id="btnEdit" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
         <button id="btnDelete" class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
 
         $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
         $scope.manageConfigStatus = '<div ng-switch on="row.getProperty(\'configStatus\')"><div ng-switch-when="COMPLETED">Completed</div><div ng-switch-when="INCOMPLETE_CONFIGURATION">Incomplete Configuration</div></div>';

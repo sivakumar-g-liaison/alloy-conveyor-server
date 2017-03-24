@@ -214,6 +214,21 @@
 			  "minLength": "",
 			  "maxLength": ""
 	        }
+	      },
+	      {
+	        "name":"includeSubDirectories",
+	        "displayName":"Include Sub Directories",
+	        "type":"select",
+	        "value":"false",
+	        "mandatory":true,
+	        "dynamic":false,
+	        "valueProvided":false,
+	        "defaultValue":"false",
+	        "validationRules":null,
+	        "options":[
+	            "false",
+	            "true"
+	        ]
 	      }
       ],
       "folderProperties":[

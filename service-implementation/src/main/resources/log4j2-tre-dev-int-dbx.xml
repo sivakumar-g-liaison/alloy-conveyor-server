@@ -134,24 +134,9 @@
         <!-- ############################################################## -->
         <!-- ######### Glass Message General ############ -->
         <!-- ############################################################## -->
-
-        <!-- Logs ONLY Glass Messages to Spectrum -->
-        <GlassMessageSpectrum name="GlassMessageSpectrumREST"
-                              ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
-                              password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
-                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
-                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}"
-                              ignoreExceptions="false">
-            <GlassMessageJSONLayout compact="true" />
-            <filters>
-                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
-                              onMismatch="DENY" />
-            </filters>
-        </GlassMessageSpectrum>
-
         <!-- failover destination -->
         <RollingFile name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
-                     filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}.log.gz"
+                     filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}-%i.log"
                      ignoreExceptions="false">
             <GlassMessageJSONLayout compact="true" />
             <filters>
@@ -164,24 +149,6 @@
                 <SizeBasedTriggeringPolicy size="${env:GLASS_ROLLING_SIZE}" />
             </Policies>
         </RollingFile>
-
-        <!-- Failover when either GlassMessageSpectrumREST appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncGlassMessageSpectrumRESTWithFailover"
-               blocking="false"
-               bufferSize="${env:GLASS_RING_BUFFER_SIZE}"
-               errorRef="GlassMessageSpectrumFile"
-               ignoreExceptions="false"
-                >
-            <AppenderRef ref="GlassMessageSpectrumREST" />
-        </Async>
-
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
-            <Failovers>
-                <AppenderRef ref="FinalFailoverLocalFile" />
-            </Failovers>
-        </Failover>
-
 
         <!-- ############################################################## -->
         <!-- ######### Instead of Console Use LocalLog File ############ -->
@@ -211,7 +178,7 @@
 
     <loggers>
         <root level="DEBUG">
-            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
+            <appender-ref ref="GlassMessageSpectrumFile" />
 
             <appender-ref ref="AsyncLogStashSocketWithFailoverFailover" />
 

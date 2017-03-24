@@ -40,6 +40,10 @@ import java.util.Date;
 @NamedQueries({
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_BY_PROCESSOR_ID,
                 query = "SELECT executionState FROM ProcessorExecutionState executionState WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_BY_PROCESSOR_ID_AND_NOT_PROCESSING,
+                query = "SELECT executionState FROM ProcessorExecutionState executionState" +
+                " WHERE executionState.processorId = :" +  ProcessorExecutionStateDAO.PROCESSOR_ID +
+                " AND executionState.executionStatus <> :" + ProcessorExecutionStateDAO.EXEC_STATUS),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_NON_EXECUTING_PROCESSORS,
                 query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus not like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS,
@@ -49,7 +53,17 @@ import java.util.Date;
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSOR_WITHIN_PERIOD,
                 query = "SELECT executionState FROM ProcessorExecutionState executionState"
                         + " WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID
-                        + " AND executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS )
+                        + " AND executionState.lastExecutionDate >= :" + ProcessorExecutionStateDAO.INTERVAL_IN_HOURS ),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_PROCESSORS,
+                query = "SELECT executionState FROM ProcessorExecutionState executionState" +
+                        " WHERE executionState.executionStatus = :" + ProcessorExecutionStateDAO.EXEC_STATUS
+                        + " AND executionState.nodeInUse = :" + ProcessorExecutionStateDAO.NODE
+                        + " AND executionState.threadName = :" + ProcessorExecutionStateDAO.THREAD_NAME
+                        + " ORDER BY executionState.lastExecutionDate desc"),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSOR_WITH_TRIGGERED_PERIOD,
+                query = "SELECT executionState FROM ProcessorExecutionState executionState"
+                        + " WHERE executionState.executionStatus = :" + ProcessorExecutionStateDAO.EXEC_STATUS
+                        + " AND executionState.modifiedDate <= :" + ProcessorExecutionStateDAO.MODIFIED_DATE )
 })
 public class ProcessorExecutionState implements Identifiable {
 
@@ -65,6 +79,7 @@ public class ProcessorExecutionState implements Identifiable {
     private Date modifiedDate;
     private String threadName;
     private RuntimeProcessors processors;
+    private String originatingDc;
 
     @Id
     @Column(unique = true, nullable = false, length = 32)
@@ -161,6 +176,15 @@ public class ProcessorExecutionState implements Identifiable {
         this.processors = processors;
     }
 
+    @Column(name = "ORIGINATING_DC", length = 16)
+    public String getOriginatingDc() {
+        return originatingDc;
+    }
+
+    public void setOriginatingDc(String originatingDc) {
+        this.originatingDc = originatingDc;
+    }
+
     @Override
     @Transient
     public Object getPrimaryKey() {
@@ -173,5 +197,6 @@ public class ProcessorExecutionState implements Identifiable {
     public Class getEntityClass() {
         return this.getClass();
     }
+
 
 }

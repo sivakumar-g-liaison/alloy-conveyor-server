@@ -10,14 +10,18 @@
 
 package com.liaison.mailbox.service.dto;
 
-
 /**
  * Helper DTO that contains various search filter details.
  * 
  * @author OFS
  */
 public class GenericSearchFilterDTO {
+
+	public static final String MATCH_MODE_EQUALS_CHR = "=";
+	public static final String MATCH_MODE_EQUALS_STR = "equals";
+	public static final String MATCH_MODE_LIKE = "like";
 	
+	private String mbxGuid;
 	private String mbxName;
 	private String serviceInstanceId;
 	private String profileName;
@@ -33,7 +37,18 @@ public class GenericSearchFilterDTO {
 	private String processorType;
 	private String processorName;
 	private String processorGuid;
+	private String matchMode;
+	private String scriptName;
 	private boolean isDisableFilters;
+	private boolean isMinResponse;
+	
+	public String getMbxGuid() {
+	    return mbxGuid;
+	}
+
+	public void setMbxGuid(String mbxGuid) {
+	    this.mbxGuid = mbxGuid;
+	}
 
 	public String getMbxName() {
 		return mbxName;
@@ -162,5 +177,42 @@ public class GenericSearchFilterDTO {
 	public void setProcessorGuid(String processorGuid) {
 		this.processorGuid = processorGuid;
 	}
+	
+	public String getScriptName() {
+	    return scriptName;
+	}
+	
+	public void setScriptName(String scriptName) {
+	    this.scriptName = scriptName;
+	}
 
+	public String getMatchMode() {
+		return matchMode;
+	}
+	
+	public boolean isMinResponse() {
+	    return isMinResponse;
+	}
+	
+	public void setMinResponse(boolean isMinResponse) {
+	    this.isMinResponse = isMinResponse;
+	}
+
+	public void setMatchMode(String matchMode) {
+
+	    if (null != matchMode) {
+	        // Force matchMode to lowercase
+	        matchMode = matchMode.toLowerCase();
+	        switch (matchMode) {
+	            case MATCH_MODE_EQUALS_STR:
+	                    this.matchMode = MATCH_MODE_EQUALS_CHR;
+	                break;
+	            default:
+	                    this.matchMode = MATCH_MODE_LIKE;
+	                break;
+	        }
+	    } else {
+	        this.matchMode = MATCH_MODE_LIKE;
+	    }
+    }
 }

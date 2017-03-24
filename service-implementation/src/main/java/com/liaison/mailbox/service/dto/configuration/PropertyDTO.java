@@ -63,6 +63,7 @@ public class PropertyDTO implements Serializable {
 
 			MailBoxProperty prop = (MailBoxProperty) entity;
 			prop.setPguid(MailBoxUtil.getGUID());
+			prop.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 			prop.setMbxPropName(this.getName());
 			prop.setMbxPropValue(this.getValue());
 
@@ -70,6 +71,7 @@ public class PropertyDTO implements Serializable {
 
 			ProcessorProperty prop = (ProcessorProperty) entity;
 			prop.setPguid(MailBoxUtil.getGUID());
+			prop.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 			prop.setProcsrPropName(this.getName());
 			prop.setProcsrPropValue(this.getValue());
 		}

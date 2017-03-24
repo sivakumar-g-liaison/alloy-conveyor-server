@@ -10,28 +10,25 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
+import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
+import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
+import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -43,29 +40,38 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-
-import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
-import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.gem.service.client.GEMACLClient;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.netflix.config.ConfigurationManager;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
+import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
+import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
+import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
 import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
@@ -74,7 +80,6 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
-import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 
 /**
  * Utilities for MailBox.
@@ -85,7 +90,8 @@ public class MailBoxUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
-
+	//for fetch datacenter name.
+	public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
 	private static final float SECONDS_PER_MIN = 60;
@@ -94,7 +100,7 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_WEEK = 7;
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
-	
+
     private static GEMACLClient gemClient = new GEMACLClient();
 
 	/**
@@ -224,25 +230,28 @@ public class MailBoxUtil {
 		return tenancyKeys;
 	}
 
-	public static List<String> getTenancyKeyGuids(String aclManifestJson)
-			throws IOException {
+    /**
+     *  Gets tenancy keys from the manfiest
+     *
+     * @param aclManifestJson manifest details
+     * @return list of tenancy key
+     * @throws IOException
+     */
+    public static List<String> getTenancyKeyGuids(String aclManifestJson)
+            throws IOException {
 
-		List<String> tenancyKeyGuids = new ArrayList<String>();
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-
-		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-			tenancyKeyGuids.add(rbac.getDomainInternalName());
-		}
-		return tenancyKeyGuids;
-
-	}
+        return gemClient.getDomainsFromACLManifest(aclManifestJson)
+                .stream()
+                .map(RoleBasedAccessControl::getDomainInternalName)
+                .collect(Collectors.toList());
+    }
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
 	 *
-	 * @param tenancyKeyGuid
-	 * @param tenancyKeys
-	 * @return
+	 * @param aclManifestJson manifest details
+	 * @param tenancyKeyGuid tenancy key guid
+	 * @return tenancy key name(org name)
 	 * @throws IOException
 	 */
 	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid)
@@ -304,6 +313,8 @@ public class MailBoxUtil {
 		} else {
 			pageValue = 1;
 		}
+        pageParameters.put(MailBoxConstants.PAGE_VALUE, pageValue);
+
 		if (pageSize != null && !pageSize.isEmpty()) {
 			pageSizeValue = Integer.parseInt(pageSize);
 			if (pageSizeValue < 0) {
@@ -571,32 +582,75 @@ public class MailBoxUtil {
 
     /**
      * Util method to read the direct upload value from processor properties
+     *
      * @param json processor properties json
      * @return boolean
      */
     public static boolean isDirectUploadEnabled(String json) {
 
-		String remotePrcsr = "remoteProcessorProperties";
-
         try {
-
-			JSONObject obj = null;
-			if (json.contains(remotePrcsr)) {
-				JSONObject innerObj = new JSONObject(json);
-				obj = innerObj.getJSONObject(remotePrcsr);
-			} else {
-				obj = new JSONObject(json);
-			}
-
-            Object o = obj.get(DIRECT_UPLOAD);
-            return Boolean.TRUE.equals(o);
+            Object obj = getJSONObject(json, DIRECT_UPLOAD);
+            return Boolean.TRUE.equals(obj);
         } catch (JSONException e) {
             return false;
         }
-
     }
 
     /**
+     * Util method to read the direct upload value from processor properties
+     *
+     * @param json processor properties json
+     * @return boolean true by default, false if it is overridden in UI
+     */
+    public static boolean isUseFileSystemEnabled(String json) {
+
+        try {
+            Object obj = getJSONObject(json, USE_FILE_SYSTEM);
+            return Boolean.TRUE.equals(obj);
+        } catch (JSONException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Util method to read the stale file TTL value from processor properties
+     *
+     * @param json processor properties json
+     * @return String TTl value
+     */
+    public static int getStaleFileTTLValue(String json) {
+
+        try {
+            Object o = getJSONObject(json, PROPERTY_STALE_FILE_TTL);
+            return (int) o;
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Reads a value from processor properties
+     *
+     * @param json processor properties
+     * @param key  key to read a value
+     * @return value
+     * @throws JSONException
+     */
+    private static Object getJSONObject(String json, String key) throws JSONException {
+
+        String remotePrcsr = "remoteProcessorProperties";
+        JSONObject obj = null;
+        if (json.contains(remotePrcsr)) {
+            JSONObject innerObj = new JSONObject(json);
+            obj = innerObj.getJSONObject(remotePrcsr);
+        } else {
+            obj = new JSONObject(json);
+        }
+
+        return obj.get(key);
+    }
+
+	/**
      * validates pipeline id
      *
      * @param processorType processor type and
@@ -606,10 +660,10 @@ public class MailBoxUtil {
 
         String pipelineId = null;
         if (HTTPSYNCPROCESSOR.equals(processorType) ||
-                HTTPASYNCPROCESSOR.equals(processorType)) {
-            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
-        } else if (SWEEPER.equals(processorType) ||
+                HTTPASYNCPROCESSOR.equals(processorType) ||
                 DROPBOXPROCESSOR.equals(processorType)) {
+            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
+        } else if (SWEEPER.equals(processorType)) {
             pipelineId = propertiesDTO.getPipeLineID();
         } else {
 			return;
@@ -617,6 +671,10 @@ public class MailBoxUtil {
 
         if (isEmpty(pipelineId)) {
             throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);
+        }
+
+        if (isEmpty(ServiceBrokerUtil.getEntity(PIPELINE, pipelineId))) {
+            throw new MailBoxConfigurationServicesException(ID_IS_INVALID, PIPELINE, Response.Status.BAD_REQUEST);
         }
     }
 
@@ -664,18 +722,30 @@ public class MailBoxUtil {
     
     /**
      * To get current execution node
-     * @return node 
+     *
+     * @return node hostname
      */
     public static String getNode() {
-        return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
+
+        if (MailBoxUtil.isEmpty(ConfigurationManager.getDeploymentContext().getDeploymentServerId())) {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return ConfigurationManager.getDeploymentContext().getDeploymentServerId();
+        }
     }
-    
+
     /**
      * To get thread by name
-     * @param threadName
-     * @return
+     *
+     * @param threadName thred name
+     * @return Thread
      */
     public static Thread getThreadByName(String threadName) {
+
         for (Thread t : Thread.getAllStackTraces().keySet()) {
             if (t.getName().equals(threadName)) return t;
         }
@@ -683,28 +753,84 @@ public class MailBoxUtil {
     }
 
     /**
-     * Util method to read the stale file TTL value from processor properties
-     * @param json processor properties json
-     * @return String TTl value
+     * To check thread interrupt status.
+     *
+     * @param threadName thread name
+     * @return true if it is interrupted
      */
-    public static int getStaleFileTTLValue(String json) {
+    public static boolean isInterrupted(String threadName) {
 
-        String remotePrcsr = "remoteProcessorProperties";
-        try {
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            return runningThread.isInterrupted();
+        }
+        return false;
+    }
 
-            JSONObject obj = null;
-            if (json.contains(remotePrcsr)) {
-                JSONObject innerObj = new JSONObject(json);
-                obj = innerObj.getJSONObject(remotePrcsr);
-            } else {
-                obj = new JSONObject(json);
-            }
+    /**
+     * To interrupt a thread by name
+     *
+     * @param threadName thread name
+     */
+    public static void interruptThread(String threadName) {
 
-            Object o = obj.get(PROPERTY_STALE_FILE_TTL);
-            return (int) o;
-        } catch (JSONException e) {
-            return 0;
+        Thread runningThread = getThreadByName(threadName);
+        if (null != runningThread) {
+            runningThread.interrupt();
         }
     }
 
+    /**
+     * Helper to get protocol from filepath
+     * 
+     * @param filePath
+     * @return
+     */
+    public static String getProtocolFromFilePath(String filePath) {
+        
+        if (filePath.contains(Protocol.FTP.getCode())) {
+            return Protocol.FTP.getCode();
+        } else if (filePath.contains(Protocol.FTPS.getCode())) {
+            return Protocol.FTPS.getCode();
+        } else if (filePath.contains(Protocol.SFTP.getCode())) {
+            return Protocol.SFTP.getCode();
+        } else {
+            return filePath;
+        }
+    }
+
+    /**
+     * Constructs expiration date of the payload based on created date and TTL
+     *
+     * @param meta fs2 meta data
+     * @return timestamp of the expiration date
+     */
+    public static Timestamp getExpirationDate(FS2MetaSnapshot meta) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(meta.getCreatedOn().toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime.plusSeconds(meta.getTTL()));
+    }
+
+    /**
+     * This method is used to concatenate a unique system timestamp to the end
+     * of the name in order to make it unique during logical delete. If the the
+     * new name is longer than the field length, the original string is trimmed
+     * at the original string is trimmed at the end first and then the timestamp
+     * is appended to fit.
+     *
+     * @param str field value
+     * @param fieldLength field length
+     * @return String
+     */
+    public static String generateName(final String str, final int fieldLength) {
+
+        String strTimestamp = new Timestamp(System.currentTimeMillis()).toString();
+        final int totalLength = str.length() + 1 + strTimestamp.length();
+
+        if (totalLength > fieldLength) {
+            return str.substring(0, str.length() - (totalLength - fieldLength)) + "." + strTimestamp;
+        } else {
+            return str + "." + strTimestamp;
+
+        }
+    }
 }

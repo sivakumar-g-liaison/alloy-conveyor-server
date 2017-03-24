@@ -28,6 +28,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.google.gson.GsonBuilder;
+import com.liaison.mailbox.dtdm.dao.FilterText;
+import com.liaison.mailbox.enums.FilterMatchMode;
+import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,7 +125,7 @@ public abstract class GridService<T> {
 			final String pageSize) {
 
 		LOGGER.debug("Entering into getGridItems.");
-		Map<String, List<FilterObject>> searchTextObjectList = new HashMap<>();
+		FilterText filterTextObj = new FilterText();
 		Map<String, Object> sortInfoMap = new HashMap<>();
 
 		// Generate JSON string from the object list
@@ -132,9 +136,9 @@ public abstract class GridService<T> {
 		try {
 
 			if (filterText != null && !filterText.isEmpty()) {
-				searchTextObjectList = gson.fromJson(filterText,
-						new TypeToken<Map<String, List<FilterObject>>>() {
-						}.getType());
+				GsonBuilder builder = new GsonBuilder();
+				builder.registerTypeAdapter(FilterMatchMode.class, new UppercaseEnumAdapter());
+				filterTextObj = builder.create().fromJson(filterText, FilterText.class);
 			}
 
 			if (sortInfo != null && !sortInfo.isEmpty()) {
@@ -155,7 +159,7 @@ public abstract class GridService<T> {
 
 			// Filtering params
 			CriteriaQueryExpressionHolder holderFilter = createSearchCriteria(
-					searchTextObjectList, clazz, criteriaBuilder, gemRequest,
+					filterTextObj, clazz, criteriaBuilder, gemRequest,
 					predicateList);
 			Predicate filterPred = holderFilter.getPredicate();
 
@@ -325,18 +329,17 @@ public abstract class GridService<T> {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private CriteriaQueryExpressionHolder createSearchCriteria(
-			final Map<String, List<FilterObject>> searchTextObjectList,
+			final FilterText searchTextObjectList,
 			Class<T> clazz, final CriteriaBuilder criteriaBuilder,
 			final Root<T> gemRequest, List<Predicate> andPredicatesList)
 			throws ParseException {
 
 		CriteriaQueryExpressionHolder holder = new CriteriaQueryExpressionHolder();
 
-		if (searchTextObjectList.get(FILTER_TEXT) != null) {
+		if (searchTextObjectList.getFilterTextListObject() != null) {
 
 			// Searching functionality
-			List<FilterObject> searchFilterObjects = searchTextObjectList
-					.get(FILTER_TEXT);
+			List<FilterObject> searchFilterObjects = searchTextObjectList.getFilterTextListObject();
 			for (FilterObject entry : searchFilterObjects) {
 
 				String field = entry.getField();
@@ -351,9 +354,15 @@ public abstract class GridService<T> {
 
 				ParameterExpression<String> parameterExp = criteriaBuilder
 						.parameter(String.class);
-				andPredicatesList.add(criteriaBuilder.like(
-						criteriaBuilder.upper(pathString), parameterExp));
-				holder.put(parameterExp, "%" + entry.getText() + "%");
+				if (searchTextObjectList.getMatchMode() == null || searchTextObjectList.getMatchMode().ordinal() == FilterMatchMode.LIKE.ordinal()) {
+					andPredicatesList.add(criteriaBuilder.like(
+							criteriaBuilder.upper(pathString), parameterExp));
+					holder.put(parameterExp, "%" + entry.getText().toUpperCase() + "%");
+
+				} else if (FilterMatchMode.EQUALS.ordinal() == searchTextObjectList.getMatchMode().ordinal()) {
+					andPredicatesList.add(criteriaBuilder.equal(pathString, parameterExp));
+					holder.put(parameterExp, entry.getText());
+				}
 			}
 		}
 

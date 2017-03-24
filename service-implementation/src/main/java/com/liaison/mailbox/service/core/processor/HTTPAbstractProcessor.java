@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.util.Map;
 
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,9 +23,6 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
-import com.liaison.usermanagement.service.client.UserManagementClient;
-
-import javax.ws.rs.core.Response;
 
 /**
  * Base class that provides implementation common to both sync and async processors.
@@ -54,33 +50,6 @@ public abstract class HTTPAbstractProcessor {
 					+ " which exceeds the configured maximum size of " + maxRequestSize);
 		}
 	}
-
-    public void authenticateRequestor(String[] authenticationCredentials) {
-
-        try {
-
-            if (authenticationCredentials.length == 2) {
-
-                String loginId = authenticationCredentials[0];
-                // encode the password using base64 bcoz UM will expect a base64
-                // encoded token
-                String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
-                // if both username and password is present call UM client to
-                // authenticate
-                UserManagementClient umClient = new UserManagementClient();
-                umClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
-                umClient.authenticate();
-                if (!umClient.isSuccessful()) {
-                    throw new RuntimeException(umClient.getMessage());
-                }
-            } else {
-                throw new RuntimeException("Invalid Authorization Header");
-            }
-        } catch (Exception e) {
-            throw new MailBoxServicesException(e.getMessage(), Response.Status.UNAUTHORIZED);
-        }
-
-    }
 
     public static String[] getAuthenticationCredentials(String basicAuthenticationHeader) {
 

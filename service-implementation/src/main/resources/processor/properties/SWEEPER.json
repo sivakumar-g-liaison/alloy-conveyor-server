@@ -187,6 +187,21 @@
                "ASYNC",
                "SYNC"
             ]
+         },
+         {
+         	"name":"allowEmptyFiles",
+         	"displayName":"Allow Empty Files",
+         	"value":"true",
+         	"type":"select",
+         	"mandatory":true,
+         	"dynamic":false,
+         	"valueProvided":false,
+         	"defaultValue":"true",
+         	"validationRules":null,
+         	"options":[
+         		"true",
+         		"false"
+         	]
          }
       ],
       "folderProperties":[

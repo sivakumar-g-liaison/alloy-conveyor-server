@@ -156,6 +156,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			String statusIndicator = staticProp.getFileTransferStatusIndicator();
 
 			for (String aFile : files) {
+
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn("The executor is gracefully interrupted");
+                    return;
+                }
+
 				if (aFile.equals(".") || aFile.equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
@@ -164,6 +170,9 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				if (isDir) {
 
+				    if (!staticProp.isIncludeSubDirectories()) {
+				        continue; 
+				    }
 					String localDir = localFileDir + File.separatorChar + aFile;
 					String remotePath = dirToList + File.separatorChar + aFile;
 					File directory = new File(localDir);

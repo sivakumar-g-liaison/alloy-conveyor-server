@@ -10,11 +10,6 @@
 
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.MapItemType;
 import com.liaison.commons.message.glass.dom.StatusCode;
@@ -24,6 +19,11 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Java wrapper client for logging messages in LENS.
@@ -52,6 +52,7 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
+	private static final String ADMIN_ERROR_DETAILS = "admin_errordetails";
 
 	private TransactionVisibilityAPI visibilityAPI;
 
@@ -63,6 +64,7 @@ public class TransactionVisibilityClient {
 	public void logToGlass(GlassMessage message) {
 
 		visibilityAPI.getAdditionalInformation().clear();
+		List<MapItemType> additionalInformation = visibilityAPI.getAdditionalInformation();
 
 		// Log TransactionVisibilityAPI
 		MapItemType item;
@@ -71,91 +73,106 @@ public class TransactionVisibilityClient {
 			item = new MapItemType();
 			item.setKey(PROCESSOR_EXEC_ID);
 			item.setValue(message.getExecutionId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMailboxId())) {
 			item = new MapItemType();
 			item.setKey(MAILBOX_ID);
 			item.setValue(message.getMailboxId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 		
 		if (!MailBoxUtil.isEmpty(message.getMailboxName())) {
 			item = new MapItemType();
 			item.setKey(MAILBOX_NAME);
 			item.setValue(message.getMailboxName());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
 			item = new MapItemType();
 			item.setKey(PROCESSOR_ID);
 			item.setValue(message.getProcessorId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTenancyKey())) {
 			item = new MapItemType();
 			item.setKey(TENANCY_KEY);
 			item.setValue(message.getTenancyKey());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getServiceInstandId())) {
 			item = new MapItemType();
 			item.setKey(SIID);
 			item.setValue(message.getServiceInstandId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getInboundPipelineId())) {
 			item = new MapItemType();
 			item.setKey(INBOUND_PIPELINE_ID);
 			item.setValue(message.getInboundPipelineId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundPipelineId())) {
 			item = new MapItemType();
 			item.setKey(OUTBOUND_PIPELINE_ID);
 			item.setValue(message.getOutboundPipelineId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTransferProfileName())) {
 			item = new MapItemType();
 			item.setKey(TRANSFER_PROFILE_NAME);
 			item.setValue(message.getTransferProfileName());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getStagedFileId())) {
 			item = new MapItemType();
 			item.setKey(STAGED_FILE_ID);
 			item.setValue(message.getStagedFileId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMeta())) {
 			item = new MapItemType();
 			item.setKey(META);
 			item.setValue(message.getMeta());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getInboundFileName())) {
             item = new MapItemType();
             item.setKey(INBOUND_FILE_NAME);
             item.setValue(message.getInboundFileName());
-            visibilityAPI.getAdditionalInformation().add(item);
+            additionalInformation.add(item);
         }
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundFileName())) {
             item = new MapItemType();
             item.setKey(OUTBOUND_FILE_NAME);
             item.setValue(message.getOutboundFileName());
-            visibilityAPI.getAdditionalInformation().add(item);
+            additionalInformation.add(item);
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getAdminErrorDetails())) {
+            item = new MapItemType();
+            item.setKey(ADMIN_ERROR_DETAILS);
+            item.setValue(message.getAdminErrorDetails());
+            additionalInformation.add(item);
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getSenderIp())) {
+            GlassMessageUtil.logSenderAddress(visibilityAPI, message.getSenderIp());
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getReceiverIp())) {
+            GlassMessageUtil.logReceiverAddress(visibilityAPI, message.getReceiverIp());
         }
 
 		if (message.getCategory() != null && !message.getCategory().equals("")) {
@@ -189,6 +206,11 @@ public class TransactionVisibilityClient {
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
 	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+
+        if (message.getSenderId() != null && message.getSenderName() != null) {
+            visibilityAPI.setSenderId(message.getSenderId());
+            visibilityAPI.setSenderName(message.getSenderName());
+        }
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
@@ -255,6 +277,10 @@ public class TransactionVisibilityClient {
 				if (null != message.getOutAgent()) {
 					visibilityAPI.setOutAgent(message.getOutAgent());
 				}
+                break;
+            case VALIDATION_ERROR :
+                visibilityAPI.setStatus(StatusCode.V);
+                visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
                 break;
             default:
                 throw new RuntimeException("Invalid glass message status - " + message.getStatus());

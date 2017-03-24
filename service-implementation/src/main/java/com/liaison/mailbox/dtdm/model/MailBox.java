@@ -52,14 +52,18 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 					+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
 					+ " inner join schd_prof_processor.scheduleProfilesRef profile"
 					+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
-					+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
+					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
+					+ " AND profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 					+ " order by mbx.mbxName"),
     @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx from MailBox mbx "
-			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME + " and mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
+			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
+			        + " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
+			        + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
 	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
 	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 
 			query = "select mbx from MailBox mbx"
-					+ " where mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME)
+					+ " where mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME
+					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS)
 })
 
 public class MailBox implements Identifiable {
@@ -77,6 +81,7 @@ public class MailBox implements Identifiable {
 	private String tenancyKey;
 	private String modifiedBy;
 	private Date modifiedDate;
+	private String originatingDc;
 	
 
 	public MailBox() {
@@ -168,7 +173,7 @@ public class MailBox implements Identifiable {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@Fetch(FetchMode.JOIN)
 	public Set<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
@@ -205,6 +210,15 @@ public class MailBox implements Identifiable {
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
+    
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
 
     /**
 	 * Method to retrieve the given properties form Mailbox

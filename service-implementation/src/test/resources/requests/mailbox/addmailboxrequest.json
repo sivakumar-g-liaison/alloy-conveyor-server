@@ -1,7 +1,7 @@
 {
   "addMailBoxRequest": {
     "mailBox": {
-      "name": "TestData",
+      "name": "TestData_001",
       "description": "This is to collect access metrics",
       "status": "ACTIVE",
       "shardKey": "key_12345",

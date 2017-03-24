@@ -134,10 +134,12 @@ var rest = myApp.controller(
                 $scope.sshkeyModal = {
                     "sshKeyPairGroupId": ''
                 };
-                $scope.status = $scope.initialProcessorData.supportedStatus.options[0];                
-                $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[0];				
-                $scope.selectedProcessorType =  $scope.procsrType.value;               
-                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];               
+                $scope.processorData = $scope.initialProcessorData;
+                $scope.status = $scope.processorData.supportedStatus.options[0];
+                $scope.procsrType = $scope.processorData.supportedProcessors.options[0];
+                $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+                $scope.selectedProcessorType =  $scope.procsrType.value;
+                
                 // Procsr Credential Props
                $scope.processorCredProperties = [];           
 				
@@ -301,6 +303,8 @@ var rest = myApp.controller(
 				if (blockuiFlag === true) {
 					$scope.block.unblockUI();
 				}
+				
+				$scope.processorData = $scope.editProcessorData;
 				$scope.allProfiles = profData.getProfileResponse.profiles;
 				$scope.clearProps();
 				$scope.processor.guid = data.getProcessorResponse.processor.guid;
@@ -316,8 +320,15 @@ var rest = myApp.controller(
 							
 				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
 				
-				$scope.processor.description = data.getProcessorResponse.processor.description;				
-				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.initialProcessorData.supportedStatus.options[0] : $scope.status = $scope.initialProcessorData.supportedStatus.options[1];
+				$scope.processor.description = data.getProcessorResponse.processor.description;
+                if (data.getProcessorResponse.processor.status === 'ACTIVE') {
+                    $scope.status = $scope.processorData.supportedStatus.options[0];
+                } else if (data.getProcessorResponse.processor.status === 'INACTIVE') {
+                    $scope.status = $scope.processorData.supportedStatus.options[1];
+                } else {
+                    $scope.status = $scope.processorData.supportedStatus.options[2];
+                }
+
 				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);				
 				$scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);				
 				$scope.selectedProfiles = data.getProcessorResponse.processor.profiles;				
@@ -380,20 +391,19 @@ var rest = myApp.controller(
                         $scope.availableProperties.push(property);
                     }
 				}
-                if ($scope.processor.protocol.value !== 'FILEWRITER') {
-                	$scope.propertiesAddedToProcessor.push({
-                    	
-                        "name":"",
-                        "displayName" : "",
-                        "value":"",
-                        "type":"textarea",
-                        "readOnly":"",
-                        "mandatory":false,
-                        "dynamic":false,
-                        "valueProvided":false,
-                        "validationRules": {}
-                     });               	
-                }
+				
+            	$scope.propertiesAddedToProcessor.push({
+                	
+                    "name":"",
+                    "displayName" : "",
+                    "value":"",
+                    "type":"textarea",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": {}
+                 });               	
                 
                 for (var i = 0; i < $scope.folderProperties.length; i++) {				     
 					 var property = $scope.folderProperties[i];
@@ -472,46 +482,54 @@ var rest = myApp.controller(
                 $scope.isEdit = true;
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
-                    function (data) {
-						$scope.scriptIsEdit = false;
-						if (data.getProcessorResponse.processor.javaScriptURI != null && 
-						data.getProcessorResponse.processor.javaScriptURI != "") {
-						$scope.scriptIsEdit = true;
-						}
-						//To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
-						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type);
-						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
-						
-                        //Fix: Reading profile in procsr callback
-                        $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
-                            function (profData) {
-                                
-									var editProcessor = false;
-									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
-										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
-										$scope.secret = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
-										
-										// read secret should be called only if password is available in the login credential
-										// for sftp processor with keys, password will not be available and hence 
-										// read secret call to KMS is not applicable for this case
-										if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
-											$scope.oldLoginDetails.userId = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
-											$scope.oldLoginDetails.passwordPguidInKMS = $scope.secret;											
-											readSecretFromKM($scope.url_secret_service + encodeURIComponent($scope.secret), i, data, profData, processorId, blockuiFlag);
-											editProcessor = true;
-											break;
-										}
-									}
-									if(editProcessor === false) {
-										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
+                    function (data, status) {
 
-									}											
+                        $scope.block.unblockUI();
+                        if (status === 200) {
+    						$scope.scriptIsEdit = false;
+    						if (data.getProcessorResponse.processor.javaScriptURI != null && 
+    						data.getProcessorResponse.processor.javaScriptURI != "") {
+    						$scope.scriptIsEdit = true;
+    						}
+    						//To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
+    						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type);
+    						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
+    						
+                            //Fix: Reading profile in procsr callback
+                            $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
+                                function (profData) {
+                                    
+    									var editProcessor = false;
+    									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
+    										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
+    										$scope.secret = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
+    										
+    										// read secret should be called only if password is available in the login credential
+    										// for sftp processor with keys, password will not be available and hence 
+    										// read secret call to KMS is not applicable for this case
+    										if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
+    											$scope.oldLoginDetails.userId = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
+    											$scope.oldLoginDetails.passwordPguidInKMS = $scope.secret;											
+    											readSecretFromKM($scope.url_secret_service + encodeURIComponent($scope.secret), i, data, profData, processorId, blockuiFlag);
+    											editProcessor = true;
+    											break;
+    										}
+    									}
+    									if(editProcessor === false) {
+    										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 
-                            }
-                        );
+    									}											
+                                }
+                            );
+                	    } else {
+                	    	showSaveMessage(data.getProcessorResponse.response.message, 'error');
+                	    	$scope.readAllProcessors();
+                	    	$scope.addNew();
+                	    }
                     }
                 );
             };
+            
             $scope.readAllProfiles = function () {
                 $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                     function (data) {
@@ -539,12 +557,12 @@ var rest = myApp.controller(
                 $scope.profilesSelectedinProcessorProfile = [];
             };
             $scope.setTypeDuringProcessorEdit = function (processorValue) {               
-                $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, processorValue)];
+                $scope.procsrType = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, processorValue)];
             };
 			$scope.setTypeDuringProtocolEdit = function (protocolValue) {               
-                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocolValue)];
+                $scope.processor.protocol = $scope.processorData.supportedProtocols.options[getIndexOfValue($scope.processorData.supportedProtocols.options, protocolValue)];
 				if (typeof($scope.processor.protocol) === "undefined") {
-				$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, protocolValue)];
+				$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, protocolValue)];
 				}
             };			
 			
@@ -577,12 +595,19 @@ var rest = myApp.controller(
             		showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
         			return;
         		}
+                $scope.confirmProcessorSave();
+            };
+
+            $scope.closeConfirmProcessorDelete = function () {
+                $("#confirmProcessorDelete").modal('hide');
+            }
+
+            $scope.confirmProcessorSave = function () {
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
                 $scope.showAddNewComponent.value=false;
-               
-            };
-			
+            }
+
             $scope.saveProcessor = function () {		    
 			
 				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
@@ -893,12 +918,13 @@ var rest = myApp.controller(
 					function (data, status) {
 						if (status === 200 || status === 400) {
 							if (data.reviseProcessorResponse.response.status === 'success') {
-								$scope.editProcessor($scope.processor.guid, false);
-								if($scope.isFileSelected)  $scope.isFileSelected = false;
-								$scope.isPrivateKeySelected = false;
-								$scope.isPublicKeySelected = false;
-								showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
-							} else {	
+
+                                $scope.editProcessor($scope.processor.guid, false);
+                                if($scope.isFileSelected)  $scope.isFileSelected = false;
+                                $scope.isPrivateKeySelected = false;
+                                $scope.isPublicKeySelected = false;
+                                showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
+							} else {
 								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');	
 								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
 							    $scope.clearCredentialProps();														
@@ -975,7 +1001,7 @@ var rest = myApp.controller(
 			}
             $scope.addNew = function () {
 
-	            	if ($rootScope.serviceInstanceId == "") {
+	            	if ($rootScope.serviceInstanceId == "" && !$scope.isEdit) {
 						showSaveMessage('Processor creation is not allowed, and it is allowed when it traverses from a task', 'error');
 						return;
 					}
@@ -1116,7 +1142,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
-					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options,$scope.selectedProcessorType)];
+					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
 					$scope.separateProperties(data.processorDefinition.staticProperties);
 					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
@@ -1129,7 +1155,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = true;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
-					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
+					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
 					  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
@@ -1140,7 +1166,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeDropbox = false;
 					$scope.isProcessorTypeFileWriter = true;
-					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];					
+					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];					
 				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {
 				      $scope.separateProperties(data.processorDefinition.staticProperties);				  
 					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
@@ -1152,7 +1178,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = true;
-					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
+					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
 					  $scope.separateProperties(data.processorDefinition.staticProperties);		
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
@@ -1176,9 +1202,9 @@ var rest = myApp.controller(
 				 $scope.clearOldLoginDetails();
 				 //To notify passwordDirective to clear the password and error message
 	             $scope.doSend();
-				 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocalName)];
+				 $scope.processor.protocol = $scope.processorData.supportedProtocols.options[getIndexOfValue($scope.processorData.supportedProtocols.options, protocalName)];
 				 if (!$scope.processor.protocol) {
-					 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];
+					 $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
 					 protocalName = $scope.processor.protocol.value;
 				 }
               	 switch ($scope.selectedProcessorType) {

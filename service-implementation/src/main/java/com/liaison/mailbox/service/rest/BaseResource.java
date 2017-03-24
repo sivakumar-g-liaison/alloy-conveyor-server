@@ -10,28 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
-import org.apache.http.entity.ContentType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -47,7 +25,26 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.spectrum.client.model.KeyValuePair;
-import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
+import org.apache.http.entity.ContentType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Base class for all resources.
@@ -56,6 +53,7 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
  */
 public class BaseResource {
 
+	public static final String CONTENT_TYPE = "Content-Type";
 	private static final Logger logger = LogManager.getLogger(BaseResource.class);
 	public static final String HEADER_USER_ID = "UserId";
     public static final String MAILBOX_ID = "mailboxId";
@@ -65,9 +63,10 @@ public class BaseResource {
     public static final String HEADER_GUID = "guid";
     public static final String SIID = "siid";
     public static final String MULTIPLE = "MULTIPLE";
-	private static final int MAX_STATUS_CODE = 299;
+    private static final int MAX_STATUS_CODE = 299;
+	protected static final String HARD_DELETE = "hardDelete";
 
-	protected void auditAttempt(String message) {
+    protected void auditAttempt(String message) {
 
 		AuditStatement auditStatement = new DefaultAuditStatement(Status.ATTEMPT, message, PCIV20Requirement.PCI10_2_5,
 				PCIV20Requirement.PCI10_2_2);
@@ -204,43 +203,47 @@ public class BaseResource {
 		return serializationMediaType;
 	}
 
-	/**
-	 *
-	 * @param httpCode
-	 * @param contentType
-	 * @param serviceResponse
-	 * @param headers
-	 * @return
-	 */
-	public Response marshalResponse(int httpCode, String contentType, Object serviceResponse, KeyValuePair... headers) {
-		String responseBody;
+    /**
+     * @param httpCode
+     * @param contentType
+     * @param serviceResponse
+     * @param headers
+     * @return
+     */
+    public Response marshalResponse(int httpCode, String contentType, Object serviceResponse, KeyValuePair... headers) {
+        String responseBody;
 
-		ResponseBuilder response = new ResponseBuilderImpl();
-		try {
+        ResponseBuilder response = null;
+        try {
 
-			if (null != serviceResponse) {
-				if (contentType.equals(MediaType.APPLICATION_JSON)) {
-					responseBody = MailBoxUtil.marshalToJSON(serviceResponse);
-					response = Response.status(httpCode).header("Content-Type", MediaType.APPLICATION_JSON).entity(
-							responseBody);
-				} else {
-					response = Response.status(httpCode).header("Content-Type", contentType).entity(serviceResponse);
-				}
-			} else {
-				response = Response.status(httpCode).header("Content-Type", contentType);
-			}
-		} catch (IOException e) {
-			response = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(
-					"Response serialization failure.");
-			logger.error(e.getMessage(), e);
-		}
+            if (null != serviceResponse) {
 
-		for (KeyValuePair header : headers) {
-			response = response.header(header.getKey(), header.getValue());
-		}
+                if (contentType.equals(MediaType.APPLICATION_JSON)) {
+                    responseBody = MailBoxUtil.marshalToJSON(serviceResponse);
+                    response = Response.status(httpCode)
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                            .entity(responseBody);
+                } else {
+                    response = Response.status(httpCode)
+                            .header(HttpHeaders.CONTENT_TYPE, contentType)
+                            .entity(serviceResponse);
+                }
+            } else {
+                response = Response.status(httpCode).header(HttpHeaders.CONTENT_TYPE, contentType);
+            }
+        } catch (IOException e) {
+            response = Response.status(500)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                    .entity("Response serialization failure.");
+            logger.error(e.getMessage(), e);
+        }
 
-		return response.build();
-	}
+        for (KeyValuePair header : headers) {
+            response = response.header(header.getKey(), header.getValue());
+        }
+
+        return response.build();
+    }
 
 	/**
 	 * @param request
@@ -422,4 +425,18 @@ public class BaseResource {
 		}
 
 	}
+
+    /**
+     * gets remote address from the http request
+     *
+     * @param request http request
+     * @return ip address
+     */
+    protected String getRemoteAddress(HttpServletRequest request) {
+        String ipAddress = request.getHeader(com.google.common.net.HttpHeaders.X_FORWARDED_FOR);
+        if (null == ipAddress) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
+    }
 }

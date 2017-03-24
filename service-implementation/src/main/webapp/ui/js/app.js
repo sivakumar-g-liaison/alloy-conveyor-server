@@ -18,13 +18,15 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'myApp.copyToClipboard',
+    'myApp.directives',
     'ngGrid', // angular grid
     'ngSanitize', // for html-bind in ckeditor
     'ui.ace', // ace code editor
     'ui.bootstrap', // jquery ui bootstrap
     'ngRoute',
     'angularTreeview', // for tree view
-    'BlockUI'
+    'BlockUI',
+    'daterangepickerapp'
 ]);
 var filters = angular.module('myApp.filters', []);
 var directives = angular.module('myApp.directives', []);
@@ -80,6 +82,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
         });
+        $routeProvider.when('/mailbox/getStagedFiles', {
+            templateUrl: 'partials/processor/stagedfiles.html',
+            controller: 'StagedFilesCntrlr'
+        });
         // by default, redirect to site root
         $routeProvider.otherwise({
             redirectTo: '/'
@@ -133,11 +139,29 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
 
-	//  load initial Processor Data
+	// load initial Processor Data
     $rootScope.initialProcessorData;
     $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
         $rootScope.initialProcessorData = data;
     }); 
+    
+    $rootScope.languageFormatData = {
+        'dateRangePattern':'',
+        'locale':''
+    };
+    $rootScope.restService.get('../language/userLocale',
+        function(data, status) {
+        	if (status === 200) {
+                $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
+                $rootScope.languageFormatData.locale = data.TreeMap.locale;
+        	}
+    });   
+    
+    //  load edit Processor Data
+    $rootScope.editProcessorData;
+    $rootScope.restService.get('data/editProcessorDetails.json', function (data) {
+    	$rootScope.editProcessorData = data;
+    });
 
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
@@ -150,7 +174,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 		globalTrustStoreGroupId: "",
 		processorSyncUrlDisplayPrefix: "",
 		processorAsyncUrlDisplayPrefix: "",
-		defaultScriptTemplateName: ""	
+		defaultScriptTemplateName: "",
+		deployAsDropbox:false	
 	};
 	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
 		function (data, status) {
@@ -160,6 +185,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 				$rootScope.javaProperties.processorSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSyncUrlDisplayPrefix;
 				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
 				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
+				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
 				
 			} else {
 				return;

@@ -33,10 +33,20 @@ import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 @Entity
 @Table(name = "SCHED_PROFILE")
 @NamedQueries({
-	@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"
-			+ ProfileConfigurationDAO.PROF_NAME),
-	@NamedQuery(name = ProfileConfigurationDAO.GET_ALL, query = "select schdprof from ScheduleProfilesRef schdprof order by schdprof.schProfName"),
-@NamedQuery(name = "ScheduleProfilesRef.findAll", query = "SELECT s FROM ScheduleProfilesRef s")
+        @NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME,
+                query = "select schdprof from ScheduleProfilesRef schdprof" +
+                        " where schdprof.schProfName = :"+ ProfileConfigurationDAO.PROF_NAME),
+        @NamedQuery(name = ProfileConfigurationDAO.GET_ALL,
+                query = "select schdprof from ScheduleProfilesRef schdprof order by schdprof.schProfName"),
+        @NamedQuery(name = ProfileConfigurationDAO.FIND_PROFILES_BY_TENANCY_KEY,
+                query = "select distinct profile from Processor processor" +
+                        " inner join processor.scheduleProfileProcessors schd_prof_processor" +
+                        " inner join schd_prof_processor.scheduleProfilesRef profile" +
+                        " inner join processor.mailbox mailbox" +
+                        " where mailbox.tenancyKey in (:" + ProfileConfigurationDAO.TENANCY_KEY + ")" +
+                        " and mailbox.mbxStatus = :" + ProfileConfigurationDAO.STATUS +
+                        " and processor.procsrStatus = :" + ProfileConfigurationDAO.STATUS +
+                        " and processor.class = :" + ProfileConfigurationDAO.PROCESSOR_TYPE)
 })
 public class ScheduleProfilesRef implements Identifiable {
 
@@ -45,6 +55,7 @@ public class ScheduleProfilesRef implements Identifiable {
 	private String pguid;
 	private String schProfName;
 	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
+	private String originatingDc;
 
 	public ScheduleProfilesRef() {
 	}
@@ -93,6 +104,15 @@ public class ScheduleProfilesRef implements Identifiable {
 		return scheduleProfileProcessor;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

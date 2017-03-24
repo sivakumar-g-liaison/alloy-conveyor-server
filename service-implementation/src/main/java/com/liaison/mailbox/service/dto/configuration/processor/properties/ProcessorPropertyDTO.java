@@ -111,6 +111,7 @@ public class ProcessorPropertyDTO {
 
 		ProcessorProperty prop = (ProcessorProperty) entity;
 		prop.setPguid(MailBoxUtil.getGUID());
+		prop.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
 		prop.setProcsrPropName(this.getName());
 		prop.setProcsrPropValue(this.getValue());
 

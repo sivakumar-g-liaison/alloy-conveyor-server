@@ -1,18 +1,10 @@
-import java.sql.Timestamp
-import javax.xml.bind.annotation.XmlRootElement
-import org.apache.commons.io.output.NullOutputStream
-import org.apache.tools.ant.filters.ReplaceTokens
-import org.apache.tools.ant.taskdefs.condition.Os
-
-import oracle.jdbc.OracleDriver
-// flyway
 import com.googlecode.flyway.core.Flyway
-import com.googlecode.flyway.gradle.task.AbstractFlywayTask
-import com.googlecode.flyway.core.api.FlywayException
-import com.googlecode.flyway.core.util.jdbc.DriverDataSource
 import com.googlecode.flyway.core.util.StringUtils
-import com.googlecode.flyway.gradle.FlywayExtension
+import com.googlecode.flyway.core.util.jdbc.DriverDataSource
+import com.googlecode.flyway.gradle.task.AbstractFlywayTask
+import org.gradle.api.plugins.jetty.internal.Monitor
 
+// flyway
 apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'flyway'
@@ -52,7 +44,7 @@ buildscript {
 		// Flyway Plugin
 		// License: Apache v2
         classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
-		classpath "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+		classpath "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
 
 		// SOAP UI
 		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
@@ -84,9 +76,9 @@ allprojects {
 	 }
 }
 
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/publish-service.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/war.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/consolidate-testresults.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/publish-service.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/war.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/consolidate-testresults.gradle')
 
 war {
     baseName = rootProject.name
@@ -142,6 +134,7 @@ war {
 }
 
 war.dependsOn('configureTomcat')
+processResources.dependsOn('setDevProperties')
 
 dependencies {
 
@@ -149,35 +142,17 @@ dependencies {
 	//common gitlab service
 	compile 'com.liaison:lib_gitlab:1.+'
 
-	// resolve fs2 in nexus
-	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
-
 	compile group: "com.liaison", name: "fs2", version: "6.+", changing: true
 
 	// inherited from NetFlix Karyon
-	//compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
 	compile "com.netflix.karyon:karyon-extensions:1.0.22"
 
 	// currently not used during runtime (inherited dependency from NetFlix)
 	compile 'com.netflix.eureka:eureka-client:1.1.97'
 
-	// for file upload
-	// TODO - See that we also depend on "jersey-bundle" inherently
-	// TODO - due to NetFlix... using the bundle is not advised... (remove)
-
-	compile('com.liaison:fsm:1.0.2') {
-        exclude module: 'commons-lib'
-    }
-
 	// for http mime
 	compile "org.apache.httpcomponents:httpmime:4.3.1"
 	compile 'javax.mail:mail:1.4.6'
-	//compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
-
-	// for hornetq jms
-	//    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
-	//   compile "org.hornetq:hornetq-server:2.3.11.Final"
-	//    compile "jboss:jnp-client:4.0.2"
 
 	// for G2Javascript engine
 	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '6.+'
@@ -197,8 +172,8 @@ dependencies {
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
-	compile 'com.oracle.jdbc:ucp:${oracleVersion}'
+	runtime "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
+	compile "com.oracle.jdbc:g2ucp:${oracleVersion}"
 
 	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
 	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
@@ -226,7 +201,7 @@ dependencies {
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
-	jdbc "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+	jdbc "com.oracle.jdbc:g2ojdbc8:${oracleVersion}"
 
 	//Dependency for UM integration
 	compile "com.liaison.commons.usermanagement:usermanagement-client:4.+"
@@ -251,8 +226,6 @@ dependencies {
 	
 	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
 
-	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
-	
 	//Required for integration test case
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
 
@@ -359,6 +332,9 @@ cargo {
 
 		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
 		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+		jvmArgs += " -Darchaius.deployment.stack=${deployStack}"
+		jvmArgs += " -Darchaius.deployment.region=${deployRegion}"
+		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
         jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
 		jvmArgs += " -Dhttps.protocols=TLSv1.2"
 
@@ -399,37 +375,7 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 }
 
 
-
-/*task buildAsDropbox (type :Copy){
-	from 'src/main/resources/g2dropbox-dev-int.properties'
-	into 'src/main/resources/'
-	rename { String fileName ->
-		fileName.replace("g2dropbox-dev-int.properties", "g2mailboxservice-dev-int.properties")
-	  }
-	
-	from 'src/main/resources/g2dropbox-qa-stage.properties'
-	into 'src/main/resources/'
-	rename { String fileName ->
-		fileName.replace("g2dropbox-qa-stage.properties", "g2mailboxservice-qa-stage.properties")
-	  }
-	
-	from 'src/main/resources/g2dropbox-uat.properties'
-	into 'src/main/resources/'
-	rename { String fileName ->
-		fileName.replace("g2dropbox-uat.properties", "g2mailboxservice-uat.properties")
-	  }
-	
-	from 'src/main/resources/g2dropbox-production.properties'
-	into 'src/main/resources/'
-	rename { String fileName ->
-		fileName.replace("g2dropbox-production.properties", "g2mailboxservice-production.properties")
-	  }
-	
-	
-	
-}*/
-
-task setDevProperties << {    
+task setDevProperties << {
     ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
     {
         filterchain {
@@ -480,22 +426,13 @@ task jettyRunSetProperties {
 	// use the default port of the ws-backend-simulation module
 	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
 	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+	System.setProperty('archaius.deployment.stack', "${deployStack}")
+	System.setProperty('archaius.deployment.region', "${deployRegion}")
+	System.setProperty('archaius.deployment.datacenter', "${deployDatacenter}")
 	// we only use jettyRun in dev... might as well output log4j debug
-	System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
+	System.setProperty('log4j.debug', 'true')
 
 }
-
-/*def enhancerLib = "$projectDir/enhancerLib"
- task createPathJar (type: Jar) {
- overwrite = true
- archiveName ='enhancerDependency.jar'
- destinationDir= new File(enhancerLib);
- manifest{
- attributes(//"Class-Path":project.runtimeClasspath.asPath,
- "Class-Path":project.runtimeClasspath.collect { it.toURI() }.join(' ')
- )
- }
- }*/
 
 project.ext {
 	mergedSuiteName = "G2 Relay Test Results"
@@ -516,7 +453,6 @@ test.doFirst {
     }
     exclude '**/DropboxIntegrationServiceTest.class'
     exclude '**/KeyManagerIntegrationServiceTest.class'
-    exclude '**/MailBoxConfigurationServiceTest.class'
     exclude '**/MailBoxProcessorServiceTest.class'
     exclude '**/StorageUtilitiesTest.class'
     exclude '**/JavaScriptEngineUtilTest.class'
@@ -525,8 +461,6 @@ test.doFirst {
     exclude '**/MailBoxProfileServiceTest.class'
     exclude '**/MailBoxAdminServiceTest.class'
     exclude '**/RemoteProcessorTest.class'
-	exclude '**/FS2ResourceTest.class'
-	exclude '**/HelloWorldResourceTest.class'
     include '**/*Test.class'
 }
 
@@ -544,9 +478,6 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     useTestNG()
     include '**/*IT.class'
 
-    // workaround for Java7 and Cobutura/Emma instrumentation problem
-    jvmArgs += "-XX:-UseSplitVerifier"
-
     jvmArgs += "-Darchaius.deployment.applicationId=${project.war.baseName}"
     jvmArgs += "-Darchaius.deployment.environment=${deployEnvironment}"
 
@@ -563,56 +494,37 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     sourceSets.test.runtimeClasspath += files("${projectDir}/src/main/resources")
 
     ignoreFailures true
-}
-
-/*// JPA (datanucleus) bytecode enhancement
-task enhance()  << {
-	logger.info("... Enhancing ...");
-
-	ant.taskdef(
-			name      : 'datanucleusenhancer',
-			classpath : (project.runtimeClasspath - configurations.workTicket).asPath,
-			classname : 'org.datanucleus.enhancer.EnhancerTask'
-			)
-
-	ant.datanucleusenhancer(
-			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
-			verbose     : true,
-			api : "JPA",
-			persistenceUnit : "mailbox-dtdm",
-			failonerror : true)
-
-	ant.datanucleusenhancer(
-			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
-			verbose     : true,
-			api : "JPA",
-			persistenceUnit : "mailbox-rtdm",
-			failonerror : true)
-
-	ant.taskdef(
-	 name      : 'datanucleusenhancer',
-	 classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
-	 classname : 'org.datanucleus.enhancer.EnhancerTask'
-	 )
-	 ant.datanucleusenhancer(
-	 classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
-	 verbose     : true,
-	 api : "JPA",
-	 persistenceUnit : "mailbox-dtdm",
-	 failonerror : true)
-	 ant.datanucleusenhancer(
-	 classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
-	 verbose     : true,
-	 api : "JPA",
-	 persistenceUnit : "mailbox-rtdm",
-	 failonerror : true)
-
 
 }
 
+def isTomcatRunning = false
+gradle.taskGraph.beforeTask { Task task ->
+	if (task.name.equals('integrationTest')) {
+		if (!isTomcatRunning) {
+			println('Configuring and starting Tomcat...')
+			// The "cargoRunLocal.dependsOn('configureTomcat')" gets skipped here because it is inside "project.afterEvaluate"
+			// so we are explicitly configuring Tomcat for in container testing
+			configureTomcat.execute()
+			cargoStartLocal.execute()
+			isTomcatRunning = true
+		}
+	}
+}
 
-classes.dependsOn('enhance')*/
-
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (task.name.equals('integrationTest')) {
+		// if containerTestSuite is in the task graph, then
+		if (isTomcatRunning && (task.name.equals('containerTestSuite'))) {
+			logger.info 'Stopping Tomcat server'
+			try {
+				cargoStopLocal.execute()
+				isTomcatRunning = false
+			} catch (Throwable t) {
+				println('Tomcat Stop failure...continuing...')
+			}
+		}
+	}
+}
 
 def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"
 def dtoArchiveDestRoot = "${projectDir}/build/libs/"
@@ -676,9 +588,6 @@ jettyStop{
 	stopPort=9999
 }
 
-
-
-import org.gradle.api.plugins.jetty.internal.Monitor
 [jettyRun, jettyRunWar]*.doLast {
 	/**
 	 * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE

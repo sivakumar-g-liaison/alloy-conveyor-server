@@ -55,8 +55,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             tenancyKey: "",
             properties: []
         };
-        $scope.enumstats = [{"name":"Active","id":"ACTIVE"},
+        $scope.initEnumStats = [{"name":"Active","id":"ACTIVE"},
             {"name":"Inactive","id":"INACTIVE"}];
+        
+        $scope.editEnumStats = [{"name":"Active","id":"ACTIVE"},
+            {"name":"Inactive","id":"INACTIVE"}];
+        
+        $scope.enumstats = $scope.initEnumStats;
         
         // Default values of payloadsize and no of files threshold
         $scope.payloadSizeThreshold = 131072;
@@ -141,6 +146,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
             if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On
 
+                $scope.enumstats = $scope.editEnumStats;
                 $scope.isMailBoxEdit = true;
                 $scope.isEnable = true;	
                 $scope.mailBoxId = $location.search().mailBoxId;
@@ -168,8 +174,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         							$scope.isProcessorsAvailable = false;
 									$scope.isDisableFilterVal = $scope.isDisableFilters;
         						}
-                                (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
-                                    data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
+
+                                if (data.getMailBoxResponse.mailBox.status === 'ACTIVE' || data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') {
+                                    $scope.status = $scope.enumstats[0];
+                                } else if (data.getMailBoxResponse.mailBox.status === 'INACTIVE') {
+                                    $scope.status = $scope.enumstats[1];
+                                } else {
+                                    $scope.status = $scope.enumstats[2];
+                                }
                                 $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
                                 $scope.tenancyKey.name = data.getMailBoxResponse.mailBox.tenancyKeyDisplayName;
                                 $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
@@ -276,10 +288,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                             if (fromAddProcsr) {
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
+
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'error');
+                                $scope.isMailBoxSaved = false;
                             }
                         } else {
                             showSaveMessage("Error while saving Mailbox", 'error');
@@ -311,6 +325,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 								} else {
 									showSaveMessage(data.addMailBoxResponse.response.message, 'success');
 									$scope.isMailBoxEdit = true;
+									$scope.isMailBoxSaved = false;
+									$location.path('/mailbox/addMailBox').search('mailBoxId', $scope.mailBoxId);
+									$scope.load();
 								}
                             } else {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'error');
@@ -369,13 +386,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
     			showSaveMessage("Mailbox creation is not allowed, and it is allowed when it traverses from a task", 'error');
     			return;
     		}
+            $scope.confirmMailboxSave();
+        };
+
+        $scope.confirmMailboxSave = function() {
             fromAddProcsr = false;
             $scope.saveForm();
             $scope.valueSelectedinSelectionBox.value = '';
-		    $scope.showAddNew.value = false ;      
+            $scope.showAddNew.value = false ;
         };
-        
-       
+
+        $scope.closeconfirmMailboxDelete = function() {
+            $('#confirmMailboxDelete').modal('hide');
+        };
+
         // Property grid
 
         $scope.valueSelectedinSelectionBox = {

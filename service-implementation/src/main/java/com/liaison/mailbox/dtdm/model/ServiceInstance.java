@@ -40,11 +40,18 @@ public class ServiceInstance implements Identifiable {
 	private String pguid;
 	private String name;
 	private List<MailboxServiceInstance> mailboxServiceInstances;
+	private String originatingDc;
 	
 	public ServiceInstance() {
 	}
-	
-	@OneToMany(mappedBy = "serviceInstance", orphanRemoval = true, cascade = { CascadeType.PERSIST,
+
+    public ServiceInstance(String pguid, String name, String originatingDc) {
+        this.pguid = pguid;
+        this.name = name;
+        this.originatingDc = originatingDc;
+    }
+
+    @OneToMany(mappedBy = "serviceInstance", orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
@@ -73,6 +80,15 @@ public class ServiceInstance implements Identifiable {
 		this.name = name;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

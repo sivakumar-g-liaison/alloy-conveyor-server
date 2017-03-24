@@ -38,6 +38,7 @@ public class ProcessorProperty implements Identifiable {
 	private String pguid;
 	private String procsrPropName;
 	private String procsrPropValue;
+	private String originatingDc;
 
 	private Processor processor;
 
@@ -83,6 +84,15 @@ public class ProcessorProperty implements Identifiable {
 		this.procsrPropValue = procsrPropValue;
 	}
 
+	@Column(name = "ORIGINATING_DC", length = 16)
+	public String getOriginatingDc() {
+		return originatingDc;
+	}
+
+	public void setOriginatingDc(String originatingDc) {
+		this.originatingDc = originatingDc;
+	}
+	
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

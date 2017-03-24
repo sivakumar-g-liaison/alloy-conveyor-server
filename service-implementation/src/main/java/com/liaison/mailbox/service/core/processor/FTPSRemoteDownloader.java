@@ -99,13 +99,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             // retrieve required properties
             FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
-            boolean binary = ftpDownloaderStaticProperties.isBinary();
-            boolean passive = ftpDownloaderStaticProperties.isPassive();
-
-            if (ftpDownloaderStaticProperties != null) {
-                ftpsRequest.setBinary(binary);
-                ftpsRequest.setPassive(passive);
-            }
+            ftpsRequest.setBinary(ftpDownloaderStaticProperties.isBinary());
+            ftpsRequest.setPassive(ftpDownloaderStaticProperties.isPassive());
 
             LOGGER.info(constructMessage("Start run"));
             startTime = System.currentTimeMillis();
@@ -179,6 +174,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             String statusIndicator = staticProp.getFileTransferStatusIndicator();
             for (FTPFile file : files) {
 
+                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                    LOGGER.warn("The executor is gracefully interrupted");
+                    return;
+                }
+
                 if (file.getName().equals(".") || file.getName().equals("..")) {
                     // skip parent directory and the directory itself
                     continue;
@@ -244,6 +244,9 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
                 } else {
 
+                    if (!staticProp.isIncludeSubDirectories()) {
+                        continue;
+                    }
                     String localDir = localFileDir + File.separatorChar + currentFileName;
                     String remotePath = dirToList + File.separatorChar + currentFileName;
                     File directory = new File(localDir);

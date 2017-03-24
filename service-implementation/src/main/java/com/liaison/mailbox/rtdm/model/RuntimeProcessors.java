@@ -40,6 +40,7 @@ public class RuntimeProcessors {
     private String pguid;
     private String processorId;
     private ProcessorExecutionState processorExecState;
+    private String originatingDc;
 
     @Column(name = "PGUID", length = 32)
     @Id
@@ -67,5 +68,14 @@ public class RuntimeProcessors {
 
     public void setProcessorExecState(ProcessorExecutionState processorExecState) {
         this.processorExecState = processorExecState;
+    }
+
+    @Column(name = "ORIGINATING_DC", length = 16)
+    public String getOriginatingDc() {
+        return originatingDc;
+    }
+
+    public void setOriginatingDc(String originatingDc) {
+        this.originatingDc = originatingDc;
     }
 }

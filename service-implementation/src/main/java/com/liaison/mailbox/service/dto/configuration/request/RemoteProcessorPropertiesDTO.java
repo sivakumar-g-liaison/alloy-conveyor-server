@@ -71,6 +71,9 @@ public class RemoteProcessorPropertiesDTO {
     private int scriptExecutionTimeout;
     private int staleFileTTL;
     private String processMode = "ASYNC";
+    private boolean allowEmptyFiles = true;
+    private boolean useFileSystem = true;
+    private boolean includeSubDirectories;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -390,6 +393,30 @@ public class RemoteProcessorPropertiesDTO {
     
     public void setStaleFileTTL(int staleFileTTL) {
         this.staleFileTTL = staleFileTTL;
+    }
+    
+    public boolean isAllowEmptyFiles() {
+        return allowEmptyFiles;
+    }
+    
+    public void setAllowEmptyFiles(boolean allowEmptyFiles) {
+        this.allowEmptyFiles = allowEmptyFiles;
+    }
+    
+    public boolean isUseFileSystem() {
+        return useFileSystem;
+    }
+    
+    public void setUseFileSystem(boolean useFileSystem) {
+        this.useFileSystem = useFileSystem;
+    }
+    
+    public boolean isIncludeSubDirectories() {
+        return includeSubDirectories;
+    }
+    
+    public void setIncludeSubDirectories(boolean includeSubDirectories) {
+        this.includeSubDirectories = includeSubDirectories;
     }
     
 }

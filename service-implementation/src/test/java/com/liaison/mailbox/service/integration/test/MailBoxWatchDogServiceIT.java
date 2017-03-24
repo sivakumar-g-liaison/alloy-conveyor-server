@@ -25,22 +25,11 @@ import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
 public class MailBoxWatchDogServiceIT extends BaseServiceTest {
 
 	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeMethod
-	public void setUp() throws Exception {
-		System.setProperty("com.liaison.secure.properties.path", "invalid");
-		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "test");
-		InitInitialDualDBContext.init();
-	}
-
-	/**
-	 * This is just to check the flow and DB operations. Not intened to test full functionality
+	 * This is just to check the flow and DB operations. Not intended to test full functionality
 	 * @throws Exception 
 	 * 
 	 */
-	@Test(enabled=false)
+	@Test
 	public void testMailBoxWatchDog() throws Exception {
 		MailboxWatchDogService service = new MailboxWatchDogService();
 		service.pollAndUpdateStatus();
