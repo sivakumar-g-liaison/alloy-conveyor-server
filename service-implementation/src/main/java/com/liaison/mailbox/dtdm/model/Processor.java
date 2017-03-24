@@ -107,7 +107,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                     " AND processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
                     " AND processor.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
     @NamedQuery(name = ProcessorConfigurationDAO.GET_CLUSTER_TYPE_BY_PROCESSOR_GUID,
-            query = "SELECT processor FROM Processor processor" +
+            query = "SELECT processor.clusterType FROM Processor processor" +
                     " WHERE processor.pguid =:" +  ProcessorConfigurationDAO.PGUID)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
