@@ -57,10 +57,10 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -823,6 +823,18 @@ public class MailBoxUtil {
         }
     }
 
+    /**
+     * This method used to get the cluster types
+     * 1. It will return 'LOWSECURE' if it is in LOW SECURE RELAY OR
+     * 2. It will return both 'LOWSECURE' and 'SECURE' if it is SECURE RELAY.
+     * 
+     * @return return list of cluster types
+     */
+    public static List<String> getClusterTypes() {
+        return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Arrays.asList(MailBoxConstants.LOWSECURE) :
+                            Arrays.asList(MailBoxConstants.LOWSECURE, MailBoxConstants.SECURE);
+    }
+    
     /**
      * Initialize the cluster type.
      */
