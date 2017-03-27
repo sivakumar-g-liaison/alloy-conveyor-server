@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -23,12 +24,14 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -157,6 +160,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 			processor.setProcsrName(this.getName());
 			processor.setJavaScriptUri(this.getJavaScriptURI());
 			processor.setProcsrProtocol(this.getProtocol());
+			processor.setClusterType(MailBoxUtil.isConveyorType() ? MailBoxConstants.SECURE : this.getClusterType());
 
 			// Setting the folders.
 			Folder folder = null;
@@ -250,7 +254,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
-
+	    this.setClusterType(processor.getClusterType());
+		
 		String propertyJSON = processor.getProcsrProperties();
 		if (!MailBoxUtil.isEmpty(propertyJSON)) {
 

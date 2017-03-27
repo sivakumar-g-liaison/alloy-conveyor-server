@@ -156,6 +156,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacy.setGuid(processorResponse.getProcessor().getGuId());
         processorLegacy.setDescription("description modified");
         processorLegacy.setName("Processor Modified" + System.currentTimeMillis());
+        processorLegacy.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         //processorLegacy.setStatus(EntityStatus.INACTIVE.value());
 
         processorLegacy.getRemoteProcessorProperties().setConnectionTimeout(60000);
@@ -699,6 +700,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacyDTO.setProtocol(protocol);
         processorLegacyDTO.setStatus(status);
         processorLegacyDTO.setDescription("test description");
+        processorLegacyDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         processorLegacyDTO.setFolders(setFolderDetails(protocol, type));
         processorLegacyDTO.setCredentials(setCredentialDetails(protocol));
         processorLegacyDTO.setLinkedProfiles(setLinkedProfileDetails());

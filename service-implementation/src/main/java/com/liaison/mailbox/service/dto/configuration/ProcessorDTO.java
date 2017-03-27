@@ -233,6 +233,7 @@ public class ProcessorDTO {
         this.modifiedDate = modifiedDate;
     }
     
+    @DataValidation(errorMessage = "Processor clusterType set to a value that is not supported.", type = MailBoxConstants.CLUSTER_TYPE)
     public String getClusterType() {
         return clusterType;
     }
@@ -291,7 +292,7 @@ public class ProcessorDTO {
     	    processor.setProcsrDesc(this.getDescription());
     		processor.setProcsrName(this.getName());
     		processor.setJavaScriptUri(this.getJavaScriptURI());
-
+    		processor.setClusterType(MailBoxUtil.isConveyorType() ? MailBoxConstants.SECURE : this.getClusterType());
 
     		// handling of folder properties
     		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
@@ -387,7 +388,8 @@ public class ProcessorDTO {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
-
+		this.setClusterType(processor.getClusterType());
+		
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
 			EntityStatus foundStatus = EntityStatus.findByCode(status);

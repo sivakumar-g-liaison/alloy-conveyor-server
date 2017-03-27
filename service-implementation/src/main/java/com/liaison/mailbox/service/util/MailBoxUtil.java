@@ -30,6 +30,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -46,6 +47,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -833,6 +835,20 @@ public class MailBoxUtil {
     public static List<String> getClusterTypes() {
         return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Arrays.asList(MailBoxConstants.LOWSECURE) :
                             Arrays.asList(MailBoxConstants.LOWSECURE, MailBoxConstants.SECURE);
+    }
+    
+    /**
+     * This method check whether the deployment type conveyor or not
+     * 
+     * 1. It will return true if it is conveyor.
+     * 
+     * @return  boolean 
+     */
+    public static boolean isConveyorType() {
+        
+        String deploymentType = MailBoxUtil.getEnvironmentProperties()
+                .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
     }
     
     /**

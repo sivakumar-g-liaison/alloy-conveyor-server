@@ -181,7 +181,6 @@ public class ProcessorConfigurationService {
 
 			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
-			processor.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 			processor.setModifiedBy(userId);
             processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			// persist the processor.

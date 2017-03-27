@@ -168,7 +168,15 @@
 			  </div>
 							
 			</div>
-			
+		    <div class="row form-group" ng-show="!javaProperties.deployAsDropbox">
+              <div class="col-sm-6 col-md-6">
+                  <label for="clusterType">
+                   Cluster Type
+                  </label>
+                  <select class="form-control" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+                  </select>
+              </div>
+            </div>
 			</br>
 			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
                 <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">

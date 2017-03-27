@@ -400,7 +400,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
         processorDTO.setStatus(processorStatus);
         processorDTO.setName(System.currentTimeMillis() + "");
         processorDTO.setDescription(processorDescription);
-
+        processorDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         processorDTO.setType(processorType);
         processorDTO.setProtocol(protocolType);
         processorDTO.setLinkedMailboxId(mailboxPguid);

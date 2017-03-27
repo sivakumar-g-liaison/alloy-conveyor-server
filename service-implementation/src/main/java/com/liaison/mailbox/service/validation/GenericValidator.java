@@ -17,6 +17,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import com.liaison.dto.enums.ProcessMode;
+
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Common validator for all mailbox operations.
@@ -353,7 +355,11 @@ public class GenericValidator {
                 &&  CredentialType.findByName(String.valueOf(value)) == null) {
             errorMessage.append(annotationDetails.errorMessage());
             return false;
-		}
+		}  else if (MailBoxConstants.CLUSTER_TYPE.equals(annotationDetails.type())
+                && MailBoxConstants.LOWSECURE.equals(MailBoxUtil.CLUSTER_TYPE) && !MailBoxConstants.LOWSECURE.equals(value)) {
+            errorMessage.append(annotationDetails.errorMessage());
+            return false;
+        }
 
 		return true;
 	}

@@ -107,6 +107,7 @@ var rest = myApp.controller(
                     javaScriptURI: "",
                     description: "",
                     status: "",
+                    clusterType: "",
                     createConfiguredLocation: true,
                     protocol: "",
                     linkedMailboxId: "",
@@ -139,6 +140,7 @@ var rest = myApp.controller(
                 $scope.procsrType = $scope.processorData.supportedProcessors.options[0];
                 $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
                 $scope.selectedProcessorType =  $scope.procsrType.value;
+                $scope.processor.clusterType = $rootScope.javaProperties.clusterTypes[0];
                 
                 // Procsr Credential Props
                $scope.processorCredProperties = [];           
@@ -321,6 +323,7 @@ var rest = myApp.controller(
 				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
 				
 				$scope.processor.description = data.getProcessorResponse.processor.description;
+				$scope.processor.clusterType = data.getProcessorResponse.processor.clusterType;
                 if (data.getProcessorResponse.processor.status === 'ACTIVE') {
                     $scope.status = $scope.processorData.supportedStatus.options[0];
                 } else if (data.getProcessorResponse.processor.status === 'INACTIVE') {

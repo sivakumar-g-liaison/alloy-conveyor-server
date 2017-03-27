@@ -239,6 +239,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
 			mailBoxDTO.setModifiedBy("unknown-user");
 
