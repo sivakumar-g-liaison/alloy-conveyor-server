@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.integration.test;
 
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
@@ -23,6 +24,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailb
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
@@ -31,10 +33,12 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxRespo
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDetailedResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 
 /**
@@ -1146,4 +1150,58 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         Assert.assertTrue(serviceResponse.getTotalItems() == count);
         Assert.assertTrue(serviceResponse.getMailBox().size() == count);
     }
+    
+    /**
+     * Method to read cluster type using mailbox guid.
+     */
+    @Test
+    public void testReadClusterTypeByMailBoxId() throws Exception {
+        
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = service.getClusterType(response.getMailBox().getGuid());
+        
+        Assert.assertEquals(MailBoxUtil.CLUSTER_TYPE, clusterTypeResponseDTO.getClusterType());
+        Assert.assertEquals(SUCCESS, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+    
+    /**
+     * Method to read cluster type using invalid mailbox guid.
+     */
+    @Test
+    public void testReadClusterTypeByInvalidMailBoxId() throws Exception {
+        
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = service.getClusterType(response.getMailBox().getGuid()+ "1");
+        
+        Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+
+    /**
+     * Method to read cluster type using invalid mailbox guid.
+     */
+    @Test
+    public void testReadClusterTypeByEmptyMailBoxId() throws Exception {
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = service.getClusterType("");
+        
+        Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+    
 }

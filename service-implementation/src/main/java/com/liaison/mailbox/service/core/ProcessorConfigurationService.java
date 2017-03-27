@@ -70,6 +70,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
@@ -1100,15 +1101,11 @@ public class ProcessorConfigurationService {
             ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
             clusterType = configDao.getClusterType(processorId);
             
-            if (null == clusterType) {
-                throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, MailBoxConstants.CLUSTER_TYPE,
-                        Response.Status.BAD_REQUEST);
-            }
             clusterTypeResponseDTO.setClusterType(clusterType);
             clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
             return clusterTypeResponseDTO;
             
-        } catch (MailBoxConfigurationServicesException e) {
+        } catch (NoResultException | MailBoxConfigurationServicesException e) {
             clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
                     MailBoxConstants.CLUSTER_TYPE,
                     Messages.FAILURE,
