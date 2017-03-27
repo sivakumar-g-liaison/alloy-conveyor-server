@@ -778,7 +778,9 @@ public class MailBoxConfigurationService {
 	        return clusterTypeResponseDTO;
 	        
 	    } catch (NoResultException | MailBoxConfigurationServicesException e) {
-	        clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.CLUSTER_TYPE, Messages.FAILURE,
+	        clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
+	                MailBoxConstants.CLUSTER_TYPE,
+	                Messages.FAILURE,
 	                e.getMessage()));
 	        return clusterTypeResponseDTO;
 	    }
