@@ -376,7 +376,7 @@ public abstract class GridServiceRTDM<T> {
         andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name()));
         
         pathString = request.get(MailBoxConstants.CLUSTER_TYPE);
-        andPredicatesList.add(criteriaBuilder.equal(pathString, MailBoxUtil.CLUSTER_TYPE));
+        andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
 
         // adding all the predicates
         holder.setPredicate(criteriaBuilder.and(andPredicatesList

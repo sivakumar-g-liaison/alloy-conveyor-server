@@ -668,10 +668,10 @@ public class MailBoxConfigurationService {
 			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
 			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
 			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
-			
-			String deploymentType = MailBoxUtil.getEnvironmentProperties()
-			        .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-			dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR_SERVER.getValue()));
+
+            String deploymentType = MailBoxUtil.getEnvironmentProperties()
+                    .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+            dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR.getValue()));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,

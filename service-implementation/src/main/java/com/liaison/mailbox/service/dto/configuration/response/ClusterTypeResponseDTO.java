@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -21,15 +21,15 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 @JsonRootName("clusterTypeResponse")
 public class ClusterTypeResponseDTO extends CommonResponseDTO {
 
-	private static final long serialVersionUID = 1L;
-	private String clusterType;
+    private static final long serialVersionUID = 1L;
+    private String clusterType;
 
-	public String getClusterType() {
-		return clusterType;
-	}
+    public String getClusterType() {
+        return clusterType;
+    }
 
-	public void setClusterType(String clusterType) {
-		this.clusterType = clusterType;
-	}
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
 
 }

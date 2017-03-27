@@ -283,8 +283,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 			.append(SERV_INST_ID)
 			.append(" and processor.procsrStatus <> :")
 			.append(ProcessorConfigurationDAO.STATUS_DELETE)
-			.append(" AND processor.clusterType =:")
-			.append(MailBoxConstants.CLUSTER_TYPE)
+			.append(" AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")")
 			.append(")");
 
 }
