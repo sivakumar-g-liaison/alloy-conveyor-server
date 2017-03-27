@@ -175,7 +175,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 		processorSyncUrlDisplayPrefix: "",
 		processorAsyncUrlDisplayPrefix: "",
 		defaultScriptTemplateName: "",
-		deployAsDropbox:false	
+	    deployAsDropbox:false,
+	    clusterTypes:[]
 	};
 	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
 		function (data, status) {
@@ -186,6 +187,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
 				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
 				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
+				$rootScope.javaProperties.clusterTypes = data.getPropertiesValueResponseDTO.properties.clusterTypes;
 				
 			} else {
 				return;

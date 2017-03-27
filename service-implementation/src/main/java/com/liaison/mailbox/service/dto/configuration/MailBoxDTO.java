@@ -17,18 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
@@ -164,6 +157,7 @@ public class MailBoxDTO implements Serializable {
         this.modifiedDate = modifiedDate;
     }
     
+    @DataValidation(errorMessage = "MailBox clusterType set to a value that is not supported.", type = MailBoxConstants.CLUSTER_TYPE)
     public String getClusterType() {
         return clusterType;
     }
@@ -185,6 +179,7 @@ public class MailBoxDTO implements Serializable {
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
 		mailBox.setTenancyKey(this.getTenancyKey());
+		mailBox.setClusterType(MailBoxUtil.isConveyorType() ? MailBoxConstants.SECURE : this.getClusterType());
 		EntityStatus status = EntityStatus.findByName(this.getStatus());
 		mailBox.setMbxStatus(status.value());
 	}

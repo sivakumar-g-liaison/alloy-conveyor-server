@@ -56,6 +56,14 @@
 	          </label>
 	          <input class="form-control" type="text" id="modifiedById" ng-model="mailBox.modifiedBy" name="modifiedByName" ng-disabled = "true"/>
          </div>
+         
+         <div class="form-group" ng-show="!javaProperties.deployAsDropbox">
+              <label for="clusterType">
+               Cluster Type
+              </label>        
+              <select class="form-control" ng-model="mailBox.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+              </select>
+         </div>
         
    </div>
       

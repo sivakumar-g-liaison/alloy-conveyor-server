@@ -997,6 +997,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         processorDTO.setName(System.currentTimeMillis() + "");
 
         processorDTO.setDescription("CREATING PROCESSOR");
+        processorDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         processorDTO.setType(processorType);
         processorDTO.setProtocol(protocolType);

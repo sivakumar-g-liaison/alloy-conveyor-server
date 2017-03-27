@@ -159,7 +159,6 @@ public class MailBoxConfigurationService {
 
 			mailBox.setModifiedBy(userId);
 			mailBox.setModifiedDate(new Timestamp(System.currentTimeMillis()));
-			mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
 			// persisting the mailbox entity
 			configDao.persist(mailBox);
@@ -668,10 +667,8 @@ public class MailBoxConfigurationService {
 			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
 			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
 			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
-
-            String deploymentType = MailBoxUtil.getEnvironmentProperties()
-                    .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-            dto.setDeployAsDropbox(deploymentType.equals(DeploymentType.CONVEYOR.getValue()));
+            dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
+            dto.setClusterTypes(MailBoxUtil.getClusterTypes());
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
