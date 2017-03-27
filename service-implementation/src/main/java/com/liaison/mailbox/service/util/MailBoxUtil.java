@@ -103,10 +103,23 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_WEEK = 7;
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
-	
-	private static String clusterType = null;
 
     private static GEMACLClient gemClient = new GEMACLClient();
+
+    /**
+     * Initialize the cluster type.
+     */
+    public static String CLUSTER_TYPE;
+
+    static {
+
+        CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
+            CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
+        } else {
+            CLUSTER_TYPE = MailBoxConstants.SECURE;
+        }
+    }
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -851,21 +864,4 @@ public class MailBoxUtil {
         return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
     }
     
-    /**
-     * Initialize the cluster type.
-     */
-    public static String CLUSTER_TYPE;
-
-    static {
-
-		if (null == CLUSTER_TYPE) {
-
-			CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-			if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
-				CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
-			} else {
-				CLUSTER_TYPE = MailBoxConstants.SECURE;
-			}
-		}
-	}
 }

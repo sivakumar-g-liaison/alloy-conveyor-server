@@ -97,8 +97,11 @@ public class QueueAndTopicProcessInitializer {
         }
 
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-        if (deploymentType.equals(DeploymentType.CONVEYOR.getValue())) {
-
+        
+        switch (DeploymentType.valueOf(deploymentType)) {
+        
+        case CONVEYOR:
+            
             // Initialize the dropbox queue
             try {
 
@@ -109,9 +112,11 @@ public class QueueAndTopicProcessInitializer {
             } catch (Exception e) {
                 logger.warn("Queue listener for Conveyor Server could not be initialized.", e);
             }
-
-        } else if (deploymentType.equals(DeploymentType.RELAY.getValue())){
-
+            break;
+            
+        case RELAY:
+        case LOW_SECURE_RELAY:
+            
             // Initialize processor queue and processedPayload queue
             try {
 
@@ -152,7 +157,7 @@ public class QueueAndTopicProcessInitializer {
             } catch (Exception e) {
                 logger.warn("Queue listener for UserManagement Directory Creation could not be initialized.", e);
             }
-
+            break;
         }
     }
 
