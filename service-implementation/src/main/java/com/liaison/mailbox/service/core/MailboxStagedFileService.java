@@ -10,17 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
@@ -33,6 +22,15 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseStagedFileReq
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class used to retrieve the staged file details in relay.
@@ -103,7 +101,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
      * @param pguid
      * @return response
     */
-    public Response deacivateStagedFile(String pguid) {
+    public Response deactivateStagedFile(String pguid) {
 	
         LOG.debug("Entering into deactivate StagedFiles.");
         EntityManager em = null;
@@ -119,7 +117,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
                 if (null == file) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
-                
+
                 if (!MailBoxUtil.CLUSTER_TYPE.equals(file.getClusterType())) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
@@ -171,12 +169,12 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             tx = em.getTransaction();
             tx.begin();
 
-            StringBuilder STAGED_FILE_BULK_UPDATE = new StringBuilder().append("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1")
-                    .append(" WHERE PGUID IN (?2)")
-                    .append(" AND STATUS = 'STAGED'")
-                    .append(" AND CLUSTER_TYPE = ?3");
-            
-            Query q = em.createNativeQuery(STAGED_FILE_BULK_UPDATE.toString());
+            String STAGED_FILE_BULK_UPDATE = "UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1" +
+                    " WHERE PGUID IN (?2)" +
+                    " AND STATUS = 'STAGED'" +
+                    " AND CLUSTER_TYPE = ?3";
+
+            Query q = em.createNativeQuery(STAGED_FILE_BULK_UPDATE);
             q.setParameter(1, MailBoxUtil.getTimestamp());
             q.setParameter(2, guids);
             q.setParameter(3, MailBoxUtil.CLUSTER_TYPE);

@@ -25,7 +25,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import java.sql.Timestamp;
 
 /**
@@ -226,12 +225,12 @@ public class StagedFile implements Identifiable {
     public void setOriginatingDc(String originatingDc) {
         this.originatingDc = originatingDc;
     }
-    
+
     @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
     public String getClusterType() {
         return clusterType;
     }
-    
+
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
     }

@@ -16,6 +16,7 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +46,7 @@ public class DropboxBaseService {
 
         LOG.info("Retrieving tenancy keys from acl-manifest");
         // retrieve the tenancy key from acl manifest
-        List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
+        List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifest);
         if (tenancyKeys.isEmpty()) {
             LOG.error("Retrieval of tenancy key from acl manifest failed");
             throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);

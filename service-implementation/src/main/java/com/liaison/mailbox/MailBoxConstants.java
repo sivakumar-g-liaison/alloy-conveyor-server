@@ -178,9 +178,9 @@ public interface MailBoxConstants {
 	String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
 	String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
-	
-	// Property to decide whether the application is deployed "RELAY", "LOWSECURE-RELAY" or "CONVEYOR"
-	String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
+
+    // Property to decide whether the application is deployed "RELAY", "LOWSECURE-RELAY" or "CONVEYOR"
+    String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
 
 	String MAILBOX = "MailBox";
 	String PROCESSOR_STATUS = "Processor Status";
@@ -461,7 +461,7 @@ public interface MailBoxConstants {
     String STUCK_PROCESSORS_IN_RELAY = "Stuck Processors in Relay";
     String MAILBOX_STUCK_PROCESSOR_TIME_UNIT = "com.liaison.mailbox.stuck.processor.time.unit";
     String MAILBOX_STUCK_PROCESSOR_TIME_VALUE = "com.liaison.mailbox.stuck.processor.time.value";
-    
+
     //Cluster type
     String CLUSTER_TYPE = "clusterType";
     String SECURE = "SECURE";

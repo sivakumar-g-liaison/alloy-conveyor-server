@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -32,188 +32,182 @@ import java.util.Map;
 
 /**
  * This will fetch the Staged file details. 
- * 
+ *
  * @author OFS
  */
 public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
 
-	public StagedFileDAOBase() {
-		super(PERSISTENCE_UNIT_NAME);
-	}
+    public StagedFileDAOBase() {
+        super(PERSISTENCE_UNIT_NAME);
+    }
 
-	/**
-	 *Method to get list of staged files based on search criteria
-	 *
-	 */
-	@Override
-	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails) {
+    /**
+     *Method to get list of staged files based on search criteria
+     *
+     */
+    @Override
+    public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails) {
 
-		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
-		EntityManager entityManager = null;
+        List<StagedFile> stagedFiles = new ArrayList<>();
+        EntityManager entityManager = null;
 
-		try {
-
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-
-		   // get Search Filters
-		    String sortDirection = searchFilter.getSortDirection();
-		    String fileName = searchFilter.getStagedFileName();
-		    String status = searchFilter.getStatus();
-		    int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
-		    int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-		    String entityStatus = MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase();
-
-			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.mailboxId in (:")
-					.append(MAILBOX_IDS)
-					.append(")")
-					.append(" and sf.stagedFileStatus = :")
-					.append(STATUS);
-
-			// GMB-595 - Setting expirationTime based on the status - (Setting only for ACTIVE status).
-			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
-				queryString.append(" and sf.expirationTime > :");
-				queryString.append(CURRENT_TIME);
-			}
-
-			if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
-				queryString.append(" and LOWER(sf.fileName) like :");
-				queryString.append(FILE_NAME);
-			}
-
-			if (!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
-				sortDirection=sortDirection.toUpperCase();
-				queryString.append(" order by sf.fileName " + sortDirection);
-			} else {
-				queryString.append(" order by sf.fileName");
-			}
-
-			Query query = entityManager.createQuery(queryString.toString());
-		    query.setParameter(STATUS, entityStatus)
-		          .setParameter(MAILBOX_IDS, mailboxIds);
-			query.setFirstResult(pagingOffset);
-			query.setMaxResults(pagingCount);
-
-			if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
-				query.setParameter(FILE_NAME, "%" + fileName.toLowerCase() + "%");
-			}
-
-			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
-				query.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
-			}
-
-			List<?> files = query.getResultList();
-
-			Iterator<?> iterator = files.iterator();
-
-			while (iterator.hasNext()) {
-				StagedFile stagedFile = (StagedFile) iterator.next();
-				stagedFiles.add(stagedFile);
-			}
-
-		} finally {
-
-			if (null != entityManager) {
-				entityManager.close();
-			}
-		}
-		return stagedFiles;
-	}
-
-	/**
-	 * Returns the stagedfileList based on the search done by given GUID and MAILBOXIDS
-	 */
-	@Override
-	public List<StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid) {
-
-		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
-		EntityManager entityManager = null;
-
-		try {
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-
-			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where (sf.pguid) = :")
-					.append(StagedFileDAO.GUID)
-					.append(" and sf.mailboxId in (:")
-					.append(MAILBOX_IDS)
-					.append(")");
-
-			List<?> files = entityManager
-					.createQuery(query.toString())
-					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
-					.setParameter(MAILBOX_IDS, mailboxIds)
-					.getResultList();
-
-			Iterator<?> iterator = files.iterator();
-			while (iterator.hasNext()) {
-				StagedFile stagedFile = (StagedFile) iterator.next();
-				stagedFiles.add(stagedFile);
-			}
-
-		} finally {
-
-			if (null != entityManager) {
-				entityManager.close();
-			}
-		}
-		return stagedFiles;
-	}
-
-
-	/**
-	 *Method to number of staged files based on search criteria
-	 *
-	 */
-	@Override
-	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status) {
-
-		EntityManager entityManager = null;
-		Long totalItems = null;
-		int count = 0;
-		boolean isActive = false;
-
-		try {
+        try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-			String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
+            // get Search Filters
+            String sortDirection = searchFilter.getSortDirection();
+            String fileName = searchFilter.getStagedFileName();
+            String status = searchFilter.getStatus();
+            int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
+            int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
+            String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
 
-			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
-					.append(" where LOWER(sf.fileName) like :")
-					.append(FILE_NAME)
-					.append(" and sf.mailboxId in (:")
-					.append(MAILBOX_IDS)
-					.append(")");
+            StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
+                    .append(" where sf.mailboxId in (:")
+                    .append(MAILBOX_IDS)
+                    .append(")")
+                    .append(" and sf.stagedFileStatus = :")
+                    .append(STATUS);
 
-			isActive = (EntityStatus.ACTIVE.name().equals(entityStatus));
-			if (isActive) {
-				query.append(" and sf.expirationTime > :")
-				     .append(CURRENT_TIME);
-			}
-			query.append(" and sf.stagedFileStatus = :")
-				 .append(STATUS);
+            // GMB-595 - Setting expirationTime based on the status - (Setting only for ACTIVE status).
+            if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+                queryString.append(" and sf.expirationTime > :");
+                queryString.append(CURRENT_TIME);
+            }
 
-			Query queryResult = entityManager.createQuery(query.toString());
-			if (isActive) {
-				queryResult.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
-			}
+            if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
+                queryString.append(" and LOWER(sf.fileName) like :");
+                queryString.append(FILE_NAME);
+            }
 
-			queryResult.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
-			           .setParameter(STATUS, entityStatus)
-			           .setParameter(MAILBOX_IDS, mailboxIds);
+            if (!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
+                sortDirection = sortDirection.toUpperCase();
+                queryString.append(" order by sf.fileName ").append(sortDirection);
+            } else {
+                queryString.append(" order by sf.fileName");
+            }
 
-			totalItems = (Long) queryResult.getSingleResult();
-			count = totalItems.intValue();
-			return count;
+            Query query = entityManager.createQuery(queryString.toString());
+            query.setParameter(STATUS, entityStatus)
+                    .setParameter(MAILBOX_IDS, mailboxIds);
+            query.setFirstResult(pagingOffset);
+            query.setMaxResults(pagingCount);
 
-		} finally {
+            if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
+                query.setParameter(FILE_NAME, "%" + fileName.toLowerCase() + "%");
+            }
 
-			if (null != entityManager) {
-				entityManager.close();
-			}
-		}
-	}
+            if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+                query.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+            }
+
+            List<?> files = query.getResultList();
+            for (Object stagedFile : files) {
+                stagedFiles.add((StagedFile) stagedFile);
+            }
+
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return stagedFiles;
+    }
+
+    /**
+     * Returns the stagedfileList based on the search done by given GUID and MAILBOXIDS
+     */
+    @Override
+    public List<StagedFile> findStagedFilesOfMailboxesBasedOnGUID(List<String> mailboxIds, String guid) {
+
+        List<StagedFile> stagedFiles = new ArrayList<>();
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            String query = "select sf from StagedFile sf" +
+                    " where (sf.pguid) = :" +
+                    StagedFileDAO.GUID +
+                    " and sf.mailboxId in (:" +
+                    MAILBOX_IDS +
+                    ")";
+
+            List<?> files = entityManager
+                    .createQuery(query)
+                    .setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
+                    .setParameter(MAILBOX_IDS, mailboxIds)
+                    .getResultList();
+
+            for (Object file : files) {
+                stagedFiles.add((StagedFile) file);
+            }
+
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return stagedFiles;
+    }
+
+
+    /**
+     *Method to number of staged files based on search criteria
+     *
+     */
+    @Override
+    public int getStagedFilesCountByName(List<String> mailboxIds, String fileName, String status) {
+
+        EntityManager entityManager = null;
+        Long totalItems;
+        int count;
+        boolean isActive;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
+
+            StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
+                    .append(" where LOWER(sf.fileName) like :")
+                    .append(FILE_NAME)
+                    .append(" and sf.mailboxId in (:")
+                    .append(MAILBOX_IDS)
+                    .append(")");
+
+            isActive = (EntityStatus.ACTIVE.name().equals(entityStatus));
+            if (isActive) {
+                query.append(" and sf.expirationTime > :")
+                        .append(CURRENT_TIME);
+            }
+            query.append(" and sf.stagedFileStatus = :")
+                    .append(STATUS);
+
+            Query queryResult = entityManager.createQuery(query.toString());
+            if (isActive) {
+                queryResult.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+            }
+
+            queryResult.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+                    .setParameter(STATUS, entityStatus)
+                    .setParameter(MAILBOX_IDS, mailboxIds);
+
+            totalItems = (Long) queryResult.getSingleResult();
+            count = totalItems.intValue();
+            return count;
+
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
 
     @Override
     public void persistStagedFile(WorkTicket workticket,
@@ -222,20 +216,20 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                                   boolean directUploadEnabled) {
 
         EntityManager entityManager = null;
-        StagedFile stagedFileEntity = null;
+        StagedFile stagedFileEntity;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-        	StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
-        	stagedFileDto.setExpirationTime("0");
-        	stagedFileDto.setProcessorId(processorId);
-        	stagedFileDto.setProcessorType(processorType);
+            StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
+            stagedFileDto.setExpirationTime("0");
+            stagedFileDto.setProcessorId(processorId);
+            stagedFileDto.setProcessorType(processorType);
 
-			if (directUploadEnabled) {
-				stagedFileDto.setStatus(EntityStatus.STAGED.value());
-			}
+            if (directUploadEnabled) {
+                stagedFileDto.setStatus(EntityStatus.STAGED.value());
+            }
 
             stagedFileEntity = new StagedFile();
             stagedFileEntity.copyFromDto(stagedFileDto, true);
@@ -250,20 +244,20 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     }
 
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     @Override
-	public StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName) {
+    public StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName) {
 
-		EntityManager em = null;
+        EntityManager em = null;
 
-		try {
+        try {
 
             em = DAOUtil.getEntityManager(persistenceUnitName);
 
             List<String> statuses = new ArrayList<>();
             statuses.add(EntityStatus.STAGED.name());
-			statuses.add(EntityStatus.ACTIVE.name());
-			statuses.add(EntityStatus.FAILED.name());
+            statuses.add(EntityStatus.ACTIVE.name());
+            statuses.add(EntityStatus.FAILED.name());
 
             List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE.toString())
                     .setParameter(PROCESSOR_ID, processorId)
@@ -274,13 +268,13 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .getResultList();
 
             return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
-		} finally {
+        } finally {
 
-			if (null != em) {
-			    em.close();
-			}
-		}
-	}
+            if (null != em) {
+                em.close();
+            }
+        }
+    }
 
     /**
      * Returns the staged files of the given processor
@@ -295,22 +289,22 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-            Query query = null;
+            Query query;
             if (directUpload) {
 
-				List<String> statuses = new ArrayList<>();
-				statuses.add(EntityStatus.FAILED.name());
-				statuses.add(EntityStatus.ACTIVE.name());
+                List<String> statuses = new ArrayList<>();
+                statuses.add(EntityStatus.FAILED.name());
+                statuses.add(EntityStatus.ACTIVE.name());
 
                 //to retrieve failed files for profile invocation if direct upload is enabled
-				if (recurseSubDir) {
-				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
-				    query.setParameter(FILE_PATH, filePath + "%");
-				} else {
-				    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
-				    query.setParameter(FILE_PATH, filePath);
-				}
-                
+                if (recurseSubDir) {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
+                    query.setParameter(FILE_PATH, filePath + "%");
+                } else {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
+                    query.setParameter(FILE_PATH, filePath);
+                }
+
                 query.setParameter(STATUS, statuses);
             } else {
 
@@ -322,18 +316,16 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH.toString());
                     query.setParameter(FILE_PATH, filePath);
                 }
-				
+
                 query.setParameter(STATUS, EntityStatus.INACTIVE.name());
             }
 
             query.setParameter(PROCESSOR_ID, processorId);
             query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
-            
+
             List<?> files = query.getResultList();
-            Iterator<?> iterator = files.iterator();
-            while (iterator.hasNext()) {
-                StagedFile stagedFile = (StagedFile) iterator.next();
-                stagedFiles.add(stagedFile);
+            for (Object file : files) {
+                stagedFiles.add((StagedFile) file);
             }
 
         } finally {
@@ -362,8 +354,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
-            for (Object file : files) {
-                return (StagedFile) file;
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
             }
 
         } finally {
@@ -376,12 +368,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
     /**
      * Returns staged file entries by filename and file path for file writer processor.
-     * 
+     *
      */
     public StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName) {
-        
+
         EntityManager entityManager = null;
-        
+
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER)
@@ -391,13 +383,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(STATUS, EntityStatus.INACTIVE.value())
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
-            
-            Iterator<?> iterator = files.iterator();
-            
-            while (iterator.hasNext()) {
-                return (StagedFile) iterator.next();
+
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
             }
-            
         } finally {
             if (null != entityManager) {
                 entityManager.close();
@@ -405,7 +394,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
         return null;
     }
-    
+
     @Override
     public void persist(StagedFile entity) {
         entity.setOriginatingDc(DATACENTER_NAME);

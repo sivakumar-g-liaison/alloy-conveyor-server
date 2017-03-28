@@ -76,12 +76,6 @@ public class QueueAndTopicProcessInitializer {
     private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
     private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
 
-    private static QueuePooledListenerContainer dropboxQueue;
-    private static QueuePooledListenerContainer mailboxProcessorQueue;
-    private static QueuePooledListenerContainer mailboxProcessedPayloadQueue;
-    private static TopicPooledListenerContainer mailBoxTopicPooledListenerContainer;
-    private static QueuePooledListenerContainer umDirOprsQueue;
-
     //To do Add low secure items
 
     public static void initialize() {
@@ -97,67 +91,65 @@ public class QueueAndTopicProcessInitializer {
         }
 
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-        
         switch (DeploymentType.valueOf(deploymentType)) {
-        
-        case CONVEYOR:
-            
-            // Initialize the dropbox queue
-            try {
 
-                logger.info("Starting Dropbox Queue Listener");
-                dropboxQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
-                dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                logger.info("Started Dropbox Queue Listener");
-            } catch (Exception e) {
-                logger.warn("Queue listener for Conveyor Server could not be initialized.", e);
-            }
-            break;
-            
-        case RELAY:
-        case LOW_SECURE_RELAY:
-            
-            // Initialize processor queue and processedPayload queue
-            try {
+            case CONVEYOR:
 
-                logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
-                mailboxProcessorQueue = new MailboxQueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
-                mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
-            } catch (Exception e) {
-                logger.warn("Queue listener for Processor could not be initialized.", e);
-            }
+                // Initialize the dropbox queue
+                try {
 
-            try {
+                    logger.info("Starting Dropbox Queue Listener");
+                    QueuePooledListenerContainer dropboxQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
+                    dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started Dropbox Queue Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for Conveyor Server could not be initialized.", e);
+                }
+                break;
 
-                logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-                mailboxProcessedPayloadQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
-                mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-            } catch (Exception e) {
-                logger.warn("Queue listener for SB to Relay Server could not be initialized.", e);
-            }
+            case RELAY:
+            case LOW_SECURE_RELAY:
 
-            try {
+                // Initialize processor queue and processedPayload queue
+                try {
 
-                logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-                mailBoxTopicPooledListenerContainer = new MailBoxTopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
-                mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-            } catch (Exception e) {
-                logger.warn("Topic listener for Relay Server could not be initialized.", e);
-            }
+                    logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
+                    QueuePooledListenerContainer mailboxProcessorQueue = new MailboxQueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
+                    mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for Processor could not be initialized.", e);
+                }
 
-            try {
+                try {
 
-                logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-                umDirOprsQueue = new MailboxQueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
-                umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-            } catch (Exception e) {
-                logger.warn("Queue listener for UserManagement Directory Creation could not be initialized.", e);
-            }
-            break;
+                    logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
+                    QueuePooledListenerContainer mailboxProcessedPayloadQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
+                    mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for SB to Relay Server could not be initialized.", e);
+                }
+
+                try {
+
+                    logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
+                    TopicPooledListenerContainer mailBoxTopicPooledListenerContainer = new MailBoxTopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
+                    mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
+                } catch (Exception e) {
+                    logger.warn("Topic listener for Relay Server could not be initialized.", e);
+                }
+
+                try {
+
+                    logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
+                    QueuePooledListenerContainer umDirOprsQueue = new MailboxQueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
+                    umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for UserManagement Directory Creation could not be initialized.", e);
+                }
         }
     }
 

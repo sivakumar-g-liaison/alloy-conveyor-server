@@ -64,7 +64,6 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,7 +71,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -1078,32 +1076,32 @@ public class ProcessorConfigurationService {
 
     /**
      * Method to get the cluster type of the mailbox based on processor id.
-     * 
-     * @param Processor Id
+     *
+     * @param processorId pguid of the processor
      * @return clusterTypeResponseDTO
      */
     public ClusterTypeResponseDTO getClusterType(String processorId) {
-        
+
         LOGGER.debug("Entering into getClusterType.");
-        LOGGER.info("The retrieve processor id is {} ", processorId);
-        
+        LOGGER.debug("The retrieve processor id is {} ", processorId);
+
         ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
         String clusterType = null;
-        
+
         if (null == processorId) {
             throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id",
                     Response.Status.BAD_REQUEST);
         }
-        
+
         try {
-            
+
             ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
             clusterType = configDao.getClusterType(processorId);
-            
+
             clusterTypeResponseDTO.setClusterType(clusterType);
             clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
             return clusterTypeResponseDTO;
-            
+
         } catch (NoResultException | MailBoxConfigurationServicesException e) {
             clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
                     MailBoxConstants.CLUSTER_TYPE,

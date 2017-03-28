@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
@@ -29,7 +28,6 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
-import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -52,8 +50,8 @@ import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +60,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -242,7 +239,7 @@ public class MailBoxConfigurationService {
 			}
 			
 			// retrieve the actual tenancykey Display Name from TenancyKeys
-			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
+            String tenancyKeyDisplayName = TenancyKeyUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
 
 			// if the tenancy key display name is not available then error will be logged as the given tenancyKey is
 			// not available in tenancyKeys retrieved from acl manifest
@@ -486,7 +483,7 @@ public class MailBoxConfigurationService {
 				processors = processorDao.findProcessorByMbx(mbx.getPguid(), false);
 	            mbx.setMailboxProcessors(processors);
                 if (!MailBoxUtil.isEmpty(aclManifestJson)) {
-                    tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
+                    tenancyKeyDisplayName = TenancyKeyUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
                 } else {
                     tenancyKeyDisplayName = mbx.getTenancyKey();
                 }
@@ -595,7 +592,7 @@ public class MailBoxConfigurationService {
             }
 
             // retrieve the actual tenancykey guids from DTO
-            tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            tenancyKeyGuids = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 
             if (tenancyKeyGuids.isEmpty()) {
                 LOG.error("retrieval of tenancy key from acl manifest failed");
@@ -650,7 +647,6 @@ public class MailBoxConfigurationService {
 	/**
 	 * getting values from java properties file
 	 * @return
-	 * @throws IOException
 	 */
 	public GetPropertiesValueResponseDTO readPropertiesFile() {
 		LOG.debug("Entering into readPropertiesFile.");
@@ -692,9 +688,6 @@ public class MailBoxConfigurationService {
 	 * 
 	 * @param guid
 	 * @return Mailbox
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws SymmetricAlgorithmException
 	 */
 	public GetMailBoxResponseDTO readMailbox(String guid) {
 
@@ -745,42 +738,42 @@ public class MailBoxConfigurationService {
 		}
 
 	}
-	
-	/**
-	 * Method to get the cluster type of the mailbox based on mailbox id.
-	 * 
-	 * @param mailboxId
-	 * @return clusterTypeResponseDTO
-	 */
-	public ClusterTypeResponseDTO getClusterType(String mailboxId) {
-	    
-	    LOG.debug("Entering into getClusterType.");
-	    LOG.info("The retrieve mailbox id is {} ", mailboxId);
-	    
-	    ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
-	    String clusterType = null;
-	    
-	    if (null == mailboxId) {
-	        throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id",
-	                Response.Status.BAD_REQUEST);
-	    }
-	    
-	    try {
-	        
-	        MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-	        clusterType = configDao.getClusterType(mailboxId);
-	        
-	        clusterTypeResponseDTO.setClusterType(clusterType);
-	        clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
-	        return clusterTypeResponseDTO;
-	        
-	    } catch (NoResultException | MailBoxConfigurationServicesException e) {
-	        clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
-	                MailBoxConstants.CLUSTER_TYPE,
-	                Messages.FAILURE,
-	                e.getMessage()));
-	        return clusterTypeResponseDTO;
-	    }
-	}
+
+    /**
+     * Method to get the cluster type of the mailbox based on mailbox id.
+     *
+     * @param mailboxId pguid of the mailbox
+     * @return clusterTypeResponseDTO
+     */
+    public ClusterTypeResponseDTO getClusterType(String mailboxId) {
+
+        LOG.debug("Entering into getClusterType.");
+        LOG.debug("The retrieve mailbox id is {} ", mailboxId);
+
+        ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
+        String clusterType = null;
+
+        if (null == mailboxId) {
+            throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id",
+                    Response.Status.BAD_REQUEST);
+        }
+
+        try {
+
+            MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+            clusterType = configDao.getClusterType(mailboxId);
+
+            clusterTypeResponseDTO.setClusterType(clusterType);
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
+            return clusterTypeResponseDTO;
+
+        } catch (NoResultException | MailBoxConfigurationServicesException e) {
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
+                    MailBoxConstants.CLUSTER_TYPE,
+                    Messages.FAILURE,
+                    e.getMessage()));
+            return clusterTypeResponseDTO;
+        }
+    }
 
 }

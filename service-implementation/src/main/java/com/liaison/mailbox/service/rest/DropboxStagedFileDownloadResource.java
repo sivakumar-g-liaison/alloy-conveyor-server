@@ -42,6 +42,7 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -146,7 +147,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 						throw new MailBoxServicesException("Staged file id is Mandatory", Response.Status.BAD_REQUEST);
 					}
 
-					List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(manifestResponse.getManifest());
+                    List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(manifestResponse.getManifest());
 					if (tenancyKeys.isEmpty()) {
 						LOG.error(MailBoxUtil.constructMessage(null, null, "retrieval of tenancy key from acl manifest failed"));
 						throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,

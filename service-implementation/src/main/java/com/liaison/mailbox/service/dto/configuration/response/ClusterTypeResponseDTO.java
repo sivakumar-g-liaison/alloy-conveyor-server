@@ -16,7 +16,6 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
  * Data Transfer Object used for sending cluster type Responses.
- *
  */
 @JsonRootName("clusterTypeResponse")
 public class ClusterTypeResponseDTO extends CommonResponseDTO {

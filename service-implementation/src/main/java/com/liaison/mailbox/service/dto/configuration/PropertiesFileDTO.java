@@ -31,7 +31,7 @@ public class PropertiesFileDTO {
 	private String processorAsyncUrlDisplayPrefix;
 	private String defaultScriptTemplateName;
 	private boolean deployAsDropbox;
-	private List<String> clusterTypes;
+    private List<String> clusterTypes;
 	
 	public String getProcessorSyncUrlDisplayPrefix() {
 		return processorSyncUrlDisplayPrefix;
@@ -70,9 +70,11 @@ public class PropertiesFileDTO {
 	public void setDeployAsDropbox(boolean deployAsDropbox) {
 	    this.deployAsDropbox = deployAsDropbox;
 	}
+
     public List<String> getClusterTypes() {
         return clusterTypes;
     }
+
     public void setClusterTypes(List<String> clusterTypes) {
         this.clusterTypes = clusterTypes;
     }

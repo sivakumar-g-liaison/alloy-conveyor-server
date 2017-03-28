@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * The dao class for the STAGED_FILE database table.
- * 
+ *
  * @author OFS
  */
 
@@ -41,16 +41,19 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String MAILBOX_IDS = "mailbox_ids";
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
 
-	/**
-	 * Method to retrieve the list of all staged files of given mailbox ids
-	 *
-	 * @param mailboxIds
-	 * @return list of stagedFiles
-	 */
-	List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
-	List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
-	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
+    /**
+     * Method to retrieve the list of all staged files of given mailbox ids
+     *
+     * @param mailboxIds
+     * @return list of stagedFiles
+     */
+    List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
+
+    List<StagedFile> findStagedFilesOfMailboxesBasedOnGUID(List<String> mailboxIds, String guid);
+
+    int getStagedFilesCountByName(List<String> mailboxIds, String fileName, String status);
+
+    StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
 
     /**
      * constructs staged file entity from workticket and persists it

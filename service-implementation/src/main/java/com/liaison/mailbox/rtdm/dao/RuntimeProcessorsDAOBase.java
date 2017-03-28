@@ -36,16 +36,14 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public RuntimeProcessors findByProcessorId(String processorId) {
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            @SuppressWarnings("unchecked")
             List<RuntimeProcessors> processors = entityManager
-                    .createNamedQuery(FIND_BY_PROCESSOR_ID)
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID, RuntimeProcessors.class)
                     .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();

@@ -20,8 +20,6 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.core.email.EmailInfoDTO;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropBoxUnStagedFileResponseDTO;
@@ -249,7 +247,7 @@ public class DropboxStagedFilesService extends DropboxBaseService {
 		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
 
 		// Find the staged file based on given GUID and mailboxIds
-		List<StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfMailboxesBasedonGUID(mailboxIds, guid);
+        List<StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfMailboxesBasedOnGUID(mailboxIds, guid);
 		if (stagedFiles.isEmpty()) {
 			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, guid,
 					Response.Status.BAD_REQUEST);
