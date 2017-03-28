@@ -100,7 +100,7 @@ def main( argv ):
 			print '\n==> Tablespace Creation Successful\n'
 		else:
 			print '\n==> Problem with Tablespace Creation\n'
-		os.system('echo. >> ' + logfile)
+		os.system('echo >> ' + logfile)
 
 		# Profiles
 		msg = 'Creating Profiles...'
@@ -115,7 +115,7 @@ def main( argv ):
 			print '\n==> ' + target_script + ' Execution Successful\n'
 		else:
 			print '\n==> Problem with Profile Creation\n'
-		os.system('echo. >> ' + logfile)
+		os.system('echo >> ' + logfile)
 
 		# Roles and Users
 		msg = 'Creating Roles and Users...'
@@ -130,7 +130,7 @@ def main( argv ):
 			print '\n==> ' + target_script + ' Execution Successful\n'
 		else:
 			print '\n==> Problem with Role/User Creation\n'
-		os.system('echo. >> ' + logfile)
+		os.system('echo >> ' + logfile)
 
 		# Quotas
 		msg = 'Assigning Quotas...'
@@ -145,7 +145,7 @@ def main( argv ):
 			print '\n==> ' + target_script + ' Execution Successful\n'
 		else:
 			print '\n==> Problem Specifying Quotas\n'
-		os.system('echo. >> ' + logfile)
+		os.system('echo >> ' + logfile)
 
 		# Flyway Tracking Table
 		msg = 'Creating Flyway Tracking Table...'
@@ -160,7 +160,7 @@ def main( argv ):
 			print '\n==> ' + target_script + ' Execution Successful\n'
 		else:
 			print '\n==> Problem with ' + target_script + ' Execution\n'
-		os.system('echo. >> ' + logfile)
+		os.system('echo >> ' + logfile)
 		print '\nSee ' + logfile + 'for details'
 	else:
 		print '================================================'
