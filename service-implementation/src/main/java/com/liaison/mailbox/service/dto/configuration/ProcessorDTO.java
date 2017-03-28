@@ -292,7 +292,9 @@ public class ProcessorDTO {
     	    processor.setProcsrDesc(this.getDescription());
     		processor.setProcsrName(this.getName());
     		processor.setJavaScriptUri(this.getJavaScriptURI());
-    		processor.setClusterType(MailBoxUtil.isConveyorType() ? MailBoxConstants.SECURE : this.getClusterType());
+    		processor.setClusterType(MailBoxUtil.isConveyorType()
+					? MailBoxConstants.SECURE
+					: (this.getClusterType() == null ? MailBoxConstants.SECURE : this.getClusterType()));
 
     		// handling of folder properties
     		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
@@ -389,7 +391,7 @@ public class ProcessorDTO {
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
 		this.setClusterType(processor.getClusterType());
-		
+
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
 			EntityStatus foundStatus = EntityStatus.findByCode(status);
@@ -554,7 +556,7 @@ public class ProcessorDTO {
    			}
    			KMSUtil.fetchTrustStore(trustStoreGroupId);
    		} catch (LiaisonException | IOException | JAXBException | MailBoxServicesException exception) {
-   			if (null != exception && Messages.CERTIFICATE_RETRIEVE_FAILED.value().equals(exception.getMessage())) {
+   			if (Messages.CERTIFICATE_RETRIEVE_FAILED.value().equals(exception.getMessage())) {
    				throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_INVALID, Response.Status.BAD_REQUEST);
    			}
    			throw new RuntimeException(exception);
@@ -571,7 +573,7 @@ public class ProcessorDTO {
    		try {
    			KMSUtil.getSecretFromKMS(password);
    		} catch (LiaisonException | IOException | MailBoxServicesException exception) {
-   			if (null != exception && Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
+   			if (Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
    				throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
    			}
    			throw new RuntimeException(exception);
@@ -587,7 +589,7 @@ public class ProcessorDTO {
    	public boolean isSSHKeyPairAvailable (List<CredentialDTO> credentials) {
    		
    		for (CredentialDTO credType : credentials) {
-   			if (credType.getCredentialType().toString().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && !MailBoxUtil.isEmpty(credType.getIdpURI())) {
+   			if (credType.getCredentialType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && !MailBoxUtil.isEmpty(credType.getIdpURI())) {
    				return true;
    			}
    		}

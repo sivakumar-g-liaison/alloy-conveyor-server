@@ -89,6 +89,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
                 System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
                 System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
+                System.setProperty("archaius.deployment.stack", prop.getProperty("STACK"));
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             } catch (Exception e) {
 
@@ -97,6 +98,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL_DROPBOX("http://localhost:9095/g2mailboxservice/config/dropbox");
                 System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
                 System.setProperty("archaius.deployment.environment", "dev");
+                System.setProperty("archaius.deployment.stack", "default");
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             }
         }

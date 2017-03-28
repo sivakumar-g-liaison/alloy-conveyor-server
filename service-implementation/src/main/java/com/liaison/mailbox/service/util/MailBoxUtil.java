@@ -61,6 +61,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -846,7 +847,7 @@ public class MailBoxUtil {
      * @return return list of cluster types
      */
     public static List<String> getClusterTypes() {
-        return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Arrays.asList(MailBoxConstants.LOWSECURE) :
+        return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Collections.singletonList(MailBoxConstants.LOWSECURE) :
                             Arrays.asList(MailBoxConstants.LOWSECURE, MailBoxConstants.SECURE);
     }
     

@@ -180,7 +180,7 @@ public class GenericValidator {
 			InvocationTargetException {
 
 		DataValidation annotationDetails = method.getAnnotation(DataValidation.class);
-		boolean isValidationPassed = false;
+		boolean isValidationPassed = true;
 
 		Object value = method.invoke(dto);
 		if (value != null && !value.toString().isEmpty()) {
@@ -355,8 +355,9 @@ public class GenericValidator {
                 &&  CredentialType.findByName(String.valueOf(value)) == null) {
             errorMessage.append(annotationDetails.errorMessage());
             return false;
-		}  else if (MailBoxConstants.CLUSTER_TYPE.equals(annotationDetails.type())
-                && MailBoxConstants.LOWSECURE.equals(MailBoxUtil.CLUSTER_TYPE) && !MailBoxConstants.LOWSECURE.equals(value)) {
+        } else if (MailBoxConstants.CLUSTER_TYPE.equals(annotationDetails.type())
+                && MailBoxConstants.LOWSECURE.equals(MailBoxUtil.CLUSTER_TYPE)
+                && !MailBoxConstants.LOWSECURE.equals(value)) {
             errorMessage.append(annotationDetails.errorMessage());
             return false;
         }

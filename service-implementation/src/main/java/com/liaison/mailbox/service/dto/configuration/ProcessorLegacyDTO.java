@@ -128,12 +128,8 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
 	 *            The processor entity
 	 * @param isCreate
 	 *            The boolean value use to differentiate create and revise processor operation.
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonGenerationException
 	 */
-	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException {
+	public void copyToEntity(Processor processor, boolean isCreate) {
 
 		try {
 			if (isCreate) {
@@ -151,16 +147,16 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             MailBoxUtil.validateConnectionTimeout(processorType, propertiesDTO.getConnectionTimeout(), validator);
             MailBoxUtil.validatePipelineId(processorType, propertiesDTO);
 
-			if (null != propertiesDTO) {
-				String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
-				processor.setProcsrProperties(propertiesJSON);
-			}
+			String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
+			processor.setProcsrProperties(propertiesJSON);
 
 			processor.setProcsrDesc(this.getDescription());
 			processor.setProcsrName(this.getName());
 			processor.setJavaScriptUri(this.getJavaScriptURI());
 			processor.setProcsrProtocol(this.getProtocol());
-			processor.setClusterType(MailBoxUtil.isConveyorType() ? MailBoxConstants.SECURE : this.getClusterType());
+			processor.setClusterType(MailBoxUtil.isConveyorType()
+					? MailBoxConstants.SECURE
+					: (this.getClusterType() == null ? MailBoxConstants.SECURE : this.getClusterType()));
 
 			// Setting the folders.
 			Folder folder = null;
