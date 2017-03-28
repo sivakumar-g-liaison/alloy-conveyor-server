@@ -248,12 +248,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
 		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
 		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
-		.append(" WHERE P.TYPE = ? AND")
-		.append(" M.PGUID = ? AND")
-		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' AND")
-		.append(" P.CLUSTER_TYPE = ? AND")
-		.append(" M.CLUSTER_TYPE = ?");
+		.append(" WHERE P.TYPE = ?1 AND")
+		.append(" M.PGUID = ?2 AND")
+		.append(" P.STATUS <> 'DELETED' AND")
+		.append(" M.STATUS <> 'DELETED' AND")
+		.append(" P.CLUSTER_TYPE = ?3 AND")
+		.append(" M.CLUSTER_TYPE = ?4");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
 		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
@@ -266,12 +266,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
 		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
 		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
-		.append(" WHERE P.TYPE = ? AND")
-		.append(" LOWER(M.NAME) = ? AND")
-		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' AND")
-		.append(" P.CLUSTER_TYPE = ? AND")
-		.append(" M.CLUSTER_TYPE = ?");
+		.append(" WHERE P.TYPE = ?1 AND")
+		.append(" LOWER(M.NAME) = ?2 AND")
+		.append(" P.STATUS <> 'DELETED' AND")
+		.append(" M.STATUS <> 'DELETED' AND")
+		.append(" P.CLUSTER_TYPE = ?3 AND")
+		.append(" M.CLUSTER_TYPE = ?4");
 
 	StringBuilder PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID = new StringBuilder().append("select processor from Processor processor")
 			.append(" inner join processor.mailbox mbx")
