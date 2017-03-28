@@ -602,16 +602,15 @@ input::-moz-focus-inner {
 	width: 165px;
 }
 
-.textPattern_width_1 {
-	width: 190px;
+.search-padding-left {
+	padding-left: 4px;
 }
 
-.textPattern_width_2 {
-	width: 385px;
+.search-form-bottom {
+	margin-bottom: 10px;
 }
-
 .button_width_2 {
-	width: 176px;
+	width: 131px;
 }
 
 .error_msg_color {

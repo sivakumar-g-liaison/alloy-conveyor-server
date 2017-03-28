@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -68,13 +67,10 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -650,14 +646,16 @@ public class ProcessorConfigurationService {
 			String procsrType = (String) obj[1];
 			String protocol = (String) obj[2];
 			String propertiesJson = (String) obj[3];
-			String procsrPropName = (String) obj[4];
-			String procsrPropValue = (String) obj[5];
-			String serviceInstanceId = (String) obj[6];
-			String mbxId = (String) obj[7];
-			String mbxName = (String) obj[8];
-			String tenancyKey = (String) obj[9];
-			String mbxPropName = (String) obj[10];
-			String mbxPropValue = (String) obj[11];
+			String procsrStatus = (String) obj[4];
+			String procsrPropName = (String) obj[5];
+			String procsrPropValue = (String) obj[6];
+			String serviceInstanceId = (String) obj[7];
+			String mbxId = (String) obj[8];
+			String mbxName = (String) obj[9];
+			String tenancyKey = (String) obj[10];
+			String mbxStatus = (String) obj[11];
+			String mbxPropName = (String) obj[12];
+			String mbxPropValue = (String) obj[13];
 			
 			// if the details are already available handle the processorProperty and mbx property alone
 			HTTPListenerHelperDTO helperDTO = httpListenerDetails.get(processorId);
@@ -702,8 +700,10 @@ public class ProcessorConfigurationService {
 					dynamicProperties.add(procsrProperty);
 				}
 				// if the details are not already available construct a new helperDTO
-				helperDTO = new HTTPListenerHelperDTO(processorId, protocol, procsrType, propertiesJson, 
-														serviceInstanceId, mbxId, mbxName, tenancyKey, ttlValue, ttlUnit, dynamicProperties);
+				helperDTO = new HTTPListenerHelperDTO(processorId, protocol,
+				                    procsrType, propertiesJson, procsrStatus,
+				                    serviceInstanceId, mbxId, mbxName, mbxStatus,
+				                    tenancyKey, ttlValue, ttlUnit, dynamicProperties);
 				httpListenerDetails.put(processorId, helperDTO);
 			}
 		}
@@ -742,6 +742,8 @@ public class ProcessorConfigurationService {
 			httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
 			httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
 			httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
+			httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
+			httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
 			if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
 				Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
 				httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));
