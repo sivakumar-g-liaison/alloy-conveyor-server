@@ -44,6 +44,10 @@ public class TenancyKeyUtil {
 
         List<TenancyKeyDTO> tenancyKeys = new ArrayList<>();
 
+        if (MailBoxUtil.isEmpty(aclManifestJson)) {
+            return tenancyKeys;
+        }
+
         List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
         TenancyKeyDTO tenancyKey = null;
         for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
@@ -74,6 +78,10 @@ public class TenancyKeyUtil {
     public static List<String> getTenancyKeyGuids(String aclManifestJson)
             throws IOException {
 
+        if (MailBoxUtil.isEmpty(aclManifestJson)) {
+            return new ArrayList<>();
+        }
+
         return gemClient.getDomainsFromACLManifest(aclManifestJson)
                 .stream()
                 .map(RoleBasedAccessControl::getDomainInternalName)
@@ -92,14 +100,15 @@ public class TenancyKeyUtil {
             throws IOException {
 
         String tenancyKeyDisplayName = null;
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        if (!MailBoxUtil.isEmpty(aclManifestJson)) {
 
-        for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-
-            if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
-                tenancyKeyDisplayName = rbac.getDomainName();
-                break;
-            }
+            List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+            tenancyKeyDisplayName = roleBasedAccessControls
+                    .stream()
+                    .filter(rbac -> rbac.getDomainInternalName().equals(tenancyKeyGuid))
+                    .map(RoleBasedAccessControl::getDomainName)
+                    .findFirst()
+                    .orElse(null);
         }
 
         if (null == tenancyKeyDisplayName) {
