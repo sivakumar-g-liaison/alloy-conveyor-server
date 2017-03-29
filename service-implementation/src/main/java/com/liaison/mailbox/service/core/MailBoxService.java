@@ -14,7 +14,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -32,7 +31,6 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
-import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
@@ -50,25 +48,22 @@ import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
-import com.netflix.config.ConfigurationManager;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.persistence.LockModeType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
+import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.RESUME;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
 
@@ -81,7 +76,6 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
 public class MailBoxService implements Runnable {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
-	private static final String DEFAULT_FILE_NAME = "NONE";
     private static final String PROFILE_NAME = "Profile Name";
     private String message;
     private boolean directUpload = false;
@@ -172,10 +166,8 @@ public class MailBoxService implements Runnable {
 	 * The method executes the processor based on given processor id.
 	 *
 	 * Unique id for processor
-	 *
-	 * @return The trigger profile response DTO
 	 */
-	public void executeProcessor(String triggerProfileRequest) {
+    private void executeProcessor(String triggerProfileRequest) {
 		
 		LOG.debug("Consumed Trigger profile request [" + triggerProfileRequest + "]");
 	    String processorId = null;
@@ -200,6 +192,10 @@ public class MailBoxService implements Runnable {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id",
 						Response.Status.CONFLICT);
 			}
+
+            //Fish tag global process id
+            ThreadContext.clearMap(); //set new context after clearing
+            ThreadContext.put(KEY_PROCESSOR_ID, processorId);
 
 			executionId = dto.getExecutionId();
 			if (MailBoxUtil.isEmpty(executionId)) {
@@ -272,8 +268,10 @@ public class MailBoxService implements Runnable {
             //send email to the configured mail id in case of failure
             EmailNotifier.sendEmail(processor, EmailNotifier.constructSubject(processor, false), e);
 
-		}
-		LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");
+		} finally {
+            ThreadContext.clearMap();
+        }
+        LOG.debug("Processor processed Trigger profile request [" + triggerProfileRequest + "]");
 
 	}
 
@@ -283,13 +281,12 @@ public class MailBoxService implements Runnable {
 	 *
 	 * @param request
 	 */
-	public void executeFileWriter(String request) {
+    private void executeFileWriter(String request) {
 
 		LOG.info("Consumed WORKTICKET [" + request + "]");
 	    String mailboxId = null;
 	    String payloadURI = null;
 	    String processorType = null;
-        boolean directUploadEnabled = false;
 
 	    WorkTicket workTicket = null;
 	    Processor processor = null;
@@ -473,7 +470,7 @@ public class MailBoxService implements Runnable {
     private Processor validateAndGetProcessor(String mailboxId, WorkTicket workTicket, ProcessorConfigurationDAO processorDAO) {
 
         Processor processor = null;
-        String processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
+        String processorId = workTicket.getAdditionalContextItem(KEY_PROCESSOR_ID);
         if (!MailBoxUtil.isEmpty(processorId)) {
             processor = processorDAO.findActiveProcessorById(processorId);
         } else {
@@ -537,7 +534,7 @@ public class MailBoxService implements Runnable {
      *
      * @param topicMessage topic message dto
      */
-    public void interruptThread(String topicMessage) {
+    private void interruptThread(String topicMessage) {
 
         try {
 
@@ -545,8 +542,6 @@ public class MailBoxService implements Runnable {
             if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
                 new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
             }
-
-
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -558,7 +553,7 @@ public class MailBoxService implements Runnable {
      * 
      * @param queueMessage message from GUM
      */
-    public void directoryOperation(String queueMessage) {
+    private void directoryOperation(String queueMessage) {
         
         try {
             
@@ -590,8 +585,7 @@ public class MailBoxService implements Runnable {
 
         // always get the first available processor because there
         // will be either one uploader or file writer available for each mailbox
-        Processor processor = (null != processors && processors.size() > 0) ? processors.get(0) : null;
-        return processor;
+        return (null != processors && processors.size() > 0) ? processors.get(0) : null;
 
     }
 
