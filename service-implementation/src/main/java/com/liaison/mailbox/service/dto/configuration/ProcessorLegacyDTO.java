@@ -134,7 +134,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             processor.setProcsrProtocol(this.getProtocol());
             processor.setClusterType(MailBoxUtil.isConveyorType()
                     ? MailBoxConstants.SECURE
-                    : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxConstants.SECURE : this.getClusterType()));
+                    : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxUtil.CLUSTER_TYPE : this.getClusterType()));
 
             // Setting the folders.
             Folder folder = null;

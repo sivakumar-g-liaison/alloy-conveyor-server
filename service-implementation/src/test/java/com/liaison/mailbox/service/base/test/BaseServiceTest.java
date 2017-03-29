@@ -306,6 +306,7 @@ public abstract class BaseServiceTest {
         procDTO.setProtocol("FTP");
         procDTO.setModifiedBy("unknown-user");
         procDTO.setJavaScriptURI("ftp://test:6060");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 

@@ -294,7 +294,7 @@ public class ProcessorDTO {
             processor.setJavaScriptUri(this.getJavaScriptURI());
             processor.setClusterType(MailBoxUtil.isConveyorType()
                     ? MailBoxConstants.SECURE
-                    : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxConstants.SECURE : this.getClusterType()));
+                    : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxUtil.CLUSTER_TYPE : this.getClusterType()));
 
             // handling of folder properties
             List<ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
