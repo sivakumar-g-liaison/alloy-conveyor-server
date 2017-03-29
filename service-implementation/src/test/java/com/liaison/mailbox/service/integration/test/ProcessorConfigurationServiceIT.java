@@ -86,6 +86,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -250,6 +251,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -284,6 +286,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -347,6 +350,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
@@ -385,6 +389,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), dummyValue, procRequestDTO.getProcessor().getModifiedBy());
 
@@ -423,6 +428,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(dummyValue, procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
@@ -1190,6 +1196,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
     
@@ -1226,6 +1233,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
         
     }
 
