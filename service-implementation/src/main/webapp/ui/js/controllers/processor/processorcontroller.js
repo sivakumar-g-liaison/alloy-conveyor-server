@@ -583,7 +583,7 @@ var rest = myApp.controller(
 				$scope.backToMailboxeModalView(); 
 				var redirectToId = $location.search().mailBoxId;
 				$location.$$search = {};
-				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId);
+				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId).search('disableFilters', isDisableFilterValue);
             };
 			$scope.backToMailboxeModalView = function () {
                  $('#backToMailboxAction').modal('hide')
