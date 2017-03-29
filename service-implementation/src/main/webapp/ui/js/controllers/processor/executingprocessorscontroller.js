@@ -1,8 +1,8 @@
 myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$location',  '$filter',
     function ($rootScope, $scope, $location, $filter) {
 	
-    $scope.totalServerItems = 0;
-	
+    $scope.totalServerItems = 0; 
+    
     //Paging set up
     $scope.pagingOptions = {
         pageSizes: [25, 100, 1000],

@@ -190,7 +190,7 @@ public class ProcessorExecutionConfigurationService {
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
             }
 
-            this.interruptAndUpdateStatus(processorId, userId, null, null);
+            this.interruptAndUpdateStatus(processorId, userId, null);
             response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
                     "The processor execution status for processor with id : " + processorId + " is ", Messages.SUCCESS));
             return response;
@@ -212,10 +212,7 @@ public class ProcessorExecutionConfigurationService {
      * @param processorId processor id
      * @param userId user login id
      */
-    public void interruptAndUpdateStatus(String processorId,
-                                         String userId,
-                                         String node,
-                                         String threadName) {
+    public void interruptAndUpdateStatus(String processorId, String userId, String updateStatusOnly) {
 
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
 
@@ -226,12 +223,19 @@ public class ProcessorExecutionConfigurationService {
                     processorId,
                     Response.Status.BAD_REQUEST);
         }
-
-        //post ticket to topic when it is not running in current node
-        if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
-            postToTopic(userId, processorExecutionState);
-        } else {
+        
+        if (Boolean.parseBoolean(updateStatusOnly)) {
             updateExecutionState(processorId, userId, processorExecutionState);
+        } else if (!Boolean.parseBoolean(updateStatusOnly)) {
+            postToTopic(userId, processorExecutionState);
+            updateExecutionState(processorId, userId, processorExecutionState);
+        } else {
+            //post ticket to topic when it is not running in current node
+            if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
+                postToTopic(userId, processorExecutionState);
+            } else {
+                updateExecutionState(processorId, userId, processorExecutionState);
+            }
         }
         
     }
@@ -340,7 +344,7 @@ public class ProcessorExecutionConfigurationService {
      * @param userId
      * @return response
      */
-    public UpdateProcessorsExecutionStateResponseDTO updateExecutingProcessors(List<String> processorIds, String userId) { 
+    public UpdateProcessorsExecutionStateResponseDTO updateExecutingProcessors(List<String> processorIds, String userId , String updateStatusOnly) { 
         
         UpdateProcessorsExecutionStateResponseDTO response = new UpdateProcessorsExecutionStateResponseDTO();
         
@@ -351,7 +355,7 @@ public class ProcessorExecutionConfigurationService {
                     if (StringUtil.isNullOrEmptyAfterTrim(processorId)) {
                         throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
                     }
-                    this.interruptAndUpdateStatus(processorId, userId, null, null);
+                    this.interruptAndUpdateStatus(processorId, userId, updateStatusOnly);
                 }
                 response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
                     "The processor execution status for processorIds updated.", Messages.SUCCESS));
