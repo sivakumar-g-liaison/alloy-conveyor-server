@@ -872,7 +872,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public List<String> getProcessorIdByName(String processorName) {
@@ -898,7 +898,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName) {
+    public String getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName) {
 
         EntityManager entityManager = null;
         List<String> results = null;
@@ -910,6 +910,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                           .setParameter(1, processorName)
                           .setParameter(2, mailboxName)
                           .getResultList();
+            if (null != results && !results.isEmpty()) {
+                return results.get(0);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -917,8 +920,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        return results;
-	}
+        return null;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -945,5 +948,5 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
         return null;
-	}
+    }
 }

@@ -242,9 +242,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * 
      * @param processorName
      * @param mailboxName
-     * @return processor ID list
+     * @return processor ID
      */
-    public List<String> getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName);
+    public String getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName);
 
     /**
      * Retrieve processor name by the given processor pugid

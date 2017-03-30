@@ -1086,7 +1086,7 @@ public class ProcessorConfigurationService {
     public GetProcessorIdResponseDTO getProcessorIdByProcNameAndMbxName(String mbxName, String processorName) {
 
         GetProcessorIdResponseDTO serviceResponse = new GetProcessorIdResponseDTO();
-        List<String> processorGuids = null;
+        List<String> processorGuids = new ArrayList<>();
 
         try {
 
@@ -1097,10 +1097,14 @@ public class ProcessorConfigurationService {
 
             ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
             if (MailBoxUtil.isEmpty(mbxName)) {
-            	processorGuids = config.getProcessorIdByName(processorName);
+                processorGuids = config.getProcessorIdByName(processorName);
             } else {
-            	LOGGER.debug("The mailbox name is {}", mbxName);
-            	processorGuids = config.getProcessorIdByProcNameAndMbxName(mbxName, processorName);
+
+                LOGGER.debug("The mailbox name is {}", mbxName);
+                String processorId = config.getProcessorIdByProcNameAndMbxName(mbxName, processorName);
+                if (null != processorId) {
+                    processorGuids.add(processorId);
+                }
             }
 
             if (null != processorGuids && !MailBoxUtil.isEmptyList(processorGuids)) {

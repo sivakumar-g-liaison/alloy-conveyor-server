@@ -34,11 +34,11 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
- * Class used to fetch the processor ID details by mailbox name and mailbox name.
+ * Class used to fetch the processor ID details by mailbox name and processor name.
  */
 @AppConfigurationResource
-@Path("config/mailbox/processor/name")
-@Api(value = "config/mailbox/processor/name", description = "Fetch the processor id by using the given mailbox and processor name")
+@Path("config/processor")
+@Api(value = "config/processor", description = "Fetch the processor id by using the given mailbox and processor name")
 public class ProcessorGuidSearchResource extends AuditedResource {
 
     private static final String PROCESSOR_NAME = "processorName";
