@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.liaison.mailbox.MailBoxConstants.PROP_DATA_FOLDER_PATTERN;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
@@ -96,6 +97,11 @@ public class MailBoxUtil {
      */
     public static String CLUSTER_TYPE;
 
+    /**
+     * Pattern to validate the path before directory creation
+     */
+    public static String DATA_FOLDER_PATTERN;
+
     static {
 
         CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
@@ -104,6 +110,9 @@ public class MailBoxUtil {
         } else {
             CLUSTER_TYPE = MailBoxConstants.SECURE;
         }
+
+        String[] patterns = CONFIGURATION.getStringArray(PROP_DATA_FOLDER_PATTERN);
+        DATA_FOLDER_PATTERN = String.join(",", patterns);
     }
 
 	/**

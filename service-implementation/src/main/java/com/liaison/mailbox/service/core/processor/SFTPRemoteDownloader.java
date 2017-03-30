@@ -186,7 +186,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 					String currentFileName = aFile;
 					// Check if the file to be uploaded is included or not excluded
-                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                    if(!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                             currentFileName,
                             staticProp.getExcludedFiles())) {
                         continue;

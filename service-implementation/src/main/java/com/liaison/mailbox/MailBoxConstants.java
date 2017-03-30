@@ -176,10 +176,12 @@ public interface MailBoxConstants {
 	String DEFAULT_SCRIPT_TEMPLATE_NAME = "mailbox.script.default.template";
 	String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
-	String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
-	String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
 
-    // Property to decide whether the application is deployed "RELAY", "LOWSECURE-RELAY" or "CONVEYOR"
+    String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix.<stack>";
+    String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix.<stack>";
+    String STACK_CONST = "<stack>";
+
+    // Property to decide whether the application is deployed "RELAY", "LOW_SECURE_RELAY" or "CONVEYOR"
     String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
 
 	String MAILBOX = "MailBox";
@@ -466,4 +468,6 @@ public interface MailBoxConstants {
     String CLUSTER_TYPE = "clusterType";
     String SECURE = "SECURE";
     String LOWSECURE = "LOWSECURE";
+
+    String PROP_DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
 }

@@ -73,6 +73,7 @@ import java.util.Map;
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 /**
  * DirectorySweeper
@@ -415,7 +416,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 }
 
                 // Check if the file to be uploaded is included or not excluded
-                if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                         fileName,
                         staticProp.getExcludedFiles())) {
                     continue;
@@ -851,8 +852,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         //validates sweeper location
         final Path payloadPath = Paths.get(payloadLocation);
         FileSystem fileSystem = FileSystems.getDefault();
-        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
-        PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+        PathMatcher pathMatcher = fileSystem.getPathMatcher(DATA_FOLDER_PATTERN);
 
         if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
 

@@ -52,6 +52,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.SERVICE_INSTANCE;
+import static com.liaison.mailbox.MailBoxConstants.STACK_CONST;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
@@ -644,46 +646,52 @@ public class MailBoxConfigurationService {
         return totalCount;
     }
 
-	/**
-	 * getting values from java properties file
-	 * @return
-	 */
-	public GetPropertiesValueResponseDTO readPropertiesFile() {
-		LOG.debug("Entering into readPropertiesFile.");
+    /**
+     * getting values from java properties file
+     *
+     * @return GetPropertiesValueResponseDTO
+     */
+    public GetPropertiesValueResponseDTO readPropertiesFile() {
+        LOG.debug("Entering into readPropertiesFile.");
 
-		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
-		PropertiesFileDTO dto = new PropertiesFileDTO();
+        GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
+        PropertiesFileDTO dto = new PropertiesFileDTO();
 
-		try {
+        try {
 
-		    DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
-			dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
-			dto.setFsmEventCheckIntervalInSeconds(config.getString(
-			        MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
-			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
-			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+            DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
+            dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+            dto.setFsmEventCheckIntervalInSeconds(config.getString(
+                    MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+
+            String syncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX
+                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
+            dto.setProcessorSyncUrlDisplayPrefix(syncUrlPrefix);
+            String asyncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX
+                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
+            dto.setProcessorAsyncUrlDisplayPrefix(asyncUrlPrefix);
+
+            dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
             dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
             dto.setClusterTypes(MailBoxUtil.getClusterTypes());
 
-			serviceResponse.setProperties(dto);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
-					Messages.SUCCESS));
-			LOG.debug("Exit from readPropertiesFile.");
-			return serviceResponse;
+            serviceResponse.setProperties(dto);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+            LOG.debug("Exit from readPropertiesFile.");
+            return serviceResponse;
 
-		} catch (Exception e) {
+        } catch (Exception e) {
 
-			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX,
-					Messages.FAILURE, e.getMessage()));
-			return serviceResponse;
-		}
+            LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX,
+                    Messages.FAILURE, e.getMessage()));
+            return serviceResponse;
+        }
 
-	}
-	
-	
-	/**
+    }
+
+
+    /**
 	 * Method to read Mailbox details based on given mailbox guid or name
 	 * 
 	 * @param guid
