@@ -1,7 +1,19 @@
 myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$location',  '$filter',
     function ($rootScope, $scope, $location, $filter) {
 	
-    $scope.totalServerItems = 0; 
+    $scope.totalServerItems = 0;
+    $scope.processorStatusUrl = '/processoradmin/processor/status';
+    
+    $scope.runningProcessorIds = {
+    		updateProcessorsExecutionStateRequest: {
+    			guids: []
+            }
+    };
+    
+    $scope.editor ;
+    $scope.loadValueData = function (_editor) {	  
+        $scope.editor = _editor;
+    } 
     
     //Paging set up
     $scope.pagingOptions = {
@@ -12,7 +24,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     
 	$scope.getExecutingProcessors = function () {
     $rootScope.gridLoaded = false;
-	$scope.restService.get($scope.base_url +'/processoradmin/processor/status',
+    $scope.restService.get($scope.base_url + $scope.processorStatusUrl,
                 function (data, status) {
             	    if (status === 200 || status === 400) {
                         if (data.processorExecutionStateResponse.response.status == 'success') {
@@ -28,7 +40,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
 				}, {page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize}
             );
 	}
-    
+
 	$scope.getPagedDataAsync = function (largeLoad) {
             setTimeout(function () {
                 $scope.setPagingData(largeLoad.processorExecutionStateResponse);
@@ -36,24 +48,33 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
     };
 	
 	// Set the paging data to grid from server object
-     $scope.setPagingData = function (data) {
+    $scope.setPagingData = function (data) {
 
-            $scope.processors = data.processors;
-            $scope.totalServerItems = data.totalItems;
-            if ( $scope.processors.length === 0) {
-            	showSaveMessage("No Results Found", 'warning');
-			}
-            if (!$scope.$$phase) {
-                $scope.$apply();
-            }
+        $scope.runningProcessorIds.updateProcessorsExecutionStateRequest.guids = [];
+        for (i=0; i<data.processors.length; i++) {
+            $scope.runningProcessorIds.updateProcessorsExecutionStateRequest.guids.push(data.processors[i].processorId);
+        }
+        var ProcessorIdsCopy = angular.copy($scope.runningProcessorIds);
+        if (angular.isObject(ProcessorIdsCopy)) {
+            $scope.updateProcessorsStatusRequestJson = $filter('json')(ProcessorIdsCopy);
+        }
+        $scope.editor.getSession().setValue($scope.updateProcessorsStatusRequestJson);
+        $scope.processors = data.processors;
+        $scope.totalServerItems = data.totalItems;
+        if ( $scope.processors.length === 0) {
+            showSaveMessage("No Results Found", 'warning');
+        }
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
 
     };
     
     $scope.updateStatusForProcessor = function (entity) {
 		
     	$rootScope.gridLoaded = false;
-		$scope.restService.put($scope.base_url + '/processoradmin/processor/status' + "?processorId=" + entity.processorId, "", 
-                    function (data, status) {                        
+        $scope.restService.put($scope.base_url + $scope.processorStatusUrl + "?processorId=" + entity.processorId, "", 
+                    function (data, status) {
                         if (status === 200 || status === 400) {
                              if (data.updateProcessorExecutionStateResponse.response.status === 'success') {
                             	$scope.getExecutingProcessors();
@@ -184,6 +205,28 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
 
     $scope.cancelExecutingProcessorInfo = function(entity) {
         $('#executingProcessorInfoModal').modal('hide');
+    }
+
+    $scope.updateRunningProcessorStatus = function(isUpdate) {
+        $scope.isUpdateOnly = isUpdate;
+    }
+
+    $scope.updateStuckProcessorsConfirmation = function() {
+
+        $rootScope.gridLoaded = false;
+        $scope.restService.put($scope.base_url + $scope.processorStatusUrl + "?updateOnly=" + $scope.isUpdateOnly, $scope.updateProcessorsStatusRequestJson, 
+            function (data, status) {                        
+                if (status === 200) {
+                    if (data.updateProcessorsExecutionStateResponse.response.status === 'success') {
+                        $scope.getExecutingProcessors();
+                        showSaveMessage(data.updateProcessorsExecutionStateResponse.response.message, 'success');
+                    }
+                } else {
+                    showSaveMessage(data.updateProcessorsExecutionStateResponse.response.message, 'error');
+                }
+                $rootScope.gridLoaded = true;
+            }
+        );
     }
 
     $scope.getProcessorDetails = function(entity) {

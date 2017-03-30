@@ -223,11 +223,8 @@ public class ProcessorExecutionConfigurationService {
                     processorId,
                     Response.Status.BAD_REQUEST);
         }
-        
+
         if (Boolean.parseBoolean(updateStatusOnly)) {
-            updateExecutionState(processorId, userId, processorExecutionState);
-        } else if (!Boolean.parseBoolean(updateStatusOnly)) {
-            postToTopic(userId, processorExecutionState);
             updateExecutionState(processorId, userId, processorExecutionState);
         } else {
             //post ticket to topic when it is not running in current node
@@ -237,7 +234,6 @@ public class ProcessorExecutionConfigurationService {
                 updateExecutionState(processorId, userId, processorExecutionState);
             }
         }
-        
     }
 
     /**
@@ -339,26 +335,30 @@ public class ProcessorExecutionConfigurationService {
     
     /**
      * Method to update the state of executing processors to failed.
-     * 
+     *
      * @param processorIds
      * @param userId
      * @return response
      */
-    public UpdateProcessorsExecutionStateResponseDTO updateExecutingProcessors(List<String> processorIds, String userId , String updateStatusOnly) { 
+    public UpdateProcessorsExecutionStateResponseDTO updateExecutingProcessors(List<String> processorIds,
+            String userId, String updateStatusOnly) {
         
         UpdateProcessorsExecutionStateResponseDTO response = new UpdateProcessorsExecutionStateResponseDTO();
-        
             try {
-                
+
+                if (null == processorIds || processorIds.isEmpty()) {
+                    throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_IDS_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+                }
                 for (String processorId : processorIds) {
-                
-                    if (StringUtil.isNullOrEmptyAfterTrim(processorId)) {
-                        throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
-                    }
                     this.interruptAndUpdateStatus(processorId, userId, updateStatusOnly);
                 }
-                response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
-                    "The processor execution status for processorIds updated.", Messages.SUCCESS));
+                if (Boolean.parseBoolean(updateStatusOnly)) {
+                    response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
+                        "The processor execution status for processorIds are updated.", Messages.SUCCESS));
+                } else {
+                    response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
+                            "The running processors are interrupted and its processor execution status are updated.", Messages.SUCCESS));
+                }
                 return response;
             } catch (MailBoxConfigurationServicesException e) {
                 

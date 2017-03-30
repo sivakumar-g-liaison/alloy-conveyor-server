@@ -186,6 +186,7 @@ public enum Messages {
 
     // referred in processor admin details resource
     PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
+    PROCESSOR_IDS_NOT_AVAILABLE("Processor IDs are not available."),
     PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
     PROCESSOR_EXECUTION_STATE_NOT_PROCESSING("The status for the given processor id %s is not updated since the execution is not in 'Processing' state."),
 

@@ -15,27 +15,61 @@
 	</div>
 	<div class="pull-right">
 	    <button id="executingProcessorID" class="btn btn-primary" ng-click="getExecutingProcessors()">
-	    Refresh
+	        Refresh
 	    </button>
-	</div>
-	<div class="form-row">
-		<h3 id="title" class="ng-binding">Update Stuck Processors</h3>
-		<hr />		
-	</div>
-	<div class="col-md-12">
-        <input type="text" id="processorIds" ng-bind="runningProcessorIds" ng-model="runningProcessorIds" name="processorIds" class="form-control"/>
-    </div>
-	<br>
-	<div class="pull-right">
-        <button id="executingProcessorID" class="btn btn-primary" ng-click="getrunningProcessorIds()">
-	    Interrupt & Update Status
+        <button id="updateStuckProcessorsId" class="btn btn-primary" data-toggle="collapse" data-target="#updateStuckProcessors">
+            Update Stuck Processors
         </button>
-	    <button id="executingProcessorID" class="btn btn-primary" data-toggle="modal" data-target="#updateStuckProcessorsConfirmationModal" ng-click="getExecutingProcessors()">
-	    Update Status
-	    </button>
 	</div>
+	<div id="updateStuckProcessors" class="collapse">
+	    <div class="form-row">
+            <br>
+            <br>
+            <hr />
+            <h3 id="title" class="ng-binding">Update Stuck Processors</h3>
+            <hr />
+        </div>
+        <div id="aceEditor" readonly="false" ui-ace="{onLoad : loadValueData,
+                theme : 'monokai',
+                useWrapMode : true,
+                showGutter: true,
+                mode: 'json'
+                }" class="updateProcessorsStatusReqJson_ace_editor">
+        </div>
+        <div class="pull-right">
+            <br>
+            <button id="executingProcessorID" class="btn btn-primary" data-toggle="modal" data-target="#interruptAndUpdateConfirmationModal" 
+                ng-click="updateRunningProcessorStatus(false)">
+                Interrupt & Update Status
+            </button>
+            <button id="executingProcessorID" class="btn btn-primary" data-toggle="modal" data-target="#updateonlyConfirmationModal" 
+                ng-click="updateRunningProcessorStatus(true)">
+                Update Status
+            </button>
+        </div>
+    </div>
 	
-	<div class="modal-custom" id="updateStuckProcessorsConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+    <div class="modal-custom" id="updateonlyConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   Are you sure you want to update the running processors status?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" ng-click="updateStuckProcessorsConfirmation()">Confirm
+                    </button>
+                    <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-custom" id="interruptAndUpdateConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -47,8 +81,7 @@
                    Are you sure you want to interrupt the running processors and update its status?
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" data-dismiss="modal"
-                            ng-click="hideConfirmDialog(executionEntity)">Confirm
+                    <button class="btn btn-primary" data-dismiss="modal" ng-click="updateStuckProcessorsConfirmation()">Confirm
                     </button>
                     <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
                 </div>
