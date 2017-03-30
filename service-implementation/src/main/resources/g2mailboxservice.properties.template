@@ -280,4 +280,4 @@ https.user.home.path=/data/https
 #service broker base url
 com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/service-broker/
 
-@next=g2mailboxservice-${@stack}.properties
+@next=g2mailboxservice-${@environment}-${@region}.properties
