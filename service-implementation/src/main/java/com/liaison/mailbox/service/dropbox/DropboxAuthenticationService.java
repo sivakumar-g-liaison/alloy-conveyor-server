@@ -63,26 +63,33 @@ public class DropboxAuthenticationService {
 		LOG.debug("Entering into user authentication for dropbox.");
 
 		AuthenticateUserAccountResponseDTO response = new AuthenticateUserAccountResponseDTO();
+		AuthenticationResponseDTO authResponse = new AuthenticationResponseDTO();
 
 		UserManagementClient UMClient = new UserManagementClient();
 		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
 				serviceRequest.getPassword(), serviceRequest.getToken());
 		UMClient.authenticate();
-
+		
 		if (!UMClient.isSuccessful()) {
-			response.setResponse(new AuthenticationResponseDTO(
-					com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
-					com.liaison.usermanagement.enums.Messages.STATUS_FAILURE, UMClient.getAuthenticationToken(),
-					UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
-			LOG.debug("Auth failed");
-			return response;
+		    
+		    authResponse.setMessage(UMClient.getMessage());
+		    authResponse.setFailureReasonCode(UMClient.getFailureReasonCode());
+		    authResponse.setAuthenticationStatus(com.liaison.usermanagement.enums.Messages.STATUS_FAILURE.value());
+		    authResponse.setAuthenticationToken(UMClient.getAuthenticationToken());
+		    authResponse.setSessionDate(UMClient.getSessionDate());
+		    authResponse.setSessionValidTillDate(UMClient.getSessionValidTillDate());
+		    response.setResponse(authResponse);
+		    LOG.debug("Auth failed");
+		    return response;
 		}
-
-		response.setResponse(new AuthenticationResponseDTO(
-				com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
-				com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS, UMClient.getAuthenticationToken(),
-				UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
-
+		
+		authResponse.setMessage(UMClient.getMessage());
+		authResponse.setAuthenticationStatus(com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS.value());
+		authResponse.setAuthenticationToken(UMClient.getAuthenticationToken());
+		authResponse.setSessionDate(UMClient.getSessionDate());
+		authResponse.setSessionValidTillDate(UMClient.getSessionValidTillDate());
+		response.setResponse(authResponse);
+		
 		LOG.debug("Exit from user authentication for dropbox.");
 		return response;
 	}
