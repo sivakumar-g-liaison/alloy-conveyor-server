@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -42,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.liaison.mailbox.MailBoxConstants.ERROR_RECEIVER;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_RECEIVER;
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_UNIT;
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_VALUE;
 import static com.liaison.mailbox.MailBoxConstants.STUCK_PROCESSORS_IN_RELAY;
@@ -159,7 +158,7 @@ public class ProcessorExecutionConfigurationService {
             emailInfoDTO.setEmailBody(emailBody.toString());
             emailInfoDTO.setSubject(STUCK_PROCESSORS_IN_RELAY);
             List<String> email = new ArrayList<>();
-            email.add(getEnvironmentProperties().getString(ERROR_RECEIVER));
+            email.add(getEnvironmentProperties().getString(MAILBOX_STUCK_PROCESSOR_RECEIVER));
             emailInfoDTO.setToEmailAddrList(email);
 
             //sends email

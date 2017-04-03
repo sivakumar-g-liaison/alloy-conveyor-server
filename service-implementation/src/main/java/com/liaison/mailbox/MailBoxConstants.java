@@ -427,6 +427,7 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
+    String CONFIGURATION_SOCKET_TIMEOUT = "com.liaison.mailbox.sync.processor.socket.timeout";
 
     String LOCALHOST = "localhost";
     
@@ -459,4 +460,5 @@ public interface MailBoxConstants {
     String STUCK_PROCESSORS_IN_RELAY = "Stuck Processors in Relay";
     String MAILBOX_STUCK_PROCESSOR_TIME_UNIT = "com.liaison.mailbox.stuck.processor.time.unit";
     String MAILBOX_STUCK_PROCESSOR_TIME_VALUE = "com.liaison.mailbox.stuck.processor.time.value";
+    String MAILBOX_STUCK_PROCESSOR_RECEIVER = "com.liaison.mailbox.stuck.processor.receiver";
 }

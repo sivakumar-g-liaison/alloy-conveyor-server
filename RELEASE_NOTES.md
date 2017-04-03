@@ -1,3 +1,8 @@
+4.13.3
+---------------
+* GMB-978 - Override default Socket timeout in sync sweeper
+* Email notification receiver updates for error and stuck processor case
+
 4.13.2
 ---------------
 * GMB-947 - Relay errors to LENS Metadata.
