@@ -867,7 +867,9 @@ public class ProcessorConfigurationService {
 
 			List<MailBoxDTO> mbxDTO = new ArrayList<MailBoxDTO>();
 			if (null == mailboxList || mailboxList.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_MBX_NAMES_EXIST, Response.Status.NOT_FOUND);
+			    serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX, Messages.SUCCESS));
+			    serviceResponse.setMailbox(mbxDTO);
+			    return serviceResponse;
 			}
 			MailBoxDTO mailboxDTO = null;
 			for (MailBox mailbox : mailboxList) {
@@ -910,7 +912,9 @@ public class ProcessorConfigurationService {
 
 			List<ProcessorDTO> processorDTO = new ArrayList<ProcessorDTO>();
 			if (null == processorList || processorList.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_PROC_NAMES_EXIST, Response.Status.NOT_FOUND);
+			    serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.PROCESSOR, Messages.SUCCESS));
+			    serviceResponse.setProcessor(processorDTO);
+			    return serviceResponse;
 			}
 			ProcessorDTO procDTO = null;
 			for (Processor processor : processorList) {
