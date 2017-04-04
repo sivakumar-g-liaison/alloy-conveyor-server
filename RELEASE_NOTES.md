@@ -1,3 +1,7 @@
+4.13.4
+---------------
+* GMB-979 - FTPS Remote Uploader - Software caused connection abort: socket write error
+
 4.13.3
 ---------------
 * GMB-978 - Override default Socket timeout in sync sweeper
