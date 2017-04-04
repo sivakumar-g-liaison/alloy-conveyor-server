@@ -55,7 +55,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
      * @param sortInfo
      * @param filterText
      * @return serviceResponse
-    */
+     */
     public GetStagedFilesResponseDTO getStagedFiles(String page, String pageSize, String sortInfo, String filterText) {
 
         LOG.debug("Entering into get all StagedFiles.");
@@ -102,9 +102,9 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
      * 
      * @param pguid
      * @return response
-    */
+     */
     public Response deacivateStagedFile(String pguid) {
-	
+
         LOG.debug("Entering into deactivate StagedFiles.");
         EntityManager em = null;
         StagedFileDAO dao = new StagedFileDAOBase();
@@ -114,14 +114,14 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
 
             em = DAOUtil.getEntityManager(MailboxRTDMDAO.PERSISTENCE_UNIT_NAME);
             if (!MailBoxUtil.isEmpty(pguid)) {
-	
+
                 file = em.find(StagedFile.class, pguid);
                 if (null == file) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
 
                 if (EntityStatus.STAGED.value().equals(file.getStagedFileStatus())) {
-	
+
                     file.setStagedFileStatus(EntityStatus.FAILED.value());
                     file.setModifiedDate(MailBoxUtil.getTimestamp());
 
@@ -145,7 +145,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
     }
 
     /**
-     *  Method to deactivate the bulk staged files
+     * Method to deactivate the bulk staged files
      * 
      * @param requestDTO
      * @return response
@@ -167,11 +167,17 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             tx = em.getTransaction();
             tx.begin();
 
-            Query q = em.createNativeQuery("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1 WHERE PGUID IN (?2) AND STATUS = 'STAGED'");
-            q.setParameter(1, MailBoxUtil.getTimestamp());
-            q.setParameter(2, guids);
+            StringBuilder query = new StringBuilder()
+                    .append("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = :")
+                    .append(StagedFileDAO.MODIFIED_DATE)
+                    .append(" WHERE PGUID IN (:" + StagedFileDAO.STAGED_FILE_IDS + ")")
+                    .append(" AND STATUS = 'STAGED'");
 
-            //Update the selected files
+            Query q = em.createNativeQuery(query.toString())
+                    .setParameter(StagedFileDAO.MODIFIED_DATE, MailBoxUtil.getTimestamp())
+                    .setParameter(StagedFileDAO.STAGED_FILE_IDS, guids);
+
+            // Update the selected files
             q.executeUpdate();
             tx.commit();
         } catch (Exception e) {
@@ -186,5 +192,5 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             }
         }
         return Response.ok().entity(STAGED_FILE_UPDATE_MESSAGE).build();
-     }
+    }
 }

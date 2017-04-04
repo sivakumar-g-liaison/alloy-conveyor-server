@@ -39,17 +39,21 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
+    String MODIFIED_DATE = "modifiedDate";
+    String STAGED_FILE_IDS = "stagedFile_ids";
 
-	/**
-	 * Method to retrieve the list of all staged files of given mailbox ids
-	 *
-	 * @param mailboxIds
-	 * @return list of stagedFiles
-	 */
+    /**
+     * Method to retrieve the list of all staged files of given mailbox ids
+     *
+     * @param mailboxIds
+     * @return list of stagedFiles
+     */
 	List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
-	List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
-	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
+    List<StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
+
+    int getStagedFilesCountByName(List<String> mailboxIds, String fileName, String status);
+
+    StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
 
     /**
      * constructs staged file entity from workticket and persists it
