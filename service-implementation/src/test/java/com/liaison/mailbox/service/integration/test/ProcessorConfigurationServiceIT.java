@@ -1077,8 +1077,8 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         SearchProcessorResponseDTO serviceResponse = processor.getMailBoxNames(searchFilter);
 
         // Assertion
-        Assert.assertEquals(FAILURE, serviceResponse.getResponse().getStatus());
-        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.MAILBOX)));
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX)));
     }
 
     /**
