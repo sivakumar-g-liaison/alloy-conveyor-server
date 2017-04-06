@@ -1,9 +1,31 @@
 4.14.0-SNAPSHOT
 ---------------
-* GMB-946 - Analyze why there are more timer threads.
-* GMB-947 - Relay errors to LENS Metadata.
 * GMB-954 - Query back to service broker to determine the sender name when creating a process.
 * GGT-1329 removing errant period from provisioning system calls to echo
+* GMB-982 - Unable to create folders in remote location.
+* GMB-977 - Named parameter make more sense than using number.
+* GMB-973 - Relay/Relay-Conveyor missing version checker for the URL
+* GMB-971 - Mailbox processors are not displayed while trying to view the processors, on navigating back to mailbox screen.
+* GMB-949 - Processor Execution Screen Improvements
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception
+
+4.13.4
+---------------
+* GMB-979 - FTPS Remote Uploader - Software caused connection abort: socket write error
+
+4.13.3
+---------------
+* GMB-978 - Override default Socket timeout in sync sweeper
+* Email notification receiver updates for error and stuck processor case
+
+4.13.2
+---------------
+* GMB-947 - Relay errors to LENS Metadata.
+* GC-367 - Relay listing issue with configurator
+
+4.13.1
+---------------
+* GMB-946 - Analyze why there are more timer threads.
 
 4.13.0
 ---------------

@@ -243,7 +243,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
     }
     
     private String safeLikeParameter(String name) {
-        return new StringBuilder().append("%").append(name == null ? "" : name.toLowerCase()).append("%").toString();
+        return "%" + (name == null ? "" : name.toLowerCase()) + "%";
     }
 
     /**
