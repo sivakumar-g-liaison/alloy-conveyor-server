@@ -442,7 +442,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     			break;
     		case REMOTE_DOWNLAODER_CLASS:
     			processorClass = RemoteDownloader.class;
-    			break;
 		}
 		return processorClass;
 	}
@@ -510,7 +509,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         		case SORT_MAILBOX_STATUS:
         			query.append(" order by mailbox.mbxStatus ")
         			.append(sortDirection);
-        			break;
         	}
         } else {
             query.append(" order by processor.procsrName");
