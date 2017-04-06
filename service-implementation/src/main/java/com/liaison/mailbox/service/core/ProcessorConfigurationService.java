@@ -55,6 +55,7 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetProcessorIdResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
@@ -868,7 +869,9 @@ public class ProcessorConfigurationService {
 
 			List<MailBoxDTO> mbxDTO = new ArrayList<MailBoxDTO>();
 			if (null == mailboxList || mailboxList.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_MBX_NAMES_EXIST, Response.Status.NOT_FOUND);
+			    serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX, Messages.SUCCESS));
+			    serviceResponse.setMailbox(mbxDTO);
+			    return serviceResponse;
 			}
 			MailBoxDTO mailboxDTO = null;
 			for (MailBox mailbox : mailboxList) {
@@ -911,7 +914,9 @@ public class ProcessorConfigurationService {
 
 			List<ProcessorDTO> processorDTO = new ArrayList<ProcessorDTO>();
 			if (null == processorList || processorList.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_PROC_NAMES_EXIST, Response.Status.NOT_FOUND);
+			    serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.PROCESSOR, Messages.SUCCESS));
+			    serviceResponse.setProcessor(processorDTO);
+			    return serviceResponse;
 			}
 			ProcessorDTO procDTO = null;
 			for (Processor processor : processorList) {
@@ -1108,6 +1113,90 @@ public class ProcessorConfigurationService {
                     Messages.FAILURE,
                     e.getMessage()));
             return clusterTypeResponseDTO;
+        }
+    }
+
+    /*
+            * Method used to retrieve the processor Id using mailbox name processor name
+     *
+             * @param mbxName
+     * @param processorName
+     * @return serviceResponse
+     */
+    public GetProcessorIdResponseDTO getProcessorIdByProcNameAndMbxName(String mbxName, String processorName) {
+
+        GetProcessorIdResponseDTO serviceResponse = new GetProcessorIdResponseDTO();
+        List<String> processorGuids = new ArrayList<>();
+
+        try {
+
+            LOGGER.debug("The processor name is {}", processorName);
+            if (MailBoxUtil.isEmpty(processorName)) {
+                throw new RuntimeException("Processor name cannot be null or empty");
+            }
+
+            ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+            if (MailBoxUtil.isEmpty(mbxName)) {
+                processorGuids = config.getProcessorIdByName(processorName);
+            } else {
+
+                LOGGER.debug("The mailbox name is {}", mbxName);
+                String processorId = config.getProcessorIdByProcNameAndMbxName(mbxName, processorName);
+                if (null != processorId) {
+                    processorGuids.add(processorId);
+                }
+            }
+
+            if (null != processorGuids && !MailBoxUtil.isEmptyList(processorGuids)) {
+                serviceResponse.setProcessorGuids(processorGuids);
+                serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+            } else {
+                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE));
+            }
+            return serviceResponse;
+        } catch (Exception e) {
+
+            LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE,
+                    e.getMessage()));
+            return serviceResponse;
+        }
+    }
+
+    /**
+     * Method used to retrieve the processor name using processor pguid
+     *
+     * @param pguid pguid of the procesor
+     * @return serviceResponse
+     */
+    public GetProcessorIdResponseDTO getProcessorNameByPguid(String pguid) {
+
+        GetProcessorIdResponseDTO serviceResponse = new GetProcessorIdResponseDTO();
+        String processorName = null;
+
+        try {
+
+            LOGGER.debug("The processor id is {}", pguid);
+            if (MailBoxUtil.isEmpty(pguid)) {
+                throw new RuntimeException("Processor id cannot be null or empty");
+            }
+
+            ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+            processorName = config.getProcessorNameByPguid(pguid);
+
+            if (!MailBoxUtil.isEmpty(processorName)) {
+                serviceResponse.setProcessorName(processorName);
+                serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+            } else {
+                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE));
+            }
+            return serviceResponse;
+        } catch (Exception e) {
+
+            LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE,
+                    e.getMessage()));
+            return serviceResponse;
         }
     }
 }

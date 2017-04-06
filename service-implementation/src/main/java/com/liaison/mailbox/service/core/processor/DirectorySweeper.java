@@ -74,6 +74,7 @@ import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 
 /**
  * DirectorySweeper
@@ -280,6 +281,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         }
 
         int connectionTimeout = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT);
+        int socketTimeout = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_SOCKET_TIMEOUT);
 
         try {
 
@@ -307,6 +309,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     HTTPRequest request = HTTPRequest.post(serviceBrokerUri)
                             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                             .connectionTimeout(connectionTimeout)
+                            .socketTimeout(socketTimeout)
                             .inputData(JAXBUtility.marshalToJSON(workTicket))
                             .outputStream(responseStream);
 

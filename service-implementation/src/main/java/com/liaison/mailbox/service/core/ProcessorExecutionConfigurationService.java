@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -26,23 +25,26 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ExecutingProcessorsDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecutionStateResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.UpdateProcessorExecutionStateResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.UpdateProcessorsExecutionStateResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.topic.producer.MailBoxTopicMessageProducer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.liaison.mailbox.MailBoxConstants.ERROR_RECEIVER;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_RECEIVER;
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_UNIT;
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_VALUE;
 import static com.liaison.mailbox.MailBoxConstants.STUCK_PROCESSORS_IN_RELAY;
@@ -159,7 +161,7 @@ public class ProcessorExecutionConfigurationService {
             emailInfoDTO.setEmailBody(emailBody.toString());
             emailInfoDTO.setSubject(STUCK_PROCESSORS_IN_RELAY);
             List<String> email = new ArrayList<>();
-            email.add(getEnvironmentProperties().getString(ERROR_RECEIVER));
+            email.add(getEnvironmentProperties().getString(MAILBOX_STUCK_PROCESSOR_RECEIVER));
             emailInfoDTO.setToEmailAddrList(email);
 
             //sends email
@@ -187,7 +189,7 @@ public class ProcessorExecutionConfigurationService {
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
             }
 
-            this.interruptAndUpdateStatus(processorId, userId, null, null);
+            this.interruptAndUpdateStatus(processorId, userId, null);
             response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
                     "The processor execution status for processor with id : " + processorId + " is ", Messages.SUCCESS));
             return response;
@@ -209,10 +211,7 @@ public class ProcessorExecutionConfigurationService {
      * @param processorId processor id
      * @param userId user login id
      */
-    public void interruptAndUpdateStatus(String processorId,
-                                         String userId,
-                                         String node,
-                                         String threadName) {
+    public void interruptAndUpdateStatus(String processorId, String userId, String updateStatusOnly) {
 
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
 
@@ -224,13 +223,16 @@ public class ProcessorExecutionConfigurationService {
                     Response.Status.BAD_REQUEST);
         }
 
-        //post ticket to topic when it is not running in current node
-        if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
-            postToTopic(userId, processorExecutionState);
-        } else {
+        if (Boolean.parseBoolean(updateStatusOnly)) {
             updateExecutionState(processorId, userId, processorExecutionState);
+        } else {
+            //post ticket to topic when it is not running in current node
+            if (!MailBoxUtil.getNode().equals(processorExecutionState.getNodeInUse())) {
+                postToTopic(userId, processorExecutionState);
+            } else {
+                updateExecutionState(processorId, userId, processorExecutionState);
+            }
         }
-        
     }
 
     /**
@@ -325,8 +327,43 @@ public class ProcessorExecutionConfigurationService {
      * 
      */
     public static void updateExecutionStateOnInit() {
+        
         ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
         processorExecutionStateDAO.updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
     }
+    
+    /**
+     * Method to update the state of executing processors to failed.
+     *
+     * @param processorIds
+     * @param userId
+     * @return response
+     */
+    public UpdateProcessorsExecutionStateResponseDTO updateExecutingProcessors(List<String> processorIds,
+            String userId, String updateStatusOnly) {
+        
+        UpdateProcessorsExecutionStateResponseDTO response = new UpdateProcessorsExecutionStateResponseDTO();
+            try {
 
+                if (null == processorIds || processorIds.isEmpty()) {
+                    throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_IDS_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+                }
+                for (String processorId : processorIds) {
+                    this.interruptAndUpdateStatus(processorId, userId, updateStatusOnly);
+                }
+                if (Boolean.parseBoolean(updateStatusOnly)) {
+                    response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
+                        "The processor execution status for processorIds are updated.", Messages.SUCCESS));
+                } else {
+                    response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
+                            "The running processors are interrupted and its processor execution status are updated.", Messages.SUCCESS));
+                }
+                return response;
+            } catch (MailBoxConfigurationServicesException e) {
+                
+                LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+                response.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROCESSORS, Messages.FAILURE, e.getMessage()));
+                return response;
+            }
+    }
 }

@@ -637,3 +637,8 @@ input::-moz-focus-inner {
   	left: 5px;
   	bottom: 0;
 }
+
+.updateProcessorsStatusReqJson_ace_editor {
+	height: 200px;
+    width: 1140px;
+}

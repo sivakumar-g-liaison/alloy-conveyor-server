@@ -108,3 +108,6 @@ classes
 
 # downloaded error pages for WAR
 */src/main/webapp/ui/error-*.html
+
+#Ignore version.java
+/service-implementation/src/main/java/com/liaison/mailbox/Version.java

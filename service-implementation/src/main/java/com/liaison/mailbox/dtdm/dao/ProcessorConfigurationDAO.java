@@ -238,6 +238,31 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      */
     String getClusterType(String processorId);
 
+    /*
+     * Retrieve processorId list by the given processor name.
+     * 
+     * @param processorName
+     * @return processor ID list
+     */
+    List<String> getProcessorIdByName(String processorName);
+
+    /**
+     * Retrieve processorId by the given processor name and mailbox name.
+     *
+     * @param processorName
+     * @param mailboxName
+     * @return processor ID
+     */
+    String getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName);
+
+    /**
+     * Retrieve processor name by the given processor pugid
+     *
+     * @param pguid
+     * @return processorName
+     */
+    public String getProcessorNameByPguid(String pguid);
+
     StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
             .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
             .append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
@@ -286,5 +311,21 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(ProcessorConfigurationDAO.STATUS_DELETE)
             .append(" AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")")
             .append(")");
+
+    //Don't modify this 3 queries while doing LOW_SECURE changes.
+    StringBuilder PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME = new StringBuilder().append("SELECT pguid FROM processor")
+            .append(" WHERE name = ? AND")
+            .append(" status = 'ACTIVE' ");
+
+    StringBuilder PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME_AND_MBX_NAME = new StringBuilder().append("SELECT proc.pguid FROM processor proc")
+            .append(" INNER JOIN mailbox mbx")
+            .append(" ON mbx.pguid = proc.mailbox_guid")
+            .append(" WHERE proc.name = ? AND")
+            .append(" mbx.name = ? AND")
+            .append(" proc.status = 'ACTIVE' AND mbx.status = 'ACTIVE' ");
+
+    StringBuilder PROCESSOR_NAME_RETRIEVAL_BY_PROCESSOR_ID = new StringBuilder().append("SELECT name FROM processor")
+            .append(" WHERE pguid = ? AND")
+            .append(" status = 'ACTIVE' ");
 
 }

@@ -51,18 +51,17 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,37 +95,30 @@ public class HTTPListenerResource extends AuditedResource {
 
     private Map<String, List<String>> formValues = null;
 
-	public Map<String, List<String>> getFormValues() {
-		return formValues;
-	}
+    private void setFormValues(Map<String, List<String>> formValues) {
+        this.formValues = formValues;
+    }
 
-	public void setFormValues(Map<String, List<String>> formValues) {
-		this.formValues = formValues;
-	}
+    @POST
+    @Path("sync/{token1}")
+    public Response handleSyncOneToken(@Context HttpServletRequest request,
+                                       @Context UriInfo uriInfo) {
+        return handleSync(request, uriInfo);
+}
 
-	@POST
-	@Path("sync/{token1}")
-	public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		return handleSync(request, mailboxId, mailboxName);
-	}
+    @POST
+    @Path("sync/{token1}/{token2}")
+    public Response handleSyncTwoTokens(@Context HttpServletRequest request,
+                                        @Context UriInfo uriInfo) {
+        return handleSync(request, uriInfo);
+    }
 
-	@POST
-	@Path("sync/{token1}/{token2}")
-	public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		return handleSync(request, mailboxId, mailboxName);
-	}
-
-	@POST
-	@Path("sync/{token1}/{token2}/{token3}")
-	public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_ID) final String mailboxName) {
-		return handleSync(request, mailboxId, mailboxName);
-	}
+    @POST
+    @Path("sync/{token1}/{token2}/{token3}")
+    public Response handleSyncThreeTokens(@Context HttpServletRequest request,
+                                          @Context UriInfo uriInfo) {
+        return handleSync(request, uriInfo);
+    }
 
 	/**
 	 * This method will processing the sync message by give request.
@@ -134,17 +126,22 @@ public class HTTPListenerResource extends AuditedResource {
 	 * @param request The HttpServletRequest
 	 * @return The Response Object
 	 */
-	@POST
-	@Path("sync")
-	@AccessDescriptor(skipFilter = true)
-	public Response handleSync(@Context final HttpServletRequest request,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
+    @POST
+    @Path("sync")
+    @AccessDescriptor(skipFilter = true)
+    public Response handleSync(@Context final HttpServletRequest request,
+                               @Context UriInfo uriInfo) {
 
-		// create the worker delegate to perform the business logic
+        final MultivaluedMap<String, String> httpQueryParams = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
+        final String mailboxId = httpQueryParams.getFirst(MAILBOX_ID);
+        final String mailboxName = httpQueryParams.getFirst(MAILBOX_NAME);
+
+        // create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws Exception {
+
 
                 //first corner timestamp
                 ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
@@ -206,10 +203,12 @@ public class HTTPListenerResource extends AuditedResource {
 					}
 
 					logger.debug("construct workticket");
-					workTicket = new WorkTicketUtil().createWorkTicket(
-							getRequestProperties(request, globalProcessId),
-							getRequestHeaders(request),
-							httpListenerProperties);
+                    workTicket = WorkTicketUtil.createWorkTicket(
+                            getRequestProperties(request, globalProcessId),
+                            getRequestHeaders(request),
+                            httpListenerProperties);
+                    workTicket.getAdditionalContext().putAll(httpQueryParams);
+                    workTicket.getAdditionalContext().putAll(pathParams);
 
                     if (httpListenerProperties.containsKey(TTL_IN_SECONDS)) {
 					    Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(TTL_IN_SECONDS));
@@ -313,8 +312,6 @@ public class HTTPListenerResource extends AuditedResource {
 	/**
 	 * Handles the application/x-www-form-urlencoded requests
 	 *
-	 * @param mailboxId mailbox guid
-	 * @param mailboxName mailbox name
 	 * @param formValues form values
      * @return The Response Object
      */
@@ -323,36 +320,49 @@ public class HTTPListenerResource extends AuditedResource {
 	@AccessDescriptor(skipFilter = true)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response handleSync(@Context final HttpServletRequest request,
-							   @QueryParam(value = MAILBOX_ID) final String mailboxId,
-							   @QueryParam(value = MAILBOX_NAME) final String mailboxName,
+                               @Context UriInfo uriInfo,
 							   MultivaluedMap<String,String> formValues) {
 		this.setFormValues(formValues);
-		return handleSync(request, mailboxId, mailboxName);
+		return handleSync(request, uriInfo);
 	}
 
-	@POST
-	@Path("async/{token1}")
-	public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		return handleAsync(request, mailboxId, mailboxName);
-	}
+    @POST
+    @Path("async/{token1}")
+    public Response handleAsyncOneToken(@Context HttpServletRequest request,
+                                        @Context UriInfo uriInfo) {
+        return handleAsync(request, uriInfo);
+    }
 
-	@POST
-	@Path("async/{token1}/{token2}")
-	public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		return handleAsync(request, mailboxId, mailboxName);
-	}
+    @POST
+    @Path("async/{token1}/{token2}")
+    public Response handleAsyncTwoTokens(@Context HttpServletRequest request,
+                                         @Context UriInfo uriInfo) {
+        return handleAsync(request, uriInfo);
+    }
 
-	@POST
-	@Path("async/{token1}/{token2}/{token3}")
-	public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
-		return handleAsync(request, mailboxId, mailboxName);
-	}
+    @POST
+    @Path("async/{token1}/{token2}/{token3}")
+    public Response handleAsyncThreeTokens(@Context HttpServletRequest request,
+                                           @Context UriInfo uriInfo) {
+        return handleAsync(request, uriInfo);
+    }
+
+    /**
+     * Handles the application/x-www-form-urlencoded requests
+     *
+     * @param formValues  form values
+     * @return The Response Object
+     */
+    @POST
+    @Path("async")
+    @AccessDescriptor(skipFilter = true)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response handleAsync(@Context final HttpServletRequest request,
+                                @Context UriInfo uriInfo,
+                                MultivaluedMap<String, String> formValues) {
+        this.setFormValues(formValues);
+        return handleAsync(request, uriInfo);
+    }
 
 	/**
 	 * This method will processing the async message by give request.
@@ -360,12 +370,16 @@ public class HTTPListenerResource extends AuditedResource {
 	 * @param request The HttpServletRequest
 	 * @return The Response Object
 	 */
-	@POST
-	@Path("async")
-	@AccessDescriptor(skipFilter = true)
-	public Response handleAsync(@Context final HttpServletRequest request,
-			@QueryParam(value = MAILBOX_ID) final String mailboxId,
-			@QueryParam(value = MAILBOX_NAME) final String mailboxName) {
+    @POST
+    @Path("async")
+    @AccessDescriptor(skipFilter = true)
+    public Response handleAsync(@Context final HttpServletRequest request,
+                                @Context UriInfo uriInfo) {
+
+        final MultivaluedMap<String, String> httpQueryParams = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> pathParams = uriInfo.getPathParameters();
+        final String mailboxId = httpQueryParams.getFirst(MAILBOX_ID);
+        final String mailboxName = httpQueryParams.getFirst(MAILBOX_NAME);
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -427,10 +441,12 @@ public class HTTPListenerResource extends AuditedResource {
                         authenticationAndAuthorization(request, asyncProcessor, httpListenerProperties, mailboxInfo);
                     }
 
-                    workTicket = new WorkTicketUtil().createWorkTicket(
+                    workTicket = WorkTicketUtil.createWorkTicket(
                             getRequestProperties(request, globalProcessId),
                             getRequestHeaders(request),
                             httpListenerProperties);
+                    workTicket.getAdditionalContext().putAll(httpQueryParams);
+                    workTicket.getAdditionalContext().putAll(pathParams);
 
                     if (httpListenerProperties.containsKey(TTL_IN_SECONDS)) {
                         Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(TTL_IN_SECONDS));
@@ -508,26 +524,6 @@ public class HTTPListenerResource extends AuditedResource {
 		worker.queryParams.put(MailBoxConstants.KEY_MAILBOX_NAME, mailboxName);
 		// hand the delegate to the framework for calling
 		return process(request, worker);
-	}
-
-    /**
-	 * Handles the application/x-www-form-urlencoded requests
-	 *
-	 * @param mailboxId mailbox guid
-	 * @param mailboxName mailbox name
-	 * @param formValues form values
-	 * @return The Response Object
-	 */
-	@POST
-	@Path("async")
-	@AccessDescriptor(skipFilter = true)
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response handleAsync(@Context final HttpServletRequest request,
-							   @QueryParam(value = MAILBOX_ID) final String mailboxId,
-							   @QueryParam(value = MAILBOX_NAME) final String mailboxName,
-							   MultivaluedMap<String,String> formValues) {
-		this.setFormValues(formValues);
-		return handleAsync(request, mailboxId, mailboxName);
 	}
 
 	@Override

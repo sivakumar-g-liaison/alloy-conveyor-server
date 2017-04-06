@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
@@ -169,15 +170,15 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             tx = em.getTransaction();
             tx.begin();
 
-            String STAGED_FILE_BULK_UPDATE = "UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = ?1" +
-                    " WHERE PGUID IN (?2)" +
+            String query = "UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = :" + StagedFileDAO.MODIFIED_DATE +
+                    " WHERE PGUID IN (:" + StagedFileDAO.STAGED_FILE_IDS + ")" +
                     " AND STATUS = 'STAGED'" +
-                    " AND CLUSTER_TYPE = ?3";
+                    " AND CLUSTER_TYPE =:" + MailBoxUtil.CLUSTER_TYPE;
 
-            Query q = em.createNativeQuery(STAGED_FILE_BULK_UPDATE);
-            q.setParameter(1, MailBoxUtil.getTimestamp());
-            q.setParameter(2, guids);
-            q.setParameter(3, MailBoxUtil.CLUSTER_TYPE);
+            Query q = em.createNativeQuery(query)
+                    .setParameter(StagedFileDAO.MODIFIED_DATE, MailBoxUtil.getTimestamp())
+                    .setParameter(StagedFileDAO.STAGED_FILE_IDS, guids)
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
 
             //Update the selected files
             q.executeUpdate();

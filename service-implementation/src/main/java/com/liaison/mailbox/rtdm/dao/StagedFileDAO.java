@@ -40,6 +40,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
+    String MODIFIED_DATE = "modifiedDate";
+    String STAGED_FILE_IDS = "stagedFile_ids";
 
     /**
      * Method to retrieve the list of all staged files of given mailbox ids

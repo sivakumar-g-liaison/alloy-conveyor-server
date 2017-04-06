@@ -339,13 +339,6 @@ public class MailBoxService implements Runnable {
                     mbx.getMbxName(),
                     mbx.getPguid());
 
-            //sets the direct upload details in workticet and it would be used to set the STAGED_FILE status
-/*            if (processor instanceof RemoteUploader) {
-                if (processorService.isDirectUploadEnabled()) {
-                    workTicket.setAdditionalContext(DIRECT_UPLOAD, directUploadEnabled);
-                }
-            }*/
-
             processorService.runProcessor(workTicket);
             glassMessage.setOutSize(workTicket.getPayloadSize());
             glassMessage.setOutboundFileName(stagedFileName);
