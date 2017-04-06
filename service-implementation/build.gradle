@@ -389,6 +389,10 @@ task stampCurrentVersion << {
             }
 }
 
+gradle.projectsEvaluated {
+    compileJava.dependsOn(stampCurrentVersion)
+}
+
 task setDevProperties << {
     ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
     {
