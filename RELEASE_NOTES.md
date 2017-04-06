@@ -4,6 +4,7 @@
 * GGT-1329 removing errant period from provisioning system calls to echo
 * GMB-982 - Unable to create folders in remote location.
 * GMB-977 - Named parameter make more sense than using number.
+* GMB-975 - MailboxConfigurationDAOBase code review
 * GMB-973 - Relay/Relay-Conveyor missing version checker for the URL
 * GMB-971 - Mailbox processors are not displayed while trying to view the processors, on navigating back to mailbox screen.
 * GMB-949 - Processor Execution Screen Improvements
