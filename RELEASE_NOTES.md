@@ -1,4 +1,4 @@
-4.14.0-SNAPSHOT
+4.14.0
 ---------------
 * GMB-954 - Query back to service broker to determine the sender name when creating a process.
 * GGT-1329 removing errant period from provisioning system calls to echo
