@@ -42,7 +42,7 @@ public class VersionResource {
     @ApiOperation(value = "Get Version", notes = "Get service version information.", position = 1)
     @AccessDescriptor(skipFilter = true)
     public Response getVersion(@Context final HttpServletRequest request) {
-        Version serviceResponse = new com.liaison.mailbox.Version();
+        Version serviceResponse = new Version();
 
         String responseBody;
 

@@ -21,7 +21,6 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 /**
  * This class holds build and version identifiers.
  * 
- * @author OFS
  *
  */
 @XmlRootElement
