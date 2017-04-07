@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -57,7 +56,7 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
  *
  */
 
-public class ProcessorExecutionConfigurationService {
+public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
@@ -118,6 +117,57 @@ public class ProcessorExecutionConfigurationService {
             return response;
         }
 
+    }
+
+    /**
+     * Method to get the executing processors
+     * 
+     * @param page
+     * @param pageSize
+     * @param sortInfo
+     * @param filterText
+     * @return
+     */
+    public GetProcessorExecutionStateResponseDTO getExecutingProcessors(String page, String pageSize, String sortInfo, String filterText) {
+        
+        LOG.debug("Entering into get all executing Processors.");
+        GetProcessorExecutionStateResponseDTO serviceResponse = new GetProcessorExecutionStateResponseDTO();
+
+        try {
+
+            GridResult<ProcessorExecutionState> result = getGridItems(ProcessorExecutionState.class, filterText, sortInfo,
+                    page, pageSize);
+            List<ProcessorExecutionState> executingProcessors = result.getResultList();
+            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
+
+            if (null == executingProcessors || executingProcessors.isEmpty()) {
+                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, EXECUTING_PROCESSORS, Messages.SUCCESS));
+                serviceResponse.setProcessors(executingProcessorsDTO);
+                return serviceResponse;
+            }
+
+            ExecutingProcessorsDTO executingProcessor = null;
+            for (ProcessorExecutionState execPrcs : executingProcessors) {
+                executingProcessor = new ExecutingProcessorsDTO();
+                executingProcessor.copyFromEntity(execPrcs);
+                executingProcessorsDTO.add(executingProcessor);
+            }
+
+            // response message construction
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(), Messages.SUCCESS));
+            serviceResponse.setProcessors(executingProcessorsDTO);
+            serviceResponse.setTotalItems((int) result.getTotalItems());
+
+            LOG.debug("Exiting from get all executing Processors.");
+            return serviceResponse;
+        } catch (Exception e) {
+
+            LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, EXECUTING_PROCESSORS, Messages.FAILURE,
+                    e.getMessage()));
+            return serviceResponse;
+        }
+        
     }
     
     /**
