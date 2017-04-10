@@ -52,72 +52,12 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
 
 /**
  * class which contains processor execution configuration information.
- * @author
- *
  */
-
 public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
     private static final String EXECUTING_PROCESSORS = "running processors";
-
-    /**
-     * Method to get the executing processors
-     * @param searchFilter
-     * @return
-     */
-    public GetProcessorExecutionStateResponseDTO findExecutingProcessors(GenericSearchFilterDTO searchFilter) {
-
-        GetProcessorExecutionStateResponseDTO response = new GetProcessorExecutionStateResponseDTO();
-
-        try {
-
-            int totalCount = 0;
-            Map<String, Integer> pageOffsetDetails = null;
-            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
-            List<String> executingProcessorIds = new ArrayList<String>();
-            ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
-
-            // setting the page offset details
-            totalCount = processorDao.findAllExecutingProcessors();
-            pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(), searchFilter.getPageSize(),
-                    totalCount);
-            List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(pageOffsetDetails);
-
-            if (executingProcessors.size() == 0) {
-
-                response.setResponse(new ResponseDTO(Messages.NO_EXECUTING_PROCESSORS_AVAIL, EXECUTING_PROCESSORS,
-                        Messages.SUCCESS));
-                response.setProcessors(executingProcessorsDTO);
-                return response;
-            }
-
-            ExecutingProcessorsDTO executingProcessor = null;
-            for (ProcessorExecutionState processorState : executingProcessors) {
-                
-                executingProcessorIds.add(processorState.getProcessorId());
-                executingProcessor = new ExecutingProcessorsDTO();
-                executingProcessor.copyFromEntity(processorState);
-                executingProcessorsDTO.add(executingProcessor);
-            }
-            response.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(),
-                    Messages.SUCCESS));
-            response.setExecutingProcessorIds(executingProcessorIds);
-            response.setProcessors(executingProcessorsDTO);
-            response.setTotalItems(totalCount);
-
-            return response;
-
-        } catch (MailBoxConfigurationServicesException e) {
-
-            LOG.error(Messages.SEARCH_OPERATION_FAILED.name(), e);
-            response.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, PROCESSORS, Messages.FAILURE, e
-                    .getMessage()));
-            return response;
-        }
-
-    }
 
     /**
      * Method to get the executing processors
@@ -138,7 +78,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
             GridResult<ProcessorExecutionState> result = getGridItems(ProcessorExecutionState.class, filterText, sortInfo,
                     page, pageSize);
             List<ProcessorExecutionState> executingProcessors = result.getResultList();
-            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
+            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<>();
 
             if (null == executingProcessors || executingProcessors.isEmpty()) {
                 serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, EXECUTING_PROCESSORS, Messages.SUCCESS));
@@ -257,8 +197,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
     /**
      * Interrupts the thread and updates the processor status
      *
-     * @param node node
-     * @param threadName thread name
+     * @param updateStatusOnly boolean to denote only update status
      * @param processorId processor id
      * @param userId user login id
      */
