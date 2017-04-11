@@ -172,7 +172,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
      * @param client sftp/ftps client
      * @param remotePath remote path
      */
-    protected void createDirectoriesInRemote(Object client, String remotePath) {
+    private void createDirectoriesInRemote(Object client, String remotePath) {
 
         try {
 
@@ -212,13 +212,11 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                             throw new MailBoxServicesException("Unable to create directory.", Response.Status.INTERNAL_SERVER_ERROR);
                         }
                     }
-                    ftpClient.changeDirectory(directory);
                 }
 
             }
-        } catch (SftpException | IOException | LiaisonException e) {
-            LOGGER.error(e);
-            throw new MailBoxServicesException("Unable to create directory.", Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (SftpException | IOException e) {
+            throw new RuntimeException(e);
         }
 
     }

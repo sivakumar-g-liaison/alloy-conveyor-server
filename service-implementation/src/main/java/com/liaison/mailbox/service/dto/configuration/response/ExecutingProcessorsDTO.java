@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.dto.configuration.response;
 import java.util.Date;
 
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 
 /**
@@ -20,7 +21,7 @@ import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
  * 
  * @author OFS
  */
-public class ExecutingProcessorsDTO {
+public class ExecutingProcessorsDTO extends CommonResponseDTO {
 
 	private String processorId;
 	private String executionStatus;

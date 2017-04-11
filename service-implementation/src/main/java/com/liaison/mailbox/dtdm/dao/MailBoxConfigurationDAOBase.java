@@ -106,7 +106,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             String profName = searchFilter.getProfileName();
             
             List<Predicate> predicates = new ArrayList<Predicate>();
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(mbxName)));
             predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
             predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
             
@@ -172,7 +172,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             String profName = searchFilter.getProfileName();
 
             List<Predicate> predicates = new ArrayList<>();
-			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%"));
+			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(mbxName)));
 			predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
 			predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
 			
@@ -241,6 +241,10 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
     private boolean isDescendingSort(String sortDirection) {
         return !StringUtil.isNullOrEmptyAfterTrim(sortDirection) && sortDirection.toUpperCase().equals(SORT_DIR_DESC);
     }
+    
+    private String safeLikeParameter(String name) {
+        return "%" + (name == null ? "" : name.toLowerCase()) + "%";
+    }
 
     /**
 	 * Fetches the count of all  MailBoxes from  MAILBOX database table by given mailbox name.
@@ -275,7 +279,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 if (isMatchModeEquals) {
                     predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), searchFilter.getMbxName().toLowerCase()));
                 } else {
-                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%"+searchFilter.getMbxName().toLowerCase()+"%"));
+                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(searchFilter.getMbxName().toLowerCase())));
                 }
             }
 
@@ -340,7 +344,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                     if (isMatchModeEquals) {
                         predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), searchFilter.getMbxName().toLowerCase()));
                     } else {
-                        predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%"+searchFilter.getMbxName().toLowerCase()+"%"));
+                        predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(searchFilter.getMbxName().toLowerCase())));
                     }
                 }
             } else {
@@ -348,7 +352,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 if (isMatchModeEquals) {
                     predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), searchFilter.getMbxName().toLowerCase()));
                 } else {
-                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), "%"+searchFilter.getMbxName().toLowerCase()+"%"));
+                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(searchFilter.getMbxName().toLowerCase())));
                 }
                 predicates.add(criteriaBuilder.lower(fromMailBox.get(TENANCY_KEY)).in(tenancyKeysLowerCase));
             }

@@ -422,6 +422,20 @@
         <filter-name>httpSyncFilter</filter-name>
         <url-pattern>/process/sync/*</url-pattern>
     </filter-mapping>
+    
+    <!-- VersionResource -->
+    <filter>
+        <filter-name>versionRequestFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/version</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>versionRequestFilter</filter-name>
+        <url-pattern>/config/version</url-pattern>
+    </filter-mapping>
 
     <filter>
         <filter-name>httpAsyncFilter</filter-name>

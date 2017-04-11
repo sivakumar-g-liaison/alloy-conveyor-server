@@ -3,6 +3,7 @@ import com.googlecode.flyway.core.util.StringUtils
 import com.googlecode.flyway.core.util.jdbc.DriverDataSource
 import com.googlecode.flyway.gradle.task.AbstractFlywayTask
 import org.gradle.api.plugins.jetty.internal.Monitor
+import java.text.SimpleDateFormat
 
 // flyway
 apply plugin: 'jetty'
@@ -374,6 +375,23 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	}
 }
 
+task stampCurrentVersion << {
+    def buildId = (null == System.env.TAG) ? 'DEV' : "${System.env.tag}".toString()
+    def formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    def timestamp = formatter.format(new Date())
+    ant.copy( file:'src/main/java/com/liaison/mailbox/Version.java.template', toFile:'src/main/java/com/liaison/mailbox/Version.java', overwrite:true )
+            {
+                filterchain {
+                    tokenfilter { replaceregex(pattern:'SERVICE_VERSION_ID', replace:"${project.version}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_ID', replace:"${buildId}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_DATE', replace:"${timestamp}") }
+                }
+            }
+}
+
+gradle.projectsEvaluated {
+    compileJava.dependsOn(stampCurrentVersion)
+}
 
 task setDevProperties << {
     ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
