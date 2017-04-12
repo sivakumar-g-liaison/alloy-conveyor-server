@@ -42,6 +42,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
@@ -109,7 +110,7 @@ public class DropboxFileTransferService {
 			startTime = System.currentTimeMillis();
 
 			// retrieve the tenancy key from acl manifest
-			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.error(MailBoxUtil.constructMessage(null, fileTransferDTO.getTransferProfileName(), "retrieval of tenancy key from acl manifest failed"));
 				throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
@@ -353,7 +354,7 @@ public class DropboxFileTransferService {
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
 		// retrieve the tenancy key from acl manifest
-		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
+        List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);

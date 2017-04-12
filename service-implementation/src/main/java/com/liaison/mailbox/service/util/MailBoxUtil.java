@@ -10,32 +10,24 @@
 
 package com.liaison.mailbox.service.util;
 
-import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
-import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
@@ -44,7 +36,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -55,16 +46,16 @@ import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static com.liaison.mailbox.MailBoxConstants.PROP_DATA_FOLDER_PATTERN;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
@@ -101,7 +92,28 @@ public class MailBoxUtil {
 	private static final float DAYS_IN_MONTH = 30;
 	private static final float DAYS_IN_YEAR = 365;
 
-    private static GEMACLClient gemClient = new GEMACLClient();
+    /**
+     * Initialize the cluster type.
+     */
+    public static String CLUSTER_TYPE;
+
+    /**
+     * Pattern to validate the path before directory creation
+     */
+    public static String DATA_FOLDER_PATTERN;
+
+    static {
+
+        CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
+            CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
+        } else {
+            CLUSTER_TYPE = MailBoxConstants.SECURE;
+        }
+
+        String[] patterns = CONFIGURATION.getStringArray(PROP_DATA_FOLDER_PATTERN);
+        DATA_FOLDER_PATTERN = String.join(",", patterns);
+    }
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -109,9 +121,6 @@ public class MailBoxUtil {
 	 * @param serializedJson The serialized JSON String.
 	 * @param clazz The corresponding class of the serialized JSON.
 	 * @return Object The instance of the give Class.
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
 	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws IOException {
@@ -130,9 +139,7 @@ public class MailBoxUtil {
 		// added to support the root level element
 		mapper.configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
 
-		T postManifest = mapper.readValue(serializedJson, clazz);
-
-		return postManifest;
+		return mapper.readValue(serializedJson, clazz);
 
 	}
 
@@ -141,9 +148,6 @@ public class MailBoxUtil {
 	 *
 	 * @param object
 	 * @return
-	 * @throws JAXBException
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
 	public static String marshalToJSON(Object object) throws IOException {
@@ -187,100 +191,21 @@ public class MailBoxUtil {
 		return CONFIGURATION;
 	}
 
-	/**
-	 * Method to get the current timestmp to insert into database.
-	 *
-	 * @return
-	 */
-	public static Timestamp getTimestamp() {
-
-		Date d = new Date();
-		return new Timestamp(d.getTime());
-	}
-
-	/**
-	 * Method to get all tenancy keys from acl manifest Json
-	 *
-	 * @param String - aclManifestJson
-	 * @return list of tenancy keys
-	 * @throws IOException
-	 */
-	public static List<TenancyKeyDTO> getTenancyKeysFromACLManifest(String aclManifestJson)
-			throws IOException {
-
-		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
-
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-		TenancyKeyDTO tenancyKey = null;
-		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-
-			tenancyKey = new TenancyKeyDTO();
-			tenancyKey.setName(rbac.getDomainName());
-			// if domainInternalName is not available then exception will be thrown.
-			if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName())) {
-				throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST,
-						Response.Status.CONFLICT);
-			} else {
-				tenancyKey.setGuid(rbac.getDomainInternalName());
-			}
-			tenancyKeys.add(tenancyKey);
-		}
-
-        LOGGER.debug("List of Tenancy keys retrieved are {}", tenancyKeys);
-		return tenancyKeys;
-	}
-
     /**
-     *  Gets tenancy keys from the manfiest
+     * Method to get the current timestmp to insert into database.
      *
-     * @param aclManifestJson manifest details
-     * @return list of tenancy key
-     * @throws IOException
+     * @return
      */
-    public static List<String> getTenancyKeyGuids(String aclManifestJson)
-            throws IOException {
-
-        return gemClient.getDomainsFromACLManifest(aclManifestJson)
-                .stream()
-                .map(RoleBasedAccessControl::getDomainInternalName)
-                .collect(Collectors.toList());
+    public static Timestamp getTimestamp() {
+        Date d = new Date();
+        return new Timestamp(d.getTime());
     }
-
-	/**
-	 * This Method will retrieve the TenancyKey Name from the given guid
-	 *
-	 * @param aclManifestJson manifest details
-	 * @param tenancyKeyGuid tenancy key guid
-	 * @return tenancy key name(org name)
-	 * @throws IOException
-	 */
-	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid)
-			throws IOException {
-
-		String tenancyKeyDisplayName = null;
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-
-		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-
-			if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
-				tenancyKeyDisplayName = rbac.getDomainName();
-				break;
-			}
-		}
-		
-		if (null == tenancyKeyDisplayName) {
-			tenancyKeyDisplayName = tenancyKeyGuid;
-		}
-
-		return tenancyKeyDisplayName;
-	}
 
 	/**
 	 * Method to calculate the elapsed time between two given time limits
 	 *
 	 * @param startTime
 	 * @param endTime
-	 * @param taskToCalulateElapsedTime
 	 */
 	public static void calculateElapsedTime(long startTime, long endTime) {
 
@@ -301,8 +226,8 @@ public class MailBoxUtil {
 	 */
 	public static Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
 
-		Map<String, Integer> pageParameters = new HashMap<String, Integer>();
-		// Calculate page size parameters
+        Map<String, Integer> pageParameters = new HashMap<>();
+        // Calculate page size parameters
 		Integer pageValue = 1;
 		Integer pageSizeValue = 10;
 		if (page != null && !page.isEmpty()) {
@@ -393,22 +318,6 @@ public class MailBoxUtil {
         }
 	}
 
-	/**
-	 * Method to add given TimeToLive value in seconds to the CurrentTime
-	 *
-	 * @param seconds
-	 *
-	 * @return Timestamp
-	 */
-	public static Timestamp addTTLToCurrentTime(int seconds) {
-
-		Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(currentTimeStamp.getTime());
-		cal.add(Calendar.SECOND, seconds);
-		return new Timestamp(cal.getTime().getTime());
-	}
-
     /**
      * Method to construct log messages for easy visibility
      *
@@ -451,10 +360,7 @@ public class MailBoxUtil {
     /**
      * Checks whether a file is modified with in the given time limit
      *
-     * @param timelimit
-     *            to check the file is modified with in the given time limit
-     * @param file
-     *            File object
+     * @param file File object
      * @return true if it is updated with in the given time limit, false otherwise
      */
     public static boolean validateLastModifiedTolerance(Path file) {
@@ -465,15 +371,12 @@ public class MailBoxUtil {
         long lastmo = file.toFile().lastModified();
 
         LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
-        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
+        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo) / 1000));
 
-        if (((system - lastmo)/1000) < timelimit) {
-            return true;
-        }
-        return false;
+        return ((system - lastmo) / 1000) < timelimit;
     }
-    
-    /**
+
+	/**
      * Method to construct the valid URL
      * 
      * @param propertiesDTO
@@ -486,13 +389,13 @@ public class MailBoxUtil {
         String scheme = uri.getScheme();
         if (propertiesDTO.getPort() == 0 && (uri.getPort() == -1 || uri.getPort() == 0)) {
             
-            if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+            if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
-            } else if (Protocol.SFTP.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.SFTP.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.SFTP_PORT);
-            } else if (Protocol.HTTP.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.HTTP.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTP_PORT);
-            } else if (Protocol.HTTPS.getCode().toString().equalsIgnoreCase(scheme)) {
+            } else if (Protocol.HTTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
             } 
             propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
@@ -540,25 +443,23 @@ public class MailBoxUtil {
 		return fileValidity.before(currentTimestamp) ;
     }
 
-	/**
-	 * Method to get the storage type
-	 * 
-	 * @param dynamicProperties
-	 * @return storageType
-	 */
-	public static String getStorageType(Set<ProcessorProperty> dynamicProperties) {
-		
-		String storageType = null;
-		Iterator<ProcessorProperty> iterator = dynamicProperties.iterator();
-		while (iterator.hasNext()) {
-			ProcessorProperty property = iterator.next();
-			if (MailBoxConstants.STORAGE_IDENTIFIER_TYPE.equals(property.getProcsrPropName())) {
-				storageType = property.getProcsrPropValue();
-				break;
-			}
-		}
-		return storageType;
-	}
+    /**
+     * Method to get the storage type
+     *
+     * @param dynamicProperties
+     * @return storageType
+     */
+    public static String getStorageType(Set<ProcessorProperty> dynamicProperties) {
+
+        String storageType = null;
+        for (ProcessorProperty property : dynamicProperties) {
+            if (MailBoxConstants.STORAGE_IDENTIFIER_TYPE.equals(property.getProcsrPropName())) {
+                storageType = property.getProcsrPropValue();
+                break;
+            }
+        }
+        return storageType;
+    }
 
     /**
      * http success code validation
@@ -744,7 +645,7 @@ public class MailBoxUtil {
      * @param threadName thred name
      * @return Thread
      */
-    public static Thread getThreadByName(String threadName) {
+    private static Thread getThreadByName(String threadName) {
 
         for (Thread t : Thread.getAllStackTraces().keySet()) {
             if (t.getName().equals(threadName)) return t;
@@ -759,12 +660,8 @@ public class MailBoxUtil {
      * @return true if it is interrupted
      */
     public static boolean isInterrupted(String threadName) {
-
         Thread runningThread = getThreadByName(threadName);
-        if (null != runningThread) {
-            return runningThread.isInterrupted();
-        }
-        return false;
+        return null != runningThread && runningThread.isInterrupted();
     }
 
     /**
@@ -833,4 +730,31 @@ public class MailBoxUtil {
 
         }
     }
+
+    /**
+     * This method used to get the cluster types
+     * 1. It will return 'LOWSECURE' if it is in LOW SECURE RELAY OR
+     * 2. It will return both 'LOWSECURE' and 'SECURE' if it is SECURE RELAY.
+     * 
+     * @return return list of cluster types
+     */
+    public static List<String> getClusterTypes() {
+        return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Collections.singletonList(MailBoxConstants.LOWSECURE) :
+                            Arrays.asList(MailBoxConstants.LOWSECURE, MailBoxConstants.SECURE);
+    }
+    
+    /**
+     * This method check whether the deployment type conveyor or not
+     * 
+     * 1. It will return true if it is conveyor.
+     * 
+     * @return  boolean 
+     */
+    public static boolean isConveyorType() {
+        
+        String deploymentType = MailBoxUtil.getEnvironmentProperties()
+                .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
+    }
+    
 }

@@ -84,6 +84,7 @@ import static com.liaison.mailbox.MailBoxConstants.FTPS;
 import static com.liaison.mailbox.MailBoxConstants.HTTP;
 import static com.liaison.mailbox.MailBoxConstants.HTTPS;
 import static com.liaison.mailbox.MailBoxConstants.SFTP;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 /**
  * Base processor type for all type of processors.
@@ -96,8 +97,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private static final String FILE_PERMISSION = "rw-rw----";
     private static final String FOLDER_PERMISSION = "rwxrwx---";
     private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
-    protected static final String DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
-    protected static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
+    private static final String DEFAULT_DATA_FOLDER_PATTERN = "glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**";
     private static final String INBOX = "inbox";
     private static final String OUTBOX = "outbox";
 
@@ -695,10 +695,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         Path filePathToCreate = fileDirectory.toPath();
         LOGGER.debug("Setting on to create - {}", filePathToCreate);
         FileSystem fileSystem = FileSystems.getDefault();
-        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
-        PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+        PathMatcher pathMatcher = fileSystem.getPathMatcher(MailBoxUtil.DATA_FOLDER_PATTERN);
         if (!pathMatcher.matches(filePathToCreate)) {
-            throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);
+            throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, MailBoxUtil.DATA_FOLDER_PATTERN.substring(5), Response.Status.BAD_REQUEST);
         }
 
         //check availability of /data/*/* folder
@@ -720,7 +719,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param excludedFiles - List of extensions to be excluded
      * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
      */
-    public boolean checkFileIncludeorExclude(String includedFiles, String currentFileName, String excludedFiles) {
+    public boolean checkFileIncludeOrExclude(String includedFiles, String currentFileName, String excludedFiles) {
 
         List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles)) ? Arrays.asList(includedFiles.split(",")) : null;
         List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
@@ -729,15 +728,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
         //check if file is in include list
         if (null != includeList && !includeList.isEmpty()) {
-            boolean fileIncluded = (includeList.contains(fileExtension)) ? true : false;
-            return fileIncluded;
+            return includeList.contains(fileExtension);
         }
 
         //check if file is not in excluded list
-        if (null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
-            return false;
-        }
-        return true;
+        return !(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension));
     }
 
     /**
@@ -800,7 +795,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             if (null == stagedFile.getFailureNotificationCount()) {
                 stagedFile.setFailureNotificationCount(1);
                 stagedFileDAO.merge(stagedFile);
-            } else if (maxCount > stagedFile.getFailureNotificationCount().intValue()) {
+            } else if (maxCount > stagedFile.getFailureNotificationCount()) {
                 // Notification count update
                 stagedFile.setFailureNotificationCount((stagedFile.getFailureNotificationCount() + 1));
                 stagedFileDAO.merge(stagedFile);

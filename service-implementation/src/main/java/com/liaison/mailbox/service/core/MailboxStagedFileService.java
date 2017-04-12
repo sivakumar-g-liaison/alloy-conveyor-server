@@ -10,18 +10,8 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
@@ -33,6 +23,15 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseStagedFileReq
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class used to retrieve the staged file details in relay.
@@ -103,7 +102,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
      * @param pguid
      * @return response
     */
-    public Response deacivateStagedFile(String pguid) {
+    public Response deactivateStagedFile(String pguid) {
 	
         LOG.debug("Entering into deactivate StagedFiles.");
         EntityManager em = null;
@@ -117,6 +116,10 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
 	
                 file = em.find(StagedFile.class, pguid);
                 if (null == file) {
+                    throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
+                }
+
+                if (!MailBoxUtil.CLUSTER_TYPE.equals(file.getClusterType())) {
                     throw new RuntimeException(STAGED_FILE_NOT_EXISTS);
                 }
 
@@ -167,15 +170,16 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             tx = em.getTransaction();
             tx.begin();
 
-            StringBuilder query = new StringBuilder()
-                    .append("UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = :")
-                    .append(StagedFileDAO.MODIFIED_DATE)
-                    .append(" WHERE PGUID IN (:" + StagedFileDAO.STAGED_FILE_IDS + ")")
-                    .append(" AND STATUS = 'STAGED'");
-            
-            Query q = em.createNativeQuery(query.toString())
+            String query = "UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = :" + StagedFileDAO.MODIFIED_DATE +
+                    " WHERE PGUID IN (:" + StagedFileDAO.STAGED_FILE_IDS + ")" +
+                    " AND STATUS = 'STAGED'" +
+                    " AND CLUSTER_TYPE =:" + MailBoxUtil.CLUSTER_TYPE;
+
+            Query q = em.createNativeQuery(query)
                     .setParameter(StagedFileDAO.MODIFIED_DATE, MailBoxUtil.getTimestamp())
-                    .setParameter(StagedFileDAO.STAGED_FILE_IDS, guids);
+                    .setParameter(StagedFileDAO.STAGED_FILE_IDS, guids)
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
+
             //Update the selected files
             q.executeUpdate();
             tx.commit();

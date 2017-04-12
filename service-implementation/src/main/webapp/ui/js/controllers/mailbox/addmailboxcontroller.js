@@ -53,6 +53,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             status: "",
             shardKey: "",
             tenancyKey: "",
+            clusterType: "",
             properties: []
         };
         $scope.initEnumStats = [{"name":"Active","id":"ACTIVE"},
@@ -72,6 +73,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		var processorSearchFlag = false;
 
         $scope.status = $scope.enumstats[0];
+        $scope.mailBox.clusterType = $rootScope.javaProperties.clusterTypes[0];
         
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
@@ -162,6 +164,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 $scope.mailBox.guid = $scope.mailBoxId;
                                 $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                                 $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
+                                $scope.mailBox.clusterType = data.getMailBoxResponse.mailBox.clusterType;
 								$scope.mailBox.modifiedBy = data.getMailBoxResponse.mailBox.modifiedBy;
 								$scope.mailBox.modifiedDate = data.getMailBoxResponse.mailBox.modifiedDate;
         						if(data.getMailBoxResponse.mailBox.processors.length > 0) {

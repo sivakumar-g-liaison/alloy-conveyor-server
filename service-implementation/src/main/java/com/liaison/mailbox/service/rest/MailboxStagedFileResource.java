@@ -100,7 +100,7 @@ public class MailboxStagedFileResource extends AuditedResource {
             @Override
             public Object call() {
                 MailboxStagedFileService stagedFileService = new MailboxStagedFileService();
-                return stagedFileService.deacivateStagedFile(pguid);
+                return stagedFileService.deactivateStagedFile(pguid);
             }
         };
         worker.actionLabel = "MailboxStagedFileResource.updateStagedFileStatus()";

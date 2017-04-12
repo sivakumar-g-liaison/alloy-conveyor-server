@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
@@ -40,6 +39,7 @@ import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
@@ -50,14 +50,15 @@ import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
+import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -69,6 +70,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.SERVICE_INSTANCE;
+import static com.liaison.mailbox.MailBoxConstants.STACK_CONST;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
@@ -239,7 +241,7 @@ public class MailBoxConfigurationService {
 			}
 			
 			// retrieve the actual tenancykey Display Name from TenancyKeys
-			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
+            String tenancyKeyDisplayName = TenancyKeyUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
 
 			// if the tenancy key display name is not available then error will be logged as the given tenancyKey is
 			// not available in tenancyKeys retrieved from acl manifest
@@ -483,7 +485,7 @@ public class MailBoxConfigurationService {
 				processors = processorDao.findProcessorByMbx(mbx.getPguid(), false);
 	            mbx.setMailboxProcessors(processors);
                 if (!MailBoxUtil.isEmpty(aclManifestJson)) {
-                    tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
+                    tenancyKeyDisplayName = TenancyKeyUtil.getTenancyKeyNameByGuid(aclManifestJson, mbx.getTenancyKey());
                 } else {
                     tenancyKeyDisplayName = mbx.getTenancyKey();
                 }
@@ -592,7 +594,7 @@ public class MailBoxConfigurationService {
             }
 
             // retrieve the actual tenancykey guids from DTO
-            tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            tenancyKeyGuids = TenancyKeyUtil.getTenancyKeyGuids(aclManifestJson);
 
             if (tenancyKeyGuids.isEmpty()) {
                 LOG.error("retrieval of tenancy key from acl manifest failed");
@@ -644,53 +646,56 @@ public class MailBoxConfigurationService {
         return totalCount;
     }
 
-	/**
-	 * getting values from java properties file
-	 * @return
-	 * @throws IOException
-	 */
-	public GetPropertiesValueResponseDTO readPropertiesFile() {
-		LOG.debug("Entering into readPropertiesFile.");
+    /**
+     * getting values from java properties file
+     *
+     * @return GetPropertiesValueResponseDTO
+     */
+    public GetPropertiesValueResponseDTO readPropertiesFile() {
+        LOG.debug("Entering into readPropertiesFile.");
 
-		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
-		PropertiesFileDTO dto = new PropertiesFileDTO();
+        GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
+        PropertiesFileDTO dto = new PropertiesFileDTO();
 
-		try {
+        try {
 
-		    DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
-			dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
-			dto.setFsmEventCheckIntervalInSeconds(config.getString(
-			        MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
-			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
-			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
-			dto.setDeployAsDropbox(config.getBoolean(MailBoxConstants.DEPLOY_AS_DROPBOX, false));
+            DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
+            dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+            dto.setFsmEventCheckIntervalInSeconds(config.getString(
+                    MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
 
-			serviceResponse.setProperties(dto);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
-					Messages.SUCCESS));
-			LOG.debug("Exit from readPropertiesFile.");
-			return serviceResponse;
+            String syncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX
+                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
+            dto.setProcessorSyncUrlDisplayPrefix(syncUrlPrefix);
+            String asyncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX
+                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
+            dto.setProcessorAsyncUrlDisplayPrefix(asyncUrlPrefix);
 
-		} catch (Exception e) {
+            dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+            dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
+            dto.setClusterTypes(MailBoxUtil.getClusterTypes());
 
-			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX,
-					Messages.FAILURE, e.getMessage()));
-			return serviceResponse;
-		}
+            serviceResponse.setProperties(dto);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+            LOG.debug("Exit from readPropertiesFile.");
+            return serviceResponse;
 
-	}
-	
-	
-	/**
+        } catch (Exception e) {
+
+            LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX,
+                    Messages.FAILURE, e.getMessage()));
+            return serviceResponse;
+        }
+
+    }
+
+
+    /**
 	 * Method to read Mailbox details based on given mailbox guid or name
 	 * 
 	 * @param guid
 	 * @return Mailbox
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws SymmetricAlgorithmException
 	 */
 	public GetMailBoxResponseDTO readMailbox(String guid) {
 
@@ -741,5 +746,42 @@ public class MailBoxConfigurationService {
 		}
 
 	}
+
+    /**
+     * Method to get the cluster type of the mailbox based on mailbox id.
+     *
+     * @param mailboxId pguid of the mailbox
+     * @return clusterTypeResponseDTO
+     */
+    public ClusterTypeResponseDTO getClusterType(String mailboxId) {
+
+        LOG.debug("Entering into getClusterType.");
+        LOG.debug("The retrieve mailbox id is {} ", mailboxId);
+
+        ClusterTypeResponseDTO clusterTypeResponseDTO = new ClusterTypeResponseDTO();
+        String clusterType = null;
+
+        if (null == mailboxId) {
+            throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Maibox Id",
+                    Response.Status.BAD_REQUEST);
+        }
+
+        try {
+
+            MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+            clusterType = configDao.getClusterType(mailboxId);
+
+            clusterTypeResponseDTO.setClusterType(clusterType);
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.CLUSTER_TYPE, Messages.SUCCESS));
+            return clusterTypeResponseDTO;
+
+        } catch (NoResultException | MailBoxConfigurationServicesException e) {
+            clusterTypeResponseDTO.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,
+                    MailBoxConstants.CLUSTER_TYPE,
+                    Messages.FAILURE,
+                    e.getMessage()));
+            return clusterTypeResponseDTO;
+        }
+    }
 
 }

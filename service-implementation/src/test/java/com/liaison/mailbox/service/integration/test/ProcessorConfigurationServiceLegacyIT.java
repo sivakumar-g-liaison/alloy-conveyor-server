@@ -16,7 +16,6 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -39,7 +38,6 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
@@ -105,6 +103,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         // Adding the processor
         AddProcessorToMailboxRequestDTO procRequestDTO = MailBoxUtil.unmarshalFromJSON(ServiceUtils.readFileFromClassPath("requests/processor/create_processor_legacy.json"), AddProcessorToMailboxRequestDTO.class);
         procRequestDTO.getProcessorLegacy().setLinkedMailboxId(response.getMailBox().getGuid());
+        procRequestDTO.getProcessor().setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         Set<String> profiles = new HashSet<String>();
         profiles.add(profileDTO.getName());
@@ -121,6 +120,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessorLegacy().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessorLegacy().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessorLegacy().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessorLegacy().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -156,6 +156,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacy.setGuid(processorResponse.getProcessor().getGuId());
         processorLegacy.setDescription("description modified");
         processorLegacy.setName("Processor Modified" + System.currentTimeMillis());
+        processorLegacy.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         //processorLegacy.setStatus(EntityStatus.INACTIVE.value());
 
         processorLegacy.getRemoteProcessorProperties().setConnectionTimeout(60000);
@@ -170,6 +171,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         Assert.assertEquals(processorLegacy.getDescription(), processorReadResponse.getProcessor().getDescription());
         Assert.assertEquals(processorLegacy.getName(), processorReadResponse.getProcessor().getName());
         Assert.assertEquals(processorLegacy.getStatus(), processorReadResponse.getProcessor().getStatus());
+        Assert.assertEquals(processorLegacy.getClusterType(), processorReadResponse.getProcessor().getClusterType());
 
         assertRemoteProcessorStaticCheck("url", processorLegacy.getRemoteProcessorProperties().getUrl(), processorReadResponse);
     }
@@ -699,6 +701,7 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorLegacyDTO.setProtocol(protocol);
         processorLegacyDTO.setStatus(status);
         processorLegacyDTO.setDescription("test description");
+        processorLegacyDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         processorLegacyDTO.setFolders(setFolderDetails(protocol, type));
         processorLegacyDTO.setCredentials(setCredentialDetails(protocol));
         processorLegacyDTO.setLinkedProfiles(setLinkedProfileDetails());

@@ -10,12 +10,9 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.sla.MailboxWatchDogService;
+import org.testng.annotations.Test;
 
 /**
  * Test class to test mailbox watchdog service.

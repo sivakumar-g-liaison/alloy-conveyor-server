@@ -13,7 +13,7 @@ package com.liaison.mailbox.rtdm.dao;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
@@ -21,9 +21,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This will fetch the processors details.
@@ -36,17 +36,16 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public RuntimeProcessors findByProcessorId(String processorId) {
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            @SuppressWarnings("unchecked")
             List<RuntimeProcessors> processors = entityManager
-                    .createNamedQuery(FIND_BY_PROCESSOR_ID)
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID, RuntimeProcessors.class)
                     .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
             if (!processors.isEmpty()) {
                 return processors.get(0);
@@ -77,6 +76,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
             @SuppressWarnings("unchecked")
             List<String> resultList = entityManager.createNativeQuery(FIND_NON_RUNNING_PROCESSORS)
                     .setParameter(PROCESSOR_ID, processorIds)
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
             //commits the transaction
@@ -111,6 +111,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         prcsrExecution.setProcessors(processors);
         prcsrExecution.setOriginatingDc(DATACENTER_NAME);
         processors.setProcessorExecState(prcsrExecution);
+        processors.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         persist(processors);
     }
