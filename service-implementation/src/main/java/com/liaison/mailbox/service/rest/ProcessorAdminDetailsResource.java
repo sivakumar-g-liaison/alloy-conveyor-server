@@ -27,9 +27,7 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
-import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessorsExecutionStateRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecutionStateResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -120,7 +118,9 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     public Response getExecutingProcessors(@Context HttpServletRequest request,
                                            @QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
-                                           @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize) {
+                                           @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+                                           @QueryParam(value = "sortInfo") @ApiParam(name = "sortInfo", required = false, value = "pagesize") final String sortInfo,
+                                           @QueryParam(value = "filterText") @ApiParam(name = "filterText", required = false, value = "filterText") final String filterText) {
 
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -128,12 +128,7 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
             public Object call() {
 
                 ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
-                GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-                //setting the current page and page size
-                searchFilter.setPage(page);
-                searchFilter.setPageSize(pageSize);
-                GetProcessorExecutionStateResponseDTO serviceResponse = configService.findExecutingProcessors(searchFilter);
-                return serviceResponse;
+                return configService.getExecutingProcessors(page, pageSize, sortInfo, filterText);
             }
         };
         worker.actionLabel = "ProcessorAdminDetailsResource.getExecutingProcessors()";

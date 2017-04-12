@@ -22,24 +22,35 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         currentPage: 1
     };
     
-	$scope.getExecutingProcessors = function () {
-    $rootScope.gridLoaded = false;
-    $scope.restService.get($scope.base_url + $scope.processorStatusUrl,
-                function (data, status) {
-            	    if (status === 200 || status === 400) {
-                        if (data.processorExecutionStateResponse.response.status == 'success') {
-                        	 $scope.getPagedDataAsync(data);
-                        } else {
-                        	showSaveMessage(data.processorExecutionStateResponse.response.message, 'warning');
-                          }
+    $scope.filterOptions = {
+        filterText: [],
+        useExternalFilter: true
+    };
+
+    $scope.sortInfo = {
+        fields: ['modifiedDate'],
+        directions: ['asc']
+    };
+
+    $scope.getExecutingProcessors = function () {
+        $scope.sortInformation = {
+            fields: $scope.sortInfo.fields,
+            directions: $scope.sortInfo.directions
+        };
+        $scope.restService.get($scope.base_url + $scope.processorStatusUrl,
+            function (data, status) {
+                if (status === 200 || status === 400) {
+                    if (data.processorExecutionStateResponse.response.status == 'success') {
+                        $scope.getPagedDataAsync(data);
                     } else {
-                    	 showSaveMessage(data.processorExecutionStateResponse.response.message, 'error');
-                      }
-                   
-                    $rootScope.gridLoaded = true;
-				}, {page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize}
-            );
-	}
+                        showSaveMessage(data.processorExecutionStateResponse.response.message, 'warning');
+                    }
+                } else {
+                    showSaveMessage(data.processorExecutionStateResponse.response.message, 'error');
+                }
+            }, {page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, filterText:$scope.filterOptions, sortInfo:$scope.sortInformation}
+        );
+    }
 
 	$scope.getPagedDataAsync = function (largeLoad) {
             setTimeout(function () {
@@ -58,7 +69,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         if (angular.isObject(ProcessorIdsCopy)) {
             $scope.updateProcessorsStatusRequestJson = $filter('json')(ProcessorIdsCopy);
         }
-        $scope.editor.getSession().setValue($scope.updateProcessorsStatusRequestJson);
+
         $scope.processors = data.processors;
         $scope.totalServerItems = data.totalItems;
         if ( $scope.processors.length === 0) {
@@ -67,6 +78,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         if (!$scope.$$phase) {
             $scope.$apply();
         }
+        $rootScope.gridLoaded = true;
 
     };
     
@@ -89,12 +101,50 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         );
 	}
     
+    var filterWatch;
+    var filterBarPlugin = {
+        init: function(scope, grid) {
+            filterBarPlugin.scope = scope;
+            filterBarPlugin.grid = grid;
+            filterWatch = scope.$watch('columns[0].filterText + columns[4].filterText', function(newVal, oldVal) {
+                var colsEmpty = true;
+                var searchQuery = [];
+                angular.forEach(filterBarPlugin.scope.columns, function(col) {
+                    if (col.visible && col.filterText) {
+                        var filterObj = {};
+                        filterObj.field = col.field;
+                        filterObj.text = col.filterText;
+                        colsEmpty = false;
+                        if (col.field == 'createdDate') {
+                            var date = col.filterText;
+                            if (date.indexOf(",") != -1) {
+                                var dates = date.split('-');
+                                var startDate = new Date(dates[0]);
+                                var endDate = new Date(dates[1]);
+                                var dateFrom = startDate.getMonth() + 1 + '/' + startDate.getDate() + '/' + startDate.getFullYear();
+                                var dateTo = endDate.getMonth() + 1 + '/' + endDate.getDate() + '/' + endDate.getFullYear();
+                                filterObj.text = dateFrom + ' - ' + dateTo + ' - ' + $scope.dateFormat;
+                            } else {
+                                filterObj.text = date + ' - ' + $scope.dateFormat;
+                            }
+                        }
+                        searchQuery.push(filterObj);
+                    }
+                });
+                $scope.filterOptions.filterText = searchQuery;
+                $scope.getExecutingProcessors();
+            }, true);
+        },
+        scope: undefined,
+        grid: undefined
+    };
     
     // Setting the grid details	
     $scope.gridOptions = {
     		columnDefs: [{
                 field: 'processorId',
-                displayName: 'Processor Id'
+                displayName: 'Processor Id',
+                headerCellTemplate: 'partials/filterInputTypeHeaderTemplate.html'
             },
 			{
                 field: 'executionStatus',
@@ -123,8 +173,9 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
             	cellFilter: "date:'dd-MMM-yy HH:mm:ss'" 
             },*/
             {
-            	field: 'nodeInUse',
-            	displayName: 'Node In Use'
+                field: 'nodeInUse',
+                displayName: 'Node In Use',
+                headerCellTemplate: 'partials/filterInputTypeHeaderTemplate.html'
             },
             { 
                 displayName: 'Action',
@@ -136,6 +187,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         data: 'processors',
         // rowTemplate: customRowTemplate,
         enablePaging: true,
+        headerRowHeight: 70,
         showFooter: true,
         canSelectRows: true,
         multiSelect: false,
@@ -143,8 +195,11 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         displaySelectionCheckbox: false,
 		useExternalSorting: true,
         pagingOptions: $scope.pagingOptions,
+        filterOptions: $scope.filterOptions,
+        plugins: [filterBarPlugin, new ngGridFlexibleHeightPlugin()],
+        sortInfo: $scope.sortInfo,
+        useExternalSorting: true,
 		enableColumnResize : true,
-		plugins: [new ngGridFlexibleHeightPlugin()],
         totalServerItems: 'totalServerItems',
     };
 	
@@ -165,7 +220,13 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
                }               
             }
     }, true);
-	
+    
+    $scope.$watch('sortInfo.directions + sortInfo.fields', function(newVal, oldVal) {
+        if (newVal !== oldVal) {
+            $scope.getExecutingProcessors();
+        }
+    }, true);
+
 	$scope.validatePageNumberValue = function(newVal, oldVal) {
             // Value cannot be empty, non number or zero
             var valid = true;

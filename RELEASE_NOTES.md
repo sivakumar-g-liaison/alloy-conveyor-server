@@ -1,3 +1,8 @@
+4.14.1
+---------------
+* GMB-980 - Provision to filter by node and processor guid
+* GMB-970 - Rest service to update multiple processor guid status
+
 4.14.0
 ---------------
 * GMB-954 - Query back to service broker to determine the sender name when creating a process.
