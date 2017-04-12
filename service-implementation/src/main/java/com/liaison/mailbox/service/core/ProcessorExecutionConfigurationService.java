@@ -52,11 +52,8 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
 
 /**
  * class which contains processor execution configuration information.
- * @author
- *
  */
-
-public class ProcessorExecutionConfigurationService {
+public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
@@ -64,59 +61,53 @@ public class ProcessorExecutionConfigurationService {
 
     /**
      * Method to get the executing processors
-     * @param searchFilter
+     * 
+     * @param page
+     * @param pageSize
+     * @param sortInfo
+     * @param filterText
      * @return
      */
-    public GetProcessorExecutionStateResponseDTO findExecutingProcessors(GenericSearchFilterDTO searchFilter) {
-
-        GetProcessorExecutionStateResponseDTO response = new GetProcessorExecutionStateResponseDTO();
+    public GetProcessorExecutionStateResponseDTO getExecutingProcessors(String page, String pageSize, String sortInfo, String filterText) {
+        
+        LOG.debug("Entering into get all executing Processors.");
+        GetProcessorExecutionStateResponseDTO serviceResponse = new GetProcessorExecutionStateResponseDTO();
 
         try {
 
-            int totalCount = 0;
-            Map<String, Integer> pageOffsetDetails = null;
-            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<ExecutingProcessorsDTO>();
-            List<String> executingProcessorIds = new ArrayList<String>();
-            ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
+            GridResult<ProcessorExecutionState> result = getGridItems(ProcessorExecutionState.class, filterText, sortInfo,
+                    page, pageSize);
+            List<ProcessorExecutionState> executingProcessors = result.getResultList();
+            List<ExecutingProcessorsDTO> executingProcessorsDTO = new ArrayList<>();
 
-            // setting the page offset details
-            totalCount = processorDao.findAllExecutingProcessors();
-            pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(), searchFilter.getPageSize(),
-                    totalCount);
-            List<ProcessorExecutionState> executingProcessors = processorDao.findExecutingProcessors(pageOffsetDetails);
-
-            if (executingProcessors.size() == 0) {
-
-                response.setResponse(new ResponseDTO(Messages.NO_EXECUTING_PROCESSORS_AVAIL, EXECUTING_PROCESSORS,
-                        Messages.SUCCESS));
-                response.setProcessors(executingProcessorsDTO);
-                return response;
+            if (null == executingProcessors || executingProcessors.isEmpty()) {
+                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, EXECUTING_PROCESSORS, Messages.SUCCESS));
+                serviceResponse.setProcessors(executingProcessorsDTO);
+                return serviceResponse;
             }
 
             ExecutingProcessorsDTO executingProcessor = null;
-            for (ProcessorExecutionState processorState : executingProcessors) {
-                
-                executingProcessorIds.add(processorState.getProcessorId());
+            for (ProcessorExecutionState execPrcs : executingProcessors) {
                 executingProcessor = new ExecutingProcessorsDTO();
-                executingProcessor.copyFromEntity(processorState);
+                executingProcessor.copyFromEntity(execPrcs);
                 executingProcessorsDTO.add(executingProcessor);
             }
-            response.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(),
-                    Messages.SUCCESS));
-            response.setExecutingProcessorIds(executingProcessorIds);
-            response.setProcessors(executingProcessorsDTO);
-            response.setTotalItems(totalCount);
 
-            return response;
+            // response message construction
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, Messages.PROCESSORS_LIST.value(), Messages.SUCCESS));
+            serviceResponse.setProcessors(executingProcessorsDTO);
+            serviceResponse.setTotalItems((int) result.getTotalItems());
 
-        } catch (MailBoxConfigurationServicesException e) {
+            LOG.debug("Exiting from get all executing Processors.");
+            return serviceResponse;
+        } catch (Exception e) {
 
-            LOG.error(Messages.SEARCH_OPERATION_FAILED.name(), e);
-            response.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, PROCESSORS, Messages.FAILURE, e
-                    .getMessage()));
-            return response;
+            LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, EXECUTING_PROCESSORS, Messages.FAILURE,
+                    e.getMessage()));
+            return serviceResponse;
         }
-
+        
     }
     
     /**
@@ -206,8 +197,7 @@ public class ProcessorExecutionConfigurationService {
     /**
      * Interrupts the thread and updates the processor status
      *
-     * @param node node
-     * @param threadName thread name
+     * @param updateStatusOnly boolean to denote only update status
      * @param processorId processor id
      * @param userId user login id
      */

@@ -18,9 +18,12 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.FilterObject;
 import com.liaison.mailbox.dtdm.dao.FilterText;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -369,9 +372,13 @@ public abstract class GridServiceRTDM<T> {
                 }
             }
         }
-
-        pathString = request.get(STATUS);
-        andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name()));
+        
+        if (ProcessorExecutionState.class.getName().equals(clazz.getName())) {
+            andPredicatesList.add(criteriaBuilder.equal(request.get("executionStatus"), ExecutionState.PROCESSING.value()));
+        } else if (StagedFile.class.getName().equals(clazz.getName())) {
+            pathString = request.get(STATUS);
+            andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name())); 
+        }
 
         pathString = request.get(MailBoxConstants.CLUSTER_TYPE);
         andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));

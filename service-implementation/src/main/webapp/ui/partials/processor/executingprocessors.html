@@ -10,7 +10,7 @@
         <img height="96px" src="img/spinner.gif" />
 	</div>
 	<div>
-		<div class="gridStyle" ng-grid="gridOptions" ng-if="gridLoaded"></div>
+		<div class="gridStyle" ng-grid="gridOptions"></div>
 		<br>
 	</div>
 	<div class="pull-right">
@@ -34,7 +34,7 @@
                 useWrapMode : true,
                 showGutter: true,
                 mode: 'json'
-                }" class="updateProcessorsStatusReqJson_ace_editor">
+                }" class="updateProcessorsStatusReqJson_ace_editor" ng-model="updateProcessorsStatusRequestJson">
         </div>
         <div class="pull-right">
             <br>
