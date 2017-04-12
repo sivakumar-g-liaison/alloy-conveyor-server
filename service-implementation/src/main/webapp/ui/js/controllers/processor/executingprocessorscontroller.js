@@ -69,7 +69,7 @@ myApp.controller('executingprocessorsCntrlr', ['$rootScope', '$scope', '$locatio
         if (angular.isObject(ProcessorIdsCopy)) {
             $scope.updateProcessorsStatusRequestJson = $filter('json')(ProcessorIdsCopy);
         }
-        $scope.editor.getSession().setValue($scope.updateProcessorsStatusRequestJson);
+
         $scope.processors = data.processors;
         $scope.totalServerItems = data.totalItems;
         if ( $scope.processors.length === 0) {
