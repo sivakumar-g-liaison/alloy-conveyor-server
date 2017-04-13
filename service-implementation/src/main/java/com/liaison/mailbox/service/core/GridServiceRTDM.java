@@ -380,8 +380,13 @@ public abstract class GridServiceRTDM<T> {
             andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name())); 
         }
 
-        pathString = request.get(MailBoxConstants.CLUSTER_TYPE);
-        andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
+        if (StagedFile.class.getName().equals(clazz.getName())) {
+            pathString = request.get(MailBoxConstants.CLUSTER_TYPE);
+            andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
+        } else if (ProcessorExecutionState.class.getName().equals(clazz.getName())) {
+            pathString = request.get("processors").get(MailBoxConstants.CLUSTER_TYPE);
+            andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
+        }
 
         // adding all the predicates
         holder.setPredicate(criteriaBuilder.and(andPredicatesList
