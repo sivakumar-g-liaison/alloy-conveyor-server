@@ -8,16 +8,9 @@
  */
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import com.liaison.commons.message.glass.dom.Status;
-
-import com.liaison.mailbox.dtdm.model.Processor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
+import com.liaison.commons.message.glass.dom.Status;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.UUIDGen;
@@ -27,6 +20,10 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Util for GlassMessage
@@ -146,10 +143,9 @@ public class MailboxGlassMessageUtil {
     public static void logProcessingStatus(GlassMessage glassMessage, StatusType statusType, String message) {
 
         // Log ActivityStatusAPI
-        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI(glassMessage.getGlobalPId());
         activityStatusAPI.setPipelineId(glassMessage.getPipelineId());
         activityStatusAPI.setProcessId(glassMessage.getProcessId());
-        activityStatusAPI.setGlobalId(glassMessage.getGlobalPId());
         activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
         Status status = new Status();

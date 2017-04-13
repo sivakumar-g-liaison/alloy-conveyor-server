@@ -10,13 +10,6 @@
 
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import com.liaison.gem.service.dto.OrganizationDTO;
-import com.liaison.mailbox.service.util.ServiceBrokerUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
 import com.liaison.commons.message.glass.dom.GatewayType;
@@ -28,10 +21,16 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.gem.service.dto.OrganizationDTO;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Class that contains the fields required for logging messages in LENS.
@@ -434,9 +433,8 @@ public class GlassMessage {
 
     private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
 
-		TimeStampAPI timeStampAPI = new TimeStampAPI();
+		TimeStampAPI timeStampAPI = new TimeStampAPI(getGlobalPId());
 		timeStampAPI.setProcessId(getProcessId());
-		timeStampAPI.setGlobalId(getGlobalPId());
 		timeStampAPI.setPipelineId(getPipelineId());
 		timeStampAPI.getTimeStamps().add(glassTimeStamp);
 		timeStampAPI.setGlassMessageId(UUIDGen.getCustomUUID());
@@ -456,10 +454,9 @@ public class GlassMessage {
 	 */
 	private ActivityStatusAPI constructActivityStatusAPI(StatusType statusType, String message, String processorType, String techDescription, String processorProtocol) {
 
-		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI(getGlobalPId());
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
-		activityStatusAPI.setGlobalId(getGlobalPId());
 		activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();

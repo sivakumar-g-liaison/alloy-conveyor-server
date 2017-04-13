@@ -225,7 +225,7 @@ dependencies {
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:7.+")
 
 	//Required for integration test case
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
