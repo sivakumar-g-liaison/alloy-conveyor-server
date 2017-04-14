@@ -1,4 +1,4 @@
-4.15.0-SNAPSHOT
+4.15.0
 ---------------
 * GMB-956 - Add a flag column to database tables to identify which cluster this belongs to.
 * GMB-959 - Migrate the server side logic to support gateway_type flag on read and write
