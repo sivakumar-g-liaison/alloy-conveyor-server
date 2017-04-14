@@ -1,6 +1,14 @@
 4.15.0-SNAPSHOT
 ---------------
-
+* GMB-956 - Add a flag column to database tables to identify which cluster this belongs to.
+* GMB-959 - Migrate the server side logic to support gateway_type flag on read and write
+* GMB-960 - Analyze the impact on conveyor server as there schema is shared with relay
+* GMB-961 - Expose a REST endpoint to identify the origin gateway type of a processor or mailbox
+* GMB-962 - Define low-secure queues
+* GMB-963 - Create lowsecure archaius properties
+* GMB-965 - Add dashboard icon for low-secure gateway
+* GMB-966 - Auto route message to designated relay cluster
+ 
 4.14.1
 ---------------
 * GMB-980 - Provision to filter by node and processor guid
