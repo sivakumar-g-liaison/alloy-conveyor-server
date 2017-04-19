@@ -225,7 +225,7 @@ dependencies {
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:7.+")
 
 	//Required for integration test case
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
@@ -323,7 +323,7 @@ cargo {
 
 		rmiPort = new Integer(tomcatRmiPort)
 		tomcat.ajpPort = new Integer(tomcatAjpPort)
-		//timeout = 600000
+		//timeout = 300000
 
 		// set the initial value
 		// MUST HAVE leading spaces for cargo JVM args

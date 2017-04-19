@@ -151,8 +151,6 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 // create directory on the server
                 checkAndCreateDirectory(remotePath, isCreateFoldersInRemote, ftpsClient);
             }
-
-            ftpsClient.changeDirectory(remotePath);
         }
     }
 

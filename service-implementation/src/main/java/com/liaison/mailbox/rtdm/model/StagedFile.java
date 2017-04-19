@@ -11,6 +11,7 @@
 package com.liaison.mailbox.rtdm.model;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
@@ -40,11 +41,13 @@ import java.sql.Timestamp;
                         + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
                         + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
                         + " AND sf.processorType =:" + StagedFileDAO.TYPE
-                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS),
+                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
+                        + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
         @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
-                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS)
+                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
+                        + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 public class StagedFile implements Identifiable {
 
@@ -66,6 +69,7 @@ public class StagedFile implements Identifiable {
     private Timestamp createdDate;
     private Timestamp modifiedDate;
     private String originatingDc;
+    private String clusterType;
 
     public StagedFile() {
     }
@@ -222,6 +226,15 @@ public class StagedFile implements Identifiable {
         this.originatingDc = originatingDc;
     }
 
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
     @Override
     @Transient
     public Object getPrimaryKey() {
@@ -288,6 +301,7 @@ public class StagedFile implements Identifiable {
         this.setProcessorType(stagedFileDto.getProcessorType());
         this.setModifiedDate(timestamp);
         this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
+        this.setClusterType(MailBoxUtil.CLUSTER_TYPE);
     }
 
     @Transient

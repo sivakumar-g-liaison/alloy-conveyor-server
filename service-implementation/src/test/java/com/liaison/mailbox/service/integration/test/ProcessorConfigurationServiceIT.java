@@ -29,6 +29,7 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
@@ -85,6 +86,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -249,6 +251,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -283,6 +286,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -346,6 +350,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
@@ -384,6 +389,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(response.getMailBox().getGuid(), dummyValue, procRequestDTO.getProcessor().getModifiedBy());
 
@@ -422,6 +428,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
         DeActivateProcessorResponseDTO procDeactResponseDTO = procService.deactivateProcessor(dummyValue, procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
 
@@ -1189,6 +1196,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
 
     }
     
@@ -1225,6 +1233,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getStatus(), procGetResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(procRequestDTO.getProcessor().getType(), procGetResponseDTO.getProcessor().getType());
         Assert.assertEquals(procRequestDTO.getProcessor().getProtocol(), procGetResponseDTO.getProcessor().getProtocol());
+        Assert.assertEquals(procRequestDTO.getProcessor().getClusterType(), procGetResponseDTO.getProcessor().getClusterType());
         
     }
 
@@ -1689,5 +1698,66 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
         Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+    
+    /**
+     * Method to read cluster type using Processor guid.
+     */
+    @Test
+    public void testReadClusterTypeByProcessorId() throws Exception {
+        
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = procService.getClusterType(procResponseDTO.getProcessor().getGuId());
+        
+        Assert.assertEquals(MailBoxUtil.CLUSTER_TYPE, clusterTypeResponseDTO.getClusterType());
+        Assert.assertEquals(SUCCESS, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+    
+    /**
+     * Method to read cluster type using invalid Processor guid.
+     */
+    @Test
+    public void testReadClusterTypeByInvalidProcessorId() throws Exception {
+        
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+        
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = procService.getClusterType(procResponseDTO.getProcessor().getGuId() + "1");
+        
+        Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+
+    /**
+     * Method to read cluster type using invalid Processor guid.
+     */
+    @Test
+    public void testReadClusterTypeByEmptyProcessorId() throws Exception {
+        
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        
+        ClusterTypeResponseDTO clusterTypeResponseDTO = procService.getClusterType("");
+        
+        Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
+        Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
     }
 }

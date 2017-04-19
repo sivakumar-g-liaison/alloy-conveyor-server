@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class TransactionVisibilityClient {
 
-	public static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
+	private static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
 	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
 	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
 
@@ -56,12 +56,10 @@ public class TransactionVisibilityClient {
 
 	private TransactionVisibilityAPI visibilityAPI;
 
-	public TransactionVisibilityClient() {
-		visibilityAPI = new TransactionVisibilityAPI();
-		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
-	}
-
 	public void logToGlass(GlassMessage message) {
+
+        visibilityAPI = new TransactionVisibilityAPI(message.getGlobalPId());
+        visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 
 		visibilityAPI.getAdditionalInformation().clear();
 		List<MapItemType> additionalInformation = visibilityAPI.getAdditionalInformation();
@@ -202,7 +200,6 @@ public class TransactionVisibilityClient {
 		handleExecutionState(message);
 
 		visibilityAPI.setId(message.getGlobalPId());
-		visibilityAPI.setGlobalId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
 	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));

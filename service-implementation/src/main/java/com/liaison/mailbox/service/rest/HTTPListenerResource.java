@@ -101,6 +101,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("sync/{token1}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleSyncOneToken(@Context HttpServletRequest request,
                                        @Context UriInfo uriInfo) {
         return handleSync(request, uriInfo);
@@ -108,6 +109,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("sync/{token1}/{token2}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleSyncTwoTokens(@Context HttpServletRequest request,
                                         @Context UriInfo uriInfo) {
         return handleSync(request, uriInfo);
@@ -115,6 +117,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("sync/{token1}/{token2}/{token3}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleSyncThreeTokens(@Context HttpServletRequest request,
                                           @Context UriInfo uriInfo) {
         return handleSync(request, uriInfo);
@@ -328,6 +331,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("async/{token1}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleAsyncOneToken(@Context HttpServletRequest request,
                                         @Context UriInfo uriInfo) {
         return handleAsync(request, uriInfo);
@@ -335,6 +339,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("async/{token1}/{token2}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleAsyncTwoTokens(@Context HttpServletRequest request,
                                          @Context UriInfo uriInfo) {
         return handleAsync(request, uriInfo);
@@ -342,6 +347,7 @@ public class HTTPListenerResource extends AuditedResource {
 
     @POST
     @Path("async/{token1}/{token2}/{token3}")
+    @AccessDescriptor(skipFilter = true)
     public Response handleAsyncThreeTokens(@Context HttpServletRequest request,
                                            @Context UriInfo uriInfo) {
         return handleAsync(request, uriInfo);

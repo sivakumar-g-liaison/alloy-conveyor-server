@@ -33,7 +33,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;
@@ -88,6 +87,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
         Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+        Assert.assertEquals(requestDTO.getMailBox().getClusterType(), getResponseDTO.getMailBox().getClusterType());
 
         Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
                 getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -203,6 +203,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
         Assert.assertEquals(mbxDTO.getShardKey(), getResponseDTO.getMailBox().getShardKey());
         Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+        Assert.assertEquals(mbxDTO.getClusterType(), getResponseDTO.getMailBox().getClusterType());
 
         Assert.assertEquals(mbxDTO.getProperties().get(0).getName(),
                 getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -221,6 +222,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         mailBox.setName("TestMailBox" + System.currentTimeMillis());
         mailBox.setStatus("ACTIVE");
         mailBox.setTenancyKey("Test Tenancy Key");
+        mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -263,6 +265,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setStatus("ACTIVE");
         mailBox.setTenancyKey("test Tenancy Key");
+        mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -292,6 +295,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setName("TestMailBox" + System.currentTimeMillis());
         mailBox.setTenancyKey("test Tenancy Key");
+        mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
@@ -321,6 +325,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setName("TestMailBox" + System.currentTimeMillis());
         mailBox.setStatus("ACTIVE");
+        mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();

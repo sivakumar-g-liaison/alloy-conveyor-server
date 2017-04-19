@@ -170,7 +170,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded file must not be uploaded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;
@@ -260,7 +260,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded file must not be uploaded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;

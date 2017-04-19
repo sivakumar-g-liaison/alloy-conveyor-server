@@ -17,18 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
@@ -58,6 +51,7 @@ public class MailBoxDTO implements Serializable {
 	private String tenancyKeyDisplayName;
 	private String modifiedBy;
 	private String modifiedDate;
+    private String clusterType;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -163,63 +157,75 @@ public class MailBoxDTO implements Serializable {
         this.modifiedDate = modifiedDate;
     }
 
+    @DataValidation(errorMessage = "MailBox clusterType set to a value that is not supported.", type = MailBoxConstants.CLUSTER_TYPE)
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
     /**
-	 * Copies all data from DTO to entity except PGUID.
-	 * 
-	 * @param mailBox
-	 *            The MailBox Entity
-	 * @throws IOException 
-	 */
-	public void copyToEntity(MailBox mailBox) throws IOException {
+     * Copies all data from DTO to entity except PGUID.
+     *
+     * @param mailBox The MailBox Entity
+     * @throws IOException
+     */
+    public void copyToEntity(MailBox mailBox) throws IOException {
 
-		mailBox.setMbxName(this.getName());
-		mailBox.setMbxDesc(this.getDescription());
-		mailBox.setShardKey(this.getShardKey());
-		mailBox.setTenancyKey(this.getTenancyKey());
-		EntityStatus status = EntityStatus.findByName(this.getStatus());
-		mailBox.setMbxStatus(status.value());
-	}
+        mailBox.setMbxName(this.getName());
+        mailBox.setMbxDesc(this.getDescription());
+        mailBox.setShardKey(this.getShardKey());
+        mailBox.setTenancyKey(this.getTenancyKey());
+        mailBox.setClusterType(MailBoxUtil.isConveyorType()
+                ? MailBoxConstants.SECURE
+                : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxUtil.CLUSTER_TYPE : this.getClusterType()));
+        EntityStatus status = EntityStatus.findByName(this.getStatus());
+        mailBox.setMbxStatus(status.value());
+    }
 
-	/**
-	 * Copies all data from Entity to DTO.
-	 * 
-	 * @param mailBox
-	 *            The MailBox Entity
-	 */
-	public void copyFromEntity(MailBox mailBox) {
+    /**
+     * Copies all data from Entity to DTO.
+     *
+     * @param mailBox The MailBox Entity
+     */
+    public void copyFromEntity(MailBox mailBox) {
 
-		this.setGuid(mailBox.getPguid());
-		this.setName(mailBox.getMbxName());
-		this.setDescription(mailBox.getMbxDesc());
+        this.setGuid(mailBox.getPguid());
+        this.setName(mailBox.getMbxName());
+        this.setDescription(mailBox.getMbxDesc());
 
-		EntityStatus status = EntityStatus.findByCode(mailBox.getMbxStatus());
-		this.setStatus(status.name());
+        EntityStatus status = EntityStatus.findByCode(mailBox.getMbxStatus());
+        this.setStatus(status.name());
 
-		this.setShardKey(mailBox.getShardKey());
-		this.setTenancyKey(mailBox.getTenancyKey());
-		
-		this.setModifiedBy(mailBox.getModifiedBy());
-		if (null != mailBox.getModifiedDate()) {
-		    this.setModifiedDate(mailBox.getModifiedDate().toString());
-		}
+        this.setShardKey(mailBox.getShardKey());
+        this.setTenancyKey(mailBox.getTenancyKey());
 
-		PropertyDTO propertyDTO = null;
-		for (MailBoxProperty property : mailBox.getMailboxProperties()) {
+        this.setClusterType(mailBox.getClusterType());
 
-			propertyDTO = new PropertyDTO();
-			propertyDTO.copyFromEntity(property, true);
-			this.getProperties().add(propertyDTO);
-		}
+        this.setModifiedBy(mailBox.getModifiedBy());
+        if (null != mailBox.getModifiedDate()) {
+            this.setModifiedDate(mailBox.getModifiedDate().toString());
+        }
 
-		MailBoxProcessorResponseDTO prcsrDTO = null;
-		for (Processor prcsr : mailBox.getMailboxProcessors()) {
+        PropertyDTO propertyDTO = null;
+        for (MailBoxProperty property : mailBox.getMailboxProperties()) {
 
-			prcsrDTO = new MailBoxProcessorResponseDTO();
-			prcsrDTO.copyFromEntity(prcsr);
-			this.getProcessors().add(prcsrDTO);
-		}
+            propertyDTO = new PropertyDTO();
+            propertyDTO.copyFromEntity(property, true);
+            this.getProperties().add(propertyDTO);
+        }
 
-	}
+        MailBoxProcessorResponseDTO prcsrDTO = null;
+        for (Processor prcsr : mailBox.getMailboxProcessors()) {
+
+            prcsrDTO = new MailBoxProcessorResponseDTO();
+            prcsrDTO.copyFromEntity(prcsr);
+            this.getProcessors().add(prcsrDTO);
+        }
+
+    }
 
     public Set<MailBoxProperty> getPropertyEntities(MailBox mailbox) {
 

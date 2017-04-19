@@ -11,7 +11,6 @@ package com.liaison.mailbox.service.base.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,7 +24,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -46,7 +44,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import javax.naming.NamingException;
 
 /**
@@ -91,6 +89,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
                 System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
                 System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
+                System.setProperty("archaius.deployment.stack", prop.getProperty("STACK"));
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             } catch (Exception e) {
 
@@ -99,6 +98,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL_DROPBOX("http://localhost:9095/g2mailboxservice/config/dropbox");
                 System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
                 System.setProperty("archaius.deployment.environment", "dev");
+                System.setProperty("archaius.deployment.stack", "default");
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             }
         }
@@ -230,6 +230,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setTenancyKey(tenancyKey);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setModifiedBy("unknown-user");
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -240,6 +241,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
 			mailBoxDTO.setModifiedBy("unknown-user");
 
@@ -304,6 +306,7 @@ public abstract class BaseServiceTest {
         procDTO.setProtocol("FTP");
         procDTO.setModifiedBy("unknown-user");
         procDTO.setJavaScriptURI("ftp://test:6060");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 
@@ -332,6 +335,7 @@ public abstract class BaseServiceTest {
         procDTO.setStatus("ACTIVE");
         procDTO.setType("HTTPASYNCPROCESSOR");
         procDTO.setProtocol("HTTP");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 
