@@ -585,6 +585,13 @@ var rest = myApp.controller(
             $scope.backToMailbox = function () {			
 				$scope.backToMailboxeModalView(); 
 				var redirectToId = $location.search().mailBoxId;
+                if (typeof isDisableFilterValue == "undefined") {
+                    if ($rootScope.serviceInstanceId == ""){
+                        isDisableFilterValue = true;
+                    } else {
+                        isDisableFilterValue = false;
+                    }
+                }
 				$location.$$search = {};
 				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId).search('disableFilters', isDisableFilterValue);
             };
