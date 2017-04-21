@@ -14,13 +14,16 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.ws.rs.core.Response;
 
 import java.util.Date;
 import java.util.List;
@@ -46,35 +49,6 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
                     .createNamedQuery(FIND_BY_PROCESSOR_ID, RuntimeProcessors.class)
                     .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
-                    .getResultList();
-            if (!processors.isEmpty()) {
-                return processors.get(0);
-            }
-
-        } finally {
-            if (entityManager != null) {
-                entityManager.close();
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Find the Processor by processorId and It doesn't consider the clusterType.
-     * 
-     * @param processorId
-     * @return RuntimeProcessors
-     */
-    @Override
-    public RuntimeProcessors findProcessorById(String processorId) {
-        EntityManager entityManager = null;
-
-        try {
-
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            List<RuntimeProcessors> processors = entityManager
-                    .createNamedQuery(FIND_PROCESSOR_BY_ID, RuntimeProcessors.class)
-                    .setParameter(PROCESSOR_ID, processorId)
                     .getResultList();
             if (!processors.isEmpty()) {
                 return processors.get(0);
@@ -145,14 +119,46 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         persist(processors);
     }
     
+    /**
+     * Update the Runtimeprocessors clusterType by processorId
+     * 
+     * @param clusterType
+     * @param processorId
+     */
     @Override
-    public void updateProcessor(String clusterType, String processorId) {
+    public void updateClusterType(String clusterType, String processorId) {
         
-        RuntimeProcessors processor = findProcessorById(processorId);
-        if (processor != null && !clusterType.equals(processor.getClusterType())) {
-            processor.setClusterType(clusterType);
-            merge(processor);            
-        }        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processors ClusterType
+            int count = entityManager.createNativeQuery(UPDATES_PROCESSOR_CLUSTERTYPE)
+                        .setParameter(MailBoxConstants.CLUSTER_TYPE, clusterType)
+                        .setParameter(PROCESSOR_ID, processorId)
+                        .executeUpdate();
+            
+            if (count == 0) {
+                throw new MailBoxConfigurationServicesException(Messages.INVALID_PROCESSOR_ID, processorId,
+                        Response.Status.BAD_REQUEST);
+            }
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
     }
 
 }
