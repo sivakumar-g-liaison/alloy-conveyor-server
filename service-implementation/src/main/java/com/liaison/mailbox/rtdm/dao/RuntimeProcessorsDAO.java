@@ -25,6 +25,7 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
 
     String FIND_BY_PROCESSOR_ID = "RuntimeProcessors.findByProcessorId";
     String PROCESSOR_ID = "processorId";
+    String FIND_PROCESSOR_BY_ID = "RuntimeProcessors.findProcessorById";
 
     String FIND_NON_RUNNING_PROCESSORS = "SELECT P.PROCESSOR_ID FROM PROCESSORS P"
             + " LEFT JOIN PROCESSOR_EXEC_STATE STATE ON P.PROCESSOR_ID = STATE.PROCESSOR_ID"
@@ -33,6 +34,14 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
             + " AND (STATE.PGUID IS NULL OR STATE.EXEC_STATUS != 'PROCESSING')";
 
     RuntimeProcessors findByProcessorId(String processorId);
+    
+    /*
+     * Find the Processor by processorId and It doesn't consider the clusterType.
+     * 
+     * @param processorId
+     * @return RuntimeProcessors
+     */
+    RuntimeProcessors findProcessorById(String processorId);
 
     /**
      * find non running processors
@@ -41,5 +50,7 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
      */
     List<String> findNonRunningProcessors(List<String> processors);
 
-    void addProcessor(ProcessorExecutionStateDTO executionStateDTO);
+    void addProcessor(ProcessorExecutionStateDTO executionStateDTO, String clusterType);
+
+    void updateProcessor(String clusterType, String processorId);
 }

@@ -58,6 +58,35 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         }
         return null;
     }
+    
+    /**
+     * Find the Processor by processorId and It doesn't consider the clusterType.
+     * 
+     * @param processorId
+     * @return RuntimeProcessors
+     */
+    @Override
+    public RuntimeProcessors findProcessorById(String processorId) {
+        EntityManager entityManager = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<RuntimeProcessors> processors = entityManager
+                    .createNamedQuery(FIND_PROCESSOR_BY_ID, RuntimeProcessors.class)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .getResultList();
+            if (!processors.isEmpty()) {
+                return processors.get(0);
+            }
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
 
     @Override
     public List<String> findNonRunningProcessors(List<String> processorIds) {
@@ -95,7 +124,7 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
     }
 
     @Override
-    public void addProcessor(ProcessorExecutionStateDTO executionStateDTO) {
+    public void addProcessor(ProcessorExecutionStateDTO executionStateDTO, String clusterType) {
 
         RuntimeProcessors processors = new RuntimeProcessors();
         processors.setPguid(UUIDGen.getCustomUUID());
@@ -111,9 +140,19 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         prcsrExecution.setProcessors(processors);
         prcsrExecution.setOriginatingDc(DATACENTER_NAME);
         processors.setProcessorExecState(prcsrExecution);
-        processors.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        processors.setClusterType(clusterType);
 
         persist(processors);
+    }
+    
+    @Override
+    public void updateProcessor(String clusterType, String processorId) {
+        
+        RuntimeProcessors processor = findProcessorById(processorId);
+        if (processor != null && !clusterType.equals(processor.getClusterType())) {
+            processor.setClusterType(clusterType);
+            merge(processor);            
+        }        
     }
 
 }
