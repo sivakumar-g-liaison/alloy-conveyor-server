@@ -401,12 +401,12 @@ public class MailBoxService implements Runnable {
             //GLASS LOGGING CORNER 4 //
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
-                transactionVisibilityClient.logToGlass(glassMessage);
                 if (directUpload && null != processorService) {
                     processorService.updateStagedFileStatus(workTicket, EntityStatus.FAILED.name());
                 }
                 String msg = (directUpload) ? "Direct upload Failed" : "File Stage Failed";
                 glassMessage.logProcessingStatus(StatusType.ERROR, msg, FILEWRITER, ExceptionUtils.getStackTrace(e));
+                transactionVisibilityClient.logToGlass(glassMessage);
             }
             //GLASS LOGGING ENDS//
 
