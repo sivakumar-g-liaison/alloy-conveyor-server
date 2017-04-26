@@ -180,7 +180,7 @@ public class MailBoxDTO implements Serializable {
         mailBox.setTenancyKey(this.getTenancyKey());
         mailBox.setClusterType(MailBoxUtil.isConveyorType()
                 ? MailBoxConstants.SECURE
-                : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxUtil.CLUSTER_TYPE : this.getClusterType()));
+                : (MailBoxUtil.isEmpty(this.getClusterType()) ? MailBoxUtil.CLUSTER_TYPE : this.getClusterType().toUpperCase()));
         EntityStatus status = EntityStatus.findByName(this.getStatus());
         mailBox.setMbxStatus(status.value());
     }

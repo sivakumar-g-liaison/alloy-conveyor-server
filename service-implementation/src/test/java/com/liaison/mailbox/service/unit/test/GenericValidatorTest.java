@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.unit.test;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +33,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  * 
  * @author veerasamyn
  */
-public class GenericValidatorTest {
+public class GenericValidatorTest extends BaseServiceTest {
 
 	/**
 	 * Method to validate mailbox with wrong status.
@@ -102,8 +103,9 @@ public class GenericValidatorTest {
 		dto.setName("MBXNAME");
 		dto.setStatus("INACTIVE");
 		dto.setTenancyKey("TENANCY_KEY");
-		
-		GenericValidator validator = new GenericValidator();
+        dto.setClusterType("seCure");
+
+        GenericValidator validator = new GenericValidator();
 		Assert.assertEquals(true, validator.validate(dto));
 	}
     
