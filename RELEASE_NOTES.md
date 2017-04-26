@@ -1,5 +1,10 @@
-4.16.0-SNAPSHOT
+4.15.1
 ---------------
+* GMB-963 - Create lowsecure archaius properties - updates
+* GMB-984 - Processors are not displayed while trying to view the processors, on navigating back from mailbox screen.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+* GMB-958 - Errors are not displayed in the admin error details field.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
 
 4.15.0
 ---------------
