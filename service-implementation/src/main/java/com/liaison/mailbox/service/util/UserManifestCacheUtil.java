@@ -10,16 +10,6 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -29,6 +19,15 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.metrics.cache.CacheStatsRegistrar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class UserManifestCacheUtil {
 	
@@ -65,10 +64,10 @@ public class UserManifestCacheUtil {
         			public GEMManifestResponse load(String loginId) throws MalformedURLException, IOException, URISyntaxException {
         				
         			    try {
-        				    return GEMHelper.getACLManifestByloginId(loginId, null);
+        				    return GEMHelper.getACLManifestByLoginId(loginId, null);
         				} catch (Exception e) {
         					//retry after the first failure
-        				    return GEMHelper.getACLManifestByloginId(loginId, null);
+        				    return GEMHelper.getACLManifestByLoginId(loginId, null);
 						}
         			}
 	            }
@@ -100,7 +99,7 @@ public class UserManifestCacheUtil {
      /**
       * Method to get all rbacs from acl manifest Json
       *
-      * @param String - aclManifestJson
+      * @param aclManifestJson - manifest json
       * @return list of rbacs
       * @throws IOException
       */

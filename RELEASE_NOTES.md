@@ -1,3 +1,11 @@
+4.15.1
+---------------
+* GMB-963 - Create lowsecure archaius properties - updates
+* GMB-984 - Processors are not displayed while trying to view the processors, on navigating back from mailbox screen.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+* GMB-958 - Errors are not displayed in the admin error details field.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+
 4.15.0
 ---------------
 * GMB-956 - Add a flag column to database tables to identify which cluster this belongs to.
@@ -8,7 +16,8 @@
 * GMB-963 - Create lowsecure archaius properties
 * GMB-965 - Add dashboard icon for low-secure gateway
 * GMB-966 - Auto route message to designated relay cluster
- 
+* GMB-990 - Invalid cluster type isn't validated in REST endpoint
+
 4.14.1
 ---------------
 * GMB-980 - Provision to filter by node and processor guid

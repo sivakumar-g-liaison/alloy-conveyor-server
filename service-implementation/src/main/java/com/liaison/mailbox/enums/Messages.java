@@ -190,6 +190,8 @@ public enum Messages {
     PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
     PROCESSOR_EXECUTION_STATE_NOT_PROCESSING("The status for the given processor id %s is not updated since the execution is not in 'Processing' state."),
 
+    INVALID_PROCESSOR_ID("The given processor %s does not exist in the RuntimeProcessors."),
+    
     FILE_WRITER_SUCCESS_MESSAGE("File is picked up by the customer or other process");
 
     private String value;
