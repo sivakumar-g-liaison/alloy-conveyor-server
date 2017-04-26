@@ -31,6 +31,10 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
             + " WHERE P.PROCESSOR_ID IN (:" + PROCESSOR_ID + ")"
             + " AND P.CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE
             + " AND (STATE.PGUID IS NULL OR STATE.EXEC_STATUS != 'PROCESSING')";
+    
+    String UPDATES_PROCESSOR_CLUSTERTYPE = "UPDATE PROCESSORS"
+            + " SET CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE
+            + " WHERE PROCESSOR_ID =:" + PROCESSOR_ID;
 
     RuntimeProcessors findByProcessorId(String processorId);
 
@@ -41,5 +45,13 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
      */
     List<String> findNonRunningProcessors(List<String> processors);
 
-    void addProcessor(ProcessorExecutionStateDTO executionStateDTO);
+    void addProcessor(ProcessorExecutionStateDTO executionStateDTO, String clusterType);
+    
+    /**
+     * Update the Runtimeprocessors clusterType by processorId
+     * 
+     * @param clusterType
+     * @param processorId
+     */
+    void updateClusterType(String clusterType, String processorId);
 }

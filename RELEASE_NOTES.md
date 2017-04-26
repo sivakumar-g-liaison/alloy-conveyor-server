@@ -8,7 +8,8 @@
 * GMB-963 - Create lowsecure archaius properties
 * GMB-965 - Add dashboard icon for low-secure gateway
 * GMB-966 - Auto route message to designated relay cluster
- 
+* GMB-990 - Invalid cluster type isn't validated in REST endpoint
+
 4.14.1
 ---------------
 * GMB-980 - Provision to filter by node and processor guid

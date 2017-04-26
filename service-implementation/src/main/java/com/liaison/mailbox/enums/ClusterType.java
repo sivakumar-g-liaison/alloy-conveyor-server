@@ -14,7 +14,7 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * Contains the list of deployment type.
+ * Contains the list of cluster type.
  */
 public enum ClusterType {
 
