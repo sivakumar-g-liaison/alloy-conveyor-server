@@ -192,7 +192,7 @@ public class ProcessorConfigurationService {
             executionDTO.setExecutionStatus(ExecutionState.READY.value());
             executionDTO.setModifiedDate(new Date());
             executionDTO.setModifiedBy(userId);
-            new RuntimeProcessorsDAOBase().addProcessor(executionDTO);
+            new RuntimeProcessorsDAOBase().addProcessor(executionDTO, processor.getClusterType());
 
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
@@ -464,7 +464,8 @@ public class ProcessorConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
 						processorDTO.getGuid(), Response.Status.BAD_REQUEST);
 			}
-
+			
+			String clusterType = processor.getClusterType();
 			// validates the given processor is belongs to given mailbox
 			validateProcessorBelongToMbx(mailBoxId, processor);
 			if (processor.getFolders() != null) {
@@ -505,7 +506,11 @@ public class ProcessorConfigurationService {
 
 			// Change the execution order if existing and incoming does not match
 			// changeExecutionOrder(request, configDao, processor);
-
+		    
+		    //updates processor cluster type in the runtime processors table
+		    if (!processorDTO.getClusterType().equals(clusterType)) {
+		        new RuntimeProcessorsDAOBase().updateClusterType(processorDTO.getClusterType(), processorId);
+		    }
 			// response message construction
 			ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
             serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
