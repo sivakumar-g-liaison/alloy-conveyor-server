@@ -104,18 +104,28 @@
                            class="form-control"
                            name="scriptname"/>
                 </div>
-                <div class="col-md-3 search-padding-left">
+                <div class="col-md-3">
+                    <label for="clusterType">
+                    Cluster Type
+                    </label>        
+                    <select id="clusterType" ng-model="clusterType" class="form-control textPattern_width_1"   ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+                    <option value="">-- select--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row search-form-bottom">
+                <div class="col-md-3 pull-right search-padding-left">
                     <label for="name">&nbsp;</label>
                     <br />
-                    <button id="filterSearch" class="btn btn-primary button_width_2" data-toggle="modal" ng-click="readAllProcessors()">
-                        Search
-                    </button>
-                    <label for="name">&nbsp;</label>
-                    <button id="filterReset" class="btn btn-primary button_width_2" data-toggle="modal" ng-click="clearAllFilters(); readAllProcessors()">
-                        Reset
-                    </button>
+					<button id="filterSearch" class="btn btn-primary button_width_2" data-toggle="modal" ng-click="readAllProcessors()">
+						Search
+					</button>
+					<label for="name">&nbsp;</label>
+					<button id="filterReset" class="btn btn-primary button_width_2" data-toggle="modal" ng-click="clearAllFilters(); readAllProcessors()">
+						Reset
+					</button>
                </div>
-           </div>
+		   </div>
     </form>
 	<br />
 	<div class="modal-custom" id="myModal" tabindex="-1" role="dialog">

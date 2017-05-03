@@ -9,7 +9,7 @@
 	<div class="form-inline">
 		<div class="row">
 		<form name="formSearchMbx" novalidate="" >
-			<div class="col-md-5">
+			<div class="col-md-3">
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
@@ -20,19 +20,38 @@
 					<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
 			</div>
-			<div class="col-md-5">
+			<div class="col-md-3">
 				<label for="prof"> Profiles </label> <select id="mbx-search-prof" ng-model="profile"
 					ng-options="prof.name for prof in profiles" ng-change="selectSearch()" class="form-control">
 					<option value="">-- select--</option>
 				</select>
 				<progress ng-show=showprogressbar> </progress>
 			</div>
+			<div class="col-md-3">
+		        <label for="clusterType">
+		        Cluster Type
+				</label>        
+				<select id="clusterType" ng-model="clusterType" class="form-control textPattern_width_1" ng-options="clusterType for clusterType in javaProperties.clusterTypes" ng-change="selectSearch()">
+				<option value="">-- select--</option>
+				</select>
+            </div>
+            <div class="col-md-3">
+                <label for="status">
+                Status
+                </label>        
+                <select id="status" ng-model="searchedMbxStatus" class="form-control textPattern_width_1" ng-options="searchedMbxStatus.name as searchedMbxStatus.id for searchedMbxStatus in mailboxStatus" ng-change="selectSearch()">
+                <option value="">-- select--</option>
+                </select>
+            </div>
 		</form>
-		<div class="col-md-2">
-				<label for="name">&nbsp;</label><br/>
-				<button id="disableFilters" class="btn btn-primary pull-left" ng-hide="!sidInURL" ng-click="disableFilter()" style="width:164px">{{filterBtnValue}}</button>
+	</div>
+	<div class="row">
+        <div class="col-md-2 pull-right">
+            <label for="name">&nbsp;</label><br/>
+            <button id="disableFilters" class="btn btn-primary pull-left" ng-hide="!sidInURL" ng-click="disableFilter()" style="width:164px">{{filterBtnValue}}</button>
 		</div>
 	</div>
+
 	<br />
 
 	<div class="modal-custom" id="myModal" tabindex="-1" role="dialog">

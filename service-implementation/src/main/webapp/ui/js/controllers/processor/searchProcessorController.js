@@ -17,7 +17,7 @@ var rest = myApp.controller(
 				fields: ['name'],
 				directions: ['asc']
 			};
-			
+
 		$scope.mailBoxName = null;
 		$scope.procName = null;
 		$scope.prcsrGuid = null;
@@ -51,7 +51,8 @@ var rest = myApp.controller(
         	var sortDirection = "";
         	var prcsrTypeVal = "";
 			var prcsrProtocol = "";
-			
+			var clustrTyp ="";
+
             if($scope.sortInfo.fields && $scope.sortInfo.directions) {
             	sortField = String($scope.sortInfo.fields);
             	sortDirection = String($scope.sortInfo.directions);
@@ -62,6 +63,9 @@ var rest = myApp.controller(
 			if($scope.protocolName) {
 				prcsrProtocol = String($scope.protocolName.value);
 			}
+            if ($scope.clusterType) {
+                clustrTyp = $scope.clusterType;
+            }
 			
 			$rootScope.gridLoaded = false;
                 $scope.restService.get($scope.base_url + '/searchprocessor',
@@ -72,7 +76,8 @@ var rest = myApp.controller(
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
                     },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-                    	mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid, mbxGuid:$scope.mailboxId, scriptName:$scope.scriptName}				
+                    	mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid, mbxGuid:$scope.mailboxId, 
+                        scriptName:$scope.scriptName, clusterType:clustrTyp}				
                 );				
             };
         $scope.readAllProcessors();

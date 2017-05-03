@@ -11,6 +11,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Search Details
         $scope.mailBoxName = null;
         $scope.profile = null;
+        
+        $scope.mailboxStatus = [{"name":"ACTIVE","id":"Active"},
+                                {"name":"INACTIVE","id":"Inactive"}];
 
         // Counter to ensure the result is for the given request.
         $scope.hitCounter = 1;
@@ -189,6 +192,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                 mbxName = $scope.mailBoxName;
             }
             
+            var clustrTyp = "";
+            if (null !== $scope.clusterType) {
+                clustrTyp = $scope.clusterType;
+            }
+            
+            var mbxStatus = "";
+            if (null !== $scope.searchedMbxStatus) {
+            	mbxStatus = $scope.searchedMbxStatus;
+            }
+            
             var sortField = "";
         	var sortDirection = "";			
             if($scope.sortInfo.fields && $scope.sortInfo.directions) {
@@ -235,7 +248,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                     }
                     $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
-                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr, minResponse:minRespond}
+                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr,
+                    minResponse:minRespond, clusterType:clustrTyp, mailBoxStatus:mbxStatus}
             );
         };
 
@@ -307,25 +321,29 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.gridOptions = {
         		columnDefs: [{
                     field: 'guid',
-                    width: '22%',
+                    width: '21%',
                     displayName: 'MailboxId'
                 }, {
                     field: 'name',
-                    width: '20%',
+                    width: '18%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '22%',
+                    width: '18%',
                     displayName: 'Description'
                 }, {
+                    field: 'clusterType',
+                    width: '10%',
+                    displayName: 'Cluster Type'
+                }, {
                 	field: 'configStatus' ,
-                	width: '19%' ,
+                	width: '17%' ,
                 	displayName: 'Config Status' , 
                 	cellTemplate: $scope.manageConfigStatus
                 }, {
                     field: 'status',
-                    width: '9%',
+                    width: '8%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },

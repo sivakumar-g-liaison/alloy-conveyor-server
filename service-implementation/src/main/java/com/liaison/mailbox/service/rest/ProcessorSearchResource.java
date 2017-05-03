@@ -77,6 +77,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
                                     @QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
                                     @QueryParam(value = "scriptName") @ApiParam(name = "scriptName", required = false, value = "scriptName") final String scriptName,
+                                    @QueryParam(value = "clusterType") @ApiParam(name = "clusterType", required = false, value = "clusterType") final String clusterType,
                                     @QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
 
         // create the worker delegate to perform the business logic
@@ -100,6 +101,7 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setProcessorName(prcsrName);
                 searchFilter.setProcessorGuid(prcsrGuid);
                 searchFilter.setScriptName(scriptName);
+                searchFilter.setClusterType(clusterType);
                 searchFilter.setMatchMode(matchMode);
 
                 // Get all the processors

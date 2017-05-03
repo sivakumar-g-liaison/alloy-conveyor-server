@@ -128,6 +128,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
             @Context final HttpServletRequest request,
             @QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") final String mbxName,
             @QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") final String profileName,
+            @QueryParam(value = "clusterType") @ApiParam(name = "clusterType", required = false, value = "clusterType") final String clusterType,
+            @QueryParam(value = "mailBoxStatus") @ApiParam(name = "mailBoxStatus", required = false, value = "mailBoxStatus") final String mailBoxStatus,
             @QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
             @QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
             @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
@@ -155,6 +157,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
                     searchFilter.setMbxName(mbxName);
                     searchFilter.setServiceInstanceId(serviceInstanceId);
                     searchFilter.setProfileName(profileName);
+                    searchFilter.setClusterType(clusterType);
+                    searchFilter.setStatus(mailBoxStatus);
                     searchFilter.setPage(page);
                     searchFilter.setPageSize(pageSize);
                     searchFilter.setSortField(sortField);
