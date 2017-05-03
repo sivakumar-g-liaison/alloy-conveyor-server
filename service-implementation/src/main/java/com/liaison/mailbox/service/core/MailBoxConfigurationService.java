@@ -624,8 +624,7 @@ public class MailBoxConfigurationService {
         MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 
 
-        if (!MailBoxUtil.isEmpty(searchFilter.getProfileName()) || !MailBoxUtil.isEmpty(searchFilter.getClusterType()) ||
-                !MailBoxUtil.isEmpty(searchFilter.getStatus())) {
+        if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
 
             totalCount = configDao.getMailboxCountByProfile(searchFilter, tenancyKeyGuids);
             pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),

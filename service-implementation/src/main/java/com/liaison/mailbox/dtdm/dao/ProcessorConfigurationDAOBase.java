@@ -737,7 +737,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
             predicateList.add("processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE);
-        }else {
+        } else {
             predicateList.add("processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")");
         }
         predicateList.add("processor.procsrStatus <> :" + STATUS_DELETE);
