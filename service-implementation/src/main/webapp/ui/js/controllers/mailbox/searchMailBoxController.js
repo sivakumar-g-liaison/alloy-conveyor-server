@@ -335,7 +335,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         		columnDefs: [{
                     field: 'guid',
                     width: '21%',
-                    displayName: 'MailboxId'
+                    displayName: 'MailboxId',
+                    sortable: false
                 }, {
                     field: 'name',
                     width: '18%',
@@ -353,7 +354,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                 	field: 'configStatus' ,
                 	width: '17%' ,
                 	displayName: 'Config Status' , 
-                	cellTemplate: $scope.manageConfigStatus
+                	cellTemplate: $scope.manageConfigStatus,
+                    sortable: false
                 }, {
                     field: 'status',
                     width: '8%',

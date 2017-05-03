@@ -49,6 +49,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String STATUS = "status";
+    private static final String MBX_CLUSTER_TYPE = "clustertype";
     private static final String MBX_SERVICE_INSTANCES = "mailboxServiceInstances";
     private static final String SERVICE_INSTANCE = "serviceInstance";
     private static final String TENANCY_KEY = "tenancyKey";
@@ -249,6 +250,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 case STATUS:
                     field = MBX_STATUS;
                     break;
+                case MBX_CLUSTER_TYPE:
+                    field = MailBoxConstants.CLUSTER_TYPE;
             }
         } else {
             field = MBX_NAME;
