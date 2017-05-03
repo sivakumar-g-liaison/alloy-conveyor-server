@@ -735,8 +735,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
             predicateList.add(" LOWER(processor.javaScriptUri) = :" + SCRIPT_NAME);
         }
+        if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
+            predicateList.add("processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE);
+        } else {
+            predicateList.add("processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")");
+        }
         predicateList.add("processor.procsrStatus <> :" + STATUS_DELETE);
-        predicateList.add(" processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")");
         for (int i = 0; i < predicateList.size(); i++) {
             query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
         }
@@ -783,8 +787,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
             query.setParameter(SCRIPT_NAME, searchDTO.getScriptName().toLowerCase());
         }
+        if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
+            query.setParameter(MailBoxConstants.CLUSTER_TYPE, searchDTO.getClusterType());
+        } else {
+            query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterTypes());
+        }
         query.setParameter(STATUS_DELETE, EntityStatus.DELETED.value());
-        query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.getClusterTypes());
         return query;
     }
 

@@ -12,6 +12,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.mailBoxName = null;
         $scope.profile = null;
 
+        $scope.mailboxStatus = [
+            {"name": "ACTIVE", "id": "Active"},
+            {"name": "INACTIVE", "id": "Inactive"}
+        ];
+
         // Counter to ensure the result is for the given request.
         $scope.hitCounter = 1;
 
@@ -188,6 +193,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             if ($scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
                 mbxName = $scope.mailBoxName;
             }
+
+            var tempClusterType = "";
+            if ($scope.clusterType) {
+                tempClusterType = $scope.clusterType;
+            }
+
+            var mbxStatus = "";
+            if ($scope.searchedMbxStatus) {
+                mbxStatus = $scope.searchedMbxStatus;
+            }
             
             var sortField = "";
         	var sortDirection = "";			
@@ -211,31 +226,43 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 			}
 			
 			var minRespond = true;
-            $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
+            $scope.restService.get($scope.base_url + '?siid=' + $rootScope.serviceInstanceId, /*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
-            	if (status === 200 || status === 400) {
+                    if (status === 200 || status === 400) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
-                        	// Commented out because of inconsistency
+                            // Commented out because of inconsistency
                             // showSaveMessage(data.searchMailBoxResponse.response.message,
-							// 'error');
+                            // 'error');
                         }
                     } else {
-                    	 showSaveMessage("retrieval of search results failed", 'error');
+                        showSaveMessage("retrieval of search results failed", 'error');
                     }
                     // if the data does not contain proper response hitCounter
-					// property will not be available and throws an error,
+                    // property will not be available and throws an error,
                     // the progress bar will be displayed even after the display
-					// of error message.
+                    // of error message.
                     // To avoid the above error, the hitCounter will be
-					// validated only if proper response is available
-                    if (data.searchMailBoxResponse) { 
-                    	 if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
-                             $scope.getPagedDataAsync(data);
-                         }
+                    // validated only if proper response is available
+                    if (data.searchMailBoxResponse) {
+                        if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
+                            $scope.getPagedDataAsync(data);
+                        }
                     }
                     $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
-                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr, minResponse:minRespond}
+                }, {
+                    name: mbxName,
+                    profile: profName,
+                    hitCounter: $scope.hitCounter,
+                    page: $scope.pagingOptions.currentPage,
+                    pagesize: $scope.pagingOptions.pageSize,
+                    sortField: sortField,
+                    sortDirection: sortDirection,
+                    disableFilters: disableFiltr,
+                    minResponse: minRespond,
+                    clusterType: tempClusterType,
+                    mailBoxStatus: mbxStatus
+                }
             );
         };
 
@@ -307,25 +334,29 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.gridOptions = {
         		columnDefs: [{
                     field: 'guid',
-                    width: '22%',
+                    width: '21%',
                     displayName: 'MailboxId'
                 }, {
                     field: 'name',
-                    width: '20%',
+                    width: '18%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '22%',
+                    width: '18%',
                     displayName: 'Description'
                 }, {
+                    field: 'clusterType',
+                    width: '10%',
+                    displayName: 'Cluster Type'
+                }, {
                 	field: 'configStatus' ,
-                	width: '19%' ,
+                	width: '17%' ,
                 	displayName: 'Config Status' , 
                 	cellTemplate: $scope.manageConfigStatus
                 }, {
                     field: 'status',
-                    width: '9%',
+                    width: '8%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },
