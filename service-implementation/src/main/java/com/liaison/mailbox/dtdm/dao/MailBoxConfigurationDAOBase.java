@@ -49,6 +49,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String STATUS = "status";
+    private static final String MBX_CLUSTER_TYPE = "clustertype";
     private static final String MBX_SERVICE_INSTANCES = "mailboxServiceInstances";
     private static final String SERVICE_INSTANCE = "serviceInstance";
     private static final String TENANCY_KEY = "tenancyKey";
@@ -102,13 +103,25 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             String mbxName = searchFilter.getMbxName();
             String profName = searchFilter.getProfileName();
-
+            String clusterType = searchFilter.getClusterType();
+            String status = searchFilter.getStatus();
+            
             List<Predicate> predicates = new ArrayList<Predicate>();
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(mbxName)));
             predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
-            predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
-
+            
+            if (!MailBoxUtil.isEmpty(status)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MBX_STATUS), status));
+            } else {
+                predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
+            }
+            
+            if (!MailBoxUtil.isEmpty(clusterType)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), clusterType));
+            } else {
+                predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+            }
+           
             if (!searchFilter.isDisableFilters()) {
                 predicates.add(fromMailBox.get(TENANCY_KEY).in(tenancyKeys));
             }
@@ -169,13 +182,25 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             String mbxName = searchFilter.getMbxName();
             String profName = searchFilter.getProfileName();
+            String clusterType = searchFilter.getClusterType();
+            String status = searchFilter.getStatus();
 
             List<Predicate> predicates = new ArrayList<>();
 			predicates.add(criteriaBuilder.like(criteriaBuilder.lower(fromMailBox.get(MBX_NAME)), safeLikeParameter(mbxName)));
 			predicates.add(criteriaBuilder.like(joinScheduleProfilesRef.get(SCH_PROF_NAME), "%" + (profName == null ? "" : profName) + "%"));
-			predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-			predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+
+            if (!MailBoxUtil.isEmpty(clusterType)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), clusterType));
+            } else {
+                predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+            }
 			
+            if (!MailBoxUtil.isEmpty(status)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MBX_STATUS), status));
+            } else {
+                predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
+            }
+            
 			if (!searchFilter.isDisableFilters()) {
 			    tenancyKeysLowerCase = tenancyKeys.stream().map(String::toLowerCase).collect(Collectors.toList());
 			    predicates.add(criteriaBuilder.lower(fromMailBox.get(TENANCY_KEY)).in(tenancyKeysLowerCase));
@@ -225,6 +250,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 case STATUS:
                     field = MBX_STATUS;
                     break;
+                case MBX_CLUSTER_TYPE:
+                    field = MailBoxConstants.CLUSTER_TYPE;
             }
         } else {
             field = MBX_NAME;
@@ -286,9 +313,21 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             if (!searchFilter.isDisableFilters()) {
                 predicates.add(fromMailBox.get(TENANCY_KEY).in(tenancyKeys));
             }
-
-            predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+            
+            String clusterType = searchFilter.getClusterType();
+            String status = searchFilter.getStatus();
+            
+            if (!MailBoxUtil.isEmpty(clusterType)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), clusterType));
+            } else {
+                predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+            }
+            
+            if (!MailBoxUtil.isEmpty(status)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MBX_STATUS), status));
+            } else {
+                predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
+            }
 
             if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
                 predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));
@@ -357,9 +396,21 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                 }
                 predicates.add(criteriaBuilder.lower(fromMailBox.get(TENANCY_KEY)).in(tenancyKeysLowerCase));
             }
-
-            predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
-            predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+           
+            String clusterType = searchFilter.getClusterType();
+            String status = searchFilter.getStatus();
+            
+            if (!MailBoxUtil.isEmpty(clusterType)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE), clusterType));
+            } else {
+                predicates.add(fromMailBox.get(MailBoxConstants.CLUSTER_TYPE).in(MailBoxUtil.getClusterTypes()));
+            }
+            
+            if (!MailBoxUtil.isEmpty(status)) {
+                predicates.add(criteriaBuilder.equal(fromMailBox.get(MBX_STATUS), status));
+            } else {
+                predicates.add(criteriaBuilder.notEqual(fromMailBox.get(MBX_STATUS), EntityStatus.DELETED.value()));
+            }
 
             if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
                 predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));

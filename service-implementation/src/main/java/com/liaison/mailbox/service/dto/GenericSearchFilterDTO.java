@@ -39,6 +39,7 @@ public class GenericSearchFilterDTO {
 	private String processorGuid;
 	private String matchMode;
 	private String scriptName;
+	private String clusterType;
 	private boolean isDisableFilters;
 	private boolean isMinResponse;
 	
@@ -185,6 +186,14 @@ public class GenericSearchFilterDTO {
 	public void setScriptName(String scriptName) {
 	    this.scriptName = scriptName;
 	}
+
+    public String getClusterType() {
+        return clusterType; 
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
 
 	public String getMatchMode() {
 		return matchMode;
