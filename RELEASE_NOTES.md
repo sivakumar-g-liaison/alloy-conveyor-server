@@ -1,3 +1,8 @@
+4.15.2
+---------------
+* GMB-991 - Add provision to filter entities by cluster type	
+* GMB-993 - Log the processor guid during script execution
+
 4.15.1
 ---------------
 * GMB-963 - Create lowsecure archaius properties - updates

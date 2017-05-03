@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
 import org.testng.annotations.BeforeClass;
@@ -31,7 +32,7 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
  * @author VNagarajan
  *
  */
-public class JavascriptExecutorIT {
+public class JavascriptExecutorIT extends BaseServiceTest {
 
 	public ProcessorJavascriptI processorService;
 
