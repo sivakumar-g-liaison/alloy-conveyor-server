@@ -1,5 +1,6 @@
 4.16.0-SNAPSHOT
 ---------------
+* GMB-994 - Sweeper is not interrupted while sweeping empty files
 
 4.15.0
 ---------------

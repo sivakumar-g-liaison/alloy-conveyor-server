@@ -163,6 +163,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 			                workTicketsToPost.add(workTicket);
 			            } else {
+			                
+			                //Interrupt signal for empty files
+			                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+			                    LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
+			                    return;
+			                }
+			                
 			                LOGGER.warn(constructMessage("The file {} is empty and empty files not allowed"), workTicket.getFileName());
 			                logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR);
 			                String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
