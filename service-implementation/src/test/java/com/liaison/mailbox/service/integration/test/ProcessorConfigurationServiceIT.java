@@ -1760,4 +1760,69 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
         Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
     }
+    
+    /*
+     * Method to search  Processor by cluster type.
+     */
+    @Test
+    public void testSearchProcessorByClusterType() throws Exception {
+    
+        // create the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        //Adding mailbox to processor
+        List<ProcessorDTO> processors = new ArrayList<>();
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        GetProcessorResponseDTO procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+
+        procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        procRequestDTO.getProcessor().setClusterType(LOWSECURE);
+        procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+        // Get the processor
+        procGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId());
+        processors.add(procGetResponseDTO.getProcessor());
+        
+        //search processor by cluster Type is lowsecure
+        GenericSearchFilterDTO lowSecureSearchFilter = new GenericSearchFilterDTO();
+        lowSecureSearchFilter.setClusterType(LOWSECURE);
+        lowSecureSearchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_STR);
+        GetProcessorResponseDTO lowsecureSearchResponse = procService.searchProcessor(lowSecureSearchFilter);
+
+        //search processor by cluster Type is secure
+        GenericSearchFilterDTO secureSearchFilter = new GenericSearchFilterDTO();
+        secureSearchFilter.setClusterType(SECURE);
+        secureSearchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO secureSearchResponse = procService.searchProcessor(secureSearchFilter);
+        
+        //search processor by cluster Type and unavailable processor guid
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setClusterType(SECURE);
+        searchFilter.setProcessorGuid("1A2S3D4F5G6H7J8K9L0ZQXWCEVRBTNYM");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO searchResponse = procService.searchProcessor(searchFilter);
+
+        Assert.assertEquals(processors.size(), 3);
+
+        Assert.assertEquals(SUCCESS, secureSearchResponse.getResponse().getStatus());
+        Assert.assertEquals(SUCCESS, lowsecureSearchResponse.getResponse().getStatus());
+        Assert.assertTrue(secureSearchResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(lowsecureSearchResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+        Assert.assertTrue(searchResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+
+    }
 }

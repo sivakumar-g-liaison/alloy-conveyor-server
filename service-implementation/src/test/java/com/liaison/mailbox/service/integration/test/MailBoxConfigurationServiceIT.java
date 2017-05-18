@@ -40,6 +40,8 @@ import org.testng.annotations.Test;
 import javax.xml.bind.JAXBException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test class to test mailbox configuration service.
@@ -1215,6 +1217,75 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
         
         Assert.assertEquals(FAILURE, clusterTypeResponseDTO.getResponse().getStatus());
         Assert.assertTrue(clusterTypeResponseDTO.getResponse().getMessage().contains(Messages.READ_OPERATION_FAILED.value().replaceAll("%s", MailBoxConstants.CLUSTER_TYPE)));
+    }
+    
+    /**
+     * Method to search mailbox by clusterType and status.
+     */
+    @Test
+    public void testSearchMbxByClusterTypeAndStatus() throws Exception {
+
+        // create the mailbox1
+        AddMailboxRequestDTO requestDTO1 = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO1 = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        mbxDTO1.setClusterType(SECURE);
+        mbxDTO1.setStatus(ACTIVE);
+        requestDTO1.setMailBox(mbxDTO1);
+
+        MailBoxConfigurationService mbxConfigService = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO secureResponse = mbxConfigService.createMailBox(requestDTO1, serviceInstanceId, mbxDTO1.getModifiedBy());
+
+        //create the mailbox2
+        AddMailboxRequestDTO requestDTO2 = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO2 = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        mbxDTO2.setClusterType(LOWSECURE);
+        mbxDTO2.setStatus(INACTIVE);
+        requestDTO2.setMailBox(mbxDTO2);
+
+        AddMailBoxResponseDTO lowSecureResponse = mbxConfigService.createMailBox(requestDTO2, serviceInstanceId, mbxDTO2.getModifiedBy());
+
+        List<String> mbxDetails = new ArrayList<>();
+        mbxDetails.add(secureResponse.getMailBox().getGuid());
+        mbxDetails.add(lowSecureResponse.getMailBox().getGuid());
+
+        //search Secure Mailbox by cluster Type is secure
+        GenericSearchFilterDTO secureSearchFilter = new GenericSearchFilterDTO();
+        secureSearchFilter.setMbxName(requestDTO1.getMailBox().getName());
+        secureSearchFilter.setClusterType(SECURE);
+        secureSearchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        SearchMailBoxResponseDTO secureSearchResponse = mbxConfigService.searchMailBoxUIResponse(secureSearchFilter, aclManifest);
+
+        //search lowSecure Mailbox  by cluster Type is lowsecure
+        GenericSearchFilterDTO lowSecureSearchFilter = new GenericSearchFilterDTO();
+        lowSecureSearchFilter.setMbxName(requestDTO2.getMailBox().getName());
+        lowSecureSearchFilter.setClusterType(LOWSECURE);
+        lowSecureSearchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        SearchMailBoxResponseDTO lowSecureSearchResponse = mbxConfigService.searchMailBoxUIResponse(lowSecureSearchFilter, aclManifest);
+
+        //search unavailable Mailbox by mbxName and clusterType by filter
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setMbxName("1A2S3D4F5G6H7J8K9L0ZQXWCEVRBTNYM");
+        searchFilter.setClusterType(LOWSECURE);
+        searchFilter.setStatus(ACTIVE);
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        SearchMailBoxResponseDTO searchFilterResponse = mbxConfigService.searchMailBoxUIResponse(searchFilter, aclManifest);
+
+        Assert.assertEquals(SUCCESS, secureResponse.getResponse().getStatus());
+        Assert.assertEquals(SUCCESS, lowSecureResponse.getResponse().getStatus());
+        Assert.assertEquals(mbxDetails.size(), 2);
+
+        Assert.assertEquals(secureSearchResponse.getTotalItems(), 1);
+        Assert.assertEquals(secureSearchResponse.getMailBox().get(0).getName(), requestDTO1.getMailBox().getName());
+        Assert.assertEquals(secureSearchResponse.getMailBox().get(0).getClusterType(), SECURE);
+        Assert.assertEquals(secureSearchResponse.getMailBox().get(0).getStatus(), ACTIVE);
+
+        Assert.assertEquals(lowSecureSearchResponse.getTotalItems(), 1);
+        Assert.assertEquals(lowSecureSearchResponse.getMailBox().get(0).getName(), requestDTO2.getMailBox().getName());
+        Assert.assertEquals(lowSecureSearchResponse.getMailBox().get(0).getClusterType(), LOWSECURE);
+        Assert.assertEquals(lowSecureSearchResponse.getMailBox().get(0).getStatus(), INACTIVE);
+
+        Assert.assertEquals(searchFilterResponse.getTotalItems(), 0);      
+
     }
     
 }

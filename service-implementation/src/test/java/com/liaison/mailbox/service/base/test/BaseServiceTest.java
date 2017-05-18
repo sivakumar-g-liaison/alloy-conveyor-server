@@ -64,6 +64,10 @@ public abstract class BaseServiceTest {
 	public static final String FAILURE = Messages.FAILURE.value();
 	public static final String STATUS = "status";
     public static final String MESSAGE = "message";
+    public static final String SECURE = "SECURE";
+    public static final String LOWSECURE = "LOWSECURE";
+    public static final String ACTIVE = "ACTIVE";
+    public static final String INACTIVE = "INACTIVE";
 
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
