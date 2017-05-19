@@ -132,7 +132,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             TypedQuery<Long> tQueryCount = em.createQuery(query
                     .select(criteriaBuilder.count(fromMailBox))
-                    .where(predicates.toArray(new Predicate[]{})));
+                    .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true));
 
             count = tQueryCount.getSingleResult().intValue();
 
@@ -213,6 +214,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			TypedQuery<MailBox> tQuery = em.createQuery(query
 			        .select(fromMailBox)
 			        .where(predicates.toArray(new Predicate[] {}))
+                    .distinct(true)
 			        .orderBy(isDescendingSort(searchFilter.getSortDirection())
 			                ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
 			                : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));
@@ -335,7 +337,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             TypedQuery<Long> tQueryCount = entityManager.createQuery(query
                     .select(criteriaBuilder.count(fromMailBox))
-                    .where(predicates.toArray(new Predicate[]{})));
+                    .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true));
 
             count = tQueryCount.getSingleResult().intValue();
 
@@ -419,6 +422,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             TypedQuery<MailBox> tQuery = entityManager.createQuery(query
                     .select(fromMailBox)
                     .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true)
                     .orderBy(isDescendingSort(searchFilter.getSortDirection())
                             ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
                             : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));

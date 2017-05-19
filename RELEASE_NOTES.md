@@ -1,6 +1,7 @@
 4.16.0-SNAPSHOT
 ---------------
 * GMB-994 - Sweeper is not interrupted while sweeping empty files
+* GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile.
 
 4.15.0
 ---------------
