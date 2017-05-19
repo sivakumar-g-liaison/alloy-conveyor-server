@@ -1,7 +1,21 @@
 4.16.0-SNAPSHOT
 ---------------
 * GMB-994 - Sweeper is not interrupted while sweeping empty files
-* GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile.
+* GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile
+* GMB-999 - Unable to update staged files
+
+4.15.2
+---------------
+* GMB-991 - Add provision to filter entities by cluster type	
+* GMB-993 - Log the processor guid during script execution
+
+4.15.1
+---------------
+* GMB-963 - Create lowsecure archaius properties - updates
+* GMB-984 - Processors are not displayed while trying to view the processors, on navigating back from mailbox screen.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+* GMB-958 - Errors are not displayed in the admin error details field.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
 
 4.15.0
 ---------------

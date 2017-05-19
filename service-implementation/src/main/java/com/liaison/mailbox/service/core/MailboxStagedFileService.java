@@ -173,7 +173,7 @@ public class MailboxStagedFileService extends GridServiceRTDM<StagedFile> {
             String query = "UPDATE STAGED_FILE SET STATUS = 'FAILED', MODIFIED_DATE = :" + StagedFileDAO.MODIFIED_DATE +
                     " WHERE PGUID IN (:" + StagedFileDAO.STAGED_FILE_IDS + ")" +
                     " AND STATUS = 'STAGED'" +
-                    " AND CLUSTER_TYPE =:" + MailBoxUtil.CLUSTER_TYPE;
+                    " AND CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE;
 
             Query q = em.createNativeQuery(query)
                     .setParameter(StagedFileDAO.MODIFIED_DATE, MailBoxUtil.getTimestamp())

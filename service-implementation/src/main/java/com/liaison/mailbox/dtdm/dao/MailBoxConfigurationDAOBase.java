@@ -210,18 +210,18 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
 			    predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));
 			}
-			
-			TypedQuery<MailBox> tQuery = em.createQuery(query
-			        .select(fromMailBox)
-			        .where(predicates.toArray(new Predicate[] {}))
+
+            TypedQuery<MailBox> tQuery = em.createQuery(query
+                    .select(fromMailBox)
+                    .where(predicates.toArray(new Predicate[]{}))
                     .distinct(true)
-			        .orderBy(isDescendingSort(searchFilter.getSortDirection())
-			                ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
-			                : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));
-			
-			mailBoxes = tQuery.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-			        .setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
-			        .getResultList();
+                    .orderBy(isDescendingSort(searchFilter.getSortDirection())
+                            ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
+                            : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));
+
+            mailBoxes = tQuery.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+                    .getResultList();
 
 		} finally {
 			if (em != null) {
