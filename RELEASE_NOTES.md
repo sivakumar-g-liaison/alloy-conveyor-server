@@ -3,6 +3,7 @@
 * GMB-994 - Sweeper is not interrupted while sweeping empty files
 * GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile
 * GMB-999 - Unable to update staged files
+* GMB-1000 - Add cluster type in the staged files grid
 
 4.15.2
 ---------------

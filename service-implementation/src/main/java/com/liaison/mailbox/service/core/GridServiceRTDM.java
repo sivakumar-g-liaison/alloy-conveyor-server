@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.liaison.mailbox.MailBoxConstants.CLUSTER_TYPE;
+
 /**
  * This class contains the methods that are used to populate RTDM data in the grid.
  * 
@@ -56,19 +58,18 @@ public abstract class GridServiceRTDM<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(GridServiceRTDM.class);
 
-    public static final String FILTER_TEXT = "filterText";
-    public static final String SORT_FIELDS = "fields";
-    public static final String SORT_DIRECTIONS = "directions";
-    public static final String SORT_DIRECTION_ASC = "asc";
-    public static final String SORT_DIRECTION_DESC = "desc";
-    public static final String STATUS = "stagedFileStatus";
-    public static final String CREATED_DATE = "createdDate";
-    public static final String NAME = "name";
-    public static final String FILE_NAME = "fileName";
-    public static final String FILE_STATUS = "status";
-    public static final String MAILBOX_GUID = "mailboxGuid";
+    private static final String SORT_FIELDS = "fields";
+    private static final String SORT_DIRECTIONS = "directions";
+    private static final String SORT_DIRECTION_ASC = "asc";
+    private static final String CREATED_DATE = "createdDate";
+    private static final String FILE_NAME = "fileName";
+    private static final String FILE_STATUS = "status";
+    private static final String PROCESSORS = "processors";
+    private static final String EXECUTION_STATUS = "executionStatus";
 
-    private final String persistenceUnitName = MailboxRTDMDAO.PERSISTENCE_UNIT_NAME;
+    public static final String NAME = "name";
+    public static final String STATUS = "stagedFileStatus";
+    public static final String MAILBOX_GUID = "mailboxGuid";
 
     public static class GridResult<T> {
 	
@@ -154,7 +155,7 @@ public abstract class GridServiceRTDM<T> {
                 sortInfoMap = gson.fromJson(sortInfo, new TypeToken<Map<String, Object>>(){}.getType());
             }
 
-            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            entityManager = DAOUtil.getEntityManager(MailboxRTDMDAO.PERSISTENCE_UNIT_NAME);
             CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
             CriteriaQuery<T> query = criteriaBuilder.createQuery(clazz);
@@ -185,7 +186,7 @@ public abstract class GridServiceRTDM<T> {
             Predicate wherePredicate = criteriaBuilder.and(criteriaBuilder.and(wherePredicateList
                     .toArray(new Predicate[wherePredicateList.size()])));
 
-            if (null != predicateList && !predicateList.isEmpty()) {
+            if (!predicateList.isEmpty()) {
                 query.where(wherePredicate);
             }
 
@@ -196,9 +197,7 @@ public abstract class GridServiceRTDM<T> {
             TypedQuery<T> tQueryObject = entityManager.createQuery(query);
 
             // Set object query parameters
-            if (holderFilter != null) {
-                holderFilter.setParametersCount(tQueryObject);
-            }
+            holderFilter.setParametersCount(tQueryObject);
 
             if (!MailBoxUtil.isEmpty(page) && !MailBoxUtil.isEmpty(pageSize)) {
 
@@ -215,7 +214,8 @@ public abstract class GridServiceRTDM<T> {
 
                 // Execute query with paging options
                 entities = tQueryObject.setFirstResult(first)
-                        .setMaxResults(currentPageSize).getResultList();
+                        .setMaxResults(currentPageSize)
+                        .getResultList();
 
             } else {
                 // Execute query without paging options
@@ -267,8 +267,7 @@ public abstract class GridServiceRTDM<T> {
             holderFilter.setParametersCount(tQueryCount);
         }
 
-        Long count = tQueryCount.getSingleResult();
-        return count;
+        return tQueryCount.getSingleResult();
     }
 
     /**
@@ -293,8 +292,8 @@ public abstract class GridServiceRTDM<T> {
 
         for (int i = 0; i < fieldsValue.size(); i++) {
 
-            String fieldName = fieldsValue.get(i).toString();
-            String direction = directionsValue.get(i).toString();
+            String fieldName = fieldsValue.get(i);
+            String direction = directionsValue.get(i);
 
             Path<Object> field = null;
             if (NAME.equals(fieldName)) {
@@ -318,16 +317,19 @@ public abstract class GridServiceRTDM<T> {
     /**
      * Adding the predicates to criteria builder
      * 
-     * @param filterTextObj
+     * @param searchTextObjectList
      * @param clazz
      * @param criteriaBuilder
      * @param request
-     * @param andPredicateList
+     * @param andPredicatesList
      * @return holder
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private CriteriaQueryExpressionHolder createSearchCriteria(final FilterText searchTextObjectList, Class<T> clazz,
-            final CriteriaBuilder criteriaBuilder, final Root<T> request, List<Predicate> andPredicatesList) {
+    private CriteriaQueryExpressionHolder createSearchCriteria(final FilterText searchTextObjectList,
+                                                               Class<T> clazz,
+                                                               final CriteriaBuilder criteriaBuilder,
+                                                               final Root<T> request,
+                                                               List<Predicate> andPredicatesList) {
 
         CriteriaQueryExpressionHolder holder = new CriteriaQueryExpressionHolder();
         Expression<String> pathString = null;
@@ -353,7 +355,8 @@ public abstract class GridServiceRTDM<T> {
                 if (MailBoxConstants.GLOBAL_PROCESS_ID.equals(field)
                         || MailBoxConstants.KEY_PROCESSOR_ID.equals(field)
                         || MAILBOX_GUID.equals(field)
-                        || FILE_STATUS.equals(field)) {
+                        || FILE_STATUS.equals(field)
+                        || CLUSTER_TYPE.equals(field)) {
                     andPredicatesList.add(criteriaBuilder.equal(pathString, parameterExp));
                     holder.put(parameterExp, entry.getText());
                 } else if (CREATED_DATE.equals(field)) {
@@ -374,17 +377,17 @@ public abstract class GridServiceRTDM<T> {
         }
         
         if (ProcessorExecutionState.class.getName().equals(clazz.getName())) {
-            andPredicatesList.add(criteriaBuilder.equal(request.get("executionStatus"), ExecutionState.PROCESSING.value()));
+            andPredicatesList.add(criteriaBuilder.equal(request.get(EXECUTION_STATUS), ExecutionState.PROCESSING.value()));
         } else if (StagedFile.class.getName().equals(clazz.getName())) {
             pathString = request.get(STATUS);
             andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name())); 
         }
 
         if (StagedFile.class.getName().equals(clazz.getName())) {
-            pathString = request.get(MailBoxConstants.CLUSTER_TYPE);
+            pathString = request.get(CLUSTER_TYPE);
             andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
         } else if (ProcessorExecutionState.class.getName().equals(clazz.getName())) {
-            pathString = request.get("processors").get(MailBoxConstants.CLUSTER_TYPE);
+            pathString = request.get(PROCESSORS).get(CLUSTER_TYPE);
             andPredicatesList.add(pathString.in(MailBoxUtil.getClusterTypes()));
         }
 
