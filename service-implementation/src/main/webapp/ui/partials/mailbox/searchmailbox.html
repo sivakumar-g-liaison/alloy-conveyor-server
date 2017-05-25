@@ -30,7 +30,7 @@
                 <div class="col-md-3">
                     <label for="mbx-search-prof"> Profiles </label>
                     <select id="mbx-search-prof" ng-model="profile"
-                            ng-options="prof.name for prof in profiles"
+                            ng-options="prof.name for prof in profiles | orderBy : 'name'"
                             ng-change="selectSearch()"
                             class="form-control">
                         <option value="">-- select--</option>

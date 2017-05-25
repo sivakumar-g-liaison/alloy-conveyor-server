@@ -38,6 +38,11 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             "DELETED"
         ];
 
+        $scope.clusterTypes = [
+            "SECURE",
+            "LOWSECURE"
+        ];
+
         $scope.reviseRequest = {
             reviseStagedFileRequest: {
                 guids: []
@@ -109,7 +114,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
             init: function(scope, grid) {
                 filterBarPlugin.scope = scope;
                 filterBarPlugin.grid = grid;
-                filterWatch = scope.$watch('columns[0].filterText + columns[1].filterText + columns[2].filterText + columns[3].filterText + columns[4].filterText + columns[5].filterText', function(newVal, oldVal) {
+                filterWatch = scope.$watch('columns[0].filterText + columns[1].filterText + columns[2].filterText + columns[3].filterText + columns[4].filterText + columns[5].filterText + + columns[6].filterText', function(newVal, oldVal) {
                     var colsEmpty = true;
                     var searchQuery = [];
                     angular.forEach(filterBarPlugin.scope.columns, function(col) {
@@ -170,6 +175,11 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
                 displayName: 'Status',
                 width: '10%',
                 headerCellTemplate:'partials/filterStatusComboBoxHeaderTemplate.html'
+            }, {
+                field: 'clusterType',
+                displayName: 'Cluster Type',
+                width: '10%',
+                headerCellTemplate:'partials/filterClusterTypeComboBoxHeaderTemplate.html'
             }, {
                 displayName: 'Action',
                 width: '12%',

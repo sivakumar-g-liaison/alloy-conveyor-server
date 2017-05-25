@@ -132,7 +132,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             TypedQuery<Long> tQueryCount = em.createQuery(query
                     .select(criteriaBuilder.count(fromMailBox))
-                    .where(predicates.toArray(new Predicate[]{})));
+                    .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true));
 
             count = tQueryCount.getSingleResult().intValue();
 
@@ -209,17 +210,18 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			if (!searchFilter.isMinResponse() && null != joinServiceInstance) {
 			    predicates.add(criteriaBuilder.equal(joinServiceInstance.get(NAME), searchFilter.getServiceInstanceId()));
 			}
-			
-			TypedQuery<MailBox> tQuery = em.createQuery(query
-			        .select(fromMailBox)
-			        .where(predicates.toArray(new Predicate[] {}))
-			        .orderBy(isDescendingSort(searchFilter.getSortDirection())
-			                ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
-			                : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));
-			
-			mailBoxes = tQuery.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-			        .setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
-			        .getResultList();
+
+            TypedQuery<MailBox> tQuery = em.createQuery(query
+                    .select(fromMailBox)
+                    .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true)
+                    .orderBy(isDescendingSort(searchFilter.getSortDirection())
+                            ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
+                            : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));
+
+            mailBoxes = tQuery.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+                    .getResultList();
 
 		} finally {
 			if (em != null) {
@@ -335,7 +337,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
             TypedQuery<Long> tQueryCount = entityManager.createQuery(query
                     .select(criteriaBuilder.count(fromMailBox))
-                    .where(predicates.toArray(new Predicate[]{})));
+                    .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true));
 
             count = tQueryCount.getSingleResult().intValue();
 
@@ -419,6 +422,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
             TypedQuery<MailBox> tQuery = entityManager.createQuery(query
                     .select(fromMailBox)
                     .where(predicates.toArray(new Predicate[]{}))
+                    .distinct(true)
                     .orderBy(isDescendingSort(searchFilter.getSortDirection())
                             ? criteriaBuilder.desc(fromMailBox.get(getSortField(searchFilter.getSortField())))
                             : criteriaBuilder.asc(fromMailBox.get(getSortField(searchFilter.getSortField())))));

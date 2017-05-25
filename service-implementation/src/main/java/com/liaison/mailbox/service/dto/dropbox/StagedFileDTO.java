@@ -194,6 +194,7 @@ public class StagedFileDTO {
 		this.setSpectrumUri(file.getSpectrumUri());
 		this.setExpirationTime(file.getExpirationTime().toString());
 		this.setId(file.getPguid());
-	}
+        this.setClusterType(file.getClusterType());
+    }
 
 }
