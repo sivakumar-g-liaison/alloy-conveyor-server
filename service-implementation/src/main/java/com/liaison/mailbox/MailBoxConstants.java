@@ -177,9 +177,10 @@ public interface MailBoxConstants {
 	String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 
-    String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix.<stack>";
-    String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix.<stack>";
-    String STACK_CONST = "<stack>";
+    String PROCESSOR_SECURE_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix.default";
+    String PROCESSOR_SECURE_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix.default";
+    String PROCESSOR_LOWSECURE_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix.lowsecure";
+    String PROCESSOR_LOWSECURE_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix.lowsecure";
 
     // Property to decide whether the application is deployed "RELAY", "LOW_SECURE_RELAY" or "CONVEYOR"
     String DEPLOYMENT_TYPE = "com.liaison.deployment.type";

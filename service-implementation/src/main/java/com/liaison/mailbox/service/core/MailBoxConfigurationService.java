@@ -52,7 +52,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
-import com.netflix.config.ConfigurationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,7 +69,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.SERVICE_INSTANCE;
-import static com.liaison.mailbox.MailBoxConstants.STACK_CONST;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
@@ -664,12 +662,10 @@ public class MailBoxConfigurationService {
             dto.setFsmEventCheckIntervalInSeconds(config.getString(
                     MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
 
-            String syncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX
-                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
-            dto.setProcessorSyncUrlDisplayPrefix(syncUrlPrefix);
-            String asyncUrlPrefix = config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX
-                    .replace(STACK_CONST, ConfigurationManager.getDeploymentContext().getDeploymentStack()));
-            dto.setProcessorAsyncUrlDisplayPrefix(asyncUrlPrefix);
+            dto.setProcessorSecureSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SECURE_SYNC_URL_DISPLAY_PREFIX));
+            dto.setProcessorSecureAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SECURE_ASYNC_URL_DISPLAY_PREFIX));
+            dto.setProcessorLowSecureSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_LOWSECURE_SYNC_URL_DISPLAY_PREFIX));
+            dto.setProcessorLowSecureAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_LOWSECURE_ASYNC_URL_DISPLAY_PREFIX));
 
             dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
             dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
