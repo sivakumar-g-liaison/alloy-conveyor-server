@@ -20,6 +20,9 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -36,6 +39,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -557,18 +561,34 @@ public class MailBoxUtil {
      * @param processorType processor type and
      * @param propertiesDTO remote processor properties dto
      */
-    public static void validatePipelineId(ProcessorType processorType, RemoteProcessorPropertiesDTO propertiesDTO) {
+    public static void validatePipelineId(ProcessorType processorType, Object obj) {
 
         String pipelineId = null;
-        if (HTTPSYNCPROCESSOR.equals(processorType) ||
-                HTTPASYNCPROCESSOR.equals(processorType) ||
-                DROPBOXPROCESSOR.equals(processorType)) {
-            pipelineId = propertiesDTO.getHttpListenerPipeLineId();
-        } else if (SWEEPER.equals(processorType)) {
-            pipelineId = propertiesDTO.getPipeLineID();
-        } else {
-			return;
-		}
+        if (obj instanceof RemoteProcessorPropertiesDTO) {
+            
+            RemoteProcessorPropertiesDTO propertiesDTO = (RemoteProcessorPropertiesDTO) obj;
+            if (HTTPSYNCPROCESSOR.equals(processorType) ||
+                    HTTPASYNCPROCESSOR.equals(processorType) ||
+                    DROPBOXPROCESSOR.equals(processorType)) {
+                pipelineId = propertiesDTO.getHttpListenerPipeLineId();
+            } else if (SWEEPER.equals(processorType)) {
+                pipelineId = propertiesDTO.getPipeLineID();
+            } else {
+                return;
+            }
+            
+        } else if (obj instanceof HTTPListenerPropertiesDTO) {
+            HTTPListenerPropertiesDTO httPropDTO = (HTTPListenerPropertiesDTO) obj;
+            pipelineId = httPropDTO.getHttpListenerPipeLineId();
+        }  else if (obj instanceof DropboxProcessorPropertiesDTO) {
+            DropboxProcessorPropertiesDTO dbxPropDTO = (DropboxProcessorPropertiesDTO) obj;
+            pipelineId = dbxPropDTO.getHttpListenerPipeLineId();
+        }  else if (obj instanceof SweeperPropertiesDTO) {
+            SweeperPropertiesDTO sweeperPropDTO = (SweeperPropertiesDTO) obj;
+            pipelineId = sweeperPropDTO.getPipeLineID();
+        }  else {
+            return;
+        }
 
         if (isEmpty(pipelineId)) {
             throw new MailBoxConfigurationServicesException(MANDATORY_FIELD_MISSING, PROPERTY_PIPELINEID.toUpperCase(), Response.Status.BAD_REQUEST);

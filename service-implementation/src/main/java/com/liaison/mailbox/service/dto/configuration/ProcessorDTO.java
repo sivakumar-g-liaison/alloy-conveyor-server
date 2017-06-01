@@ -281,6 +281,8 @@ public class ProcessorDTO {
             StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(), Protocol.findByCode(processor.getProcsrProtocol()));
 
             ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
+            //validate PipelineId
+            MailBoxUtil.validatePipelineId(processor.getProcessorType(), processorPropsDTO);
             GenericValidator validator = new GenericValidator();
             validator.validate(processorPropsDTO);
             if (processorPropsDTO != null) {

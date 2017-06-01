@@ -10,7 +10,7 @@
             "displayName" : "HTTP Listener PipelineId",
             "value":"",
             "type":"textarea",
-            "readOnly":true,
+            "readOnly":false,
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
