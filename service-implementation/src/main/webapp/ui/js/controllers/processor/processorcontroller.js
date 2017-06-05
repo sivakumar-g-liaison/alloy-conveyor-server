@@ -46,7 +46,7 @@ var rest = myApp.controller(
 				return -1
 		    };
 		    var secure = 'SECURE';
-		    $scope. = function (prcsrType, clusterType) {
+		    $scope.handleDisplayOfHTTPListenerURL = function (prcsrType, clusterType) {
 				$scope.mailboxId = $location.search().mailBoxId;
 				$scope.mailboxName = $location.search().mbxname;
 				if( prcsrType === "HTTPSYNCPROCESSOR") {
