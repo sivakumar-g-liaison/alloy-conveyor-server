@@ -164,61 +164,6 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
     }
 
-    /**
-     * Create directories in the remote server if it is not available
-     *
-     * @param client sftp/ftps client
-     * @param remotePath remote path
-     */
-    private void createDirectoriesInRemote(Object client, String remotePath) {
-
-        try {
-
-            for (String directory : remotePath.split(File.separatorChar == '\\' ? "\\\\" : File.separator)) {
-
-                if (directory.isEmpty()) {// For when path starts with /
-                    continue;
-                }
-
-                if (client instanceof G2SFTPClient) {
-
-                    G2SFTPClient sftpClient = (G2SFTPClient) client;
-                    // Info logs are required to track the folders creation and it won't log frequently
-                    try {
-                        sftpClient.getNative().lstat(directory);
-                        LOGGER.debug(constructMessage("The remote directory {} already exists."), directory);
-                    } catch (SftpException ex) {
-                        LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
-                        sftpClient.getNative().mkdir(directory);
-                        LOGGER.info(constructMessage("Created remote directory {}"), directory);
-                    }
-
-                    sftpClient.getNative().cd(directory);
-
-                } else if (client instanceof G2FTPSClient) {
-
-                    G2FTPSClient ftpClient = (G2FTPSClient) client;
-                    // Info logs are required to track the folders creation and it won't log frequently
-                    boolean isExist = ftpClient.getNative().changeWorkingDirectory(directory);
-                    if (!isExist) {
-                        boolean isCreated = ftpClient.getNative().makeDirectory(directory);
-                        if (isCreated) {
-                            LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
-                            ftpClient.getNative().changeWorkingDirectory(directory);
-                            LOGGER.info(constructMessage("Created remote directory {}"), directory);
-                        } else {
-                            throw new MailBoxServicesException("Unable to create directory.", Response.Status.INTERNAL_SERVER_ERROR);
-                        }
-                    }
-                }
-
-            }
-        } catch (SftpException | IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
     @Override
     public void logToLens(String msg, RelayFile file, ExecutionState status) {
 
