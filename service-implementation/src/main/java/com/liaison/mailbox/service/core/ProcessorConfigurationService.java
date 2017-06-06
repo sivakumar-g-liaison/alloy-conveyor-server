@@ -1152,11 +1152,11 @@ public class ProcessorConfigurationService {
                 }
             }
 
+            serviceResponse.setProcessorGuids(processorGuids);
             if (null != processorGuids && !MailBoxUtil.isEmptyList(processorGuids)) {
-                serviceResponse.setProcessorGuids(processorGuids);
                 serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
             } else {
-                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE));
+                serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
             }
             return serviceResponse;
         } catch (Exception e) {
