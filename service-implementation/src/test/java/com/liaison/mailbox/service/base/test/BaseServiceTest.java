@@ -69,6 +69,8 @@ public abstract class BaseServiceTest {
     public static final String ACTIVE = "ACTIVE";
     public static final String INACTIVE = "INACTIVE";
 
+    public static final String PIPELINE_ID = "E7698D981EE8403F8E9591584A076D28";
+
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
 	public String tenancyKey = "G2_DEV_INT_MONIKER";
@@ -369,10 +371,13 @@ public abstract class BaseServiceTest {
         List<ProcessorCredentialPropertyDTO> procCredentialPropDTO = new ArrayList<ProcessorCredentialPropertyDTO>();
         setValidationRules();
         ProcessorPropertyDTO procURLPropDTO = setProcessorHttpURLPropertyDTO();
+        ProcessorPropertyDTO pipeLinePropDTO = setHttpProcessorPipelindIdPropertyDTO();
+        pipeLinePropDTO.setValidationRules(setValidationRules());        
         ProcessorFolderPropertyDTO procFolderPropDTO = setProcessorFolderPropertyDTO();
         setProcessorCredentialPropertyDTO();
         folderProperties.add(procFolderPropDTO);
         staticProperties.add(procURLPropDTO);
+        staticProperties.add(pipeLinePropDTO);
         propDTO.setStaticProperties(staticProperties);
         propDTO.setFolderProperties(folderProperties);
         propDTO.setCredentialProperties(procCredentialPropDTO);
@@ -395,6 +400,21 @@ public abstract class BaseServiceTest {
         procPropDTO.setDefaultValue("Invisible");
         procPropDTO.setValidationRules(null);
         procPropDTO.setOptions(options);
+        return procPropDTO;
+    }
+    
+    private ProcessorPropertyDTO setHttpProcessorPipelindIdPropertyDTO() {
+
+        ProcessorPropertyDTO procPropDTO = new ProcessorPropertyDTO();
+        procPropDTO.setName("httpListenerPipeLineId");
+        procPropDTO.setDisplayName("HTTP Listener PipelineId");
+        procPropDTO.setType("textarea");
+        procPropDTO.setReadOnly(false);
+        procPropDTO.setValue(PIPELINE_ID);
+        procPropDTO.setMandatory(true);
+        procPropDTO.setDynamic(false);
+        procPropDTO.setValueProvided(true);
+        procPropDTO.setDefaultValue(PIPELINE_ID);
         return procPropDTO;
     }
 
