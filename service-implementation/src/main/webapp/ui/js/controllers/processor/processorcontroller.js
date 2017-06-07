@@ -44,15 +44,20 @@ var rest = myApp.controller(
 					}
 				}
 				return -1
-		    };    
-		    $scope.handleDisplayOfHTTPListenerURL = function (prcsrType) {
+		    };
+		    var secure = 'SECURE';
+		    $scope.handleDisplayOfHTTPListenerURL = function (prcsrType, clusterType) {
 				$scope.mailboxId = $location.search().mailBoxId;
 				$scope.mailboxName = $location.search().mbxname;
 				if( prcsrType === "HTTPSYNCPROCESSOR") {
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Sync URL";
-						$scope.urlPrefix = $rootScope.javaProperties.processorSyncUrlDisplayPrefix;
+						if (secure === clusterType) {
+						   $scope.urlPrefix = $rootScope.javaProperties.processorSecureSyncUrlDisplayPrefix;
+						} else {
+						   $scope.urlPrefix = $rootScope.javaProperties.processorLowSecureSyncUrlDisplayPrefix;
+						}						
 						$scope.displayHTTPListenerURL();
 					}	
 				}
@@ -60,7 +65,11 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = true;
 					if( $scope.isEdit && $scope.isProcessorTypeHTTPListener) {
 						$scope.urlType = "HTTP Async URL";
-						$scope.urlPrefix = $rootScope.javaProperties.processorAsyncUrlDisplayPrefix;
+						if (secure === clusterType) {
+						   $scope.urlPrefix = $rootScope.javaProperties.processorSecureAsyncUrlDisplayPrefix;
+						} else {
+						   $scope.urlPrefix = $rootScope.javaProperties.processorLowSecureAsyncUrlDisplayPrefix;
+						}
 						$scope.displayHTTPListenerURL();
 					}
 				}
@@ -495,7 +504,7 @@ var rest = myApp.controller(
     						$scope.scriptIsEdit = true;
     						}
     						//To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
-    						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type);
+    						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type, data.getProcessorResponse.processor.clusterType);
     						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
     						
                             //Fix: Reading profile in procsr callback
@@ -726,7 +735,7 @@ var rest = myApp.controller(
 					addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.processor.protocol.value;
                     addRequest.addProcessorToMailBoxRequest.processor.createConfiguredLocation = $scope.isCreateConfiguredLocation;
                     //To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
-                    $scope.handleDisplayOfHTTPListenerURL($scope.procsrType.value);
+                    $scope.handleDisplayOfHTTPListenerURL($scope.procsrType.value, $scope.processor.clusterType);
 						var saveProcessor = false;
 						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
 						

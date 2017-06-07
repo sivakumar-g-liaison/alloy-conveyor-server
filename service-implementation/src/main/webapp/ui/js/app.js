@@ -172,8 +172,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.javaProperties = {
 		globalTrustStoreId: "",
 		globalTrustStoreGroupId: "",
-		processorSyncUrlDisplayPrefix: "",
-		processorAsyncUrlDisplayPrefix: "",
+		processorSecureSyncUrlDisplayPrefix: "",
+		processorSecureAsyncUrlDisplayPrefix: "",
+		processorLowSecureSyncUrlDisplayPrefix: "",
+        processorLowSecureAsyncUrlDisplayPrefix: "",
 		defaultScriptTemplateName: "",
 	    deployAsDropbox:false,
 	    clusterTypes:[]
@@ -183,9 +185,11 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
 				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
 				$rootScope.javaProperties.globalTrustStoreGroupId = data.getPropertiesValueResponseDTO.properties.trustStoreGroupId;
-				$rootScope.javaProperties.processorSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSyncUrlDisplayPrefix;
-				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
-				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
+				$rootScope.javaProperties.processorSecureSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSecureSyncUrlDisplayPrefix;
+				$rootScope.javaProperties.processorSecureAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSecureAsyncUrlDisplayPrefix;
+				$rootScope.javaProperties.processorLowSecureSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorLowSecureSyncUrlDisplayPrefix;
+                $rootScope.javaProperties.processorLowSecureAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorLowSecureAsyncUrlDisplayPrefix;
+                $rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
 				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
 				$rootScope.javaProperties.clusterTypes = data.getPropertiesValueResponseDTO.properties.clusterTypes;
 				
