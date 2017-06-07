@@ -36,7 +36,9 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -65,6 +67,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,6 +75,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -375,7 +379,13 @@ public class ProcessorConfigurationService {
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid,
                         Response.Status.BAD_REQUEST);
             }
-
+            
+            //Updating the stagedFile Status as INACTIVE during deleting the corresponding processor
+            new StagedFileDAOBase().updateStagedFileStatusByProcessorId(processorGuid, EntityStatus.INACTIVE.name());
+            
+            //Updating the ProcessorExecutionState status as COMPLETED during deleting the corresponding processor
+            new ProcessorExecutionStateDAOBase().updateProcessorExecutionStateStatusByProcessorId(processorGuid, ExecutionState.COMPLETED.name());
+            
             // Changing the processor status
             retrievedProcessor.setProcsrName(MailBoxUtil.generateName(retrievedProcessor.getProcsrName(), 512));
             retrievedProcessor.setProcsrStatus(EntityStatus.DELETED.value());
