@@ -23,10 +23,11 @@ import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -393,6 +394,43 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             }
         }
         return null;
+    }
+    
+    /**
+     * Update the StagedFile Status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateStagedFileStatusByProcessorId(String processorId,  String status) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_STAGED_FILE_STATUS_BY_PROCESSORID)
+                .setParameter(STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
     }
 
     @Override

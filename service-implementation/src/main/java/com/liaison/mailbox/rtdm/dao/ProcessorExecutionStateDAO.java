@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.liaison.commons.jpa.GenericDAO;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 
@@ -67,10 +66,15 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String UPDATE_PROCESSOR_EXECUTION_STATE = "UPDATE PROCESSOR_EXEC_STATE" +
             " SET EXEC_STATUS =:" + EXEC_STATUS +
             " WHERE PGUID =:" + PGUID;
+    
     String UPDATE_PROCESSOR_EXECUTION_STATE_ON_INIT = "UPDATE PROCESSOR_EXEC_STATE" +
             " SET EXEC_STATUS =:" + NEW_EXEC_STATUS +
             " WHERE NODE_IN_USE =:" + NODE_IN_USE +
             " AND EXEC_STATUS =:" + EXEC_STATUS;
+    
+    String UPDATE_PROCESSOR_EXECUTION_STATE_STATUS_BY_PROCESSORID = "UPDATE PROCESSOR_EXEC_STATE" +
+            " SET EXEC_STATUS =:" + EXEC_STATUS +
+            " WHERE PROCESSOR_ID =:" + PROCESSOR_ID;
 
     ProcessorExecutionState findByProcessorId(String processorId);
 
@@ -125,5 +129,13 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     List<ProcessorExecutionState> findExecutingProcessors(TimeUnit timeUnit, int value);
 
     int findAllExecutingProcessors();
+    
+    /**
+     * Update the ProcessorExecutionState Status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    void updateProcessorExecutionStateStatusByProcessorId( String processorId,  String status);
 
 }
