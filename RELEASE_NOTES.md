@@ -1,3 +1,7 @@
+4.16.1-SNAPSHOT
+---------------
+* GGT-1356: Remove Spectrum settings from Archaius *.properties files 
+
 4.16.0-SNAPSHOT
 ---------------
 * GMB-994 - Sweeper is not interrupted while sweeping empty files
