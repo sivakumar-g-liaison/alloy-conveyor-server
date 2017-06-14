@@ -18,10 +18,10 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
-
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -424,6 +424,43 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
 
         } finally {
             if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
+    
+    /**
+     * Update the ProcessorExecutionState status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateProcessorExecutionStateStatusByProcessorId( String processorId,  String status) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the processor execution state
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_EXECUTION_STATE_STATUS_BY_PROCESSORID)
+                .setParameter(EXEC_STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
                 entityManager.close();
             }
         }

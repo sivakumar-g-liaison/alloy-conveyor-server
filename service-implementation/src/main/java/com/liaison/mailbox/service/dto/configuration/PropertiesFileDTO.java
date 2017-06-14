@@ -27,25 +27,39 @@ public class PropertiesFileDTO {
 	
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
-	private String processorSyncUrlDisplayPrefix;
-	private String processorAsyncUrlDisplayPrefix;
+	private String processorSecureSyncUrlDisplayPrefix;
+	private String processorSecureAsyncUrlDisplayPrefix;
+	private String processorLowSecureSyncUrlDisplayPrefix;
+    private String processorLowSecureAsyncUrlDisplayPrefix;
 	private String defaultScriptTemplateName;
 	private boolean deployAsDropbox;
     private List<String> clusterTypes;
-	
-	public String getProcessorSyncUrlDisplayPrefix() {
-		return processorSyncUrlDisplayPrefix;
-	}
-	public void setProcessorSyncUrlDisplayPrefix(String processorSyncUrlDisplayPrefix) {
-		this.processorSyncUrlDisplayPrefix = processorSyncUrlDisplayPrefix;
-	}
-	public String getProcessorAsyncUrlDisplayPrefix() {
-		return processorAsyncUrlDisplayPrefix;
-	}
-	public void setProcessorAsyncUrlDisplayPrefix(String processorAsyncUrlDisplayPrefix) {
-		this.processorAsyncUrlDisplayPrefix = processorAsyncUrlDisplayPrefix;
-	}
-	public String getDefaultScriptTemplateName() {
+    
+    public String getProcessorSecureSyncUrlDisplayPrefix() {
+        return processorSecureSyncUrlDisplayPrefix;
+    }
+    public void setProcessorSecureSyncUrlDisplayPrefix(String processorSecureSyncUrlDisplayPrefix) {
+        this.processorSecureSyncUrlDisplayPrefix = processorSecureSyncUrlDisplayPrefix;
+    }
+    public String getProcessorSecureAsyncUrlDisplayPrefix() {
+        return processorSecureAsyncUrlDisplayPrefix;
+    }
+    public void setProcessorSecureAsyncUrlDisplayPrefix(String processorSecureAsyncUrlDisplayPrefix) {
+        this.processorSecureAsyncUrlDisplayPrefix = processorSecureAsyncUrlDisplayPrefix;
+    }
+    public String getProcessorLowSecureSyncUrlDisplayPrefix() {
+        return processorLowSecureSyncUrlDisplayPrefix;
+    }
+    public void setProcessorLowSecureSyncUrlDisplayPrefix(String processorLowSecureSyncUrlDisplayPrefix) {
+        this.processorLowSecureSyncUrlDisplayPrefix = processorLowSecureSyncUrlDisplayPrefix;
+    }
+    public String getProcessorLowSecureAsyncUrlDisplayPrefix() {
+        return processorLowSecureAsyncUrlDisplayPrefix;
+    }
+    public void setProcessorLowSecureAsyncUrlDisplayPrefix(String processorLowSecureAsyncUrlDisplayPrefix) {
+        this.processorLowSecureAsyncUrlDisplayPrefix = processorLowSecureAsyncUrlDisplayPrefix;
+    }
+    public String getDefaultScriptTemplateName() {
 		return defaultScriptTemplateName;
 	}
 	public void setDefaultScriptTemplateName(String defaultScriptTemplateName) {
