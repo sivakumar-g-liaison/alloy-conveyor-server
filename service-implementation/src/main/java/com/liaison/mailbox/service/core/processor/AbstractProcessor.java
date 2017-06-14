@@ -9,11 +9,13 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -50,12 +52,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -978,6 +982,60 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             throw new MailBoxServicesException("The given remote path is Empty.", Response.Status.CONFLICT);
         }
         return remotePath;
+    }
+    
+    /**
+     * Create directories in the remote server if it is not available
+     *
+     * @param client sftp/ftps client
+     * @param remotePath remote path
+     */
+    public void createDirectoriesInRemote(Object client, String remotePath) {
+
+        try {
+
+            for (String directory : remotePath.split(File.separatorChar == '\\' ? "\\\\" : File.separator)) {
+
+                if (directory.isEmpty()) {// For when path starts with /
+                    continue;
+                }
+
+                if (client instanceof G2SFTPClient) {
+
+                    G2SFTPClient sftpClient = (G2SFTPClient) client;
+                    // Info logs are required to track the folders creation and it won't log frequently
+                    try {
+                        sftpClient.getNative().lstat(directory);
+                        LOGGER.debug(constructMessage("The remote directory {} already exists."), directory);
+                    } catch (SftpException ex) {
+                        LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
+                        sftpClient.getNative().mkdir(directory);
+                        LOGGER.info(constructMessage("Created remote directory {}"), directory);
+                    }
+
+                    sftpClient.getNative().cd(directory);
+
+                } else if (client instanceof G2FTPSClient) {
+
+                    G2FTPSClient ftpClient = (G2FTPSClient) client;
+                    // Info logs are required to track the folders creation and it won't log frequently
+                    boolean isExist = ftpClient.getNative().changeWorkingDirectory(directory);
+                    if (!isExist) {
+                        boolean isCreated = ftpClient.getNative().makeDirectory(directory);
+                        if (isCreated) {
+                            LOGGER.info(constructMessage("The remote directory {} doesn't exist."), directory);
+                            ftpClient.getNative().changeWorkingDirectory(directory);
+                            LOGGER.info(constructMessage("Created remote directory {}"), directory);
+                        } else {
+                            throw new MailBoxServicesException("Unable to create directory.", Response.Status.INTERNAL_SERVER_ERROR);
+                        }
+                    }
+                }
+
+            }
+        } catch (SftpException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
