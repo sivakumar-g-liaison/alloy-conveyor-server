@@ -20,11 +20,15 @@ import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.service.dto.OrganizationDTO;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.metrics.cache.CacheStatsRegistrar;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_BASE_URL;
+import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 
 /**
  * This class is used to access service broker entities
@@ -139,6 +144,10 @@ public class ServiceBrokerUtil {
 
         try {
 
+            if (MailBoxUtil.isEmpty(response)) {
+                throw new MailBoxConfigurationServicesException(ID_IS_INVALID, PIPELINE, Response.Status.BAD_REQUEST);
+            }
+            
             ObjectMapper mapper = new ObjectMapper();
             JsonNode responseNode = mapper.readTree(response);
             JsonNode dtoNode = responseNode.get(DATA_TRANSFER_OBJECT).get(PROCESS).get(ORG_ENTITY);
