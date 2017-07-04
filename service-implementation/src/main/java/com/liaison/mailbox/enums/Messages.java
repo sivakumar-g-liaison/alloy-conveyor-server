@@ -24,6 +24,7 @@ import java.util.Map;
 public enum Messages {
 
     MBX_DOES_NOT_EXIST("Mailbox with the given id %s does not exist."),
+    UPLOADED_FILE_DOES_NOT_EXIST("Uploaded file with the given id %s does not exist."),
     PROFILE_DOES_NOT_EXIST("Profile with the given id %s does not exist."),
     PROFILE_NAME_DOES_NOT_EXIST("Profile with the given name %s does not exist."),
     PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
