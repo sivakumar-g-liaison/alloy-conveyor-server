@@ -118,7 +118,8 @@ public class DropboxUploadedFileResource extends AuditedResource {
                         return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
                     
-					//add uploaded file					
+					//add uploaded file
+                    serviceRequest.setId(loginId);
 					uploadedFileService.addUploadedFile(serviceRequest);					
 					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
 					
