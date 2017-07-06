@@ -10,6 +10,8 @@ package com.liaison.mailbox.service.dto.dropbox;
 
 import java.util.Date;
 
+import com.liaison.mailbox.rtdm.model.UploadedFile;
+
 public class UploadedFileDTO {
 	
     private String id;
@@ -83,5 +85,12 @@ public class UploadedFileDTO {
 
 	public void setTtl(String ttl) {
 		this.ttl = ttl;
+	}
+
+	public void copyFromEntity(UploadedFile uploadedFile) {
+		this.setFileName(uploadedFile.getFileName().toString());
+		this.setId(uploadedFile.getUserId().toString());
+		
+		
 	}
 }

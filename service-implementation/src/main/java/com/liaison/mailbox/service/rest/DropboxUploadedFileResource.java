@@ -10,8 +10,11 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,6 +23,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,9 +40,11 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxUploadedFileService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.UploadedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.GetUploadedFilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
@@ -59,7 +65,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/dropbox/uploadedFiles", description = "Gateway for the dropbox services.")
 public class DropboxUploadedFileResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxUploadedFileResource.class);
+	private static final Logger LOGGER = LogManager.getLogger(DropboxUploadedFileResource.class);
 	
 	/**
 	 * REST method to add uploaded file.
@@ -80,7 +86,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
 			@Override
 			public Object call() {
 
-			    LOG.debug("Entering into addUploadedFile service.");
+			    LOGGER.debug("Entering into addUploadedFile service.");
                
                 DropboxAuthAndGetManifestResponseDTO responseEntity = null;
                 DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
@@ -106,7 +112,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     // authentication
                     String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
                     if (encryptedMbxToken == null) {
-                        LOG.error("Dropbox - user authentication failed");
+                        LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
                         return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
@@ -123,12 +129,12 @@ public class DropboxUploadedFileResource extends AuditedResource {
 					uploadedFileService.addUploadedFile(serviceRequest);					
 					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
 					
-                    LOG.debug("Exit from addUploadedFile service.");
+                    LOGGER.debug("Exit from addUploadedFile service.");
 
                     return builder.build();
 					
 				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
+					LOGGER.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
 				}
 			}
@@ -137,6 +143,90 @@ public class DropboxUploadedFileResource extends AuditedResource {
 
 		// hand the delegate to the framework for calling
 		return process(serviceRequest, worker);
+	}
+	
+	
+	@GET
+	@Path("/list")
+	@ApiOperation(value = "get list of uploaded files", notes = "retrieve the list of uploaded files",
+	position = 2, 
+	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
+	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+	public Response getUploadedFiles(
+			@Context final HttpServletRequest serviceRequest,
+			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the uploaded file searched.") final String uploadedFileName,
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+			@QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {
+		
+		// create the worker delegate to perform the business logic
+				AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+					
+					@Override
+					public Object call()
+							throws Exception {
+
+						LOGGER.debug("Entering into getUploadedFiles service.");
+
+						DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+						DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
+						DropboxAuthenticationService authService = new DropboxAuthenticationService();
+						DropboxUploadedFileService  uploadedFilesService = new DropboxUploadedFileService();
+						
+						try {
+							
+							// get login id and auth token from mailbox token
+							String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+							String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+							String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
+							dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
+
+							// constructing authenticate and get manifest request
+							dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
+
+							// authentication
+							String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
+							if (encryptedMbxToken == null) {
+								LOGGER.error("Dropbox - user authentication failed");
+								responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+								return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+							}
+
+							// getting manifest
+							GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+							if (manifestResponse == null) {
+								responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
+								return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+							}
+							
+							// construct the generic search filter dto
+							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+							searchFilter.setUploadedFileName(uploadedFileName);
+							searchFilter.setPage(page);
+							searchFilter.setPageSize(pageSize);
+							searchFilter.setSortField(sortField);
+							searchFilter.setSortDirection(sortDirection);
+							
+							GetUploadedFilesResponseDTO getUploadedFilesResponseDTO = uploadedFilesService.getuploadedFiles(
+									searchFilter, loginId);
+							String responseBody = MailBoxUtil.marshalToJSON(getUploadedFilesResponseDTO);
+							
+							ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
+							
+							LOGGER.debug("Exit from getUploadedFiles service.");
+
+							return builder.build();
+							
+						} catch (IOException | JAXBException e) {
+							LOGGER.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						}
+						
+					}
+					
+				};
+				return process(serviceRequest, worker);
 	}
 	
 	/**
@@ -176,7 +266,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     String encryptedMbxToken =
                             authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
                     if (encryptedMbxToken == null) {
-                        LOG.error("Dropbox - user authentication failed");
+                        LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
                         return Response.status(401)
                                        .header("Content-Type", MediaType.APPLICATION_JSON)
@@ -201,7 +291,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     return builder.build();
 
                 } catch (MailBoxServicesException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                     throw new LiaisonRuntimeException(e.getMessage());
                 }
             }
