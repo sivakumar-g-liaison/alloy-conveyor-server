@@ -15,11 +15,13 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.gson.Gson;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.UploadedFileDAO;
 import com.liaison.mailbox.rtdm.model.UploadedFile;
 import com.liaison.mailbox.service.dto.dropbox.UploadedFileDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.spectrum.client.model.table.DataTableRow;
 
 /**
  * Class which has Dropbox uploaded file related operations.
@@ -35,14 +37,14 @@ public class DropboxUploadedFileService extends DropboxBaseService {
      * 
      * @param dto
      */
-    public void addUploadedFile(UploadedFileDTO dto) {
+    public void addUploadedFile(UploadedFileDTO dto, boolean isCreate) {
         
         LOG.debug("Enter into addUploadedFile ()");
         
         try {
             
             UploadedFile uploadedFile = new UploadedFile();
-            uploadedFile.copyFromDto(dto, true);
+            uploadedFile.copyFromDto(dto, isCreate);
             
             UploadedFileDAO dao = new UploadedFileDAOBase();
             dao.persist(uploadedFile);          
@@ -83,6 +85,35 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             LOG.error(e);            
             throw new RuntimeException("Failed to delete the uploaded file");            
         }        
+    }
+    
+    /**
+     * Data Migration for Uploaded files.
+     * 
+     * @param tableRows
+     */
+    public void dataMigration(DataTableRow[] tableRows) {
+        
+        LOG.debug("Enter into dataMigration ()");
+        
+        UploadedFileDTO fileDTO;
+        try {
+            
+            for (DataTableRow row : tableRows) {
+                
+                fileDTO = new Gson().fromJson(new Gson().toJson(row.getColumns()), UploadedFileDTO.class);
+                fileDTO.setTtl(String.valueOf(row.getTtl()));
+                addUploadedFile(fileDTO, false);                
+            }
+            
+            LOG.info("Data Migration has done for upload files successfully");
+            
+        } catch (Exception e) {
+            LOG.error(e);            
+            throw new RuntimeException("Failed data migration for uploaded files");            
+        }  
+        
+        LOG.debug("Exit from dataMigration ()");        
     }
 
 }

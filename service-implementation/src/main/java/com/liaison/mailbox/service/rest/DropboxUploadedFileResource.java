@@ -30,6 +30,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
@@ -40,7 +41,6 @@ import com.liaison.mailbox.service.dto.dropbox.UploadedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -97,7 +97,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
                     
 					requestString = getRequestBody(serviceRequest);
-					UploadedFileDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+					UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
 							UploadedFileDTO.class);
 					
 					// constructing authenticate and get manifest request
@@ -120,7 +120,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     
 					//add uploaded file
                     serviceRequest.setId(loginId);
-					uploadedFileService.addUploadedFile(serviceRequest);					
+					uploadedFileService.addUploadedFile(serviceRequest, true);					
 					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
 					
                     LOG.debug("Exit from addUploadedFile service.");
