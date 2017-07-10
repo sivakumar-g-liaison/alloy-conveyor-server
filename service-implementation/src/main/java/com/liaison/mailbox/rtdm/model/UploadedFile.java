@@ -155,6 +155,9 @@ public class UploadedFile  implements Identifiable {
         if (isCreate) {
             this.setPguid(MailBoxUtil.getGUID());
             this.setUploadDate(timestamp);
+        } else {
+            this.setPguid(MailBoxUtil.getGUID());            
+            this.setUploadDate(new Timestamp(uploadedFileDto.getUploadDate().getTime()));
         }
         
         this.setComment(uploadedFileDto.getComment());

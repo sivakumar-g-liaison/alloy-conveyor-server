@@ -23,14 +23,9 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
  */
 public interface UploadedFileDAO extends GenericDAO<UploadedFile> {
 	
-	String FILE_NAME = "file_Name";
-	String FILE_SIZE = "file_Size";
-	String UPLOADED_COMMENT = "uploaded_comment";
 	String TTL = "ttl";
-	String STATUS = "status";
 	String USER_ID = "userid";
-	String UPLOAD_DATE ="upload_date";
-	String PROFILE_NAME ="profile_name";
+	String CURRENT_TIME = "current_time";
 	
 	int getUploadedFilesCountByUserId(String loginId, String fileName, String status);
 	List<UploadedFile> findUploadedFiles(String loginId, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);

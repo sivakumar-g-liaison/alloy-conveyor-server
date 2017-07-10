@@ -34,6 +34,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
@@ -103,7 +104,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
                     
 					requestString = getRequestBody(serviceRequest);
-					UploadedFileDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+					UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
 							UploadedFileDTO.class);
 					
 					// constructing authenticate and get manifest request
@@ -126,7 +127,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     
 					//add uploaded file
                     serviceRequest.setId(loginId);
-					uploadedFileService.addUploadedFile(serviceRequest);					
+					uploadedFileService.addUploadedFile(serviceRequest, true);					
 					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
 					
                     LOGGER.debug("Exit from addUploadedFile service.");
@@ -147,14 +148,14 @@ public class DropboxUploadedFileResource extends AuditedResource {
 	
 	
 	@GET
-	@Path("/list")
 	@ApiOperation(value = "get list of uploaded files", notes = "retrieve the list of uploaded files",
 	position = 2, 
 	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response getUploadedFiles(
 			@Context final HttpServletRequest serviceRequest,
-			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the uploaded file searched.") final String uploadedFileName,
+			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
 			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
 			@QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
 			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
@@ -202,7 +203,6 @@ public class DropboxUploadedFileResource extends AuditedResource {
 							
 							// construct the generic search filter dto
 							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-							searchFilter.setUploadedFileName(uploadedFileName);
 							searchFilter.setPage(page);
 							searchFilter.setPageSize(pageSize);
 							searchFilter.setSortField(sortField);

@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class DropboxBaseService {
 
-    private static final Logger LOG = LogManager.getLogger(DropboxStagedFilesService.class);
+    private static final Logger LOGGER = LogManager.getLogger(DropboxStagedFilesService.class);
     private static String NEW_LINE = "\n\n";
     private static final String CONVEYOR = "Liaison Conveyor URL";
     private static String SEPARATOR = ": ";
@@ -44,23 +44,23 @@ public class DropboxBaseService {
      */
     protected List<String> validateAndGetMailboxes(String aclManifest) throws IOException {
 
-        LOG.info("Retrieving tenancy keys from acl-manifest");
+        LOGGER.info("Retrieving tenancy keys from acl-manifest");
         // retrieve the tenancy key from acl manifest
         List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifest);
         if (tenancyKeys.isEmpty()) {
-            LOG.error("Retrieval of tenancy key from acl manifest failed");
+            LOGGER.error("Retrieval of tenancy key from acl manifest failed");
             throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
         }
 
-        LOG.debug("The retrieved tenancykey values are {}", tenancyKeys);
+        LOGGER.debug("The retrieved tenancykey values are {}", tenancyKeys);
 
         // retrieve corresponding mailboxes of the available tenancyKeys.
         MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
-        LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
+        LOGGER.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
         List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeys);
 
         if (mailboxIds.isEmpty()) {
-            LOG.error("There are no mailboxes linked to the tenancyKeys");
+            LOGGER.error("There are no mailboxes linked to the tenancyKeys");
             throw new MailBoxServicesException("There are no mailboxes available for tenancykeys",
                     Response.Status.NOT_FOUND);
         }
@@ -78,7 +78,7 @@ public class DropboxBaseService {
 
         List<String> emailAddressList = mailbox.getEmailAddress();
         if (null == emailAddressList || emailAddressList.isEmpty()) {
-            LOG.info("Email address is not configured in the mailbox");
+            LOGGER.info("Email address is not configured in the mailbox");
             return;
         }
 

@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.google.gson.Gson;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.UploadedFileDAO;
 import com.liaison.mailbox.rtdm.model.UploadedFile;
@@ -32,6 +33,7 @@ import com.liaison.mailbox.service.dto.dropbox.response.GetUploadedFilesResponse
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.spectrum.client.model.table.DataTableRow;
 
 
 /**
@@ -49,14 +51,14 @@ public class DropboxUploadedFileService extends DropboxBaseService {
      * 
      * @param dto
      */
-    public void addUploadedFile(UploadedFileDTO dto) {
+    public void addUploadedFile(UploadedFileDTO dto, boolean isCreate) {
         
         LOGGER.debug("Enter into addUploadedFile ()");
         
         try {
             
             UploadedFile uploadedFile = new UploadedFile();
-            uploadedFile.copyFromDto(dto, true);
+            uploadedFile.copyFromDto(dto, isCreate);
             
             UploadedFileDAO dao = new UploadedFileDAOBase();
             dao.persist(uploadedFile);          
@@ -120,6 +122,7 @@ public class DropboxUploadedFileService extends DropboxBaseService {
         }
         
         serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, UPLOADED_FILES, Messages.SUCCESS));
+        serviceResponse.setUploadedFile(uploadedFileDTOs);
         
 		LOGGER.debug("Exit from get  uploaded files service.");
 
@@ -155,6 +158,35 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             LOGGER.error(e);            
             throw new RuntimeException("Failed to delete the uploaded file");            
         }        
+    }
+    
+    /**
+     * Data Migration for Uploaded files.
+     * 
+     * @param tableRows
+     */
+    public void dataMigration(DataTableRow[] tableRows) {
+        
+        LOGGER.debug("Enter into dataMigration ()");
+        
+        UploadedFileDTO fileDTO;
+        try {
+            
+            for (DataTableRow row : tableRows) {
+                
+                fileDTO = new Gson().fromJson(new Gson().toJson(row.getColumns()), UploadedFileDTO.class);
+                fileDTO.setTtl(String.valueOf(row.getTtl()));
+                addUploadedFile(fileDTO, false);                
+            }
+            
+            LOGGER.info("Data Migration has done for upload files successfully");
+            
+        } catch (Exception e) {
+            LOGGER.error(e);            
+            throw new RuntimeException("Failed data migration for uploaded files");            
+        }  
+        
+        LOGGER.debug("Exit from dataMigration ()");        
     }
 
 }

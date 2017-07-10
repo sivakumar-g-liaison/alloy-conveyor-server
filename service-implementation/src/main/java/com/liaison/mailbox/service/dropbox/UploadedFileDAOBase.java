@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dropbox;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,14 @@ public class UploadedFileDAOBase extends GenericDAOBase<UploadedFile> implements
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
             StringBuilder query = new StringBuilder().append("select count(uf.fileName) from UploadedFile uf")
-            		.append(" WHERE uf.userId LIKE :")
-            		.append(USER_ID);
+            		.append(" WHERE uf.userId =:")
+            		.append(USER_ID)
+            		.append(" and uf.ttl >:")
+                    .append(CURRENT_TIME);
+            
             Query uploadedFileCountQuery = entityManager.createQuery(query.toString());
             uploadedFileCountQuery.setParameter(USER_ID, loginId);
+            uploadedFileCountQuery.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
 
             totalItems = (Long) uploadedFileCountQuery.getSingleResult();
             count = totalItems.intValue();
@@ -80,10 +85,13 @@ public class UploadedFileDAOBase extends GenericDAOBase<UploadedFile> implements
 
             StringBuilder queryString = new StringBuilder().append("select uf from UploadedFile uf")
             		.append(" WHERE  uf.userId =:")
-            		.append(USER_ID);
-            
+            		.append(USER_ID)
+            		.append(" and uf.ttl > :")
+                    .append(CURRENT_TIME);
+            		
             Query query = entityManager.createQuery(queryString.toString());
             query.setParameter(USER_ID, loginId);
+            query.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
             query.setFirstResult(pagingOffset);
             query.setMaxResults(pagingCount);
             
