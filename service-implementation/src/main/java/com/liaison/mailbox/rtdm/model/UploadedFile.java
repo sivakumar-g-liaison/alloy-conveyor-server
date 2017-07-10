@@ -12,6 +12,7 @@ package com.liaison.mailbox.rtdm.model;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,14 +28,13 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * The persistent class for the UPLOADED_FILE database table.
- *
  */
 @Entity
 @Table(name = "UPLOADED_FILE")
-public class UploadedFile  implements Identifiable {
+public class UploadedFile implements Identifiable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private String pguid;
     private String userId;
     private String fileName;
@@ -44,10 +44,10 @@ public class UploadedFile  implements Identifiable {
     private Timestamp uploadDate;
     private String status;
     private Timestamp expiryDate;
-    
+
     public UploadedFile() {
     }
-    
+
     @Id
     @Column(unique = true, nullable = false, length = 36)
     public String getPguid() {
@@ -120,7 +120,7 @@ public class UploadedFile  implements Identifiable {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     @Column(name = "EXPIRY_DATE", nullable = false)
     public Timestamp getExpiryDate() {
         return expiryDate;
@@ -142,7 +142,7 @@ public class UploadedFile  implements Identifiable {
     public Class getEntityClass() {
         return this.getClass();
     }
-    
+
     /**
      * Copies required data from DTO to Entity
      *
@@ -150,23 +150,22 @@ public class UploadedFile  implements Identifiable {
      * @param isCreate
      */
     public void copyFromDto(UploadedFileDTO uploadedFileDto, boolean isCreate) {
-        
+
         Timestamp timestamp = MailBoxUtil.getTimestamp();
         if (isCreate) {
             this.setPguid(MailBoxUtil.getGUID());
             this.setUploadDate(timestamp);
         } else {
-            this.setPguid(uploadedFileDto.getId());            
+            this.setPguid(uploadedFileDto.getId());
             this.setUploadDate(new Timestamp(uploadedFileDto.getUploadDate().getTime()));
         }
-        
+
         this.setComment(uploadedFileDto.getComment());
         this.setFileName(uploadedFileDto.getFileName());
         this.setFileSize(uploadedFileDto.getFileSize());
         this.setStatus(uploadedFileDto.getStatus());
         this.setTransferProfile(uploadedFileDto.getTransferProfile());
-        Date date = MailBoxUtil.calculateExpires(Integer.parseInt(uploadedFileDto.getTtl()), TTL_UNIT_SECONDS);        
-        this.setExpiryDate(new Timestamp(date.getTime()));
+        this.setExpiryDate(new Timestamp(TimeUnit.SECONDS.toMillis(Integer.parseInt(uploadedFileDto.getTtl()))));
         this.setUserId(uploadedFileDto.getUserId());
-    }    
+    }
 }

@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -55,6 +56,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.w3c.www.http.HTTP;
 
 /**
  * This is the gateway for the Dropbox uploaded files configuration services.
@@ -63,104 +65,102 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @AppConfigurationResource
 @Path("config/dropbox/uploadedFiles")
-@Api(value = "config/dropbox/uploadedFiles", description = "Gateway for the dropbox services.")
+@Api(value = "config/dropbox/uploadedFiles", description = "Gateway for the Conveyor Server upload services.")
 public class DropboxUploadedFileResource extends AuditedResource {
 
-	private static final Logger LOGGER = LogManager.getLogger(DropboxUploadedFileResource.class);
-	
-	/**
-	 * REST method to add uploaded file.
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 *
-	 * @return Response Object
-	 */
-	@POST	
-	@ApiOperation(value = "Added uploaded file", notes = "Add a new upload file entry", position = 1)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Add a new upload file entry")})
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response addUploadedFile(@Context final HttpServletRequest serviceRequest) {
+    private static final Logger LOGGER = LogManager.getLogger(DropboxUploadedFileResource.class);
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+    /**
+     * REST method to add uploaded file.
+     *
+     * @param serviceRequest HttpServletRequest, injected with context annotation
+     *
+     * @return Response Object
+     */
+    @POST
+    @ApiOperation(value = "Added uploaded file", notes = "Add a new upload file entry", position = 1)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Add a new upload file entry")})
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response addUploadedFile(@Context final HttpServletRequest serviceRequest) {
 
-			    LOGGER.debug("Entering into addUploadedFile service.");
-               
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
+
+                LOGGER.debug("Entering into addUploadedFile service.");
+
                 DropboxAuthAndGetManifestResponseDTO responseEntity = null;
                 DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
                 DropboxAuthenticationService authService = new DropboxAuthenticationService();
                 DropboxUploadedFileService uploadedFileService = new DropboxUploadedFileService();
-				String requestString;
-				
-				try {
-				    
-				    // get login id and auth token from mailbox token
+                String requestString;
+
+                try {
+
+                    // get login id and auth token from mailbox token
                     String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
                     String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
                     String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
                     dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
-                    
-					requestString = getRequestBody(serviceRequest);
-					UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
-							UploadedFileDTO.class);
-					
-					// constructing authenticate and get manifest request
+
+                    requestString = getRequestBody(serviceRequest);
+                    UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
+                            UploadedFileDTO.class);
+
+                    // constructing authenticate and get manifest request
                     dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
-                    
+
                     // authentication
                     String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
                     if (encryptedMbxToken == null) {
                         LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-                        return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                        return Response.status(HTTP.UNAUTHORIZED).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
 
                     // getting manifest
                     GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-                        return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                        return Response.status(HTTP.BAD_REQUEST).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
-                    
-					//add uploaded file
+
+                    //add uploaded file
                     serviceRequest.setUserId(loginId);
-					uploadedFileService.addUploadedFile(serviceRequest, true);					
-					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
-					
+                    uploadedFileService.addUploadedFile(serviceRequest, true);
+                    ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
+
                     LOGGER.debug("Exit from addUploadedFile service.");
 
                     return builder.build();
-					
-				} catch (Exception e) {
-					LOGGER.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
-				}
-			}
-		};
-		worker.actionLabel = "DropboxUploadedFileResource.addUploadedFile()";
 
-		// hand the delegate to the framework for calling
-		return process(serviceRequest, worker);
-	}
-	
-	/**
-	 * Method retrieve the list of uploaded files.
-	 * 
-	 * @param serviceRequest
-	 * @param stageFileName
-	 * @param hitCounter
-	 * @param page
-	 * @param pageSize
-	 * @param sortField
-	 * @param sortDirection
-	 * @return Response
-	 */
+                } catch (Exception e) {
+                    throw new LiaisonRuntimeException(e.getMessage(), e);
+                }
+            }
+        };
+        worker.actionLabel = "DropboxUploadedFileResource.addUploadedFile()";
+
+        // hand the delegate to the framework for calling
+        return process(serviceRequest, worker);
+    }
+
+    /**
+     * Method retrieve the list of uploaded files.
+     *
+     * @param serviceRequest
+     * @param uploadedFileName
+     * @param page
+     * @param pageSize
+     * @param sortField
+     * @param sortDirection
+     * @return
+     */
     @GET
     @ApiOperation(value = "get list of uploaded files", notes = "retrieve the list of uploaded files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
-    @ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     public Response getUploadedFiles(
             @Context final HttpServletRequest serviceRequest,
             @QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the uploaded file searched.") final String uploadedFileName,
@@ -197,16 +197,16 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
                     if (encryptedMbxToken == null) {
                         LOGGER.error("Dropbox - user authentication failed");
-								responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-								return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                        responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+                        return Response.status(HTTP.UNAUTHORIZED).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
 
                     // getting manifest
-							GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-                        return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-							}
+                        return Response.status(HTTP.BAD_REQUEST).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                    }
 
                     // construct the generic search filter dto
                     GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -216,43 +216,42 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     searchFilter.setSortDirection(sortDirection);
                     searchFilter.setUploadedFileName(uploadedFileName);
 
-                    GetUploadedFilesResponseDTO getUploadedFilesResponseDTO = uploadedFilesService.getuploadedFiles(
+                    GetUploadedFilesResponseDTO getUploadedFilesResponseDTO = uploadedFilesService.listUploadedFiles(
                             searchFilter, loginId);
                     String responseBody = MailBoxUtil.marshalToJSON(getUploadedFilesResponseDTO);
 
-							ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
+                    ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
 
                     LOGGER.debug("Exit from getUploadedFiles service.");
 
                     return builder.build();
 
-                } catch (IOException | JAXBException e) {
-                    LOGGER.error(e.getMessage(), e);
-                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
                 }
 
             }
 
         };
-        
+
         worker.actionLabel = "DropboxUploadedFileResource.getUploadedFiles()";
-        
+
         // hand the delegate to the framework for calling
         return process(serviceRequest, worker);
     }
-	
-	/**
-     * REST method to delete uploaded file.
+
+    /**
+     * REST API to delete uploaded file form the archive
      *
-     * @param request HttpServletRequest, injected with context annotation
-     *
-     * @return Response Object
+     * @param serviceRequest HttpServletRequest
+     * @param uploadedFileId uploaded file guid
+     * @return successful response if the deletion successful
      */
-	@DELETE
+    @DELETE
     @ApiOperation(value = "delete specific uploaded file", notes = "delete specific uploaded file bu id", position = 2)
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-    public Response deleteUploadedFile(@Context final HttpServletRequest serviceRequest, 
-                    @QueryParam(value = "uploadedFileId") @ApiParam(name = "uploadedFileId", required = true, value = "uploaded file id") final String uploadedFileId) {
+    public Response deleteUploadedFile(@Context final HttpServletRequest serviceRequest,
+                                       @QueryParam(value = "uploadedFileId") @ApiParam(name = "uploadedFileId", required = true, value = "uploaded file id") final String uploadedFileId) {
 
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -280,20 +279,20 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     if (encryptedMbxToken == null) {
                         LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-                        return Response.status(401)
-                                       .header("Content-Type", MediaType.APPLICATION_JSON)
-                                       .entity(responseEntity)
-                                       .build();
+                        return Response.status(HTTP.UNAUTHORIZED)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                                .entity(responseEntity)
+                                .build();
                     }
 
                     // getting manifest
                     GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-                        return Response.status(400)
-                                       .header("Content-Type", MediaType.APPLICATION_JSON)
-                                       .entity(responseEntity)
-                                       .build();
+                        return Response.status(HTTP.BAD_REQUEST)
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                                .entity(responseEntity)
+                                .build();
                     }
 
                     //deleted uploaded file                    
@@ -303,8 +302,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     return builder.build();
 
                 } catch (MailBoxServicesException e) {
-                    LOGGER.error(e.getMessage(), e);
-                    throw new LiaisonRuntimeException(e.getMessage());
+                    throw new LiaisonRuntimeException(e.getMessage(), e);
                 }
             }
         };
@@ -316,12 +314,12 @@ public class DropboxUploadedFileResource extends AuditedResource {
         return process(serviceRequest, worker);
     }
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

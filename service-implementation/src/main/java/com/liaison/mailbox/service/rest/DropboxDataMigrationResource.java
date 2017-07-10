@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -44,6 +45,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.w3c.www.http.HTTP;
 
 /**
  * This is the gateway for the Dropbox Data Migration configuration services.
@@ -55,91 +57,89 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/dropbox/dataMigration", description = "Gateway for the dropbox services.")
 public class DropboxDataMigrationResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxDataMigrationResource.class);
-	
-	/**
-	 * REST method to Data Migration of uploaded files.
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 *
-	 * @return Response Object
-	 */
-	@POST	
-	@ApiOperation(value = "Data Migration of uploaded files", notes = "Data Migration of uploaded files entry", position = 1)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Data Migration of uploaded files entry")})
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response dataMigrationForUploadedFiles(@Context final HttpServletRequest serviceRequest) {
+    private static final Logger LOG = LogManager.getLogger(DropboxDataMigrationResource.class);
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+    /**
+     * REST method to Data Migration of uploaded files and it will be removed in next release
+     *
+     * @param serviceRequest HttpServletRequest
+     *
+     * @return Response Object
+     */
+    @POST
+    @ApiOperation(value = "Data Migration of uploaded files", notes = "Data Migration of uploaded files entry", position = 1)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Data Migration of uploaded files entry")})
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response dataMigrationForUploadedFiles(@Context final HttpServletRequest serviceRequest) {
 
-			    LOG.debug("Entering into dataMigrationForUploadedFiles service.");
-               
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
+
+                LOG.debug("Entering into dataMigrationForUploadedFiles service.");
+
                 DropboxAuthAndGetManifestResponseDTO responseEntity = null;
                 DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
                 DropboxAuthenticationService authService = new DropboxAuthenticationService();
                 DropboxUploadedFileService uploadedFileService = new DropboxUploadedFileService();
-				String requestString;
-				
-				try {
-				    
-				    // get login id and auth token from mailbox token
+                String requestString;
+
+                try {
+
+                    // get login id and auth token from mailbox token
                     String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
                     String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
                     String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
                     dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
-                    
-					requestString = getRequestBody(serviceRequest);
-					DataTableRow[] serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
-					        DataTableRow[].class);
-					
-					// constructing authenticate and get manifest request
+
+                    requestString = getRequestBody(serviceRequest);
+                    DataTableRow[] serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
+                            DataTableRow[].class);
+
+                    // constructing authenticate and get manifest request
                     dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
-                    
+
                     // authentication
                     String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
                     if (encryptedMbxToken == null) {
                         LOG.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-                        return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                        return Response.status(HTTP.UNAUTHORIZED).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
 
                     // getting manifest
                     GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-                        return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                        return Response.status(HTTP.BAD_REQUEST).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
-                    
-					//Migrate uploaded files
-					uploadedFileService.dataMigration(serviceRequest);					
-					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully done the data migration for uploaded files");
-					
+
+                    //Migrate uploaded files
+                    uploadedFileService.dataMigration(serviceRequest);
+                    ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully done the data migration for uploaded files");
+
                     LOG.debug("Exit from dataMigrationForUploadedFiles service.");
-
                     return builder.build();
-					
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
-				}
-			}
-		};
-		worker.actionLabel = "DropboxDataMigrationResource.dataMigrationForUploadedFiles()";
 
-		// hand the delegate to the framework for calling
-		return process(serviceRequest, worker);
-	}
+                } catch (Exception e) {
+                    throw new LiaisonRuntimeException(e.getMessage(), e);
+                }
+            }
+        };
+        worker.actionLabel = "DropboxDataMigrationResource.dataMigrationForUploadedFiles()";
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+        // hand the delegate to the framework for calling
+        return process(serviceRequest, worker);
+    }
+
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

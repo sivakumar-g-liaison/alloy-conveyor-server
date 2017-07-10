@@ -782,26 +782,5 @@ public class MailBoxUtil {
                 .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
     }
-    
-    /**
-     * This method adds the ttl date.
-     *
-     * @param latency
-     * @param unit
-     * @return updated date
-     */
-    public static Date calculateExpires(int latency, String unit) {
 
-        Date date = new Date();
-        switch(unit) {
-
-            case TTL_UNIT_SECONDS       : return DateUtils.addSeconds(date, latency);
-            case TTL_UNIT_MINUTES       : return DateUtils.addMinutes(date, latency);
-            case TTL_UNIT_HOURS         : return DateUtils.addHours(date, latency);
-            case TTL_UNIT_DAYS          : return DateUtils.addDays(date, latency);
-            
-            default: return date;
-        }
-    }
-    
 }

@@ -9,12 +9,12 @@
 
 package com.liaison.mailbox.service.dto.dropbox;
 
-import java.text.ParseException;
-import java.util.Date;
 import com.liaison.mailbox.rtdm.model.UploadedFile;
 
+import java.util.Date;
+
 public class UploadedFileDTO {
-	
+
     private String id;
     private String fileName;
     private Long fileSize;
@@ -81,15 +81,15 @@ public class UploadedFileDTO {
         this.fileSize = fileSize;
     }
 
-	public String getTtl() {
-		return ttl;
-	}
+    public String getTtl() {
+        return ttl;
+    }
 
-	public void setTtl(String ttl) {
-		this.ttl = ttl;
-	}
+    public void setTtl(String ttl) {
+        this.ttl = ttl;
+    }
 
-	public String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
@@ -97,15 +97,15 @@ public class UploadedFileDTO {
         this.userId = userId;
     }
 
-    public void copyFromEntity(UploadedFile uploadedFile) throws ParseException {	    
-	       
+    public void copyFromEntity(UploadedFile uploadedFile) {
+
         this.setComment(uploadedFile.getComment());
         this.setFileName(uploadedFile.getFileName());
         this.setFileSize(uploadedFile.getFileSize());
         this.setStatus(uploadedFile.getStatus());
-        this.setTransferProfile(uploadedFile.getTransferProfile());        
+        this.setTransferProfile(uploadedFile.getTransferProfile());
         this.setUploadDate(new Date(uploadedFile.getUploadDate().getTime()));
         this.setUserId(uploadedFile.getUserId());
         this.setId(uploadedFile.getPguid());
-   }
+    }
 }

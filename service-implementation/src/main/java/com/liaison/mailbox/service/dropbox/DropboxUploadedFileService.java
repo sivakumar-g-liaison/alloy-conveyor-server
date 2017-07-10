@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -10,14 +10,11 @@
 
 package com.liaison.mailbox.service.dropbox;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,148 +42,137 @@ import com.liaison.spectrum.client.model.table.DataTableRow;
 public class DropboxUploadedFileService extends DropboxBaseService {
 
     private static final Logger LOGGER = LogManager.getLogger(DropboxUploadedFileService.class);
-	private static final String UPLOADED_FILES = "uploaded Files";
-    
+    private static final String UPLOADED_FILES = "uploaded Files";
+
     /**
      * Method add Uploaded file details.
-     * 
-     * @param dto
+     *
+     * @param dto uploaded files details
+     * @param isCreate boolean to differentiate creation and migration
      */
     public void addUploadedFile(UploadedFileDTO dto, boolean isCreate) {
-        
+
         LOGGER.debug("Enter into addUploadedFile ()");
-        
+
         try {
-            
+
             UploadedFile uploadedFile = new UploadedFile();
             uploadedFile.copyFromDto(dto, isCreate);
-            
+
             UploadedFileDAO dao = new UploadedFileDAOBase();
-            dao.persist(uploadedFile);          
-            
+            dao.persist(uploadedFile);
             LOGGER.debug("Exit from addUploadedFile ()");
-            
+
         } catch (Exception e) {
-            LOGGER.error(e);            
-            throw new RuntimeException("Failed to add the uploaded file");            
-        }        
+            throw new RuntimeException("Failed to add the uploaded file", e);
+        }
     }
-    
+
     /**
-     * Method get Uploaded file details.
-     * 
-     * @param dto
-     * @throws ParseException 
+     * lists uploaded files history
+     *
+     * @param searchFilter search filters
+     * @param loginId user id
+     * @return uploaded files
      */
-	public GetUploadedFilesResponseDTO getuploadedFiles(GenericSearchFilterDTO searchFilter, String loginId)
-			throws IOException, JAXBException, ParseException {
-		
-		LOGGER.debug("Entering into get uploaded files service.");
-		
-		GetUploadedFilesResponseDTO serviceResponse = new GetUploadedFilesResponseDTO();
-		
-		int totalCount = 0;
-		Map<String, Integer> pageOffsetDetails = null;
-		List<UploadedFileDTO> uploadedFileDTOs = new ArrayList<UploadedFileDTO>();
-		
-		UploadedFileDAO uploadedFileDAO = new UploadedFileDAOBase();
-		
+    public GetUploadedFilesResponseDTO listUploadedFiles(GenericSearchFilterDTO searchFilter, String loginId) {
+
+        LOGGER.debug("Entering into get uploaded files service.");
+        GetUploadedFilesResponseDTO serviceResponse = new GetUploadedFilesResponseDTO();
+
+        int totalCount = 0;
+        Map<String, Integer> pageOffsetDetails = null;
+        List<UploadedFileDTO> uploadedFileDTOs = new ArrayList<>();
+
         if (MailBoxUtil.isEmpty(loginId)) {
             throw new RuntimeException("Failed to get upload history: loginId null or empty");
         }
-				
-		totalCount = uploadedFileDAO.getUploadedFilesCountByUserId(loginId, searchFilter.getUploadedFileName());
-		
+
+        UploadedFileDAO uploadedFileDAO = new UploadedFileDAOBase();
+        totalCount = uploadedFileDAO.getUploadedFilesCountByUserId(loginId, searchFilter.getUploadedFileName());
+
         pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(
                 searchFilter.getPage(),
                 searchFilter.getPageSize(),
                 totalCount);
-        
+
         //Invalid Page validation
         if (pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT) <= 0
                 && !MailBoxUtil.isEmpty(searchFilter.getPage())
                 && pageOffsetDetails.get(MailBoxConstants.PAGE_VALUE) != 1) {
             throw new MailBoxServicesException("Invalid Page Number", Response.Status.BAD_REQUEST);
         }
-        
+
         serviceResponse.setTotalItems(totalCount);
-        
-        List<UploadedFile> uploadedFiles = uploadedFileDAO.findUploadedFiles(loginId, searchFilter, pageOffsetDetails);
-        
+
+        List<UploadedFile> uploadedFiles = uploadedFileDAO.fetchUploadedFiles(loginId, searchFilter, pageOffsetDetails);
+
         UploadedFileDTO uploadedFileDTO;
         for (UploadedFile uploadedFile : uploadedFiles) {
-        	
-        	uploadedFileDTO = new UploadedFileDTO();
-        	uploadedFileDTO.copyFromEntity(uploadedFile);
-        	uploadedFileDTOs.add(uploadedFileDTO);
-        }
-        
-        serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, UPLOADED_FILES, Messages.SUCCESS));
-        serviceResponse.setUploadedFile(uploadedFileDTOs);
-        
-		LOGGER.debug("Exit from get uploaded files service.");
 
-		return serviceResponse;
-		
-	}
-    
+            uploadedFileDTO = new UploadedFileDTO();
+            uploadedFileDTO.copyFromEntity(uploadedFile);
+            uploadedFileDTOs.add(uploadedFileDTO);
+        }
+
+        serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, UPLOADED_FILES, Messages.SUCCESS));
+        serviceResponse.setUploadedFiles(uploadedFileDTOs);
+
+        LOGGER.debug("Exit from get uploaded files service.");
+        return serviceResponse;
+
+    }
+
     /**
-     * Method delete Uploaded file.
-     * 
-     * @param dto
+     * Hard delete the uploaded file from the history
+     *
+     * @param guid uploaded file guid
      */
     public void deleteUploadedFile(String guid) {
-        
+
         LOGGER.debug("Enter into deleteUploadedFile ()");
-        
+
         try {
-            
+
             UploadedFileDAO dao = new UploadedFileDAOBase();
-            
             UploadedFile uploadedFile = dao.find(UploadedFile.class, guid);
-            
-            if (uploadedFile == null) {
-                throw new MailBoxConfigurationServicesException(Messages.UPLOADED_FILE_DOES_NOT_EXIST, guid,
-                        Response.Status.BAD_REQUEST);
-            }           
-            
+            if (null == uploadedFile) {
+                throw new MailBoxConfigurationServicesException(Messages.UPLOADED_FILE_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
+            }
+
             dao.remove(uploadedFile);
-            
             LOGGER.debug("Exit from deleteUploadedFile ()");
-            
+
         } catch (Exception e) {
-            LOGGER.error(e);            
-            throw new RuntimeException("Failed to delete the uploaded file");            
-        }        
+            LOGGER.error(e);
+            throw new RuntimeException("Failed to delete the uploaded file");
+        }
     }
-    
+
     /**
      * Data Migration for Uploaded files.
-     * 
+     *
      * @param tableRows
      */
     public void dataMigration(DataTableRow[] tableRows) {
-        
-        LOGGER.debug("Enter into dataMigration ()");
-        
+
+        LOGGER.info("Enter into dataMigration");
         UploadedFileDTO fileDTO;
         try {
-            
+
             for (DataTableRow row : tableRows) {
-                
+
                 fileDTO = new Gson().fromJson(new Gson().toJson(row.getColumns()), UploadedFileDTO.class);
                 fileDTO.setTtl(String.valueOf(row.getTtl()));
-                addUploadedFile(fileDTO, false);                
+                addUploadedFile(fileDTO, false);
             }
-            
+
             LOGGER.info("Data Migration has done for upload files successfully");
-            
         } catch (Exception e) {
-            LOGGER.error(e);            
-            throw new RuntimeException("Failed data migration for uploaded files");            
-        }  
-        
-        LOGGER.debug("Exit from dataMigration ()");        
+            throw new RuntimeException("Failed data migration for uploaded files", e);
+        }
+
+        LOGGER.debug("Exit from dataMigration ()");
     }
 
 }
