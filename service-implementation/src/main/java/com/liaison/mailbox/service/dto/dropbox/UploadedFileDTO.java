@@ -6,10 +6,11 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
+
 package com.liaison.mailbox.service.dto.dropbox;
 
+import java.text.ParseException;
 import java.util.Date;
-
 import com.liaison.mailbox.rtdm.model.UploadedFile;
 
 public class UploadedFileDTO {
@@ -22,6 +23,7 @@ public class UploadedFileDTO {
     private Date uploadDate;
     private String status;
     private String ttl;
+    private String userId;
 
     public String getId() {
         return id;
@@ -87,10 +89,23 @@ public class UploadedFileDTO {
 		this.ttl = ttl;
 	}
 
-	public void copyFromEntity(UploadedFile uploadedFile) {
-		this.setFileName(uploadedFile.getFileName().toString());
-		this.setId(uploadedFile.getUserId().toString());
-		
-		
-	}
+	public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void copyFromEntity(UploadedFile uploadedFile) throws ParseException {	    
+	       
+        this.setComment(uploadedFile.getComment());
+        this.setFileName(uploadedFile.getFileName());
+        this.setFileSize(uploadedFile.getFileSize());
+        this.setStatus(uploadedFile.getStatus());
+        this.setTransferProfile(uploadedFile.getTransferProfile());        
+        this.setUploadDate(new Date(uploadedFile.getUploadDate().getTime()));
+        this.setUserId(uploadedFile.getUserId());
+        this.setId(uploadedFile.getPguid());
+   }
 }

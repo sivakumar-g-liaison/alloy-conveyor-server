@@ -26,7 +26,8 @@ public interface UploadedFileDAO extends GenericDAO<UploadedFile> {
 	String TTL = "ttl";
 	String USER_ID = "userid";
 	String CURRENT_TIME = "current_time";
+	String FILE_NAME = "fileName";
 	
-	int getUploadedFilesCountByUserId(String loginId, String fileName, String status);
+	int getUploadedFilesCountByUserId(String loginId, String fileName);
 	List<UploadedFile> findUploadedFiles(String loginId, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 }

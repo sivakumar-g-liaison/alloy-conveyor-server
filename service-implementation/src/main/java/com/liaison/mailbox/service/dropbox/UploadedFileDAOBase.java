@@ -25,6 +25,7 @@ import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.UploadedFileDAO;
 import com.liaison.mailbox.rtdm.model.UploadedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * This will fetch the uploaded file details. 
@@ -37,8 +38,7 @@ public class UploadedFileDAOBase extends GenericDAOBase<UploadedFile> implements
     }
 
 	@Override
-	public int getUploadedFilesCountByUserId(String loginId, String fileName,
-			String status) {
+	public int getUploadedFilesCountByUserId(String loginId, String fileName) {
 		
         EntityManager entityManager = null;
         Long totalItems;
@@ -49,14 +49,24 @@ public class UploadedFileDAOBase extends GenericDAOBase<UploadedFile> implements
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
             StringBuilder query = new StringBuilder().append("select count(uf.fileName) from UploadedFile uf")
-            		.append(" WHERE uf.userId =:")
+            		.append(" WHERE uf.userId = :")
             		.append(USER_ID)
-            		.append(" and uf.ttl >:")
+            		.append(" and uf.expiryDate > :")
                     .append(CURRENT_TIME);
             
-            Query uploadedFileCountQuery = entityManager.createQuery(query.toString());
+            boolean nameIsEmpty = MailBoxUtil.isEmpty(fileName) ? true : false;
+            if (!nameIsEmpty) {
+                query.append(" and LOWER(uf.fileName) like :")
+                .append(FILE_NAME);
+            }           
+            
+            Query uploadedFileCountQuery = entityManager.createQuery(query.toString());            
+            
             uploadedFileCountQuery.setParameter(USER_ID, loginId);
             uploadedFileCountQuery.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+            if (!nameIsEmpty) {
+               uploadedFileCountQuery.setParameter(FILE_NAME, fileName.toLowerCase() + "%");
+            }
 
             totalItems = (Long) uploadedFileCountQuery.getSingleResult();
             count = totalItems.intValue();
@@ -80,18 +90,38 @@ public class UploadedFileDAOBase extends GenericDAOBase<UploadedFile> implements
 		try{
 			
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+			// get Search Filters
+            String sortDirection = searchFilter.getSortDirection();
             int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
             int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-
+            String fileName =  searchFilter.getUploadedFileName();
+            
             StringBuilder queryString = new StringBuilder().append("select uf from UploadedFile uf")
             		.append(" WHERE  uf.userId =:")
             		.append(USER_ID)
-            		.append(" and uf.ttl > :")
+            		.append(" and uf.expiryDate > :")
                     .append(CURRENT_TIME);
-            		
+            
+            boolean nameIsEmpty = MailBoxUtil.isEmpty(fileName) ? true : false;
+            if (!nameIsEmpty) {
+                queryString.append(" and LOWER(uf.fileName) like :")
+                .append(FILE_NAME);
+            }
+            
+            if (!MailBoxUtil.isEmpty(sortDirection)) {
+                sortDirection = sortDirection.toUpperCase();
+                queryString.append(" order by uf.fileName ").append(sortDirection);
+            } else {
+                queryString.append(" order by uf.fileName");
+            }
+            
             Query query = entityManager.createQuery(queryString.toString());
             query.setParameter(USER_ID, loginId);
             query.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+            if (!nameIsEmpty) {
+                query.setParameter(FILE_NAME, fileName.toLowerCase() + "%");
+            }
+            
             query.setFirstResult(pagingOffset);
             query.setMaxResults(pagingCount);
             

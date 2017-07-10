@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +76,10 @@ public class DropboxUploadedFileService extends DropboxBaseService {
      * Method get Uploaded file details.
      * 
      * @param dto
+     * @throws ParseException 
      */
 	public GetUploadedFilesResponseDTO getuploadedFiles(GenericSearchFilterDTO searchFilter, String loginId)
-			throws IOException, JAXBException {
+			throws IOException, JAXBException, ParseException {
 		
 		LOGGER.debug("Entering into get uploaded files service.");
 		
@@ -89,13 +91,11 @@ public class DropboxUploadedFileService extends DropboxBaseService {
 		
 		UploadedFileDAO uploadedFileDAO = new UploadedFileDAOBase();
 		
-        if (loginId == null || loginId.isEmpty()) {
+        if (MailBoxUtil.isEmpty(loginId)) {
             throw new RuntimeException("Failed to get upload history: loginId null or empty");
         }
 				
-		totalCount = uploadedFileDAO.getUploadedFilesCountByUserId(loginId,
-                searchFilter.getUploadedFileName(),
-                searchFilter.getStatus());
+		totalCount = uploadedFileDAO.getUploadedFilesCountByUserId(loginId, searchFilter.getUploadedFileName());
 		
         pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(
                 searchFilter.getPage(),
@@ -124,7 +124,7 @@ public class DropboxUploadedFileService extends DropboxBaseService {
         serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, UPLOADED_FILES, Messages.SUCCESS));
         serviceResponse.setUploadedFile(uploadedFileDTOs);
         
-		LOGGER.debug("Exit from get  uploaded files service.");
+		LOGGER.debug("Exit from get uploaded files service.");
 
 		return serviceResponse;
 		

@@ -43,13 +43,13 @@ public class UploadedFile  implements Identifiable {
     private String transferProfile;
     private Timestamp uploadDate;
     private String status;
-    private Timestamp ttl;
+    private Timestamp expiryDate;
     
     public UploadedFile() {
     }
     
     @Id
-    @Column(unique = true, nullable = false, length = 32)
+    @Column(unique = true, nullable = false, length = 36)
     public String getPguid() {
         return pguid;
     }
@@ -121,13 +121,13 @@ public class UploadedFile  implements Identifiable {
         this.status = status;
     }
     
-    @Column(name = "TTL", nullable = false)
-    public Timestamp getTtl() {
-        return ttl;
+    @Column(name = "EXPIRY_DATE", nullable = false)
+    public Timestamp getExpiryDate() {
+        return expiryDate;
     }
 
-    public void setTtl(Timestamp ttl) {
-        this.ttl = ttl;
+    public void setExpiryDate(Timestamp expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     @Override
@@ -156,7 +156,7 @@ public class UploadedFile  implements Identifiable {
             this.setPguid(MailBoxUtil.getGUID());
             this.setUploadDate(timestamp);
         } else {
-            this.setPguid(MailBoxUtil.getGUID());            
+            this.setPguid(uploadedFileDto.getId());            
             this.setUploadDate(new Timestamp(uploadedFileDto.getUploadDate().getTime()));
         }
         
@@ -166,7 +166,7 @@ public class UploadedFile  implements Identifiable {
         this.setStatus(uploadedFileDto.getStatus());
         this.setTransferProfile(uploadedFileDto.getTransferProfile());
         Date date = MailBoxUtil.calculateExpires(Integer.parseInt(uploadedFileDto.getTtl()), TTL_UNIT_SECONDS);        
-        this.setTtl(new Timestamp(date.getTime()));
-        this.setUserId(uploadedFileDto.getId());
+        this.setExpiryDate(new Timestamp(date.getTime()));
+        this.setUserId(uploadedFileDto.getUserId());
     }    
 }
