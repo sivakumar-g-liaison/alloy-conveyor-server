@@ -154,7 +154,7 @@ public class DropboxUploadedFileService extends DropboxBaseService {
      *
      * @param tableRows
      */
-    public void dataMigration(DataTableRow[] tableRows) {
+    public void migrateUploadedHistory(DataTableRow[] tableRows) {
 
         LOGGER.info("Enter into dataMigration");
         UploadedFileDTO fileDTO;

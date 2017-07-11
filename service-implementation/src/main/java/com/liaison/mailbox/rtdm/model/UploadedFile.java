@@ -12,7 +12,6 @@ package com.liaison.mailbox.rtdm.model;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,7 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
+import org.apache.commons.lang.time.DateUtils;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.service.dto.dropbox.UploadedFileDTO;
@@ -165,7 +164,7 @@ public class UploadedFile implements Identifiable {
         this.setFileSize(uploadedFileDto.getFileSize());
         this.setStatus(uploadedFileDto.getStatus());
         this.setTransferProfile(uploadedFileDto.getTransferProfile());
-        this.setExpiryDate(new Timestamp(TimeUnit.SECONDS.toMillis(Integer.parseInt(uploadedFileDto.getTtl()))));
+        this.setExpiryDate(new Timestamp(DateUtils.addSeconds(new Date(), Integer.parseInt(uploadedFileDto.getTtl())).getTime()));
         this.setUserId(uploadedFileDto.getUserId());
     }
 }
