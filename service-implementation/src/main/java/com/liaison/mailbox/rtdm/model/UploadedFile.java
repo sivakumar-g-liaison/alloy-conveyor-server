@@ -167,4 +167,19 @@ public class UploadedFile implements Identifiable {
         this.setExpiryDate(new Timestamp(DateUtils.addSeconds(new Date(), Integer.parseInt(uploadedFileDto.getTtl())).getTime()));
         this.setUserId(uploadedFileDto.getUserId());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UploadedFile that = (UploadedFile) o;
+
+        return pguid.equals(that.pguid);
+    }
+
+    @Override
+    public int hashCode() {
+        return pguid.hashCode();
+    }
 }

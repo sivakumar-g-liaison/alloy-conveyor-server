@@ -60,7 +60,12 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             uploadedFile.copyFromDto(dto, isCreate);
 
             UploadedFileDAO dao = new UploadedFileDAOBase();
-            dao.persist(uploadedFile);
+            if (isCreate) {
+                dao.persist(uploadedFile);
+            } else {
+                //only for migration stuff
+                dao.merge(uploadedFile);
+            }
             LOGGER.debug("Exit from addUploadedFile ()");
 
         } catch (Exception e) {
