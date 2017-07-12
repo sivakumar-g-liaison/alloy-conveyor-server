@@ -384,7 +384,7 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
         Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", "null"));
     }
     
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testUploadFile() throws Exception {
     	
         //authenticate user account
@@ -434,8 +434,55 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
         request.execute();
         jsonResponse = getOutput().toString();
         logger.info(jsonResponse);
-        Assert.assertEquals(SUCCESS, getUploadedFilesResponseDTO.getResponse().getStatus());
-    	
+        Assert.assertEquals(SUCCESS, getUploadedFilesResponseDTO.getResponse().getStatus());    	
+    }
+    
+    @Test(enabled = false)
+    public void testDeleteUploadFile_InvalidId() throws Exception {
+        
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+        
+        //delete uploaded file with null pguid
+        String deleteUploadFileURLWithNULLPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + null;
+        request = constructHTTPRequest(deleteUploadFileURLWithNULLPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");
+        
+        //delete uploaded file with empty pguid
+        String deleteUploadFileURLWithEmptyPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + "";
+        request = constructHTTPRequest(deleteUploadFileURLWithEmptyPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");
+        
+        //delete uploaded file with invalid pguid
+        String deleteUploadFileURLWithInvalidPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + "123456";
+        request = constructHTTPRequest(deleteUploadFileURLWithInvalidPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");        
     }
 
     private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
