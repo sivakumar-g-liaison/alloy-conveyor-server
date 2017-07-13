@@ -733,7 +733,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             predicateList.add(" LOWER(processor.pguid) = :" + PGUID);
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
-            predicateList.add(" LOWER(processor.javaScriptUri) = :" + SCRIPT_NAME);
+            if (GenericSearchFilterDTO.MATCH_MODE_LIKE.equals(searchDTO.getMatchMode())) {
+                predicateList.add(" LOWER(processor.javaScriptUri) " + searchDTO.getMatchMode() + " :" + SCRIPT_NAME);
+            } else {
+                predicateList.add(" processor.javaScriptUri " + searchDTO.getMatchMode() + " :" + SCRIPT_NAME);
+            }
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
             predicateList.add("processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE);
@@ -785,7 +789,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             query.setParameter(PGUID, searchDTO.getProcessorGuid().toLowerCase());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getScriptName())) {
-            query.setParameter(SCRIPT_NAME, searchDTO.getScriptName().toLowerCase());
+            query.setParameter(SCRIPT_NAME, (GenericSearchFilterDTO.MATCH_MODE_LIKE.equals(searchDTO.getMatchMode())) ?
+                    "%" + searchDTO.getScriptName().toLowerCase() + "%" :
+                    searchDTO.getScriptName());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
             query.setParameter(MailBoxConstants.CLUSTER_TYPE, searchDTO.getClusterType());
