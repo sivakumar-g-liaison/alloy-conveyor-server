@@ -136,6 +136,232 @@ public class DirectorySweeperTest extends BaseServiceTest {
             Files.delete(target);
         }
 	}
+    
+    /**
+     * Method to test with valid wild card for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithValidWildCar() throws Exception {
+        
+        String includeFiles = "file*.js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", null);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+
+    /**
+     * Method to test with invalid wild card for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithInValidWildCard() throws Exception {
+        
+        String includeFiles = "sfile*.js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", null);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid extension for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithValidExtension() throws Exception {
+        
+        String includeFiles = "js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", null);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with invalid extension for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithInValidExtension() throws Exception {
+        
+        String includeFiles = "jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", null);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid extension(.ext) for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithValidDotExtension() throws Exception {
+        
+        String includeFiles = ".js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", includeFiles);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with invalid extension for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeWithInValidDotExtension() throws Exception {
+        
+        String includeFiles = ".jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", includeFiles);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid wild card for file exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithValidWildCard() throws Exception {
+        
+        String excludeFiles = "*js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with invalid wild card for file exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithInValidWildCard() throws Exception {
+        
+        String excludeFiles = "*css";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid extension for file exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithValidExtension() throws Exception {
+        
+        String excludeFiles = "js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with invalid extension for file  exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithInValidExtension() throws Exception {
+        
+        String excludeFiles = "jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid extension(.ext) for file  exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithValidDotExtension() throws Exception {
+        
+        String excludeFiles = ".js";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with invalid extension for file exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileExcludeWithInValidDotExtension() throws Exception {
+        
+        String excludeFiles = ".jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(null, "filename12345_ctm.js", excludeFiles);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid wild card for file inclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeOrExcludeWithValidIncludeFile() throws Exception {
+        
+        String includeFiles = "file*.js";
+        String excludeFiles = ".jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.js", excludeFiles);
+        Assert.assertTrue(isFileIncludedOrExcluded);
+    }
+    
+    /**
+     * Method to test with valid extension for file exclusion
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCheckFileIncludeOrExcludeWithInValidIncludeFile() throws Exception {
+        
+        String includeFiles = "sfile*.js";
+        String excludeFiles = ".jsp";
+        
+        Processor processor = new Sweeper();
+        DirectorySweeper sweeper = new DirectorySweeper(processor);
+        boolean isFileIncludedOrExcluded = sweeper.checkFileIncludeOrExclude(includeFiles, "filename12345_ctm.jsp", excludeFiles);
+        Assert.assertFalse(isFileIncludedOrExcluded);
+    }
 
     private List<WorkTicket> sweep() throws Exception {
 
