@@ -66,7 +66,7 @@ public class StorageUtilitiesIT {
         try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
             logger.info("The received payload is \"{}\"", new String(StreamUtil.streamToBytes(is)));
         }
-        Assert.assertTrue((!metaSnapshot.getURI().toString().contains("boss")));
+        Assert.assertTrue((metaSnapshot.getURI().toString().contains("boss")));
 
     }
 
@@ -92,7 +92,7 @@ public class StorageUtilitiesIT {
         try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
             logger.info("The received payload is \"{}\"", new String(StreamUtil.streamToBytes(is)));
         }
-        Assert.assertTrue(!metaSnapshot.getURI().toString().contains("boss"));
+        Assert.assertTrue(metaSnapshot.getURI().toString().contains("boss"));
 
     }
 

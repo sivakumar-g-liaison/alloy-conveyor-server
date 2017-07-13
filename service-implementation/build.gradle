@@ -231,7 +231,7 @@ dependencies {
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
 
 	//Dependency for Encryption
-	compile "com.liaison.commons.lib:crypto:4.2.1"
+	compile "com.liaison.commons.lib:crypto:5.+"
 	
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"

@@ -1,6 +1,9 @@
 4.16.1-SNAPSHOT
 ---------------
 * GGT-1356: Remove Spectrum settings from Archaius *.properties files 
+* GMB-952  - Upgrade Jsch library
+* GMB-1025 - SFTP Client doesn't support newer algorithms
+* GMB-1017 - Null pointer exception when fetching organization detail
 
 4.16.0-SNAPSHOT
 ---------------
