@@ -60,7 +60,6 @@ public class StorageUtilitiesIT {
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(true));
         properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, "12345678");
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, "SPECTRUM");
 
         FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
         System.out.println(metaSnapshot.getURI().toString());
@@ -87,8 +86,6 @@ public class StorageUtilitiesIT {
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(true));
         properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, "12345678");
-        //ENABLED THIS TO BOSS ENVIRONMENT ONCE DEV IS AVAILABLE
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, "SPECTRUM");
 
         FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
         System.out.println(metaSnapshot.getURI().toString());
