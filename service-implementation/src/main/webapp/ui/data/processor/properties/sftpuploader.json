@@ -122,7 +122,7 @@
             "dynamic":false,
             "valueProvided":false,
             "validationRules":{
-               "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+               "pattern":"\/^(([.]+[a-zA-Z*]+)?([a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+)?([a-zA-Z*]+))*$\/",
                "minLength":"",
                "maxLength":""
             }
@@ -137,7 +137,7 @@
             "dynamic":false,
             "valueProvided":false,
             "validationRules":{
-               "pattern":"\/\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/\/",
+               "pattern":"\/^(([.]+[a-zA-Z*]+)?([a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+)?([a-zA-Z*]+))*$\/",
                "minLength":"",
                "maxLength":""
             }

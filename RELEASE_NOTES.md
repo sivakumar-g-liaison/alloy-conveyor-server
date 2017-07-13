@@ -9,6 +9,11 @@
 * GMB-999 - Unable to update staged files
 * GMB-1000 - Add cluster type in the staged files grid
 
+4.15.3
+---------------
+* GMB-1022 - Property ExcludedFiles and IncludeFiles to support wild carding
+* GMB-1024 - Upgrade to FS2 library version 8.+
+
 4.15.2
 ---------------
 * GMB-991 - Add provision to filter entities by cluster type	
