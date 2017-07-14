@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,6 +64,7 @@ public class DropboxMigrateResource extends AuditedResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "migrate uploaded files entry")})
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @AccessDescriptor(skipFilter = true)
     public Response migrateUploadedHistory(@Context final HttpServletRequest serviceRequest) {
 
         // create the worker delegate to perform the business logic
