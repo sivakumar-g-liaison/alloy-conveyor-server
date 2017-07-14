@@ -1,6 +1,7 @@
 4.16.1-SNAPSHOT
 ---------------
-* GGT-1356: Remove Spectrum settings from Archaius *.properties files 
+* GGT-1356: Remove Spectrum settings from Archaius *.properties files
+* GWUD-144 - Move file state persistence from spectrum tables to oracle tables
 
 4.16.0-SNAPSHOT
 ---------------
