@@ -231,12 +231,4 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      */
     public void logToLens(String msg, RelayFile file, ExecutionState status);
 
-    /**
-     * Create directories in the remote server if it is not available
-     *
-     * @param client sftp/ftps client
-     * @param remotePath remote path
-     */
-    public void createDirectoriesInRemote(Object client, String remotePath);
-    
 }
