@@ -40,3 +40,40 @@ GRANT INSERT ON GATEWAY_OWNR.UPLOADED_FILE TO GATEWAY_APPL_ROLE;
 GRANT SELECT ON GATEWAY_OWNR.UPLOADED_FILE TO GATEWAY_APPL_ROLE;
 GRANT UPDATE ON GATEWAY_OWNR.UPLOADED_FILE TO GATEWAY_APPL_ROLE;
 GRANT DELETE ON GATEWAY_OWNR.UPLOADED_FILE TO GATEWAY_APPL_ROLE;
+
+/**
+ * INDEX for mostly used non unique columns
+ */
+DECLARE
+  i INTEGER;
+BEGIN
+  SELECT COUNT(*)
+  INTO i
+  FROM user_indexes
+  WHERE index_name = 'IX01_UPLOADED_FILE' AND table_owner = 'GATEWAY_OWNR' AND table_name = 'UPLOADED_FILE';
+  IF i = 0
+  THEN
+    EXECUTE IMMEDIATE 'CREATE INDEX GATEWAY_OWNR.UPLOADED_FILE ON GATEWAY_OWNR.UPLOADED_FILE
+              (
+                FILE_NAME
+              )
+                LOGGING
+                TABLESPACE GATEWAY_TRNX
+                PCTFREE    10
+                INITRANS   2
+                MAXTRANS   255
+                STORAGE    (
+                          INITIAL          64K
+                          NEXT             1M
+                          MAXSIZE          UNLIMITED
+                          MINEXTENTS       1
+                          MAXEXTENTS       UNLIMITED
+                          PCTINCREASE      0
+                          BUFFER_POOL      DEFAULT
+                          FLASH_CACHE      DEFAULT
+                          CELL_FLASH_CACHE DEFAULT
+                         )
+              NOPARALLEL';
+  END IF;
+END;
+/

@@ -44,7 +44,7 @@ public class DropboxBaseService {
      */
     protected List<String> validateAndGetMailboxes(String aclManifest) throws IOException {
 
-        LOGGER.info("Retrieving tenancy keys from acl-manifest");
+        LOGGER.debug("Retrieving tenancy keys from acl-manifest");
         // retrieve the tenancy key from acl manifest
         List<String> tenancyKeys = TenancyKeyUtil.getTenancyKeyGuids(aclManifest);
         if (tenancyKeys.isEmpty()) {
@@ -78,7 +78,7 @@ public class DropboxBaseService {
 
         List<String> emailAddressList = mailbox.getEmailAddress();
         if (null == emailAddressList || emailAddressList.isEmpty()) {
-            LOGGER.info("Email address is not configured in the mailbox");
+            LOGGER.info("Email address is not configured in the mailbox - {}", mailbox.getMbxName());
             return;
         }
 

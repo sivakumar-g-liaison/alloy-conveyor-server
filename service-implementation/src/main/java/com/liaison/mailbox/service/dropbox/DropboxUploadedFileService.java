@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,7 +70,7 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             LOGGER.debug("Exit from addUploadedFile ()");
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to add the uploaded file", e);
+            throw new RuntimeException("Failed to add the uploaded file - " + dto.getFileName(), e);
         }
     }
 
@@ -149,8 +150,7 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             LOGGER.debug("Exit from deleteUploadedFile ()");
 
         } catch (Exception e) {
-            LOGGER.error(e);
-            throw new RuntimeException("Failed to delete the uploaded file");
+            throw new RuntimeException("Failed to delete the uploaded file", e);
         }
     }
 
