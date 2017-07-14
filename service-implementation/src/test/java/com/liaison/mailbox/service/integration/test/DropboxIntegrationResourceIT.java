@@ -10,10 +10,9 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,14 +21,11 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
@@ -52,10 +48,12 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.dto.dropbox.UploadedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.GetUploadedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -385,6 +383,107 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
         logger.info(jsonResponse);
         Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", "null"));
     }
+    
+    @Test(enabled = false)
+    public void testUploadFile() throws Exception {
+    	
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+
+       //upload payload
+        UploadedFileDTO uploadedFileDTO = constructUploadedPayloadReq();
+        jsonRequest = JAXBUtility.marshalToJSON(uploadedFileDTO);
+        String uploadPayloadURL = getBASE_URL_DROPBOX() + "/uploadedFiles";
+        request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, jsonRequest, logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Successfully added uploaded file");
+        
+        //getUploaded files
+        String getUploadFileURL = getBASE_URL_DROPBOX() + "/uploadedFiles?sortDirection=asc&&sortField=fileName&&fileName=" + uploadedFileDTO.getFileName();
+        request = constructHTTPRequest(getUploadFileURL, HTTP_METHOD.GET, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        
+        GetUploadedFilesResponseDTO getUploadedFilesResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetUploadedFilesResponseDTO.class);
+        String pguid = getUploadedFilesResponseDTO.getUploadedFiles().get(0).getId();
+        Assert.assertEquals(SUCCESS, getUploadedFilesResponseDTO.getResponse().getStatus());
+        
+        //delete uploaded file
+        String deleteUploadFileURL = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + pguid;
+        request = constructHTTPRequest(deleteUploadFileURL, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(SUCCESS, getUploadedFilesResponseDTO.getResponse().getStatus());    	
+    }
+    
+    @Test(enabled = false)
+    public void testDeleteUploadFile_InvalidId() throws Exception {
+        
+        //authenticate user account
+        DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+        jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+        String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+        request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+        HTTPResponse authResponse = request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+        Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+        
+        //delete uploaded file with null pguid
+        String deleteUploadFileURLWithNULLPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + null;
+        request = constructHTTPRequest(deleteUploadFileURLWithNULLPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");
+        
+        //delete uploaded file with empty pguid
+        String deleteUploadFileURLWithEmptyPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + "";
+        request = constructHTTPRequest(deleteUploadFileURLWithEmptyPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");
+        
+        //delete uploaded file with invalid pguid
+        String deleteUploadFileURLWithInvalidPguid = getBASE_URL_DROPBOX() + "/uploadedFiles?uploadedFileId=" + "123456";
+        request = constructHTTPRequest(deleteUploadFileURLWithInvalidPguid, HTTP_METHOD.DELETE, "", logger);
+        request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+        request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+        request.addHeader(MailBoxConstants.DROPBOX_LOGIN_ID, authResponse.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID));
+        request.execute();
+        jsonResponse = getOutput().toString();
+        logger.info(jsonResponse);
+        Assert.assertEquals(jsonResponse, "Failed to delete the uploaded file");        
+    }
 
     private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
                                        String processorType, String processorDescription, boolean isRevise, String protocolType, String profileName, String mailboxPguid) throws Exception {
@@ -458,6 +557,21 @@ public class DropboxIntegrationResourceIT extends BaseServiceTest {
 
         return req;
     }
+    
+    private UploadedFileDTO constructUploadedPayloadReq() {
+    	
+    	UploadedFileDTO uploadFile = new UploadedFileDTO(); 
+    	uploadFile.setUserId(USER_ID);
+    	uploadFile.setFileName("dummyFile"+ System.currentTimeMillis());
+    	uploadFile.setComment("dummyComment");
+    	uploadFile.setFileSize(100l);
+    	uploadFile.setTtl("3600");
+    	uploadFile.setUploadDate(new Date());
+    	uploadFile.setTransferProfile("dummyProfile");
+    	uploadFile.setStatus("uploaded");
+    	
+		return uploadFile;
+	}
 
     private DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest() {
         DropboxAuthAndGetManifestRequestDTO dto = new DropboxAuthAndGetManifestRequestDTO();

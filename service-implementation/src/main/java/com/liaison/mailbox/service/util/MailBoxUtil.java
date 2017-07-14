@@ -27,6 +27,8 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
+
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -66,6 +68,10 @@ import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
 import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
+import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
+import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_MINUTES;
+import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_HOURS;
+import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_DAYS;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
@@ -776,5 +782,5 @@ public class MailBoxUtil {
                 .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
     }
-    
+
 }

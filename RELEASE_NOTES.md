@@ -5,6 +5,7 @@
 * GMB-1025 - SFTP Client doesn't support newer algorithms
 * GMB-1017 - Null pointer exception when fetching organization detail
 
+
 4.16.0-SNAPSHOT
 ---------------
 * GMB-994 - Sweeper is not interrupted while sweeping empty files

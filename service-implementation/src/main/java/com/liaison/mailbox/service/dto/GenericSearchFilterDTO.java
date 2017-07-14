@@ -30,6 +30,7 @@ public class GenericSearchFilterDTO {
 	private String sortField;
 	private String sortDirection;
 	private String stagedFileName;
+	private String uploadedFileName;
 	private String status;
 	private String pipelineId;
 	private String folderPath;
@@ -113,6 +114,14 @@ public class GenericSearchFilterDTO {
 
     public void setStagedFileName(String stagedFileName) {
         this.stagedFileName = stagedFileName;
+    }
+    
+    public String getUploadedFileName() {
+        return uploadedFileName;
+    }
+
+    public void setUploadedFileName(String uploadedFileName) {
+        this.uploadedFileName = uploadedFileName;
     }
 
     public String getStatus() {
