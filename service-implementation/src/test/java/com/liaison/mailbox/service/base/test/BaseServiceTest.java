@@ -69,12 +69,12 @@ public abstract class BaseServiceTest {
     public static final String ACTIVE = "ACTIVE";
     public static final String INACTIVE = "INACTIVE";
 
-    public static final String PIPELINE_ID = "E7698D981EE8403F8E9591584A076D28";
+    public static final String PIPELINE_ID = "B676D412522E4F1FBCE268683A1C977E";
 
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
 	public String tenancyKey = "G2_DEV_INT_MONIKER";
-	public String serviceInstanceId = "3A7D4AE638B14113818651F92E67FD16";
+	public String serviceInstanceId = "B16189BA6BF841D48F9F3EDDCC8A2573";
 	public String spectrumUri = "fs2://secure@dev-int/mailbox/payload/1.0/21F9B154FB54495A855EAC63E1CDC69B";
 	public String response = "response";
 
