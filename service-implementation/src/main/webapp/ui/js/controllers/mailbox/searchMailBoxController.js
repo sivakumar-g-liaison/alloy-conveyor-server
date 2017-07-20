@@ -334,25 +334,30 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.gridOptions = {
         		columnDefs: [{
                     field: 'guid',
-                    width: '21%',
+                    width: '18%',
                     displayName: 'MailboxId',
                     sortable: false
                 }, {
                     field: 'name',
-                    width: '18%',
+                    width: '16%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '18%',
+                    width: '13%',
                     displayName: 'Description'
                 }, {
+                    field: 'tenancyKey',
+                    width: '15%',
+                    displayName: 'TenancyKey',
+                    cellTemplate: '<div class="ngCellText" id="tenancyKey-{{row.rowIndex}}" tooltip="{{row.entity.tenancyKey}}" tooltip-append-to-body="true" tooltip-placement="right">{{row.entity.tenancyKey}}</div>'
+                }, {
                     field: 'clusterType',
-                    width: '10%',
+                    width: '8%',
                     displayName: 'Cluster Type'
                 }, {
                 	field: 'configStatus' ,
-                	width: '17%' ,
+                	width: '14%' ,
                 	displayName: 'Config Status' , 
                 	cellTemplate: $scope.manageConfigStatus,
                     sortable: false

@@ -32,6 +32,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
     private static final String SCH_PROF_NAME = "schProfName";
     private static final String MBX_DESC = "mbxDesc";
     private static final String SORT_DIR_DESC = "DESC";
+    private static final String TENANCY_KEY_VALUE = "tenancykey";
 
     public MailBoxConfigurationDAOBase() {
         super(PERSISTENCE_UNIT_NAME);
@@ -243,6 +245,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
         if (!StringUtil.isNullOrEmptyAfterTrim(sortField)) {
 
             switch (sortField.toLowerCase()) {
+
                 case NAME:
                     field = MBX_NAME;
                     break;
@@ -254,6 +257,10 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
                     break;
                 case MBX_CLUSTER_TYPE:
                     field = MailBoxConstants.CLUSTER_TYPE;
+                    break;
+                case TENANCY_KEY_VALUE:
+                    field = TENANCY_KEY;
+                    break;
             }
         } else {
             field = MBX_NAME;
