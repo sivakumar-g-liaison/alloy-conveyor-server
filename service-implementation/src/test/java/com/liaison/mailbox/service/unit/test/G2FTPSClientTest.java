@@ -34,8 +34,8 @@ public class G2FTPSClientTest {
 
 	private static final Logger LOGGER = LogManager.getLogger(G2FTPSClientTest.class);
 
-	@Test(enabled=false)
-	public void ftps() throws MailBoxServicesException, IOException, LiaisonException, URISyntaxException, FS2Exception {
+	@Test(enabled=true)
+	public void main() throws MailBoxServicesException, IOException, LiaisonException, URISyntaxException, FS2Exception {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		ftpsRequest.enableSessionReuse(true);
@@ -46,81 +46,23 @@ public class G2FTPSClientTest {
 		ftpsRequest.setBinary(false);
 		ftpsRequest.setPassive(true);
 
-		String path = "/inbox";
-		String remotePath = "/tmp";
-
-		ftpsRequest.changeDirectory(path);
-		downloadDirectory(ftpsRequest, path, remotePath);
 		ftpsRequest.disconnect();
-
-
 	}
 
 	protected G2FTPSClient getFTPSClient(Logger logger) throws LiaisonException {
 
 		G2FTPSClient ftpsRequest = new G2FTPSClient();
-		ftpsRequest.setURI("ftps://10.147.18.253:21");
+		ftpsRequest.setURI("ftps://idwftp.idea4industry.com:990");
 		ftpsRequest.setDiagnosticLogger(logger);
 		ftpsRequest.setCommandLogger(logger);
 		ftpsRequest.setConnectionTimeout(60000);
 
 		ftpsRequest.setSocketTimeout(60000);
-		ftpsRequest.setRetryCount(1);
 
-		ftpsRequest.setUser("ftpestest");
-		ftpsRequest.setPassword("Welcome@123");
+		ftpsRequest.setUser("liason");
+		ftpsRequest.setPassword("VXh%HxyM");
 
 		return ftpsRequest;
-	}
-
-	public void downloadDirectory(G2FTPSClient ftpsClient, String currentDir, String localFileDir) throws IOException, LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException {
-
-		String dirToList = "";
-		if (!currentDir.equals("")) {
-			dirToList += currentDir;
-		}
-
-		FTPFile[] files = ftpsClient.getNative().listFiles(dirToList);
-		BufferedOutputStream bos = null;
-		FileOutputStream fos = null;
-
-		if (files != null) {
-
-			for (FTPFile file : files) {
-
-				if (file.getName().equals(".") || file.getName().equals("..")) {
-					// skip parent directory and the directory itself
-					continue;
-				}
-
-				String currentFileName = file.getName();
-				if (file.isFile()) {
-
-					String localDir = localFileDir + File.separatorChar + currentFileName;
-					ftpsClient.changeDirectory(dirToList);
-
-					try {// GSB-1337,GSB-1336
-
-						fos = new FileOutputStream(localDir);
-						bos = new BufferedOutputStream(fos);
-						ftpsClient.getFile(currentFileName, bos);
-					} finally {
-					    if (bos != null) bos.close();
-					    if (fos != null) fos.close();
-					}
-				} else {
-
-					String localDir = localFileDir + File.separatorChar + currentFileName;
-					String remotePath = dirToList + File.separatorChar + currentFileName;
-					File directory = new File(localDir);
-					if (!directory.exists()) {
-						Files.createDirectories(directory.toPath());
-					}
-					ftpsClient.changeDirectory(remotePath);
-					downloadDirectory(ftpsClient, remotePath, localDir);
-				}
-			}
-		}
 	}
 
 }

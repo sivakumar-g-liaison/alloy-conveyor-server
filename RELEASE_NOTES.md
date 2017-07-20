@@ -1,13 +1,9 @@
-4.16.1-SNAPSHOT
+4.16.1
 ---------------
 * GGT-1356: Remove Spectrum settings from Archaius *.properties files 
 * GMB-952  - Upgrade Jsch library
 * GMB-1025 - SFTP Client doesn't support newer algorithms
 * GMB-1017 - Null pointer exception when fetching organization detail
-
-
-4.16.0-SNAPSHOT
----------------
 * GMB-994 - Sweeper is not interrupted while sweeping empty files
 * GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile
 * GMB-999 - Unable to update staged files
