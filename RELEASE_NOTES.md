@@ -1,5 +1,6 @@
 4.17.0-SNAPSHOT
 ---------------
+* GMB-1028 - FTPSClient needs to be updated
 
 4.16.1
 ---------------
