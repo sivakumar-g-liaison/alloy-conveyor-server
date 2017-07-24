@@ -1,3 +1,6 @@
+4.17.0-SNAPSHOT
+---------------
+
 4.16.1
 ---------------
 * GGT-1356: Remove Spectrum settings from Archaius *.properties files 
