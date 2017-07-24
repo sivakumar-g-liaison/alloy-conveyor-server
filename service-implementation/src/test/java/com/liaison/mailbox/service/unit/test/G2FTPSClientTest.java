@@ -105,8 +105,8 @@ public class G2FTPSClientTest {
 						bos = new BufferedOutputStream(fos);
 						ftpsClient.getFile(currentFileName, bos);
 					} finally {
-					    if (bos != null) bos.close();
-					    if (fos != null) fos.close();
+						if (bos != null) bos.close();
+						if (fos != null) fos.close();
 					}
 				} else {
 
