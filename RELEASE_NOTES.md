@@ -1,6 +1,8 @@
 4.17.0-SNAPSHOT
 ---------------
 * GMB-1028 - FTPSClient needs to be updated
+* [GGT-1356](https://jira.liaison.tech/browse/GGT-1356): Remove Spectrum settings from Archaius *.properties files
+* [GGT-1357](https://jira.liaison.tech/browse/GGT-1357) and [GSB-452](https://jira.liaison.tech/browse/GSB-452): Inheritance and Minimization of Archaius property files. (Backwards-compatible)
 
 4.16.1
 ---------------
