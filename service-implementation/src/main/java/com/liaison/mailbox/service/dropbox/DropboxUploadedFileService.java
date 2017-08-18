@@ -153,31 +153,4 @@ public class DropboxUploadedFileService extends DropboxBaseService {
             throw new RuntimeException("Failed to delete the uploaded file", e);
         }
     }
-
-    /**
-     * Data Migration for Uploaded files.
-     *
-     * @param tableRows
-     */
-    public void migrateUploadedHistory(DataTableRow[] tableRows) {
-
-        LOGGER.info("Enter into dataMigration");
-        UploadedFileDTO fileDTO;
-        try {
-
-            for (DataTableRow row : tableRows) {
-
-                fileDTO = new Gson().fromJson(new Gson().toJson(row.getColumns()), UploadedFileDTO.class);
-                fileDTO.setTtl(String.valueOf(row.getTtl()));
-                addUploadedFile(fileDTO, false);
-            }
-
-            LOGGER.info("Data Migration has done for upload files successfully");
-        } catch (Exception e) {
-            throw new RuntimeException("Failed data migration for uploaded files", e);
-        }
-
-        LOGGER.debug("Exit from dataMigration ()");
-    }
-
 }
