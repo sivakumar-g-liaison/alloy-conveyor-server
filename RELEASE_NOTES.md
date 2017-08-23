@@ -1,3 +1,7 @@
+4.16.2
+---------------
+* GMB-1044 - Relay sets processor execution id instead of processor id in stuck processor alerts
+
 4.16.1
 ---------------
 * GGT-1356: Remove Spectrum settings from Archaius *.properties files 

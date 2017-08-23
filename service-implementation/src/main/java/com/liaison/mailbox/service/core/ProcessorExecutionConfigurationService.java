@@ -141,7 +141,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
 
             for (ProcessorExecutionState processorState : executingProcessors) {
 
-                emailBody.append(processorState.getPguid());
+                emailBody.append(processorState.getProcessorId());
                 emailBody.append("----");
                 emailBody.append(processorState.getNodeInUse());
                 emailBody.append("\n");
