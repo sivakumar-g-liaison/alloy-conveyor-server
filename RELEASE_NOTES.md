@@ -1,3 +1,7 @@
+4.16.3
+---------------
+* GMB-1045 - Increase script sandbox pool size
+
 4.16.2
 ---------------
 * GMB-1044 - Relay sets processor execution id instead of processor id in stuck processor alerts
