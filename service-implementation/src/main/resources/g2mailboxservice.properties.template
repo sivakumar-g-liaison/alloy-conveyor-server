@@ -153,7 +153,7 @@ mailbox.script.default.template=defaultScriptTemplate.js
 com.liaison.lens.hub=LSG2-DEV
 
 # For Dropbox
-com.liaison.dropbox.payload.ttl.days=1
+com.liaison.dropbox.payload.ttl.days=30
 
 com.liaison.deployAsDropbox=false
 
