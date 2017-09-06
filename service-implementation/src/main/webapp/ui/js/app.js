@@ -140,11 +140,34 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
 
 	// load initial Processor Data
-    $rootScope.initialProcessorData;
-    $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
-        $rootScope.initialProcessorData = data;
-    }); 
-    
+	$rootScope.initialProcessorData;
+	$rootScope.conveyorProcessorData;
+	$rootScope.legacyRelayProcessorData;
+	$rootScope.relayProcessorData;	
+	//  load edit Processor Data
+	$rootScope.editProcessorData;
+	$rootScope.editConveyorProcessorData;
+	$rootScope.editLegacyRelayProcessorData;
+	$rootScope.editRelayProcessorData;
+	
+	$rootScope.restService.get('data/createConveyorProcessorDetails.json', function (data) {
+		$rootScope.conveyorProcessorData = data;
+	});	
+	$rootScope.restService.get('data/editConveyorProcessorDetails.json', function (data) {
+		$rootScope.editConveyorProcessorData = data;
+	});
+	$rootScope.restService.get('data/createLegacyRelayProcessorDetails.json', function (data) {
+		$rootScope.legacyRelayProcessorData = data;
+	});	
+	$rootScope.restService.get('data/editLegacyRelayProcessorDetails.json', function (data) {
+		$rootScope.editLegacyRelayProcessorData = data;
+	});
+	$rootScope.restService.get('data/createRelayProcessorDetails.json', function (data) {
+		$rootScope.relayProcessorData = data;
+	});	
+	$rootScope.restService.get('data/editRelayProcessorDetails.json', function (data) {
+		$rootScope.editRelayProcessorData = data;
+	});
     $rootScope.languageFormatData = {
         'dateRangePattern':'',
         'locale':''
@@ -155,12 +178,6 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
                 $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
                 $rootScope.languageFormatData.locale = data.TreeMap.locale;
         	}
-    });   
-    
-    //  load edit Processor Data
-    $rootScope.editProcessorData;
-    $rootScope.restService.get('data/editProcessorDetails.json', function (data) {
-    	$rootScope.editProcessorData = data;
     });
 
 	// pipeline id
@@ -192,11 +209,21 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
                 $rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
 				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
 				$rootScope.javaProperties.clusterTypes = data.getPropertiesValueResponseDTO.properties.clusterTypes;
-				
-			} else {
-				return;
-			}
-		}
+                var deploymentType = data.getPropertiesValueResponseDTO.properties.deploymentType;
+                if ('CONVEYOR' == deploymentType) {
+                    $rootScope.initialProcessorData = $rootScope.conveyorProcessorData;
+                    $rootScope.editProcessorData = $rootScope.editConveyorProcessorData; 
+                } else if ('LOW_SECURE_RELAY' == deploymentType) {
+                    $rootScope.initialProcessorData = $rootScope.legacyRelayProcessorData;
+                    $rootScope.editProcessorData = $rootScope.editLegacyRelayProcessorData; 
+                } else {
+                    $rootScope.initialProcessorData = $rootScope.relayProcessorData;
+                    $rootScope.editProcessorData = $rootScope.editRelayProcessorData; 
+                }			
+            } else {
+                return;
+            }
+        }
 	);
 
 	/*

@@ -173,7 +173,7 @@
                   <label for="clusterType">
                    Cluster Type
                   </label>
-                  <select class="form-control" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+                  <select class="form-control" ng-change="onClusterChange()" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
                   </select>
               </div>
             </div>

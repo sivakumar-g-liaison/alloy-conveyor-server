@@ -1,10 +1,11 @@
 4.17.0-SNAPSHOT
 ---------------
-* GMB-1028 - FTPSClient needs to be updated
+* [GMB-1028](https://jira.liaison.tech/browse/GMB-1028) - FTPSClient needs to be updated
 * [GGT-1356](https://jira.liaison.tech/browse/GGT-1356): Remove Spectrum settings from Archaius *.properties files
 * [GGT-1357](https://jira.liaison.tech/browse/GGT-1357) and [GSB-452](https://jira.liaison.tech/browse/GSB-452): Inheritance and Minimization of Archaius property files. (Backwards-compatible)
-* GMB-1046 - Upgrade fs2 library 9.x
-* GMB-972  - Need "(recursive) mkdir" in a SFTP Client Wrapper
+* [GMB-1046](https://jira.liaison.tech/browse/GMB-1046) - Upgrade fs2 library 9.x
+* [GMB-972](https://jira.liaison.tech/browse/GMB-972)  - Need "(recursive) mkdir" in a SFTP Client Wrapper
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay
 
 4.16.3
 ---------------

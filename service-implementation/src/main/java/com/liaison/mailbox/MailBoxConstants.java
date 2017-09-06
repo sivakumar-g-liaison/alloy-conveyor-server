@@ -473,4 +473,9 @@ public interface MailBoxConstants {
 
     String LOWSECURE = "LOWSECURE";
     String PROP_DATA_FOLDER_PATTERN = "com.liaison.data.folder.pattern";
+    
+    //Deployment type
+    String RELAY = "RELAY";
+    String LOW_SECURE_RELAY = "LOW_SECURE_RELAY";
+    String CONVEYOR = "CONVEYOR";
 }

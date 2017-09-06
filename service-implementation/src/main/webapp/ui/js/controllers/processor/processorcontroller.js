@@ -168,6 +168,22 @@ var rest = myApp.controller(
                 		passwordPguidInKMS:""
                 }
             };
+            
+            $scope.supportedProtocols = angular.copy($scope.initialProcessorData.supportedProtocols.options);
+            $scope.onClusterChange = function () {
+     
+                if ($scope.processor.clusterType == "LOWSECURE") {
+     
+                    $scope.lowSecureSupportedProtocols = [{"key":"FTP", "value":"FTP"}, {"key":"FTPS", "value":"FTPS"}];
+                    $scope.processorData.supportedProtocols.options = $scope.lowSecureSupportedProtocols;
+                } else {
+     
+                    $scope.secureSupportedProtocols = $scope.supportedProtocols;
+                    $scope.processorData.supportedProtocols.options = $scope.secureSupportedProtocols;
+                }
+                $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+            }
+
             $scope.loadOrigin();
 			
             $scope.initialLoad = function () {
@@ -1050,8 +1066,8 @@ var rest = myApp.controller(
             };		    
             
             //GMB-201
-			$scope. showTruststoreSection = ($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") ? true : false;
-            $scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
+			$scope. showTruststoreSection = ($scope.processor.protocol && ($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS")) ? true : false;
+            $scope.showSSHKeysSection = ($scope.processor.protocol && $scope.processor.protocol.value === "SFTP") ? true : false;
             
 			$scope.appendPortToUrl = function() {
 			    

@@ -670,6 +670,7 @@ public class MailBoxConfigurationService {
             dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
             dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
             dto.setClusterTypes(MailBoxUtil.getClusterTypes());
+            dto.setDeploymentType(MailBoxUtil.DEPLOYMENT_TYPE);
 
             serviceResponse.setProperties(dto);
             serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
