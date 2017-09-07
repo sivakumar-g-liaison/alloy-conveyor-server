@@ -40,8 +40,8 @@ import java.nio.file.Paths;
 public class FileDeleteReplicationService {
 
     private static final Logger LOGGER = LogManager.getLogger(FileDeleteReplicationService.class);
-    private static final String PATH = "path";
-    private static final String USER_UID = "user_uid";
+    private static final String PATH = "object_path";
+    private static final String USER_SID = "user_sid";
     
     /**
      * Method to in-activate staged file entry and update lens status.
@@ -53,7 +53,7 @@ public class FileDeleteReplicationService {
         try {
             JSONObject reqeustObj = new JSONObject(requestString);
             String path = (String) reqeustObj.get(PATH);
-            String uId = (String) reqeustObj.get(USER_UID);
+            String sId = (String) reqeustObj.get(USER_SID);
             String filePath = path.substring(0, path.lastIndexOf("/"));
             String fileName = path.substring(path.lastIndexOf("/") + 1);
             
@@ -76,7 +76,7 @@ public class FileDeleteReplicationService {
                 glassMessageDTO.setFilePath(filePath);
                 glassMessageDTO.setFileLength(0);
                 glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + uId);
+                glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + sId);
                 glassMessageDTO.setPipelineId(null);
                 glassMessageDTO.setFirstCornerTimeStamp(null);
                 

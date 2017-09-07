@@ -60,7 +60,7 @@
             <div class="col-md-3">
                 <label for="protocol"> Protocol </label>
                 <select id="protocol" ng-model="protocolName"
-                        ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox"
+                        ng-disabled="isProcessorTypeSweeper || isProcessorTypeConditionalSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox"
                         ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options"
                         class="form-control textPattern_width_1">
                     <option value="">-- select--</option>

@@ -38,6 +38,15 @@ public class JavascriptValidator
 		validate();
 	}
 
+	public JavascriptValidator (String script, JavascriptScriptContext javascriptScriptContext, String method) {
+
+	    this.script = script;
+	    this.javascriptScriptContext = javascriptScriptContext;
+
+	    message = new StringBuilder();
+	    validate(method);
+	}
+
 	public boolean isValidScript ()
 	{
 		return valid;
@@ -50,9 +59,13 @@ public class JavascriptValidator
 
 	protected void validate ()
 	{
-		if (!hasRequiredValue(REQUIRES_FUNCTION_NAME)) { valid = false; }
-		if (!hasRequiredValue(PROCESS_FUNCTION_NAME)) { valid = false; }
-		if (!hasRequiredValue(CLEANUP_FUNCTION_NAME)) { valid = false; }
+	    validate(REQUIRES_FUNCTION_NAME);
+	    validate(PROCESS_FUNCTION_NAME);
+	    validate(CLEANUP_FUNCTION_NAME);
+	}
+
+	protected void validate (String funtion_name) {
+	    if (!hasRequiredValue(funtion_name)) { valid = false; }
 	}
 
 	protected boolean hasRequiredValue (String name)

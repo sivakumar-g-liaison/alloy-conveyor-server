@@ -13,17 +13,14 @@ import com.liaison.commons.scripting.javascript.JavascriptFunction;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
@@ -46,54 +43,50 @@ public final class JavaScriptExecutorUtil {
 	 * @throws Exception
 	 *
 	 */
-	public static Object executeJavaScript(String scriptPath, String methodName, Object... parameters) {
+    public static Object executeJavaScript(String scriptPath, String methodName, Object... parameters) {
 
-		Exception expectedException = null;
-		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
-		JavascriptScriptContext scriptContext = null;
-		URI scriptUri = null;
+        ContextCreator contextCreator = new ContextCreator(scriptPath);
+        JavascriptScriptContext scriptContext = contextCreator.getJavascriptContext();
+        JavascriptExecutor javascriptExecutor = new JavascriptExecutor();
 
-		try {
+        URI scriptUri = null;
 
-			String scriptName = scriptPath;
+        try {
+            String scriptName = scriptPath;
+            String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
+                    PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
+            scriptPath = gitlabDirectory + "/" + scriptPath;
 
-			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
-			scriptPath = gitlabDirectory + "/" + scriptPath;
+            if (scriptPath.contains("gitlab:")) {
+                scriptUri = new URI(scriptPath);
+                LOGGER.debug("The process script uri is {}", scriptUri);
+            }
 
-			if (scriptPath.contains("gitlab:")) {
-				scriptUri = new URI(scriptPath);
-				LOGGER.debug("The process script uri is {}", scriptUri);
-			}
+            Object returnValue = javascriptExecutor.executeInContext(
+                    scriptContext,
+                    scriptPath,
 
-			if (scriptContext == null) {
+                    new JavascriptFunction((obj) -> {
+                        JavascriptValidator validator = new JavascriptValidator(scriptName, scriptContext, methodName);
+                        if (!validator.isValidScript()) {
+                            throw new RuntimeException(String.format("Script '%s' is invalid: %s", scriptName, validator.getErrorMessage()));
+                        }
 
-				try (InputStreamReader reader = new InputStreamReader(System.in, UTF_8);
-					 PrintWriter outputWriter = new PrintWriter(new OutputStreamWriter(System.out, UTF_8));
-					 PrintWriter errorWriter = new PrintWriter(new OutputStreamWriter(System.err, UTF_8))) {
+                        return null;
+                    }, scriptUri, null),
+                    new JavascriptFunction(scriptUri, methodName, parameters));
 
-					scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
+            Map<String, Exception> exceptionMap = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS));
+            Exception expectedException = exceptionMap.get(scriptName + ":" + methodName);
+            if (null != expectedException) {
+                throw expectedException;
+            }
 
-					scriptExecutor.setScriptContext(scriptContext);
-					JavascriptFunction function = new JavascriptFunction(scriptUri, methodName, parameters);
-					Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, function);
-
-					// did my function call throw?
-					expectedException = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
-					if (null != expectedException) {
-						throw expectedException;
-					}
-
-					return returnValue;
-				}
-
-			}
-
-			return null;
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+            return returnValue;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	/**
 	 * Executes the specified method in the javascript available

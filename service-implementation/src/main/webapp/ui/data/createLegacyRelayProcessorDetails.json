@@ -21,6 +21,11 @@
                 "type":"Other"
             },
             {  
+                "key":"Conditional Sweeper",
+                "value":"CONDITIONALSWEEPER",
+                "type":"Other"
+            },
+            {  
                 "key":"HTTP Async Processor",
                 "value":"HTTPASYNCPROCESSOR",
                 "type":"Server"

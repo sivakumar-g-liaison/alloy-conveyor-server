@@ -81,6 +81,7 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
+import static com.liaison.mailbox.enums.ProcessorType.CONDITIONALSWEEPER;
 
 /**
  * Utilities for MailBox.
@@ -584,7 +585,8 @@ public class MailBoxUtil {
                     HTTPASYNCPROCESSOR.equals(processorType) ||
                     DROPBOXPROCESSOR.equals(processorType)) {
                 pipelineId = propertiesDTO.getHttpListenerPipeLineId();
-            } else if (SWEEPER.equals(processorType)) {
+            } else if (SWEEPER.equals(processorType) ||
+            		CONDITIONALSWEEPER.equals(processorType)) {
                 pipelineId = propertiesDTO.getPipeLineID();
             } else {
                 return;

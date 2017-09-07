@@ -14,6 +14,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.ConditionalSweeper;
 import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
@@ -29,11 +30,13 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -437,6 +440,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 break;
             case SWEEPER_CLASS:
                 processorClass = Sweeper.class;
+                break;
+            case CONDITIONAL_SWEEPER_CLASS:
+                processorClass = ConditionalSweeper.class;
                 break;
             case REMOTE_UPLAODER_CLASS:
                 processorClass = RemoteUploader.class;

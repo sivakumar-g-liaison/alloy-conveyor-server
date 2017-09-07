@@ -82,6 +82,7 @@ var rest = myApp.controller(
                 $scope.isFileSelected = false;
         		$scope.isEdit = false;
                 $scope.isProcessorTypeSweeper = false;
+                $scope.isProcessorTypeConditionalSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;				
 				//GIT URL
 				$scope.script = '';
@@ -145,6 +146,7 @@ var rest = myApp.controller(
                     "sshKeyPairGroupId": ''
                 };
                 $scope.processorData = $scope.initialProcessorData;
+                $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 $scope.status = $scope.processorData.supportedStatus.options[0];
                 $scope.procsrType = $scope.processorData.supportedProcessors.options[0];
                 $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
@@ -393,6 +395,13 @@ var rest = myApp.controller(
                     $scope.isProcessorTypeSweeper = true;
                 } else {
                     $scope.isProcessorTypeSweeper = false;
+                }
+                if ($scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
+                    $scope.isProcessorTypeConditionalSweeper = true;
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
+                } else {
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
@@ -1174,6 +1183,7 @@ var rest = myApp.controller(
                 switch ($scope.selectedProcessorType) {
                   case "SWEEPER":
 					$scope.isProcessorTypeSweeper = true;
+					$scope.isProcessorTypeConditionalSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
@@ -1183,10 +1193,26 @@ var rest = myApp.controller(
 					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
 					$scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
 					break;
+                  case "CONDITIONALSWEEPER":
+                      $scope.isProcessorTypeSweeper = false;
+                      $scope.isProcessorTypeConditionalSweeper = true;
+                      $scope.isProcessorTypeHTTPListener = false;
+                      $scope.isProcessorTypeFileWriter = false;
+                      $scope.isProcessorTypeDropbox = false;
+                      $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
+                      $rootScope.restService.get('data/processor/properties/conditionalsweeper.json', function (data) {                    
+                      $scope.separateProperties(data.processorDefinition.staticProperties);
+                      $scope.separateFolderProperties(data.processorDefinition.folderProperties); 
+                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+                      });
+                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
+                      break;	
                   case "HTTPSYNCPROCESSOR": 
 				  case "HTTPASYNCPROCESSOR": 				 
 					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeConditionalSweeper = false;
 					$scope.isProcessorTypeHTTPListener = true;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
@@ -1194,10 +1220,12 @@ var rest = myApp.controller(
 					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
 					  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});	
+					});
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
 					break;
 				  case "FILEWRITER": 				
 					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeConditionalSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeDropbox = false;
 					$scope.isProcessorTypeFileWriter = true;
@@ -1207,9 +1235,11 @@ var rest = myApp.controller(
 					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                     break;
                   case "DROPBOXPROCESSOR":			
 					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeConditionalSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = true;
@@ -1218,9 +1248,11 @@ var rest = myApp.controller(
 					  $scope.separateProperties(data.processorDefinition.staticProperties);		
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                     break;
 				  default:
 					$scope.resetProtocol($scope.processor.protocol);
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
 				    break;
 			    }		
                 $scope.$broadcast("resetCredentialSection");
@@ -1229,6 +1261,7 @@ var rest = myApp.controller(
 			$scope.resetProtocol = function(potocolType) {
 			
 				 $scope.isProcessorTypeSweeper = false;
+				 $scope.isProcessorTypeConditionalSweeper = false;
 				 $scope.isProcessorTypeHTTPListener = false;
 				 $scope.isProcessorTypeFileWriter = false;
 				 $scope.isProcessorTypeDropbox = false;

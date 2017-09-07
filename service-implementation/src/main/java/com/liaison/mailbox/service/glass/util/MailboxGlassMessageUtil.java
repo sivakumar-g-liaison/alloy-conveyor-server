@@ -74,7 +74,8 @@ public class MailboxGlassMessageUtil {
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
 
-            if (ProcessorType.SWEEPER.equals(processorType)) {
+            if (ProcessorType.SWEEPER.equals(processorType)
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 glassMessage.setOrganizationDetails(pipelineId);
             }
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
@@ -84,7 +85,8 @@ public class MailboxGlassMessageUtil {
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.PROCESSING.equals(status)) {
 
-            if (ProcessorType.SWEEPER.equals(processorType)) {
+            if (ProcessorType.SWEEPER.equals(processorType)
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 glassMessage.setInAgent(glassMessageDTO.getFilePath());
                 glassMessage.setOrganizationDetails(pipelineId);
             } else {
@@ -102,7 +104,8 @@ public class MailboxGlassMessageUtil {
 
             // Queued message for async inbound
             if (ProcessorType.HTTPASYNCPROCESSOR.equals(processorType)
-                    || ProcessorType.SWEEPER.equals(processorType)) {
+                    || ProcessorType.SWEEPER.equals(processorType)
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 logProcessingStatus(glassMessage, StatusType.QUEUED, "Workticket queued for file " + fileName);
             }
         } else if (ExecutionState.READY.equals(status)) {

@@ -116,6 +116,7 @@ public class Processor implements Identifiable {
 	public static final String TYPE_REMOTEDOWNLOADER = "REMOTEDOWNLOADER";
 	public static final String TYPE_REMOTEUPLOADER = "REMOTEUPLOADER";
 	public static final String TYPE_SWEEPER = "SWEEPER";
+	public static final String TYPE_CONDITIONAL_SWEEPER = "CONDITIONALSWEEPER";
 	public static final String HTTP_ASYNC = "HTTPASYNCPROCESSOR";
 	public static final String HTTP_SYNC = "HTTPSYNCPROCESSOR";
 	public static final String TYPE_FILE_WRITER = "FILEWRITER";
@@ -408,27 +409,38 @@ public class Processor implements Identifiable {
 	 * @return a new instance of Processor of the give type.
 	 */
 	@Transient
-	public static Processor processorInstanceFactory(ProcessorType processorType) {
+    public static Processor processorInstanceFactory(ProcessorType processorType) {
 
-		Processor processor = null;
-		if (ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
-			processor = new RemoteDownloader();
-		} else if (ProcessorType.REMOTEUPLOADER.equals(processorType)) {
-			processor = new RemoteUploader();
-		} else if (ProcessorType.HTTPASYNCPROCESSOR.equals(processorType)) {
-			processor = new HTTPAsyncProcessor();
-		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(processorType)) {
-			processor = new HTTPSyncProcessor();
-		} else if (ProcessorType.FILEWRITER.equals(processorType)) {
-			processor = new FileWriter();
-		} else if (ProcessorType.DROPBOXPROCESSOR.equals(processorType)) {
-			processor = new DropBoxProcessor();
-		} else {
-			processor = new Sweeper();
-		}
+        Processor processor = null;
+        switch (processorType) {
+            case REMOTEDOWNLOADER:
+                processor = new RemoteDownloader();
+                break;
+            case REMOTEUPLOADER:
+                processor = new RemoteUploader();
+                break;
+            case HTTPASYNCPROCESSOR:
+                processor = new HTTPAsyncProcessor();
+                break;
+            case HTTPSYNCPROCESSOR:
+                processor = new HTTPSyncProcessor();
+                break;
+            case FILEWRITER:
+                processor = new FileWriter();
+                break;
+            case DROPBOXPROCESSOR:
+                processor = new DropBoxProcessor();
+                break;
+            case CONDITIONALSWEEPER:
+                processor = new ConditionalSweeper();
+                break;
+            default:
+                processor = new Sweeper();
+                break;
+        }
 
-		return processor;
-	}
+        return processor;
+    }
 
 	/**
 	 * Gets the configured email receivers from the mailbox for the processor.

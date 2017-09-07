@@ -27,17 +27,21 @@ import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.processor.ConditionalSweeper;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -124,6 +128,8 @@ public class MailboxWatchDogService {
                     .setParameter(1, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
+            List<GlassMessageDTO> glassMessageDTOs = new ArrayList<>();
+
 			if (stagedFiles == null || stagedFiles.isEmpty()) {
 				LOGGER.debug(constructMessage("No active files found"));
 				return;
@@ -146,6 +152,13 @@ public class MailboxWatchDogService {
                 // get the processor from processor Id
                 processor = processors.computeIfAbsent(stagedFile.getProcessorId()
                         , k -> config.find(Processor.class, stagedFile.getProcessorId()));
+
+                // Inactive the staged files if processor is deleted or inactive
+                // This may be old staged file and this needs to be in-activated since process is not found
+                if (null == processor) {
+                    inactiveStagedFile(stagedFile, updatedStatusList);
+                    continue;
+                }
 
                 //get the mailbox properties
                 int staleFileTTL = MailBoxUtil.getStaleFileTTLValue(processor.getProcsrProperties());
@@ -187,20 +200,19 @@ public class MailboxWatchDogService {
                     continue;
                 }
 
-				GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-	            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-	            glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
-	            glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
-	            glassMessageDTO.setFileName(fileName);
-	            glassMessageDTO.setFilePath(filePath);
-	            glassMessageDTO.setFileLength(0);
-	            glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-	            glassMessageDTO.setMessage("File is picked up by the customer or another process");
-	            glassMessageDTO.setPipelineId(null);
-	            glassMessageDTO.setFirstCornerTimeStamp(null);
+                GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+                glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+                glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+                glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
+                glassMessageDTO.setFileName(fileName);
+                glassMessageDTO.setFilePath(filePath);
+                glassMessageDTO.setFileLength(0);
+                glassMessageDTO.setStatus(ExecutionState.COMPLETED);
+                glassMessageDTO.setMessage("File is picked up by the customer or another process");
+                glassMessageDTO.setPipelineId(null);
+                glassMessageDTO.setFirstCornerTimeStamp(null);
 
-                MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-                LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), stagedFile.getProcessorId(), stagedFile.getFileName(), stagedFile.getFilePath());
+                glassMessageDTOs.add(glassMessageDTO);
                 inactiveStagedFile(stagedFile, updatedStatusList);
 
 			}
@@ -214,13 +226,18 @@ public class MailboxWatchDogService {
 	            em.merge(updatedFile);
 	        }
 
-			tx.commit();
+            glassMessageDTOs.forEach((glassMessage) -> {
+                MailboxGlassMessageUtil.logGlassMessage(glassMessage);
+                LOGGER.info(constructMessage("{} : Updated LENS status for the file {} and location is {}"), glassMessage.getGlobalProcessId(), glassMessage.getFileName(), glassMessage.getFilePath());
+            });
+
+            tx.commit();
 
         } catch (Exception e) {
             if (null != tx && tx.isActive()) {
                 tx.rollback();
             }
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             if (em != null) {
                 em.close();
@@ -472,8 +489,9 @@ public class MailboxWatchDogService {
 		LOGGER.debug("Retrieving all sweepers");
 		List <String> processorTypes = new ArrayList<>();
 		processorTypes.add(ProcessorType.SWEEPER.name());
+		processorTypes.add(ProcessorType.CONDITIONALSWEEPER.name());
 
-		//fetches the sweeper based on mailbox and processor status
+		//fetches the sweeper and conditionalsweeper based on mailbox and processor status
 		List <Processor> sweepers = config.findProcessorsByType(processorTypes, mailboxStatus);
 
 		for (Processor procsr : sweepers) {
@@ -494,8 +512,14 @@ public class MailboxWatchDogService {
 				}
 
 				// check sweeper location for stale file cleanup
-				DirectorySweeper directorySweeper = (DirectorySweeper) MailBoxProcessorFactory.getInstance(procsr);
-				directorySweeper.cleanupStaleFiles();
+				if (ProcessorType.SWEEPER.equals(procsr.getProcessorType())) {
+				    DirectorySweeper directorySweeper = (DirectorySweeper) MailBoxProcessorFactory.getInstance(procsr);
+				    directorySweeper.cleanupStaleFiles();
+				} else {
+				    ConditionalSweeper conditionalSweeper = (ConditionalSweeper) MailBoxProcessorFactory.getInstance(procsr);
+				    conditionalSweeper.cleanupStaleFiles(((ConditionalSweeperPropertiesDTO) conditionalSweeper.getProperties()).getStaleFileTTL());
+				}
+				
 			} catch (Exception e) {
                 // Exceptions are handled gracefully so that sla validation can be continued for other processors.
                 LOGGER.error(constructMessage("Error occurred in watchdog service during mailbox sla validation", e.getMessage()));

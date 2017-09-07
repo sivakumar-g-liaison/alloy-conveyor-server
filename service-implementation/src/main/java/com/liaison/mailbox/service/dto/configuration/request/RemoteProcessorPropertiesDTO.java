@@ -74,6 +74,9 @@ public class RemoteProcessorPropertiesDTO {
     private boolean allowEmptyFiles = true;
     private boolean useFileSystem = true;
     private boolean includeSubDirectories;
+    private boolean deleteEmptyDirectoryAfterSwept = true;
+    private String triggerFile;
+    private String sort;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -419,4 +422,27 @@ public class RemoteProcessorPropertiesDTO {
         this.includeSubDirectories = includeSubDirectories;
     }
     
+    public boolean isDeleteEmptyDirectoryAfterSwept() {
+        return deleteEmptyDirectoryAfterSwept;
+    }
+
+    public void setDeleteEmptyDirectoryAfterSwept(boolean deleteEmptyDirectoryAfterSwept) {
+        this.deleteEmptyDirectoryAfterSwept = deleteEmptyDirectoryAfterSwept;
+    }
+    
+    public String getTriggerFile() {
+        return triggerFile;
+    }
+    
+    public void setTriggerFile(String triggerFile) {
+        this.triggerFile = triggerFile;
+    }
+    
+    public String getSort() {
+        return sort;
+    }
+    
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
 }

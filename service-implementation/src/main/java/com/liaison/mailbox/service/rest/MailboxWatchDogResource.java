@@ -57,6 +57,7 @@ public class MailboxWatchDogResource extends AuditedResource {
 	private static final String TYPE = "type";
 	private static final String MAILBOX_STATUS = "mailboxstatus";
 	private static final String SWEEPER = "sweeper";
+	private static final String CONDITIONALSWEEPER = "conditionalsweeper";
 
 	/**
 	 * REST method to validate the sla rules of all mailboxes.
@@ -82,7 +83,7 @@ public class MailboxWatchDogResource extends AuditedResource {
 				try {
 					LOG.debug("Entering into mailbox watchdog resource");
 
-					if (!MailBoxUtil.isEmpty(type) && SWEEPER.equals(type.toLowerCase())) {
+					if (!MailBoxUtil.isEmpty(type) && (SWEEPER.equals(type.toLowerCase()) || CONDITIONALSWEEPER.equals(type.toLowerCase()))) {
                         // validate the sla rules of all mailboxes
                         EntityStatus status = MailBoxUtil.isEmpty(mailboxStatus) ? ACTIVE : findByCode(mailboxStatus.toUpperCase());
                         new MailboxWatchDogService().validateMailboxSLARule(status);

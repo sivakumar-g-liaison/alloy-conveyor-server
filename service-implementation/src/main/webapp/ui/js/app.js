@@ -180,6 +180,18 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
         	}
     });
 
+    // load java script checkbox details
+    $rootScope.javaScriptCheckBox;
+    $rootScope.restService.get('data/javaScriptCheckBox.json', function (data) {
+    	$rootScope.javaScriptCheckBox = data;
+    });
+
+    // load java script checkbox details for conditional sweeper
+    $rootScope.javaScriptCheckBoxConditionalSweeper;
+    $rootScope.restService.get('data/javaScriptCheckBoxConSweeper.json', function (data) {
+    	$rootScope.javaScriptCheckBoxConditionalSweeper = data;
+    });
+
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
 	// service instance id

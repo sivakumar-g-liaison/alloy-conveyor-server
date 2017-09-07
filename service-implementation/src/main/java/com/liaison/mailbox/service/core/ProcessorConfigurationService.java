@@ -1252,6 +1252,7 @@ public class ProcessorConfigurationService {
                         ProcessorType.HTTPASYNCPROCESSOR,
                         ProcessorType.HTTPSYNCPROCESSOR,
                         ProcessorType.SWEEPER,
+                        ProcessorType.CONDITIONALSWEEPER,
                         ProcessorType.FILEWRITER).anyMatch(s -> s.equals(processorType));
             case MailBoxConstants.CONVEYOR:
                 return ProcessorType.DROPBOXPROCESSOR.equals(processorType);
@@ -1281,6 +1282,7 @@ public class ProcessorConfigurationService {
                         Protocol.HTTPS,
                         Protocol.HTTP,
                         Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
                         Protocol.HTTPSYNCPROCESSOR,
                         Protocol.HTTPASYNCPROCESSOR,
                         Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
@@ -1289,6 +1291,7 @@ public class ProcessorConfigurationService {
                         Protocol.FTPS,
                         Protocol.HTTP,
                         Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
                         Protocol.HTTPSYNCPROCESSOR,
                         Protocol.HTTPASYNCPROCESSOR,
                         Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
@@ -1299,6 +1302,7 @@ public class ProcessorConfigurationService {
                 isValidProtocol = Stream.of(Protocol.FTP,
                         Protocol.FTPS,
                         Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
                         Protocol.HTTPSYNCPROCESSOR,
                         Protocol.HTTPASYNCPROCESSOR,
                         Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
