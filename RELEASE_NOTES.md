@@ -1,4 +1,8 @@
-4.17.0-SNAPSHOT
+4.18.0-SNAPSHOT
+---------------
+
+
+4.17.0
 ---------------
 * GMB-1030 - Add new processor type ConditionalSweeper - Server
 * GMB-1031 - Add new processor type ConditionalSweeper - UI
