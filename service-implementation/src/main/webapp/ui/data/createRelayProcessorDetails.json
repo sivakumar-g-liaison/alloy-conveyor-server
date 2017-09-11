@@ -59,6 +59,14 @@
             {  
                 "key":"SFTP",
                 "value":"SFTP"
+            },
+            {
+                "key":"HTTP",
+                "value":"HTTP"
+            },
+            {
+                "key":"HTTPS",
+                "value":"HTTPS"
             }
         ]
     },
