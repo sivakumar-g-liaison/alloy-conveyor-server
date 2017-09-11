@@ -1,6 +1,6 @@
-4.18.0-SNAPSHOT
+4.17.1
 ---------------
-
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay - protocol changes
 
 4.17.0
 ---------------
