@@ -35,7 +35,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
         // TODO use html5 *no hash) where possible
         //$locationProvider.html5Mode(true);
-		
+
 		//GMB-472 Fix - Disable $http request cache
 		$httpProvider.defaults.cache = false;
 		if (!$httpProvider.defaults.headers.common) {
@@ -43,7 +43,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 	    }
 	    $httpProvider.defaults.headers.common["Cache-Control"] = "no-cache";
 	    $httpProvider.defaults.headers.common.Pragma = "no-cache";
-    
+
         $routeProvider.when('/', {
             templateUrl: 'partials/home.html'
         });
@@ -143,31 +143,20 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.initialProcessorData;
 	$rootScope.conveyorProcessorData;
 	$rootScope.legacyRelayProcessorData;
-	$rootScope.relayProcessorData;	
+	$rootScope.relayProcessorData;
 	//  load edit Processor Data
 	$rootScope.editProcessorData;
 	$rootScope.editConveyorProcessorData;
 	$rootScope.editLegacyRelayProcessorData;
 	$rootScope.editRelayProcessorData;
-	
-	$rootScope.restService.get('data/createConveyorProcessorDetails.json', function (data) {
-		$rootScope.conveyorProcessorData = data;
-	});	
-	$rootScope.restService.get('data/editConveyorProcessorDetails.json', function (data) {
-		$rootScope.editConveyorProcessorData = data;
-	});
-	$rootScope.restService.get('data/createLegacyRelayProcessorDetails.json', function (data) {
-		$rootScope.legacyRelayProcessorData = data;
-	});	
-	$rootScope.restService.get('data/editLegacyRelayProcessorDetails.json', function (data) {
-		$rootScope.editLegacyRelayProcessorData = data;
-	});
-	$rootScope.restService.get('data/createRelayProcessorDetails.json', function (data) {
-		$rootScope.relayProcessorData = data;
-	});	
-	$rootScope.restService.get('data/editRelayProcessorDetails.json', function (data) {
-		$rootScope.editRelayProcessorData = data;
-	});
+
+    $rootScope.conveyorProcessorData = loadFile('data/createConveyorProcessorDetails.json');
+    $rootScope.editConveyorProcessorData = loadFile('data/editConveyorProcessorDetails.json');
+    $rootScope.legacyRelayProcessorData = loadFile('data/createLegacyRelayProcessorDetails.json');
+    $rootScope.editLegacyRelayProcessorData = loadFile('data/editLegacyRelayProcessorDetails.json');
+    $rootScope.relayProcessorData = loadFile('data/createRelayProcessorDetails.json');
+    $rootScope.editRelayProcessorData = loadFile('data/editRelayProcessorDetails.json');
+
     $rootScope.languageFormatData = {
         'dateRangePattern':'',
         'locale':''
@@ -181,16 +170,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     });
 
     // load java script checkbox details
-    $rootScope.javaScriptCheckBox;
-    $rootScope.restService.get('data/javaScriptCheckBox.json', function (data) {
-    	$rootScope.javaScriptCheckBox = data;
-    });
+    $rootScope.javaScriptCheckBox = loadFile('data/javaScriptCheckBox.json');
 
     // load java script checkbox details for conditional sweeper
-    $rootScope.javaScriptCheckBoxConditionalSweeper;
-    $rootScope.restService.get('data/javaScriptCheckBoxConSweeper.json', function (data) {
-    	$rootScope.javaScriptCheckBoxConditionalSweeper = data;
-    });
+    $rootScope.javaScriptCheckBoxConditionalSweeper = loadFile('data/javaScriptCheckBoxConSweeper.json');
 
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
@@ -209,34 +192,36 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	    deployAsDropbox:false,
 	    clusterTypes:[]
 	};
-	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
-		function (data, status) {
-			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
-				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
-				$rootScope.javaProperties.globalTrustStoreGroupId = data.getPropertiesValueResponseDTO.properties.trustStoreGroupId;
-				$rootScope.javaProperties.processorSecureSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSecureSyncUrlDisplayPrefix;
-				$rootScope.javaProperties.processorSecureAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSecureAsyncUrlDisplayPrefix;
-				$rootScope.javaProperties.processorLowSecureSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorLowSecureSyncUrlDisplayPrefix;
-                $rootScope.javaProperties.processorLowSecureAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorLowSecureAsyncUrlDisplayPrefix;
-                $rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
-				$rootScope.javaProperties.deployAsDropbox = data.getPropertiesValueResponseDTO.properties.deployAsDropbox;
-				$rootScope.javaProperties.clusterTypes = data.getPropertiesValueResponseDTO.properties.clusterTypes;
-                var deploymentType = data.getPropertiesValueResponseDTO.properties.deploymentType;
-                if ('CONVEYOR' == deploymentType) {
-                    $rootScope.initialProcessorData = $rootScope.conveyorProcessorData;
-                    $rootScope.editProcessorData = $rootScope.editConveyorProcessorData; 
-                } else if ('LOW_SECURE_RELAY' == deploymentType) {
-                    $rootScope.initialProcessorData = $rootScope.legacyRelayProcessorData;
-                    $rootScope.editProcessorData = $rootScope.editLegacyRelayProcessorData; 
-                } else {
-                    $rootScope.initialProcessorData = $rootScope.relayProcessorData;
-                    $rootScope.editProcessorData = $rootScope.editRelayProcessorData; 
-                }			
+
+    var responseJson = loadFile($rootScope.base_url + '/serviceconfigurations');
+    if (responseJson) {
+        var propertyResponse = responseJson.getPropertiesValueResponseDTO;
+        if (propertyResponse.response.status === 'success') {
+            var properties = propertyResponse.properties;
+
+            $rootScope.javaProperties.globalTrustStoreId = properties.trustStoreId;
+            $rootScope.javaProperties.globalTrustStoreGroupId = properties.trustStoreGroupId;
+            $rootScope.javaProperties.processorSecureSyncUrlDisplayPrefix = properties.processorSecureSyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorSecureAsyncUrlDisplayPrefix = properties.processorSecureAsyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorLowSecureSyncUrlDisplayPrefix = properties.processorLowSecureSyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorLowSecureAsyncUrlDisplayPrefix = properties.processorLowSecureAsyncUrlDisplayPrefix;
+            $rootScope.javaProperties.defaultScriptTemplateName = properties.defaultScriptTemplateName;
+            $rootScope.javaProperties.deployAsDropbox = properties.deployAsDropbox;
+            $rootScope.javaProperties.clusterTypes = properties.clusterTypes;
+
+            var deploymentType = properties.deploymentType;
+            if ('CONVEYOR' === deploymentType) {
+                $rootScope.initialProcessorData = $rootScope.conveyorProcessorData;
+                $rootScope.editProcessorData = $rootScope.editConveyorProcessorData;
+            } else if ('LOW_SECURE_RELAY' === deploymentType) {
+                $rootScope.initialProcessorData = $rootScope.legacyRelayProcessorData;
+                $rootScope.editProcessorData = $rootScope.editLegacyRelayProcessorData;
             } else {
-                return;
+                $rootScope.initialProcessorData = $rootScope.relayProcessorData;
+                $rootScope.editProcessorData = $rootScope.editRelayProcessorData;
             }
         }
-	);
+    };
 
 	/*
 	* Pipeline Id code
@@ -259,4 +244,14 @@ function getParameterByName(url, name) {
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function loadFile(file) {
+
+    var request = new XMLHttpRequest();
+    request.open('GET', file, false);
+    request.send(null);
+    if (request.status === 200) {
+        return JSON.parse(request.responseText);
+    }
 }
