@@ -433,6 +433,10 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
     String CONFIGURATION_SOCKET_TIMEOUT = "com.liaison.mailbox.sync.processor.socket.timeout";
+    String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
+    String GEM_URL = "com.liaison.acl.manifest.url";
+    String GUM_URL = "usermanagement.url.authenticate";
+    String BOSS_URL = "fs2.storage.secure@uat-boss.url";
 
     String LOCALHOST = "localhost";
     

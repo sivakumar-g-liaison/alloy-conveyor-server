@@ -39,7 +39,12 @@ import javax.servlet.http.HttpServlet;
 
 import java.net.URL;
 
+import static com.liaison.mailbox.MailBoxConstants.BOSS_URL;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
+import static com.liaison.mailbox.MailBoxConstants.GEM_URL;
+import static com.liaison.mailbox.MailBoxConstants.GUM_URL;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_KEY_MANAGEMENT_BASE_URL;
 
 
 /**
@@ -113,6 +118,71 @@ public class InitializationServlet extends HttpServlet {
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
                 logger.error("Unable to register http sbasync pool", e);
+            }
+        }
+
+        //Register sb http sync host
+        String serviceBrokerAsync = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerAsync)) {
+
+            try {
+                URL uri = new URL(serviceBrokerAsync);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http sb sync pool", e);
+            }
+        }
+
+        //Register kms
+        String kmsUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
+        if (!MailBoxUtil.isEmpty(kmsUrl)) {
+
+            try {
+                URL uri = new URL(kmsUrl);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http kms pool", e);
+            }
+        }
+
+        //Register gem
+        String gemUrl = MailBoxUtil.getEnvironmentProperties().getString(GEM_URL);
+        if (!MailBoxUtil.isEmpty(gemUrl)) {
+
+            try {
+                URL uri = new URL(gemUrl);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http gem pool", e);
+            }
+        }
+
+        //Register gum
+        String gumURl = MailBoxUtil.getEnvironmentProperties().getString(GUM_URL);
+        if (!MailBoxUtil.isEmpty(gumURl)) {
+
+            try {
+                URL uri = new URL(gumURl);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http gum pool", e);
+            }
+        }
+
+        //Register boss
+        String bossUrl = MailBoxUtil.getEnvironmentProperties().getString(BOSS_URL);
+        if (!MailBoxUtil.isEmpty(bossUrl)) {
+
+            try {
+                URL uri = new URL(bossUrl);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http boss pool", e);
             }
         }
 

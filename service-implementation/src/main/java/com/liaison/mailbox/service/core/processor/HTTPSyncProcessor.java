@@ -73,14 +73,6 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
 		}
 
-		try {
-			URL uri = new URL(SERVICE_BROKER_URI);
-			HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-			HTTPRequest.registerHealthCheck();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
 		ENV_CONNECTION_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT, 60000);
 	}
 

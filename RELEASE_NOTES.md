@@ -1,3 +1,8 @@
+4.16.3.2
+---------------
+* GMB-1053 - HTTP Connection Leaks
+    * Revamp the connection manager register
+
 4.16.3
 ---------------
 * GMB-1045 - Increase script sandbox pool size
