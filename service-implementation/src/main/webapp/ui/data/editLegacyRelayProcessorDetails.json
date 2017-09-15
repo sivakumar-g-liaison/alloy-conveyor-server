@@ -55,6 +55,14 @@
             {
                 "key":"FTPS",
                 "value":"FTPS"
+            },
+            {
+                "key":"HTTP",
+                "value":"HTTP"
+            },
+            {
+                "key":"HTTPS",
+                "value":"HTTPS"
             }
         ]
     },

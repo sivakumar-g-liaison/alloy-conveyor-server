@@ -169,6 +169,7 @@ var rest = myApp.controller(
                 		password:"",
                 		passwordPguidInKMS:""
                 }
+                
             };
             
             $scope.supportedProtocols = angular.copy($scope.initialProcessorData.supportedProtocols.options);
