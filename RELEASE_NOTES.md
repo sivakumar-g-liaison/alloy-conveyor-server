@@ -1,4 +1,4 @@
-4.16.3.2
+4.16.5
 ---------------
 * GMB-1053 - HTTP Connection Leaks
     * Revamp the connection manager register
