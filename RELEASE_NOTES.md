@@ -1,3 +1,9 @@
+4.16.6
+---------------
+* GMB-1053 - HTTP Connection Leaks
+    * Revamp the connection manager register
+    * Remove try with resources while handling the payload
+
 4.16.5
 ---------------
 * GMB-1053 - HTTP Connection Leaks

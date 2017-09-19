@@ -272,9 +272,15 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                 : currentFileName;
 
         // upload file
-        try (InputStream inputStream = file.getPayloadInputStream()) {
+        InputStream inputStream = null;
+        try {
+            inputStream = file.getPayloadInputStream();
             LOGGER.info(constructMessage("uploading file from storage {} to remote path {}"), file.getPayloadUri(), remoteParentDir);
             replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
+            }
         }
 
         // Check whether the file is uploaded successfully

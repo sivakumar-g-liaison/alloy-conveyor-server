@@ -193,9 +193,12 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
         HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
         String contentType = httpUploaderStaticProperties.getContentType();
 
-        try (InputStream contentStream = file.getPayloadInputStream();
-             ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
+        InputStream contentStream = null;
+        ByteArrayOutputStream responseStream = null;
+        try {
 
+            contentStream = file.getPayloadInputStream();
+            responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE);
             LOGGER.info(constructMessage("uploading file from fs2 uri {} and file name {}"), file.getPayloadUri(), file.getName());
 
             request = (HTTPRequest) getClient();
@@ -217,13 +220,20 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
             } else {
 
-                //deletes the file if it is staged using file system
+                // deletes the file if it is staged using file system
                 file.delete();
                 String msg = "File " +
                         file.getName() +
                         " uploaded successfully";
                 logToLens(msg, file, ExecutionState.COMPLETED);
                 totalNumberOfProcessedFiles++;
+            }
+        } finally {
+            if (contentStream != null) {
+                contentStream.close();
+            }
+            if (responseStream != null) {
+                responseStream.close();
             }
         }
 

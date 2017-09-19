@@ -117,7 +117,7 @@ public class InitializationServlet extends HttpServlet {
                 HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
-                logger.error("Unable to register http sbasync pool", e);
+                logger.error("Unable to register http sb async pool", e);
             }
         }
 
@@ -131,45 +131,6 @@ public class InitializationServlet extends HttpServlet {
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
                 logger.error("Unable to register http sb sync pool", e);
-            }
-        }
-
-        //Register kms
-        String kmsUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
-        if (!MailBoxUtil.isEmpty(kmsUrl)) {
-
-            try {
-                URL uri = new URL(kmsUrl);
-                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-                HTTPRequest.registerHealthCheck();
-            } catch (Exception e) {
-                logger.error("Unable to register http kms pool", e);
-            }
-        }
-
-        //Register gem
-        String gemUrl = MailBoxUtil.getEnvironmentProperties().getString(GEM_URL);
-        if (!MailBoxUtil.isEmpty(gemUrl)) {
-
-            try {
-                URL uri = new URL(gemUrl);
-                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-                HTTPRequest.registerHealthCheck();
-            } catch (Exception e) {
-                logger.error("Unable to register http gem pool", e);
-            }
-        }
-
-        //Register gum
-        String gumURl = MailBoxUtil.getEnvironmentProperties().getString(GUM_URL);
-        if (!MailBoxUtil.isEmpty(gumURl)) {
-
-            try {
-                URL uri = new URL(gumURl);
-                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-                HTTPRequest.registerHealthCheck();
-            } catch (Exception e) {
-                logger.error("Unable to register http gum pool", e);
             }
         }
 
