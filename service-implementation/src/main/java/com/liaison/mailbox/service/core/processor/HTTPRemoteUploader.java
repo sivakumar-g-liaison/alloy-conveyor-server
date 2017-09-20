@@ -222,10 +222,18 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             }
         } finally {
             if (contentStream != null) {
-                contentStream.close();
+                try {
+                    contentStream.close();
+                } catch (IOException e) {
+                    LOGGER.error("Failed to close the stream", e);
+                }
             }
             if (responseStream != null) {
-                responseStream.close();
+                try {
+                    responseStream.close();
+                } catch (IOException e) {
+                    LOGGER.error("Failed to close the stream", e);
+                }
             }
         }
 
