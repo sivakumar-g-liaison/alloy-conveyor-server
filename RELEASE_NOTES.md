@@ -1,13 +1,19 @@
-4.16.6
+4.16.7
 ---------------
 * GMB-1053 - HTTP Connection Leaks
-    * Revamp the connection manager register
-    * Remove try with resources while handling the payload
+* GMB-1055 - HTTPS delivery does not report failure to Service Broker for unsuccessful HTTP response
+
+4.16.6
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
 
 4.16.5
----------------
-* GMB-1053 - HTTP Connection Leaks
-    * Revamp the connection manager register
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.4
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
 
 4.16.3
 ---------------

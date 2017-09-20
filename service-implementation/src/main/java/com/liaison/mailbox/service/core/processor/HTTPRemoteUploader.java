@@ -50,7 +50,6 @@ import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
     private static final Logger LOGGER = LogManager.getLogger(HTTPRemoteUploader.class);
-    private boolean executionStatus = false;
 
     @SuppressWarnings("unused")
     private HTTPRemoteUploader() {
@@ -106,10 +105,6 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                     }
                 }
 
-                if (executionStatus) {
-                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
-                }
-
             }
 
             // to calculate the elapsed time for processing files
@@ -118,8 +113,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
         } catch (IOException | LiaisonException | IllegalAccessException e) {
-            LOGGER.error(constructMessage("Error occurred during http(s) upload", seperator, e.getMessage()), e);
-            throw new RuntimeException(e);
+            throw new RuntimeException(constructMessage("Error occurred during http(s) upload", seperator, e.getMessage()), e);
         }
 
     }
@@ -134,8 +128,8 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
      */
     private void uploadFile(File file) throws IOException, IllegalAccessException, LiaisonException {
 
-        HTTPRequest request = null;
-        HTTPResponse response = null;
+        HTTPRequest request;
+        HTTPResponse response;
 
         // retrieve required properties
         HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
@@ -158,10 +152,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 LOGGER.warn(constructMessage("The response code received is {} "), response.getStatusCode());
                 LOGGER.warn(constructMessage("Execution failure for "), file.getAbsolutePath());
-
-                executionStatus = true;
-                String msg = "Failed to upload a file " + file.getName();
+                String msg = String.format("Failed to upload a file %s  status code received %s and the reason is %s", file.getName(), response.getStatusCode(), response.getReasonPhrease());
                 logToLens(msg, file, ExecutionState.FAILED);
+                throw new RuntimeException(msg);
 
             } else {
 
@@ -213,10 +206,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 LOGGER.warn(constructMessage("The response code received is {} "), response.getStatusCode());
                 LOGGER.warn(constructMessage("Execution failure for "), file.getAbsolutePath());
-
-                executionStatus = true;
-                String msg = "Failed to upload a file " + file.getName();
+                String msg = String.format("Failed to upload a file %s  status code received %s and the reason is %s", file.getName(), response.getStatusCode(), response.getReasonPhrease());
                 logToLens(msg, file, ExecutionState.FAILED);
+                throw new RuntimeException(msg);
 
             } else {
 
@@ -274,7 +266,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
         try {
 
-            boolean isHandOverExecutionToJavaScript = false;
+            boolean isHandOverExecutionToJavaScript;
             int scriptExecutionTimeout;
             try {
                 isHandOverExecutionToJavaScript = getProperties().isHandOverExecutionToJavaScript();

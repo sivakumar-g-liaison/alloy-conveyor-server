@@ -29,22 +29,16 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
 import java.net.URL;
 
-import static com.liaison.mailbox.MailBoxConstants.BOSS_URL;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
-import static com.liaison.mailbox.MailBoxConstants.GEM_URL;
-import static com.liaison.mailbox.MailBoxConstants.GUM_URL;
-import static com.liaison.mailbox.MailBoxConstants.PROPERTY_KEY_MANAGEMENT_BASE_URL;
 
 
 /**
@@ -109,11 +103,11 @@ public class InitializationServlet extends HttpServlet {
 		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
         //Register sb http async host
-        String serviceBrokerUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
-        if (!MailBoxUtil.isEmpty(serviceBrokerUri)) {
+        String serviceBrokerAsyncUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerAsyncUri)) {
             try {
 
-                URL uri = new URL(serviceBrokerUri);
+                URL uri = new URL(serviceBrokerAsyncUri);
                 HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
@@ -122,28 +116,15 @@ public class InitializationServlet extends HttpServlet {
         }
 
         //Register sb http sync host
-        String serviceBrokerAsync = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
-        if (!MailBoxUtil.isEmpty(serviceBrokerAsync)) {
+        String serviceBrokerRTUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerRTUri)) {
 
             try {
-                URL uri = new URL(serviceBrokerAsync);
+                URL uri = new URL(serviceBrokerRTUri);
                 HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
                 logger.error("Unable to register http sb sync pool", e);
-            }
-        }
-
-        //Register boss
-        String bossUrl = MailBoxUtil.getEnvironmentProperties().getString(BOSS_URL);
-        if (!MailBoxUtil.isEmpty(bossUrl)) {
-
-            try {
-                URL uri = new URL(bossUrl);
-                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-                HTTPRequest.registerHealthCheck();
-            } catch (Exception e) {
-                logger.error("Unable to register http boss pool", e);
             }
         }
 
