@@ -105,11 +105,9 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
+					throw new LiaisonRuntimeException(e.getMessage(), e);
 				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
 				}
 			}
 

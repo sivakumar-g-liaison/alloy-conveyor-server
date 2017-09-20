@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -43,7 +43,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- * 
+ *
  * @author OFS
  */
 @AppConfigurationResource
@@ -51,62 +51,56 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/dropbox/authenticate", description = "Gateway for the dropbox services.")
 public class DropboxAuthenticationResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationResource.class);
+    private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationResource.class);
 
-	/**
-	 * REST method to update a processor.
-	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @param guid The id of the mailbox
-	 * 
-	 * @return Response Object
-	 */
-	@POST
-	@ApiOperation(value = "Authenticate Account", notes = "authenticate an user account", position = 1, response = com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Authenticate an user account", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body")})
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	@AccessDescriptor(skipFilter = true)
-	public Response authenticateAccount(@Context final HttpServletRequest request) {
+    /**
+     * REST method to update a processor.
+     *
+     * @param request HttpServletRequest, injected with context annotation
+     *
+     * @return Response Object
+     */
+    @POST
+    @ApiOperation(value = "Authenticate Account", notes = "authenticate an user account", position = 1, response = com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO.class)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Authenticate an user account", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body")})
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @AccessDescriptor(skipFilter = true)
+    public Response authenticateAccount(@Context final HttpServletRequest request) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
-			@Override
-			public Object call() throws Exception {
+            @Override
+            public Object call() throws Exception {
 
-				DropboxAuthAndGetManifestRequestDTO serviceRequest;
+                DropboxAuthAndGetManifestRequestDTO serviceRequest;
 
-				try {
+                try {
 
-					String requestString = getRequestBody(request);
+                    String requestString = getRequestBody(request);
+                    serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);
+                    return new DropboxAuthenticationService().authenticateAccount(serviceRequest);
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
 
-					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);
+            }
 
-					DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
-					return dropboxService.authenticateAccount(serviceRequest);
+        };
+        worker.actionLabel = "DropboxAuthenticationResource.authenticateAccount()";
 
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-			}
-
-		};
-		worker.actionLabel = "DropboxAuthenticationResource.authenticateAccount()";
-
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
-
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

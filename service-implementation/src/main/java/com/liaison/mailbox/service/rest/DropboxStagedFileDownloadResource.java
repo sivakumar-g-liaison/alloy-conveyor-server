@@ -192,8 +192,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.logProcessingStatus(StatusType.ERROR,
                             MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId +
                             " file download", MailBoxConstants.DROPBOXPROCESSOR, ExceptionUtils.getStackTrace(e));
-                    LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
-                    throw new LiaisonRuntimeException(e.getMessage());
+                    throw new LiaisonRuntimeException(e.getMessage(), e);
                 } finally {
                     // Log time stamp
                     glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
@@ -264,11 +263,9 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     return builder.build();
 
                 } catch (MailBoxServicesException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw new LiaisonRuntimeException(e.getMessage());
+                    throw new LiaisonRuntimeException(e.getMessage(), e);
                 } catch (IOException | JAXBException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
                 }
             }
         };

@@ -51,7 +51,7 @@
         <!-- ACL -->
           <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
-            <param-value>com.liaison.commons.acl.resource.filter.ValidationFilterFactory</param-value>
+            <param-value>com.liaison.mailbox.service.dropbox.filter.ConveyorAuthValidationFilterFactory</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

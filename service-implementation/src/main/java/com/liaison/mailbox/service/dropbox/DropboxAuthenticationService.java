@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import com.liaison.gem.service.client.GEMHelper;
+import com.liaison.usermanagement.service.client.filter.UserAuthenticationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -200,11 +202,11 @@ public class DropboxAuthenticationService {
 	 * Method to authenticate user Account and give manifest for given request.
 	 * 
 	 * @param serviceRequest
-	 * @return AuthenticateUserAccountResponseDTO
+	 * @return GEMManifestResponse
 	 */
 	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
 		// get manifest from GEM for the given loginId
-		return new GEMACLClient().getACLManifestByloginId(serviceRequest.getLoginId());
+		return GEMHelper.getACLManifestByLoginId(serviceRequest.getLoginId(), null);
 	}
 
 	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
@@ -212,16 +214,18 @@ public class DropboxAuthenticationService {
 		LOG.debug("Entering into user authentication using UM client.");
 
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
-				serviceRequest.getPassword(), serviceRequest.getToken());
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD,
+                serviceRequest.getLoginId(),
+				serviceRequest.getPassword(),
+                serviceRequest.getToken());
 		UMClient.authenticate();
 
 		LOG.debug("Exit from user authentication using UM client.");
 
 		if (UMClient.isSuccessful()) {
 			return UMClient.getAuthenticationToken();
+		} else {
+            throw new UserAuthenticationException(UMClient.getMessage());
 		}
-
-		return null;
 	}
 }

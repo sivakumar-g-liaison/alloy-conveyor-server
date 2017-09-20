@@ -24,6 +24,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.google.gson.Gson;
+import com.liaison.mailbox.service.dropbox.filter.ConveyorAuth;
+import com.liaison.usermanagement.service.client.filter.Auth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,8 +104,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 					return stagedFileService.addStagedFile(serviceRequest, null);
 
 				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
 				}
 			}
 		};
@@ -115,6 +117,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @ConveyorAuth
 	public Response getStagedFiles(
 			@Context final HttpServletRequest serviceRequest,
 			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
@@ -132,36 +135,12 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 				LOG.debug("Entering into getStagedFiles service.");
 
-				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
-				DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
-				DropboxAuthenticationService authService = new DropboxAuthenticationService();
-				DropboxStagedFilesService fileStagedService = new DropboxStagedFilesService();
-
 				try {
 
 					// get login id and auth token from mailbox token
 					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					GEMManifestResponse manifestResponse = new Gson().fromJson(serviceRequest.getHeader(MailBoxConstants.MANIFEST_DTO), GEMManifestResponse.class);
 					String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
-					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
-
-					// constructing authenticate and get manifest request
-					dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
-
-					// authentication
-					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
-					if (encryptedMbxToken == null) {
-						LOG.error("Dropbox - user authentication failed");
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-					}
-
-					// getting manifest
-					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
-					if (manifestResponse == null) {
-						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-					}
 
 					// construct the generic search filter dto
 					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
@@ -173,19 +152,18 @@ public class DropboxFileStagedResource extends AuditedResource {
 					searchFilter.setStatus(status);
 
 					// getting staged files based on manifest
-					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService.getStagedFiles(
-							searchFilter, manifestResponse.getManifest());
-					getStagedFilesResponseDTO.setHitCounter(hitCounter);
+                    GetStagedFilesResponseDTO getStagedFilesResponseDTO = new DropboxStagedFilesService().getStagedFiles(
+                            searchFilter, manifestResponse.getManifest());
+                    getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 
-					ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, responseBody);
+					ResponseBuilder builder = constructResponse(loginId, authenticationToken, manifestResponse, responseBody);
 					LOG.debug("Exit from getStagedFiles service.");
 
 					return builder.build();
 
 				} catch (IOException | JAXBException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
 				}
 			}
 

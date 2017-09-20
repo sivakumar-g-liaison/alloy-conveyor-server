@@ -206,11 +206,9 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 					return builder.build();
 				} catch (MailBoxServicesException e) {
-					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
-					throw new LiaisonRuntimeException(e.getMessage());
+					throw new LiaisonRuntimeException(e.getMessage(), e);
 				} catch (IOException | JAXBException e) {
-					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
 				}
 			}
 		};
