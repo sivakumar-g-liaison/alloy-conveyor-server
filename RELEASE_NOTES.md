@@ -1,6 +1,6 @@
 4.18.0-SNAPSHOT
 ---------------
-
+* GMB-1051 - Conditional sweeper sweeps files marked as inactive
 4.17.2
 ---------------
 * GMB-1050 - Page displays empty fields when loading the processor on relay
