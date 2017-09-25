@@ -182,10 +182,14 @@ public class StorageUtilities {
 
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot;
-            try (InputStream is = payload) {
-                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, is);
+            try {
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
                 LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
                         workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
+            } finally {
+                if (payload != null) {
+                    payload.close();
+                }
             }
 
             LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
@@ -225,12 +229,18 @@ public class StorageUtilities {
             LOGGER.debug("Persist the workticket **");
             URI requestUri = createPayloadURI(uri, false, properties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
 
-            // fetch the metdata includes payload size
+            // fetch the metadata includes payload size
             FS2MetaSnapshot metaSnapshot;
-            try (InputStream is = new ByteArrayInputStream(JAXBUtility.marshalToJSON(workTicket).getBytes())) {
+            InputStream is = null;
+            try {
+                is = new ByteArrayInputStream(JAXBUtility.marshalToJSON(workTicket).getBytes());
                 metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, is);
                 LOGGER.debug("Time spent on uploading workticket {} of size {} to spectrum only is {} ms",
                         workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
+            } finally {
+                if (is != null) {
+                    is.close();
+                }
             }
 
             LOGGER.debug("Successfully persisted the workticket in spectrum to url {} ", requestUri);

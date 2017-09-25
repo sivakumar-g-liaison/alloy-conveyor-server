@@ -32,6 +32,8 @@ import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_KEY_MANAGEMENT_BASE_URL;
+
 /**
  * Utilities for KMS.
  *
@@ -43,7 +45,6 @@ public class KMSUtil {
 	private static final String SECRET = "/secret/";
 	private static final String GROUP_KEYPAIR = "/fetch/group/keypair/current/";
 	private static final String GROUP_TRUSTSTORE = "/fetch/truststore/current/";
-	private static final String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
 	private static final String UTF_ENCODE = "UTF-8";
 
 	/**
