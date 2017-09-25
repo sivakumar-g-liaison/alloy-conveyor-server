@@ -37,6 +37,7 @@ public enum Messages {
     USERNAME_EMPTY("Username cannot be Empty."),
     PWD_INVALID("The given secret guid does not exist in the key management system."),
     PWD_ENCODE_INVALID("The secret from key management system is not base64 encoded."),
+    PROCESSOR_NOT_ALLOWED("Processor type or cluster type and protocol type is not allowed for deployment type %s"),
     PROCESSOR_PROFILE_NOT_ALLOWED("Profile is not allowed for processor type %s"),
     MBX_NON_DELETED_PROCESSOR("There are active processors available for the Mailbox"),
     DELETE_OPERATION_NOT_ALLOWED("Delete operation is not allowed in revise request"),

@@ -22,6 +22,7 @@
 		<class>com.liaison.mailbox.dtdm.model.RemoteDownloader</class>
 		<class>com.liaison.mailbox.dtdm.model.RemoteUploader</class>
 		<class>com.liaison.mailbox.dtdm.model.Sweeper</class>
+		<class>com.liaison.mailbox.dtdm.model.ConditionalSweeper</class>
 		<class>com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor</class>
 		<class>com.liaison.mailbox.dtdm.model.HTTPSyncProcessor</class>
 		<class>com.liaison.mailbox.dtdm.model.FileWriter</class>

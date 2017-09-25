@@ -1,0 +1,46 @@
+{  
+    "supportedProcessors":{  
+        "name":"processors",
+        "displayName":"Type",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+            {  
+                "key":"ALLOY Conveyor Processor",
+                "value":"DROPBOXPROCESSOR",
+                "type":"Server"
+            }
+        ]
+    },
+    "supportedProtocols":{  
+        "name":"protocols",
+        "displayName":"Protocol",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+
+        ]
+    },
+    "supportedJavaScriptCheckBox":{  
+        "name":"handOverExecutionToJavaScript",
+        "displayName":"HandOverExecutionToJavaScript",
+        "uiFiledtype":"checkbox",
+        "value":""
+    },
+    "supportedStatus":{  
+        "name":"status",
+        "displayName":"Status",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+            {  
+                "key":"Active",
+                "value":"ACTIVE"
+            },
+            {  
+                "key":"Inactive",
+                "value":"INACTIVE"
+            }
+        ]
+    }
+}

@@ -241,6 +241,68 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
         processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
 
     }
+    
+    /**
+     * Method to create conditional sweeper processor with valid data.
+     *
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test
+    public void testCreateConditionalSweeperProcessor() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+
+        // Adding Mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mailboxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        String mailboxId = response.getMailBox().getGuid();
+
+        // Adding Processor
+        AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorLegacyDTO processorLegacy = constructLegacyProcessorDTO(ProcessorType.CONDITIONALSWEEPER.getCode(), Protocol.CONDITIONALSWEEPER.name(), EntityStatus.ACTIVE.value());
+        processorLegacy.setLinkedMailboxId(mailboxId);
+        processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
+        ProcessorConfigurationService processorService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO processorResponse = processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
+        Assert.assertEquals(SUCCESS, processorResponse.getResponse().getStatus());
+
+    }
+    
+    /**
+     * Method to create conditional sweeper processor with valid data.
+     *
+     * @throws JAXBException
+     * @throws IOException
+     */
+    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    public void testCreateConditionalSweeperProcessorWithInvalidPipelineId() throws MailBoxConfigurationServicesException, JAXBException, IOException {
+
+        // Adding Mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailboxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mailboxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mailboxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        String mailboxId = response.getMailBox().getGuid();
+
+        // Adding Processor
+        AddProcessorToMailboxRequestDTO processorCreateRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorLegacyDTO processorLegacy = constructLegacyProcessorDTO(ProcessorType.CONDITIONALSWEEPER.getCode(), Protocol.CONDITIONALSWEEPER.name(), EntityStatus.ACTIVE.value());
+        processorLegacy.getRemoteProcessorProperties().setPipeLineID("INVALID");
+        processorLegacy.setLinkedMailboxId(mailboxId);
+        processorCreateRequestDTO.setProcessorLegacy(processorLegacy);
+        ProcessorConfigurationService processorService = new ProcessorConfigurationService();
+        processorService.createProcessor(mailboxId, processorCreateRequestDTO, serviceInstanceId, processorCreateRequestDTO.getProcessor().getModifiedBy());
+
+    }
 
     /**
      * Method constructs Processor with valid credential data.
@@ -734,6 +796,10 @@ public class ProcessorConfigurationServiceLegacyIT extends BaseServiceTest {
                 legacyProperties.setPipeLineID("E074B40BB4B74431AEDBA186D26CF3DC");
                 legacyProperties.setIncludeFiles(includeFiles);
                 legacyProperties.setExcludeFiles(excludeFiles);
+                break;
+            case "conditionalsweeper":
+                legacyProperties.setDeleteFileAfterSweep(true);
+                legacyProperties.setPipeLineID("E074B40BB4B74431AEDBA186D26CF3DC");
         }
 
         if (ProcessorType.REMOTEUPLOADER.getCode().equals(type)) {

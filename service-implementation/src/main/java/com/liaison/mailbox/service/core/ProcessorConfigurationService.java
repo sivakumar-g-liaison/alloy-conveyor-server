@@ -10,6 +10,28 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.ws.rs.core.Response;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
@@ -67,26 +89,6 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.ws.rs.core.Response;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 /**
@@ -153,8 +155,17 @@ public class ProcessorConfigurationService {
                         Response.Status.BAD_REQUEST);
             }
 
-			GenericValidator validator = new GenericValidator();
-			validator.validate(processorDTO);
+            GenericValidator validator = new GenericValidator();
+            validator.validate(processorDTO);
+
+            Protocol foundProtocolType = Protocol.findByName(processorDTO.getProtocol());
+            String clusterType = (MailBoxUtil.isEmpty(processorDTO.getClusterType()))
+                    ? MailBoxUtil.CLUSTER_TYPE
+                    : processorDTO.getClusterType();
+            if (!isValidProtocol(foundProtocolType, clusterType) || !isValidProcessorType(foundProcessorType)) {
+                throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_NOT_ALLOWED, MailBoxUtil.DEPLOYMENT_TYPE,
+                        Response.Status.BAD_REQUEST);
+            }
 
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
@@ -452,6 +463,15 @@ public class ProcessorConfigurationService {
 						Response.Status.BAD_REQUEST);
 			}
 
+            Protocol foundProtocolType = Protocol.findByName(processorDTO.getProtocol());
+            String inputClusterType = (MailBoxUtil.isEmpty(processorDTO.getClusterType()))
+                    ? MailBoxUtil.CLUSTER_TYPE
+                    : processorDTO.getClusterType();
+            if (!isValidProtocol(foundProtocolType, inputClusterType) || !isValidProcessorType(foundProcessorType)) {
+                throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_NOT_ALLOWED, MailBoxUtil.DEPLOYMENT_TYPE,
+                        Response.Status.BAD_REQUEST);
+            }
+            
 			// validates the processor status
 			EntityStatus foundStatusType = EntityStatus.findByName(processorDTO.getStatus());
 			if (foundStatusType == null) {
@@ -518,11 +538,11 @@ public class ProcessorConfigurationService {
 			// changeExecutionOrder(request, configDao, processor);
 		    
 		    //updates processor cluster type in the runtime processors table
-		    if (!processorDTO.getClusterType().equals(clusterType)) {
-		        new RuntimeProcessorsDAOBase().updateClusterType(processorDTO.getClusterType(), processorId);
-		    }
-			// response message construction
-			ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
+            if (!inputClusterType.equals(clusterType)) {
+                new RuntimeProcessorsDAOBase().updateClusterType(inputClusterType, processorId);
+            }
+            // response message construction
+            ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
             serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
             serviceResponse.setProcessor(dto);
             LOGGER.debug("Exit from revise processor.");
@@ -1212,6 +1232,86 @@ public class ProcessorConfigurationService {
             serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE,
                     e.getMessage()));
             return serviceResponse;
+        }
+    }
+    
+    /**
+     * Helper method validate the Processor type by deployment type
+     * 
+     * @param processorType
+     * @return boolean
+     */
+    private boolean isValidProcessorType(ProcessorType processorType) {
+
+        switch (MailBoxUtil.DEPLOYMENT_TYPE) {
+        
+            case MailBoxConstants.RELAY:
+            case MailBoxConstants.LOW_SECURE_RELAY:
+                return Stream.of(ProcessorType.REMOTEDOWNLOADER,
+                        ProcessorType.REMOTEUPLOADER,
+                        ProcessorType.HTTPASYNCPROCESSOR,
+                        ProcessorType.HTTPSYNCPROCESSOR,
+                        ProcessorType.SWEEPER,
+                        ProcessorType.CONDITIONALSWEEPER,
+                        ProcessorType.FILEWRITER).anyMatch(s -> s.equals(processorType));
+            case MailBoxConstants.CONVEYOR:
+                return ProcessorType.DROPBOXPROCESSOR.equals(processorType);
+            default:
+                return false;
+        }
+    }
+    
+    /**
+     * Helper method validate the Protocol by deployment type
+     * 
+     * @param protocol
+     * @param clusterType
+     * @return boolean
+     */
+    private boolean isValidProtocol(Protocol protocol, String clusterType) {
+    	
+    	boolean isValidProtocol;
+    	boolean isValidLegacyProtocol;
+
+        switch (MailBoxUtil.DEPLOYMENT_TYPE) {
+		
+            case MailBoxConstants.RELAY:
+                isValidProtocol = Stream.of(Protocol.FTP,
+                        Protocol.FTPS,
+                        Protocol.SFTP,
+                        Protocol.HTTPS,
+                        Protocol.HTTP,
+                        Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
+                        Protocol.HTTPSYNCPROCESSOR,
+                        Protocol.HTTPASYNCPROCESSOR,
+                        Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
+
+                isValidLegacyProtocol = Stream.of(Protocol.FTP,
+                        Protocol.FTPS,
+                        Protocol.HTTP,
+                        Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
+                        Protocol.HTTPSYNCPROCESSOR,
+                        Protocol.HTTPASYNCPROCESSOR,
+                        Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
+
+                return (MailBoxConstants.SECURE.equals(clusterType) && isValidProtocol)
+                        || (MailBoxConstants.LOWSECURE.equals(clusterType) && isValidLegacyProtocol);
+            case MailBoxConstants.LOW_SECURE_RELAY:
+                isValidProtocol = Stream.of(Protocol.FTP,
+                        Protocol.FTPS,
+                        Protocol.SWEEPER,
+                        Protocol.CONDITIONALSWEEPER,
+                        Protocol.HTTPSYNCPROCESSOR,
+                        Protocol.HTTPASYNCPROCESSOR,
+                        Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
+
+                return MailBoxConstants.LOWSECURE.equals(clusterType) && isValidProtocol;
+            case MailBoxConstants.CONVEYOR:
+        	    return MailBoxConstants.SECURE.equals(clusterType) && Protocol.DROPBOXPROCESSOR.equals(protocol);
+            default:
+                return false;
         }
     }
 }

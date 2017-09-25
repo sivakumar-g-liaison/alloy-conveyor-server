@@ -34,6 +34,7 @@ public class PropertiesFileDTO {
 	private String defaultScriptTemplateName;
 	private boolean deployAsDropbox;
     private List<String> clusterTypes;
+    private String deploymentType;
     
     public String getProcessorSecureSyncUrlDisplayPrefix() {
         return processorSecureSyncUrlDisplayPrefix;
@@ -91,5 +92,11 @@ public class PropertiesFileDTO {
 
     public void setClusterTypes(List<String> clusterTypes) {
         this.clusterTypes = clusterTypes;
+    }
+    public String getDeploymentType() {
+        return deploymentType;
+    }
+    public void setDeploymentType(String deploymentType) {
+        this.deploymentType = deploymentType;
     }
 }

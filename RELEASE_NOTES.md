@@ -1,3 +1,33 @@
+4.18.0-SNAPSHOT
+---------------
+* GMB-1051 - Conditional sweeper sweeps files marked as inactive
+
+4.17.2
+---------------
+* GMB-1050 - Page displays empty fields when loading the processor on relay
+
+4.17.1
+---------------
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay - protocol changes
+
+4.17.0
+---------------
+* GMB-1030 - Add new processor type ConditionalSweeper - Server
+* GMB-1031 - Add new processor type ConditionalSweeper - UI
+* GMB-1032 - Conditional Sweeper execution
+* GMB-1033 - SFTP Clients keep sub-directories intact
+* GMB-1034 - Data retention based on TTL and should not delete a file after pickup
+* GMB-1035 - Watchdog service has to monitor the conditional sweeper
+* GMB-1036 - LENS should show one triggered file move as a single transaction.
+* GMB-1037 - Provide ability to filter files eligible for move
+* [GMB-1028](https://jira.liaison.tech/browse/GMB-1028) - FTPSClient needs to be updated
+* [GGT-1356](https://jira.liaison.tech/browse/GGT-1356): Remove Spectrum settings from Archaius *.properties files
+* [GGT-1357](https://jira.liaison.tech/browse/GGT-1357) and [GSB-452](https://jira.liaison.tech/browse/GSB-452): Inheritance and Minimization of Archaius property files. (Backwards-compatible)
+* GMB-1047 - Should not post infinite glass log messages when uploader fails
+* [GMB-1046](https://jira.liaison.tech/browse/GMB-1046) - Upgrade fs2 library 9.x
+* [GMB-972](https://jira.liaison.tech/browse/GMB-972)  - Need "(recursive) mkdir" in a SFTP Client Wrapper
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay
+
 4.16.7
 ---------------
 * GMB-1053 - HTTP Connection Leaks

@@ -85,21 +85,16 @@ public class MailBoxProcessorFactory {
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new DirectorySweeper(processor);
-			/*
-			 * } else if
-			 * (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType
-			 * ())) { //mailBoxProcessor = new DropBoxProcessor(processor); }
-			 */
-
-		} else if (ProcessorType.FILEWRITER
-				.equals(processor.getProcessorType())) {
+		} else if (ProcessorType.CONDITIONALSWEEPER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new ConditionalSweeper(processor);
+		} else if (ProcessorType.FILEWRITER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new FileWriter(processor);
 		}
 		return mailBoxProcessor;
 	}
 
     /**
-     * Factory to method to create instances for mailbox processor.
+     * Factory method to create instances for mailbox processor.
      *
      * @param processor
      *            The Processor Entity

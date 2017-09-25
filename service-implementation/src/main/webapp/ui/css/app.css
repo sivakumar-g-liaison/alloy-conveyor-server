@@ -642,3 +642,7 @@ input::-moz-focus-inner {
 	height: 200px;
     width: 1140px;
 }
+
+.tooltip {
+    word-break: break-all;
+}

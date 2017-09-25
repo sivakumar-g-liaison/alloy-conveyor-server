@@ -81,6 +81,7 @@ import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
+import static com.liaison.mailbox.enums.ProcessorType.CONDITIONALSWEEPER;
 
 /**
  * Utilities for MailBox.
@@ -106,6 +107,11 @@ public class MailBoxUtil {
      * Initialize the cluster type.
      */
     public static String CLUSTER_TYPE;
+    
+    /**
+     * Initialize the deployment type.
+     */
+    public static String DEPLOYMENT_TYPE;
 
     /**
      * Pattern to validate the path before directory creation
@@ -115,6 +121,8 @@ public class MailBoxUtil {
     static {
 
         CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        DEPLOYMENT_TYPE = CLUSTER_TYPE;
+        
         if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
             CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
         } else {
@@ -577,7 +585,8 @@ public class MailBoxUtil {
                     HTTPASYNCPROCESSOR.equals(processorType) ||
                     DROPBOXPROCESSOR.equals(processorType)) {
                 pipelineId = propertiesDTO.getHttpListenerPipeLineId();
-            } else if (SWEEPER.equals(processorType)) {
+            } else if (SWEEPER.equals(processorType) ||
+            		CONDITIONALSWEEPER.equals(processorType)) {
                 pipelineId = propertiesDTO.getPipeLineID();
             } else {
                 return;
@@ -766,7 +775,7 @@ public class MailBoxUtil {
      */
     public static List<String> getClusterTypes() {
         return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Collections.singletonList(MailBoxConstants.LOWSECURE) :
-                            Arrays.asList(MailBoxConstants.LOWSECURE, MailBoxConstants.SECURE);
+                            Arrays.asList(MailBoxConstants.SECURE, MailBoxConstants.LOWSECURE);
     }
     
     /**
