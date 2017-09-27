@@ -436,6 +436,7 @@ public interface MailBoxConstants {
     String CONFIGURATION_SERVICE_BROKER_ASYNC_URI = "com.liaison.servicebroker.async.uri";
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
     String CONFIGURATION_SOCKET_TIMEOUT = "com.liaison.mailbox.sync.processor.socket.timeout";
+    String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
 
     String LOCALHOST = "localhost";
     
@@ -497,4 +498,7 @@ public interface MailBoxConstants {
     String RELAY = "RELAY";
     String LOW_SECURE_RELAY = "LOW_SECURE_RELAY";
     String CONVEYOR = "CONVEYOR";
+    
+    String TRIGGER_FILE = "Trigger File";
+
 }

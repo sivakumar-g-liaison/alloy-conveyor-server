@@ -1,3 +1,8 @@
+4.18.0-SNAPSHOT
+---------------
+* GMB-1052 - EOF exception is received when the trigger file name is given as .INP
+* GMB-1051 - Conditional sweeper sweeps files marked as inactive
+
 4.17.2
 ---------------
 * GMB-1050 - Page displays empty fields when loading the processor on relay
@@ -23,6 +28,23 @@
 * [GMB-1046](https://jira.liaison.tech/browse/GMB-1046) - Upgrade fs2 library 9.x
 * [GMB-972](https://jira.liaison.tech/browse/GMB-972)  - Need "(recursive) mkdir" in a SFTP Client Wrapper
 * [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay
+
+4.16.7
+---------------
+* GMB-1053 - HTTP Connection Leaks
+* GMB-1055 - HTTPS delivery does not report failure to Service Broker for unsuccessful HTTP response
+
+4.16.6
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.5
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.4
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
 
 4.16.3
 ---------------

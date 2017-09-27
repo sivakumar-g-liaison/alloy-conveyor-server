@@ -153,12 +153,18 @@ public class ComponentVerificationService  {
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
 
 			FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(stream, wTicket, properties, false);
-			try (InputStream is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString())) {
+            InputStream is = null;
+            try {
 
-				String paylaod = new String(StreamUtil.streamToBytes(is));
-                logger.debug("The received payload is \"{}\"", paylaod);
-			}
-			endTime = System.currentTimeMillis();
+                is = StorageUtilities.retrievePayload(metaSnapshot.getURI().toString());
+                String payload = new String(StreamUtil.streamToBytes(is));
+                logger.debug("The received payload is \"{}\"", payload);
+            } finally {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            endTime = System.currentTimeMillis();
         	elapsedTime = calculateElapsedTime(startTime, endTime);
 			constructComponentVerificationDTO(COMPONENT_NAME_FS2, SUCCESS, "", elapsedTime);
 			logger.debug("Component: " + COMPONENT_NAME_FS2 + ", Status : " + SUCCESS + ", ElapsedTime in milli seconds : " + elapsedTime );
