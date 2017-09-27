@@ -12,7 +12,7 @@ package com.liaison.mailbox.service.util;
 
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -27,8 +27,6 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
-
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -41,7 +39,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -61,27 +58,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.liaison.mailbox.MailBoxConstants.PROP_DATA_FOLDER_PATTERN;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_STALE_FILE_TTL;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_URL;
+import static com.liaison.mailbox.MailBoxConstants.PROP_DATA_FOLDER_PATTERN;
 import static com.liaison.mailbox.MailBoxConstants.USE_FILE_SYSTEM;
-import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_SECONDS;
-import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_MINUTES;
-import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_HOURS;
-import static com.liaison.mailbox.MailBoxConstants.TTL_UNIT_DAYS;
 import static com.liaison.mailbox.enums.Messages.ID_IS_INVALID;
 import static com.liaison.mailbox.enums.Messages.INVALID_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.enums.Messages.MANDATORY_FIELD_MISSING;
+import static com.liaison.mailbox.enums.ProcessorType.CONDITIONALSWEEPER;
 import static com.liaison.mailbox.enums.ProcessorType.DROPBOXPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPASYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.HTTPSYNCPROCESSOR;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEDOWNLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.REMOTEUPLOADER;
 import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
-import static com.liaison.mailbox.enums.ProcessorType.CONDITIONALSWEEPER;
 
 /**
  * Utilities for MailBox.
@@ -91,7 +84,7 @@ import static com.liaison.mailbox.enums.ProcessorType.CONDITIONALSWEEPER;
 public class MailBoxUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
+	private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
 	//for fetch datacenter name.
 	public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
 	// for logging dropbox related details.

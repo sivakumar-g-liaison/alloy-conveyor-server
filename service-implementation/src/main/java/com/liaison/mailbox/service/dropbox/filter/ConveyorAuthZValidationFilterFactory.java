@@ -9,29 +9,25 @@
 package com.liaison.mailbox.service.dropbox.filter;
 
 
-import com.liaison.usermanagement.service.client.filter.Auth;
-import com.liaison.usermanagement.service.client.filter.AuthenticationFilter;
 import com.netflix.config.ConfigurationManager;
-import com.sun.jersey.api.model.AbstractMethod;
-import com.sun.jersey.spi.container.ResourceFilter;
-import com.sun.jersey.spi.container.ResourceFilterFactory;
 import org.apache.commons.configuration.AbstractConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.ws.rs.container.DynamicFeature;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.FeatureContext;
 
 
-public final class ConveyorAuthValidationFilterFactory implements ResourceFilterFactory {
+public final class ConveyorAuthZValidationFilterFactory implements DynamicFeature {
 
     private static final String PROPERTY_AUTH_SKIP = "com.liaison.skip.authentication";
     private static AbstractConfiguration configuration = ConfigurationManager.getConfigInstance();
 
     @Override
-    public List<ResourceFilter> create(AbstractMethod abstractMethod) {
+    public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
         Boolean skipAuth = true;
         //verifies Auth annotation exists on the method
-        if (null != abstractMethod.getAnnotation(ConveyorAuth.class)) {
+        if (null != resourceInfo.getResourceMethod().getAnnotation(ConveyorAuthZ.class)) {
             skipAuth = false;
         }
 
@@ -40,11 +36,9 @@ public final class ConveyorAuthValidationFilterFactory implements ResourceFilter
             skipAuth = true;
         }
 
-        List<ResourceFilter> filters = new ArrayList<>();
         if (!skipAuth) {
-            filters.add(0, new ConveyorAuthFilter());
+            context.register(new ConveyorAuthZFilter());
         }
-        return filters;
-    }
 
+    }
 }

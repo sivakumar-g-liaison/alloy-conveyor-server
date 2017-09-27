@@ -19,7 +19,7 @@ import com.liaison.commons.message.glass.dom.TimeStampAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.gem.service.dto.OrganizationDTO;
 import com.liaison.mailbox.MailBoxConstants;
@@ -58,7 +58,7 @@ public class GlassMessage {
 
 	private static final Logger logger = LogManager.getLogger(GlassMessage.class);
 
-	DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
+	DecryptableConfiguration config = LiaisonArchaiusConfiguration.getInstance();
 
 	public GlassMessage(WorkTicket wrkTicket) {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());

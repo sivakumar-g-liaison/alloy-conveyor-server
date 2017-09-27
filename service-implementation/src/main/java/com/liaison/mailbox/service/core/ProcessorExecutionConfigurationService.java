@@ -12,7 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;

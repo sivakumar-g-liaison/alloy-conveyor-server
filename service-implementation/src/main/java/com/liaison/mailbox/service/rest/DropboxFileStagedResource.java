@@ -10,26 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
-
 import com.google.gson.Gson;
-import com.liaison.mailbox.service.dropbox.filter.ConveyorAuth;
-import com.liaison.usermanagement.service.client.filter.Auth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -39,15 +20,11 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
+import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZ;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
-import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
-import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
@@ -56,6 +33,23 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
@@ -68,7 +62,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class DropboxFileStagedResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileStagedResource.class);
-	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
 	/**
 	 * REST method to add staged file.
@@ -117,16 +110,18 @@ public class DropboxFileStagedResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-    @ConveyorAuth
+	@ConveyorAuthZ
 	public Response getStagedFiles(
-			@Context final HttpServletRequest serviceRequest,
-			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
-			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
-			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
-			@QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
-			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
-			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
-			@QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "Status of staged file") final String status) {
+            @Context final HttpServletRequest serviceRequest,
+            @QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
+            @QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
+            @QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+            @QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+            @QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+            @QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
+            @QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "Status of staged file") final String status,
+            @HeaderParam(MailBoxConstants.MANIFEST_DTO) String manifestJson,
+            @HeaderParam(MailBoxConstants.UM_AUTH_TOKEN) String token) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -138,8 +133,8 @@ public class DropboxFileStagedResource extends AuditedResource {
 				try {
 
 					// get login id and auth token from mailbox token
-					String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
-					GEMManifestResponse manifestResponse = new Gson().fromJson(serviceRequest.getHeader(MailBoxConstants.MANIFEST_DTO), GEMManifestResponse.class);
+					String authenticationToken = token;
+					GEMManifestResponse manifestResponse = new Gson().fromJson(manifestJson, GEMManifestResponse.class);
 					String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
 
 					// construct the generic search filter dto
@@ -152,8 +147,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 					searchFilter.setStatus(status);
 
 					// getting staged files based on manifest
-                    GetStagedFilesResponseDTO getStagedFilesResponseDTO = new DropboxStagedFilesService().getStagedFiles(
-                            searchFilter, manifestResponse.getManifest());
+                    GetStagedFilesResponseDTO getStagedFilesResponseDTO = new DropboxStagedFilesService().getStagedFiles(searchFilter, manifestResponse.getManifest());
                     getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 

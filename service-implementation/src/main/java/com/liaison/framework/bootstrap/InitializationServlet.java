@@ -18,7 +18,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.health.check.file.FileReadDeleteCheck;
 import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
@@ -29,14 +29,12 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
 import java.net.URL;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
@@ -61,7 +59,7 @@ public class InitializationServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
 
-        DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+        DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
 
         // nfs health check

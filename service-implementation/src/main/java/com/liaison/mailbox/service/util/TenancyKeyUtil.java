@@ -9,7 +9,7 @@
 package com.liaison.mailbox.service.util;
 
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;

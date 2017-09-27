@@ -12,7 +12,7 @@ package com.liaison.mailbox.service.dropbox;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
 import com.liaison.mailbox.rtdm.dao.UploadedFileDAO;

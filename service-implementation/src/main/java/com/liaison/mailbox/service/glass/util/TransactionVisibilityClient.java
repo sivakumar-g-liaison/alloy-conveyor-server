@@ -16,7 +16,7 @@ import com.liaison.commons.message.glass.dom.StatusCode;
 import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +36,7 @@ public class TransactionVisibilityClient {
 	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
 	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
 
-	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+	private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 	private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
 
 	private static final String PROCESSOR_EXEC_ID = "proc-exec-id";

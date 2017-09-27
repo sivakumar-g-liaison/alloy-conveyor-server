@@ -139,12 +139,8 @@ public class DropboxManifestResource extends AuditedResource {
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
             @Override
-            public Object call()
-                    throws MessagingException, IOException {
-
-                DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
-
-                return dropboxService.getManifest();
+            public Object call() throws IOException, MessagingException {
+                return new DropboxAuthenticationService().getManifest();
             }
         };
         worker.actionLabel = "DropboxManifestResource.getManifest()";

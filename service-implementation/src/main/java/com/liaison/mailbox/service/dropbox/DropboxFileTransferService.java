@@ -13,7 +13,7 @@ import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.gem.service.dto.OrganizationDTO;
@@ -83,7 +83,7 @@ public class DropboxFileTransferService {
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferService.class);
 
 	public static final String TRANSFER_PROFILE = "Tranfer Profiles";
-	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+	private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
 	/**
 	 *

@@ -49,33 +49,37 @@ allprojects {
         maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
+        maven { url 'http://nexus.liaison.dev/content/repositories/mapr' }
     }
-    
+
     configurations {
         all {
 
             //REJECT karyon admin due to compliance reasons
             all*.exclude group: 'com.netflix.karyon', module: 'karyon-admin'
-            all*.exclude group: 'com.oracle.jdbc', module: 'ojdbc7'
-            all*.exclude group: 'com.oracle.jdbc', module: 'ucp'
+            all*.exclude group: 'com.sun.jersey'
+            all*.exclude group: 'com.sun.jersey.contribs'
+            all*.exclude group: 'com.wordnik', module: 'swagger-jersey-jaxrs_2.10'
 
-              // Most of the time this is a bad idea with little upside:   // check for updates every build
-              //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-
-             //force eureka-client to use 1.1.159
-             resolutionStrategy {
+            //force eureka-client to use 1.1.159
+            resolutionStrategy {
                 force 'com.netflix.eureka:eureka-client:1.1.159'
+            }
+            resolutionStrategy {
+                force 'org.glassfish.jersey.containers:jersey-container-jetty-servlet:2.23.2'
             }
 
             // force the version of transient dependencies for the entire project
-         	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-	             //javassist:javassist:3.12.1.GA to org.javassist:javassist:3.18.1-GA
-	             if(details.requested.group == 'javassist'){
-	                 details.useTarget 'org.javassist:javassist:3.18.1-GA'
-	             }
-         	}
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                //javassist:javassist:3.12.1.GA to org.javassist:javassist:3.18.1-GA
+                if (details.requested.group == 'javassist') {
+                    details.useTarget 'org.javassist:javassist:3.18.1-GA'
+                }
+            }
+
+            exclude module: 'sisu-guice'
         }
-    }    
+    }
 }
 
 apply from: file('gradle/convention.gradle')
@@ -94,11 +98,11 @@ subprojects {
         compile 'com.google.guava:guava:11.0.2'
        
         //swagger
-        compile 'com.wordnik:swagger-jersey-jaxrs_2.10:1.3.1'
-        testCompile 'org.testng:testng:6.8'
+        compile 'com.wordnik:swagger-jersey2-jaxrs_2.10:1.3.13'
+        testCompile 'org.testng:testng:6.11'
 
         //Dependency for ACL integration 
-        compile 'com.liaison.commons.acl:acl-commons-lib:6.+'
+        compile 'com.liaison.commons.acl:acl-commons-lib:8.+'
 
         compile ([group: 'com.liaison', name: 'lib_thread_management', version: '2.+', classifier: 'core'],
                  [group: 'com.liaison', name: 'lib_thread_management', version: '2.+', classifier: 'rest'])
