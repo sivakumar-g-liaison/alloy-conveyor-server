@@ -350,7 +350,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
     private List<Path> listFilePathFromInprogressTriggerFile() {
 
         Map<String, String> statusMapFromFile = readMapFromFile(triggerFileNameWithPath);
-        List<String> inprogressFiles = statusMapFromFile.keySet().stream().collect(Collectors.toList());
+        Map<String, String> activeMapFromFile = statusMapFromFile.entrySet()
+                                                  .stream()
+                                                  .filter(a->a.getValue().equals(EntityStatus.ACTIVE.name()))
+                                                  .collect(Collectors.toMap(e->e.getKey(),e->e.getValue()));
+        List<String> inprogressFiles = activeMapFromFile.keySet().stream().collect(Collectors.toList());
         List<Path> result = new ArrayList<>();
         Path path;
         for (String file : inprogressFiles) {

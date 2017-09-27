@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServlet;
 import java.net.URL;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
 
 
 /**
@@ -102,15 +103,28 @@ public class InitializationServlet extends HttpServlet {
 		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
         //Register sb http async host
-        String serviceBrokerUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
-        if (!MailBoxUtil.isEmpty(serviceBrokerUri)) {
+        String serviceBrokerAsyncUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerAsyncUri)) {
             try {
 
-                URL uri = new URL(serviceBrokerUri);
+                URL uri = new URL(serviceBrokerAsyncUri);
                 HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
-                logger.error("Unable to register http sbasync pool", e);
+                logger.error("Unable to register http sb async pool", e);
+            }
+        }
+
+        //Register sb http sync host
+        String serviceBrokerRTUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerRTUri)) {
+
+            try {
+                URL uri = new URL(serviceBrokerRTUri);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http sb sync pool", e);
             }
         }
 

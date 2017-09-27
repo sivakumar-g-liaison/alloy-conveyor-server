@@ -73,14 +73,6 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
 		}
 
-		try {
-			URL uri = new URL(SERVICE_BROKER_URI);
-			HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-			HTTPRequest.registerHealthCheck();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
 		ENV_CONNECTION_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT, 60000);
 	}
 
@@ -205,19 +197,27 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 		} else {
 
-			// If payload URI avail, reads payload from spectrum. Mostly it
-			// would be an error message payload
-			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-				InputStream inputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-				if (inputStream != null) {
-					builder.entity(IOUtils.toString(inputStream, CharEncoding.UTF_8));
-				}
-			} else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
-				builder.entity(result.getErrorMessage());
-			} else {
-				builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-			}
-		}
-	}
+            // If payload URI avail, reads payload from spectrum. Mostly it
+            // would be an error message payload
+            if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+
+                InputStream inputStream = null;
+                try {
+                    inputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+                    if (inputStream != null) {
+                        builder.entity(IOUtils.toString(inputStream, CharEncoding.UTF_8));
+                    }
+                } finally {
+                    if (null != inputStream) {
+                        inputStream.close();
+                    }
+                }
+            } else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+                builder.entity(result.getErrorMessage());
+            } else {
+                builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+            }
+        }
+    }
 
 }
