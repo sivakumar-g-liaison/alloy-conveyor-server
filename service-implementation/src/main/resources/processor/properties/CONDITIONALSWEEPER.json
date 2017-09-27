@@ -102,7 +102,9 @@
             "mandatory":false,
             "dynamic":false,
             "valueProvided":false,
-            "validationRules":null
+            "validationRules":{
+               "pattern": "\/^(?!.*(inp|INP|Inp|iNp|inP|INp|iNP|InP)).*$\/"
+            }
          },
          {  
             "name":"contentType",

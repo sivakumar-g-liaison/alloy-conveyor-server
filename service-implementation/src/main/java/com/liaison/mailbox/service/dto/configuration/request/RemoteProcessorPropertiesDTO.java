@@ -430,6 +430,7 @@ public class RemoteProcessorPropertiesDTO {
         this.deleteEmptyDirectoryAfterSwept = deleteEmptyDirectoryAfterSwept;
     }
     
+    @PatternValidation(errorMessage = "Invalid trigger file", type = MailBoxConstants.TRIGGER_FILE)
     public String getTriggerFile() {
         return triggerFile;
     }
