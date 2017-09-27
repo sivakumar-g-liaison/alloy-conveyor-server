@@ -255,11 +255,25 @@ public class GenericValidator {
                     errorMessage.append(annotationDetails.errorMessage());
                 }
             }
+            if (MailBoxConstants.TRIGGER_FILE.equals(annotationDetails.type()) && isInvalidTriggerFilePattern(value)) {
+                isValidPattern = false;
+                errorMessage.append(annotationDetails.errorMessage());
+            }
 		}
 		return isValidPattern;
 
 	}
-	
+
+    /**
+     * Method to validate whether given string is valid trigger file name
+     *
+     * @param value trigger file value
+     * @return boolean
+     */
+    private boolean isInvalidTriggerFilePattern(Object value) {
+         return value.toString().toLowerCase().endsWith(".inp");
+    }
+    
 	/**
 	 * Method to validate whether given string is valid retryAttempt value
 	 *

@@ -68,6 +68,7 @@ public class ConditionalSweeperPropertiesDTO extends StaticProcessorPropertiesDT
         this.payloadSizeThreshold = payloadSizeThreshold;
     }
 
+    @PatternValidation(errorMessage = "Invalid trigger file", type = MailBoxConstants.TRIGGER_FILE)
     public String getTriggerFile() {
         return triggerFile;
     }

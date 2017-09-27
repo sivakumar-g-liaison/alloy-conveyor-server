@@ -339,5 +339,66 @@ public class GenericValidatorTest extends BaseServiceTest {
         validator.validate(propertiesDTO);
 
     }
+    
+    @Test()
+    public void testValidTriggerFileIncludingExtension() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setTriggerFile("trigger.txt");
+        Assert.assertTrue(validator.validate(propertiesDTO));
+    }
+    
+    @Test()
+    public void testValidTriggerFile() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setTriggerFile("trigger");
+        Assert.assertTrue(validator.validate(propertiesDTO));
+
+    }
+    
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testValidTriggerInValidFile() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setTriggerFile("trigger.inp");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+
+    }
+    
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testInValidTriggerFiles() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setTriggerFile("trigger.INP");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.Inp");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.iNp");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.inP");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.INp");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.iNP");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setTriggerFile("trigger.InP");
+        Assert.assertFalse(validator.validate(propertiesDTO));
+
+    }
 
 }

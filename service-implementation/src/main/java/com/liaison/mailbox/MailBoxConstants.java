@@ -498,4 +498,7 @@ public interface MailBoxConstants {
     String RELAY = "RELAY";
     String LOW_SECURE_RELAY = "LOW_SECURE_RELAY";
     String CONVEYOR = "CONVEYOR";
+    
+    String TRIGGER_FILE = "Trigger File";
+
 }
