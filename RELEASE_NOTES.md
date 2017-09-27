@@ -1,4 +1,4 @@
-4.18.0-SNAPSHOT
+4.17.3
 ---------------
 * GMB-1052 - EOF exception is received when the trigger file name is given as .INP
 * GMB-1051 - Conditional sweeper sweeps files marked as inactive
