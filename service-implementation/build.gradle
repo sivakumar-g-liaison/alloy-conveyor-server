@@ -196,7 +196,7 @@ dependencies {
 	compile project(':service-framework')
 
 	// ************************************* beg cargo *********************************************
-	def cargoVersion = "1.4.0"
+	def cargoVersion = "1.6.4"
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
@@ -231,7 +231,7 @@ dependencies {
 	
 	//METRICS
 	compile 'com.liaison.commons:lib_metrics:1.+'
-	
+
 }
 
 idea {
