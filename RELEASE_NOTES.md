@@ -1,3 +1,18 @@
+4.18.0-SNAPSHOT
+---------------
+* GMB-1059 - Upgrade libraries in Relay
+    * commons-lib 11.+
+    * acl-commons-lib 8.+
+    * lib_crypt 6.+
+    * fs2 10.+
+    * globalenterprisemanager-client 5.+
+    * usermanagement-client 5.+
+    * lib_message_bu 13.+
+    * jersey 2.x
+    * lib_health_monitor 6.+
+* GWUD-140 - Proper error message from the dropbox/conveyor server when the passsword expire and account locked
+    * Filter level changes  - Removed redundant code on the dropbox side
+
 4.17.3
 ---------------
 * GMB-1052 - EOF exception is received when the trigger file name is given as .INP

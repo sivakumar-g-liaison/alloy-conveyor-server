@@ -70,7 +70,11 @@ public class DropboxManifestResource extends AuditedResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "authenticateAndGetManifest", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body")})
-    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @ApiResponses({
+            @ApiResponse(code = 401, message = "Unauthorized."),
+            @ApiResponse(code = 403, message = "Permission Denied."),
+            @ApiResponse(code = 500, message = "Unexpected Service failure.")
+    })
     @AccessDescriptor(skipFilter = true)
     public Response authenticateAndGetManifest(@Context final HttpServletRequest request) {
 

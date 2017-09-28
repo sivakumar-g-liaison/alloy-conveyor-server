@@ -186,11 +186,11 @@ dependencies {
         exclude group: 'org.sonatype.sisu'
     }
 
-	compile "com.liaison.commons:lib_health_monitor_core:5.+"
-	compile "com.liaison.commons:lib_health_monitor_file:5.+"
-	compile "com.liaison.commons:lib_health_monitor_jdbc:5.+"
-	compile "com.liaison.commons:lib_health_monitor_fs2:5.+"
-	compile "com.liaison.commons:lib_health_monitor_threadpool:5.+"
+	compile "com.liaison.commons:lib_health_monitor_core:6.+"
+	compile "com.liaison.commons:lib_health_monitor_file:6.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:6.+"
+	compile "com.liaison.commons:lib_health_monitor_fs2:6.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:6.+"
 	
 	// reusable utilities / framework components
 	compile project(':service-framework')
