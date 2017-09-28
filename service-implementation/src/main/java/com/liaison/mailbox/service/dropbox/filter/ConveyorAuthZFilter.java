@@ -9,6 +9,7 @@
 package com.liaison.mailbox.service.dropbox.filter;
 
 import com.google.gson.Gson;
+import com.liaison.commons.acl.util.ACLPermissionCheckRuntimeException;
 import com.liaison.commons.util.StringUtil;
 import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
@@ -50,7 +51,7 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
         if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
                 || StringUtil.isNullOrEmptyAfterTrim(aclManifest)
                 || StringUtil.isNullOrEmptyAfterTrim(loginId)) {
-            throw new MailBoxServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+            throw new UserAuthenticationException(Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
         }
 
         //validate token
@@ -66,7 +67,7 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
             // validation
             GEMManifestResponse manifestResponse = GEMHelper.getACLManifestByLoginId(loginId, null);
             if (manifestResponse == null) {
-                throw new MailBoxServicesException(Messages.AUTH_AND_GET_ACL_FAILURE, Response.Status.BAD_REQUEST);
+                throw new ACLPermissionCheckRuntimeException(Messages.AUTH_AND_GET_ACL_FAILURE.value());
             }
 
             requestContext.getHeaders().putSingle(UM_AUTH_TOKEN, authenticationToken);
@@ -76,7 +77,7 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
 
             String message = "Authentication failure : " + umClient.getMessage();
             logger.error("Authentication failure : " + umClient.getMessage() + ", Failure Message Code : " + umClient.getFailureReasonCode());
-            throw new MailBoxServicesException(message, Response.Status.UNAUTHORIZED);
+            throw new UserAuthenticationException(message);
         }
 
     }
