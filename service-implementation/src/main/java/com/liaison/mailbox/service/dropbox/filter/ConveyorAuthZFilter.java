@@ -50,7 +50,7 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
         if (StringUtil.isNullOrEmptyAfterTrim(authenticationToken)
                 || StringUtil.isNullOrEmptyAfterTrim(aclManifest)
                 || StringUtil.isNullOrEmptyAfterTrim(loginId)) {
-            throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+            throw new MailBoxServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
         }
 
         //validate token
@@ -76,7 +76,7 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
 
             String message = "Authentication failure : " + umClient.getMessage();
             logger.error("Authentication failure : " + umClient.getMessage() + ", Failure Message Code : " + umClient.getFailureReasonCode());
-            throw new UserAuthenticationException(message);
+            throw new MailBoxServicesException(message, Response.Status.UNAUTHORIZED);
         }
 
     }

@@ -77,7 +77,6 @@ public class DropboxUploadedFileResource extends AuditedResource {
      * REST method to add uploaded file.
      *
      * @param serviceRequest HttpServletRequest, injected with context annotation
-     *
      * @return Response Object
      */
     @POST

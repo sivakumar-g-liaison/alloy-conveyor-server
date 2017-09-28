@@ -15,9 +15,9 @@ import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
-import com.liaison.usermanagement.service.client.filter.UserAuthenticationException;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
 import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
 import org.apache.logging.log4j.LogManager;
@@ -221,7 +221,7 @@ public class DropboxAuthenticationService {
         if (UMClient.isSuccessful()) {
             return UMClient.getAuthenticationToken();
         } else {
-            throw new UserAuthenticationException(UMClient.getMessage());
+            throw new MailBoxServicesException(UMClient.getMessage(), Response.Status.UNAUTHORIZED);
         }
     }
 }

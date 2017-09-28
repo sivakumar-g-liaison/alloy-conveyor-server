@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -61,57 +61,57 @@ import java.io.IOException;
 @Api(value = "config/dropbox/stagedFiles", description = "Gateway for the dropbox services.")
 public class DropboxFileStagedResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxFileStagedResource.class);
+    private static final Logger LOG = LogManager.getLogger(DropboxFileStagedResource.class);
 
-	/**
-	 * REST method to add staged file.
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 *
-	 * @return Response Object
-	 */
-	@POST
-	@ApiOperation(value = "Create a staged file", notes = "create a new staged file entry", position = 1, response = com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Create new processor", required = true, dataType = "com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO", paramType = "body")})
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response addStagedFile(@Context final HttpServletRequest request) {
+    /**
+     * REST method to add staged file.
+     *
+     * @param request HttpServletRequest, injected with context annotation
+     *
+     * @return Response Object
+     */
+    @POST
+    @ApiOperation(value = "Create a staged file", notes = "create a new staged file entry", position = 1, response = com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO.class)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Create new processor", required = true, dataType = "com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO", paramType = "body")})
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response addStagedFile(@Context final HttpServletRequest request) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
 
-				String requestString;
-				try {
-					requestString = getRequestBody(request);
-					StagePayloadRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
-							StagePayloadRequestDTO.class);
-					//Added the quid from service Request
+                String requestString;
+                try {
+                    requestString = getRequestBody(request);
+                    StagePayloadRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+                            StagePayloadRequestDTO.class);
+                    //Added the quid from service Request
                     if (serviceRequest != null && serviceRequest.getStagedFile() != null) {
-						queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getStagedFile().getId());
-					}
-					// create the new staged file
-					DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
-					return stagedFileService.addStagedFile(serviceRequest, null);
+                        queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getStagedFile().getId());
+                    }
+                    // create the new staged file
+                    DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
+                    return stagedFileService.addStagedFile(serviceRequest, null);
 
-				} catch (IOException e) {
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
-				}
-			}
-		};
-		worker.actionLabel = "DropboxFileStagedResource.addStagedFile()";
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
+            }
+        };
+        worker.actionLabel = "DropboxFileStagedResource.addStagedFile()";
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-	@GET
-	@ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	@ConveyorAuthZ
-	public Response getStagedFiles(
+    @GET
+    @ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @ConveyorAuthZ
+    public Response getStagedFiles(
             @Context final HttpServletRequest serviceRequest,
             @QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
             @QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
@@ -122,59 +122,59 @@ public class DropboxFileStagedResource extends AuditedResource {
             @QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "Status of staged file") final String status,
             @HeaderParam(MailBoxConstants.MANIFEST_DTO) String manifestJson,
             @HeaderParam(MailBoxConstants.UM_AUTH_TOKEN) String token) {
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call()
-					throws Exception {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call()
+                    throws Exception {
 
-				LOG.debug("Entering into getStagedFiles service.");
+                LOG.debug("Entering into getStagedFiles service.");
 
-				try {
+                try {
 
-					// get login id and auth token from mailbox token
-					String authenticationToken = token;
-					GEMManifestResponse manifestResponse = new Gson().fromJson(manifestJson, GEMManifestResponse.class);
-					String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
+                    // get login id and auth token from mailbox token
+                    String authenticationToken = token;
+                    GEMManifestResponse manifestResponse = new Gson().fromJson(manifestJson, GEMManifestResponse.class);
+                    String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
 
-					// construct the generic search filter dto
-					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-					searchFilter.setStagedFileName(stageFileName);
-					searchFilter.setPage(page);
-					searchFilter.setPageSize(pageSize);
-					searchFilter.setSortField(sortField);
-					searchFilter.setSortDirection(sortDirection);
-					searchFilter.setStatus(status);
+                    // construct the generic search filter dto
+                    GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+                    searchFilter.setStagedFileName(stageFileName);
+                    searchFilter.setPage(page);
+                    searchFilter.setPageSize(pageSize);
+                    searchFilter.setSortField(sortField);
+                    searchFilter.setSortDirection(sortDirection);
+                    searchFilter.setStatus(status);
 
-					// getting staged files based on manifest
+                    // getting staged files based on manifest
                     GetStagedFilesResponseDTO getStagedFilesResponseDTO = new DropboxStagedFilesService().getStagedFiles(searchFilter, manifestResponse.getManifest());
                     getStagedFilesResponseDTO.setHitCounter(hitCounter);
-					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
+                    String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 
-					ResponseBuilder builder = constructResponse(loginId, authenticationToken, manifestResponse, responseBody);
-					LOG.debug("Exit from getStagedFiles service.");
+                    ResponseBuilder builder = constructResponse(loginId, authenticationToken, manifestResponse, responseBody);
+                    LOG.debug("Exit from getStagedFiles service.");
 
-					return builder.build();
+                    return builder.build();
 
-				} catch (IOException | JAXBException e) {
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
-				}
-			}
+                } catch (IOException | JAXBException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
+            }
 
-		};
-		worker.actionLabel = "DropboxFileTransferResource.getStagedFiles()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
+        };
+        worker.actionLabel = "DropboxFileTransferResource.getStagedFiles()";
+        worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
-		// hand the delegate to the framework for calling
-		return process(serviceRequest, worker);
-	}
+        // hand the delegate to the framework for calling
+        return process(serviceRequest, worker);
+    }
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

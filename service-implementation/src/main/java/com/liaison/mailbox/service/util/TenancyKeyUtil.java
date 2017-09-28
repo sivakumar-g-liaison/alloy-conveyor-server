@@ -10,7 +10,7 @@ package com.liaison.mailbox.service.util;
 
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.util.StringUtil;
-import com.liaison.gem.service.client.GEMACLClient;
+import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -30,8 +30,6 @@ public class TenancyKeyUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TenancyKeyUtil.class);
 
-    private static GEMACLClient gemClient = new GEMACLClient();
-
     /**
      * Method to get all tenancy keys from acl manifest Json
      *
@@ -48,7 +46,7 @@ public class TenancyKeyUtil {
             return tenancyKeys;
         }
 
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
         TenancyKeyDTO tenancyKey = null;
         for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
@@ -82,7 +80,7 @@ public class TenancyKeyUtil {
             return new ArrayList<>();
         }
 
-        return gemClient.getDomainsFromACLManifest(aclManifestJson)
+        return GEMHelper.getDomainsFromACLManifest(aclManifestJson)
                 .stream()
                 .map(RoleBasedAccessControl::getDomainInternalName)
                 .collect(Collectors.toList());
@@ -102,7 +100,7 @@ public class TenancyKeyUtil {
         String tenancyKeyDisplayName = null;
         if (!MailBoxUtil.isEmpty(aclManifestJson)) {
 
-            List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+            List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
             tenancyKeyDisplayName = roleBasedAccessControls
                     .stream()
                     .filter(rbac -> rbac.getDomainInternalName().equals(tenancyKeyGuid))
