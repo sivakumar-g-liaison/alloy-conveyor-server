@@ -11,14 +11,14 @@ package com.liaison.mailbox.service.queue.consumer;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 
 /**
  * Custom MailboxQueuePooled Listener
  */
 public class MailboxQueuePooledListenerContainer extends QueuePooledListenerContainer {
 
-    private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+    private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
     private static final String PROPERTY_QUEUE_KEEP_ALIVE = "com.liaison.mailbox.queue.pool.keepalive.seconds";
 
 

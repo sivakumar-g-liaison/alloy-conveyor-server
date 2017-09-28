@@ -16,7 +16,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;

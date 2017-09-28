@@ -10,25 +10,21 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.core.Response;
-
-import com.liaison.mailbox.service.core.MailboxStagedFileService;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.service.core.processor.HTTPAbstractProcessor;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.metrics.cache.CacheStatsRegistrar;
 import com.liaison.usermanagement.service.client.UserManagementClient;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.core.Response;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that authenticate the user by using the authentication cache.
@@ -59,7 +55,7 @@ public class UserAuthCacheUtil {
      */
     static {
     	
-        DecryptableConfiguration serviceConfig = LiaisonConfigurationFactory.getConfiguration();
+        DecryptableConfiguration serviceConfig = LiaisonArchaiusConfiguration.getInstance();
         maxCacheSize = serviceConfig.getInt(PROPERTY_NAME_MAX_CACHE_SIZE, 100);
         cacheTimeToLive = serviceConfig.getLong(PROPERTY_NAME_CACHE_TTL, 1L);
         cacheTimeToLiveUnit = TimeUnit.valueOf(serviceConfig.getString(PROPERTY_NAME_CACHE_TTL_UNIT, "MINUTES"));

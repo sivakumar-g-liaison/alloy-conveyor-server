@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -10,11 +10,18 @@
 
 package com.liaison.mailbox.service.dropbox;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import com.liaison.gem.service.client.GEMHelper;
+import com.liaison.gem.service.client.GEMManifestResponse;
+import com.liaison.gem.util.GEMConstants;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.usermanagement.service.client.UserManagementClient;
+import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
+import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
@@ -27,30 +34,22 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.gem.service.client.GEMACLClient;
-import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.util.GEMConstants;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.usermanagement.service.client.UserManagementClient;
-import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
-import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 
 /**
  * Class which has mailbox configuration related operations.
- * 
+ *
  * @author OFS
  */
 public class DropboxAuthenticationService {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
+    private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
 
     /**
      * Method to authenticate user Account by given serviceRequest.
@@ -97,131 +96,132 @@ public class DropboxAuthenticationService {
         return response;
     }
 
-	/**
-	 * getting manifest from GEMClient and construct multipart response
-	 * 
-	 * @param request
-	 * @return
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	public Response getManifest() throws MessagingException, IOException {
+    /**
+     * getting manifest from GEMClient and construct multipart response
+     *
+     * @return
+     * @throws IOException
+     * @throws MessagingException
+     */
+    public Response getManifest() throws MessagingException, IOException {
 
-		LOG.debug("Entering into get manifest service.");
+        LOG.debug("Entering into get manifest service.");
 
-		Response response = null;
-		MimeMultipart multiPartResponse = new MimeMultipart();
-		Session session = Session.getDefaultInstance(new Properties());
-		MimeMessage mm = new MimeMessage(session);
-		ByteArrayOutputStream rawMimeBAOS = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE);
-		InputStream mimeStreamResponse = null;
-		GEMManifestResponse gemManifestFromGEM = null;
+        Response response = null;
+        MimeMultipart multiPartResponse = new MimeMultipart();
+        Session session = Session.getDefaultInstance(new Properties());
+        MimeMessage mm = new MimeMessage(session);
+        ByteArrayOutputStream rawMimeBAOS = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE);
+        InputStream mimeStreamResponse = null;
+        GEMManifestResponse gemManifestFromGEM = null;
 
-		try {
-			// get gem manifest response from GEM
-			GEMACLClient gemClient = new GEMACLClient();
-			gemManifestFromGEM = gemClient.getACLManifest();
+        try {
+            // get gem manifest response from GEM
+            gemManifestFromGEM = GEMHelper.getACLManifest();
 
-			BodyPart responseMessage = new MimeBodyPart();
-			responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getMessage(),
-					"text/plain")));
+            BodyPart responseMessage = new MimeBodyPart();
+            responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getMessage(),
+                    "text/plain")));
 
-			BodyPart plainManifest = new MimeBodyPart();
-			plainManifest.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getManifest(),
-					"text/plain")));
+            BodyPart plainManifest = new MimeBodyPart();
+            plainManifest.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getManifest(),
+                    "text/plain")));
 
-			BodyPart signedManifest = new MimeBodyPart();
-			signedManifest.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getSignature(),
-					"text/plain")));
+            BodyPart signedManifest = new MimeBodyPart();
+            signedManifest.setDataHandler(new DataHandler(new ByteArrayDataSource(gemManifestFromGEM.getSignature(),
+                    "text/plain")));
 
-			multiPartResponse.addBodyPart(responseMessage);
-			multiPartResponse.addBodyPart(plainManifest);
-			multiPartResponse.addBodyPart(signedManifest);
+            multiPartResponse.addBodyPart(responseMessage);
+            multiPartResponse.addBodyPart(plainManifest);
+            multiPartResponse.addBodyPart(signedManifest);
 
-			mm.setContent(multiPartResponse);
-			mm.writeTo(rawMimeBAOS);
-			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
-			
-			ResponseBuilder builder = Response
-					.ok(mimeStreamResponse)
-					.header("Content-Type", MediaType.MULTIPART_FORM_DATA);
-			
-			// set signer public key guid in response header based on response from GEM
-			if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
-				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, gemManifestFromGEM.getPublicKeyGroupGuid());
-			} else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
-				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-						gemManifestFromGEM.getPublicKeyGuid());
-			}
-			response = builder.build();
+            mm.setContent(multiPartResponse);
+            mm.writeTo(rawMimeBAOS);
+            mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
 
-			rawMimeBAOS.close();
-			mimeStreamResponse.close();
+            ResponseBuilder builder = Response
+                    .ok(mimeStreamResponse)
+                    .header("Content-Type", MediaType.MULTIPART_FORM_DATA);
 
-			LOG.debug("Exit from get manifest service.");
+            // set signer public key guid in response header based on response from GEM
+            if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
+                builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, gemManifestFromGEM.getPublicKeyGroupGuid());
+            } else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
+                builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+                        gemManifestFromGEM.getPublicKeyGuid());
+            }
+            response = builder.build();
 
-			return response;
+            rawMimeBAOS.close();
+            mimeStreamResponse.close();
 
-		} catch (Exception e) {
+            LOG.debug("Exit from get manifest service.");
 
-			LOG.error("Get manifest failed.");
+            return response;
 
-			BodyPart responseMessage = new MimeBodyPart();
-			responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(
-					MailBoxConstants.ACL_MANIFEST_FAILURE_MESSAGE, "text/plain")));
+        } catch (Exception e) {
 
-			multiPartResponse.addBodyPart(responseMessage);
+            LOG.error("Get manifest failed.", e);
 
-			mm.setContent(multiPartResponse);
-			mm.writeTo(rawMimeBAOS);
-			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
+            BodyPart responseMessage = new MimeBodyPart();
+            responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(
+                    MailBoxConstants.ACL_MANIFEST_FAILURE_MESSAGE, "text/plain")));
 
-			ResponseBuilder builder =  Response
-					.ok(mimeStreamResponse)
-					.header("Content-Type", MediaType.MULTIPART_FORM_DATA);
-			
-			// set signer public key guid in response header based on response from GEM
-			if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
-				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID, 
-						gemManifestFromGEM.getPublicKeyGroupGuid());
-			} else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
-				builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-						gemManifestFromGEM.getPublicKeyGuid());
-			}			response = builder.build();
+            multiPartResponse.addBodyPart(responseMessage);
 
-			rawMimeBAOS.close();
-			mimeStreamResponse.close();
+            mm.setContent(multiPartResponse);
+            mm.writeTo(rawMimeBAOS);
+            mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
 
-			return response;
-		}
-	}
+            ResponseBuilder builder = Response
+                    .ok(mimeStreamResponse)
+                    .header("Content-Type", MediaType.MULTIPART_FORM_DATA);
 
-	/**
-	 * Method to authenticate user Account and give manifest for given request.
-	 * 
-	 * @param serviceRequest
-	 * @return AuthenticateUserAccountResponseDTO
-	 */
-	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
-		// get manifest from GEM for the given loginId
-		return new GEMACLClient().getACLManifestByloginId(serviceRequest.getLoginId());
-	}
+            // set signer public key guid in response header based on response from GEM
+            if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGroupGuid())) {
+                builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GROUP_GUID,
+                        gemManifestFromGEM.getPublicKeyGroupGuid());
+            } else if (!MailBoxUtil.isEmpty(gemManifestFromGEM.getPublicKeyGuid())) {
+                builder.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+                        gemManifestFromGEM.getPublicKeyGuid());
+            }
+            response = builder.build();
 
-	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
+            rawMimeBAOS.close();
+            mimeStreamResponse.close();
 
-		LOG.debug("Entering into user authentication using UM client.");
+            return response;
+        }
+    }
 
-		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
-				serviceRequest.getPassword(), serviceRequest.getToken());
-		UMClient.authenticate();
+    /**
+     * Method to authenticate user Account and give manifest for given request.
+     *
+     * @param serviceRequest
+     * @return GEMManifestResponse
+     */
+    public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
+        // get manifest from GEM for the given loginId
+        return GEMHelper.getACLManifestByLoginId(serviceRequest.getLoginId(), null);
+    }
 
-		LOG.debug("Exit from user authentication using UM client.");
+    public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
 
-		if (UMClient.isSuccessful()) {
-			return UMClient.getAuthenticationToken();
-		}
+        LOG.debug("Entering into user authentication using UM client.");
 
-		return null;
-	}
+        UserManagementClient UMClient = new UserManagementClient();
+        UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD,
+                serviceRequest.getLoginId(),
+                serviceRequest.getPassword(),
+                serviceRequest.getToken());
+        UMClient.authenticate();
+
+        LOG.debug("Exit from user authentication using UM client.");
+
+        if (UMClient.isSuccessful()) {
+            return UMClient.getAuthenticationToken();
+        } else {
+            throw new MailBoxServicesException(UMClient.getMessage(), Response.Status.UNAUTHORIZED);
+        }
+    }
 }

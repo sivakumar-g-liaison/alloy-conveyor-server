@@ -8,16 +8,14 @@
  */
 package com.liaison.mailbox.service.base.test;
 
-import java.sql.SQLException;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import oracle.jdbc.pool.OracleConnectionPoolDataSource;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-
-import oracle.jdbc.pool.OracleConnectionPoolDataSource;
+import java.sql.SQLException;
 
 public class InitInitialDualDBContext {
 
@@ -38,7 +36,7 @@ public class InitInitialDualDBContext {
 	public static final String PERSISTENCE_UNIT_NAME_PROPERTY_EDM = "com.liaison.dtdm.persistenceUnitName";
 	public static final String PERSISTENCE_UNIT_NAME_PROPERTY_RTDM = "com.liaison.rtdm.persistenceUnitName";
 
-	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+	private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 	private static boolean isInitialized = false;
 
 	public static void init() throws SQLException, ClassNotFoundException, NamingException {

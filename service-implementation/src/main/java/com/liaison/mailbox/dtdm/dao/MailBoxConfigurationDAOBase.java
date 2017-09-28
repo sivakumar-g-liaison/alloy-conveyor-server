@@ -12,7 +12,7 @@ package com.liaison.mailbox.dtdm.dao;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;

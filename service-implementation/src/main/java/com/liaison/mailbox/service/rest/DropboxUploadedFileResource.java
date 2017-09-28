@@ -15,6 +15,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -26,6 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.google.gson.Gson;
+import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZ;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,7 +77,6 @@ public class DropboxUploadedFileResource extends AuditedResource {
      * REST method to add uploaded file.
      *
      * @param serviceRequest HttpServletRequest, injected with context annotation
-     *
      * @return Response Object
      */
     @POST
@@ -82,7 +84,10 @@ public class DropboxUploadedFileResource extends AuditedResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "Add a new upload file entry")})
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-    public Response addUploadedFile(@Context final HttpServletRequest serviceRequest) {
+    @ConveyorAuthZ
+    public Response addUploadedFile(@Context final HttpServletRequest serviceRequest,
+                                    @HeaderParam(MailBoxConstants.MANIFEST_DTO) String manifestJson,
+                                    @HeaderParam(MailBoxConstants.UM_AUTH_TOKEN) String token) {
 
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -91,49 +96,26 @@ public class DropboxUploadedFileResource extends AuditedResource {
 
                 LOGGER.debug("Entering into addUploadedFile service.");
 
-                DropboxAuthAndGetManifestResponseDTO responseEntity = null;
-                DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = null;
-                DropboxAuthenticationService authService = new DropboxAuthenticationService();
                 DropboxUploadedFileService uploadedFileService = new DropboxUploadedFileService();
                 String requestString;
 
                 try {
 
                     // get login id and auth token from mailbox token
-                    String authenticationToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
                     String loginId = serviceRequest.getHeader(MailBoxConstants.DROPBOX_LOGIN_ID);
-                    String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-                    dropboxMandatoryValidation(loginId, authenticationToken, aclManifest);
 
                     requestString = getRequestBody(serviceRequest);
-                    UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString,
-                            UploadedFileDTO.class);
-
-                    // constructing authenticate and get manifest request
-                    dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
-
-                    // authentication
-                    String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
-                    if (encryptedMbxToken == null) {
-                        LOGGER.error("Dropbox - user authentication failed");
-                        responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-                        return Response.status(HTTP.UNAUTHORIZED).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
-                    }
+                    UploadedFileDTO serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, UploadedFileDTO.class);
 
                     // getting manifest
-                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
-                    if (manifestResponse == null) {
-                        responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-                        return Response.status(HTTP.BAD_REQUEST).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
-                    }
+                    GEMManifestResponse manifestResponse = new Gson().fromJson(manifestJson, GEMManifestResponse.class);
 
                     //add uploaded file
                     serviceRequest.setUserId(loginId);
                     uploadedFileService.addUploadedFile(serviceRequest, true);
-                    ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, "Successfully added uploaded file");
+                    ResponseBuilder builder = constructResponse(loginId, token, manifestResponse, "Successfully added uploaded file");
 
                     LOGGER.debug("Exit from addUploadedFile service.");
-
                     return builder.build();
 
                 } catch (Exception e) {

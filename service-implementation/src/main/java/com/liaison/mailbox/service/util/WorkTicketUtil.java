@@ -20,7 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;

@@ -18,7 +18,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.health.check.file.FileReadDeleteCheck;
 import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
@@ -60,7 +60,7 @@ public class InitializationServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
 
-        DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+        DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
 
         // nfs health check

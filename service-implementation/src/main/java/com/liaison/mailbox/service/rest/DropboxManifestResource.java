@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -49,7 +49,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- * 
+ *
  * @author santoshc
  */
 @AppConfigurationResource
@@ -57,110 +57,108 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/dropbox/authAndGetACL", description = "Gateway for the dropbox manifest services.")
 public class DropboxManifestResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxManifestResource.class);
+    private static final Logger LOG = LogManager.getLogger(DropboxManifestResource.class);
 
-	/**
-	 * REST method to authenticate and retrieve manifest details.
-	 * 
-	 * @param request
-	 * @return Response
-	 */
-	@POST
-	@ApiOperation(value = "Get manifest", notes = "This function is used to authencate from usermanagement and get manifest from gem", position = 3, response = com.liaison.gem.service.dto.response.GetManifestResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name = "request", value = "authenticateAndGetManifest", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body")})
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	@AccessDescriptor(skipFilter = true)
-	public Response authenticateAndGetManifest(@Context final HttpServletRequest request) {
-		
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() throws IOException {
+    /**
+     * REST method to authenticate and retrieve manifest details.
+     *
+     * @param request
+     * @return Response
+     */
+    @POST
+    @ApiOperation(value = "Get manifest", notes = "This function is used to authencate from usermanagement and get manifest from gem", position = 3, response = com.liaison.gem.service.dto.response.GetManifestResponseDTO.class)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "authenticateAndGetManifest", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body")})
+    @ApiResponses({
+            @ApiResponse(code = 401, message = "Unauthorized."),
+            @ApiResponse(code = 403, message = "Permission Denied."),
+            @ApiResponse(code = 500, message = "Unexpected Service failure.")
+    })
+    @AccessDescriptor(skipFilter = true)
+    public Response authenticateAndGetManifest(@Context final HttpServletRequest request) {
 
-				LOG.debug("Entering into authenticate and get manifest service");
-				DropboxAuthAndGetManifestRequestDTO serviceRequest = null;
-				DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() throws IOException {
 
-				try {
+                LOG.debug("Entering into authenticate and get manifest service");
+                DropboxAuthAndGetManifestRequestDTO serviceRequest = null;
+                DropboxAuthAndGetManifestResponseDTO responseEntity = null;
 
-					String requestString = getRequestBody(request);
-					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);					
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+                try {
 
-				DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
+                    String requestString = getRequestBody(request);
+                    serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
+                }
 
-				// authenticating
-				String loginId = serviceRequest.getLoginId();
-				String encryptedMbxToken = dropboxService.isAccountAuthenticatedSuccessfully(serviceRequest);
-				if (encryptedMbxToken == null) {
-					LOG.error("Dropbox - user authentication failed");
-					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
-					return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-				}
+                DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 
-				// getting manifest
-				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest);
-				if (manifestResponse == null) {
-					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
-					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
-					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-				}
+                // authentication
+                String loginId = serviceRequest.getLoginId();
+                String encryptedMbxToken = dropboxService.isAccountAuthenticatedSuccessfully(serviceRequest);
+                if (encryptedMbxToken == null) {
+                    LOG.error("Dropbox - user authentication failed");
+                    responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
+                    return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                }
 
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL, Messages.SUCCESS);
-				ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, MailBoxUtil.marshalToJSON(responseEntity));
+                // getting manifest
+                GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest);
+                if (manifestResponse == null) {
+                    LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
+                    responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
+                    return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+                }
 
-				LOG.debug("Exit from authenticate and get manifest service.");
+                responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL, Messages.SUCCESS);
+                ResponseBuilder builder = constructResponse(loginId, encryptedMbxToken, manifestResponse, MailBoxUtil.marshalToJSON(responseEntity));
+                LOG.debug("Exit from authenticate and get manifest service.");
 
-				return builder.build();
-			}
-		};
-		worker.actionLabel = "DropboxManifestResource.authenticateAndGetManifest()";
+                return builder.build();
+            }
+        };
+        worker.actionLabel = "DropboxManifestResource.authenticateAndGetManifest()";
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-	/**
-	 * REST method to retrieve manifest details.
-	 * 
-	 * @param request
-	 * @return Response
-	 */
-	@GET
-	@ApiOperation(value = "Get manifest", notes = "This function is used to get manifest from gem", position = 3, response = com.liaison.gem.service.dto.response.GetManifestResponseDTO.class)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	@AccessDescriptor(skipFilter = true)
-	public Response getManifest(@Context final HttpServletRequest request) {
+    /**
+     * REST method to retrieve manifest details.
+     *
+     * @param request
+     * @return Response
+     */
+    @GET
+    @ApiOperation(value = "Get manifest", notes = "This function is used to get manifest from gem", position = 3, response = com.liaison.gem.service.dto.response.GetManifestResponseDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @AccessDescriptor(skipFilter = true)
+    public Response getManifest(@Context final HttpServletRequest request) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call()
-					throws MessagingException, IOException {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() throws IOException, MessagingException {
+                return new DropboxAuthenticationService().getManifest();
+            }
+        };
+        worker.actionLabel = "DropboxManifestResource.getManifest()";
 
-				DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-				return dropboxService.getManifest();
-			}
-		};
-		worker.actionLabel = "DropboxManifestResource.getManifest()";
-
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
-
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

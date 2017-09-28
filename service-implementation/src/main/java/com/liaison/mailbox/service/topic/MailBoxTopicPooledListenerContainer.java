@@ -12,14 +12,14 @@ package com.liaison.mailbox.service.topic;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicTextMessageProcessor;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 
 /**
  * Custom MailboxTopicPooled Listener
  */
 public class MailBoxTopicPooledListenerContainer extends TopicPooledListenerContainer {
 
-    private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+    private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
     private static final String PROPERTY_TOPIC_KEEP_ALIVE = "com.liaison.mailbox.topic.pool.keepalive.seconds";
 
     /**

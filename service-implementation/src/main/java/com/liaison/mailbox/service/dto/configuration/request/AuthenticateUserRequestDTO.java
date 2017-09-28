@@ -12,7 +12,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.StringUtil;
 import com.liaison.usermanagement.validation.Mandatory;
 
 /**
