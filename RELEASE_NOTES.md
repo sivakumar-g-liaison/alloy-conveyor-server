@@ -1,5 +1,6 @@
 4.18.0-SNAPSHOT
 ---------------
+* GMB-1062 - Provision to enter the socket timeout in http sync processor
 * GMB-1059 - Upgrade libraries in Relay
     * commons-lib 11.+
     * acl-commons-lib 8.+

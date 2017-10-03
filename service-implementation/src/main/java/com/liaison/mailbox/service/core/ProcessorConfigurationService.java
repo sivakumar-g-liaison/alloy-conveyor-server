@@ -766,6 +766,7 @@ public class ProcessorConfigurationService {
 			boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
 			boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
 			int connectionTimeout = httpListenerStaticProperties.getConnectionTimeout();
+			int socketTimeout = httpListenerStaticProperties.getSocketTimeout();
 			
 			httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerDetail.getServiceInstanceId());
 			httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, httpListenerDetail.getTenancyKey());
@@ -776,6 +777,7 @@ public class ProcessorConfigurationService {
 			httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
 			httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
 			httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
+			httpListenerProperties.put(MailBoxConstants.SOCKET_TIMEOUT, String.valueOf(socketTimeout));
 			httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
 			httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
 			if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
