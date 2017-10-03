@@ -41,8 +41,10 @@ import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
 
 /**
@@ -55,6 +57,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 	private static String SERVICE_BROKER_URI = null;
 	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
+	private static int ENV_SOCKET_TIMEOUT_VALUE = 0;
 
 	private long payloadSize = 0;
 
@@ -74,6 +77,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		}
 
 		ENV_CONNECTION_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT, 60000);
+		ENV_SOCKET_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_SOCKET_TIMEOUT, 60000);
 	}
 
 	/**
@@ -97,10 +101,14 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					: ENV_CONNECTION_TIMEOUT_VALUE;
+			int socketTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(SOCKET_TIMEOUT)) 
+					? Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT)) 
+					: ENV_SOCKET_TIMEOUT_VALUE;
 
 			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
 					.connectionTimeout(connectionTimeout)
+					.socketTimeout(socketTimeout)
 					.inputData(JAXBUtility.marshalToJSON(workTicket))
 					.outputStream(responseStream);
 
