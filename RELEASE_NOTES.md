@@ -14,6 +14,7 @@
     * lib_health_monitor 6.+
 * GWUD-140 - Proper error message from the dropbox/conveyor server when the passsword expire and account locked
     * Filter level changes  - Removed redundant code on the dropbox side
+* GMB-948 Log the application logs to Kibana directly
 
 4.17.3
 ---------------

@@ -21,57 +21,8 @@
         <!-- #########    Logstash, General Application Logs   ############ -->
         <!-- ############################################################## -->
 
-        <!--
-            LogStashSocket is a tcp socket dumping logstash spec 1.0 messages
-         -->
-        <Socket name="LogStashSocket" host="${env:LOGSTASHMACHINE}" port="${env:LOGSTASHPORT}"
-                connectTimeoutMillis="500"
-                reconnectionDelayMillis="500"
-                immediateFail="true"
-                protocol="tcp"
-                ignoreExceptions="false">
-            <!-- exclude redundant log element -->
-            <LogStashJSONLayout excludeLog="true">
-
-                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
-                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
-                <!-- produce a valid and escaped json element -->
-                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg"/>
-
-                <!-- helpful sort filter -->
-                <KeyValuePair key="layout" value="log4j2_event_json"/>
-
-
-                <!-- Archaius Properties -->
-                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
-                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
-                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
-                <KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}"/>
-                <KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}"/>
-                <KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}"/>
-
-                <!-- AppEnv set properties -->
-                <KeyValuePair key="host_ips" value="${env:HOST_IPS}"/>
-                <KeyValuePair key="hostname" value="${env:LOCAL_HOSTNAME}"/>
-                <KeyValuePair key="environment_user" value="${env:DAEMON_USER}"/>
-                <KeyValuePair key="login_user" value="${env:LOGIN_USER}"/>
-
-                <!-- jre properties -->
-                <KeyValuePair key="java_version" value="${sys:java.version}"/>
-
-            </LogStashJSONLayout>
-            <filters>
-                <!-- remove some noise-->
-                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
-                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
-                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
-            </filters>
-
-        </Socket>
-
-
-        <!-- destination of failover when logstash socket fails -->
-        <File name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
+        <!-- LogStashFile disk appender to LogShipper -->
+        <File name="LogStashFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
               append="true" ignoreExceptions="false">
             <!-- exclude redundant log element -->
             <LogStashJSONLayout excludeLog="true">
@@ -110,25 +61,6 @@
                 <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
             </filters>
         </File>
-
-        <!-- Failover when either logstash socket appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncLogStashSocketWithFailover"
-               blocking="false"
-               bufferSize="${env:LOGSTASH_RING_BUFFER_SIZE}"
-               errorRef="LogStashFailoverFile"
-               ignoreExceptions="false"
-                >
-            <AppenderRef ref="LogStashSocket"/>
-        </Async>
-
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncLogStashSocketWithFailoverFailover" primary="AsyncLogStashSocketWithFailover">
-            <Failovers>
-                <AppenderRef ref="FinalFailoverLocalFile"/>
-            </Failovers>
-        </Failover>
-
-
 
         <!-- ############################################################## -->
         <!-- #########          Glass Message General         ############ -->
@@ -193,11 +125,11 @@
 
     <loggers>
         <root level="INFO">
-            <appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
+            <appender-ref ref="LogStashFile"/>
             <appender-ref ref="GlassMessageSpectrumFile" />
             <appender-ref ref="AuditSyslogAppender" />
 
-            <appender-ref ref="LocalLog" />
+            <!-- <appender-ref ref="LocalLog"/> -->
 
         </root>
     </loggers>
