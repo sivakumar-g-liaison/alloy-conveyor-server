@@ -1,5 +1,6 @@
 4.18.0-SNAPSHOT
 ---------------
+* GMB-1058 - Failed to stage files but there is no error logged
 * GMB-1062 - Provision to enter the socket timeout in http sync processor
 * GMB-1059 - Upgrade libraries in Relay
     * commons-lib 11.+
@@ -13,6 +14,7 @@
     * lib_health_monitor 6.+
 * GWUD-140 - Proper error message from the dropbox/conveyor server when the passsword expire and account locked
     * Filter level changes  - Removed redundant code on the dropbox side
+* GMB-948 Log the application logs to Kibana directly
 
 4.17.3
 ---------------

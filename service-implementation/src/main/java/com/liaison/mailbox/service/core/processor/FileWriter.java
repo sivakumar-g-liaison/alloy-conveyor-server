@@ -145,7 +145,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
             //GLASS LOGGING ENDS//
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            
+            //caught Throwable to handle the class initialization errors and this is needed to update proper LENS status
             LOG.error("File Staging failed", e);
             //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
