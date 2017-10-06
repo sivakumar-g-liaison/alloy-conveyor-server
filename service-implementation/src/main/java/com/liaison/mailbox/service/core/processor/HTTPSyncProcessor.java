@@ -101,9 +101,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
 					: ENV_CONNECTION_TIMEOUT_VALUE;
-			int socketTimeout = Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT)) != 0 
-					? Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT)) 
-					: ENV_SOCKET_TIMEOUT_VALUE;
+			int socketTimeout = (MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT)) ||
+									Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT)) == 0) 
+					? ENV_SOCKET_TIMEOUT_VALUE 
+					: Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT));
 
 			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
