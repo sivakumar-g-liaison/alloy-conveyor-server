@@ -35,17 +35,16 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
-import static com.liaison.mailbox.MailBoxConstants.SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.SOCKET_TIMEOUT;
 
 /**
  * Class that deals with processing of sync request.
@@ -98,18 +97,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
-			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
-					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
-					: ENV_CONNECTION_TIMEOUT_VALUE;
-			int socketTimeout = (MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT)) ||
-									Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT)) == 0) 
-					? ENV_SOCKET_TIMEOUT_VALUE 
-					: Integer.parseInt(httpListenerProperties.get(SOCKET_TIMEOUT));
-
-			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
+            HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-					.connectionTimeout(connectionTimeout)
-					.socketTimeout(socketTimeout)
+					.connectionTimeout(getTimeout(httpListenerProperties, CONNECTION_TIMEOUT, ENV_CONNECTION_TIMEOUT_VALUE))
+					.socketTimeout(getTimeout(httpListenerProperties, SOCKET_TIMEOUT, ENV_SOCKET_TIMEOUT_VALUE))
 					.inputData(JAXBUtility.marshalToJSON(workTicket))
 					.outputStream(responseStream);
 
@@ -120,13 +111,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		}
 	}
 
-	/**
+    /**
 	 * This method will copy all Response Information from SB
 	 *
 	 * @param reqContentType request content type
 	 * @param httpResponse sb response
 	 * @return response
-	 * @throws IllegalStateException
 	 * @throws IOException
      * @throws JAXBException
      */
@@ -229,4 +219,25 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
         }
     }
 
+    /**
+     * get timeout from the configuration
+     * returns default if it is configured 0 or not configured
+     *
+     * @param httpListenerProperties properties
+     * @return socket timeout
+     */
+    private int getTimeout(Map<String, String> httpListenerProperties, String propName, int defaultValue) {
+
+        String timeoutStr = httpListenerProperties.get(propName);
+        if (MailBoxUtil.isEmpty(timeoutStr)) {
+            return defaultValue;
+        }
+
+        int timeout = Integer.parseInt(timeoutStr);
+        if (timeout <= 0) {
+            return defaultValue;
+        }
+
+        return timeout;
+    }
 }
