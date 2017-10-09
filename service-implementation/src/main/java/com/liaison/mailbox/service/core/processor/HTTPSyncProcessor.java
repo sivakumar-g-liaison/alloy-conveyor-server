@@ -188,10 +188,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
         }
 
 		// Content type
-		String contentType = result.getHeader(MailBoxConstants.CONTENT_TYPE);
-		if (contentType == null) {
-			builder.header(MailBoxConstants.CONTENT_TYPE, reqContentType);
-		}
+        if (result.getHeader(HttpHeaders.CONTENT_TYPE) == null
+                && result.getHeader(HttpHeaders.CONTENT_TYPE.toLowerCase()) == null) {
+            builder.header(MailBoxConstants.CONTENT_TYPE, reqContentType);
+        }
 
 		//sets the response payload for both success and error case
 		if (MailBoxUtil.isSuccessful(result.getStatus())) {
