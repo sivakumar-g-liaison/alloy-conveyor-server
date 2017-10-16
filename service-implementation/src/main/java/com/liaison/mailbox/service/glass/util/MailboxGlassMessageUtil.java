@@ -76,7 +76,7 @@ public class MailboxGlassMessageUtil {
 
             if (ProcessorType.SWEEPER.equals(processorType)
                     || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
-                glassMessage.setOrganizationDetails(pipelineId);
+                glassMessage.setSenderOrganizationDetails(pipelineId);
             }
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         } else if (ExecutionState.DUPLICATE.equals(status)) {
@@ -85,10 +85,13 @@ public class MailboxGlassMessageUtil {
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.PROCESSING.equals(status)) {
 
-            if (ProcessorType.SWEEPER.equals(processorType)
-                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+            if (ProcessorType.SWEEPER.equals(processorType)) {
                 glassMessage.setInAgent(glassMessageDTO.getFilePath());
-                glassMessage.setOrganizationDetails(pipelineId);
+                glassMessage.setSenderOrganizationDetails(pipelineId);
+            } else if ( ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+                glassMessage.setInAgent(glassMessageDTO.getFilePath() != null ? glassMessageDTO.getFilePath() : "");
+                glassMessage.setSenderOrganizationDetails(pipelineId);
+                glassMessage.setRelatedTransactionId(glassMessageDTO.getRelatedTransactionId());
             } else {
                 glassMessage.setInAgent(processProtocol);
             }
@@ -115,8 +118,12 @@ public class MailboxGlassMessageUtil {
             glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
         } else if (ExecutionState.VALIDATION_ERROR.equals(status)) {
-            glassMessage.setOrganizationDetails(pipelineId);
+            glassMessage.setSenderOrganizationDetails(pipelineId);
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
+        } else if (ExecutionState.QUEUED.equals(status)) {
+            glassMessage.setSenderOrganizationDetails(pipelineId);
+            glassMessage.setReceiverOrganizationDetails(pipelineId);
+            glassMessage.setInboundPipelineId(pipelineId);
         }
 
         // TVAPI

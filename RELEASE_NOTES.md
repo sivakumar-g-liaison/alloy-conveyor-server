@@ -1,5 +1,6 @@
 4.18.0-SNAPSHOT
 ---------------
+* GMB-1036 - LENS should show one triggered file move as a single transaction
 * GMB-1058 - Failed to stage files but there is no error logged
 * GMB-1062 - Provision to enter the socket timeout in http sync processor
 * GMB-1059 - Upgrade libraries in Relay

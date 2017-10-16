@@ -27,8 +27,15 @@ public class GlassMessageDTO {
     private ExecutionTimestamp firstCornerTimeStamp;
     private String senderIp;
     private String receiverIp;
+    private String relatedTransactionId;
     
-    public String getGlobalProcessId() {
+    public String getRelatedTransactionId() {
+        return relatedTransactionId;
+    }
+    public void setRelatedTransactionId(String relatedTransactionId) {
+        this.relatedTransactionId = relatedTransactionId;
+    }
+	public String getGlobalProcessId() {
         return globalProcessId;
     }
     public void setGlobalProcessId(String globalProcessId) {

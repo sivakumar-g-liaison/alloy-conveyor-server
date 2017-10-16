@@ -651,7 +651,7 @@ public class HTTPListenerResource extends AuditedResource {
 
             //sets sender Ip
             glassMessage.setSenderIp(getRemoteAddress(request));
-            glassMessage.setOrganizationDetails(pipelineId);
+            glassMessage.setSenderOrganizationDetails(pipelineId);
         } else if (ExecutionState.COMPLETED.equals(state)) {
 
             glassMessage.setStatus(ExecutionState.COMPLETED);
@@ -667,7 +667,7 @@ public class HTTPListenerResource extends AuditedResource {
             //sets receiver Ip
             glassMessage.setReceiverIp(getRemoteAddress(request));
             if (!MailBoxUtil.isEmpty(pipelineId)) {
-                glassMessage.setOrganizationDetails(pipelineId);
+                glassMessage.setSenderOrganizationDetails(pipelineId);
             }
         }
 

@@ -9,6 +9,36 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.dto.queue.WorkTicketGroup;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.TriggerFileContentDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,39 +50,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.Comparator;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
-import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.logging.LogTags;
-import com.liaison.dto.queue.WorkTicket;
-import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
-import com.liaison.mailbox.service.glass.util.GlassMessage;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * ConditionalSweeper
@@ -120,7 +123,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             long startTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Start run"));
 
-            postedWorkTickets = new ArrayList<WorkTicket>();
+            postedWorkTickets = new ArrayList<>();
 
             // Check for in-progress trigger file. If .INP file is available complete active file sweeping.
             String inprogressFileName = findInprogressTriggerFile(inputLocation);
@@ -128,7 +131,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             if (!MailBoxUtil.isEmpty(inprogressFileName)) {
 
                 this.setTriggerFilePath(inputLocation + File.separator + inprogressFileName);
-                filePathList = listFilePathFromInprogressTriggerFile();
+                filePathList = listFilePathFromInProgressTriggerFile();
                 postToAsyncSweeper(filePathList, postedWorkTickets);
             }
 
@@ -183,7 +186,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
     private void postToAsyncSweeper(List<Path> filePathList, List<WorkTicket> postedWorkTickets)
             throws IllegalAccessException, IOException, JAXBException, JSONException {
 
-        List<WorkTicket> workTicketsToPost = new ArrayList<WorkTicket>();
+        List<WorkTicket> workTicketsToPost = new ArrayList<>();
         List<WorkTicket> workTickets;
         List<List<Path>> groupedFilePathList = groupingFiles(filePathList);
 
@@ -213,7 +216,6 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * Async conditional sweeper posts workticket to queue
      *
      * @param workTickets worktickets
-     * @param staticProp sweeper property
      * @throws IllegalAccessException
      * @throws IOException
      * @throws JAXBException
@@ -232,7 +234,9 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             LOGGER.debug("The file group is empty");
         } else {
 
-            Map<String, String> statusMapFromFile = readMapFromFile(triggerFileNameWithPath);
+            TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+            Map<String, String> statusMapFromFile = relatedTransactionDto.getFilePathStatusIndex();
+            String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
             Map<String, String> sweptFileStatus;
             for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
@@ -264,7 +268,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     try {
                         ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING);
+                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, relatedTransactionId);
                         LOGGER.info(constructMessage("Global PID",
                                 seperator,
                                 wrkTicket.getGlobalProcessId(),
@@ -280,11 +284,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                 }
 
                 statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), sweptFileStatus.entrySet().stream())
-                        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue(), (entry1, entry2) -> entry2));
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entry1, entry2) -> entry2));
+                relatedTransactionDto.setFilePathStatusIndex(statusMapFromFile);
 
-                writeMapToFile(statusMapFromFile, triggerFileNameWithPath);
+                writeMapToFile(relatedTransactionDto, triggerFileNameWithPath);
 
             }
+
+            //post parent gpid
+            logToLens(relatedTransactionDto.getParentGlobalProcessId(), staticProp.getPipeLineID());
         }
     }
 
@@ -297,6 +305,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
     public List<Path> listFilePathFromPayloadDirectory(String root) {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), root);
+        TriggerFileContentDTO triggerFileContentDto = new TriggerFileContentDTO();
         Path rootPath = Paths.get(root);
         if (!Files.isDirectory(rootPath)) {
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
@@ -305,11 +314,13 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         List<Path> result = new ArrayList<>();
         listFiles(result, rootPath);
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (Path path : result) {
             map.put(path.toString(), EntityStatus.ACTIVE.name());
         }
-        writeMapToFile(map, triggerFileNameWithPath);
+        triggerFileContentDto.setFilePathStatusIndex(map);
+        triggerFileContentDto.setParentGlobalProcessId(MailBoxUtil.getGUID());
+        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
 
         File triggerFile = new File(triggerFileNameWithPath);
         triggerFile.renameTo(new File(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION));
@@ -320,63 +331,39 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
     }
 
     /**
-     * Retry generate file list from activeFiles list
-     * 
-     * @param activeFilesList
-     * @return
-     */
-    protected List<Path> retryGenFileListFromActiveFiles(List<Path> activeFilesList) {
-
-        List<Path> files = new ArrayList<>();
-        for (Path file : activeFilesList) {
-
-            if (!MailBoxUtil.validateLastModifiedTolerance(file)) {
-                LOGGER.info("There are no changes in the file {} recently. So it is added in the sweeper list.", file.getFileName());
-                files.add(file);
-                continue;
-            }
-            LOGGER.info("The file {} is still modified within the tolerance. So it is removed from the current sweep list.", file.getFileName());
-        }
-
-        activeFilesList.clear();// Clearing the recently updated files after the second call.
-        return files;
-    }
-
-    /**
      * This method is used to list file path from in-progress trigger file in case of process stuck
-     * 
      * @return path list
      */
-    private List<Path> listFilePathFromInprogressTriggerFile() {
+    private List<Path> listFilePathFromInProgressTriggerFile() {
 
-        Map<String, String> statusMapFromFile = readMapFromFile(triggerFileNameWithPath);
+        TriggerFileContentDTO triggerFileContentDto = readMapFromFile(triggerFileNameWithPath);
+        Map<String, String> statusMapFromFile = triggerFileContentDto.getFilePathStatusIndex();
+        String relatedTransactionId = triggerFileContentDto.getParentGlobalProcessId();
         Map<String, String> activeMapFromFile = statusMapFromFile.entrySet()
                                                   .stream()
                                                   .filter(a->a.getValue().equals(EntityStatus.ACTIVE.name()))
-                                                  .collect(Collectors.toMap(e->e.getKey(),e->e.getValue()));
-        List<String> inprogressFiles = activeMapFromFile.keySet().stream().collect(Collectors.toList());
+                                                  .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        List<String> inProgressFiles = new ArrayList<>(activeMapFromFile.keySet());
         List<Path> result = new ArrayList<>();
-        Path path;
-        for (String file : inprogressFiles) {
-            path = Paths.get(file);
-            result.add(path);
+        for (String file : inProgressFiles) {
+            result.add(Paths.get(file));
         }
 
         LOGGER.debug("Result inprogress files size: {}, results {}", result.size(), result.toArray());
-        return filterDeletedFiles(result);
+        return filterDeletedFiles(result, relatedTransactionId);
     }
 
     /**
      * Writer map values to trigger file
      * 
-     * @param map
      * @param filePath
+     * @param relatedTransactionDto 
      */
-    private void writeMapToFile(Map<String, String> map, String filePath) {
+    private void writeMapToFile(TriggerFileContentDTO relatedTransactionDto, String filePath) {
 
         try (FileOutputStream fos = new FileOutputStream(new File(filePath));
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(map);
+            oos.writeObject(relatedTransactionDto);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -388,13 +375,14 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * @param filePath
      * @return map with file path and status
      */
-    @SuppressWarnings("unchecked")
-    private Map<String, String> readMapFromFile(String filePath) {
+    private TriggerFileContentDTO readMapFromFile(String filePath) {
 
         try (FileInputStream fis = new FileInputStream(new File(filePath));
                 ObjectInputStream ois = new ObjectInputStream(fis)) {
+                TriggerFileContentDTO relatedTransactionDto = new TriggerFileContentDTO();
+                relatedTransactionDto = (TriggerFileContentDTO) ois.readObject();
 
-            return (HashMap<String, String>) ois.readObject();
+            return relatedTransactionDto;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -515,13 +503,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * @throws IOException
      * @throws IllegalAccessException
      */
-    protected void emptyFilesCheckInWorkTicket(List<WorkTicket> workTickets, List<WorkTicket> workTicketsToPost, boolean isAllowEmptyFiles)
+    private void emptyFilesCheckInWorkTicket(List<WorkTicket> workTickets, List<WorkTicket> workTicketsToPost, boolean isAllowEmptyFiles)
             throws JAXBException, JSONException, IOException, IllegalAccessException {
 
         if (!isAllowEmptyFiles) {
 
-            Map<String, String> statusMapFromFile = readMapFromFile(triggerFileNameWithPath);
-            HashMap<String, String> deletedFileSatus = new HashMap<String, String>();
+            TriggerFileContentDTO triggerFileContentDto = readMapFromFile(triggerFileNameWithPath);
+            Map<String, String> statusMapFromFile = triggerFileContentDto.getFilePathStatusIndex();
+            String relatedTransactionId = triggerFileContentDto.getParentGlobalProcessId();
+            HashMap<String, String> deletedFileStatus = new HashMap<>();
             
             for (WorkTicket workTicket : workTickets) {
 
@@ -536,17 +526,18 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     }
 
                     LOGGER.warn(constructMessage("The file {} is empty and empty files not allowed"), workTicket.getFileName());
-                    logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR);
+                    logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR, relatedTransactionId);
                     String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
                     delete(filePath);
-                    deletedFileSatus.put(filePath, EntityStatus.INACTIVE.name());
+                    deletedFileStatus.put(filePath, EntityStatus.INACTIVE.name());
                 }
             }
 
-            statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), deletedFileSatus.entrySet().stream())
-                    .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue(), (entry1, entry2) -> entry2));
+            statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), deletedFileStatus.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entry1, entry2) -> entry2));
+            triggerFileContentDto.setFilePathStatusIndex(statusMapFromFile);
 
-            writeMapToFile(statusMapFromFile, triggerFileNameWithPath);
+            writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
         } else {
             workTicketsToPost.addAll(workTickets);
         }
@@ -556,32 +547,55 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * To filter deleted files in the path list in pay-load location
      * 
      * @param filePathList
+     * @param relatedTransactionId 
      * @return updated file path list
      */
-    private List<Path> filterDeletedFiles(List<Path> filePathList) {
+    private List<Path> filterDeletedFiles(List<Path> filePathList, String relatedTransactionId) {
         
         List<Path> updatedFilePath =new ArrayList<>();
-        HashMap<String, String> deletedFileSatus = new HashMap<String, String>();
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        HashMap<String, String> deletedFileStatus = new HashMap<>();
         
         for (Path filePath : filePathList) {
             
            if (Files.exists(filePath)) {
                updatedFilePath.add(filePath);
            } else {
-               deletedFileSatus.put(filePath.toString(), EntityStatus.INACTIVE.name());
+               deletedFileStatus.put(filePath.toString(), EntityStatus.INACTIVE.name());
                LOGGER.warn(constructMessage("The file {} is not available in the localtion."), filePath);
            }
         }
         
-        if (!deletedFileSatus.isEmpty()) {
+        if (!deletedFileStatus.isEmpty()) {
             
-            Map<String, String> statusMapFromFile = readMapFromFile(triggerFileNameWithPath);
-            statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), deletedFileSatus.entrySet().stream())
-                    .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue(), (entry1, entry2) -> entry2));
-            writeMapToFile(statusMapFromFile, triggerFileNameWithPath);
+            Map<String, String> statusMapFromFile = relatedTransactionDto.getFilePathStatusIndex();
+            statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), deletedFileStatus.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entry1, entry2) -> entry2));
+            relatedTransactionDto.setFilePathStatusIndex(statusMapFromFile);
+            relatedTransactionDto.setParentGlobalProcessId(relatedTransactionId);
+
+            writeMapToFile(relatedTransactionDto, triggerFileNameWithPath);
         }
         
         return updatedFilePath;
+    }
+
+    /**
+     * Logs the TVAPI and ActivityStatus messages to LENS of the parent PGUID. This will be invoked at the end of the transaction.
+     * @param relatedTransactionId
+     * @param pipelineId
+     */
+    protected void logToLens(String relatedTransactionId, String pipelineId) {
+
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(relatedTransactionId);
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setStatus(ExecutionState.QUEUED);
+        glassMessageDTO.setPipelineId(pipelineId);
+        glassMessageDTO.setMessage("Processed trigger file");
+
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     @Override

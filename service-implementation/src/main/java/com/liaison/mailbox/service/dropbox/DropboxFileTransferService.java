@@ -281,7 +281,7 @@ public class DropboxFileTransferService {
             glassMessage.setInboundPipelineId(workTicket.getPipelineId());
             glassMessage.setInSize(workTicket.getPayloadSize());
             glassMessage.setTransferProfileName(fileTransferDTO.getTransferProfileName());
-            glassMessage.setOrganizationDetails(workTicket.getPipelineId());
+            glassMessage.setSenderOrganizationDetails(workTicket.getPipelineId());
 
             // start time to calculate elapsed time for storing payload in spectrum
             startTime = System.currentTimeMillis();

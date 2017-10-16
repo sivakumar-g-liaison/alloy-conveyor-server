@@ -209,6 +209,15 @@ public class TransactionVisibilityClient {
             visibilityAPI.setSenderName(message.getSenderName());
         }
 
+        if (message.getReceiverId() != null && message.getReceiverName() != null) {
+            visibilityAPI.setReceiverId(message.getReceiverId());
+            visibilityAPI.setReceiverName(message.getReceiverName());
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getRelatedTransactionId())) {
+            visibilityAPI.getRelatedTransactions().add(visibilityAPI.getHub() + "-" + message.getRelatedTransactionId());
+        }
+
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
 		        message.getGlobalPId(), visibilityAPI.getId());
@@ -233,8 +242,10 @@ public class TransactionVisibilityClient {
 				visibilityAPI.setInAgent(message.getInAgent());
 				break;
 			case QUEUED :
-				visibilityAPI.setStatus(StatusCode.B);
-				break;
+                visibilityAPI.setStatus(StatusCode.B);
+                visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+                visibilityAPI.setInAgent(message.getInAgent());
+                break;
 			case READY :
 				visibilityAPI.setStatus(StatusCode.R);
 				if (null != message.getOutSize()) {

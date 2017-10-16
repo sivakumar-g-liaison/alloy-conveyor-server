@@ -109,11 +109,19 @@ public class GlassMessage {
     private String receiverIp;
     private boolean arrivalTime;
     private String adminErrorDetails;
+    private String relatedTransactionId;
 
+    public String getRelatedTransactionId() {
+        return relatedTransactionId;
+    }
 
-	public String getTransferProfileName() {
-		return transferProfileName;
-	}
+    public void setRelatedTransactionId(String relatedTransactionId) {
+        this.relatedTransactionId = relatedTransactionId;
+    }
+
+    public String getTransferProfileName() {
+        return transferProfileName;
+    }
 
 	public void setTransferProfileName(String transferProfileName) {
 		this.transferProfileName = transferProfileName;
@@ -571,11 +579,23 @@ public class GlassMessage {
      *
      * @param pipelineId pipeline pguid
      */
-    public void setOrganizationDetails(String pipelineId) {
+    public void setSenderOrganizationDetails(String pipelineId) {
 
         OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
         this.setSenderId(org.getPguid());
         this.setSenderName(org.getName());
+    }
+
+    /**
+     * Reads org details from SB and sets in TVAPI
+     *
+     * @param pipelineId pipeline pguid
+     */
+    public void setReceiverOrganizationDetails(String pipelineId) {
+
+        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
+        this.setReceiverId(org.getPguid());
+        this.setReceiverName(org.getName());
     }
     
     public String getAdminErrorDetails() {
