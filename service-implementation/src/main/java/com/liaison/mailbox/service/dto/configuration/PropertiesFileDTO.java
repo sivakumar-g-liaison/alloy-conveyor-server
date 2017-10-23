@@ -16,6 +16,8 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.util.List;
+
 /**
  * Data Transfer Object to hold the properties.
  * 
@@ -25,23 +27,40 @@ public class PropertiesFileDTO {
 	
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
-	private String processorSyncUrlDisplayPrefix;
-	private String processorAsyncUrlDisplayPrefix;
-	private String defaultScriptTemplateName;	
-	
-	public String getProcessorSyncUrlDisplayPrefix() {
-		return processorSyncUrlDisplayPrefix;
-	}
-	public void setProcessorSyncUrlDisplayPrefix(String processorSyncUrlDisplayPrefix) {
-		this.processorSyncUrlDisplayPrefix = processorSyncUrlDisplayPrefix;
-	}
-	public String getProcessorAsyncUrlDisplayPrefix() {
-		return processorAsyncUrlDisplayPrefix;
-	}
-	public void setProcessorAsyncUrlDisplayPrefix(String processorAsyncUrlDisplayPrefix) {
-		this.processorAsyncUrlDisplayPrefix = processorAsyncUrlDisplayPrefix;
-	}
-	public String getDefaultScriptTemplateName() {
+	private String processorSecureSyncUrlDisplayPrefix;
+	private String processorSecureAsyncUrlDisplayPrefix;
+	private String processorLowSecureSyncUrlDisplayPrefix;
+    private String processorLowSecureAsyncUrlDisplayPrefix;
+	private String defaultScriptTemplateName;
+	private boolean deployAsDropbox;
+    private List<String> clusterTypes;
+    private String deploymentType;
+    
+    public String getProcessorSecureSyncUrlDisplayPrefix() {
+        return processorSecureSyncUrlDisplayPrefix;
+    }
+    public void setProcessorSecureSyncUrlDisplayPrefix(String processorSecureSyncUrlDisplayPrefix) {
+        this.processorSecureSyncUrlDisplayPrefix = processorSecureSyncUrlDisplayPrefix;
+    }
+    public String getProcessorSecureAsyncUrlDisplayPrefix() {
+        return processorSecureAsyncUrlDisplayPrefix;
+    }
+    public void setProcessorSecureAsyncUrlDisplayPrefix(String processorSecureAsyncUrlDisplayPrefix) {
+        this.processorSecureAsyncUrlDisplayPrefix = processorSecureAsyncUrlDisplayPrefix;
+    }
+    public String getProcessorLowSecureSyncUrlDisplayPrefix() {
+        return processorLowSecureSyncUrlDisplayPrefix;
+    }
+    public void setProcessorLowSecureSyncUrlDisplayPrefix(String processorLowSecureSyncUrlDisplayPrefix) {
+        this.processorLowSecureSyncUrlDisplayPrefix = processorLowSecureSyncUrlDisplayPrefix;
+    }
+    public String getProcessorLowSecureAsyncUrlDisplayPrefix() {
+        return processorLowSecureAsyncUrlDisplayPrefix;
+    }
+    public void setProcessorLowSecureAsyncUrlDisplayPrefix(String processorLowSecureAsyncUrlDisplayPrefix) {
+        this.processorLowSecureAsyncUrlDisplayPrefix = processorLowSecureAsyncUrlDisplayPrefix;
+    }
+    public String getDefaultScriptTemplateName() {
 		return defaultScriptTemplateName;
 	}
 	public void setDefaultScriptTemplateName(String defaultScriptTemplateName) {
@@ -60,4 +79,24 @@ public class PropertiesFileDTO {
 	public void setListJobsIntervalInHours(String listJobsIntervalInHours) {
 		this.listJobsIntervalInHours = listJobsIntervalInHours;
 	}
+	public boolean isDeployAsDropbox() {
+	    return deployAsDropbox;
+	}
+	public void setDeployAsDropbox(boolean deployAsDropbox) {
+	    this.deployAsDropbox = deployAsDropbox;
+	}
+
+    public List<String> getClusterTypes() {
+        return clusterTypes;
+    }
+
+    public void setClusterTypes(List<String> clusterTypes) {
+        this.clusterTypes = clusterTypes;
+    }
+    public String getDeploymentType() {
+        return deploymentType;
+    }
+    public void setDeploymentType(String deploymentType) {
+        this.deploymentType = deploymentType;
+    }
 }

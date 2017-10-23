@@ -33,7 +33,6 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -52,9 +51,6 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-/**
- * @author OFS
- */
 public class MailBoxProcessorResourceIT extends BaseServiceTest {
 
     private String jsonResponse;
@@ -63,30 +59,18 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
 
     private Logger logger = LogManager.getLogger(MailBoxProcessorResourceIT.class);;
     private AddMailBoxResponseDTO responseDTO;
-    private final String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public void setUp() throws Exception {
-        System.setProperty("com.liaison.secure.properties.path", "invalid");
-        System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-        System.setProperty("archaius.deployment.environment", "test");
-
         // Adding the mailbox
         responseDTO = createMailBox();
     }
 
     /**
      * Method to test mailbox processor.
-     *
-     * @throws LiaisonException
-     * @throws JSONException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws JAXBException
-     * @throws IOException
      */
     @Test
     public void testCreateProcessorToMailBox() throws Exception {
@@ -121,6 +105,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
         Assert.assertEquals(false, getResponseDTO.getProcessor().getProfiles().isEmpty());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -159,6 +144,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
         Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -396,6 +382,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
         Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
     }
 
     /**
@@ -466,6 +453,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
         Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
     }
 
     /**
@@ -516,8 +504,8 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(reviseProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
         Assert.assertEquals(reviseProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
         Assert.assertEquals(reviseProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
-        Assert.assertEquals(reviseProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor()
-                .getJavaScriptURI());
+        Assert.assertEquals(reviseProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
     }
 
     /**
@@ -808,8 +796,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         jsonResponse = getOutput().toString();
         GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
-        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-        Assert.assertEquals(EntityStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
     }
 
     /**
@@ -892,6 +879,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
         Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor()
                 .getJavaScriptURI());
+        Assert.assertEquals(addProcessorDTO.getProcessor().getClusterType(), getResponseDTO.getProcessor().getClusterType());
 
     }
 
@@ -1013,6 +1001,7 @@ public class MailBoxProcessorResourceIT extends BaseServiceTest {
         processorDTO.setName(System.currentTimeMillis() + "");
 
         processorDTO.setDescription("CREATING PROCESSOR");
+        processorDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         processorDTO.setType(processorType);
         processorDTO.setProtocol(protocolType);

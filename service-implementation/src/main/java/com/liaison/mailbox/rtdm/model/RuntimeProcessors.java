@@ -10,18 +10,18 @@
 
 package com.liaison.mailbox.rtdm.model;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 
 
 /**
@@ -33,7 +33,8 @@ import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 @Table(name = "PROCESSORS")
 @NamedQueries({
         @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
-                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
+                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID
+                        + " AND processors.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 public class RuntimeProcessors {
 
@@ -41,6 +42,7 @@ public class RuntimeProcessors {
     private String processorId;
     private ProcessorExecutionState processorExecState;
     private String originatingDc;
+    private String clusterType;
 
     @Column(name = "PGUID", length = 32)
     @Id
@@ -77,5 +79,14 @@ public class RuntimeProcessors {
 
     public void setOriginatingDc(String originatingDc) {
         this.originatingDc = originatingDc;
+    }
+    
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+    public String getClusterType() {
+        return clusterType;
+    }
+    
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 }

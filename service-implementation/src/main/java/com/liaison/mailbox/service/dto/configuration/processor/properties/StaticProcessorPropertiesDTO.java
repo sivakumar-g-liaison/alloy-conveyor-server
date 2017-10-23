@@ -27,6 +27,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 		@JsonSubTypes.Type(value = SFTPUploaderPropertiesDTO.class),
 		@JsonSubTypes.Type(value = SFTPDownloaderPropertiesDTO.class),
 		@JsonSubTypes.Type(value = SweeperPropertiesDTO.class),
+		@JsonSubTypes.Type(value = ConditionalSweeperPropertiesDTO.class),
 		@JsonSubTypes.Type(value = FileWriterPropertiesDTO.class),
 		@JsonSubTypes.Type(value = DropboxProcessorPropertiesDTO.class),
 		@JsonSubTypes.Type(value = HTTPListenerPropertiesDTO.class) })

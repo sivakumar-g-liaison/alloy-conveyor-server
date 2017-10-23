@@ -44,8 +44,14 @@ public class ServiceInstance implements Identifiable {
 	
 	public ServiceInstance() {
 	}
-	
-	@OneToMany(mappedBy = "serviceInstance", orphanRemoval = true, cascade = { CascadeType.PERSIST,
+
+    public ServiceInstance(String pguid, String name, String originatingDc) {
+        this.pguid = pguid;
+        this.name = name;
+        this.originatingDc = originatingDc;
+    }
+
+    @OneToMany(mappedBy = "serviceInstance", orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;

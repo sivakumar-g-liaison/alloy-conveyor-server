@@ -73,6 +73,10 @@ public class RemoteProcessorPropertiesDTO {
     private String processMode = "ASYNC";
     private boolean allowEmptyFiles = true;
     private boolean useFileSystem = true;
+    private boolean includeSubDirectories;
+    private boolean deleteEmptyDirectoryAfterSwept = true;
+    private String triggerFile;
+    private String sort;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -410,4 +414,36 @@ public class RemoteProcessorPropertiesDTO {
         this.useFileSystem = useFileSystem;
     }
     
+    public boolean isIncludeSubDirectories() {
+        return includeSubDirectories;
+    }
+    
+    public void setIncludeSubDirectories(boolean includeSubDirectories) {
+        this.includeSubDirectories = includeSubDirectories;
+    }
+    
+    public boolean isDeleteEmptyDirectoryAfterSwept() {
+        return deleteEmptyDirectoryAfterSwept;
+    }
+
+    public void setDeleteEmptyDirectoryAfterSwept(boolean deleteEmptyDirectoryAfterSwept) {
+        this.deleteEmptyDirectoryAfterSwept = deleteEmptyDirectoryAfterSwept;
+    }
+    
+    @PatternValidation(errorMessage = "Invalid trigger file", type = MailBoxConstants.TRIGGER_FILE)
+    public String getTriggerFile() {
+        return triggerFile;
+    }
+    
+    public void setTriggerFile(String triggerFile) {
+        this.triggerFile = triggerFile;
+    }
+    
+    public String getSort() {
+        return sort;
+    }
+    
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
 }

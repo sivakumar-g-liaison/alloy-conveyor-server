@@ -17,13 +17,15 @@ var rest = myApp.controller(
 				fields: ['name'],
 				directions: ['asc']
 			};
-			
+
 		$scope.mailBoxName = null;
 		$scope.procName = null;
 		$scope.prcsrGuid = null;
-		
+		$scope.mailboxId = null;
+		$scope.scriptName =null;
+
 		// Profiles loads initially
-        $scope.profiles = [];
+		$scope.profiles = [];
         
         $scope.isProcessorTypeSweeper = false;
 		$scope.isProcessorTypeHTTPListener = false;
@@ -49,7 +51,7 @@ var rest = myApp.controller(
         	var sortDirection = "";
         	var prcsrTypeVal = "";
 			var prcsrProtocol = "";
-			
+
             if($scope.sortInfo.fields && $scope.sortInfo.directions) {
             	sortField = String($scope.sortInfo.fields);
             	sortDirection = String($scope.sortInfo.directions);
@@ -60,22 +62,37 @@ var rest = myApp.controller(
 			if($scope.protocolName) {
 				prcsrProtocol = String($scope.protocolName.value);
 			}
-			
-			$rootScope.gridLoaded = false;
-                $scope.restService.get($scope.base_url + '/searchprocessor',
-                    function (data) {
-                        $scope.getPagedDataAsync(data,
-                            $scope.pagingOptions.pageSize,
-                            $scope.pagingOptions.currentPage);
-						$rootScope.gridLoaded = true;
-						 $scope.showprogressbar = false;
-                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-					   mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal, prcsrName:$scope.procName, prcsrGuid:$scope.prcsrGuid}				
-                );				
-            };
-			$scope.readAllProcessors();
-			
-	$scope.clearAllFilters = function(){
+
+            $rootScope.gridLoaded = false;
+            $scope.restService.get($scope.base_url + '/searchprocessor',
+                function (data) {
+                    $scope.getPagedDataAsync(data,
+                        $scope.pagingOptions.pageSize,
+                        $scope.pagingOptions.currentPage);
+                    $rootScope.gridLoaded = true;
+                    $scope.showprogressbar = false;
+                }, {
+                    page: $scope.pagingOptions.currentPage,
+                    pagesize: $scope.pagingOptions.pageSize,
+                    sortField: sortField,
+                    sortDirection: sortDirection,
+                    mbxName: $scope.mailBoxName,
+                    pipelineId: $scope.PrcsrPipelineId,
+                    folderPath: $scope.folderPath,
+                    profileName: $scope.profileName,
+                    protocol: prcsrProtocol,
+                    prcsrType: prcsrTypeVal,
+                    prcsrName: $scope.procName,
+                    prcsrGuid: $scope.prcsrGuid,
+                    mbxGuid: $scope.mailboxId,
+                    scriptName: $scope.scriptName,
+                    clusterType: $scope.clusterType
+                }
+            );
+        };
+        $scope.readAllProcessors();
+
+        $scope.clearAllFilters = function() {
 		$scope.mailBoxName = null;
 		$scope.PrcsrPipelineId = null;
 		$scope.folderPath = null;
@@ -84,8 +101,10 @@ var rest = myApp.controller(
 		$scope.processorType = null;
 		$scope.procName = null;
 		$scope.prcsrGuid = null;
+		$scope.mailboxId = null;
+		$scope.scriptName = null;
 	}
-			
+
 	// Get Mailbox names for Typeahead display		
 	$scope.getMailboxNames = function(choice) {
         var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
@@ -150,10 +169,26 @@ var rest = myApp.controller(
         // calls the rest deactivate service
         $scope.deactivateProcessor = function () {
 
-            $scope.restService.delete($scope.base_url + '/' + $scope.key.linkedMailboxId + '/processor/' + $scope.key.guid , function (data, status) {								  
-                $scope.readAllProcessors();
+            $scope.block.blockUI();
+            $scope.restService.delete($scope.base_url + '/' + $scope.key.linkedMailboxId + '/processor/' + $scope.key.guid,
+                function (data, status) {
+                    if (status === 200) {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        showSaveMessage(data.deActivateProcessorResponse.response.message, 'success');
+                        $scope.readAllProcessors();
+                    } else {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        if (data.deActivateProcessorResponse) {
+                            showSaveMessage(data.deActivateProcessorResponse.response.message, 'error');
+                        } else {
+                            showSaveMessage("Failed to delete processor", 'error');
+                        }
+                    }
             });
-            $scope.closeDelete();
         };
 
         // Close the modal
@@ -221,15 +256,10 @@ var rest = myApp.controller(
             return valid;
         }		
 			// Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
-        <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
+        $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button class="btn btn-default btn-xs" ng-disabled="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
-        <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
-        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal" tooltip = "Deactivate" tooltip-placement="right" tooltip-append-to-body="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal" tooltip = "Delete" tooltip-placement="right" tooltip-append-to-body="true">\n\
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
 		
 		$scope.cellToolTip = {
 			overflow: 'visible'

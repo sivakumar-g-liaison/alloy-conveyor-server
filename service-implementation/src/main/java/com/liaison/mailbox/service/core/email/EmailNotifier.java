@@ -16,6 +16,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,8 @@ public class EmailNotifier {
 	private static final String CONTENT_TYPE = "text/plain; charset=UTF-8";
 	private static final String MAIL_FROM = "mail.from";
 	private static final String MAIL_HOST = "mail.host";
+    private static final String[] KEYWORDS = PROPS.getStringArray(MailBoxConstants.ERROR_RECEIVER_KEYWORDS);
+    private static final String[] INTERNAL_SYSTEM_EMAIL = PROPS.getStringArray(MailBoxConstants.ERROR_RECEIVER);
 
 	private static String SEPARATOR = ": ";
 	private static String MAILBOX_NAME = "Mailbox Name";
@@ -160,19 +163,38 @@ public class EmailNotifier {
         }
 
         List<String> emailAddress = new ArrayList<>();
-        if (isSuccess) {
-           emailAddress = processor.getEmailAddress();
-        } else {
-        	String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
-        	// Validate the email address configuration from Property file
-        	for (String tempEmail : internalEmail) {
-        		if (!MailBoxUtil.isEmpty(tempEmail)) {
-        			emailAddress.add(tempEmail);
-        		}        		
-        	}        	
+        List<String> configuredEmailAddress = processor.getEmailAddress();
+        // Send all type of email to the configured email address
+        if (!CollectionUtils.isEmpty(configuredEmailAddress)) {
+            emailAddress.addAll(configuredEmailAddress);
         }
 
-        if (null == emailAddress || emailAddress.isEmpty()) {
+        if (!isSuccess) {
+
+            // Send all specific failure to the system email address
+            boolean keywordMatch = false;
+            if (emailBody != null) {
+
+                for (String keyword : KEYWORDS) {
+                    if (StringUtils.isNotEmpty(keyword) && emailBody.contains(keyword)) {
+                        keywordMatch = true;
+                    }
+                }
+
+                if (keywordMatch) {
+
+                    // Validate the email address configuration from Property file
+                    for (String tempEmail : INTERNAL_SYSTEM_EMAIL) {
+                        if (!MailBoxUtil.isEmpty(tempEmail)) {
+                            emailAddress.add(tempEmail);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (CollectionUtils.isEmpty(emailAddress)) {
             LOGGER.debug("Email Address is not configured.");
             return;
         }

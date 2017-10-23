@@ -10,17 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
 import com.liaison.commons.logging.LogTags;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -31,6 +20,16 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * class which has file delete replication activities
@@ -41,20 +40,20 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class FileDeleteReplicationService {
 
     private static final Logger LOGGER = LogManager.getLogger(FileDeleteReplicationService.class);
-    private static final String PATH = "path";
-    private static final String USER_UID = "user_uid";
+    private static final String PATH = "object_path";
+    private static final String USER_SID = "user_sid";
     
     /**
      * Method to in-activate staged file entry and update lens status.
      * 
      * @param requestString
      */
-    public void inactivateStageFileAndUpldateLens(String requestString) {
+    public void inactivateStageFileAndUpdateLens(String requestString) {
         
         try {
             JSONObject reqeustObj = new JSONObject(requestString);
             String path = (String) reqeustObj.get(PATH);
-            String uId = (String) reqeustObj.get(USER_UID);
+            String sId = (String) reqeustObj.get(USER_SID);
             String filePath = path.substring(0, path.lastIndexOf("/"));
             String fileName = path.substring(path.lastIndexOf("/") + 1);
             
@@ -77,7 +76,7 @@ public class FileDeleteReplicationService {
                 glassMessageDTO.setFilePath(filePath);
                 glassMessageDTO.setFileLength(0);
                 glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + uId);
+                glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + sId);
                 glassMessageDTO.setPipelineId(null);
                 glassMessageDTO.setFirstCornerTimeStamp(null);
                 
@@ -99,7 +98,7 @@ public class FileDeleteReplicationService {
      * 
      * @param requestString
      */
-    public void deleteRelicatedFile(String requestString) {
+    public void deleteReplicatedFile(String requestString) {
         
         try {
             JSONObject reqeustObj = new JSONObject(requestString);

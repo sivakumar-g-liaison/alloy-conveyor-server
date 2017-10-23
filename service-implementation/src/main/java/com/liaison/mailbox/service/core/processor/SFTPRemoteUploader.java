@@ -171,7 +171,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;
@@ -250,7 +250,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;
@@ -263,12 +263,18 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
                 : currentFileName;
 
         // upload the file
-        try (InputStream inputStream = file.getPayloadInputStream()) {
+        InputStream inputStream = null;
+        try {
 
+            inputStream = file.getPayloadInputStream();
             sftpRequest.changeDirectory(remoteParentDir);
             LOGGER.info(constructMessage("uploading file from storage {} to remote path {}"),
                     file.getPayloadUri(), remoteParentDir);
             replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
+            }
         }
 
         // Check whether the file uploaded successfully

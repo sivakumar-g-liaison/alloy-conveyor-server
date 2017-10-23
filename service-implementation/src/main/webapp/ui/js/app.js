@@ -18,13 +18,15 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'myApp.copyToClipboard',
+    'myApp.directives',
     'ngGrid', // angular grid
     'ngSanitize', // for html-bind in ckeditor
     'ui.ace', // ace code editor
     'ui.bootstrap', // jquery ui bootstrap
     'ngRoute',
     'angularTreeview', // for tree view
-    'BlockUI'
+    'BlockUI',
+    'daterangepickerapp'
 ]);
 var filters = angular.module('myApp.filters', []);
 var directives = angular.module('myApp.directives', []);
@@ -33,7 +35,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
         // TODO use html5 *no hash) where possible
         //$locationProvider.html5Mode(true);
-		
+
 		//GMB-472 Fix - Disable $http request cache
 		$httpProvider.defaults.cache = false;
 		if (!$httpProvider.defaults.headers.common) {
@@ -41,7 +43,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 	    }
 	    $httpProvider.defaults.headers.common["Cache-Control"] = "no-cache";
 	    $httpProvider.defaults.headers.common.Pragma = "no-cache";
-    
+
         $routeProvider.when('/', {
             templateUrl: 'partials/home.html'
         });
@@ -79,6 +81,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
         $routeProvider.when('/profiles/trigger', {
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
+        });
+        $routeProvider.when('/mailbox/getStagedFiles', {
+            templateUrl: 'partials/processor/stagedfiles.html',
+            controller: 'StagedFilesCntrlr'
         });
         // by default, redirect to site root
         $routeProvider.otherwise({
@@ -134,16 +140,40 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
 
 	// load initial Processor Data
-    $rootScope.initialProcessorData;
-    $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
-        $rootScope.initialProcessorData = data;
+	$rootScope.initialProcessorData;
+	$rootScope.conveyorProcessorData;
+	$rootScope.legacyRelayProcessorData;
+	$rootScope.relayProcessorData;
+	//  load edit Processor Data
+	$rootScope.editProcessorData;
+	$rootScope.editConveyorProcessorData;
+	$rootScope.editLegacyRelayProcessorData;
+	$rootScope.editRelayProcessorData;
+
+    $rootScope.conveyorProcessorData = loadFile('data/createConveyorProcessorDetails.json');
+    $rootScope.editConveyorProcessorData = loadFile('data/editConveyorProcessorDetails.json');
+    $rootScope.legacyRelayProcessorData = loadFile('data/createLegacyRelayProcessorDetails.json');
+    $rootScope.editLegacyRelayProcessorData = loadFile('data/editLegacyRelayProcessorDetails.json');
+    $rootScope.relayProcessorData = loadFile('data/createRelayProcessorDetails.json');
+    $rootScope.editRelayProcessorData = loadFile('data/editRelayProcessorDetails.json');
+
+    $rootScope.languageFormatData = {
+        'dateRangePattern':'',
+        'locale':''
+    };
+    $rootScope.restService.get('../language/userLocale',
+        function(data, status) {
+        	if (status === 200) {
+                $rootScope.languageFormatData.dateRangePattern = data.TreeMap.dateRangePattern;
+                $rootScope.languageFormatData.locale = data.TreeMap.locale;
+        	}
     });
-    
-    //  load edit Processor Data
-    $rootScope.editProcessorData;
-    $rootScope.restService.get('data/editProcessorDetails.json', function (data) {
-    	$rootScope.editProcessorData = data;
-    });
+
+    // load java script checkbox details
+    $rootScope.javaScriptCheckBox = loadFile('data/javaScriptCheckBox.json');
+
+    // load java script checkbox details for conditional sweeper
+    $rootScope.javaScriptCheckBoxConditionalSweeper = loadFile('data/javaScriptCheckBoxConSweeper.json');
 
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
@@ -154,24 +184,44 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 	$rootScope.javaProperties = {
 		globalTrustStoreId: "",
 		globalTrustStoreGroupId: "",
-		processorSyncUrlDisplayPrefix: "",
-		processorAsyncUrlDisplayPrefix: "",
-		defaultScriptTemplateName: ""	
+		processorSecureSyncUrlDisplayPrefix: "",
+		processorSecureAsyncUrlDisplayPrefix: "",
+		processorLowSecureSyncUrlDisplayPrefix: "",
+        processorLowSecureAsyncUrlDisplayPrefix: "",
+		defaultScriptTemplateName: "",
+	    deployAsDropbox:false,
+	    clusterTypes:[]
 	};
-	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
-		function (data, status) {
-			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
-				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
-				$rootScope.javaProperties.globalTrustStoreGroupId = data.getPropertiesValueResponseDTO.properties.trustStoreGroupId;
-				$rootScope.javaProperties.processorSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSyncUrlDisplayPrefix;
-				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
-				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
-				
-			} else {
-				return;
-			}
-		}
-	);
+
+    var responseJson = loadFile($rootScope.base_url + '/serviceconfigurations');
+    if (responseJson) {
+        var propertyResponse = responseJson.getPropertiesValueResponseDTO;
+        if (propertyResponse.response.status === 'success') {
+            var properties = propertyResponse.properties;
+
+            $rootScope.javaProperties.globalTrustStoreId = properties.trustStoreId;
+            $rootScope.javaProperties.globalTrustStoreGroupId = properties.trustStoreGroupId;
+            $rootScope.javaProperties.processorSecureSyncUrlDisplayPrefix = properties.processorSecureSyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorSecureAsyncUrlDisplayPrefix = properties.processorSecureAsyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorLowSecureSyncUrlDisplayPrefix = properties.processorLowSecureSyncUrlDisplayPrefix;
+            $rootScope.javaProperties.processorLowSecureAsyncUrlDisplayPrefix = properties.processorLowSecureAsyncUrlDisplayPrefix;
+            $rootScope.javaProperties.defaultScriptTemplateName = properties.defaultScriptTemplateName;
+            $rootScope.javaProperties.deployAsDropbox = properties.deployAsDropbox;
+            $rootScope.javaProperties.clusterTypes = properties.clusterTypes;
+
+            var deploymentType = properties.deploymentType;
+            if ('CONVEYOR' === deploymentType) {
+                $rootScope.initialProcessorData = $rootScope.conveyorProcessorData;
+                $rootScope.editProcessorData = $rootScope.editConveyorProcessorData;
+            } else if ('LOW_SECURE_RELAY' === deploymentType) {
+                $rootScope.initialProcessorData = $rootScope.legacyRelayProcessorData;
+                $rootScope.editProcessorData = $rootScope.editLegacyRelayProcessorData;
+            } else {
+                $rootScope.initialProcessorData = $rootScope.relayProcessorData;
+                $rootScope.editProcessorData = $rootScope.editRelayProcessorData;
+            }
+        }
+    };
 
 	/*
 	* Pipeline Id code
@@ -194,4 +244,14 @@ function getParameterByName(url, name) {
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(url);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function loadFile(file) {
+
+    var request = new XMLHttpRequest();
+    request.open('GET', file, false);
+    request.send(null);
+    if (request.status === 200) {
+        return JSON.parse(request.responseText);
+    }
 }

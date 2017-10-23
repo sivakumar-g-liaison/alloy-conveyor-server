@@ -37,8 +37,9 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean deleteFiles;
 	private String includeFiles;
 	private String excludeFiles;
-	private boolean debugTranscript;	
+	private boolean debugTranscript;
 	private int scriptExecutionTimeout;
+	private boolean includeSubDirectories;
 
 	public String getUrl() {
 		return url;
@@ -140,6 +141,12 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setScriptExecutionTimeout(int scriptExecutionTimeout) {
 		this.scriptExecutionTimeout = scriptExecutionTimeout;
+	}
+	public boolean isIncludeSubDirectories() {
+	    return includeSubDirectories;
+	}
+	public void setIncludeSubDirectories(boolean includeSubDirectories) {
+	    this.includeSubDirectories = includeSubDirectories;
 	}
 
 }

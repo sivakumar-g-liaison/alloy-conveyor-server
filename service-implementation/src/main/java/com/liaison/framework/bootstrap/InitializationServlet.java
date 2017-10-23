@@ -18,12 +18,15 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.health.check.file.FileReadDeleteCheck;
 import com.liaison.health.check.jdbc.JdbcConnectionCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.DeploymentType;
+import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +38,7 @@ import javax.servlet.http.HttpServlet;
 import java.net.URL;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
 
 
 /**
@@ -49,21 +53,22 @@ import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_
  */
 public class InitializationServlet extends HttpServlet {
 
-	private static final long serialVersionUID = -8418412083748649428L;
-	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
+    private static final long serialVersionUID = -8418412083748649428L;
+    private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
-	public static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+    private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
 
     public void init(ServletConfig config) throws ServletException {
 
-        DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-		boolean isDropbox = configuration.getBoolean(QueueAndTopicProcessInitializer.START_DROPBOX_QUEUE, false);
+        DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
+        String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+
         // nfs health check
         // check only if current service is not dropbox
-        if(!isDropbox) {
+        if (!DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
             String[] serviceNfsMount = configuration.getStringArray(PROPERTY_SERVICE_NFS_MOUNT);
-            if(serviceNfsMount != null) {
-                for(String mount : serviceNfsMount) {
+            if (serviceNfsMount != null) {
+                for (String mount : serviceNfsMount) {
                     LiaisonHealthCheckRegistry.INSTANCE.register(mount + "_read_delete_check",
                             new FileReadDeleteCheck(mount));
                 }
@@ -72,8 +77,13 @@ public class InitializationServlet extends HttpServlet {
 
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
-        QueueAndTopicProcessInitializer.initialize();
     	DAOUtil.init();
+    	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
+    	// Update the status from "PROCESSING" to "FAILED" for the current node.
+        ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
+
+        //QUEUE and TOPIC consumers initialization
+        QueueAndTopicProcessInitializer.initialize();
 
 		// db health check
 		LiaisonHealthCheckRegistry.INSTANCE.register("dtdm_db_connection_check",
@@ -93,15 +103,28 @@ public class InitializationServlet extends HttpServlet {
 		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
         //Register sb http async host
-        String serviceBrokerUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
-        if (!MailBoxUtil.isEmpty(serviceBrokerUri)) {
+        String serviceBrokerAsyncUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_ASYNC_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerAsyncUri)) {
             try {
 
-                URL uri = new URL(serviceBrokerUri);
+                URL uri = new URL(serviceBrokerAsyncUri);
                 HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
                 HTTPRequest.registerHealthCheck();
             } catch (Exception e) {
-                logger.error("Unable to register http sbasync pool", e);
+                logger.error("Unable to register http sb async pool", e);
+            }
+        }
+
+        //Register sb http sync host
+        String serviceBrokerRTUri = configuration.getString(CONFIGURATION_SERVICE_BROKER_URI);
+        if (!MailBoxUtil.isEmpty(serviceBrokerRTUri)) {
+
+            try {
+                URL uri = new URL(serviceBrokerRTUri);
+                HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
+                HTTPRequest.registerHealthCheck();
+            } catch (Exception e) {
+                logger.error("Unable to register http sb sync pool", e);
             }
         }
 

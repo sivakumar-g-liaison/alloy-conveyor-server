@@ -114,14 +114,14 @@
                         <label>
                             {{processorData.supportedProtocols.displayName}}
                         </label>
-                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in processorData.supportedProtocols.options" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeConditionalSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in processorData.supportedProtocols.options" class="form-control">
                         </select>
                     </div>
                 </div>
             </div>            			
             <div class="row form-group">
 			    <div class="col-sm-6 col-md-6 processor_adjustPaddingTop">
-				 <span>{{processorData.supportedJavaScriptCheckBox.displayName}}
+				 <span>{{supportedJavaScriptCheckBox.displayName}}
 				 <input type="checkbox" ng-model="isJavaScriptExecution" id="mbx_procsr_javascript" ng-click="onChangeJavaScriptExecutor()">
 				</span>
 				</div>
@@ -168,7 +168,15 @@
 			  </div>
 							
 			</div>
-			
+		    <div class="row form-group" ng-show="!javaProperties.deployAsDropbox">
+              <div class="col-sm-6 col-md-6">
+                  <label for="clusterType">
+                   Cluster Type
+                  </label>
+                  <select class="form-control" ng-change="onClusterChange()" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+                  </select>
+              </div>
+            </div>
 			</br>
 			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
                 <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
@@ -229,7 +237,7 @@
                 <br>
             </div>
 
-            <div ng-controller = "CredentialHanlderCntrlr" class="form-group" ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeSweeper">
+            <div ng-controller = "CredentialHanlderCntrlr" class="form-group" ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeSweeper || isProcessorTypeConditionalSweeper">
 			 	<h4>Credentials</h4>
 	            <div class ="row" ng-show="showTruststoreSection">
 	                    <div class="col-sm-4 col-md-4 adjustPaddingRight">
@@ -282,7 +290,7 @@
                         all available transfer profiles
                         </i>
                     </label>
-                    <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
+                    <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles | orderBy : 'name'" class="form-control">
                     </select>
                 </div>
                 <div class="col-md-1">
@@ -379,6 +387,25 @@
 			<div class="modal-footer">
 				<button class="btn btn-primary" data-dismiss="modal" ng-click="backToMailbox()">Confirm</button>
 				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Model for delete processor -->
+<div class="modal-custom" id="confirmProcessorDelete" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirm Processor Delete</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Do you really want to delete the processor?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-danger" data-dismiss="modal" ng-click="confirmProcessorSave()">Delete</button>
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="closeConfirmProcessorDelete()">Cancel</button>
 			</div>
 		</div>
 	</div>

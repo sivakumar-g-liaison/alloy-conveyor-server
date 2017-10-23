@@ -38,20 +38,15 @@
     <servlet>
         <servlet-name>StaticRest</servlet-name>
         <servlet-class>
-            com.sun.jersey.spi.container.servlet.ServletContainer
+            org.glassfish.jersey.servlet.ServletContainer
         </servlet-class>
         <init-param>
-            <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service.rest;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl;com.liaison.service;com.liaison.threadmanagement.resources</param-value>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>com.liaison.mailbox.service.rest;com.liaison.service.resources.acl;com.liaison.service;com.liaison.threadmanagement.resources;com.wordnik.swagger.jersey.listing;</param-value>
          </init-param>
         <init-param>
-            <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <!-- ACL -->
-          <init-param>
-            <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
-            <param-value>com.liaison.commons.acl.resource.filter.ValidationFilterFactory</param-value>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>org.glassfish.jersey.jackson.JacksonFeature;com.liaison.commons.acl.resource.filter.ValidationFilterFactory;com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZValidationFilterFactory</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -155,7 +150,7 @@
         <filter-name>componentVerifyFilter</filter-name>
         <url-pattern>/verifycomponent</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxAuthenticationResource -->
     <filter>
         <filter-name>dropboxAuthFilter</filter-name>
@@ -169,7 +164,7 @@
         <filter-name>dropboxAuthFilter</filter-name>
         <url-pattern>/config/dropbox/authenticate</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxFileStagedResource -->
     <filter>
         <filter-name>dropboxFileStageFilter</filter-name>
@@ -183,7 +178,7 @@
         <filter-name>dropboxFileStageFilter</filter-name>
         <url-pattern>/config/dropbox/stagedFiles</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxFileTransferResource -->
     <filter>
         <filter-name>dropboxFileTransStageFilter</filter-name>
@@ -197,7 +192,7 @@
         <filter-name>dropboxFileTransStageFilter</filter-name>
         <url-pattern>/config/dropbox/transferContent</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxManifestResource -->
     <filter>
         <filter-name>dropboxManifestFilter</filter-name>
@@ -211,7 +206,7 @@
         <filter-name>dropboxManifestFilter</filter-name>
         <url-pattern>/config/dropbox/authAndGetACL</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxStagedFileDownloadResource -->
     <filter>
         <filter-name>dropboxStagedFileDLFilter</filter-name>
@@ -225,7 +220,7 @@
         <filter-name>dropboxStagedFileDLFilter</filter-name>
         <url-pattern>/config/dropbox/stagedFiles/*</url-pattern>
     </filter-mapping>
-    
+
     <!-- DropboxTransferProfileResource -->
     <filter>
         <filter-name>dropboxTransferProfileFilter</filter-name>
@@ -239,7 +234,7 @@
         <filter-name>dropboxTransferProfileFilter</filter-name>
         <url-pattern>/config/dropbox/transferProfiles</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailboxConfigurationDetailsResource -->
     <filter>
         <filter-name>mailboxConfigDetailsFilter</filter-name>
@@ -253,7 +248,7 @@
         <filter-name>mailboxConfigDetailsFilter</filter-name>
         <url-pattern>/config/mailbox/*</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailBoxConfigurationResource -->
     <filter>
         <filter-name>mailboxConfigFilter</filter-name>
@@ -267,7 +262,7 @@
         <filter-name>mailboxConfigFilter</filter-name>
         <url-pattern>/config/mailbox</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailBoxProfileResource -->
     <filter>
         <filter-name>mailboxProfileFilter</filter-name>
@@ -281,7 +276,7 @@
         <filter-name>mailboxProfileFilter</filter-name>
         <url-pattern>/config/mailbox/profile</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailboxReadResource -->
     <filter>
         <filter-name>mailboxReadFilter</filter-name>
@@ -295,7 +290,7 @@
         <filter-name>mailboxReadFilter</filter-name>
         <url-pattern>/config/entity/read/*</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailBoxScriptConfigurationResource -->
     <!-- MailBoxScriptDetailsConfigurationResource -->
     <filter>
@@ -324,7 +319,7 @@
         <filter-name>mailBoxServiceConfigFilter</filter-name>
         <url-pattern>/config/mailbox/serviceconfigurations</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailboxTenancyKeyResource -->
     <filter>
         <filter-name>mailboxTenancyKeyFilter</filter-name>
@@ -338,7 +333,7 @@
         <filter-name>mailboxTenancyKeyFilter</filter-name>
         <url-pattern>/config/mailbox/tenancyKeys</url-pattern>
     </filter-mapping>
-    
+
     <!-- MailboxWatchDogResource -->
     <filter>
         <filter-name>mailboxWatchDogFilter</filter-name>
@@ -352,7 +347,7 @@
         <filter-name>mailboxWatchDogFilter</filter-name>
         <url-pattern>/config/mailbox/trigger/status</url-pattern>
     </filter-mapping>
-    
+
     <!-- ProcessorAdminDetailsResource -->
     <filter>
         <filter-name>processorAdminDetFilter</filter-name>
@@ -366,7 +361,7 @@
         <filter-name>processorAdminDetFilter</filter-name>
         <url-pattern>/config/mailbox/processoradmin/processor/status</url-pattern>
     </filter-mapping>
-    
+
     <!-- ProcessorSearchResource -->
     <filter>
         <filter-name>processorSearchFilter</filter-name>
@@ -380,7 +375,7 @@
         <filter-name>processorSearchFilter</filter-name>
         <url-pattern>/config/mailbox/searchprocessor</url-pattern>
     </filter-mapping>
-    
+
     <!-- TriggerProfileResource -->
     <filter>
         <filter-name>triggerProfileFilter</filter-name>
@@ -394,7 +389,7 @@
         <filter-name>triggerProfileFilter</filter-name>
         <url-pattern>/config/mailbox/trigger/profile</url-pattern>
     </filter-mapping>
-    
+
     <!-- TypeaheadResource -->
     <filter>
         <filter-name>typeaheadFilter</filter-name>
@@ -408,7 +403,7 @@
         <filter-name>typeaheadFilter</filter-name>
         <url-pattern>/config/mailbox/typeAhead/getEntityByNames</url-pattern>
     </filter-mapping>
-    
+
     <!-- HTTPListenerResource -->
     <filter>
         <filter-name>httpSyncFilter</filter-name>
@@ -423,6 +418,20 @@
         <url-pattern>/process/sync/*</url-pattern>
     </filter-mapping>
 
+    <!-- VersionResource -->
+    <filter>
+        <filter-name>versionRequestFilter</filter-name>
+        <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
+        <init-param>
+            <param-name>name-prefix</param-name>
+            <param-value>/config/version</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>versionRequestFilter</filter-name>
+        <url-pattern>/config/version</url-pattern>
+    </filter-mapping>
+
     <filter>
         <filter-name>httpAsyncFilter</filter-name>
         <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
@@ -435,7 +444,7 @@
         <filter-name>httpAsyncFilter</filter-name>
         <url-pattern>/process/async/*</url-pattern>
     </filter-mapping>
-    
+
     <listener>
         <listener-class>com.liaison.health.core.MetricsServletContextListener</listener-class>
     </listener>

@@ -10,7 +10,7 @@
             "displayName" : "HTTP Listener PipelineId",
             "value":"",
             "type":"textarea",
-            "readOnly":true,
+            "readOnly":false,
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
@@ -84,7 +84,23 @@
                "minLength":"",
                "maxLength":""
             }
-        }
+        },
+        {
+            "name": "socketTimeout",
+            "displayName": "Socket Timeout",
+            "type": "textarea",
+            "value": "",
+            "readOnly": false,
+            "mandatory": false,
+            "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": {
+               "pattern": "\/^([0-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$\/",
+               "minLength": "",
+               "maxLength": ""
+               }
+         }
     ],
     "folderProperties":[],
     "credentialProperties":[]

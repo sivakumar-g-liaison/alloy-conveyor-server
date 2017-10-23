@@ -10,11 +10,6 @@
 
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
 import com.liaison.commons.message.glass.dom.GatewayType;
@@ -24,12 +19,18 @@ import com.liaison.commons.message.glass.dom.TimeStampAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.gem.service.dto.OrganizationDTO;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ServiceBrokerUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Class that contains the fields required for logging messages in LENS.
@@ -57,7 +58,7 @@ public class GlassMessage {
 
 	private static final Logger logger = LogManager.getLogger(GlassMessage.class);
 
-	DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
+	DecryptableConfiguration config = LiaisonArchaiusConfiguration.getInstance();
 
 	public GlassMessage(WorkTicket wrkTicket) {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());
@@ -95,6 +96,9 @@ public class GlassMessage {
 	private Long outSize;
 	private String processId;
 	private String senderId;
+    private String senderName;
+    private String receiverId;
+    private String receiverName;
 	private String transferProfileName;
 	private String stagedFileId;
 	private String meta;
@@ -104,11 +108,20 @@ public class GlassMessage {
     private String senderIp;
     private String receiverIp;
     private boolean arrivalTime;
+    private String adminErrorDetails;
+    private String relatedTransactionId;
 
+    public String getRelatedTransactionId() {
+        return relatedTransactionId;
+    }
 
-	public String getTransferProfileName() {
-		return transferProfileName;
-	}
+    public void setRelatedTransactionId(String relatedTransactionId) {
+        this.relatedTransactionId = relatedTransactionId;
+    }
+
+    public String getTransferProfileName() {
+        return transferProfileName;
+    }
 
 	public void setTransferProfileName(String transferProfileName) {
 		this.transferProfileName = transferProfileName;
@@ -138,7 +151,31 @@ public class GlassMessage {
 		this.senderId = senderId;
 	}
 
-	public GatewayType getOutAgent() {
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public GatewayType getOutAgent() {
 		return outAgent;
 	}
 
@@ -404,9 +441,8 @@ public class GlassMessage {
 
     private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
 
-		TimeStampAPI timeStampAPI = new TimeStampAPI();
+		TimeStampAPI timeStampAPI = new TimeStampAPI(getGlobalPId());
 		timeStampAPI.setProcessId(getProcessId());
-		timeStampAPI.setGlobalId(getGlobalPId());
 		timeStampAPI.setPipelineId(getPipelineId());
 		timeStampAPI.getTimeStamps().add(glassTimeStamp);
 		timeStampAPI.setGlassMessageId(UUIDGen.getCustomUUID());
@@ -426,10 +462,9 @@ public class GlassMessage {
 	 */
 	private ActivityStatusAPI constructActivityStatusAPI(StatusType statusType, String message, String processorType, String techDescription, String processorProtocol) {
 
-		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI(getGlobalPId());
 		activityStatusAPI.setPipelineId(getPipelineId());
 		activityStatusAPI.setProcessId(getProcessId());
-		activityStatusAPI.setGlobalId(getGlobalPId());
 		activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
 		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
@@ -491,7 +526,8 @@ public class GlassMessage {
 	}
 
 	/**
-	 * Method to log the errors and technical description in ActivityStatusAPI 
+	 * Method to log the errors and technical description in ActivityStatusAPI
+	 * and to log error details (tech description) in meta data.
 	 * 
 	 * @param statusType
 	 * @param message
@@ -502,6 +538,7 @@ public class GlassMessage {
 		
 		// Log ActivityStatusAPI
 		ActivityStatusAPI activityStatusAPI = constructActivityStatusAPI(statusType, message, processorType, techDescription, null);
+		this.setAdminErrorDetails(techDescription);
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
 	}
 
@@ -536,4 +573,36 @@ public class GlassMessage {
 	public void setFourthCornerTimestamp(ExecutionTimestamp fourthCornerTimestamp) {
 		this.fourthCornerTimestamp = fourthCornerTimestamp;
 	}
+
+    /**
+     * Reads org details from SB and sets in TVAPI
+     *
+     * @param pipelineId pipeline pguid
+     */
+    public void setSenderOrganizationDetails(String pipelineId) {
+
+        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
+        this.setSenderId(org.getPguid());
+        this.setSenderName(org.getName());
+    }
+
+    /**
+     * Reads org details from SB and sets in TVAPI
+     *
+     * @param pipelineId pipeline pguid
+     */
+    public void setReceiverOrganizationDetails(String pipelineId) {
+
+        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
+        this.setReceiverId(org.getPguid());
+        this.setReceiverName(org.getName());
+    }
+    
+    public String getAdminErrorDetails() {
+        return adminErrorDetails;
+    }
+    
+    public void setAdminErrorDetails(String adminErrorDetails) {
+        this.adminErrorDetails = adminErrorDetails;
+    }
 }

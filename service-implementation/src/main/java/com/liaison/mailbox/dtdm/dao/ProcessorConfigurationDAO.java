@@ -11,11 +11,11 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 import java.util.List;
@@ -36,6 +36,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS = "Processor.findProcessorsByType";
     String FIND_PROCESSORS_BY_TYPE_AND_STATUS = "Processor.findProcessorsByTypeAndStatus";
     String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
+    String GET_CLUSTER_TYPE_BY_PROCESSOR_GUID = "Processor.getClusterType";
 
 	String PROF_NAME = "sch_prof_name";
 	String MBX_NAME = "mbx_name";
@@ -51,14 +52,16 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	String FOLDER_URI = "folder_uri";
 	String PROTOCOL = "protocol";
 	String PIPELINE_ID = "pipeline_id";
-
 	String MBX_ID = "mbx_id";
+	String SCRIPT_NAME ="script_name";
+
 	/**
 	 * Constants for getProcessor Class
 	 */
 	String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
 	String HTTP_ASYNC_PRCSR_CLASS = "httpasyncprocessor";
 	String SWEEPER_CLASS = "sweeper";
+	String CONDITIONAL_SWEEPER_CLASS = "conditionalsweeper";
 	String FILEWRITER_CLASS = "filewriter";
 	String REMOTE_UPLAODER_CLASS = "remoteuploader";
 	String REMOTE_DOWNLAODER_CLASS = "remotedownloader";
@@ -78,9 +81,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 *
 	 * @param profileName    The profile name.
 	 * @param mbxNamePattern The MailBox name pattern to exclude
-	 * @return The list of processors.
+	 * @return The list of processor guids
 	 */
-	List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
+	List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
 	/**
      * Checks the mailbox has the processor or not.
@@ -228,46 +231,102 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 */
 	List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mailboxName, String processorType);
 
-	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
-		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
-		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
-		.append(" SI.SERVICE_INSTANCE_ID,")
-		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")		
-		.append(" FROM PROCESSOR P")
-		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
-		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
-		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
-		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
-		.append(" WHERE P.TYPE = ? AND")
-		.append(" M.PGUID = ? AND")
-		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+    /**
+     * Retrieve cluster type based on processorId.
+     *
+     * @param processorId pguid of the processor
+     * @return cluster type of the processor entity
+     */
+    String getClusterType(String processorId);
 
-	StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
-		.append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES,")
-		.append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
-		.append(" SI.SERVICE_INSTANCE_ID,")
-		.append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
-		.append(" FROM PROCESSOR P")
-		.append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
-		.append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
-		.append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
-		.append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
-		.append(" WHERE P.TYPE = ? AND")
-		.append(" LOWER(M.NAME) = ? AND")
-		.append(" P.STATUS = 'ACTIVE' AND")
-		.append(" M.STATUS = 'ACTIVE' ");
+    /*
+     * Retrieve processorId list by the given processor name.
+     * 
+     * @param processorName
+     * @return processor ID list
+     */
+    List<String> getProcessorIdByName(String processorName);
 
-	StringBuilder PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID = new StringBuilder().append("select processor from Processor processor")
-			.append(" inner join processor.mailbox mbx")
-			.append(" where mbx.pguid = :")
-			.append(PGUID)
-			.append(" and processor.pguid in (select prcsr.pguid from Processor prcsr")
-			.append(" inner join prcsr.serviceInstance si")
-			.append(" where si.name like :")
-			.append(SERV_INST_ID)
-			.append(" and processor.procsrStatus <> :")
-			.append(ProcessorConfigurationDAO.STATUS_DELETE)
-			.append(")");
+    /**
+     * Retrieve processorId by the given processor name and mailbox name.
+     *
+     * @param processorName
+     * @param mailboxName
+     * @return processor ID
+     */
+    String getProcessorIdByProcNameAndMbxName(String mailboxName, String processorName);
+
+    /**
+     * Retrieve processor name by the given processor pugid
+     *
+     * @param pguid
+     * @return processorName
+     */
+    public String getProcessorNameByPguid(String pguid);
+
+    StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
+            .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
+            .append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
+            .append(" SI.SERVICE_INSTANCE_ID,")
+            .append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, M.STATUS AS MBX_STATUS,")
+            .append(" MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
+            .append(" FROM PROCESSOR P")
+            .append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
+            .append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
+            .append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
+            .append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
+            .append(" WHERE P.TYPE = ?1 AND")
+            .append(" M.PGUID = ?2 AND")
+            .append(" P.STATUS <> 'DELETED' AND")
+            .append(" M.STATUS <> 'DELETED' AND")
+            .append(" P.CLUSTER_TYPE = ?3 AND")
+            .append(" M.CLUSTER_TYPE = ?4");
+
+    StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_NAME_QUERY = new StringBuilder()
+            .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
+            .append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
+            .append(" SI.SERVICE_INSTANCE_ID,")
+            .append(" M.PGUID AS MBX_GUID, M.NAME, M.TENANCY_KEY, M.STATUS AS MBX_STATUS,")
+            .append(" MP.NAME AS MBX_PROP_NAME, MP.VALUE AS MBX_PROP_VALUE")
+            .append(" FROM PROCESSOR P")
+            .append(" LEFT OUTER JOIN PROCESSOR_PROPERTY PP ON PP.PROCESSOR_GUID = P.PGUID")
+            .append(" INNER JOIN SERVICE_INSTANCE SI ON SI.PGUID = P.SERVICE_INSTANCE_GUID")
+            .append(" INNER JOIN MAILBOX M ON M.PGUID = P.MAILBOX_GUID")
+            .append(" LEFT OUTER JOIN MAILBOX_PROPERTY MP ON MP.MAILBOX_GUID = M.PGUID")
+            .append(" WHERE P.TYPE = ?1 AND")
+            .append(" LOWER(M.NAME) = ?2 AND")
+            .append(" P.STATUS <> 'DELETED' AND")
+            .append(" M.STATUS <> 'DELETED' AND")
+            .append(" P.CLUSTER_TYPE = ?3 AND")
+            .append(" M.CLUSTER_TYPE = ?4");
+
+    StringBuilder PROCESSOR_RETRIEVAL_BY_MAILBOX_AND_SIID = new StringBuilder().append("select processor from Processor processor")
+            .append(" inner join processor.mailbox mbx")
+            .append(" where mbx.pguid = :")
+            .append(PGUID)
+            .append(" and processor.pguid in (select prcsr.pguid from Processor prcsr")
+            .append(" inner join prcsr.serviceInstance si")
+            .append(" where si.name like :")
+            .append(SERV_INST_ID)
+            .append(" and processor.procsrStatus <> :")
+            .append(ProcessorConfigurationDAO.STATUS_DELETE)
+            .append(" AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")")
+            .append(")");
+
+    //Don't modify this 3 queries while doing LOW_SECURE changes.
+    StringBuilder PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME = new StringBuilder().append("SELECT pguid FROM processor")
+            .append(" WHERE name = ? AND")
+            .append(" status = 'ACTIVE' ");
+
+    StringBuilder PROCESSOR_ID_RETRIEVAL_BY_PROCESSOR_NAME_AND_MBX_NAME = new StringBuilder().append("SELECT proc.pguid FROM processor proc")
+            .append(" INNER JOIN mailbox mbx")
+            .append(" ON mbx.pguid = proc.mailbox_guid")
+            .append(" WHERE proc.name = ? AND")
+            .append(" mbx.name = ? AND")
+            .append(" proc.status = 'ACTIVE' AND mbx.status = 'ACTIVE' ");
+
+    StringBuilder PROCESSOR_NAME_RETRIEVAL_BY_PROCESSOR_ID = new StringBuilder().append("SELECT name FROM processor")
+            .append(" WHERE pguid = ? AND")
+            .append(" status = 'ACTIVE' ");
 
 }

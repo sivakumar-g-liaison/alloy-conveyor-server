@@ -14,8 +14,6 @@ apply from: file("../gradle/license.gradle")
 
 dependencies {
 
-    //compile 'javax.servlet:javax.servlet-api:3.1.0'
-
     compile "commons-beanutils:commons-beanutils:1.8.3"
     compile "commons-codec:commons-codec:1.8"
     compile "commons-digester:commons-digester:2.1"
@@ -49,13 +47,13 @@ dependencies {
     compile 'javax.servlet:javax.servlet-api:3.1.0'
 
     // Oracle OJDBC
-    compile 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
-    compile 'com.oracle.jdbc:ucp:${oracleVersion}'
+    compile "com.oracle.jdbc:ojdbc8:${oracleVersion}"
+    compile "com.oracle.jdbc:ucp:${oracleVersion}"
 
     // Liaison code
     // commons-lib dependencies
-	compile 'com.liaison:commons-lib:8.+'
-	
+	compile 'com.liaison:commons-lib:11.+'
+
 	//For shell script execution
 	compile "org.apache.commons:commons-exec:1.3"
 

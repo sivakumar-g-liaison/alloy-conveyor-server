@@ -16,22 +16,28 @@ package com.liaison.mailbox.service.rest;
  * @author OFS
  */
 
+import java.io.IOException;
+
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
-import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecutionStateResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessorsExecutionStateRequestDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -63,7 +69,8 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     public Response updateProcessorStatusToFailed(
             @Context final HttpServletRequest request,
-            @QueryParam(value = "processorId") final @ApiParam(name = "processorId", required = true, value = "Processor id") String processorId) {
+            @QueryParam(value = "processorId") final @ApiParam(name = "processorId", required = false, value = "Processor id") String processorId,
+            @QueryParam(value = "updateOnly") @ApiParam(name = "updateOnly", required = false, value = "updateOnly") final String updateOnly) {
 
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -72,9 +79,26 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
             public Object call() {
 
                 ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
-                LOG.info("Updates the processors status to failed {}", processorId);
                 final String userId = getUserIdFromHeader(request);
-                return configService.updateExecutingProcessor(processorId, userId);
+                
+                if (!MailBoxUtil.isEmpty(processorId)) {
+                    LOG.info("Updates the processor status to failed {}", processorId);
+                    return configService.updateExecutingProcessor(processorId, userId);
+                } else {
+                    
+                    String requestString;
+                    try {
+                        requestString = getRequestBody(request);
+                        UpdateProcessorsExecutionStateRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+                                UpdateProcessorsExecutionStateRequestDTO.class);
+                        LOG.info("Updates the processors status to failed {}", serviceRequest.getGuids());
+                        String processorsPguidString = String.join(",", serviceRequest.getGuids());
+                        ThreadContext.put(LogTags.PGUIDS, processorsPguidString);
+                        return configService.updateExecutingProcessors(serviceRequest.getGuids(), userId, updateOnly);
+                    } catch (IOException e) {
+                        throw new LiaisonRuntimeException("Unable to Update the Processors Status to Failed " + e.getMessage(), e);
+                    }
+                }
             }
         };
         worker.actionLabel = "ProcessorAdminDetailsResource.updateProcessorStatusToFailed()";
@@ -94,7 +118,9 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     public Response getExecutingProcessors(@Context HttpServletRequest request,
                                            @QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
-                                           @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize) {
+                                           @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+                                           @QueryParam(value = "sortInfo") @ApiParam(name = "sortInfo", required = false, value = "pagesize") final String sortInfo,
+                                           @QueryParam(value = "filterText") @ApiParam(name = "filterText", required = false, value = "filterText") final String filterText) {
 
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -102,12 +128,7 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
             public Object call() {
 
                 ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
-                GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-                //setting the current page and page size
-                searchFilter.setPage(page);
-                searchFilter.setPageSize(pageSize);
-                GetProcessorExecutionStateResponseDTO serviceResponse = configService.findExecutingProcessors(searchFilter);
-                return serviceResponse;
+                return configService.getExecutingProcessors(page, pageSize, sortInfo, filterText);
             }
         };
         worker.actionLabel = "ProcessorAdminDetailsResource.getExecutingProcessors()";

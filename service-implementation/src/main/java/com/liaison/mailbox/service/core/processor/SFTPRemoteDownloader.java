@@ -170,6 +170,9 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				if (isDir) {
 
+				    if (!staticProp.isIncludeSubDirectories()) {
+				        continue; 
+				    }
 					String localDir = localFileDir + File.separatorChar + aFile;
 					String remotePath = dirToList + File.separatorChar + aFile;
 					File directory = new File(localDir);
@@ -183,7 +186,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 					String currentFileName = aFile;
 					// Check if the file to be uploaded is included or not excluded
-                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                    if(!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                             currentFileName,
                             staticProp.getExcludedFiles())) {
                         continue;

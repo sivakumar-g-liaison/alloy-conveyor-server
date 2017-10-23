@@ -1,5 +1,182 @@
-4.12.0-SNAPSHOT
+4.18.0-SNAPSHOT
 ---------------
+* GMB-1036 - LENS should show one triggered file move as a single transaction
+* GMB-1058 - Failed to stage files but there is no error logged
+* GMB-1062 - Provision to enter the socket timeout in http sync processor
+* GMB-1059 - Upgrade libraries in Relay
+    * commons-lib 11.+
+    * acl-commons-lib 8.+
+    * lib_crypt 6.+
+    * fs2 10.+
+    * globalenterprisemanager-client 5.+
+    * usermanagement-client 5.+
+    * lib_message_bu 13.+
+    * jersey 2.x
+    * lib_health_monitor 6.+
+* GWUD-140 - Proper error message from the dropbox/conveyor server when the passsword expire and account locked
+    * Filter level changes  - Removed redundant code on the dropbox side
+* GMB-948 Log the application logs to Kibana directly
+* GMB-1063 - Unable to receive the response payload in http sync request
+
+4.17.3
+---------------
+* GMB-1052 - EOF exception is received when the trigger file name is given as .INP
+* GMB-1051 - Conditional sweeper sweeps files marked as inactive
+
+4.17.2
+---------------
+* GMB-1050 - Page displays empty fields when loading the processor on relay
+
+4.17.1
+---------------
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay - protocol changes
+
+4.17.0
+---------------
+* GMB-1030 - Add new processor type ConditionalSweeper - Server
+* GMB-1031 - Add new processor type ConditionalSweeper - UI
+* GMB-1032 - Conditional Sweeper execution
+* GMB-1033 - SFTP Clients keep sub-directories intact
+* GMB-1034 - Data retention based on TTL and should not delete a file after pickup
+* GMB-1035 - Watchdog service has to monitor the conditional sweeper
+* GMB-1036 - LENS should show one triggered file move as a single transaction.
+* GMB-1037 - Provide ability to filter files eligible for move
+* [GMB-1028](https://jira.liaison.tech/browse/GMB-1028) - FTPSClient needs to be updated
+* [GGT-1356](https://jira.liaison.tech/browse/GGT-1356): Remove Spectrum settings from Archaius *.properties files
+* [GGT-1357](https://jira.liaison.tech/browse/GGT-1357) and [GSB-452](https://jira.liaison.tech/browse/GSB-452): Inheritance and Minimization of Archaius property files. (Backwards-compatible)
+* GMB-1047 - Should not post infinite glass log messages when uploader fails
+* [GMB-1046](https://jira.liaison.tech/browse/GMB-1046) - Upgrade fs2 library 9.x
+* [GMB-972](https://jira.liaison.tech/browse/GMB-972)  - Need "(recursive) mkdir" in a SFTP Client Wrapper
+* [GMB-988](https://jira.liaison.tech/browse/GMB-988) - REST - Processor Creation/Updation : We able to create a processor using FTPS/SFTP/Sweeper protocol in low secure relay
+
+4.16.7
+---------------
+* GMB-1053 - HTTP Connection Leaks
+* GMB-1055 - HTTPS delivery does not report failure to Service Broker for unsuccessful HTTP response
+
+4.16.6
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.5
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.4
+------
+* GMB-1053 - HTTP Connection Leaks - NO PROD DEPLOYMENT AND ONLY UAT TESTING
+
+4.16.3
+---------------
+* GMB-1045 - Increase script sandbox pool size
+
+4.16.2
+---------------
+* GMB-1044 - Relay sets processor execution id instead of processor id in stuck processor alerts
+
+4.16.1
+---------------
+* GGT-1356: Remove Spectrum settings from Archaius *.properties files 
+* GMB-952  - Upgrade Jsch library
+* GMB-1025 - SFTP Client doesn't support newer algorithms
+* GMB-1017 - Null pointer exception when fetching organization detail
+* GMB-994 - Sweeper is not interrupted while sweeping empty files
+* GMB-998 - Mailbox is listed multiple times in data grid while searching mailbox using Profile
+* GMB-999 - Unable to update staged files
+* GMB-1000 - Add cluster type in the staged files grid
+
+4.15.3
+---------------
+* GMB-1022 - Property ExcludedFiles and IncludeFiles to support wild carding
+* GMB-1024 - Upgrade to FS2 library version 8.+
+
+4.15.2
+---------------
+* GMB-991 - Add provision to filter entities by cluster type	
+* GMB-993 - Log the processor guid during script execution
+
+4.15.1
+---------------
+* GMB-963 - Create lowsecure archaius properties - updates
+* GMB-984 - Processors are not displayed while trying to view the processors, on navigating back from mailbox screen.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+* GMB-958 - Errors are not displayed in the admin error details field.
+* GMB-987 - Relay sets wrong Cluster type in Runtime table when we create legacy processors
+
+4.15.0
+---------------
+* GMB-956 - Add a flag column to database tables to identify which cluster this belongs to.
+* GMB-959 - Migrate the server side logic to support gateway_type flag on read and write
+* GMB-960 - Analyze the impact on conveyor server as there schema is shared with relay
+* GMB-961 - Expose a REST endpoint to identify the origin gateway type of a processor or mailbox
+* GMB-962 - Define low-secure queues
+* GMB-963 - Create lowsecure archaius properties
+* GMB-965 - Add dashboard icon for low-secure gateway
+* GMB-966 - Auto route message to designated relay cluster
+* GMB-990 - Invalid cluster type isn't validated in REST endpoint
+
+4.14.1
+---------------
+* GMB-980 - Provision to filter by node and processor guid
+* GMB-970 - Rest service to update multiple processor guid status
+
+4.14.0
+---------------
+* GMB-954 - Query back to service broker to determine the sender name when creating a process.
+* GGT-1329 removing errant period from provisioning system calls to echo
+* GMB-982 - Unable to create folders in remote location.
+* GMB-977 - Named parameter make more sense than using number.
+* GMB-975 - MailboxConfigurationDAOBase code review
+* GMB-973 - Relay/Relay-Conveyor missing version checker for the URL
+* GMB-971 - Mailbox processors are not displayed while trying to view the processors, on navigating back to mailbox screen.
+* GMB-949 - Processor Execution Screen Improvements
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception
+
+4.13.4
+---------------
+* GMB-979 - FTPS Remote Uploader - Software caused connection abort: socket write error
+
+4.13.3
+---------------
+* GMB-978 - Override default Socket timeout in sync sweeper
+* Email notification receiver updates for error and stuck processor case
+
+4.13.2
+---------------
+* GMB-947 - Relay errors to LENS Metadata.
+* GC-367 - Relay listing issue with configurator
+
+4.13.1
+---------------
+* GMB-946 - Analyze why there are more timer threads.
+
+4.13.0
+---------------
+* GGT-1236, GGT-1209 add appenv and archaius properties layers
+* GMB-944 - Dropbox : Files-Staged Files : Pro
+* GMB-945 - Files-Staged Files : In Show Details Pop up screen meta information doesn't fit in the Popup details
+* GMB-932 - Remote Downloader should download directories based on the property
+* GMB-915 - Mailbox list/read operation ignores serviceInstance defined in search criteria
+* GMB-902 - Staging a file to Dropbox throws a NumberFormatException.
+* GMB-943 - Sort transfer profiles in mailbox processor screen.
+* GWUD-128 - Provide a default sender organization.
+* GMB-934 - "callback is not a function error" is received in Relay application.
+* GMB-949 - Processor Execution Screen Improvements
+* GMB-942 - org.hibernate.exception.GenericJDBCException: could not inspect JDBC autocommit mode - Added sql for validation
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception 
+
+4.12.0
+---------------
+* GWUD-130 - Conveyor errs, when a page that doesn't exist is requested.
+* Removed Spectrum FS2 configs from Staging environment
+
+4.11.2
+---------------
+* test case failure fix
+
+4.11.1
+---------------
+* Rebuilding to pickup new common-lib
 
 4.11.0
 ---------------

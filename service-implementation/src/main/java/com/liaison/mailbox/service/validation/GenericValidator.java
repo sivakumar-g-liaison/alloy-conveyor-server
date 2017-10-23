@@ -17,6 +17,9 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import com.liaison.dto.enums.ProcessMode;
+
+import com.liaison.mailbox.enums.ClusterType;
+import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +32,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Common validator for all mailbox operations.
@@ -178,7 +182,7 @@ public class GenericValidator {
 			InvocationTargetException {
 
 		DataValidation annotationDetails = method.getAnnotation(DataValidation.class);
-		boolean isValidationPassed = false;
+		boolean isValidationPassed = true;
 
 		Object value = method.invoke(dto);
 		if (value != null && !value.toString().isEmpty()) {
@@ -251,11 +255,25 @@ public class GenericValidator {
                     errorMessage.append(annotationDetails.errorMessage());
                 }
             }
+            if (MailBoxConstants.TRIGGER_FILE.equals(annotationDetails.type()) && isInvalidTriggerFilePattern(value)) {
+                isValidPattern = false;
+                errorMessage.append(annotationDetails.errorMessage());
+            }
 		}
 		return isValidPattern;
 
 	}
-	
+
+    /**
+     * Method to validate whether given string is valid trigger file name
+     *
+     * @param value trigger file value
+     * @return boolean
+     */
+    private boolean isInvalidTriggerFilePattern(Object value) {
+         return value.toString().toLowerCase().endsWith(".inp");
+    }
+    
 	/**
 	 * Method to validate whether given string is valid retryAttempt value
 	 *
@@ -353,7 +371,16 @@ public class GenericValidator {
                 &&  CredentialType.findByName(String.valueOf(value)) == null) {
             errorMessage.append(annotationDetails.errorMessage());
             return false;
-		}
+        } else if (MailBoxConstants.CLUSTER_TYPE.equals(annotationDetails.type())) {
+            if (ClusterType.findByName(String.valueOf(value)) == null) {
+                errorMessage.append(annotationDetails.errorMessage());
+                return false;
+            } else if (MailBoxConstants.LOWSECURE.equals(MailBoxUtil.CLUSTER_TYPE)
+                    && !MailBoxConstants.LOWSECURE.equals(value)) {
+                errorMessage.append(annotationDetails.errorMessage());
+                return false;
+            }
+        }
 
 		return true;
 	}

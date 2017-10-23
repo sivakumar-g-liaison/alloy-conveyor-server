@@ -36,6 +36,8 @@ public class SearchMailBoxDTO {
 	private List<PropertyDTO> properties;
 	private String profiles;
 	private boolean incomplete;
+    private String clusterType;
+    private String tenancyKey;
 
 	public String getGuid() {
 		return guid;
@@ -126,6 +128,22 @@ public class SearchMailBoxDTO {
 		this.incomplete = incomplete;
 	}
 
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+    
+    public String getTenancyKey() {
+    	return tenancyKey;
+    }
+
+    public void setTenancyKey(String tenancyKey) {
+    	this.tenancyKey = tenancyKey ;
+    }
+
 	/**
 	 * Copies all data from Entity to DTO.
 	 * 
@@ -142,6 +160,8 @@ public class SearchMailBoxDTO {
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
+		this.setClusterType(mailBox.getClusterType());
+		this.setTenancyKey(mailBox.getTenancyKey());
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

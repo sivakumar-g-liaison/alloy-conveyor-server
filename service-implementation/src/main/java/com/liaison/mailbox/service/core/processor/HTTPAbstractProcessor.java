@@ -10,19 +10,18 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import java.util.Map;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 /**
  * Base class that provides implementation common to both sync and async processors.
@@ -42,7 +41,7 @@ public abstract class HTTPAbstractProcessor {
 	 * @param contentLength the content length
 	 */
 	public  void validateRequestSize(long contentLength) {
-		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
+		DecryptableConfiguration config = LiaisonArchaiusConfiguration.getInstance();
 		int maxRequestSize = config.getInt(CONFIGURATION_MAX_REQUEST_SIZE);
 
 		if (contentLength > maxRequestSize) {

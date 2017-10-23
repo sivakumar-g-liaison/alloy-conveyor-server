@@ -37,6 +37,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
@@ -401,6 +402,8 @@ public class ProcessorPropertyJsonMapper {
 
 			case SWEEPER:
 				return new SweeperPropertiesDTO();
+			case CONDITIONALSWEEPER:
+				return new ConditionalSweeperPropertiesDTO();
 			case DROPBOXPROCESSOR:
 				return new DropboxProcessorPropertiesDTO();
 			case HTTPASYNCPROCESSOR:
@@ -557,6 +560,8 @@ public class ProcessorPropertyJsonMapper {
 				}
 			case SWEEPER:
 				return new SweeperPropertiesDTO();
+			case CONDITIONALSWEEPER:
+				return new ConditionalSweeperPropertiesDTO();
 			case DROPBOXPROCESSOR:
 				return new DropboxProcessorPropertiesDTO();
 			case HTTPASYNCPROCESSOR:
@@ -723,6 +728,7 @@ public class ProcessorPropertyJsonMapper {
 								propsFolderDTO.setReadOnly(true);
 								break;
 							case SWEEPER:
+							case CONDITIONALSWEEPER:
 								handleFolderProperties(propsFolderDTO, folder);
 								propsFolderDTO.setFolderDisplayType(MailBoxConstants.PROPERTY_SWEEPER_DISPLAYTYPE);
 								propsFolderDTO.setReadOnly(true);

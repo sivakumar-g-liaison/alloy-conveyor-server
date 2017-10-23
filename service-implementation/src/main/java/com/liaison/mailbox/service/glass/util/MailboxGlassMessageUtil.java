@@ -8,15 +8,9 @@
  */
 package com.liaison.mailbox.service.glass.util;
 
-import java.util.Date;
-
-import com.liaison.commons.message.glass.dom.Status;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
+import com.liaison.commons.message.glass.dom.Status;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.UUIDGen;
@@ -26,6 +20,10 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Util for GlassMessage
@@ -75,6 +73,11 @@ public class MailboxGlassMessageUtil {
             glassMessage.logFourthCornerTimestamp();
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
+
+            if (ProcessorType.SWEEPER.equals(processorType)
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+                glassMessage.setSenderOrganizationDetails(pipelineId);
+            }
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         } else if (ExecutionState.DUPLICATE.equals(status)) {
             glassMessage.setOutAgent(processProtocol);
@@ -84,6 +87,11 @@ public class MailboxGlassMessageUtil {
 
             if (ProcessorType.SWEEPER.equals(processorType)) {
                 glassMessage.setInAgent(glassMessageDTO.getFilePath());
+                glassMessage.setSenderOrganizationDetails(pipelineId);
+            } else if ( ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+                glassMessage.setInAgent(glassMessageDTO.getFilePath() != null ? glassMessageDTO.getFilePath() : "");
+                glassMessage.setSenderOrganizationDetails(pipelineId);
+                glassMessage.setRelatedTransactionId(glassMessageDTO.getRelatedTransactionId());
             } else {
                 glassMessage.setInAgent(processProtocol);
             }
@@ -99,7 +107,8 @@ public class MailboxGlassMessageUtil {
 
             // Queued message for async inbound
             if (ProcessorType.HTTPASYNCPROCESSOR.equals(processorType)
-                    || ProcessorType.SWEEPER.equals(processorType)) {
+                    || ProcessorType.SWEEPER.equals(processorType)
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 logProcessingStatus(glassMessage, StatusType.QUEUED, "Workticket queued for file " + fileName);
             }
         } else if (ExecutionState.READY.equals(status)) {
@@ -109,7 +118,12 @@ public class MailboxGlassMessageUtil {
             glassMessage.setOutboundPipelineId(pipelineId);
             glassMessage.setOutSize(fileLength);
         } else if (ExecutionState.VALIDATION_ERROR.equals(status)) {
+            glassMessage.setSenderOrganizationDetails(pipelineId);
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
+        } else if (ExecutionState.QUEUED.equals(status)) {
+            glassMessage.setSenderOrganizationDetails(pipelineId);
+            glassMessage.setReceiverOrganizationDetails(pipelineId);
+            glassMessage.setInboundPipelineId(pipelineId);
         }
 
         // TVAPI
@@ -139,10 +153,9 @@ public class MailboxGlassMessageUtil {
     public static void logProcessingStatus(GlassMessage glassMessage, StatusType statusType, String message) {
 
         // Log ActivityStatusAPI
-        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI(glassMessage.getGlobalPId());
         activityStatusAPI.setPipelineId(glassMessage.getPipelineId());
         activityStatusAPI.setProcessId(glassMessage.getProcessId());
-        activityStatusAPI.setGlobalId(glassMessage.getGlobalPId());
         activityStatusAPI.setGlassMessageId(UUIDGen.getCustomUUID());
 
         Status status = new Status();

@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -50,78 +50,77 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/mailbox/searchprocessor", description = "Administration of processor services")
 public class ProcessorSearchResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(ProcessorSearchResource.class);
+    private static final Logger LOG = LogManager.getLogger(ProcessorSearchResource.class);
 
-	/**
-	 * REST service to get all the processors
-	 * 
-	 * @param HttpServletRequest
-	 * @return Response
-	 */
-	@GET
-	@ApiOperation(value = "Get All Processors", notes = "get all the processors", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response searchProcessor(@Context HttpServletRequest request,
-			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
-			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
-			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
-			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
-			@QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName,
-			@QueryParam(value = "pipelineId") @ApiParam(name = "pipelineId", required = false, value = "pipelineId") final String pipelineId,
-			@QueryParam(value = "folderPath") @ApiParam(name = "folderPath", required = false, value = "folderPath") final String folderPath,
-			@QueryParam(value = "profileName") @ApiParam(name = "profileName", required = false, value = "profileName") final String profileName,
-			@QueryParam(value = "protocol") @ApiParam(name = "protocol", required = false, value = "protocol") final String protocol,
-			@QueryParam(value = "prcsrType") @ApiParam(name = "prcsrType", required = false, value = "prcsrType") final String prcsrType,
-			@QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
-			@QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
-			@QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
+    /**
+     * REST service to get all the processors
+     *
+     * @param request input request
+     * @return Response seach response
+     */
+    @GET
+    @ApiOperation(value = "Get All Processors", notes = "get all the processors", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response searchProcessor(@Context HttpServletRequest request,
+                                    @QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+                                    @QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+                                    @QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+                                    @QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
+                                    @QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName,
+                                    @QueryParam(value = "mbxGuid") @ApiParam(name = "mbxGuid", required = false, value = "mbxGuid") final String mbxGuid,
+                                    @QueryParam(value = "pipelineId") @ApiParam(name = "pipelineId", required = false, value = "pipelineId") final String pipelineId,
+                                    @QueryParam(value = "folderPath") @ApiParam(name = "folderPath", required = false, value = "folderPath") final String folderPath,
+                                    @QueryParam(value = "profileName") @ApiParam(name = "profileName", required = false, value = "profileName") final String profileName,
+                                    @QueryParam(value = "protocol") @ApiParam(name = "protocol", required = false, value = "protocol") final String protocol,
+                                    @QueryParam(value = "prcsrType") @ApiParam(name = "prcsrType", required = false, value = "prcsrType") final String prcsrType,
+                                    @QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
+                                    @QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
+                                    @QueryParam(value = "scriptName") @ApiParam(name = "scriptName", required = false, value = "scriptName") final String scriptName,
+                                    @QueryParam(value = "clusterType") @ApiParam(name = "clusterType", required = false, value = "clusterType") final String clusterType,
+                                    @QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
 
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-				try {
+                ProcessorConfigurationService processor = new ProcessorConfigurationService();
+                GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+                searchFilter.setPage(page);
+                searchFilter.setPageSize(pageSize);
+                searchFilter.setSortField(sortField);
+                searchFilter.setSortDirection(sortDirection);
+                searchFilter.setMbxName(mbxName);
+                searchFilter.setMbxGuid(mbxGuid);
+                searchFilter.setPipelineId(pipelineId);
+                searchFilter.setFolderPath(folderPath);
+                searchFilter.setProfileName(profileName);
+                searchFilter.setProtocol(protocol);
+                searchFilter.setProcessorType(prcsrType);
+                searchFilter.setProcessorName(prcsrName);
+                searchFilter.setProcessorGuid(prcsrGuid);
+                searchFilter.setScriptName(scriptName);
+                searchFilter.setClusterType(clusterType);
+                searchFilter.setMatchMode(matchMode);
 
-					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-					searchFilter.setPage(page);
-					searchFilter.setPageSize(pageSize);
-					searchFilter.setSortField(sortField);
-					searchFilter.setSortDirection(sortDirection);
-					searchFilter.setMbxName(mbxName);
-					searchFilter.setPipelineId(pipelineId);
-					searchFilter.setFolderPath(folderPath);
-					searchFilter.setProfileName(profileName);
-					searchFilter.setProtocol(protocol);
-					searchFilter.setProcessorType(prcsrType);
-					searchFilter.setProcessorName(prcsrName);
-					searchFilter.setProcessorGuid(prcsrGuid);
-					searchFilter.setMatchMode(matchMode);
+                // Get all the processors
+                return processor.searchProcessor(searchFilter);
+            }
+        };
+        worker.actionLabel = "ProcessorSearchResource.searchProcessor()";
+        worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
-					// Get all the processors
-					return processor.searchProcessor(searchFilter);
-				} catch (IOException | JAXBException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
-			}
-		};
-		worker.actionLabel = "ProcessorSearchResource.getAllProcessors()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
-
-		// hand the delegate to the framework for calling
-		return process(request, worker);
-	}
-
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }

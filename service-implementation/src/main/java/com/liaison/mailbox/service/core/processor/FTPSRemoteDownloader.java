@@ -28,7 +28,6 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -99,13 +98,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             // retrieve required properties
             FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
-            boolean binary = ftpDownloaderStaticProperties.isBinary();
-            boolean passive = ftpDownloaderStaticProperties.isPassive();
-
-            if (ftpDownloaderStaticProperties != null) {
-                ftpsRequest.setBinary(binary);
-                ftpsRequest.setPassive(passive);
-            }
+            ftpsRequest.setBinary(ftpDownloaderStaticProperties.isBinary());
+            ftpsRequest.setPassive(ftpDownloaderStaticProperties.isPassive());
 
             LOGGER.info(constructMessage("Start run"));
             startTime = System.currentTimeMillis();
@@ -192,7 +186,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                 if (file.isFile()) {
 
                     // Check if the file to be downloaded is included or not excluded
-                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                    if(!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                             currentFileName,
                             staticProp.getExcludedFiles())) {
                         continue;
@@ -249,6 +243,9 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
                 } else {
 
+                    if (!staticProp.isIncludeSubDirectories()) {
+                        continue;
+                    }
                     String localDir = localFileDir + File.separatorChar + currentFileName;
                     String remotePath = dirToList + File.separatorChar + currentFileName;
                     File directory = new File(localDir);

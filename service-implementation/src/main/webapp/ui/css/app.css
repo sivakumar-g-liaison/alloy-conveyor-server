@@ -602,16 +602,15 @@ input::-moz-focus-inner {
 	width: 165px;
 }
 
-.textPattern_width_1 {
-	width: 190px;
+.search-padding-left {
+	padding-left: 4px;
 }
 
-.textPattern_width_2 {
-	width: 385px;
+.search-form-bottom {
+	margin-bottom: 10px;
 }
-
 .button_width_2 {
-	width: 176px;
+	width: 131px;
 }
 
 .error_msg_color {
@@ -625,4 +624,25 @@ input::-moz-focus-inner {
 
 #mbx-procsr-name {
 	text-overflow: ellipsis;
+}
+
+.modal-body p {
+	word-wrap: break-word;
+}
+
+.status_select_style {
+  	position: absolute;
+  	top: 30px;
+  	bottom: 30px;
+  	left: 5px;
+  	bottom: 0;
+}
+
+.updateProcessorsStatusReqJson_ace_editor {
+	height: 200px;
+    width: 1140px;
+}
+
+.tooltip {
+    word-break: break-all;
 }

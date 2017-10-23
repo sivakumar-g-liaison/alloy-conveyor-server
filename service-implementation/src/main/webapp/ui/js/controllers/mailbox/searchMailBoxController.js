@@ -12,6 +12,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.mailBoxName = null;
         $scope.profile = null;
 
+        $scope.mailboxStatus = [
+            {"name": "ACTIVE", "id": "Active"},
+            {"name": "INACTIVE", "id": "Inactive"}
+        ];
+
         // Counter to ensure the result is for the given request.
         $scope.hitCounter = 1;
 
@@ -122,12 +127,28 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // calls the rest deactivate service
         $scope.deactivateMailBox = function () {
 
-            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid, function (data, status) {
-                // alert(data.deactivateMailBoxResponse.response.message); TODO
-				// modal dialog
-                $scope.search();
+            $scope.block.blockUI();
+            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid,
+
+                function (data, status) {
+                    if (status === 200) {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        showSaveMessage(data.deactivateMailBoxResponse.response.message, 'success');
+                        $scope.search();
+                    } else {
+
+                        $scope.block.unblockUI();
+                        $scope.closeDelete();
+                        if (data.deactivateMailBoxResponse) {
+                            showSaveMessage(data.deactivateMailBoxResponse.response.message, 'error');
+                        } else {
+                            showSaveMessage("Failed to delete mailbox", 'error');
+                        }
+                    }
             });
-            $scope.closeDelete();
+
         };
 
         // Close the modal
@@ -172,6 +193,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             if ($scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
                 mbxName = $scope.mailBoxName;
             }
+
+            var tempClusterType = "";
+            if ($scope.clusterType) {
+                tempClusterType = $scope.clusterType;
+            }
+
+            var mbxStatus = "";
+            if ($scope.searchedMbxStatus) {
+                mbxStatus = $scope.searchedMbxStatus;
+            }
             
             var sortField = "";
         	var sortDirection = "";			
@@ -195,31 +226,43 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 			}
 			
 			var minRespond = true;
-            $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
+            $scope.restService.get($scope.base_url + '?siid=' + $rootScope.serviceInstanceId, /*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
-            	if (status === 200 || status === 400) {
+                    if (status === 200 || status === 400) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
-                        	// Commented out because of inconsistency
+                            // Commented out because of inconsistency
                             // showSaveMessage(data.searchMailBoxResponse.response.message,
-							// 'error');
+                            // 'error');
                         }
                     } else {
-                    	 showSaveMessage("retrieval of search results failed", 'error');
+                        showSaveMessage("retrieval of search results failed", 'error');
                     }
                     // if the data does not contain proper response hitCounter
-					// property will not be available and throws an error,
+                    // property will not be available and throws an error,
                     // the progress bar will be displayed even after the display
-					// of error message.
+                    // of error message.
                     // To avoid the above error, the hitCounter will be
-					// validated only if proper response is available
-                    if (data.searchMailBoxResponse) { 
-                    	 if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
-                             $scope.getPagedDataAsync(data);
-                         }
+                    // validated only if proper response is available
+                    if (data.searchMailBoxResponse) {
+                        if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
+                            $scope.getPagedDataAsync(data);
+                        }
                     }
                     $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
-                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr, minResponse:minRespond}
+                }, {
+                    name: mbxName,
+                    profile: profName,
+                    hitCounter: $scope.hitCounter,
+                    page: $scope.pagingOptions.currentPage,
+                    pagesize: $scope.pagingOptions.pageSize,
+                    sortField: sortField,
+                    sortDirection: sortDirection,
+                    disableFilters: disableFiltr,
+                    minResponse: minRespond,
+                    clusterType: tempClusterType,
+                    mailBoxStatus: mbxStatus
+                }
             );
         };
 
@@ -279,15 +322,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             return valid;
         }
         // Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
-        <div ng-switch-when="INACTIVE" style="cursor: default;"><button id="btnEditInActive" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
-        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button id="btnDelInActive" class="btn btn-default btn-xs" ng-disabled="true">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
-        <div ng-switch-default><button id="btnEdit" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        $scope.editableInPopup = '<button id="btnEdit" class="btn btn-default btn-xs" ng-click="edit(row)">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
         <button id="btnDelete" class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
-        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
 
         $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
         $scope.manageConfigStatus = '<div ng-switch on="row.getProperty(\'configStatus\')"><div ng-switch-when="COMPLETED">Completed</div><div ng-switch-when="INCOMPLETE_CONFIGURATION">Incomplete Configuration</div></div>';
@@ -296,25 +334,36 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.gridOptions = {
         		columnDefs: [{
                     field: 'guid',
-                    width: '22%',
-                    displayName: 'MailboxId'
+                    width: '18%',
+                    displayName: 'MailboxId',
+                    sortable: false
                 }, {
                     field: 'name',
-                    width: '20%',
+                    width: '16%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '22%',
+                    width: '13%',
                     displayName: 'Description'
                 }, {
+                    field: 'tenancyKey',
+                    width: '15%',
+                    displayName: 'TenancyKey',
+                    cellTemplate: '<div class="ngCellText" id="tenancyKey-{{row.rowIndex}}" tooltip="{{row.entity.tenancyKey}}" tooltip-append-to-body="true" tooltip-placement="right">{{row.entity.tenancyKey}}</div>'
+                }, {
+                    field: 'clusterType',
+                    width: '8%',
+                    displayName: 'Cluster Type'
+                }, {
                 	field: 'configStatus' ,
-                	width: '19%' ,
+                	width: '14%' ,
                 	displayName: 'Config Status' , 
-                	cellTemplate: $scope.manageConfigStatus
+                	cellTemplate: $scope.manageConfigStatus,
+                    sortable: false
                 }, {
                     field: 'status',
-                    width: '9%',
+                    width: '8%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },

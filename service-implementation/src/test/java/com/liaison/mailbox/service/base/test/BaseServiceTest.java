@@ -11,10 +11,10 @@ package com.liaison.mailbox.service.base.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -24,7 +24,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -45,6 +44,8 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import javax.naming.NamingException;
 
 /**
  * Base Test class for initial setup and cleanup.
@@ -63,35 +64,52 @@ public abstract class BaseServiceTest {
 	public static final String FAILURE = Messages.FAILURE.value();
 	public static final String STATUS = "status";
     public static final String MESSAGE = "message";
+    public static final String SECURE = "SECURE";
+    public static final String LOWSECURE = "LOWSECURE";
+    public static final String ACTIVE = "ACTIVE";
+    public static final String INACTIVE = "INACTIVE";
+
+    public static final String PIPELINE_ID = "B676D412522E4F1FBCE268683A1C977E";
 
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
 	public String tenancyKey = "G2_DEV_INT_MONIKER";
-	public String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
+	public String serviceInstanceId = "B16189BA6BF841D48F9F3EDDCC8A2573";
 	public String spectrumUri = "fs2://secure@dev-int/mailbox/payload/1.0/21F9B154FB54495A855EAC63E1CDC69B";
 	public String response = "response";
 
     protected String aclManifest = "H4sIAAAAAAAAAO1YbW/aMBD+K5U/TqRNokACn5aW0EUroaLRJrWqIpMckVfHjpwQlVb973NeKKBWXcdWEVV8QbLvfPfwnO8ewyMCVgDlKaDBIwoF4ByiofxAA6SrWldR+4qq+7o6MPoD1Tg2e8Y16qCY8hmmboQGbEFpB6VYAMs31oKHkGXrjUUGolyhguEYC/wLs6+UYJJxdhxBgWqPERFZ7uEENo9d4O29BuTp0k5TSkKcE85q25NMTHE+5yJBg5vH50V9Gp3rMo3gFE5xBpEdlgjPOMvlVuUe8QQT9uwcDJ0fgev5wWR6Lg/WVn9ZMoXklu2517bvTrxnm8tyEAzTlxHGE8/97kyb9DKZNNrDseuh25IrUhAKMVQgBGR8IcIywJfSv1k2eaeQ5dOVx9pafgu4z6WD5KsgISgzwe9ASJcUREKyrOJIhi8wXaxir01N9J/fXN+5cK989HT71PlnLGXxEizrDYm8HPvFEuuyQnTG7xuC9ovmDpZKW5iJcI4lmDTd93WpZwqUTSRbIoOaoD2DSihNlZCSvZepAlJe3v/JyEnI2ZzEJ7Hgi3QHUCAEFwrjOZmvBvHHYGNypGZ7B1hB3FKJIST8aCJizMhDFV7bRSlGPVMdmYap2n1dNcyRZmjGmTOybN1ynJ7R3dCNAkDgoFq9JR3bo7ehciEqiLvw+N5RXvJxuTa9TWjn/dxvuF4600A3Jmd+oKraDiUb1zoQlDWIxepO/HXNXg+zKtMr1sCOEsI+teC3SdbaJfhtegp9ZsF/2e6nE8f1dnq/1ydfebs3ho95wLfr3h6my6Gf29XPrh/4Ekgof8LrvaMrYBGIrRfYTmJOGpEec0bkRVdCs6tapmYq4XxmKIY615SZZYZKV7Ow1Y90sGawMRH+COog/gfxbwUzn3tYyP5iMjFEV3Xdh5CWvcjCZfU/n2x8mfqm9PwNJYKk5vgUAAA=";
 
 	@BeforeClass
-	public void initialSetUp() throws IOException {
+	public void initialSetUp() throws SQLException, NamingException, ClassNotFoundException {
 
 		if (BASE_URL == null) {
 
 			Properties prop = new Properties();
-			String properties = ServiceUtils.readFileFromClassPath("config.properties");
-			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
-			prop.load(is);
+            try (InputStream is = new ByteArrayInputStream(ServiceUtils.readFileFromClassPath("config.properties").getBytes("UTF-8"))) {
 
-			setBASE_URL(prop.getProperty("BASE_URL"));
-			setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
-			setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
-			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
-            System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
-            //System.setProperty("com.liaison.secure.properties.path", prop.getProperty("SECURE_URL"));
-			// close the stream
-			is.close();
-		}
+                prop.load(is);
+
+                setBASE_URL(prop.getProperty("BASE_URL"));
+                setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
+                setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
+                System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
+                System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
+                System.setProperty("archaius.deployment.stack", prop.getProperty("STACK"));
+                System.setProperty("com.liaison.secure.properties.path", "invalid");
+            } catch (Exception e) {
+
+                setBASE_URL("http://localhost:8989/g2mailboxservice/config/mailbox");
+                setKMS_BASE_URL("http://lsvlkms01d.liaison.dev:8989/key-management");
+                setBASE_URL_DROPBOX("http://localhost:9095/g2mailboxservice/config/dropbox");
+                System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+                System.setProperty("archaius.deployment.environment", "dev");
+                System.setProperty("archaius.deployment.stack", "default");
+                System.setProperty("com.liaison.secure.properties.path", "invalid");
+            }
+        }
+
+        InitInitialDualDBContext.init();
 
 	}
 
@@ -218,6 +236,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setTenancyKey(tenancyKey);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setModifiedBy("unknown-user");
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -228,6 +247,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
+			mailBoxDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
 			mailBoxDTO.setModifiedBy("unknown-user");
 
@@ -245,6 +265,22 @@ public abstract class BaseServiceTest {
         ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
         ProcessorDTO procDTO = setProcessorDTO(guid, mbxDTO);
         constructProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
+    /**
+     * To construct http asycn processor property for revice operation.
+     * @param guid
+     * @param mbxDTO
+     * @return
+     * @throws IOException
+     */
+    public ReviseProcessorRequestDTO constructReviseHTTPAsyncProcessorDTO(String guid, MailBoxDTO mbxDTO) throws IOException {
+
+        ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
+        ProcessorDTO procDTO = setHttpProcessorDTO(guid, mbxDTO);
+        constructHttpProcessorProperties(procDTO);
         procRequestDTO.setProcessor(procDTO);
         return procRequestDTO;
     }
@@ -275,6 +311,8 @@ public abstract class BaseServiceTest {
         procDTO.setType("REMOTEDOWNLOADER");
         procDTO.setProtocol("FTP");
         procDTO.setModifiedBy("unknown-user");
+        procDTO.setJavaScriptURI("ftp://test:6060");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 
@@ -303,6 +341,7 @@ public abstract class BaseServiceTest {
         procDTO.setStatus("ACTIVE");
         procDTO.setType("HTTPASYNCPROCESSOR");
         procDTO.setProtocol("HTTP");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
 
@@ -332,10 +371,13 @@ public abstract class BaseServiceTest {
         List<ProcessorCredentialPropertyDTO> procCredentialPropDTO = new ArrayList<ProcessorCredentialPropertyDTO>();
         setValidationRules();
         ProcessorPropertyDTO procURLPropDTO = setProcessorHttpURLPropertyDTO();
+        ProcessorPropertyDTO pipeLinePropDTO = setHttpProcessorPipelindIdPropertyDTO();
+        pipeLinePropDTO.setValidationRules(setValidationRules());        
         ProcessorFolderPropertyDTO procFolderPropDTO = setProcessorFolderPropertyDTO();
         setProcessorCredentialPropertyDTO();
         folderProperties.add(procFolderPropDTO);
         staticProperties.add(procURLPropDTO);
+        staticProperties.add(pipeLinePropDTO);
         propDTO.setStaticProperties(staticProperties);
         propDTO.setFolderProperties(folderProperties);
         propDTO.setCredentialProperties(procCredentialPropDTO);
@@ -358,6 +400,21 @@ public abstract class BaseServiceTest {
         procPropDTO.setDefaultValue("Invisible");
         procPropDTO.setValidationRules(null);
         procPropDTO.setOptions(options);
+        return procPropDTO;
+    }
+    
+    private ProcessorPropertyDTO setHttpProcessorPipelindIdPropertyDTO() {
+
+        ProcessorPropertyDTO procPropDTO = new ProcessorPropertyDTO();
+        procPropDTO.setName("httpListenerPipeLineId");
+        procPropDTO.setDisplayName("HTTP Listener PipelineId");
+        procPropDTO.setType("textarea");
+        procPropDTO.setReadOnly(false);
+        procPropDTO.setValue(PIPELINE_ID);
+        procPropDTO.setMandatory(true);
+        procPropDTO.setDynamic(false);
+        procPropDTO.setValueProvided(true);
+        procPropDTO.setDefaultValue(PIPELINE_ID);
         return procPropDTO;
     }
 

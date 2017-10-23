@@ -131,7 +131,7 @@
 		  "dynamic": false,
 	      "valueProvided":false,
 		  "validationRules": {  
-            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "pattern":"\/^(([.]+[a-zA-Z*]+)?([a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+)?([a-zA-Z*]+))*$\/",
             "minLength": "",
             "maxLength": ""
         }
@@ -146,7 +146,7 @@
 		   "dynamic": false,
 		   "valueProvided":false,
 	       "validationRules": {  
-            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "pattern":"\/^(([.]+[a-zA-Z*]+)?([a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+[.]+[a-zA-Z*]+)?([,]+[a-zA-Z*]+)?([a-zA-Z*]+))*$\/",
             "minLength": "",
             "maxLength": ""
         }
@@ -190,6 +190,21 @@
 		  "minLength": "",
 		  "maxLength": ""
         }
+      },
+      {
+        "name":"includeSubDirectories",
+        "displayName":"Include Sub Directories",
+        "type":"select",
+        "value":"false",
+        "mandatory":true,
+        "dynamic":false,
+        "valueProvided":false,
+        "defaultValue":"false",
+        "validationRules":null,
+        "options":[
+            "false",
+            "true"
+        ]
       }
     ],
       "folderProperties":[

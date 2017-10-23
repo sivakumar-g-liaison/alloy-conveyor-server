@@ -46,24 +46,29 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 @Entity
 @Table(name = "MAILBOX")
 @NamedQueries({
-	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
-			query = "SELECT mbx FROM MailBox mbx"
-					+ " inner join mbx.mailboxProcessors prcsr"
-					+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
-					+ " inner join schd_prof_processor.scheduleProfilesRef profile"
-					+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
-					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
-					+ " AND profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
-					+ " order by mbx.mbxName"),
-    @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx from MailBox mbx "
-			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
-			        + " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
-			        + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
-	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
-	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME, 
-			query = "select mbx from MailBox mbx"
-					+ " where mbx.mbxName =:" +  MailBoxConfigurationDAO.MBOX_NAME
-					+ " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS)
+        @NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
+                query = "SELECT mbx FROM MailBox mbx"
+                        + " inner join mbx.mailboxProcessors prcsr"
+                        + " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
+                        + " inner join schd_prof_processor.scheduleProfilesRef profile"
+                        + " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
+                        + " AND mbx.mbxStatus NOT like :" + MailBoxConfigurationDAO.STATUS
+                        + " AND profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
+                        + " order by mbx.mbxName"),
+        @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCY_KEY_NAME, query = "SELECT mbx FROM MailBox mbx "
+                + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
+                + " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
+                + " AND mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS
+                + " AND mbx.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")"),
+        @NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m"),
+        @NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_NAME,
+                query = "SELECT mbx FROM MailBox mbx"
+                        + " WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME
+                        + " AND mbx.mbxStatus NOT LIKE :" + MailBoxConfigurationDAO.STATUS
+                        + " AND mbx.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")"),
+        @NamedQuery(name = MailBoxConfigurationDAO.GET_CLUSTER_TYPE_BY_MAILBOX_GUID,
+                query = "SELECT mbx.clusterType FROM MailBox mbx"
+                        + " WHERE mbx.pguid =:" + MailBoxConfigurationDAO.PGUID)
 })
 
 public class MailBox implements Identifiable {
@@ -81,8 +86,8 @@ public class MailBox implements Identifiable {
 	private String tenancyKey;
 	private String modifiedBy;
 	private Date modifiedDate;
-	private String originatingDc;
-	
+    private String originatingDc;
+    private String clusterType;
 
 	public MailBox() {
 	}
@@ -173,7 +178,7 @@ public class MailBox implements Identifiable {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@Fetch(FetchMode.JOIN)
 	public Set<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
@@ -219,6 +224,15 @@ public class MailBox implements Identifiable {
 	public void setOriginatingDc(String originatingDc) {
 		this.originatingDc = originatingDc;
 	}
+
+    @Column(name = "CLUSTER_TYPE", nullable = false, length = 32)
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
 
     /**
 	 * Method to retrieve the given properties form Mailbox

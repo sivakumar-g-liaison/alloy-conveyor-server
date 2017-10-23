@@ -170,7 +170,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded file must not be uploaded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;
@@ -260,7 +260,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
         String currentFileName = file.getName();
 
         // Check if the file to be uploaded is included or not excluded file must not be uploaded
-        if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+        if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                 currentFileName,
                 staticProp.getExcludedFiles())) {
             return;
@@ -272,9 +272,15 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
                 : currentFileName;
 
         // upload file
-        try (InputStream inputStream = file.getPayloadInputStream()) {
+        InputStream inputStream = null;
+        try {
+            inputStream = file.getPayloadInputStream();
             LOGGER.info(constructMessage("uploading file from storage {} to remote path {}"), file.getPayloadUri(), remoteParentDir);
             replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
+            }
         }
 
         // Check whether the file is uploaded successfully

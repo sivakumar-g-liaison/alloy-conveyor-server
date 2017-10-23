@@ -82,8 +82,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             if (this.canUseFileSystem() || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
 
                 //get payload from spectrum
-                try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
+                InputStream payload = null;
+                try {
 
+                    payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI());
                     if (null == payload) {
                         LOG.error("Failed to retrieve payload from spectrum");
                         throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
@@ -107,6 +109,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                     }
 
+                } finally {
+                    if (payload != null) {
+                        payload.close();
+                    }
                 }
 
                 message = (writeStatus ? "Payload written at target location : " : "File already exists at the location - ")
@@ -139,7 +145,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             MailboxGlassMessageUtil.logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
             //GLASS LOGGING ENDS//
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            
+            //caught Throwable to handle the class initialization errors and this is needed to update proper LENS status
             LOG.error("File Staging failed", e);
             //GLASS LOGGING ENDS//
             throw new RuntimeException(e);

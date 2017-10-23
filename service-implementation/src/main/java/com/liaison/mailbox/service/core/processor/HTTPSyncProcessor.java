@@ -35,15 +35,16 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.KEY_RAW_PAYLOAD_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.SOCKET_TIMEOUT;
 
 /**
  * Class that deals with processing of sync request.
@@ -55,6 +56,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 	private static String SERVICE_BROKER_URI = null;
 	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
+	private static int ENV_SOCKET_TIMEOUT_VALUE = 0;
 
 	private long payloadSize = 0;
 
@@ -73,15 +75,8 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
 		}
 
-		try {
-			URL uri = new URL(SERVICE_BROKER_URI);
-			HTTPRequest.registerHostForSeparateConnectionPool(uri.getHost());
-			HTTPRequest.registerHealthCheck();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
 		ENV_CONNECTION_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT, 60000);
+		ENV_SOCKET_TIMEOUT_VALUE = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_SOCKET_TIMEOUT, 60000);
 	}
 
 	/**
@@ -102,13 +97,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream(BYTE_ARRAY_INITIAL_SIZE)) {
 
-			int connectionTimeout = !MailBoxUtil.isEmpty(httpListenerProperties.get(CONNECTION_TIMEOUT))
-					? Integer.parseInt(httpListenerProperties.get(CONNECTION_TIMEOUT))
-					: ENV_CONNECTION_TIMEOUT_VALUE;
-
-			HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
+            HTTPRequest request = HTTPRequest.post(SERVICE_BROKER_URI)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-					.connectionTimeout(connectionTimeout)
+					.connectionTimeout(getTimeout(httpListenerProperties, CONNECTION_TIMEOUT, ENV_CONNECTION_TIMEOUT_VALUE))
+					.socketTimeout(getTimeout(httpListenerProperties, SOCKET_TIMEOUT, ENV_SOCKET_TIMEOUT_VALUE))
 					.inputData(JAXBUtility.marshalToJSON(workTicket))
 					.outputStream(responseStream);
 
@@ -119,13 +111,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		}
 	}
 
-	/**
+    /**
 	 * This method will copy all Response Information from SB
 	 *
 	 * @param reqContentType request content type
 	 * @param httpResponse sb response
 	 * @return response
-	 * @throws IllegalStateException
 	 * @throws IOException
      * @throws JAXBException
      */
@@ -187,10 +178,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
         }
 
 		// Content type
-		String contentType = result.getHeader(MailBoxConstants.CONTENT_TYPE);
-		if (contentType == null) {
-			builder.header(MailBoxConstants.CONTENT_TYPE, reqContentType);
-		}
+        if (result.getHeader(HttpHeaders.CONTENT_TYPE) == null
+                && result.getHeader(HttpHeaders.CONTENT_TYPE.toLowerCase()) == null) {
+            builder.header(MailBoxConstants.CONTENT_TYPE, reqContentType);
+        }
 
 		//sets the response payload for both success and error case
 		if (MailBoxUtil.isSuccessful(result.getStatus())) {
@@ -205,19 +196,48 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 		} else {
 
-			// If payload URI avail, reads payload from spectrum. Mostly it
-			// would be an error message payload
-			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-				InputStream inputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-				if (inputStream != null) {
-					builder.entity(IOUtils.toString(inputStream, CharEncoding.UTF_8));
-				}
-			} else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
-				builder.entity(result.getErrorMessage());
-			} else {
-				builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-			}
-		}
-	}
+            // If payload URI avail, reads payload from spectrum. Mostly it
+            // would be an error message payload
+            if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
 
+                InputStream inputStream = null;
+                try {
+                    inputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+                    if (inputStream != null) {
+                        builder.entity(IOUtils.toString(inputStream, CharEncoding.UTF_8));
+                    }
+                } finally {
+                    if (null != inputStream) {
+                        inputStream.close();
+                    }
+                }
+            } else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+                builder.entity(result.getErrorMessage());
+            } else {
+                builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+            }
+        }
+    }
+
+    /**
+     * get timeout from the configuration
+     * returns default if it is configured 0 or not configured
+     *
+     * @param httpListenerProperties properties
+     * @return socket timeout
+     */
+    private int getTimeout(Map<String, String> httpListenerProperties, String propName, int defaultValue) {
+
+        String timeoutStr = httpListenerProperties.get(propName);
+        if (MailBoxUtil.isEmpty(timeoutStr)) {
+            return defaultValue;
+        }
+
+        int timeout = Integer.parseInt(timeoutStr);
+        if (timeout <= 0) {
+            return defaultValue;
+        }
+
+        return timeout;
+    }
 }

@@ -5,7 +5,7 @@
     "retryAttempts": 1,
     "socketTimeout": 60000,
     "connectionTimeout": 60000,
-    "url": "http://soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response",
+    "url": "http://www.google.com/",
     "port": 0,
     "chunkedEncoding": true,
     "contentType": "",

@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -12,6 +12,7 @@ package com.liaison.mailbox.rtdm.dao;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
@@ -20,7 +21,7 @@ import java.util.Map;
 
 /**
  * The dao class for the STAGED_FILE database table.
- * 
+ *
  * @author OFS
  */
 
@@ -39,17 +40,22 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
+    String MODIFIED_DATE = "modifiedDate";
+    String STAGED_FILE_IDS = "stagedFile_ids";
 
-	/**
-	 * Method to retrieve the list of all staged files of given mailbox ids
-	 *
-	 * @param mailboxIds
-	 * @return list of stagedFiles
-	 */
-	List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
-	List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
-	int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
-	StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
+    /**
+     * Method to retrieve the list of all staged files of given mailbox ids
+     *
+     * @param mailboxIds
+     * @return list of stagedFiles
+     */
+    List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
+
+    List<StagedFile> findStagedFilesOfMailboxesBasedOnGUID(List<String> mailboxIds, String guid);
+
+    int getStagedFilesCountByName(List<String> mailboxIds, String fileName, String status);
+
+    StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
 
     /**
      * constructs staged file entity from workticket and persists it
@@ -84,6 +90,14 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @return staged file
      */
     StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName);
+    
+    /**
+     * Update the StagedFile Status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    void updateStagedFileStatusByProcessorId( String processorId,  String status);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -93,7 +107,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" )")
             .append(" and sf.stagedFileStatus IN (:")
             .append(STATUS)
-            .append("))");
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -103,6 +120,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" )")
             .append(" and sf.stagedFileStatus != :")
             .append(STATUS)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
@@ -112,7 +131,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_PATH)
             .append(" and sf.stagedFileStatus IN (:")
             .append(StagedFileDAO.STATUS)
-            .append("))");
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) =:")
@@ -121,6 +143,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_PATH)
             .append(" and sf.stagedFileStatus !=:")
             .append(StagedFileDAO.STATUS)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(")");
 
     StringBuilder FIND_STAGED_FILE = new StringBuilder()
@@ -133,6 +157,14 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_NAME)
             .append(" and sf.filePath =:")
             .append(FILE_PATH)
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
             .append(" order by sf.createdDate desc");
+    
+    String UPDATE_STAGED_FILE_STATUS_BY_PROCESSORID = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET STATUS =:" + STATUS)
+            .append(" WHERE PROCESSOR_GUID =:")
+            .append(PROCESSOR_ID).toString();
 
 }

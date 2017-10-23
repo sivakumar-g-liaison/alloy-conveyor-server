@@ -73,6 +73,8 @@ import java.util.Map;
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 
 /**
  * DirectorySweeper
@@ -86,7 +88,7 @@ import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_
 
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
-	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
+    private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 	private static final String PROCESS = "process";
 	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
 	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
@@ -97,6 +99,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final Object SORT_BY_NAME = "Name";
     private static final Object SORT_BY_SIZE = "Size";
+    private static final String WATCH_DOG_SERVICE = "WatchDog Service";
 
     private String pipelineId;
     private List<Path> activeFiles = new ArrayList<>();
@@ -156,13 +159,21 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			        
 			        for (WorkTicket workTicket : workTickets) {
 			            
-			            if (0 == workTicket.getPayloadSize()) {
+			            if (isPayloadValid(workTicket)) {
+
+			                workTicketsToPost.add(workTicket);
+			            } else {
+			                
+			                //Interrupt signal for empty files
+			                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+			                    LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
+			                    return;
+			                }
+			                
 			                LOGGER.warn(constructMessage("The file {} is empty and empty files not allowed"), workTicket.getFileName());
 			                logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR);
 			                String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
 			                delete(filePath);
-			            } else {
-			                workTicketsToPost.add(workTicket);
 			            }
 			        }
 			    } else {
@@ -277,6 +288,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         }
 
         int connectionTimeout = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_CONNECTION_TIMEOUT);
+        int socketTimeout = MailBoxUtil.getEnvironmentProperties().getInt(CONFIGURATION_SOCKET_TIMEOUT);
 
         try {
 
@@ -304,6 +316,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     HTTPRequest request = HTTPRequest.post(serviceBrokerUri)
                             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                             .connectionTimeout(connectionTimeout)
+                            .socketTimeout(socketTimeout)
                             .inputData(JAXBUtility.marshalToJSON(workTicket))
                             .outputStream(responseStream);
 
@@ -323,6 +336,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
                     glassMessageDTO.setFileName(workTicket.getFileName());
                     glassMessageDTO.setStatus(ExecutionState.FAILED);
+                    glassMessageDTO.setPipelineId(workTicket.getPipelineId());
                     glassMessageDTO.setMessage(e.getMessage());
                     MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
 
@@ -412,7 +426,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 }
 
                 // Check if the file to be uploaded is included or not excluded
-                if (!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                if (!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
                         fileName,
                         staticProp.getExcludedFiles())) {
                     continue;
@@ -848,15 +862,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         //validates sweeper location
         final Path payloadPath = Paths.get(payloadLocation);
         FileSystem fileSystem = FileSystems.getDefault();
-        String pattern = MailBoxUtil.getEnvironmentProperties().getString(DATA_FOLDER_PATTERN, DEFAULT_DATA_FOLDER_PATTERN);
-        PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+        PathMatcher pathMatcher = fileSystem.getPathMatcher(DATA_FOLDER_PATTERN);
 
         if (!Files.isDirectory(payloadPath) || !pathMatcher.matches(payloadPath)) {
 
             //inactivate the mailboxes which doesn't have valid directory
             ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
             configurationInstance.setProcsrStatus(EntityStatus.INACTIVE.name());
-            configurationInstance.setModifiedBy("WatchDog Service");
+            configurationInstance.setModifiedBy(WATCH_DOG_SERVICE);
             configurationInstance.setModifiedDate(new Date());
             dao.merge(configurationInstance);
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
@@ -932,4 +945,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		EmailNotifier.sendEmail(configurationInstance, emailSubject, body.toString(), true);
 		
 	}
+
+    /**
+     * Verifies the payload size
+     *
+     * @param workTicket workticket
+     * @return true if payload size is not 0
+     */
+    private boolean isPayloadValid(WorkTicket workTicket) {
+        return !(0 == workTicket.getPayloadSize());
+    }
 }

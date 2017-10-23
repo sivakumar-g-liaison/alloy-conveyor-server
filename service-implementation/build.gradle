@@ -3,6 +3,7 @@ import com.googlecode.flyway.core.util.StringUtils
 import com.googlecode.flyway.core.util.jdbc.DriverDataSource
 import com.googlecode.flyway.gradle.task.AbstractFlywayTask
 import org.gradle.api.plugins.jetty.internal.Monitor
+import java.text.SimpleDateFormat
 
 // flyway
 apply plugin: 'jetty'
@@ -44,7 +45,7 @@ buildscript {
 		// Flyway Plugin
 		// License: Apache v2
         classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
-		classpath "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+		classpath "com.oracle.jdbc:ojdbc8:${oracleVersion}"
 
 		// SOAP UI
 		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
@@ -76,9 +77,9 @@ allprojects {
 	 }
 }
 
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/publish-service.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/war.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/2.x.x/consolidate-testresults.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/publish-service.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/war.gradle')
+apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/consolidate-testresults.gradle')
 
 war {
     baseName = rootProject.name
@@ -142,7 +143,7 @@ dependencies {
 	//common gitlab service
 	compile 'com.liaison:lib_gitlab:1.+'
 
-	compile group: "com.liaison", name: "fs2", version: "6.+", changing: true
+	compile group: "com.liaison", name: "fs2", version: "10.+", changing: true
 
 	// inherited from NetFlix Karyon
 	compile "com.netflix.karyon:karyon-extensions:1.0.22"
@@ -155,7 +156,7 @@ dependencies {
 	compile 'javax.mail:mail:1.4.6'
 
 	// for G2Javascript engine
-	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '6.+'
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '9.+'
 
 	//Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
 	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
@@ -172,39 +173,37 @@ dependencies {
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime 'com.oracle.jdbc:ojdbc7:${oracleVersion}'
-	compile 'com.oracle.jdbc:ucp:${oracleVersion}'
+	runtime "com.oracle.jdbc:ojdbc8:${oracleVersion}"
+	compile "com.oracle.jdbc:ucp:${oracleVersion}"
 
-	compile "com.sun.jersey:jersey-core:${jerseyVersion}"
-	compile "com.sun.jersey:jersey-server:${jerseyVersion}"
-	compile "com.sun.jersey:jersey-json:${jerseyVersion}"
-	compile "com.sun.jersey.contribs:jersey-multipart:${jerseyVersion}"
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-jetty-servlet', version: '2.23.2'
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.2'
 
-
-	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
 	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:3.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
-	compile 'com.liaison.commons:lib_message_bus:8.+'
+    compile ('com.liaison.commons:lib_message_bus:13.+') {
+        exclude group: 'org.sonatype.sisu'
+    }
 
-	compile "com.liaison.commons:lib_health_monitor_core:4.+"
-	compile "com.liaison.commons:lib_health_monitor_file:4.+"
-	compile "com.liaison.commons:lib_health_monitor_jdbc:4.+"
-	compile "com.liaison.commons:lib_health_monitor_fs2:4.+"
-	compile "com.liaison.commons:lib_health_monitor_threadpool:4.+"
+	compile "com.liaison.commons:lib_health_monitor_core:6.+"
+	compile "com.liaison.commons:lib_health_monitor_file:6.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:6.+"
+	compile "com.liaison.commons:lib_health_monitor_fs2:6.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:6.+"
 	
 	// reusable utilities / framework components
 	compile project(':service-framework')
 
 	// ************************************* beg cargo *********************************************
-	def cargoVersion = "1.4.0"
+	def cargoVersion = "1.6.4"
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
-	jdbc "com.oracle.jdbc:ojdbc7:${oracleVersion}"
+	jdbc "com.oracle.jdbc:ojdbc8:${oracleVersion}"
 
 	//Dependency for UM integration
-	compile "com.liaison.commons.usermanagement:usermanagement-client:4.+"
+	compile "com.liaison.commons.usermanagement:usermanagement-client:5.+"
 
 	// Dependency for KeyManager
 	compile('com.liaison.key.management:key-management:3.2.0:grammar') {
@@ -212,32 +211,27 @@ dependencies {
 	}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'4.+', changing: true
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'5.+', changing: true
 
 	//dependency for testng
-	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
-
-	compile ("com.liaison.commons.spectrum.client:spectrum-client:3.+") {
-		exclude group: "com.google.collections", module: "google-collections"
-		exclude group: "bouncycastle" , module:"bcprov-jdk16"
-	}
+	testCompile group: 'org.testng', name: 'testng', version: '6.11'
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:7.+")
 
 	//Required for integration test case
-	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
+	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.79'
 
 	//Dependency for Encryption
-	compile "com.liaison.commons.lib:crypto:4.2.1"
+	compile "com.liaison.commons.lib:crypto:6.1.0"
 	
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"
 	
 	//METRICS
 	compile 'com.liaison.commons:lib_metrics:1.+'
-	
+
 }
 
 idea {
@@ -322,7 +316,7 @@ cargo {
 
 		rmiPort = new Integer(tomcatRmiPort)
 		tomcat.ajpPort = new Integer(tomcatAjpPort)
-		//timeout = 600000
+		//timeout = 300000
 
 		// set the initial value
 		// MUST HAVE leading spaces for cargo JVM args
@@ -332,6 +326,9 @@ cargo {
 
 		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
 		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+		jvmArgs += " -Darchaius.deployment.stack=${deployStack}"
+		jvmArgs += " -Darchaius.deployment.region=${deployRegion}"
+		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
         jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
 		jvmArgs += " -Dhttps.protocols=TLSv1.2"
 
@@ -371,6 +368,23 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	}
 }
 
+task stampCurrentVersion << {
+    def buildId = (null == System.env.TAG) ? 'DEV' : "${System.env.tag}".toString()
+    def formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    def timestamp = formatter.format(new Date())
+    ant.copy( file:'src/main/java/com/liaison/mailbox/Version.java.template', toFile:'src/main/java/com/liaison/mailbox/Version.java', overwrite:true )
+            {
+                filterchain {
+                    tokenfilter { replaceregex(pattern:'SERVICE_VERSION_ID', replace:"${project.version}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_ID', replace:"${buildId}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_DATE', replace:"${timestamp}") }
+                }
+            }
+}
+
+gradle.projectsEvaluated {
+    compileJava.dependsOn(stampCurrentVersion)
+}
 
 task setDevProperties << {
     ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
@@ -423,6 +437,9 @@ task jettyRunSetProperties {
 	// use the default port of the ws-backend-simulation module
 	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
 	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+	System.setProperty('archaius.deployment.stack', "${deployStack}")
+	System.setProperty('archaius.deployment.region', "${deployRegion}")
+	System.setProperty('archaius.deployment.datacenter', "${deployDatacenter}")
 	// we only use jettyRun in dev... might as well output log4j debug
 	System.setProperty('log4j.debug', 'true')
 
@@ -471,9 +488,6 @@ task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], gr
     logger.info 'Integration Tests'
     useTestNG()
     include '**/*IT.class'
-
-    // workaround for Java7 and Cobutura/Emma instrumentation problem
-    jvmArgs += "-XX:-UseSplitVerifier"
 
     jvmArgs += "-Darchaius.deployment.applicationId=${project.war.baseName}"
     jvmArgs += "-Darchaius.deployment.environment=${deployEnvironment}"

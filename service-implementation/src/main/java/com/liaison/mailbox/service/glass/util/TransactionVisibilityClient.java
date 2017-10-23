@@ -16,13 +16,14 @@ import com.liaison.commons.message.glass.dom.StatusCode;
 import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Java wrapper client for logging messages in LENS.
@@ -31,11 +32,11 @@ import java.util.Date;
  */
 public class TransactionVisibilityClient {
 
-	public static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
+	private static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
 	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
 	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
 
-	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+	private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 	private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
 
 	private static final String PROCESSOR_EXEC_ID = "proc-exec-id";
@@ -51,17 +52,17 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
+	private static final String ADMIN_ERROR_DETAILS = "admin_errordetails";
 
 	private TransactionVisibilityAPI visibilityAPI;
 
-	public TransactionVisibilityClient() {
-		visibilityAPI = new TransactionVisibilityAPI();
-		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
-	}
-
 	public void logToGlass(GlassMessage message) {
 
+        visibilityAPI = new TransactionVisibilityAPI(message.getGlobalPId());
+        visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
+
 		visibilityAPI.getAdditionalInformation().clear();
+		List<MapItemType> additionalInformation = visibilityAPI.getAdditionalInformation();
 
 		// Log TransactionVisibilityAPI
 		MapItemType item;
@@ -70,91 +71,98 @@ public class TransactionVisibilityClient {
 			item = new MapItemType();
 			item.setKey(PROCESSOR_EXEC_ID);
 			item.setValue(message.getExecutionId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMailboxId())) {
 			item = new MapItemType();
 			item.setKey(MAILBOX_ID);
 			item.setValue(message.getMailboxId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 		
 		if (!MailBoxUtil.isEmpty(message.getMailboxName())) {
 			item = new MapItemType();
 			item.setKey(MAILBOX_NAME);
 			item.setValue(message.getMailboxName());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
 			item = new MapItemType();
 			item.setKey(PROCESSOR_ID);
 			item.setValue(message.getProcessorId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTenancyKey())) {
 			item = new MapItemType();
 			item.setKey(TENANCY_KEY);
 			item.setValue(message.getTenancyKey());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getServiceInstandId())) {
 			item = new MapItemType();
 			item.setKey(SIID);
 			item.setValue(message.getServiceInstandId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getInboundPipelineId())) {
 			item = new MapItemType();
 			item.setKey(INBOUND_PIPELINE_ID);
 			item.setValue(message.getInboundPipelineId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundPipelineId())) {
 			item = new MapItemType();
 			item.setKey(OUTBOUND_PIPELINE_ID);
 			item.setValue(message.getOutboundPipelineId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getTransferProfileName())) {
 			item = new MapItemType();
 			item.setKey(TRANSFER_PROFILE_NAME);
 			item.setValue(message.getTransferProfileName());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getStagedFileId())) {
 			item = new MapItemType();
 			item.setKey(STAGED_FILE_ID);
 			item.setValue(message.getStagedFileId());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMeta())) {
 			item = new MapItemType();
 			item.setKey(META);
 			item.setValue(message.getMeta());
-			visibilityAPI.getAdditionalInformation().add(item);
+			additionalInformation.add(item);
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getInboundFileName())) {
             item = new MapItemType();
             item.setKey(INBOUND_FILE_NAME);
             item.setValue(message.getInboundFileName());
-            visibilityAPI.getAdditionalInformation().add(item);
+            additionalInformation.add(item);
         }
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundFileName())) {
             item = new MapItemType();
             item.setKey(OUTBOUND_FILE_NAME);
             item.setValue(message.getOutboundFileName());
-            visibilityAPI.getAdditionalInformation().add(item);
+            additionalInformation.add(item);
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getAdminErrorDetails())) {
+            item = new MapItemType();
+            item.setKey(ADMIN_ERROR_DETAILS);
+            item.setValue(message.getAdminErrorDetails());
+            additionalInformation.add(item);
         }
 
         if (!MailBoxUtil.isEmpty(message.getSenderIp())) {
@@ -192,10 +200,23 @@ public class TransactionVisibilityClient {
 		handleExecutionState(message);
 
 		visibilityAPI.setId(message.getGlobalPId());
-		visibilityAPI.setGlobalId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
 	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+
+        if (message.getSenderId() != null && message.getSenderName() != null) {
+            visibilityAPI.setSenderId(message.getSenderId());
+            visibilityAPI.setSenderName(message.getSenderName());
+        }
+
+        if (message.getReceiverId() != null && message.getReceiverName() != null) {
+            visibilityAPI.setReceiverId(message.getReceiverId());
+            visibilityAPI.setReceiverName(message.getReceiverName());
+        }
+
+        if (!MailBoxUtil.isEmpty(message.getRelatedTransactionId())) {
+            visibilityAPI.getRelatedTransactions().add(visibilityAPI.getHub() + "-" + message.getRelatedTransactionId());
+        }
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
@@ -221,8 +242,10 @@ public class TransactionVisibilityClient {
 				visibilityAPI.setInAgent(message.getInAgent());
 				break;
 			case QUEUED :
-				visibilityAPI.setStatus(StatusCode.B);
-				break;
+                visibilityAPI.setStatus(StatusCode.B);
+                visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+                visibilityAPI.setInAgent(message.getInAgent());
+                break;
 			case READY :
 				visibilityAPI.setStatus(StatusCode.R);
 				if (null != message.getOutSize()) {

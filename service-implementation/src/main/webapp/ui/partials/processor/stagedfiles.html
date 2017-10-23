@@ -1,0 +1,113 @@
+<div class="container fade-in">
+    <div class="form-row">
+        <h3 id="title" class="ng-binding">Staged Files</h3>
+        <hr/>
+        <br/>
+    </div>
+
+	   <div class="form-inline">
+	       <div class = "form-group">
+	          <div class="gridStyle" ng-grid="gridOptions"></div>
+	       </div>
+	       <div class="form-row"></div>
+           <button id="stafedFileUpdateId" class="btn btn-primary pull-right" ng-click="reviseStagedFileModal()">
+               update
+           </button>
+	   </div>
+
+	   <!-- Loading image will be shown until grid is loaded -->
+       <div class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">
+            <h4>Loading Staged Files...</h4>
+            <img height="96px" src="img/spinner.gif" />
+       </div>
+
+	   <form id="fileInfoModalForm" name="form.fileInfoModalForm" novalidate>
+	       <div class="modal-custom fade" id="fileInfoModal">
+	           <div class="modal-dialog">
+	               <div class="modal-content">
+	                   <div class="modal-header">
+	                       <button class="close" data-dismiss="modal" aria-hidden="true"
+	                               id="close-btn-update-modal" ng-click="cancelInfo()">&times;</button>
+	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Details</h4>
+	                   </div>
+	                   <div class="modal-body">
+	                       <div class="row">
+	                           <b>File name:</b> {{selectedFile.name}} <br><br>
+	                           <b>File size:</b> {{selectedFile.fileSize}} <br><br>
+	                           <b>File path:</b> {{selectedFile.path}} <br><br>
+	                           <b>Global process id:</b> {{selectedFile.globalProcessId}} <br><br>
+	                           <b>Mailbox id:</b> {{selectedFile.mailboxGuid}} <br><br>
+	                           <div ng-hide="javaProperties.deployAsDropbox"><b>Processor type:</b> {{selectedFile.processorType}} <br><br></div>
+	                           <b>Spectrum URI:</b> <p>{{selectedFile.spectrumUri}}</p><br>
+	                           <b>Meta:</b> <p>{{selectedFile.meta}}</p> <br><br>
+	                           <b>Status:</b> {{selectedFile.status}} <br><br>
+	                           <b>Created on:</b> {{selectedFile.createdDate}} <br><br>
+	                           <b>Modified on:</b> {{selectedFile.modifiedDate}} <br><br>
+                               <b>Cluster Type:</b> {{selectedFile.clusterType}} <br><br>
+	                       </div>
+	                   </div>
+	                   <div class="modal-footer">
+	                       <a class="btn btn-default" id="fileInfoModalCancelBtn"
+	                       ng-click="cancelInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
+	                   </div>
+	               </div>
+	           </div>
+	       </div>
+	   </form>
+	   
+	   <form id="fileUpdateModalForm" name="fileUpdateModalForm" novalidate>
+	       <div class="modal-custom fade" id="fileUpdateModal">
+	           <div class="modal-dialog">
+	               <div class="modal-content">
+	                   <div class="modal-header">
+	                       <button class="close" data-dismiss="modal" aria-hidden="true"
+	                               id="close-btn-update-modal" ng-click="cancelUpdate()">&times;</button>
+	                       <h4 class="modal-title" id="profileCreateModalHeaderText">Staged File Update</h4>
+	                   </div>
+	                   <div class="modal-body">
+	                       <div class="row">
+	                           Do you really need to update the staged file - {{selectedFileToUpdate.name}}
+	                           status to FAILED ?
+	                       </div>
+	                   </div>
+	                   <div class="modal-footer">
+	                       <a class="btn btn-primary" id="reviseProfileModalSaveBtn"
+	                       ng-click="deactivateStagedFile(selectedFileToUpdate.id)">Update</a>
+	                       <a class="btn btn-default" id="fileInfoModalCancelBtn"
+	                       ng-click="cancelInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
+	                   </div>
+	               </div>
+	           </div>
+	       </div>
+	   </form>
+	   
+      <!--Modal for bulk delete operation -->
+      <div class="modal fade" id="updateSelectedFilesModal">
+          <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <button  type="button" class="close" id="updateButtonModal"
+                          ng-click="cancelSelectedFiles()">&times;</button>
+                      <h4 draggable-modal class="modal-title" id="confirmUpdateFileId">Confirm Staged File Update</h4>
+                  </div>
+              <div class="modal-body modal-body-enable-overflow">
+                    Do you really need to update the selected staged files status<br>
+                    to FAILED ?<br>
+                    <span ng-repeat="name in stagedFileName">
+                    {{name}}<font ng-show="!$last">,</font>
+                    </span>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="btnCancelFileModal"
+                          ng-click="cancelSelectedFiles()">Cancel
+                  </button>
+                  <button type="button" class="btn btn-primary" id="btnUpdateFileModal"
+                          ng-click="updateSelectedFiles()">Update
+                  </button>
+              </div>
+          </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+</div>

@@ -21,6 +21,11 @@
             "type":"Other"
          },
          {
+             "key":"Conditional Sweeper",
+             "value":"CONDITIONALSWEEPER",
+             "type":"Other"
+         },
+         {
             "key":"File Writer",
             "value":"FILEWRITER",
             "type":"Other"
@@ -70,12 +75,6 @@
          }
       ]
    },
-   "supportedJavaScriptCheckBox":{
-	 "name":"handOverExecutionToJavaScript",
-	 "displayName":"HandOverExecutionToJavaScript",					   
-	 "uiFiledtype":"checkbox",
-	 "value":""
-  },
   "supportedStatus":{
 	 "name":"status",
 	 "displayName":"Status",	
@@ -89,10 +88,6 @@
 		{
 		   "key":"Inactive",
 		   "value":"INACTIVE"
-		},
-		{
-		   "key":"Delete",
-		   "value":"DELETED"
 		}
 	 ]
   }  
