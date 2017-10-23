@@ -26,8 +26,6 @@ import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +35,8 @@ import java.nio.file.Paths;
 
 
 /**
+ * Service to stage the replicated files
+ *
  * @author OFS
  */
 public class FileStageReplicationService implements Runnable {
@@ -73,9 +73,9 @@ public class FileStageReplicationService implements Runnable {
     @Override
     public void run() {
         try {
-            stage(getMessage());
+            this.stage(getMessage());
         } catch (JSONException | ClientUnavailableException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -97,7 +97,7 @@ public class FileStageReplicationService implements Runnable {
 
         if (null == stagedFile) {
             //Staged file is not replicated so adding back to queue with delay
-            LOGGER.info("Posting back to queue since staged_file isn't replicated - datacenter");
+            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter");
             FileStageReplicationSendQueue.getInstance().sendMessage(requestString, delay);
         } else {
 
@@ -115,7 +115,7 @@ public class FileStageReplicationService implements Runnable {
 
             } catch (MailBoxServicesException e) {
                 //Payload doesn't exist in BOSS so adding back to queue with delay
-                LOGGER.info("Posting back to queue since payload isn't replicated - datacenter");
+                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
                 FileStageReplicationSendQueue.getInstance().sendMessage(requestString, delay);
             } finally {
                 if (null != response) {

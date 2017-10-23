@@ -53,8 +53,7 @@ public class DirectoryService implements Runnable {
     @Override
     public void run() {
         try {
-            DirectoryMessageDTO directoryMessageDTO = JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class);
-            executeDirectoryOperation(directoryMessageDTO);
+            this.executeDirectoryOperation(JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class));
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }

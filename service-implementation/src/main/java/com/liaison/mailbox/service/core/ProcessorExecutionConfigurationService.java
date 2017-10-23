@@ -80,7 +80,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
 
             TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(getMessage(), TopicMessageDTO.class);
             if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
-                new ProcessorExecutionConfigurationService().interruptAndUpdateStatus(message);
+                this.interruptAndUpdateStatus(message);
             }
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
@@ -323,7 +323,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
      * Overloaded version of interruptAndUpdateStatus
      * @param messageDTO TopicMessageDTO
      */
-    public void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
+    private void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
 
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
         ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(messageDTO.getProcessorId());
@@ -339,15 +339,12 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
                 messageDTO.getUserId(),
                 processorExecutionState);
     }
-    
+
     /**
      * Method to update the processor state from "PROCESSING" to "FAILED" on starting the server.
-     * 
      */
     public static void updateExecutionStateOnInit() {
-        
-        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-        processorExecutionStateDAO.updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
+        new ProcessorExecutionStateDAOBase().updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
     }
     
     /**

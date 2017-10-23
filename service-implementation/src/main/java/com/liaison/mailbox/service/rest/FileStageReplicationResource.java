@@ -16,30 +16,23 @@ import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.framework.AppConfigurationResource;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
-import com.liaison.mailbox.service.core.MailBoxService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 /**
  * This is the gateway for trigger profile services.
@@ -59,7 +52,7 @@ public class FileStageReplicationResource extends AuditedResource {
      * @return Response Object
      */
     @POST
-    @ApiOperation(value = "Trigger profile", notes = "trigger a profile", position = 23, response = com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO.class)
+    @ApiOperation(value = "Stage File Replication REST", notes = "Stage a file", position = 23, response = java.lang.String.class)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     @AccessDescriptor(skipFilter = true)
