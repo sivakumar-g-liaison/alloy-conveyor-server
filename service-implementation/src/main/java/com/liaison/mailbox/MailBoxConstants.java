@@ -503,4 +503,7 @@ public interface MailBoxConstants {
     String MANIFEST_DTO = "manifest_dto";
     String TRIGGER_FILE = "Trigger File";
 
+    String FILE_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.file.stage.replication.retry.delay";
+    String FILE_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.file.stage.replication.max.retry.count";
+
 }

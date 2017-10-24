@@ -33,6 +33,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_DELAY;
+import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_MAX_COUNT;
+
 
 /**
  * Service to stage the replicated files
@@ -45,9 +48,12 @@ public class FileStageReplicationService implements Runnable {
     private static final String URI = "uri";
     private static final String GLOBAL_PROCESS_ID = "globalProcessId";
     private static final String PAYLOAD_LOCATION = "payloadLocation";
+    private static final String RETRY_COUNT = "retry";
+
+    private static final Long DELAY = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_DELAY, 10000);
+    private static final Long MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_MAX_COUNT, 10);
 
     private String message;
-    private Long delay;
 
     public String getMessage() {
         return message;
@@ -57,24 +63,15 @@ public class FileStageReplicationService implements Runnable {
         this.message = message;
     }
 
-    public Long getDelay() {
-        return delay;
-    }
-
-    public void setDelay(Long delay) {
-        this.delay = delay;
-    }
-
     public FileStageReplicationService(String message) {
         this.message = message;
-        this.delay = MailBoxUtil.getEnvironmentProperties().getLong("com.liaison.mailbox.file.stage.replication.retry.delay", 10000);
     }
 
     @Override
     public void run() {
         try {
             this.stage(getMessage());
-        } catch (JSONException | ClientUnavailableException | IOException e) {
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
@@ -90,6 +87,14 @@ public class FileStageReplicationService implements Runnable {
         String fs2uri = (String) requestObj.get(URI);
         String globalProcessId = (String) requestObj.get(GLOBAL_PROCESS_ID);
         String payloadLocation = (String) requestObj.get(PAYLOAD_LOCATION);
+        int retry = (int) requestObj.get(RETRY_COUNT);
+
+        if (retry >= MAX_RETRY_COUNT) {
+            LOGGER.warn("Reached maximum retry and dropping this message - {}", message);
+            return;
+        }
+        requestObj.put(RETRY_COUNT, ++retry);
+        requestString = requestObj.toString();
 
         //Initial Check
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
@@ -98,7 +103,7 @@ public class FileStageReplicationService implements Runnable {
         if (null == stagedFile) {
             //Staged file is not replicated so adding back to queue with delay
             LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter");
-            FileStageReplicationSendQueue.getInstance().sendMessage(requestString, delay);
+            FileStageReplicationSendQueue.getInstance().sendMessage(requestString, DELAY);
         } else {
 
             //write the file
@@ -113,10 +118,10 @@ public class FileStageReplicationService implements Runnable {
                 IOUtils.copy(response, outputStream);
                 LOGGER.info("Staged the file successfully - datacenter");
 
-            } catch (MailBoxServicesException e) {
+            } catch (MailBoxServicesException | IllegalArgumentException e) {
                 //Payload doesn't exist in BOSS so adding back to queue with delay
                 LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
-                FileStageReplicationSendQueue.getInstance().sendMessage(requestString, delay);
+                FileStageReplicationSendQueue.getInstance().sendMessage(requestString, DELAY);
             } finally {
                 if (null != response) {
                     response.close();
