@@ -20,7 +20,6 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ExecutingProcessorsDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecutionStateResponseDTO;
@@ -31,17 +30,14 @@ import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.topic.producer.MailBoxTopicMessageProducer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_RECEIVER;
@@ -53,11 +49,43 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
 /**
  * class which contains processor execution configuration information.
  */
-public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> {
+public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
     private static final String EXECUTING_PROCESSORS = "running processors";
+
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public ProcessorExecutionConfigurationService() {
+        super();
+    }
+
+    public ProcessorExecutionConfigurationService(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void run() {
+
+        try {
+
+            TopicMessageDTO message = JAXBUtility.unmarshalFromJSON(getMessage(), TopicMessageDTO.class);
+            if (MailBoxUtil.getNode().equals(message.getNodeInUse())) {
+                this.interruptAndUpdateStatus(message);
+            }
+        } catch (JAXBException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Method to get the executing processors
@@ -295,7 +323,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
      * Overloaded version of interruptAndUpdateStatus
      * @param messageDTO TopicMessageDTO
      */
-    public void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
+    private void interruptAndUpdateStatus(TopicMessageDTO messageDTO) {
 
         ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
         ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(messageDTO.getProcessorId());
@@ -311,15 +339,12 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
                 messageDTO.getUserId(),
                 processorExecutionState);
     }
-    
+
     /**
      * Method to update the processor state from "PROCESSING" to "FAILED" on starting the server.
-     * 
      */
     public static void updateExecutionStateOnInit() {
-        
-        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-        processorExecutionStateDAO.updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
+        new ProcessorExecutionStateDAOBase().updateStuckProcessorsExecutionState(ConfigurationManager.getDeploymentContext().getDeploymentServerId());
     }
     
     /**

@@ -34,12 +34,12 @@ public class DirectoryServiceTest extends BaseServiceTest {
      */
     @Test
     public void directoryCreationTest() throws IOException {
-        DirectoryService service =  new DirectoryService();
+        DirectoryService service =  new DirectoryService("");
         DirectoryMessageDTO messageDTO =  new DirectoryMessageDTO();
         messageDTO.setGatewayType(MailBoxConstants.FTP);
         messageDTO.setOperationType(DirectoryOperationTypes.CREATE.value());
         messageDTO.setUserName("test");
-        
+
         service.executeDirectoryOperation(messageDTO);
     }
     
@@ -50,7 +50,7 @@ public class DirectoryServiceTest extends BaseServiceTest {
      */
     @Test
     public void direcoryDeletionTest() throws IOException {
-        DirectoryService service =  new DirectoryService();
+        DirectoryService service =  new DirectoryService("");
         DirectoryMessageDTO messageDTO =  new DirectoryMessageDTO();
         messageDTO.setGatewayType(MailBoxConstants.FTP);
         messageDTO.setOperationType(DirectoryOperationTypes.DELETE.value());

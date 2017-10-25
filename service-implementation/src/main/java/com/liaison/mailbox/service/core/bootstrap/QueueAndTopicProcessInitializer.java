@@ -10,22 +10,21 @@ package com.liaison.mailbox.service.core.bootstrap;
 
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
-import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
-import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
-import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
+import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectoryQueueProcessor;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
+import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
+import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Initializes all queue pollers.
@@ -75,8 +74,7 @@ public class QueueAndTopicProcessInitializer {
     private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
     private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
     private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
-
-    //To do Add low secure items
+    private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
 
     public static void initialize() {
 
@@ -150,6 +148,17 @@ public class QueueAndTopicProcessInitializer {
                 } catch (Exception e) {
                     logger.warn("Queue listener for UserManagement Directory Creation could not be initialized.", e);
                 }
+
+                try {
+
+                    logger.info("Starting FILE_STAGE_REPLICATION_RETRY Listener");
+                    QueuePooledListenerContainer fileStageReplicationQueue = new QueuePooledListenerContainer(FileStageReplicationRetryQueueProcessor.class, FILE_STAGE_REPLICATON_RETRY);
+                    fileStageReplicationQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started FILE_STAGE_REPLICATON_RETRY Listener");
+                }  catch (Exception e) {
+                    logger.warn("Queue listener for FILE_STAGE_REPLICATION_RETRY could not be initialized.", e);
+                }
+
         }
     }
 

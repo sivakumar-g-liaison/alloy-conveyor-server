@@ -369,23 +369,6 @@ public interface MailBoxConstants {
     String HTTPSYNCPROCESSOR = "HTTPSYNCPROCESSOR";
     String DROPBOXPROCESSOR = "DROPBOXPROCESSOR";
     String FILEWRITER = "FILEWRITER";
-    /**
-     * STATIC KEY used to encrypt/decrypt the token. The token contains
-     * username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't
-     * contain any sensitive data
-     */
-    byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes();
-
-    /**
-     * ivBytes used to encrypt/decrypt the token. The token contains username::
-     * tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any
-     * sensitive data
-     */
-    byte[] IV_BYTES = new byte[] { (byte) 0x8E, 0x12, 0x39, (byte) 0x9C, 0x07, 0x72, 0x6F, 0x5A, (byte) 0x8E, 0x12,
-            0x39, (byte) 0x9C, 0x07, 0x72, 0x6F, 0x5A };
-
-    int ENCRYPT_MODE = 1;
-    int DECRYPT_MODE = 2;
 
     // Added for read resource for migrator services
     String TYPE_MAILBOX = "mailbox";
@@ -508,5 +491,11 @@ public interface MailBoxConstants {
 
     String MANIFEST_DTO = "manifest_dto";
     String TRIGGER_FILE = "Trigger File";
+
+    String FILE_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.file.stage.replication.retry.delay";
+    String FILE_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.file.stage.replication.max.retry.count";
+
+    String URI = "uri";
+    String RETRY_COUNT = "retry";
 
 }
