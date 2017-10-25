@@ -14,11 +14,6 @@ import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 
-/**
-*
-* @author OFS
-*
-*/
 public class FileStageReplicationRetryQueueProcessor implements QueueTextMessageProcessor {
     
     @Override

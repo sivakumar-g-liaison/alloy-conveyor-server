@@ -150,6 +150,7 @@ public class QueueAndTopicProcessInitializer {
                 }
 
                 try {
+
                     logger.info("Starting FILE_STAGE_REPLICATION_RETRY Listener");
                     QueuePooledListenerContainer fileStageReplicationQueue = new QueuePooledListenerContainer(FileStageReplicationRetryQueueProcessor.class, FILE_STAGE_REPLICATON_RETRY);
                     fileStageReplicationQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);

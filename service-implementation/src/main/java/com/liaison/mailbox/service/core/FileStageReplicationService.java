@@ -35,20 +35,20 @@ import java.nio.file.Paths;
 
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_DELAY;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_MAX_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
+import static com.liaison.mailbox.MailBoxConstants.PAYLOAD_LOCATION;
+import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.URI;
 
 
 /**
- * Service to stage the replicated files
+ * Service to stage the files posted from other dc
  *
  * @author OFS
  */
 public class FileStageReplicationService implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(FileStageReplicationService.class);
-    private static final String URI = "uri";
-    private static final String GLOBAL_PROCESS_ID = "globalProcessId";
-    private static final String PAYLOAD_LOCATION = "payloadLocation";
-    private static final String RETRY_COUNT = "retry";
 
     private static final Long DELAY = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_DELAY, 10000);
     private static final Long MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_MAX_COUNT, 10);
@@ -77,7 +77,7 @@ public class FileStageReplicationService implements Runnable {
     }
 
     /**
-     * Method to in-activate staged file entry and update lens status.
+     * Staged the files which is posted from other dc
      *
      * @param requestString message string from the queue
      */
@@ -89,7 +89,7 @@ public class FileStageReplicationService implements Runnable {
         String payloadLocation = (String) requestObj.get(PAYLOAD_LOCATION);
         int retry = (int) requestObj.get(RETRY_COUNT);
 
-        if (retry >= MAX_RETRY_COUNT) {
+        if (retry > MAX_RETRY_COUNT) {
             LOGGER.warn("Reached maximum retry and dropping this message - {}", message);
             return;
         }
@@ -123,13 +123,13 @@ public class FileStageReplicationService implements Runnable {
                 LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
                 FileStageReplicationSendQueue.getInstance().sendMessage(requestString, DELAY);
             } finally {
+                ThreadContext.clearMap();
                 if (null != response) {
                     response.close();
                 }
                 if (null != outputStream) {
                     outputStream.close();
                 }
-                ThreadContext.clearMap();
             }
 
         }
