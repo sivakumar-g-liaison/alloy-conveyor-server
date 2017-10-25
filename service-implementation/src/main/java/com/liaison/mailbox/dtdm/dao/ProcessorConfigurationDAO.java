@@ -29,207 +29,218 @@ import java.util.Set;
  */
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
-	String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
-	String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
-	String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
+    String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
+    String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
+    String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
     String FIND_PROCESSOR_BY_PROFILE_AND_TENANCY = "Processor.findProcessorByProfileAndTenancy";
     String FIND_PROCESSORS_BY_TYPE_AND_MBX_STATUS = "Processor.findProcessorsByType";
     String FIND_PROCESSORS_BY_TYPE_AND_STATUS = "Processor.findProcessorsByTypeAndStatus";
     String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
     String GET_CLUSTER_TYPE_BY_PROCESSOR_GUID = "Processor.getClusterType";
+    String FIND_PROCESSORS_BY_DATACENTER = "Processor.findProcessorsByDatacenter";
 
-	String PROF_NAME = "sch_prof_name";
-	String MBX_NAME = "mbx_name";
-	String STATUS = "status";
-	String STATUS_DELETE = "status_delete";
-	String SHARD_KEY = "shard_key";
-	String PGUID = "pguid";
-	String SERV_INST_ID = "proc_serv_inst_id";
-	String PROCESSOR_TYPE = "processor_type";
-	String PRCSR_NAME = "prcsr_name";
-	String PROFILE_ID = "profile_id";
-	String TENANCY_KEY = "tenancy_key";
-	String FOLDER_URI = "folder_uri";
-	String PROTOCOL = "protocol";
-	String PIPELINE_ID = "pipeline_id";
-	String MBX_ID = "mbx_id";
-	String SCRIPT_NAME ="script_name";
+    String PROF_NAME = "sch_prof_name";
+    String MBX_NAME = "mbx_name";
+    String STATUS = "status";
+    String STATUS_DELETE = "status_delete";
+    String SHARD_KEY = "shard_key";
+    String PGUID = "pguid";
+    String SERV_INST_ID = "proc_serv_inst_id";
+    String PROCESSOR_TYPE = "processor_type";
+    String PRCSR_NAME = "prcsr_name";
+    String PROFILE_ID = "profile_id";
+    String TENANCY_KEY = "tenancy_key";
+    String FOLDER_URI = "folder_uri";
+    String PROTOCOL = "protocol";
+    String PIPELINE_ID = "pipeline_id";
+    String MBX_ID = "mbx_id";
+    String SCRIPT_NAME = "script_name";
+    String DATACENTER = "datacenter";
+    String IGNORE_DATACENTERS = "datacenters";
+    String UPDATE_SIZE = "updatesize";
+    String DATACENTER_NAME = "datacenter_name";
 
-	/**
-	 * Constants for getProcessor Class
-	 */
-	String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
-	String HTTP_ASYNC_PRCSR_CLASS = "httpasyncprocessor";
-	String SWEEPER_CLASS = "sweeper";
-	String CONDITIONAL_SWEEPER_CLASS = "conditionalsweeper";
-	String FILEWRITER_CLASS = "filewriter";
-	String REMOTE_UPLAODER_CLASS = "remoteuploader";
-	String REMOTE_DOWNLAODER_CLASS = "remotedownloader";
+    /**
+     * Constants for getProcessor Class
+     */
+    String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
+    String HTTP_ASYNC_PRCSR_CLASS = "httpasyncprocessor";
+    String SWEEPER_CLASS = "sweeper";
+    String CONDITIONAL_SWEEPER_CLASS = "conditionalsweeper";
+    String FILEWRITER_CLASS = "filewriter";
+    String REMOTE_UPLAODER_CLASS = "remoteuploader";
+    String REMOTE_DOWNLAODER_CLASS = "remotedownloader";
 
-	String DROPBOX_PRCSR_CLASS = "dropboxprocessor";
-	/**
-	 * Sorting constants
-	 */
-	String SORT_MAILBOX_NAME = "mailboxname";
-	String SORT_NAME = "name";
-	String SORT_PROTOCOL = "protocol";
-	String SORT_STATUS = "status";
-	String SORT_MAILBOX_STATUS = "mailboxStatus";
+    String DROPBOX_PRCSR_CLASS = "dropboxprocessor";
+    /**
+     * Sorting constants
+     */
+    String SORT_MAILBOX_NAME = "mailboxname";
+    String SORT_NAME = "name";
+    String SORT_PROTOCOL = "protocol";
+    String SORT_STATUS = "status";
+    String SORT_MAILBOX_STATUS = "mailboxStatus";
 
-	/**
-	 * Find by profileName and mailbox name pattern.
-	 *
-	 * @param profileName    The profile name.
-	 * @param mbxNamePattern The MailBox name pattern to exclude
-	 * @return The list of processor guids
-	 */
-	List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
+    /**
+     * Find by profileName and mailbox name pattern.
+     *
+     * @param profileName The profile name.
+     * @param mbxNamePattern The MailBox name pattern to exclude
+     * @return The list of processor guids
+     */
+    List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
-	/**
+    /**
      * Checks the mailbox has the processor or not.
      * 
-	 * @param siid service instance id
-	 * @param mbxGuid mailbox pguid
-	 * @param disableFilter boolean to enable or disable filter
+     * @param siid service instance id
+     * @param mbxGuid mailbox pguid
+     * @param disableFilter boolean to enable or disable filter
      * @return true if mailbox has the processor otherwise false
      */
-	boolean isMailboxHasProcessor(String siid, String mbxGuid, boolean disableFilter);
+    boolean isMailboxHasProcessor(String siid, String mbxGuid, boolean disableFilter);
 
-	/**
-	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
-	 * 
-	 * @param mbxGuid pguid of the mailbox
-	 * @param siGuid service instance id(name)
-	 * @return list of processor
-	 */
-	Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
-
-	/**
-	 * Retrieves list of processor from the given mailbox guid
-	 * 
-	 * @param mbxGuid the mailbox guid
-	 * @return list of processor
-	 */
-	Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
-
-	/**
-	 * Retrieves all active processors of specific types of given mailbox 
-	 * 
-	 * @param mbxGuid mailbox guid
-	 * @param processorTypes - A List of Canonical Names of different types of processor class.
-	 * @return list of specific types of processors
-	 */
-	List<Processor> findActiveProcessorsByTypeAndMailbox(String mbxGuid, List<String> processorTypes);
-	
-	/**
-	 * Retrieves specific type of processors based on the given profile id and Tenancy key
-	 * 
-	 * @param profileId - Pguid of linked profile
-	 * @param tenancyKey - tenancykey of mailbox of the processor
-	 * @return list of specific types of processors based on profile id and tenancykey
-	 */
-	List<Processor> fetchDropboxProcessorsByProfileAndTenancyKey(String profileId, String tenancyKey);
-	
-	/**
-	 * Retrieves all processors of given types and mailbox status
-	 * 
-	 * @param processorTypes processor types
-	 * @param mailboxStatus status mailbox status
-	 * @return list of processors
-	 */
-	List<Processor> findProcessorsByType(List<String> processorTypes, EntityStatus mailboxStatus);
-
-	/**
-	 * Retrieves list of all active processors
-	 *
-	 * @return list of processors
-	 */
-	List<Processor> findAllActiveProcessors();
-	
-	/**
-	 * Retrieves processors by mailbox guid and processor name
-	 *
-	 * @param mbxGuid mailbox guid
-	 * @param procName processor name
-     * @return processors
+    /**
+     * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
+     * 
+     * @param mbxGuid pguid of the mailbox
+     * @param siGuid service instance id(name)
+     * @return list of processor
      */
-	Processor findProcessorByNameAndMbx(String mbxGuid, String procName);
- 	
- 	/**
-	 * Retrieves list of all processors  
-	 *
-	 * @param searchFilter filters
-	 * @param pageOffsetDetails page size details
+    Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
+
+    /**
+     * Retrieves list of processor from the given mailbox guid
+     * 
+     * @param mbxGuid the mailbox guid
+     * @return list of processor
+     */
+    Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
+
+    /**
+     * Retrieves all active processors of specific types of given mailbox
+     * 
+     * @param mbxGuid mailbox guid
+     * @param processorTypes - A List of Canonical Names of different types of processor class.
+     * @return list of specific types of processors
+     */
+    List<Processor> findActiveProcessorsByTypeAndMailbox(String mbxGuid, List<String> processorTypes);
+
+    /**
+     * Retrieves specific type of processors based on the given profile id and Tenancy key
+     * 
+     * @param profileId - Pguid of linked profile
+     * @param tenancyKey - tenancykey of mailbox of the processor
+     * @return list of specific types of processors based on profile id and tenancykey
+     */
+    List<Processor> fetchDropboxProcessorsByProfileAndTenancyKey(String profileId, String tenancyKey);
+
+    /**
+     * Retrieves all processors of given types and mailbox status
+     * 
+     * @param processorTypes processor types
+     * @param mailboxStatus status mailbox status
      * @return list of processors
      */
-	List<Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
-	
-	/**
-	 * Retrieve the mailboxes to get mailbox names
-	 *
-	 * @param searchDTO search details
-	 * @return list of mailboxes
+    List<Processor> findProcessorsByType(List<String> processorTypes, EntityStatus mailboxStatus);
+
+    /**
+     * Retrieves list of all active processors
+     *
+     * @return list of processors
      */
-	List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO);
-	
-	/**
-	 * Retrieve the processors to get the processor names
-	 *
-	 * @param searchDTO search details
-	 * @return list of processor
+    List<Processor> findAllActiveProcessors();
+
+    /**
+     * Retrieves processors count
+     *
+     * @return list of processors count
      */
-	List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO);
+    long getProcessorCount();
 
-	/**
-	 * Retrieve the profile names
-	 *
-	 * @param searchDTO search details
-	 * @return list of profiles
-	 */
-	List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO);
+    /**
+     * Retrieves processors by mailbox guid and processor name
+     *
+     * @param mbxGuid mailbox guid
+     * @param procName processor name
+     * @return processors
+     */
+    Processor findProcessorByNameAndMbx(String mbxGuid, String procName);
 
-	/**
-	 * Retrieves count of filtered processors
-	 *
-	 * @param searchDTO search details
-	 * @return count of filtered processors
-	 */
-	int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
+    /**
+     * Retrieves list of all processors
+     *
+     * @param searchFilter filters
+     * @param pageOffsetDetails page size details
+     * @return list of processors
+     */
+    List<Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 
-	/**
-	 * Retrieves active processor by processor id
-	 *
-	 * @param id processor guid
-	 * @return processor
-	 */
-	Processor findActiveProcessorById(String id);
- 	
-	/**
-	 * Retrieves all processors by given Name
-	 * 
-	 * @param processorName processor name
-	 * @return List of Processors
-	 */
-	List<Processor> findProcessorsByName(String processorName);
-	
-	
-	/**
-	 * Retrieve processors of specific type by given mailbox Id and type
-	 * 
-	 * @param mbxId mailbox pguid
-	 * @param processorType processor type
-	 * @return list of processors
-	 */
-	List<Object[]> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType);
-	
-	/**
-	 * Retrieve processors of specific type by given mailbox Name and type
-	 * 
-	 * @param mailboxName mailbox name
-	 * @param processorType processor type
-	 * @return list of processors
-	 */
-	List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mailboxName, String processorType);
+    /**
+     * Retrieve the mailboxes to get mailbox names
+     *
+     * @param searchDTO search details
+     * @return list of mailboxes
+     */
+    List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO);
+
+    /**
+     * Retrieve the processors to get the processor names
+     *
+     * @param searchDTO search details
+     * @return list of processor
+     */
+    List<Processor> getProcessorNames(GenericSearchFilterDTO searchDTO);
+
+    /**
+     * Retrieve the profile names
+     *
+     * @param searchDTO search details
+     * @return list of profiles
+     */
+    List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO);
+
+    /**
+     * Retrieves count of filtered processors
+     *
+     * @param searchDTO search details
+     * @return count of filtered processors
+     */
+    int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
+
+    /**
+     * Retrieves active processor by processor id
+     *
+     * @param id processor guid
+     * @return processor
+     */
+    Processor findActiveProcessorById(String id);
+
+    /**
+     * Retrieves all processors by given Name
+     * 
+     * @param processorName processor name
+     * @return List of Processors
+     */
+    List<Processor> findProcessorsByName(String processorName);
+
+    /**
+     * Retrieve processors of specific type by given mailbox Id and type
+     * 
+     * @param mbxId mailbox pguid
+     * @param processorType processor type
+     * @return list of processors
+     */
+    List<Object[]> findProcessorsByMailboxIdAndProcessorType(String mbxId, String processorType);
+
+    /**
+     * Retrieve processors of specific type by given mailbox Name and type
+     * 
+     * @param mailboxName mailbox name
+     * @param processorType processor type
+     * @return list of processors
+     */
+    List<Object[]> findProcessorsByMailboxNameAndProcessorType(String mailboxName, String processorType);
 
     /**
      * Retrieve cluster type based on processorId.
@@ -243,6 +254,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * Retrieve processorId list by the given processor name.
      * 
      * @param processorName
+     * 
      * @return processor ID list
      */
     List<String> getProcessorIdByName(String processorName);
@@ -263,6 +275,36 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @return processorName
      */
     public String getProcessorNameByPguid(String pguid);
+
+    /**
+     * Update the Datacenter
+     * 
+     * @param dc
+     * @param ignoreDatacenters
+     * @param updateSize
+     */
+    void updateDatacenter(String dc, List<String> processedDC, int processSize);
+
+    /**
+     * Update the process_dc to current_dc where the process_dc is null
+     * 
+     */
+    void updateProcessDc();
+
+    /**
+     * Retrieve the all datacenters
+     * 
+     * @return all datacenters
+     */
+    List<String> getAllDatacenters();
+
+    /**
+     * Retrieve the all processors by dcName
+     * 
+     * @param dcName
+     * @return list of processors
+     */
+    List<Processor> findProcessorsByDatacenter(String dcName);
 
     StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
             .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
@@ -328,5 +370,21 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     StringBuilder PROCESSOR_NAME_RETRIEVAL_BY_PROCESSOR_ID = new StringBuilder().append("SELECT name FROM processor")
             .append(" WHERE pguid = ? AND")
             .append(" status = 'ACTIVE' ");
+    
+    String UPDATE_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET PROCESS_DC =:" + DATACENTER)
+            .append(" WHERE (PROCESS_DC NOT IN (:" + IGNORE_DATACENTERS + ")")
+            .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
+            .append(UPDATE_SIZE).toString();
+    
+    String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET PROCESS_DC =:" + DATACENTER)
+            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+    
+    String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
+            .append(" WHERE STATUS <> 'DELETED' ").toString();
+    
+    String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")
+            .append(" WHERE STATUS <> 'DELETED' ").toString(); 
 
 }

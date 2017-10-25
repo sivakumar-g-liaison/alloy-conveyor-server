@@ -17,6 +17,7 @@
     * Filter level changes  - Removed redundant code on the dropbox side
 * GMB-948 Log the application logs to Kibana directly
 * GMB-1063 - Unable to receive the response payload in http sync request
+* GMB-1011 - Processor affinity support
 
 4.17.3
 ---------------
