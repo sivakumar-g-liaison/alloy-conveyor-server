@@ -27,6 +27,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -39,6 +40,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -84,11 +86,15 @@ import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
 public class MailBoxUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
+	private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();	
+	        
 	//for fetch datacenter name.
 	public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
 	// for logging dropbox related details.
 	public static final String seperator = ": ";
+	
+	public static final boolean SKIP_PROCESS_DC = CONFIGURATION.getBoolean(MailBoxConstants.PROPERTY_SKIP_PROCESS_DC_CHECK, true);
+	
 	private static final float SECONDS_PER_MIN = 60;
 	private static final float MINUTES_PER_HOUR = 60;
 	private static final float HOURS_PER_DAY = 24;

@@ -57,6 +57,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                 query = "SELECT processor FROM Processor processor"
                         + " WHERE processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
                         + " AND processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE),
+        @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSORS_BY_DATACENTER,
+                query = "SELECT processor FROM Processor processor"
+                        + " WHERE processor.processDc = :" + ProcessorConfigurationDAO.DATACENTER_NAME
+                        + " AND processor.procsrStatus <> 'DELETED' "
+                        + " AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")"),             
         @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX,
                 query = "SELECT processor FROM Processor processor"
                         + " INNER JOIN processor.mailbox mbx" + " WHERE mbx.pguid = :"
@@ -135,6 +140,7 @@ public class Processor implements Identifiable {
 	private Date modifiedDate;
 	private String originatingDc;
     private String clusterType;
+    private String processDc;
 
 	private Set<Credential> credentials;
 	private Set<Folder> folders;
@@ -372,6 +378,15 @@ public class Processor implements Identifiable {
 
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
+    }
+    
+    @Column(name = "PROCESS_DC", length = 16)
+    public String getProcessDc() {
+        return processDc;
+    }
+	
+    public void setProcessDc(String processDc) {
+        this.processDc = processDc;
     }
 
 	@Override

@@ -185,6 +185,9 @@ public interface MailBoxConstants {
     // "LOW_SECURE_RELAY" or "CONVEYOR"
     String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
 
+    // Active-Active property to enable process dc check
+    String PROPERTY_SKIP_PROCESS_DC_CHECK = "com.liaison.mailbox.skip.process.dc.check";
+
     String MAILBOX = "MailBox";
     String PROCESSOR_STATUS = "Processor Status";
     String INTERRUPT_SIGNAL = "Interrupt Signal";
@@ -482,6 +485,9 @@ public interface MailBoxConstants {
     String RELAY = "RELAY";
     String LOW_SECURE_RELAY = "LOW_SECURE_RELAY";
     String CONVEYOR = "CONVEYOR";
+
+    //process Dc
+    String PROCESS_DC = "process_dc";
 
     String MANIFEST_DTO = "manifest_dto";
     String TRIGGER_FILE = "Trigger File";

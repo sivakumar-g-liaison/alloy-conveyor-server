@@ -113,6 +113,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
+                processor.setProcessDc(MailBoxUtil.DATACENTER_NAME);
                 //processor.setProcsrExecutionStatus(ExecutionState.READY.value());
             }
 
