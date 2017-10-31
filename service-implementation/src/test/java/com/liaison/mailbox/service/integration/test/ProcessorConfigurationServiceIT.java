@@ -116,8 +116,8 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         requestDTO.setMailBox(mbxDTO);
 
         MailBoxConfigurationService service = new MailBoxConfigurationService();
-        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
 
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
         Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
         // Adding the processor
@@ -290,6 +290,194 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     }
 
+    /**
+     * Method constructs REMOTEDOWNLOADER Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateRemoteUploaderWithInvalidProtocol() throws Exception {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the REMOTEDOWNLOADER processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());        
+    }
+    
+    /**
+     * Method constructs REMOTEUPLOADER Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateRemoteDownloaderWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the REMOTEUPLOADER processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.REMOTEUPLOADER);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());
+    }
+    
+    /**
+     * Method constructs HTTPSYNCPROCESSOR Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateHttpSyncWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the HTTPSYNCPROCESSOR processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.HTTPSYNCPROCESSOR);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());        
+    }
+        
+    /**
+     * Method constructs HTTPASYNCPROCESSOR Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateHttpAsyncWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+            
+        // Adding the HTTPASYNCPROCESSOR processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.HTTPASYNCPROCESSOR);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());        
+    }
+    
+    /**
+     * Method constructs SWEEPER Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateSweeperWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the SWEEPER processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.SWEEPER);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.FILEWRITER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());        
+    }
+    
+    /**
+     * Method constructs CONDITIONALSWEEPER Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateConditionalSweeperWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the CONDITIONALSWEEPER processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.CONDITIONALSWEEPER);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());        
+    }
+    
+    /**
+     * Method constructs FILEWRITER Processor with Invalid Processor protocol.
+     */
+    @Test
+    public void testCreateFilewriterWithInvalidProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+        
+        // Adding the FILEWRITER processor with invalid protocol
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        procRequestDTO.getProcessor().setType(MailBoxConstants.FILEWRITER);
+        procRequestDTO.getProcessor().setProtocol(MailBoxConstants.SWEEPER);
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procResponseDTO.getResponse().getStatus());
+    }
+    
     /**
      * Method get Processor with invalid data.
      */
@@ -762,6 +950,65 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
 
     }
     
+    /**
+     * Method to Revise Processor Type
+     */
+    @Test
+    public void testReviseProcessorType() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setType(ProcessorType.HTTPASYNCPROCESSOR.toString());
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus()); 
+    }
+    
+    /**
+     * Method to Revise Processor Protocol
+     */
+    @Test
+    public void testReviseProcessorProtocol() throws Exception {
+        
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Adding the processor
+        AddProcessorToMailboxRequestDTO procRequestDTO = constructDummyProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO procResponseDTO = procService.createProcessor(response.getMailBox().getGuid(), procRequestDTO, serviceInstanceId, procRequestDTO.getProcessor().getModifiedBy());
+
+        ReviseProcessorRequestDTO revProcRequestDTO = constructReviseProcessorDTO(response.getMailBox().getGuid(), mbxDTO);
+        revProcRequestDTO.getProcessor().setProtocol("FTPS");
+        revProcRequestDTO.getProcessor().setGuid(procResponseDTO.getProcessor().getGuId());
+        ReviseProcessorResponseDTO procReviseResponseDTO = procService.reviseProcessor(revProcRequestDTO, response.getMailBox().getGuid(), procResponseDTO.getProcessor().getGuId(), procRequestDTO.getProcessor().getModifiedBy());
+
+        // Assertion
+        Assert.assertEquals(FAILURE, procReviseResponseDTO.getResponse().getStatus()); 
+    }
     /**
      * Method Get Http Listener Properties
      *

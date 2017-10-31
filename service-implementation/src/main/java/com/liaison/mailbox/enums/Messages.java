@@ -28,6 +28,8 @@ public enum Messages {
     PROFILE_DOES_NOT_EXIST("Profile with the given id %s does not exist."),
     PROFILE_NAME_DOES_NOT_EXIST("Profile with the given name %s does not exist."),
     PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
+    PROCESSOR_TYPE_REVISION_NOT_ALLOWED("Processor type revision is not allowed"),
+    PROCESSOR_PROTOCOL_REVISION_NOT_ALLOWED("Processor protocol revision is not allowed"),
     MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
     MBX_PROFILE_LINK_DOES_NOT_MATCH("Mailbox-Profile link with the given id %s does not match the given Mailbox."),
     PROFILE_ALREADY_EXISTS("Profile Already exists"),
@@ -41,6 +43,7 @@ public enum Messages {
     PROCESSOR_PROFILE_NOT_ALLOWED("Profile is not allowed for processor type %s"),
     MBX_NON_DELETED_PROCESSOR("There are active processors available for the Mailbox"),
     DELETE_OPERATION_NOT_ALLOWED("Delete operation is not allowed in revise request"),
+    INVALID_PROTOCOL_ERROR_MESSAGE(" Protocol %s is not allowed for the processor type %s"),
 
     // generic messages
     CREATE_OPERATION_FAILED("%s creation failed."),

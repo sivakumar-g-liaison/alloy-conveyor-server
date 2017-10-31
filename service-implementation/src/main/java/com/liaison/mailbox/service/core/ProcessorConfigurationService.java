@@ -170,7 +170,14 @@ public class ProcessorConfigurationService {
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_NOT_ALLOWED, MailBoxUtil.DEPLOYMENT_TYPE,
                         Response.Status.BAD_REQUEST);
             }
-
+            
+            // validate the protocol against processor type for the current deployment
+            boolean isvalidprotocol = validateProtocolAgainstProcessorType(foundProcessorType, foundProtocolType, clusterType);
+            if (!isvalidprotocol) {
+                String errorMessage = String.format(Messages.INVALID_PROTOCOL_ERROR_MESSAGE.value(), foundProtocolType, foundProcessorType);
+                throw new MailBoxConfigurationServicesException(errorMessage, Response.Status.BAD_REQUEST);
+            }
+            
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {
@@ -499,6 +506,16 @@ public class ProcessorConfigurationService {
 						processorDTO.getGuid(), Response.Status.BAD_REQUEST);
 			}
 			
+			// validate whether the processor type is changed
+			if (!processor.getProcessorType().toString().equals(processorDTO.getType())) {
+			    throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_TYPE_REVISION_NOT_ALLOWED, Response.Status.BAD_REQUEST);
+			}
+			
+			// validate whether the protocol is changed
+			if (!processor.getProcsrProtocol().equals(processorDTO.getProtocol().toLowerCase())) {
+			    throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_PROTOCOL_REVISION_NOT_ALLOWED, Response.Status.BAD_REQUEST);
+			}
+            
 			String clusterType = processor.getClusterType();
 			// validates the given processor is belongs to given mailbox
 			validateProcessorBelongToMbx(mailBoxId, processor);
@@ -1391,6 +1408,7 @@ public class ProcessorConfigurationService {
                 isValidLegacyProtocol = Stream.of(Protocol.FTP,
                         Protocol.FTPS,
                         Protocol.HTTP,
+                        Protocol.HTTPS,
                         Protocol.SWEEPER,
                         Protocol.CONDITIONALSWEEPER,
                         Protocol.HTTPSYNCPROCESSOR,
@@ -1402,6 +1420,8 @@ public class ProcessorConfigurationService {
             case MailBoxConstants.LOW_SECURE_RELAY:
                 isValidProtocol = Stream.of(Protocol.FTP,
                         Protocol.FTPS,
+                        Protocol.HTTP,
+                        Protocol.HTTPS,
                         Protocol.SWEEPER,
                         Protocol.CONDITIONALSWEEPER,
                         Protocol.HTTPSYNCPROCESSOR,
@@ -1416,6 +1436,54 @@ public class ProcessorConfigurationService {
         }
     }
 
+    /**
+     * Helper method validate the Protocol and processor type by deployment type
+     * 
+     * @param processorType
+     * @param protocol
+     * @param clusterType
+     * @return
+     */
+    private boolean validateProtocolAgainstProcessorType(ProcessorType processorType, Protocol protocol, String clusterType) {
+        
+        switch (MailBoxUtil.DEPLOYMENT_TYPE) {
+        
+            case MailBoxConstants.RELAY:
+            case MailBoxConstants.LOW_SECURE_RELAY:
+                switch (processorType.toString()) {
+                   
+                    case MailBoxConstants.REMOTEDOWNLOADER:                       
+                    case MailBoxConstants.REMOTEUPLOADER:
+                        return clusterType.equals(MailBoxConstants.SECURE) ? 
+                                Stream.of(Protocol.FTP,
+                                          Protocol.FTPS,
+                                          Protocol.SFTP,
+                                          Protocol.HTTPS,
+                                          Protocol.HTTP).anyMatch(s -> s.equals(protocol)) :
+                                    
+                                Stream.of(Protocol.FTP,
+                                          Protocol.FTPS,
+                                          Protocol.HTTPS,
+                                          Protocol.HTTP).anyMatch(s -> s.equals(protocol));
+                    case MailBoxConstants.HTTPASYNCPROCESSOR:
+                        return Protocol.HTTPASYNCPROCESSOR.equals(protocol);
+                    case MailBoxConstants.HTTPSYNCPROCESSOR:
+                        return Protocol.HTTPSYNCPROCESSOR.equals(protocol);
+                    case MailBoxConstants.SWEEPER:
+                        return Protocol.SWEEPER.equals(protocol);
+                    case MailBoxConstants.CONDITIONALSWEEPER:
+                        return Protocol.CONDITIONALSWEEPER.equals(protocol);
+                    case MailBoxConstants.FILEWRITER:
+                        return Protocol.FILEWRITER.equals(protocol);
+                }
+                
+            case MailBoxConstants.CONVEYOR:
+                return MailBoxConstants.SECURE.equals(clusterType) && Protocol.DROPBOXPROCESSOR.equals(protocol);
+            default:
+                return false;
+        }
+    }
+    
     /**
      * This method is used to update the process_dc to the current_Dc where the process_dc is null
      */

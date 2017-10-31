@@ -19,6 +19,7 @@
 * GMB-1063 - Unable to receive the response payload in http sync request
 * GMB-912 - File writer replication retry if storage replication is not done.
 * GMB-1011 - Processor affinity support
+* GMB-1068 - Nullpointer exception while updating a processor
 
 4.17.3
 ---------------

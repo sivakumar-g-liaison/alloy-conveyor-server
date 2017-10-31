@@ -177,7 +177,7 @@ var rest = myApp.controller(
      
                 if ($scope.processor.clusterType == "LOWSECURE") {
      
-                    $scope.lowSecureSupportedProtocols = [{"key":"FTP", "value":"FTP"}, {"key":"FTPS", "value":"FTPS"}];
+                    $scope.lowSecureSupportedProtocols = [{"key":"FTP", "value":"FTP"}, {"key":"FTPS", "value":"FTPS"},{"key":"HTTP", "value":"HTTP"}, {"key":"HTTPS", "value":"HTTPS"}];
                     $scope.processorData.supportedProtocols.options = $scope.lowSecureSupportedProtocols;
                 } else {
      
