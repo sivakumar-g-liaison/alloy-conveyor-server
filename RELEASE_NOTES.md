@@ -21,6 +21,7 @@
 * GMB-1011 - Processor affinity support
 * GMB-1068 - Nullpointer exception while updating a processor
 * Production properties update
+* Staging Properties update
 
 4.17.3
 ---------------
