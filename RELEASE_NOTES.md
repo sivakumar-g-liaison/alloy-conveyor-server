@@ -20,6 +20,7 @@
 * GMB-912 - File writer replication retry if storage replication is not done.
 * GMB-1011 - Processor affinity support
 * GMB-1068 - Nullpointer exception while updating a processor
+* Production properties update
 
 4.17.3
 ---------------
