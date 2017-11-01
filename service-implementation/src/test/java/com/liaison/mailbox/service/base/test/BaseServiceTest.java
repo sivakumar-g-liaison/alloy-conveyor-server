@@ -340,7 +340,7 @@ public abstract class BaseServiceTest {
         procDTO.setName("testProcessor" + System.currentTimeMillis());
         procDTO.setStatus("ACTIVE");
         procDTO.setType("HTTPASYNCPROCESSOR");
-        procDTO.setProtocol("HTTP");
+        procDTO.setProtocol("HTTPASYNCPROCESSOR");
         procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }
