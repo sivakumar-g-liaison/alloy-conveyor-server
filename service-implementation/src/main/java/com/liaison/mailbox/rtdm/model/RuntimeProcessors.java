@@ -34,7 +34,9 @@ import javax.persistence.Table;
 @NamedQueries({
         @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
                 query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID
-                        + " AND processors.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
+                        + " AND processors.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
+        @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID_WITHOUT_CLUSTER_TYPE,
+                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
 })
 public class RuntimeProcessors {
 
