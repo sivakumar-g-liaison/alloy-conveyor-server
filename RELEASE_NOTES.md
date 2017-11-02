@@ -22,6 +22,7 @@
 * GMB-1068 - Nullpointer exception while updating a processor
 * Production properties update
 * Staging Properties update
+* GMB-1067 - Validate the runtime processor configuration during revise operation
 
 4.17.3
 ---------------

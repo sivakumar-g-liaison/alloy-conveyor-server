@@ -24,6 +24,7 @@ import java.util.List;
 public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
 
     String FIND_BY_PROCESSOR_ID = "RuntimeProcessors.findByProcessorId";
+    String FIND_BY_PROCESSOR_ID_WITHOUT_CLUSTER_TYPE = "RuntimeProcessors.findByProcessorIdWithoutClusterType";
     String PROCESSOR_ID = "processorId";
 
     String FIND_NON_RUNNING_PROCESSORS = "SELECT P.PROCESSOR_ID FROM PROCESSORS P"
@@ -54,4 +55,6 @@ public interface RuntimeProcessorsDAO extends GenericDAO<RuntimeProcessors> {
      * @param processorId
      */
     void updateClusterType(String clusterType, String processorId);
+
+    RuntimeProcessors findByProcessorIdWithoutClusterType(String processorId);
 }

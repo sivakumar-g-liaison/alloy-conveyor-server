@@ -37,8 +37,10 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
 import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -555,12 +557,24 @@ public class ProcessorConfigurationService {
 			em.merge(processor);
 		    tx.commit();
 
-			// Change the execution order if existing and incoming does not match
-			// changeExecutionOrder(request, configDao, processor);
-		    
+            // Validate the processor guid is in the runtime processor table
+            // Add if it is not available
+            RuntimeProcessorsDAO runtimeProcessorsDAO = new RuntimeProcessorsDAOBase();
+            RuntimeProcessors runtimeProcessor = runtimeProcessorsDAO.findByProcessorIdWithoutClusterType(processor.getPguid());
+            if (null == runtimeProcessor) {
+
+                ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
+                executionDTO.setPguid(UUIDGen.getCustomUUID());
+                executionDTO.setProcessorId(processor.getPguid());
+                executionDTO.setExecutionStatus(ExecutionState.READY.value());
+                executionDTO.setModifiedDate(new Date());
+                executionDTO.setModifiedBy(userId);
+                runtimeProcessorsDAO.addProcessor(executionDTO, processor.getClusterType());
+            }
+
 		    //updates processor cluster type in the runtime processors table
             if (!inputClusterType.equals(clusterType)) {
-                new RuntimeProcessorsDAOBase().updateClusterType(inputClusterType, processorId);
+                runtimeProcessorsDAO.updateClusterType(inputClusterType, processorId);
             }
             // response message construction
             ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));

@@ -161,4 +161,27 @@ public class RuntimeProcessorsDAOBase extends GenericDAOBase<RuntimeProcessors> 
         }
     }
 
+    @Override
+    public RuntimeProcessors findByProcessorIdWithoutClusterType(String processorId) {
+        EntityManager entityManager = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<RuntimeProcessors> processors = entityManager
+                    .createNamedQuery(FIND_BY_PROCESSOR_ID_WITHOUT_CLUSTER_TYPE, RuntimeProcessors.class)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .getResultList();
+            if (!processors.isEmpty()) {
+                return processors.get(0);
+            }
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
+
 }
