@@ -1,4 +1,8 @@
-4.18.0-SNAPSHOT
+5.1.0-SNAPSHOT
+---------------
+*
+
+5.0.0
 ---------------
 * GMB-1036 - LENS should show one triggered file move as a single transaction
 * GMB-1058 - Failed to stage files but there is no error logged
