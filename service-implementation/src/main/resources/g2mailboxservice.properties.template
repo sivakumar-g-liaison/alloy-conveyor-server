@@ -21,10 +21,6 @@ com.liaison.rtdm.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
 com.liaison.rtdm.DB_DESCRIPTION=G2 Mailbox RTDM UI UCP in Tomcat (DEV)
 com.liaison.rtdm.DB_VALIDATECONNECTIONONBORROW=true
 
-# jpa persistence unit name
-com.liaison.persistenceUnitName.dtdm=mailbox-dtdm
-com.liaison.persistenceUnitName.rtdm=mailbox-rtdm
-
 #///###########################\\\#
 ######## QUEUE Properties #########
 java.naming.provider.url=jnp://localhost:1199,jnp://localhost:1199
@@ -155,8 +151,6 @@ com.liaison.lens.hub=LSG2-DEV
 # For Dropbox
 com.liaison.dropbox.payload.ttl.days=30
 
-com.liaison.deployAsDropbox=false
-
 com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
 
 # skips the queue initializer and works as standalone server
@@ -182,5 +176,3 @@ https.user.home.path=/data/https
 
 # service broker base url
 com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/service-broker/
-
-@next=g2mailboxservice-${@environment}-${@region}.properties
