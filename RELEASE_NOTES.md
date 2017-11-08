@@ -1,6 +1,6 @@
 5.1.0-SNAPSHOT
 ---------------
-*
+* GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
 
 5.0.0
 ---------------

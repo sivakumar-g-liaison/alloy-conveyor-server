@@ -401,4 +401,37 @@ public class GenericValidatorTest extends BaseServiceTest {
 
     }
 
+    @Test(expectedExceptions = MailBoxConfigurationServicesException.class)
+    public void testInvaidSocketTimeOut() {
+
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setSocketTimeout(0);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setSocketTimeout(-1);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setSocketTimeout(6000000);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+        propertiesDTO.setSocketTimeout(300001);
+        Assert.assertFalse(validator.validate(propertiesDTO));
+        
+    }
+    
+    @Test()
+    public void testValidSocketTimeOut() {
+ 
+        RemoteProcessorPropertiesDTO propertiesDTO = new RemoteProcessorPropertiesDTO();
+        GenericValidator validator = new GenericValidator();
+
+        propertiesDTO.setSocketTimeout(1000);
+        Assert.assertTrue(validator.validate(propertiesDTO));
+
+        propertiesDTO.setSocketTimeout(29999);
+        Assert.assertTrue(validator.validate(propertiesDTO));
+
+    }
 }

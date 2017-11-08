@@ -401,6 +401,9 @@ public interface MailBoxConstants {
     int TIMEOUT_RANGE_MIN = 0;
     int TIMEOUT_RANGE_MAX = 60000;
 
+    int SOCKET_TIMEOUT_MIN = 1;
+    int SOCKET_TIMEOUT_MAX = 300000;
+
     String POST = "POST";
     String PUT = "PUT";
 
