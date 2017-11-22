@@ -36,8 +36,8 @@ import java.util.TreeMap;
 /**
  * This class contains methods to determine the language settings of the user.
  */
-@Api(value = "config/language", description = "Language related methods")
-@Path("config/language")
+@Api(value = "config/language/userLocale", description = "Language related methods")
+@Path("config/language/userLocale")
 public class LanguageResource extends AuditedResource {
 
     private final static Logger logger = LogManager.getLogger(LanguageResource.class);
@@ -47,7 +47,6 @@ public class LanguageResource extends AuditedResource {
     private final static String LOCALE_KEY = "locale";
 
     @GET
-    @Path("/userLocale")
     @ApiOperation(value = "This method parses the users language locale code from the request and returns the pattern " +
             "with locale.")
     @Produces({MediaType.APPLICATION_JSON})

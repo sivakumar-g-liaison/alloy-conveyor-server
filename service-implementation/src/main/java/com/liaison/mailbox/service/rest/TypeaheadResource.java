@@ -35,14 +35,13 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 @AppConfigurationResource
-@Path("config/mailbox/typeAhead")
+@Path("config/mailbox/typeAhead/getEntityByNames")
 @Api(value = "config/mailbox/typeAhead", description = "Administration of processor services")
 public class TypeaheadResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(TypeaheadResource.class);
 
 	@GET
-	@Path("/getEntityByNames")
 	@ApiOperation(value = "Get Entities By Name", notes = "get entity by names", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO.class)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response getEntitiesByName(

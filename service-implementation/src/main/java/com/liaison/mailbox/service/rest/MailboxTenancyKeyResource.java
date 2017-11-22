@@ -39,7 +39,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  */
 @AppConfigurationResource
-@Path("config/mailbox/tenancyKeys/")
+@Path("config/mailbox/tenancyKeys")
 @Api(value = "config/mailbox/tenancyKeys", description = "gateway to retrieve all tenancy keys of acl manifest in request")
 public class MailboxTenancyKeyResource extends AuditedResource {
 

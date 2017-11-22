@@ -8,11 +8,6 @@
     =========================================================================
     -->
 
-    <!-- Framework-level support for guice, please do not modify. -->
-    <listener>
-        <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
-    </listener>
-
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -42,7 +37,7 @@
         </servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.liaison.mailbox.service.rest;com.liaison.service.resources.acl;com.liaison.service;com.liaison.threadmanagement.resources;com.wordnik.swagger.jersey.listing;</param-value>
+            <param-value>com.liaison.mailbox.service.rest;com.liaison.service.resources.acl;com.liaison.threadmanagement.resources;com.wordnik.swagger.jersey.listing;com.fasterxml.jackson.jaxrs.json;com.fasterxml.jackson.jaxrs.xml</param-value>
          </init-param>
         <init-param>
             <param-name>jersey.config.server.provider.classnames</param-name>

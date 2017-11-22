@@ -141,12 +141,9 @@ dependencies {
 
 
 	//common gitlab service
-	compile 'com.liaison:lib_gitlab:1.+'
+	compile 'com.liaison:lib_gitlab:3.+'
 
-	compile group: "com.liaison", name: "fs2", version: "10.+", changing: true
-
-	// inherited from NetFlix Karyon
-	compile "com.netflix.karyon:karyon-extensions:1.0.22"
+	compile group: "com.liaison", name: "fs2", version: "11.+", changing: true
 
 	// currently not used during runtime (inherited dependency from NetFlix)
 	compile 'com.netflix.eureka:eureka-client:1.1.97'
@@ -175,9 +172,6 @@ dependencies {
 	// def oracleVersion = '11g-11.2.0.3.0'
 	runtime "com.oracle.jdbc:ojdbc8:${oracleVersion}"
 	compile "com.oracle.jdbc:ucp:${oracleVersion}"
-
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-jetty-servlet', version: '2.23.2'
-    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.2'
 
 	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:3.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
@@ -224,7 +218,7 @@ dependencies {
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.79'
 
 	//Dependency for Encryption
-	compile "com.liaison.commons.lib:crypto:6.1.0"
+	compile "com.liaison.commons.lib:crypto:6.+"
 	
 	//Required for URL validations
 	compile "commons-validator:commons-validator:1.5.0"

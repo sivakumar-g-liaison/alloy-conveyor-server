@@ -76,7 +76,7 @@ com.liaison.acl.use.mock.verifier=false
 signatureverifier.publickey.url=https://at4d-vpkms.liaison.dev/key-management/export/public/
 
 # Bug in ACLResourceMap related to dto level ACL. DO NOT CHANGE THIS
-liaison.acl.packages=com.liaison.fakepath
+liaison.acl.packages=com.liaison.mailbox.service.rest
 
 # acl-manifest json string
 # use.dummy.manifest.as.backup=true

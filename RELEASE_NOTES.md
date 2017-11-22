@@ -1,6 +1,8 @@
 5.1.0-SNAPSHOT
 ---------------
-*
+* lib configurationv6 upgrade
+* commons-lib upgrade
+* tomcat scripts updates
 
 5.0.0
 ---------------

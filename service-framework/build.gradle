@@ -22,7 +22,7 @@ dependencies {
     compile "aspectj:aspectjrt:1.5.4"
     compile "cactus:cactus:13-1.7.2"
 
-    testCompile 'org.testng:testng:6.8'
+    testCompile 'org.testng:testng:6.11'
 
     def jacksonVersion='1.9.12'
     // JACKSON 1.9.x (2.x would supplant these w/ different name spaces)
@@ -37,10 +37,6 @@ dependencies {
     runtime 'javax.xml.bind:jaxb-api:2.1'
 
     compile 'com.netflix.servo:servo-core:0.8.0'
-    compile ("com.netflix.karyon:karyon-extensions:${karyonVersion}") {
-        exclude group: "com.sun.jersey", module: "jersey-bundle"
-        exclude group: "com.netflix.servo", module: "servo-core"
-    }
 
     // JPA2.0 API
     compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
@@ -49,10 +45,6 @@ dependencies {
     // Oracle OJDBC
     compile "com.oracle.jdbc:ojdbc8:${oracleVersion}"
     compile "com.oracle.jdbc:ucp:${oracleVersion}"
-
-    // Liaison code
-    // commons-lib dependencies
-	compile 'com.liaison:commons-lib:11.+'
 
 	//For shell script execution
 	compile "org.apache.commons:commons-exec:1.3"
