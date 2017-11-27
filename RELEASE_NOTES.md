@@ -3,6 +3,7 @@
 * lib configurationv6 upgrade
 * commons-lib upgrade
 * tomcat scripts updates
+* GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
 
 5.0.0
 ---------------

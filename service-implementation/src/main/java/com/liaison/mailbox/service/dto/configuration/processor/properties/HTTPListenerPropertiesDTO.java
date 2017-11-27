@@ -12,6 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.validation.PatternValidation;
+
 /**
  * Data Transfer Object for the properties of HTTP listener.
  * 
@@ -58,6 +61,7 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
     }
+    @PatternValidation(errorMessage = "Invalid Value for Timeout", type = MailBoxConstants.PROPERTY_SOCKET_TIMEOUT)
     public int getSocketTimeout() {
         return socketTimeout;
     }

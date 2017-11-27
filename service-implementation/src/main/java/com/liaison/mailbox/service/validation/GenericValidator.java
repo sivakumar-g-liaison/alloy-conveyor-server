@@ -217,7 +217,7 @@ public class GenericValidator {
 				errorMessage.append(annotationDetails.errorMessage());
 			}
 			
-			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isBetweenRange(value))) {
+			if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT) && !isSocketTimeoutBetweenRange(value))) {
 				isValidPattern = false;
 				errorMessage.append(annotationDetails.errorMessage());
 			}
@@ -295,6 +295,17 @@ public class GenericValidator {
 		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
 	}
 
+	/**
+	 * Method to validate whether given string is valid timeout value
+	 *
+	 * @param value connection timeout
+	 * @return boolean
+	 */
+	public boolean isSocketTimeoutBetweenRange (Object value) {
+	    int range = Integer.valueOf(value.toString()).intValue();
+	    return range <= MailBoxConstants.SOCKET_TIMEOUT_MAX  && range >= MailBoxConstants.SOCKET_TIMEOUT_MIN;
+	}
+	
 	/**
 	 * Method to validate whether given string is valid Http connection timeout
 	 * value
