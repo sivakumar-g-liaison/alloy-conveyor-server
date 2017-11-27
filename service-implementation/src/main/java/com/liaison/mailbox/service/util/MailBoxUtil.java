@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -85,28 +85,28 @@ import static com.liaison.mailbox.enums.ProcessorType.SWEEPER;
  */
 public class MailBoxUtil {
 
-	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();	
-	        
-	//for fetch datacenter name.
-	public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
-	// for logging dropbox related details.
-	public static final String seperator = ": ";
-	
-	public static final boolean SKIP_PROCESS_DC = CONFIGURATION.getBoolean(MailBoxConstants.PROPERTY_SKIP_PROCESS_DC_CHECK, true);
-	
-	private static final float SECONDS_PER_MIN = 60;
-	private static final float MINUTES_PER_HOUR = 60;
-	private static final float HOURS_PER_DAY = 24;
-	private static final float DAYS_IN_WEEK = 7;
-	private static final float DAYS_IN_MONTH = 30;
-	private static final float DAYS_IN_YEAR = 365;
+    private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
+
+    //for fetch datacenter name.
+    public static final String DATACENTER_NAME = System.getProperty("archaius.deployment.datacenter");
+    // for logging dropbox related details.
+    public static final String seperator = ": ";
+
+    private static final float SECONDS_PER_MIN = 60;
+    private static final float MINUTES_PER_HOUR = 60;
+    private static final float HOURS_PER_DAY = 24;
+    private static final float DAYS_IN_WEEK = 7;
+    private static final float DAYS_IN_MONTH = 30;
+    private static final float DAYS_IN_YEAR = 365;
+
+    public static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
+    public static final boolean SKIP_PROCESS_DC = CONFIGURATION.getBoolean(MailBoxConstants.PROPERTY_SKIP_PROCESS_DC_CHECK, true);
 
     /**
      * Initialize the cluster type.
      */
     public static String CLUSTER_TYPE;
-    
+
     /**
      * Initialize the deployment type.
      */
@@ -121,7 +121,7 @@ public class MailBoxUtil {
 
         CLUSTER_TYPE = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         DEPLOYMENT_TYPE = CLUSTER_TYPE;
-        
+
         if (DeploymentType.LOW_SECURE_RELAY.getValue().equals(CLUSTER_TYPE)) {
             CLUSTER_TYPE = MailBoxConstants.LOWSECURE;
         } else {
@@ -132,81 +132,81 @@ public class MailBoxUtil {
         DATA_FOLDER_PATTERN = String.join(",", patterns);
     }
 
-	/**
-	 * Utility is used to un-marshal from JSON String to Object.
-	 *
-	 * @param serializedJson The serialized JSON String.
-	 * @param clazz The corresponding class of the serialized JSON.
-	 * @return Object The instance of the give Class.
-	 * @throws IOException
-	 */
-	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws IOException {
+    /**
+     * Utility is used to un-marshal from JSON String to Object.
+     *
+     * @param serializedJson The serialized JSON String.
+     * @param clazz The corresponding class of the serialized JSON.
+     * @return Object The instance of the give Class.
+     * @throws IOException
+     */
+    public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws IOException {
 
-		LOGGER.debug("Input JSON is {}", serializedJson);
-		ObjectMapper mapper = new ObjectMapper();
-		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+        LOGGER.debug("Input JSON is {}", serializedJson);
+        ObjectMapper mapper = new ObjectMapper();
+        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
 
-		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
-		// make serializer use JAXB annotations (only)
-		mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
+        // make deserializer use JAXB annotations (only)
+        mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+        // make serializer use JAXB annotations (only)
+        mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
-		// added to support the root level element
-		mapper.configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
+        // added to support the root level element
+        mapper.configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
 
-		return mapper.readValue(serializedJson, clazz);
+        return mapper.readValue(serializedJson, clazz);
 
-	}
+    }
 
-	/**
-	 * Utility is used to marshal the Object to JSON.
-	 *
-	 * @param object
-	 * @return
-	 * @throws IOException
-	 */
-	public static String marshalToJSON(Object object) throws IOException {
+    /**
+     * Utility is used to marshal the Object to JSON.
+     *
+     * @param object
+     * @return
+     * @throws IOException
+     */
+    public static String marshalToJSON(Object object) throws IOException {
 
-		ObjectMapper mapper = new ObjectMapper();
-		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
-		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
-		// make serializer use JAXB annotations (only)
-		mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
+        ObjectMapper mapper = new ObjectMapper();
+        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+        // make deserializer use JAXB annotations (only)
+        mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+        // make serializer use JAXB annotations (only)
+        mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
-		// added to support root level element.
-		mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
-		String jsonBuilt = mapper.writeValueAsString(object);
-		LOGGER.debug("JSON Built is {}", jsonBuilt);
-		return jsonBuilt;
-	}
+        // added to support root level element.
+        mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
+        String jsonBuilt = mapper.writeValueAsString(object);
+        LOGGER.debug("JSON Built is {}", jsonBuilt);
+        return jsonBuilt;
+    }
 
-	/**
-	 * Method is used to get the unique id from UUIDGen Utility.
-	 *
-	 * @return UUID The 32bit string.
-	 */
-	public static String getGUID() {
-		return UUIDGen.getCustomUUID();
-	}
+    /**
+     * Method is used to get the unique id from UUIDGen Utility.
+     *
+     * @return UUID The 32bit string.
+     */
+    public static String getGUID() {
+        return UUIDGen.getCustomUUID();
+    }
 
-	/**
-	 * Checks the given string is empty or not.
-	 *
-	 * @param str The input String
-	 * @return boolean
-	 */
-	public static boolean isEmpty(String str) {
-		return str == null || str.trim().isEmpty();
-	}
+    /**
+     * Checks the given string is empty or not.
+     *
+     * @param str The input String
+     * @return boolean
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 
-	public static DecryptableConfiguration getEnvironmentProperties() {
-		return CONFIGURATION;
-	}
+    public static DecryptableConfiguration getEnvironmentProperties() {
+        return CONFIGURATION;
+    }
 
     /**
      * Method to get the current timestmp to insert into database.
@@ -218,122 +218,122 @@ public class MailBoxUtil {
         return new Timestamp(d.getTime());
     }
 
-	/**
-	 * Method to calculate the elapsed time between two given time limits
-	 *
-	 * @param startTime
-	 * @param endTime
-	 */
-	public static void calculateElapsedTime(long startTime, long endTime) {
+    /**
+     * Method to calculate the elapsed time between two given time limits
+     *
+     * @param startTime
+     * @param endTime
+     */
+    public static void calculateElapsedTime(long startTime, long endTime) {
 
-		LOGGER.debug("start time - {}", startTime);
-		LOGGER.debug("end time - {}", endTime);
-		Long elapsedTime = endTime - startTime;
-		LOGGER.debug("elapsed time is {}", elapsedTime);
+        LOGGER.debug("start time - {}", startTime);
+        LOGGER.debug("end time - {}", endTime);
+        Long elapsedTime = endTime - startTime;
+        LOGGER.debug("elapsed time is {}", elapsedTime);
 
-	}
+    }
 
-	/**
-	 * Method to get pagingOffsetDetails
-	 *
-	 * @param page
-	 * @param pageSize
-	 * @param totalCount
-	 * @return Map
-	 */
-	public static Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
+    /**
+     * Method to get pagingOffsetDetails
+     *
+     * @param page
+     * @param pageSize
+     * @param totalCount
+     * @return Map
+     */
+    public static Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
 
         Map<String, Integer> pageParameters = new HashMap<>();
         // Calculate page size parameters
-		Integer pageValue = 1;
-		Integer pageSizeValue = 10;
-		if (page != null && !page.isEmpty()) {
-			pageValue = Integer.parseInt(page);
-			if (pageValue < 0) {
-				pageValue = 1;
-			}
-		} else {
-			pageValue = 1;
-		}
+        Integer pageValue = 1;
+        Integer pageSizeValue = 10;
+        if (page != null && !page.isEmpty()) {
+            pageValue = Integer.parseInt(page);
+            if (pageValue < 0) {
+                pageValue = 1;
+            }
+        } else {
+            pageValue = 1;
+        }
         pageParameters.put(MailBoxConstants.PAGE_VALUE, pageValue);
 
-		if (pageSize != null && !pageSize.isEmpty()) {
-			pageSizeValue = Integer.parseInt(pageSize);
-			if (pageSizeValue < 0) {
-				pageSizeValue = 10;
-			}
-		} else {
-			pageSizeValue = 100;
-		}
-
-		Integer fromIndex = (pageValue - 1) * pageSizeValue;
-		pageParameters.put(MailBoxConstants.PAGING_OFFSET, fromIndex);
-
-		int toIndex = fromIndex + pageSizeValue;
-		if (toIndex > totalCount) {
-			toIndex = (totalCount - fromIndex);
-		} else {
-			toIndex = pageSizeValue;
-		}
-		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
-
-		return pageParameters;
-	}
-
-	/**
-	 * Method to convertTTLIntoSeconds
-	 *
-	 * @param ttlUnit
-	 * @param ttlNumber
-	 * @return Integer
-	 */
-	public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
-
-		switch (ttlUnit) {
-        case MailBoxConstants.TTL_UNIT_YEARS:
-            return (int) (ttlNumber * DAYS_IN_YEAR * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
-        case MailBoxConstants.TTL_UNIT_MONTHS:
-            return (int) (ttlNumber * DAYS_IN_MONTH  * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
-        case MailBoxConstants.TTL_UNIT_WEEKS:
-            return (int) (ttlNumber * DAYS_IN_WEEK * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
-        case MailBoxConstants.TTL_UNIT_DAYS:
-            return (int) (ttlNumber * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
-        case MailBoxConstants.TTL_UNIT_HOURS:
-            return (int) (ttlNumber * MINUTES_PER_HOUR * SECONDS_PER_MIN);
-        case MailBoxConstants.TTL_UNIT_MINUTES:
-            return (int) (ttlNumber * SECONDS_PER_MIN);
-        default:
-            return ttlNumber;
+        if (pageSize != null && !pageSize.isEmpty()) {
+            pageSizeValue = Integer.parseInt(pageSize);
+            if (pageSizeValue < 0) {
+                pageSizeValue = 10;
+            }
+        } else {
+            pageSizeValue = 100;
         }
-	}
 
-	/**
-	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer.
-	* Example: 0.1 rounded off to 1
-	*
-	* @param ttlUnit specifies the type of TTL value  which can be Year,Month,Week,Day,Hours,Minutes.
-	* @param ttlNumber specifies the TTL value in days.
-	* @return Integer
-	*/
-	public static Integer convertTTLIntoDays(String ttlUnit, Integer ttlNumber) {
-	    
-		switch (ttlUnit) {
-        case MailBoxConstants.TTL_UNIT_YEARS:
-            return (int) Math.ceil(ttlNumber * DAYS_IN_YEAR);
-        case MailBoxConstants.TTL_UNIT_MONTHS:
-            return (int) Math.ceil(ttlNumber * DAYS_IN_MONTH);
-        case MailBoxConstants.TTL_UNIT_WEEKS:
-            return (int) Math.ceil(ttlNumber * DAYS_IN_WEEK);
-        case MailBoxConstants.TTL_UNIT_DAYS:
-            return ttlNumber;
-        case MailBoxConstants.TTL_UNIT_HOURS:
-            return (int) Math.ceil(ttlNumber / HOURS_PER_DAY);
-        case MailBoxConstants.TTL_UNIT_MINUTES:
-            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR));
-        default:
-            return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN));
+        Integer fromIndex = (pageValue - 1) * pageSizeValue;
+        pageParameters.put(MailBoxConstants.PAGING_OFFSET, fromIndex);
+
+        int toIndex = fromIndex + pageSizeValue;
+        if (toIndex > totalCount) {
+            toIndex = (totalCount - fromIndex);
+        } else {
+            toIndex = pageSizeValue;
         }
-	}
+        pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
+
+        return pageParameters;
+    }
+
+    /**
+     * Method to convertTTLIntoSeconds
+     *
+     * @param ttlUnit
+     * @param ttlNumber
+     * @return Integer
+     */
+    public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
+
+        switch (ttlUnit) {
+            case MailBoxConstants.TTL_UNIT_YEARS:
+                return (int) (ttlNumber * DAYS_IN_YEAR * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+            case MailBoxConstants.TTL_UNIT_MONTHS:
+                return (int) (ttlNumber * DAYS_IN_MONTH * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+            case MailBoxConstants.TTL_UNIT_WEEKS:
+                return (int) (ttlNumber * DAYS_IN_WEEK * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+            case MailBoxConstants.TTL_UNIT_DAYS:
+                return (int) (ttlNumber * HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+            case MailBoxConstants.TTL_UNIT_HOURS:
+                return (int) (ttlNumber * MINUTES_PER_HOUR * SECONDS_PER_MIN);
+            case MailBoxConstants.TTL_UNIT_MINUTES:
+                return (int) (ttlNumber * SECONDS_PER_MIN);
+            default:
+                return ttlNumber;
+        }
+    }
+
+    /**
+     * Converts the given work ticket lifetime (TTL) in days - Round up to next integer.
+     * Example: 0.1 rounded off to 1
+     *
+     * @param ttlUnit specifies the type of TTL value  which can be Year,Month,Week,Day,Hours,Minutes.
+     * @param ttlNumber specifies the TTL value in days.
+     * @return Integer
+     */
+    public static Integer convertTTLIntoDays(String ttlUnit, Integer ttlNumber) {
+
+        switch (ttlUnit) {
+            case MailBoxConstants.TTL_UNIT_YEARS:
+                return (int) Math.ceil(ttlNumber * DAYS_IN_YEAR);
+            case MailBoxConstants.TTL_UNIT_MONTHS:
+                return (int) Math.ceil(ttlNumber * DAYS_IN_MONTH);
+            case MailBoxConstants.TTL_UNIT_WEEKS:
+                return (int) Math.ceil(ttlNumber * DAYS_IN_WEEK);
+            case MailBoxConstants.TTL_UNIT_DAYS:
+                return ttlNumber;
+            case MailBoxConstants.TTL_UNIT_HOURS:
+                return (int) Math.ceil(ttlNumber / HOURS_PER_DAY);
+            case MailBoxConstants.TTL_UNIT_MINUTES:
+                return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR));
+            default:
+                return (int) Math.ceil(ttlNumber / (HOURS_PER_DAY * MINUTES_PER_HOUR * SECONDS_PER_MIN));
+        }
+    }
 
     /**
      * Method to construct log messages for easy visibility
@@ -344,29 +344,29 @@ public class MailBoxUtil {
     public static String constructMessage(Processor processor, String transferProfile, String... messages) {
 
         StringBuilder logPrefix = null;
-    	 if (null == processor) {
+        if (null == processor) {
 
-    		 logPrefix = new StringBuilder()
-                 .append("DROPBOX")
-                 .append(seperator);
-         } else {
+            logPrefix = new StringBuilder()
+                    .append("DROPBOX")
+                    .append(seperator);
+        } else {
 
-        	 logPrefix = new StringBuilder()
-            .append("DROPBOX")
-            .append(seperator)
-            .append((transferProfile == null ? "NONE" : transferProfile))
-            .append(seperator)
-            .append(processor.getProcessorType())
-            .append(seperator)
-            .append(processor.getProcsrName())
-            .append(seperator)
-            .append(processor.getMailbox().getMbxName())
-            .append(seperator)
-            .append(processor.getMailbox().getPguid())
-            .append(seperator);
+            logPrefix = new StringBuilder()
+                    .append("DROPBOX")
+                    .append(seperator)
+                    .append((transferProfile == null ? "NONE" : transferProfile))
+                    .append(seperator)
+                    .append(processor.getProcessorType())
+                    .append(seperator)
+                    .append(processor.getProcsrName())
+                    .append(seperator)
+                    .append(processor.getMailbox().getMbxName())
+                    .append(seperator)
+                    .append(processor.getMailbox().getPguid())
+                    .append(seperator);
         }
 
-    	 StringBuilder msgBuf = new StringBuilder().append(logPrefix);
+        StringBuilder msgBuf = new StringBuilder().append(logPrefix);
         for (String str : messages) {
             msgBuf.append(str);
         }
@@ -393,19 +393,19 @@ public class MailBoxUtil {
         return ((system - lastmo) / 1000) < timelimit;
     }
 
-	/**
+    /**
      * Method to construct the valid URL
-     * 
+     *
      * @param propertiesDTO
      * @throws URISyntaxException
      * @throws MalformedURLException
      */
     public static void constructURLAndPort(RemoteProcessorPropertiesDTO propertiesDTO) throws URISyntaxException, MalformedURLException {
-        
+
         URI uri = new URI(propertiesDTO.getUrl());
         String scheme = uri.getScheme();
         if (propertiesDTO.getPort() == 0 && (uri.getPort() == -1 || uri.getPort() == 0)) {
-            
+
             if (Protocol.FTP.getCode().equalsIgnoreCase(scheme) || Protocol.FTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.FTPS_PORT);
             } else if (Protocol.SFTP.getCode().equalsIgnoreCase(scheme)) {
@@ -414,50 +414,50 @@ public class MailBoxUtil {
                 propertiesDTO.setPort(MailBoxConstants.HTTP_PORT);
             } else if (Protocol.HTTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
-            } 
+            }
             propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
-        } else if (uri.getPort() != -1 &&  propertiesDTO.getPort() == 0) {
+        } else if (uri.getPort() != -1 && propertiesDTO.getPort() == 0) {
             propertiesDTO.setPort(uri.getPort());
         } else if (uri.getPort() != propertiesDTO.getPort()) {
             propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
         }
-        
+
     }
 
     /**
      * Checks the given list is empty or not.
-     * 
+     *
      * @param list
      * @return boolean
      */
     public static boolean isEmptyList(List<String> list) {
         return list == null || list.isEmpty();
     }
-    
+
     /**
      * Method to find if the file expired after the stale file ttl configured in properties file for sweeper
      * file is considered as expired if the (last modified time + ttl) is before current time
-     * 
+     *
      * @param lastModified - the last modified time of file which needs to be validated for expiry
      * @param staleFileTTL  ttl for the file in filesystem
      * @return true if file expired otherwise false
      */
     public static boolean isFileExpired(long lastModified, int staleFileTTL) {
-    	
+
         if (0 == staleFileTTL) {
             staleFileTTL = CONFIGURATION.getInt(MailBoxConstants.PROPERTY_STALE_FILE_CLEAN_UP,
-                                                    MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
+                    MailBoxConstants.STALE_FILE_CLEAN_UP_TTL);
         }
-		// calculate file validity
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(lastModified);
-		cal.add(Calendar.DATE, staleFileTTL);
+        // calculate file validity
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(lastModified);
+        cal.add(Calendar.DATE, staleFileTTL);
         Timestamp fileValidity = new Timestamp(cal.getTime().getTime());
         LOGGER.debug("The file validity is {}", fileValidity);
-        
+
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         LOGGER.debug("Current time is {}", currentTimestamp);
-		return fileValidity.before(currentTimestamp) ;
+        return fileValidity.before(currentTimestamp);
     }
 
     /**
@@ -485,12 +485,12 @@ public class MailBoxUtil {
      * @return
      */
     public static boolean isSuccessful(int http_status) {
-		return http_status >= 200 && http_status <= 299;
-    } 
-    
+        return http_status >= 200 && http_status <= 299;
+    }
+
     /**
      * Checks the given set is empty or not.
-     * 
+     *
      * @param set
      * @return boolean
      */
@@ -568,7 +568,7 @@ public class MailBoxUtil {
         return obj.get(key);
     }
 
-	/**
+    /**
      * validates pipeline id
      *
      * @param processorType processor type and
@@ -578,29 +578,29 @@ public class MailBoxUtil {
 
         String pipelineId = null;
         if (obj instanceof RemoteProcessorPropertiesDTO) {
-            
+
             RemoteProcessorPropertiesDTO propertiesDTO = (RemoteProcessorPropertiesDTO) obj;
             if (HTTPSYNCPROCESSOR.equals(processorType) ||
                     HTTPASYNCPROCESSOR.equals(processorType) ||
                     DROPBOXPROCESSOR.equals(processorType)) {
                 pipelineId = propertiesDTO.getHttpListenerPipeLineId();
             } else if (SWEEPER.equals(processorType) ||
-            		CONDITIONALSWEEPER.equals(processorType)) {
+                    CONDITIONALSWEEPER.equals(processorType)) {
                 pipelineId = propertiesDTO.getPipeLineID();
             } else {
                 return;
             }
-            
+
         } else if (obj instanceof HTTPListenerPropertiesDTO) {
             HTTPListenerPropertiesDTO httPropDTO = (HTTPListenerPropertiesDTO) obj;
             pipelineId = httPropDTO.getHttpListenerPipeLineId();
-        }  else if (obj instanceof DropboxProcessorPropertiesDTO) {
+        } else if (obj instanceof DropboxProcessorPropertiesDTO) {
             DropboxProcessorPropertiesDTO dbxPropDTO = (DropboxProcessorPropertiesDTO) obj;
             pipelineId = dbxPropDTO.getHttpListenerPipeLineId();
-        }  else if (obj instanceof SweeperPropertiesDTO) {
+        } else if (obj instanceof SweeperPropertiesDTO) {
             SweeperPropertiesDTO sweeperPropDTO = (SweeperPropertiesDTO) obj;
             pipelineId = sweeperPropDTO.getPipeLineID();
-        }  else {
+        } else {
             return;
         }
 
@@ -654,7 +654,7 @@ public class MailBoxUtil {
             }
         }
     }
-    
+
     /**
      * To get current execution node
      *
@@ -713,12 +713,12 @@ public class MailBoxUtil {
 
     /**
      * Helper to get protocol from filepath
-     * 
+     *
      * @param filePath
      * @return
      */
     public static String getProtocolFromFilePath(String filePath) {
-        
+
         if (filePath.contains(Protocol.FTP.getCode())) {
             return Protocol.FTP.getCode();
         } else if (filePath.contains(Protocol.FTPS.getCode())) {
@@ -769,23 +769,23 @@ public class MailBoxUtil {
      * This method used to get the cluster types
      * 1. It will return 'LOWSECURE' if it is in LOW SECURE RELAY OR
      * 2. It will return both 'LOWSECURE' and 'SECURE' if it is SECURE RELAY.
-     * 
+     *
      * @return return list of cluster types
      */
     public static List<String> getClusterTypes() {
         return CLUSTER_TYPE.equals(MailBoxConstants.LOWSECURE) ? Collections.singletonList(MailBoxConstants.LOWSECURE) :
-                            Arrays.asList(MailBoxConstants.SECURE, MailBoxConstants.LOWSECURE);
+                Arrays.asList(MailBoxConstants.SECURE, MailBoxConstants.LOWSECURE);
     }
-    
+
     /**
      * This method check whether the deployment type conveyor or not
-     * 
+     *
      * 1. It will return true if it is conveyor.
-     * 
-     * @return  boolean 
+     *
+     * @return boolean
      */
     public static boolean isConveyorType() {
-        
+
         String deploymentType = MailBoxUtil.getEnvironmentProperties()
                 .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         return deploymentType.equals(DeploymentType.CONVEYOR.getValue());

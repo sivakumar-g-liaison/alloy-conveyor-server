@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -10,25 +10,24 @@
 
 package com.liaison.mailbox.service.directory;
 
-import java.io.IOException;
-import java.io.File;
-
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.mailbox.service.core.MailBoxService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+
+import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 
 /**
  * This class is used to create and delete directories based on usermanagement information.
- * 
+ *
  * @author OFS
  *
  */
@@ -72,30 +71,30 @@ public class DirectoryService implements Runnable {
         // Invokes script to create folder and assign permissions
         // executing the script
         LOGGER.info("Invokes script to create folder and assign permissions for gateway type {} and user {}", gatewayType, userName);
-        String scriptPath = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.PERMISSION_SCRIPT_PATH);
-        String sftpUserGroupName = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SFTP_USER_GROUP_NAME);
+        String scriptPath = CONFIGURATION.getString(MailBoxConstants.PERMISSION_SCRIPT_PATH);
+        String sftpUserGroupName = CONFIGURATION.getString(MailBoxConstants.SFTP_USER_GROUP_NAME);
         ShellScriptEngineUtil.executeShellScript(scriptPath, folderPath, userName, sftpUserGroupName);
 
     }
-    
+
     /**
-    * Invokes the shell script to delete folder.
-    *
-    * @param gatewayType gateway type
-    * @param userName username
-    * @throws IOException
-    */
-   private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
+     * Invokes the shell script to delete folder.
+     *
+     * @param gatewayType gateway type
+     * @param userName username
+     * @throws IOException
+     */
+    private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
 
-       // Invokes script to delete home folders
-       // executing the script
-       String homeFolderPath = getHomeFolderPath(gatewayType, userName);
-       LOGGER.info("Invokes script to delete user home folders in path {} for user {}",homeFolderPath, userName);
-       String scriptPath = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DELETION_SCRIPT_PATH);
-       ShellScriptEngineUtil.executeDeletionShellScript(scriptPath, homeFolderPath, userName);
+        // Invokes script to delete home folders
+        // executing the script
+        String homeFolderPath = getHomeFolderPath(gatewayType, userName);
+        LOGGER.info("Invokes script to delete user home folders in path {} for user {}", homeFolderPath, userName);
+        String scriptPath = CONFIGURATION.getString(MailBoxConstants.DELETION_SCRIPT_PATH);
+        ShellScriptEngineUtil.executeDeletionShellScript(scriptPath, homeFolderPath, userName);
 
-   }
-    
+    }
+
     /**
      * Method to get home folder path from the given gatewaytype and userName
      *
@@ -115,19 +114,19 @@ public class DirectoryService implements Runnable {
                 return (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.FTPS_PATH)) + File.separatorChar + userName;
             case MailBoxConstants.SFTP:
                 return (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SFTP_PATH)) + File.separatorChar + userName;
-            default :
+            default:
                 throw new RuntimeException("Undefined gateway type");
         }
     }
 
     /**
      * Based on operation type invokes create/delete methods.
-     * 
+     *
      * @param message message from the queue
-     * @throws IOException 
+     * @throws IOException
      */
     public void executeDirectoryOperation(DirectoryMessageDTO message) throws IOException {
-        
+
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
             invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
@@ -136,5 +135,5 @@ public class DirectoryService implements Runnable {
             throw new RuntimeException("Invalid operation");
         }
     }
-  
+
 }
