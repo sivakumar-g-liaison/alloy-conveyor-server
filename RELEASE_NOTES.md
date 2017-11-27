@@ -1,3 +1,8 @@
+5.0.1
+---------------
+* use acl-commons-lib 8.4.0
+* use commons-lib 11.4.0
+
 5.0.0
 ---------------
 * GMB-1036 - LENS should show one triggered file move as a single transaction
