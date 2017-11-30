@@ -4,6 +4,7 @@
 * commons-lib upgrade
 * tomcat scripts updates
 * GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
+* GMB-1073 - Mailbox created successfully with invalid tenancy key through postman services
 
 5.0.0
 ---------------

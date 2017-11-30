@@ -408,7 +408,7 @@ public class GenericValidatorTest extends BaseServiceTest {
         GenericValidator validator = new GenericValidator();
 
         propertiesDTO.setSocketTimeout(0);
-        Assert.assertFalse(validator.validate(propertiesDTO));
+        Assert.assertTrue(validator.validate(propertiesDTO));
         
         propertiesDTO.setSocketTimeout(-1);
         Assert.assertFalse(validator.validate(propertiesDTO));

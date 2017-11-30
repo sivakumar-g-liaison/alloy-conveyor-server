@@ -115,4 +115,25 @@ public class TenancyKeyUtil {
 
         return tenancyKeyDisplayName;
     }
+
+    /**
+     * This method will validate TenancyKey name with given guid
+     * @param tenancyKeyGuid tenancy key guid
+     * @param aclManifestJson manifest details
+     * @return boolean
+     * @throws IOException 
+     */
+    public static boolean isValidTenancyKeyByGuid(String aclManifestJson, String tenancyKeyGuid) throws IOException {
+
+        boolean isvalidTenancyKey = false;
+        if (!MailBoxUtil.isEmpty(aclManifestJson)) {
+            List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
+            isvalidTenancyKey = roleBasedAccessControls
+                    .stream()
+                    .anyMatch(rbac -> rbac.getDomainInternalName().equals(tenancyKeyGuid));
+        }
+
+        return isvalidTenancyKey;
+    }
+    
 }

@@ -84,6 +84,7 @@ public class MailBoxConfigurationService {
 
     /**
      * Creates Mailbox
+     * @param aclManifestJson 
      *
      * @param request mailbox request
      * @param serviceInstanceId service instance id
@@ -92,7 +93,7 @@ public class MailBoxConfigurationService {
      * @throws JAXBException
      * @throws IOException
      */
-	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String serviceInstanceId, String userId)
+	public AddMailBoxResponseDTO createMailBox(String aclManifestJson, AddMailboxRequestDTO request, String serviceInstanceId, String userId)
 			throws JAXBException, IOException {
 
 		LOG.debug("Entering into create mailbox.");
@@ -128,6 +129,12 @@ public class MailBoxConfigurationService {
                         ID_IS_INVALID,
                         SERVICE_INSTANCE,
                         Response.Status.BAD_REQUEST);
+            }
+
+            if (!MailBoxUtil.isEmpty(aclManifestJson)) {
+                if (!TenancyKeyUtil.isValidTenancyKeyByGuid(aclManifestJson, mailboxDTO.getTenancyKey())) {
+                    throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_MISMATCH, Response.Status.BAD_REQUEST);
+                }
             }
 
             // validation

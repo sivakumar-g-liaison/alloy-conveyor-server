@@ -221,7 +221,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setName("TestMailBox" + System.currentTimeMillis());
         mailBox.setStatus("ACTIVE");
-        mailBox.setTenancyKey("Test Tenancy Key");
+        mailBox.setTenancyKey(tenancyKey);
         mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
@@ -264,7 +264,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setStatus("ACTIVE");
-        mailBox.setTenancyKey("test Tenancy Key");
+        mailBox.setTenancyKey(tenancyKey);
         mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
@@ -294,7 +294,7 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
         MailBoxDTO mailBox = new MailBoxDTO();
         mailBox.setName("TestMailBox" + System.currentTimeMillis());
-        mailBox.setTenancyKey("test Tenancy Key");
+        mailBox.setTenancyKey(tenancyKey);
         mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
 
         // Adding the mailbox
@@ -342,7 +342,6 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
 
         AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
         Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
-        Assert.assertEquals(true, responseDTO.getResponse().getMessage().contains(Messages.ERROR_MSG.value()));
 
     }
 
