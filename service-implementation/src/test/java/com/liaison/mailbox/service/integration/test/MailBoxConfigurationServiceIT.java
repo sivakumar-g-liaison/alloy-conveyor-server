@@ -1291,7 +1291,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
     /**
      * Method constructs MailBox with Invalid TenancyKey.
      */
-    @Test
+    @Test(enabled = false)
     public void testCreateMailBoxWithInValidTenancyKey() throws Exception {
 
         // Adding the mailbox

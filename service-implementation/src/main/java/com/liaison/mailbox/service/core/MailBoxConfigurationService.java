@@ -131,13 +131,6 @@ public class MailBoxConfigurationService {
                         Response.Status.BAD_REQUEST);
             }
 
-            // Need to modify this check to support the valid tenancyKey
-            /* if (!MailBoxUtil.isEmpty(aclManifestJson)) {
-                if (!TenancyKeyUtil.isValidTenancyKeyByGuid(aclManifestJson, mailboxDTO.getTenancyKey())) {
-                    throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_MISMATCH, Response.Status.BAD_REQUEST);
-                }
-            } */
-
             // validation
             GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
