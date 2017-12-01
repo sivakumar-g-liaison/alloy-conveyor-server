@@ -6,6 +6,11 @@
 * GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
 * GMB-1073 - Mailbox created successfully with invalid tenancy key through postman services - reverted
 
+5.0.1
+---------------
+* use acl-commons-lib 8.4.0
+* use commons-lib 11.4.0
+
 5.0.0
 ---------------
 * GMB-1036 - LENS should show one triggered file move as a single transaction
