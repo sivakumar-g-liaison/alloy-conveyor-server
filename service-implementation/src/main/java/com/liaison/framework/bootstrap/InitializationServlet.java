@@ -31,11 +31,13 @@ import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitialize
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.net.URL;
+import java.security.Security;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
@@ -59,6 +61,15 @@ public class InitializationServlet extends HttpServlet {
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
 
     public void init(ServletConfig config) throws ServletException {
+
+        //GMB-1064 Making sure the BC is before SUNJCE
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+        int result = Security.insertProviderAt(new BouncyCastleProvider(), 5);
+        if (result == -1) {
+            logger.warn("The provider was already installed at the order {}", result);
+        } else {
+            logger.info("The provider({}) installed successfully at the order {}", BouncyCastleProvider.PROVIDER_NAME, result);
+        }
 
         DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
