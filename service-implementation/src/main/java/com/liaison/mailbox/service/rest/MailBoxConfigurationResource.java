@@ -98,7 +98,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
                     // creates new mailbox
                     MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
                     final String userId = getUserIdFromHeader(request);
-                    AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(manifestJson, serviceRequest, serviceInstanceId, userId);
+                    AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, userId);
                     //Added the guid
                     if (null != serviceResponse.getMailBox()) {
                         queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getMailBox().getGuid());

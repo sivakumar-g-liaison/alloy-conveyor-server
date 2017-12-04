@@ -8,19 +8,28 @@
  */
 package com.liaison.mailbox.service.util;
 
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL;
+
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.StringUtil;
 import com.liaison.gem.service.client.GEMHelper;
+import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +38,7 @@ import java.util.stream.Collectors;
 public class TenancyKeyUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TenancyKeyUtil.class);
+    private static final String JSON_KEY_BOOLEAN = "Boolean";
 
     /**
      * Method to get all tenancy keys from acl manifest Json
@@ -118,22 +128,29 @@ public class TenancyKeyUtil {
 
     /**
      * This method will validate TenancyKey name with given guid
+     * 
      * @param tenancyKeyGuid tenancy key guid
-     * @param aclManifestJson manifest details
      * @return boolean
      * @throws IOException 
+     * @throws LiaisonException 
+     * @throws JSONException 
      */
-    public static boolean isValidTenancyKeyByGuid(String aclManifestJson, String tenancyKeyGuid) throws IOException {
+    public static boolean isValidTenancyKeyByGuid(String tenancyKeyGuid) throws IOException, LiaisonException, JSONException {
 
-        boolean isvalidTenancyKey = false;
-        if (!MailBoxUtil.isEmpty(aclManifestJson)) {
-            List<RoleBasedAccessControl> roleBasedAccessControls = GEMHelper.getDomainsFromACLManifest(aclManifestJson);
-            isvalidTenancyKey = roleBasedAccessControls
-                    .stream()
-                    .anyMatch(rbac -> rbac.getDomainInternalName().equals(tenancyKeyGuid));
-        }
+    	String url = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL);
+    	if (url == null) {
+    	    throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL));
+    	}
 
-        return isvalidTenancyKey;
+    	GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
+    	Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
+
+    	url = url + tenancyKeyGuid;
+    	LOGGER.debug("The GEM URL TO VALIDATE TENANCY KEY " + url);
+    	String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+    	JSONObject obj = new JSONObject(jsonResponse);
+
+        return obj.getBoolean(JSON_KEY_BOOLEAN);
     }
     
 }

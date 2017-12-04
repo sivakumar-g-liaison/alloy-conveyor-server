@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
@@ -52,14 +53,17 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ServiceBrokerUtil;
 import com.liaison.mailbox.service.util.TenancyKeyUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -84,8 +88,6 @@ public class MailBoxConfigurationService {
 
     /**
      * Creates Mailbox
-     * @param aclManifestJson 
-     *
      * @param request mailbox request
      * @param serviceInstanceId service instance id
      * @param userId user login id
@@ -93,7 +95,7 @@ public class MailBoxConfigurationService {
      * @throws JAXBException
      * @throws IOException
      */
-	public AddMailBoxResponseDTO createMailBox(String aclManifestJson, AddMailboxRequestDTO request, String serviceInstanceId, String userId)
+	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String serviceInstanceId, String userId)
 			throws JAXBException, IOException {
 
 		LOG.debug("Entering into create mailbox.");
@@ -129,6 +131,11 @@ public class MailBoxConfigurationService {
                         ID_IS_INVALID,
                         SERVICE_INSTANCE,
                         Response.Status.BAD_REQUEST);
+            }
+            
+            // Tenancy key validation
+            if (!TenancyKeyUtil.isValidTenancyKeyByGuid(mailboxDTO.getTenancyKey())) {
+            	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
             }
 
             // validation
@@ -167,7 +174,7 @@ public class MailBoxConfigurationService {
 			LOG.debug("Exit from create mailbox.");
 			return serviceResponse;
 
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (MailBoxConfigurationServicesException | LiaisonException | JSONException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, MAILBOX, Messages.FAILURE,

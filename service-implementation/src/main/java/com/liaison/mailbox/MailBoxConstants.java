@@ -431,6 +431,7 @@ public interface MailBoxConstants {
     String CONFIGURATION_CONNECTION_TIMEOUT = "com.liaison.mailbox.sync.processor.connection.timeout";
     String CONFIGURATION_SOCKET_TIMEOUT = "com.liaison.mailbox.sync.processor.socket.timeout";
     String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
+    String PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL = "com.liaison.mailbox.tenancy.validation.url";
 
     String LOCALHOST = "localhost";
     
