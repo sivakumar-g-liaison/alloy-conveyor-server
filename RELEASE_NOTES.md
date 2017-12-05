@@ -1,4 +1,4 @@
-5.1.0-SNAPSHOT
+5.1.0
 ---------------
 * lib configurationv6 upgrade
 * commons-lib upgrade
