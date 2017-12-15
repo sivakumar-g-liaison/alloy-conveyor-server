@@ -1,3 +1,7 @@
+5.1.2
+---------------
+* bootstrap properties typo updated 
+
 5.1.1
 ---------------
 * staging at4 db service_name updated 
