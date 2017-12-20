@@ -134,6 +134,10 @@ public class MailBoxConfigurationService {
             }
             
             // Tenancy key validation
+            if (MailBoxUtil.isEmpty(mailboxDTO.getTenancyKey())) {
+            	throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+            }
+            
             if (!TenancyKeyUtil.isValidTenancyKeyByGuid(mailboxDTO.getTenancyKey())) {
             	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
             }

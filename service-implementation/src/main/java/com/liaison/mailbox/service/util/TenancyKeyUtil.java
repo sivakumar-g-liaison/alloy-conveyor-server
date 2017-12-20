@@ -27,6 +27,8 @@ import org.codehaus.jettison.json.JSONObject;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -137,15 +139,11 @@ public class TenancyKeyUtil {
      */
     public static boolean isValidTenancyKeyByGuid(String tenancyKeyGuid) throws IOException, LiaisonException, JSONException {
 
-    	String url = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL);
-    	if (url == null) {
-    	    throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL));
-    	}
-
+    	String url = MailBoxUtil.constructUrl(PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL, URLEncoder.encode(tenancyKeyGuid, StandardCharsets.UTF_8.name()));
+    	
     	GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
     	Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-    	url = url + tenancyKeyGuid;
     	LOGGER.debug("The GEM URL TO VALIDATE TENANCY KEY " + url);
     	String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
     	JSONObject obj = new JSONObject(jsonResponse);
