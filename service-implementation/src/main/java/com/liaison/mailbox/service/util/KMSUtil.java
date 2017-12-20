@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -45,7 +46,6 @@ public class KMSUtil {
 	private static final String SECRET = "/secret/";
 	private static final String GROUP_KEYPAIR = "/fetch/group/keypair/current/";
 	private static final String GROUP_TRUSTSTORE = "/fetch/truststore/current/";
-	private static final String UTF_ENCODE = "UTF-8";
 
 	/**
 	 * Util method get stored secret from KMS
@@ -64,7 +64,7 @@ public class KMSUtil {
 		// setting the request headers in the request to key manager from gem
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		String url = getKeyManagementUrl(SECRET + URLEncoder.encode(guid, UTF_ENCODE));
+		String url = MailBoxUtil.constructUrl(PROPERTY_KEY_MANAGEMENT_BASE_URL, SECRET + URLEncoder.encode(guid, StandardCharsets.UTF_8.name()));
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
@@ -98,7 +98,7 @@ public class KMSUtil {
 		// manifest response
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		String url = getKeyManagementUrl(GROUP_KEYPAIR + URLEncoder.encode(keypairPguid, UTF_ENCODE));
+		String url = MailBoxUtil.constructUrl(PROPERTY_KEY_MANAGEMENT_BASE_URL, GROUP_KEYPAIR + URLEncoder.encode(keypairPguid, StandardCharsets.UTF_8.name()));
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
@@ -131,7 +131,7 @@ public class KMSUtil {
 
 		Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-		String url = getKeyManagementUrl(GROUP_TRUSTSTORE + URLEncoder.encode(trustStoreId, UTF_ENCODE));
+		String url = MailBoxUtil.constructUrl(PROPERTY_KEY_MANAGEMENT_BASE_URL, GROUP_TRUSTSTORE + URLEncoder.encode(trustStoreId, StandardCharsets.UTF_8.name()));
         LOGGER.debug("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
@@ -147,26 +147,6 @@ public class KMSUtil {
 		}
 
 		return is;
-	}
-
-	/**
-	 * Construct a KMS URL from a partial path. Base URL comes from properties.
-	 *
-	 * @param path
-	 * @return String
-	 * @throws IOException
-	 */
-	public static String getKeyManagementUrl(String path) throws IOException {
-
-		String baseUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
-		if (baseUrl == null) {
-			throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_KEY_MANAGEMENT_BASE_URL));
-		}
-		// strip trailing slashes
-		while (baseUrl.endsWith("/")) {
-			baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-		}
-		return baseUrl + path;
 	}
 
 }

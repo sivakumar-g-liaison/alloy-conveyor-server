@@ -126,6 +126,7 @@ public enum Messages {
     // retrieving tenancy key from acl manifest
     TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
     INVALID_TENANCY_KEY("Tenancy Key is not available in Global Enterprise Manager"),
+    TENANCY_KEY_NOT_AVAILABLE("Tenancy Key is not available in the request."),
     ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the request header."),
 
     READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),

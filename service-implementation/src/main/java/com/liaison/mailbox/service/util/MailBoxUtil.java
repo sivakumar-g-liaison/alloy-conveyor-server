@@ -654,6 +654,27 @@ public class MailBoxUtil {
             }
         }
     }
+    
+    /**
+     * Construct a URL from a partial path. Base URL comes from properties.
+     * 
+     * @param property
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static String constructUrl(String property, String path) throws IOException {
+    	
+    	String baseUrl = MailBoxUtil.getEnvironmentProperties().getString(property);
+    	if (baseUrl == null) {
+    	    throw new RuntimeException(String.format("Property [%s] cannot be null", property));
+    	}
+    	// strip trailing slashes
+    	while (baseUrl.endsWith("/")) {
+    	    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+    	}
+    	return baseUrl + path;
+    }
 
     /**
      * To get current execution node
