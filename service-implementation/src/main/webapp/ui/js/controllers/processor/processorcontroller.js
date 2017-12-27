@@ -184,7 +184,10 @@ var rest = myApp.controller(
                     $scope.secureSupportedProtocols = $scope.supportedProtocols;
                     $scope.processorData.supportedProtocols.options = $scope.secureSupportedProtocols;
                 }
-                $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+                
+                if ($scope.procsrType.value === 'REMOTEDOWNLOADER' || $scope.procsrType.value === 'REMOTEUPLOADER') {
+                    $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+                }
             }
 
             $scope.loadOrigin();
