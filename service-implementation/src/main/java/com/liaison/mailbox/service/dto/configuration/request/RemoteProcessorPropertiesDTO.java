@@ -77,6 +77,8 @@ public class RemoteProcessorPropertiesDTO {
     private boolean deleteEmptyDirectoryAfterSwept = true;
     private String triggerFile;
     private String sort;
+    private boolean saveResponsePayload;
+    private String execution;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -446,4 +448,21 @@ public class RemoteProcessorPropertiesDTO {
     public void setSort(String sort) {
         this.sort = sort;
     }
+
+    public boolean isSaveResponsePayload() {
+        return saveResponsePayload;
+    }
+
+    public void setSaveResponsePayload(boolean saveResponsePayload) {
+        this.saveResponsePayload = saveResponsePayload;
+    }
+
+    public String getExecution() {
+        return execution;
+    }
+
+    public void setExecution(String execution) {
+        this.execution = execution;
+    }
+
 }

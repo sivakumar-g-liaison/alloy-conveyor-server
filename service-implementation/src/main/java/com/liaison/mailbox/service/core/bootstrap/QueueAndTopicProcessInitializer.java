@@ -51,7 +51,7 @@ public class QueueAndTopicProcessInitializer {
     /**
      * Property to decide whether to initialize queue processors or not
      */
-    private static final String SKIP_QUEUE_INITIALIZER = "com.liaison.skip.queue";
+    public static final String SKIP_QUEUE_INITIALIZER = "com.liaison.skip.queue";
 
     /**
      * Queue Processor default thread count

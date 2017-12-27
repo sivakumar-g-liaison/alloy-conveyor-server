@@ -15,6 +15,7 @@ import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -48,10 +49,12 @@ import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,6 +63,7 @@ import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
@@ -119,6 +123,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     private boolean directUploadEnabled;
     private boolean useFileSystem;
+    private String responseFs2Uri;
 
     protected Map<String, StagedFile> stagedFileMap = new HashMap<>();
 
@@ -168,6 +173,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     public void setUseFileSystem(boolean canUseFileSystem) {
         this.useFileSystem = canUseFileSystem;
+    }
+
+    public String getResponseFs2Uri() {
+        return responseFs2Uri;
+    }
+
+    public void setResponseFs2Uri(String responseFs2Uri) {
+        this.responseFs2Uri = responseFs2Uri;
+    }
+
+    public void setResponseUri(String uri) {
+        this.setResponseFs2Uri(uri);
     }
 
     /**
@@ -938,6 +955,42 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public void logToLens(String msg, RelayFile file, ExecutionState status) {
         throw new RuntimeException("Not Implemented");
+    }
+
+    /**
+     * To store the response stream in storage
+     *
+     * @param stream
+     * @return String - fs2 uri
+     * @throws Exception
+     */
+    public String persistResponse(InputStream stream, RelayFile file) {
+
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(file.getGlobalProcessId());
+        if (StringUtils.isNotEmpty(file.getTenancyKey())) {
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_TENANCY_KEY, file.getTenancyKey());
+        }
+        FS2MetaSnapshot response = StorageUtilities.persistPayload(stream, workTicket, new HashMap<>());
+        return response.getURI().toString();
+    }
+
+    /**
+     * To store the response stream in storage
+     *
+     * @param stream
+     * @return String - fs2 uri
+     * @throws Exception
+     */
+    public String persistResponse(ByteArrayOutputStream stream, RelayFile file) {
+
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(file.getGlobalProcessId());
+        if (StringUtils.isNotEmpty(file.getTenancyKey())) {
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_TENANCY_KEY, file.getTenancyKey());
+        }
+        FS2MetaSnapshot response = StorageUtilities.persistPayload(stream, workTicket, new HashMap<>());
+        return response.getURI().toString();
     }
 
     /**

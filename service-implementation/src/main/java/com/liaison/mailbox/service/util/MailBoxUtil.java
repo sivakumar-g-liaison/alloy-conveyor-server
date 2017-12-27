@@ -415,11 +415,11 @@ public class MailBoxUtil {
             } else if (Protocol.HTTPS.getCode().equalsIgnoreCase(scheme)) {
                 propertiesDTO.setPort(MailBoxConstants.HTTPS_PORT);
             }
-            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), uri.getQuery(), null).toString()));
         } else if (uri.getPort() != -1 && propertiesDTO.getPort() == 0) {
             propertiesDTO.setPort(uri.getPort());
         } else if (uri.getPort() != propertiesDTO.getPort()) {
-            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), null, null).toString()));
+            propertiesDTO.setUrl((new URI(scheme, null, uri.getHost(), propertiesDTO.getPort(), uri.getPath() == null ? "" : uri.getPath(), uri.getQuery(), null).toString()));
         }
 
     }
@@ -810,6 +810,20 @@ public class MailBoxUtil {
         String deploymentType = MailBoxUtil.getEnvironmentProperties()
                 .getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         return deploymentType.equals(DeploymentType.CONVEYOR.getValue());
+    }
+    
+    /**
+     * This method check the processor type and Protocol type
+     *
+     * It will return true if processor type is RemoteUploader and protocol is HTTP or HTTPS.
+     * @param configurationInstance 
+     *
+     * @return boolean
+     */
+    public static boolean isHttpOrHttpsRemoteUploader(Processor configurationInstance) {
+        return (ProcessorType.REMOTEUPLOADER.equals(configurationInstance.getProcessorType()) && 
+                (Protocol.HTTP.equals(Protocol.findByName(configurationInstance.getProcsrProtocol())) ||
+                Protocol.HTTPS.equals(Protocol.findByName(configurationInstance.getProcsrProtocol()))));
     }
 
 }

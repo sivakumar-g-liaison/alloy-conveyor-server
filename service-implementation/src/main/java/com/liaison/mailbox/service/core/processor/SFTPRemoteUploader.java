@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.processor;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -31,6 +32,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -331,7 +334,11 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
     }
 
     @Override
-    public void doDirectUpload(String fileName, String folderPath, String globalProcessId) {
+    public void doDirectUpload(WorkTicket workticket) {
+
+        String fileName = workticket.getFileName();
+        String folderPath = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
+        String globalProcessId = workticket.getGlobalProcessId();
 
         setDirectUpload(true);
         boolean isHandOverExecutionToJavaScript = false;

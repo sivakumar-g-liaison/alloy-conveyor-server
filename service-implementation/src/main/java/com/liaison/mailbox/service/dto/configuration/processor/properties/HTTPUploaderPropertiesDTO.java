@@ -42,7 +42,9 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     private boolean directUpload;
     private int scriptExecutionTimeout;
     private int staleFileTTL;
-    private boolean useFileSystem = true;
+    private boolean useFileSystem = false;
+    private boolean saveResponsePayload;
+    private String execution;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -150,6 +152,18 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     }
     public void setUseFileSystem(boolean useFileSystem) {
         this.useFileSystem = useFileSystem;
+    }
+    public boolean isSaveResponsePayload() {
+        return saveResponsePayload;
+    }
+    public void setSaveResponsePayload(boolean saveResponsePayload) {
+        this.saveResponsePayload = saveResponsePayload;
+    }
+    public String getExecution() {
+        return execution;
+    }
+    public void setExecution(String execution) {
+        this.execution = execution;
     }
 
 }

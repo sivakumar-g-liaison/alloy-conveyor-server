@@ -59,6 +59,7 @@ public abstract class BaseServiceTest {
 	private static String BASE_URL;
 	private static String KMS_BASE_URL;
     private static String BASE_URL_DROPBOX;
+    private static String BASE_URL_RUNTIME;
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
@@ -93,6 +94,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL(prop.getProperty("BASE_URL"));
                 setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
                 setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
+                setBASE_URL_RUNTIME(prop.getProperty("BASE_URL_RUNTIME"));
                 System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
                 System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
                 System.setProperty("archaius.deployment.stack", prop.getProperty("STACK"));
@@ -102,6 +104,7 @@ public abstract class BaseServiceTest {
                 setBASE_URL("http://localhost:8989/g2mailboxservice/config/mailbox");
                 setKMS_BASE_URL("http://lsvlkms01d.liaison.dev:8989/key-management");
                 setBASE_URL_DROPBOX("http://localhost:9095/g2mailboxservice/config/dropbox");
+                setBASE_URL_RUNTIME("http://localhost:8989/g2mailboxservice/process");
                 System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
                 System.setProperty("archaius.deployment.environment", "dev");
                 System.setProperty("archaius.deployment.stack", "default");
@@ -144,6 +147,15 @@ public abstract class BaseServiceTest {
 	public static void setBASE_URL_DROPBOX(String bASE_URL_DROPBOX) {
 		BASE_URL_DROPBOX = bASE_URL_DROPBOX;
 	}
+	
+	public static String getBASE_URL_RUNTIME() {
+		return BASE_URL_RUNTIME;
+	}
+
+	public static void setBASE_URL_RUNTIME(String baseURLRuntime) {
+		BASE_URL_RUNTIME = baseURLRuntime;
+	}
+	
 
 	@AfterMethod
 	public void finalCleanUp() {

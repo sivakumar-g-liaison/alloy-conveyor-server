@@ -18,22 +18,23 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -79,7 +80,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             LOG.info("filename from the workticket - {}", fileName);
 
             String message = "";
-            if (this.canUseFileSystem() || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
+            // stage file if Use file system is true and not HTTP or HTTPS remote uploader or file writer
+            if ((this.canUseFileSystem() && !MailBoxUtil.isHttpOrHttpsRemoteUploader(configurationInstance)) 
+                    || ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
 
                 //get payload from spectrum
                 InputStream payload = null;
@@ -120,6 +123,16 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         + File.separatorChar
                         + fileName;
 
+            } else if (MailBoxUtil.isHttpOrHttpsRemoteUploader(configurationInstance)) {
+
+                writeStatus = addAnEntryToStagedFile(null, null, workTicket);
+
+                if (writeStatus) {
+                    LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", workTicket.getPayloadURI());
+                } 
+                message = (writeStatus ? "Added an entry in STAGED FILE for the file - " : "File already exists in STAGED_FILE - ")
+                        + workTicket.getPayloadURI()
+                        + workTicket.getGlobalProcessId();
             } else {
 
                 //do remote uploader operation
@@ -308,9 +321,17 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
         StagedFileDAOBase dao = new StagedFileDAOBase();
         String isOverwrite = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase();
-        File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+        File file = null;
+        StagedFile stagedFile = null;
 
-        StagedFile stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), fileName);
+        if (!MailBoxUtil.isEmpty(processorPayloadLocation) && !MailBoxUtil.isEmpty(fileName)) {
+            file = new File(processorPayloadLocation + File.separatorChar + fileName);
+            stagedFile = dao.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), fileName);
+        } else {
+            file = new File(workTicket.getPayloadURI() + File.separatorChar + workTicket.getFileName());
+            stagedFile = dao.findStagedFileByProcessorIdAndGpid(configurationInstance.getPguid(), workTicket.getGlobalProcessId());
+        }
+
         if (null != stagedFile) {
 
             if (MailBoxConstants.OVERWRITE_FALSE.equals(isOverwrite)) {
@@ -323,6 +344,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 dao.merge(stagedFile);
                 logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
 
+                if (workTicket.getPayloadSize() == 0 ||  workTicket.getPayloadSize() == -1) {
+                    workTicket.setPayloadSize(StorageUtilities.getPayloadSize(workTicket.getPayloadURI()));
+                }
                 workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, file.getParent());
                 dao.persistStagedFile(workTicket,
                         configurationInstance.getPguid(),

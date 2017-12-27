@@ -8,8 +8,11 @@
  */
 package com.liaison.mailbox.service.dto.remote.uploader;
 
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +30,7 @@ public class RelayFile {
     private String globalProcessId;
     private String processorId;
     private long size;
+    private String tenancyKey;
 
     public File getFile() {
         return file;
@@ -55,6 +59,15 @@ public class RelayFile {
         }
 
         return null;
+    }
+
+    public String getTenancyKey() {
+
+        if (StringUtils.isEmpty(tenancyKey) && StringUtils.isNotEmpty(payloadUri)) {
+            FS2MetaSnapshot metadata = StorageUtilities.getMetaData(payloadUri);
+            return metadata.getHeader(MailBoxConstants.KEY_TENANCY_KEY)[0];
+        }
+        return tenancyKey;
     }
 
     public String getPayloadUri() {
@@ -99,6 +112,10 @@ public class RelayFile {
 
     public long length() {
         return this.size;
+    }
+
+    public void setTenancyKey(String tenancyKey) {
+        this.tenancyKey = tenancyKey;
     }
 
     /**

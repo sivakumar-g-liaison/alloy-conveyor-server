@@ -8,9 +8,7 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
-
-import java.io.IOException;
+import com.liaison.dto.queue.WorkTicket;
 
 /**
  * API only applicable for RemoteUploader
@@ -22,8 +20,8 @@ public interface RemoteUploaderI {
     /**
      * Upload a file which isn't require profile invocation
      *
-     * @param fileName file name to be uploaded
+     * @param workticket workticket
      */
-    void doDirectUpload(String fileName, String folderPath, String globalProcessId);
+    void doDirectUpload(WorkTicket workticket);
 
 }

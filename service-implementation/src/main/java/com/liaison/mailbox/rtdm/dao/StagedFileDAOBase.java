@@ -277,6 +277,89 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public StagedFile findStagedFileByProcessorIdAndGpid(String processorId, String gpid) {
+
+       EntityManager em = null;
+
+       try {
+
+           List<String> statuses = new ArrayList<>();
+           statuses.add(EntityStatus.STAGED.name());
+           statuses.add(EntityStatus.ACTIVE.name());
+           statuses.add(EntityStatus.FAILED.name());
+
+           em = DAOUtil.getEntityManager(persistenceUnitName);
+           List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE_BY_GPID_AND_PROCESSID)
+                   .setParameter(PROCESSOR_ID, processorId)
+                   .setParameter(GLOBAL_PROCESS_ID, gpid)
+                   .setParameter(STATUS, statuses)
+                   .getResultList();
+
+           return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
+       } finally {
+           if (null != em) {
+               em.close();
+           }
+       }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<StagedFile> findStagedFilesByProcessorId(String processId) {
+
+        EntityManager em = null;
+
+        try {
+
+            List<String> statuses = new ArrayList<>();
+            statuses.add(EntityStatus.STAGED.name());
+            statuses.add(EntityStatus.ACTIVE.name());
+            statuses.add(EntityStatus.FAILED.name());
+
+            em = DAOUtil.getEntityManager(persistenceUnitName);
+            List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE_BY_PROCESSID)
+                    .setParameter(PROCESSOR_ID, processId)
+                    .setParameter(STATUS, statuses)
+                    .getResultList();
+
+            return stagedFiles;
+        } finally {
+            if (null != em) {
+                em.close();
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public StagedFile findStagedFileByProcessorIdAndFileName(String processorId, String fileName) {
+
+        EntityManager em = null;
+
+        try {
+
+            List<String> statuses = new ArrayList<>();
+            statuses.add(EntityStatus.STAGED.name());
+            statuses.add(EntityStatus.ACTIVE.name());
+            statuses.add(EntityStatus.FAILED.name());
+
+            em = DAOUtil.getEntityManager(persistenceUnitName);
+            List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILES_BY_PROCESSID_AND_NAME)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(STATUS, statuses)
+                    .getResultList();
+
+            return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
+        } finally {
+            if (null != em) {
+                em.close();
+            }
+        }
+    }
+    
     /**
      * Returns the staged files of the given processor
      */
