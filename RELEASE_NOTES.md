@@ -5,7 +5,9 @@
 * tomcat scripts updates
 * GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
 * GMB-1073 - Mailbox created successfully with invalid tenancy key through postman services
-* GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1 
+* GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1
+* GLASS-13 : Use GlassMessageUtil to add admin error details and also node information 
+    * By using the GlassMessageUtil, we can add more logic to additional information just by modifying the library
 
 5.0.1
 ---------------
