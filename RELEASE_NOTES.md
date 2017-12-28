@@ -11,6 +11,7 @@
 * GMB-1076 - FTP Protocol type is set when selecting the cluster type is set as Low secure.
 * GLASS-13 : Use GlassMessageUtil to add admin error details and also node information 
     * By using the GlassMessageUtil, we can add more logic to additional information just by modifying the library
+* GMB-1075 - HTTP Async Processor: Socket Timeout Value deleted permanently from processor properties screen
 
 5.0.1
 ---------------
