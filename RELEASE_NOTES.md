@@ -12,6 +12,7 @@
 * GLASS-13 : Use GlassMessageUtil to add admin error details and also node information 
     * By using the GlassMessageUtil, we can add more logic to additional information just by modifying the library
 * GMB-1075 - HTTP Async Processor: Socket Timeout Value deleted permanently from processor properties screen
+* GMB-1078 - URL generated in the Mailbox processor is incomplete
 
 5.0.1
 ---------------
