@@ -1,5 +1,6 @@
 5.1.4
 ---------------
+* GGT-1532-Update com.liaison.acl.skipList in the properties
 * GGT-1528 Upgrade lib-dto to latest version in gateway services Relay
 * GMB-1080-px1s-vpmbox: com.liaison.commons.acl.util.ACLPermissionCheckRuntimeException: HTTP 403 Forbidden
 
