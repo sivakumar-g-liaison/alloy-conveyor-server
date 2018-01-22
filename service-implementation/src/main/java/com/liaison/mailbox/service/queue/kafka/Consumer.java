@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -16,13 +16,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Arrays;
 
 public class Consumer {
-	
-	private static final Logger LOG = LogManager.getLogger(Consumer.class);
-	
+
+    private static final Logger LOG = LogManager.getLogger(Consumer.class);
+
     public static void consume() {
         // Create a consumer
         KafkaConsumer<String, String> consumer;
@@ -33,19 +34,19 @@ public class Consumer {
         // Set the consumer group (all consumers must belong to a group).
         properties.setProperty("group.id", "soap-client-1");
         // Set how to serialize key/value pairs
-        properties.setProperty("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
-        properties.setProperty("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        properties.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         // When a group is first created, it has no offset stored to start reading from. This tells it to start
         // with the earliest record in the stream.
-        properties.setProperty("auto.offset.reset","earliest");
+        properties.setProperty("auto.offset.reset", "earliest");
         consumer = new KafkaConsumer<>(properties);
 
         // Subscribe to the 'relay-to-relay_dummy_highprioritymessages' topic
-        consumer.subscribe(Arrays.asList("relay-to-relay_dummy_highprioritymessages"));
+        consumer.subscribe(Collections.singletonList("/appdata/devint/queue/stream:relay-to-relay_dummy_highprioritymessages"));
 
         // Loop until ctrl + c
         int count = 0;
-        while(true) {
+        while (true) {
             // Poll for records
             ConsumerRecords<String, String> records = consumer.poll(200);
             // Did we get any?
@@ -53,7 +54,7 @@ public class Consumer {
                 // timeout/nothing to read
             } else {
                 // Yes, loop over records
-                for(ConsumerRecord<String, String> record: records) {
+                for (ConsumerRecord<String, String> record : records) {
                     // Display record and count
                     count += 1;
                     LOG.info("Consumer : " + count + ": " + record.value());

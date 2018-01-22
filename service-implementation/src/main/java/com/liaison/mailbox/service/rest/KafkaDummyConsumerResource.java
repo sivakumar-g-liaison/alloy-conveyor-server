@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -37,7 +37,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is dummy kafka producer.
- * 
+ *
  * @author OFS
  */
 @AppConfigurationResource
@@ -45,41 +45,41 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "kafka/dummy/consumer", description = "dummy kafka consumer service.")
 public class KafkaDummyConsumerResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(KafkaDummyConsumerResource.class);
+    private static final Logger LOG = LogManager.getLogger(KafkaDummyConsumerResource.class);
 
 
     @GET
-	@ApiOperation(value = "common response", position = 3, response = com.liaison.mailbox.service.dto.CommonResponseDTO.class)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @ApiOperation(value = "common response", position = 3, response = com.liaison.mailbox.service.dto.CommonResponseDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     @AccessDescriptor(skipFilter = true)
-	public Response dummyKafkaConsumer(
-			@Context final HttpServletRequest request) {
+    public Response dummyKafkaConsumer(
+            @Context final HttpServletRequest request) {
 
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
-			@Override
-			public Object call() throws IOException {
+            @Override
+            public Object call() throws IOException {
 
-				LOG.info("dummy kafka consumer");
-				Consumer.consume();
-				return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
+                LOG.info("dummy kafka consumer");
+                Consumer.consume();
+                return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
 
-			}
-		};
-		worker.actionLabel = "MailboxReadResource.dummyKafkaConsumer()";
+            }
+        };
+        worker.actionLabel = "MailboxReadResource.dummyKafkaConsumer()";
 
-		// hand the delegate to the framework for calling
-		return process(request, worker);
+        // hand the delegate to the framework for calling
+        return process(request, worker);
 
-	}
+    }
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(AuditStatement.Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(AuditStatement.Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 
 }
