@@ -16,50 +16,74 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+
 import java.util.Collections;
 import java.util.Properties;
-import java.util.Arrays;
 
 public class Consumer {
 
     private static final Logger LOG = LogManager.getLogger(Consumer.class);
+    private static final String AUTO_OFFSET_RESET_DEFAULT = "latest";
 
-    public static void consume() {
-        // Create a consumer
-        KafkaConsumer<String, String> consumer;
-        // Configure the consumer
-        Properties properties = new Properties();
-        // Point it to the brokers
-        properties.setProperty("bootstrap.servers", "at4d-lpdbstor01.liaison.dev:7222");
-        // Set the consumer group (all consumers must belong to a group).
-        properties.setProperty("group.id", "soap-client-1");
-        // Set how to serialize key/value pairs
-        properties.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        // When a group is first created, it has no offset stored to start reading from. This tells it to start
-        // with the earliest record in the stream.
-        properties.setProperty("auto.offset.reset", "earliest");
+    private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
+    private int timeout = 200;
+    private KafkaConsumer<String, String> consumer = null;
+
+    public void consume() {
+
+        Properties properties = getProperties();
+
         consumer = new KafkaConsumer<>(properties);
+        timeout = configuration.getInt(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.TIMEOUT, timeout);
+        consumer.subscribe(Collections.singletonList(configuration.getString(QueueServiceConstants.KAFKA_STREAM) + configuration.getString(QueueServiceConstants.KAFKA_TOPIC_RELAY)));
 
-        // Subscribe to the 'relay-to-relay_dummy_highprioritymessages' topic
-        consumer.subscribe(Collections.singletonList("/appdata/devint/queue/stream:relay-to-relay_dummy_highprioritymessages"));
-
-        // Loop until ctrl + c
         int count = 0;
         while (true) {
-            // Poll for records
-            ConsumerRecords<String, String> records = consumer.poll(200);
-            // Did we get any?
+
+            ConsumerRecords<String, String> records = consumer.poll(timeout);
             if (records.count() == 0) {
                 // timeout/nothing to read
             } else {
-                // Yes, loop over records
                 for (ConsumerRecord<String, String> record : records) {
-                    // Display record and count
                     count += 1;
-                    LOG.info("Consumer : " + count + ": " + record.value());
+                    LOG.info("MapR Streams consumer : " + count + ": " + record.value());
                 }
             }
         }
+    }
+
+    public void stop() throws Exception {
+
+        if (consumer != null) {
+            
+            try {
+                consumer.unsubscribe();
+                consumer.close();
+                LOG.info("MapR Streams consumer successfully closed!");
+            } catch (Exception e) {
+                LOG.error("An error occurred while closing MapR Streams consumer. " + e.getMessage());
+                // Retry once
+                try {
+                    consumer.close();
+                    LOG.info("MapR Streams consumer successfully closed!");
+                } catch (Exception ex) {
+                    LOG.error("An error occurred while closing MapR Streams consumer. " + ex.getMessage());
+                }
+            }
+        }
+    }
+
+    private static Properties getProperties() {
+
+        Properties properties = new Properties();
+        properties.put(QueueServiceConstants.SERVERS, configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.SERVERS));
+        properties.put(QueueServiceConstants.KEY_DESERIALIZER, configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.KEY_DESERIALIZER, QueueServiceConstants.KEY_DESERIALIZER_DEFAULT));
+        properties.put(QueueServiceConstants.VALUE_DESERIALIZER, configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.VALUE_DESERIALIZER, QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT));
+        properties.put(QueueServiceConstants.AUTO_OFFSET_RESET, configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.AUTO_OFFSET_RESET, AUTO_OFFSET_RESET_DEFAULT));
+        properties.setProperty(QueueServiceConstants.GROUP_ID, configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.GROUP_ID));
+
+        return properties;
     }
 }

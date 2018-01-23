@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -32,6 +33,7 @@ import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -46,6 +48,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class KafkaDummyProducerResource extends AuditedResource {
 
     private static final Logger LOG = LogManager.getLogger(KafkaDummyProducerResource.class);
+    private static final String MESSAGE_COUNT = "messageCount";
 
 
     @GET
@@ -54,7 +57,8 @@ public class KafkaDummyProducerResource extends AuditedResource {
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     @AccessDescriptor(skipFilter = true)
     public Response dummyKafkaProducer(
-            @Context final HttpServletRequest request) {
+            @Context final HttpServletRequest request,
+            @QueryParam(value = MESSAGE_COUNT) final @ApiParam(name = MESSAGE_COUNT, required = true, value = MESSAGE_COUNT) int messageCount) {
 
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
@@ -62,7 +66,8 @@ public class KafkaDummyProducerResource extends AuditedResource {
             public Object call() throws IOException {
 
                 LOG.info("dummy kafka producer");
-                Producer.produce();
+                Producer producer = new Producer();
+                producer.produce(messageCount);
                 return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
 
             }

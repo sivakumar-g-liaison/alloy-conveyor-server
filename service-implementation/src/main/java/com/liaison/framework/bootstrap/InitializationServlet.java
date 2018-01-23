@@ -28,6 +28,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
+import com.liaison.mailbox.service.queue.kafka.Consumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,8 +58,12 @@ public class InitializationServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8418412083748649428L;
     private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
+    private static final String DEV_ENV = "dev";
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+    
+    private Consumer consumer = null;
+    private String environment = System.getProperty("archaius.deployment.environment");
 
     public void init(ServletConfig config) throws ServletException {
 
@@ -139,6 +144,22 @@ public class InitializationServlet extends HttpServlet {
             }
         }
 
+        if (!MailBoxUtil.isEmpty(environment) && !DEV_ENV.equals(environment) && null == consumer) {
+            consumer = new Consumer();
+            consumer.consume();
+        }
+
 	}
+    
+    public void destroy() {
+
+        if (!MailBoxUtil.isEmpty(environment) && !DEV_ENV.equals(environment) && null != consumer) {
+            try {
+                consumer.stop();
+            } catch (Exception e) {
+                logger.error("Unable to stop kafka consumer", e);
+            }
+        }
+    }
 
 }
