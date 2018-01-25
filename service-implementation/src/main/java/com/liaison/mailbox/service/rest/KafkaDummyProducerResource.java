@@ -29,8 +29,9 @@ import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.service.queue.kafka.Producer;
+import com.liaison.mailbox.service.queue.kafka.KafkaSendQueue;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -48,7 +49,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class KafkaDummyProducerResource extends AuditedResource {
 
     private static final Logger LOG = LogManager.getLogger(KafkaDummyProducerResource.class);
-    private static final String MESSAGE_COUNT = "messageCount";
+    private static final String MESSAGE = "message";
 
 
     @GET
@@ -58,16 +59,15 @@ public class KafkaDummyProducerResource extends AuditedResource {
     @AccessDescriptor(skipFilter = true)
     public Response dummyKafkaProducer(
             @Context final HttpServletRequest request,
-            @QueryParam(value = MESSAGE_COUNT) final @ApiParam(name = MESSAGE_COUNT, required = true, value = MESSAGE_COUNT) int messageCount) {
+            @QueryParam(value = MESSAGE) final @ApiParam(name = MESSAGE, required = true, value = MESSAGE) String message) {
 
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
             @Override
-            public Object call() throws IOException {
+            public Object call() throws IOException, ClientUnavailableException {
 
                 LOG.info("dummy kafka producer");
-                Producer producer = new Producer();
-                producer.produce(messageCount);
+                KafkaSendQueue.getInstance().sendMessage(message);
                 return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
 
             }

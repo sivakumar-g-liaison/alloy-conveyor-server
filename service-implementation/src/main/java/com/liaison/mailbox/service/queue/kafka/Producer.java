@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.service.queue.kafka;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.logging.log4j.LogManager;
@@ -18,43 +21,23 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Random;
-import java.io.IOException;
-
 public class Producer {
 
     private static final Logger LOG = LogManager.getLogger(Producer.class);
     private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
     private KafkaProducer<String, String> producer = null;
 
-    public void produce(int messageCount) throws IOException {
+    public void produce(String message) throws IOException {
 
-        LOG.info("MapR Streams producer message count to send" + messageCount);
+        LOG.info("MapR Streams producer message to send" + message);
         
         Properties properties = getProperties();
         producer = new KafkaProducer<>(properties);
 
-        Random random = new Random();
-        String[] sentences = new String[] {
-                "the cow jumped over the moon",
-                "an apple a day keeps the doctor away",
-                "four score and seven years ago",
-                "snow white and the seven dwarfs",
-                "i am at two with nature" };
-
-        String progressAnimation = "|/-\\";
-        String topicName = configuration.getString(QueueServiceConstants.KAFKA_STREAM) + configuration.getString(QueueServiceConstants.KAFKA_TOPIC_RELAY);
+        String topicName = configuration.getString(QueueServiceConstants.KAFKA_STREAM) + configuration.getString(QueueServiceConstants.KAFKA_PRODUCER_TOPIC_NAME);
 
         try {
-            for (int i = 0; i < messageCount; i++) {
-
-                String sentence = sentences[random.nextInt(sentences.length)];
-                producer.send(new ProducerRecord<>(topicName, sentence));
-                String progressBar = "\r" + progressAnimation.charAt(i % progressAnimation.length()) + " " + i;
-                LOG.info("MapR Streams producer" + Arrays.toString(progressBar.getBytes()));
-            }
+            producer.send(new ProducerRecord<>(topicName, message));
         } catch (Exception e) {
             throw new RuntimeException("Unable to send message to topic " + topicName + ". " + e.getMessage(), e);
         } finally {

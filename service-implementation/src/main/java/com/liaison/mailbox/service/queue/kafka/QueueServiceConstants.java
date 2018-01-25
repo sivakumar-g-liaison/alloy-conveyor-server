@@ -13,7 +13,8 @@ package com.liaison.mailbox.service.queue.kafka;
 public interface QueueServiceConstants {
 
     String KAFKA_STREAM = "kafka.stream";
-    String KAFKA_TOPIC_RELAY = "kafka.topic.relaytorelay";
+    String KAFKA_CONSUMER_TOPIC_NAME ="kafka.consumer.topic.name";
+    String KAFKA_PRODUCER_TOPIC_NAME ="kafka.producer.topic.name";
 
     String KAFKA_CONSUMER_PREFIX = "kafka.consumer.";
     String SERVERS = "bootstrap.servers";

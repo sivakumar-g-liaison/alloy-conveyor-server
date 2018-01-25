@@ -13,15 +13,19 @@ package com.liaison.mailbox.service.queue.kafka;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class KafkaConsumerService implements Runnable {
-    
-    private static final Logger LOG = LogManager.getLogger(KafkaConsumerService.class);
+
+public class KafkaMessageService implements Runnable {
+
+    private static final Logger LOGGER = LogManager.getLogger(KafkaMessageService.class);
+    private String message;
+
+    public KafkaMessageService(String message) {
+        this.message = message;
+    }
 
     @Override
     public void run() {
-        LOG.info("Starting Kafka consumer");
-        Consumer consumer = new Consumer();
-        consumer.consume();
+        LOGGER.info("KafkaMessageService : received message is :" + message);
     }
 
 }

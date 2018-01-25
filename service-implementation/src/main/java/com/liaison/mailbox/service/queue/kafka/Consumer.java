@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import com.liaison.mailbox.service.thread.pool.KafkaConsumerThreadPool;
 
 import java.util.Collections;
 import java.util.Properties;
@@ -37,19 +38,13 @@ public class Consumer {
 
         consumer = new KafkaConsumer<>(properties);
         timeout = configuration.getInt(QueueServiceConstants.KAFKA_CONSUMER_PREFIX + QueueServiceConstants.TIMEOUT, timeout);
-        consumer.subscribe(Collections.singletonList(configuration.getString(QueueServiceConstants.KAFKA_STREAM) + configuration.getString(QueueServiceConstants.KAFKA_TOPIC_RELAY)));
+        consumer.subscribe(Collections.singletonList(configuration.getString(QueueServiceConstants.KAFKA_STREAM) + configuration.getString(QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME)));
 
-        int count = 0;
         while (true) {
 
             ConsumerRecords<String, String> records = consumer.poll(timeout);
-            if (records.count() == 0) {
-                // timeout/nothing to read
-            } else {
-                for (ConsumerRecord<String, String> record : records) {
-                    count += 1;
-                    LOG.info("MapR Streams consumer : " + count + ": " + record.value());
-                }
+            for (ConsumerRecord<String, String> record : records) {
+                KafkaConsumerThreadPool.getExecutorService().submit(new KafkaMessageService(record.value()));
             }
         }
     }
