@@ -68,6 +68,8 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -549,6 +551,7 @@ public class ProcessorConfigurationService {
 				if (processorService != null) {
 					processorService.createLocalPath();
 					//TODO post it to stream
+					new Producer().produce(KafkaMessageType.DIRECTORY_CREATION, processor);
 				}
 			}
 

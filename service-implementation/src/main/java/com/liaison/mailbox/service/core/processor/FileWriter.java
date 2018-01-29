@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -25,6 +26,8 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.kafka.Producer;
+import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -106,7 +109,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            //TODO post it to stream
+                            new Producer().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
                         }
                     } else {
 
