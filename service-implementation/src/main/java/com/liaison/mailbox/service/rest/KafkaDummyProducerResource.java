@@ -10,7 +10,21 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
+import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.framework.AppConfigurationResource;
+import com.liaison.mailbox.service.queue.kafka.Producer;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -20,23 +34,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.acl.annotation.AccessDescriptor;
-import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.DefaultAuditStatement;
-import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
-import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.service.queue.kafka.KafkaSendQueue;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import java.io.IOException;
 
 /**
  * This is dummy kafka producer.
@@ -67,7 +65,7 @@ public class KafkaDummyProducerResource extends AuditedResource {
             public Object call() throws IOException, ClientUnavailableException {
 
                 LOG.info("dummy kafka producer");
-                KafkaSendQueue.getInstance().sendMessage(message);
+                new Producer().produce(message);
                 return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
 
             }

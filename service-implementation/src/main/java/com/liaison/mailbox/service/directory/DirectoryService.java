@@ -129,8 +129,10 @@ public class DirectoryService implements Runnable {
 
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
             invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
+            //TODO post it to stream
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());
+            //TODO post it to stream
         } else {
             throw new RuntimeException("Invalid operation");
         }

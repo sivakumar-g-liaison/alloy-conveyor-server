@@ -26,6 +26,23 @@ public class KafkaMessageService implements Runnable {
     @Override
     public void run() {
         LOGGER.info("KafkaMessageService : received message is :" + message);
+
+        //TODO read the message type and invoke the particular method
+        // The structure would be like MessageType(FILEWRITER_CREATE,USERACCOUNT_CREATE, USERACCOUNT_DELETE AND DIRECTORY_CREATION) and Message(string)
+        //1. Filewriter notification - We will receive notification whenever file staged in other datacenter for the filewriter
+        //We have to receive this notification and write the file to disk
+
+
+        //2. User Directory Creation
+        //Whenever machine user account created in other datacenter, that datacenter Relay would create directories and post notification to other datacenter.
+        //This has to receive and create directories for that account
+
+        //3. User Directory Deletion
+
+        //4. Directory Creation notification
+        //Whenever we create directories in Relay Process it would be redirected to other datacenter.
+        //we have to receive and create directories here
+
     }
 
 }

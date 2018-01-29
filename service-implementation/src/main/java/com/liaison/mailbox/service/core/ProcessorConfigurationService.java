@@ -548,6 +548,7 @@ public class ProcessorConfigurationService {
 				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
 					processorService.createLocalPath();
+					//TODO post it to stream
 				}
 			}
 

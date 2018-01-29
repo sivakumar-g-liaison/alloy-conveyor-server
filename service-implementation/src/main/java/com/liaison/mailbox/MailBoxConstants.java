@@ -509,4 +509,6 @@ public interface MailBoxConstants {
     String RESPONSE_FS2_URI = "response_fs2_uri";
 
     String EXECUTE = "infinite";
+
+    String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 }

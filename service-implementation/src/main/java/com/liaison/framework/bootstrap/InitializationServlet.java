@@ -43,6 +43,7 @@ import java.security.Security;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 
 
 /**
@@ -61,7 +62,6 @@ public class InitializationServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
-    private static final String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
     public void init(ServletConfig config) throws ServletException {
 
