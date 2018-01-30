@@ -65,7 +65,7 @@ public class KafkaDummyProducerResource extends AuditedResource {
             public Object call() throws IOException, ClientUnavailableException {
 
                 LOG.info("dummy kafka producer");
-                new Producer().produce(message);
+                Producer.getInstance().produce(message);
                 return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Produced dummy's");
 
             }

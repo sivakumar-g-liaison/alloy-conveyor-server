@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.queue.kafka;
 
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
@@ -20,21 +19,21 @@ public class KafkaMessage {
     private KafkaMessageType messageType;
     private WorkTicket filewriterWorkTicket;
     private DirectoryMessageDTO directoryMessageDTO;
-    private Processor processor;
+    private String processorGuid;
 
-    public KafkaMessage(KafkaMessageType messageType, WorkTicket filewriterWorkTicket, DirectoryMessageDTO directoryMessageDTO, Processor processor) {
+    public KafkaMessage(KafkaMessageType messageType, WorkTicket filewriterWorkTicket, DirectoryMessageDTO directoryMessageDTO, String processorGuid) {
         this.messageType = messageType;
         this.filewriterWorkTicket = filewriterWorkTicket;
         this.directoryMessageDTO = directoryMessageDTO;
-        this.processor = processor;
+        this.processorGuid = processorGuid;
     }
 
-    public Processor getProcessor() {
-        return processor;
+    public String getProcessorGuid() {
+        return processorGuid;
     }
 
-    public void setProcessor(Processor processor) {
-        this.processor = processor;
+    public void setProcessorGuid(String processorGuid) {
+        this.processorGuid = processorGuid;
     }
 
     public DirectoryMessageDTO getDirectoryMessageDTO() {

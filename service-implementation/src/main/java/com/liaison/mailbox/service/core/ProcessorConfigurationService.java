@@ -550,8 +550,7 @@ public class ProcessorConfigurationService {
 				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
 					processorService.createLocalPath();
-					//TODO post it to stream
-					new Producer().produce(KafkaMessageType.DIRECTORY_CREATION, processor);
+					Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, processor.getPguid());
 				}
 			}
 

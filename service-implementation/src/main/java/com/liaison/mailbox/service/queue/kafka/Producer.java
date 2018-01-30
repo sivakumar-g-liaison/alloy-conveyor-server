@@ -14,7 +14,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
@@ -43,10 +42,23 @@ public class Producer implements AutoCloseable {
 
     private static final Logger LOG = LogManager.getLogger(Producer.class);
     private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
-    private static KafkaProducer<String, String> producer;
+    private static KafkaProducer<String, String> kafkaProducer;
     private static String TOPIC_NAME = configuration.getString(KAFKA_STREAM)
             + configuration.getString(KAFKA_PRODUCER_TOPIC_NAME);
 
+    private static Producer producer = null;
+    
+    private Producer() {
+        
+    }
+    
+    public static Producer getInstance() {
+        if (null == producer) {
+            producer = new Producer();
+        }
+        return producer;
+    }
+    
     public void produce(String message) {
         
         if (MailBoxUtil.isEmpty(message)) {
@@ -56,8 +68,8 @@ public class Producer implements AutoCloseable {
         LOG.info("MapR Streams PRODUCER message to send" + message);
 
         try {
-            producer = new KafkaProducer<>(getProperties());
-            producer.send(new ProducerRecord<>(TOPIC_NAME, message));
+            kafkaProducer = new KafkaProducer<>(getProperties());
+            kafkaProducer.send(new ProducerRecord<>(TOPIC_NAME, message));
         } catch (Exception e) {
             throw new RuntimeException("Unable to send message to topic " + TOPIC_NAME + ". " + e.getMessage(), e);
         }
@@ -74,16 +86,16 @@ public class Producer implements AutoCloseable {
 
     @Override
     public void close() {
-        if (producer != null) {
+        if (kafkaProducer != null) {
 
             try {
-                producer.close();
+                kafkaProducer.close();
                 LOG.info("MapR Streams PRODUCER successfully flushed and closed!");
             } catch (Exception e) {
                 LOG.error("An error occurred while flushing/closing MapR Streams PRODUCER. " + e.getMessage(), e);
                 // Retry once
                 try {
-                    producer.close();
+                    kafkaProducer.close();
                     LOG.info("MapR Streams PRODUCER successfully flushed and closed after retry!");
                 } catch (Exception ex) {
                     LOG.error("An error occurred while flushing/closing MapR Streams PRODUCER. " + ex.getMessage(), e);
@@ -119,8 +131,8 @@ public class Producer implements AutoCloseable {
      * @param directoryCreation
      * @param processor
      */
-    public void produce(KafkaMessageType directoryCreation, Processor processor) {
-        KafkaMessage kafkaMessage = new KafkaMessage(directoryCreation, null, null, processor);
+    public void produce(KafkaMessageType directoryCreation, String processorGuid) {
+        KafkaMessage kafkaMessage = new KafkaMessage(directoryCreation, null, null, processorGuid);
         produce(marshalToJSON(kafkaMessage));
     }
     

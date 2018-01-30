@@ -55,22 +55,26 @@ public class KafkaMessageService implements Runnable {
 
             switch (kafkaMessage.getMessageType()) {
                 case FILEWRITER_CREATE:
-                    WorkTicket workTicket = kafkaMessage.getFilewriterWorkTicket();
+                    LOGGER.info("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFilewriterWorkTicket().getFileName());
+                    /*WorkTicket workTicket = kafkaMessage.getFilewriterWorkTicket();
                     try (FileOutputStream outputStream = new FileOutputStream(workTicket.getFileName())) {
                         IOUtils.copy(StorageUtilities.retrievePayload(workTicket.getPayloadURI()), outputStream);
-                    }
+                    }*/
                     break;
                 case USERACCOUNT_CREATE:
-                    new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
+                    LOGGER.info("KAFKA_CONSUMER: USERACCOUNT_CREATE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
+                    // new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
                     break;
                 case USERACCOUNT_DELETE:
-                    new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
+                    LOGGER.info("KAFKA_CONSUMER: USERACCOUNT_DELETE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
+                    // new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
                     break;
                 case DIRECTORY_CREATION:
-                    MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(kafkaMessage.getProcessor());
+                    LOGGER.info("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getProcessorGuid());
+                    /*MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(kafkaMessage.getProcessorGuid());
                     if (processorService != null) {
                         processorService.createLocalPath();
-                    }
+                    }*/
                     break;
                 default:
                     LOGGER.info("MessageType is not valid.");
