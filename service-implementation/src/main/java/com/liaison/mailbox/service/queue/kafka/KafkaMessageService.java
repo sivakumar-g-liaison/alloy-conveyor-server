@@ -25,6 +25,10 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.processor.FileWriter;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 
@@ -55,45 +59,32 @@ public class KafkaMessageService implements Runnable {
             LOGGER.info("KafkaMessageService : received message type :" + kafkaMessage.getMessageType().toString());
 
             switch (kafkaMessage.getMessageType()) {
+                
                 case FILEWRITER_CREATE:
-                    LOGGER.info("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFilewriterWorkTicket().getFileName());
-                    /*WorkTicket workTicket = kafkaMessage.getFilewriterWorkTicket();
-                    try (FileOutputStream outputStream = new FileOutputStream(workTicket.getFileName())) {
-                        IOUtils.copy(StorageUtilities.retrievePayload(workTicket.getPayloadURI()), outputStream);
-                    }*/
+                    LOGGER.debug("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFilewriterWorkTicket().getFileName());
+                    FileWriter fileWriter = new FileWriter(getProcessor(kafkaMessage.getProcessorGuid()));
+                    fileWriter.writeReplicateData(kafkaMessage.getFilewriterWorkTicket());
+                    
                     break;
+                    
                 case USERACCOUNT_CREATE:
-                    LOGGER.info("KAFKA_CONSUMER: USERACCOUNT_CREATE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
-                    // new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
+                    LOGGER.debug("KAFKA_CONSUMER: USERACCOUNT_CREATE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
+                    new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
                     break;
+                    
                 case USERACCOUNT_DELETE:
-                    LOGGER.info("KAFKA_CONSUMER: USERACCOUNT_DELETE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
-                    // new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
+                    LOGGER.debug("KAFKA_CONSUMER: USERACCOUNT_DELETE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
+                    new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
                     break;
+                    
                 case DIRECTORY_CREATION:
-                    LOGGER.info("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getProcessorGuid());
-                    /*MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(kafkaMessage.getProcessorGuid());
+                    LOGGER.debug("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getProcessorGuid());
+                    MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(getProcessor(kafkaMessage.getProcessorGuid()));
                     if (processorService != null) {
                         processorService.createLocalPath();
-                    }*/
-                    EntityManager em = null;
-
-                    try {
-                        em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
-                        Processor processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
-                        
-                        if (processor == null) {
-                            throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
-                                    kafkaMessage.getProcessorGuid(), Response.Status.BAD_REQUEST);
-                        }
-                        LOGGER.info("ProcessorName" + processor.getProcsrName());
-                    } finally {
-                        if (em != null) {
-                            em.close();
-                        }
                     }
-
-                break;
+                    break;
+                
                 default:
                     LOGGER.info("MessageType is not valid.");
                     break;
@@ -101,6 +92,34 @@ public class KafkaMessageService implements Runnable {
         } catch (JAXBException | IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Method to return processor by using processor guid.
+     * 
+     * @param processorGuid
+     * @return
+     */
+    private Processor getProcessor(String processorGuid) {
+        EntityManager em = null;
+        Processor processor = null;
+
+        try {
+            em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
+            processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
+
+            if (processor == null) {
+                throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
+                        kafkaMessage.getProcessorGuid(), Response.Status.BAD_REQUEST);
+            }
+
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+
+        return processor;
     }
 
 }

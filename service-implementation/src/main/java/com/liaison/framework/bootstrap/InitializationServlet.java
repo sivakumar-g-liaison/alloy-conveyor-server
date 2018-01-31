@@ -152,6 +152,6 @@ public class InitializationServlet extends HttpServlet {
 	}
 
     public void destroy() {
-        Producer.getInstance().close();
+        Producer.getInstance().stop();
     }
 }

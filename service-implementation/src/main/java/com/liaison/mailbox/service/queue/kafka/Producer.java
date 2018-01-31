@@ -38,7 +38,7 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERV
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER_DEFAULT;
 
-public class Producer implements AutoCloseable {
+public class Producer {
 
     private static final Logger LOG = LogManager.getLogger(Producer.class);
     private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
@@ -88,8 +88,7 @@ public class Producer implements AutoCloseable {
         return producerProperties;
     }
 
-    @Override
-    public void close() {
+    public void stop() {
         if (kafkaProducer != null) {
 
             try {
@@ -125,19 +124,21 @@ public class Producer implements AutoCloseable {
     /**
      * To send workticket for filewriter operation
      * @param filewriterCreate
+     * @param processorGuid
      * @param workTicket
      */
-    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket) {
+    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket, String processorGuid) {
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(filewriterCreate);
         kafkaMessage.setFilewriterWorkTicket(workTicket);
+        kafkaMessage.setProcessorGuid(processorGuid);
         produce(marshalToJSON(kafkaMessage));
     }
 
     /**
      * To send local folders creation details.
      * @param directoryCreation
-     * @param processor
+     * @param processorGuid
      */
     public void produce(KafkaMessageType directoryCreation, String processorGuid) {
         KafkaMessage kafkaMessage = new KafkaMessage();
