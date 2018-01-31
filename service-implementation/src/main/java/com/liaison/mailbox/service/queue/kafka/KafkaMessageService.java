@@ -12,12 +12,17 @@ package com.liaison.mailbox.service.queue.kafka;
 
 import java.io.IOException;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
+import com.liaison.mailbox.dtdm.model.Processor;
 
 
 public class KafkaMessageService implements Runnable {
@@ -68,7 +73,29 @@ public class KafkaMessageService implements Runnable {
                     if (processorService != null) {
                         processorService.createLocalPath();
                     }*/
-                    break;
+                    EntityManager em = null;
+                    EntityTransaction tx = null;
+
+                try {
+                	// Getting the mailbox.
+                    em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
+                    tx = em.getTransaction();
+                    tx.begin();
+
+                    Processor processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
+                    LOGGER.info("ProcessorName" + processor.getProcsrName());
+                } catch (Exception e) {
+                	if (tx != null && tx.isActive()) {
+                        tx.rollback();
+                    }
+                    throw e;
+                    
+                } finally {
+                    if (em != null) {
+                        em.close();
+                    }
+                }
+                break;
                 default:
                     LOGGER.info("MessageType is not valid.");
                     break;
