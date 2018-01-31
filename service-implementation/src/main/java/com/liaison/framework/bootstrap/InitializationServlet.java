@@ -29,8 +29,10 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.queue.kafka.KafkaConsumerService;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.thread.pool.KafkaConsumerThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -38,6 +40,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+
 import java.net.URL;
 import java.security.Security;
 
@@ -148,4 +151,7 @@ public class InitializationServlet extends HttpServlet {
 
 	}
 
+    public void destroy() {
+        Producer.getInstance().close();
+    }
 }

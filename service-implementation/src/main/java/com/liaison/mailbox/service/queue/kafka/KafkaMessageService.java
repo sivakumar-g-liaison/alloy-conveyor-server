@@ -10,21 +10,14 @@
 
 package com.liaison.mailbox.service.queue.kafka;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.dto.queue.WorkTicket;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
-import com.liaison.mailbox.service.directory.DirectoryService;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 
 public class KafkaMessageService implements Runnable {

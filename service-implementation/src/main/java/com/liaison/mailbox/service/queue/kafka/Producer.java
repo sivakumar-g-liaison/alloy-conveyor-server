@@ -54,7 +54,11 @@ public class Producer implements AutoCloseable {
     
     public static Producer getInstance() {
         if (null == producer) {
-            producer = new Producer();
+            synchronized (Producer.class) {
+                if (null == producer) {
+                    producer = new Producer();
+                }
+            }
         }
         return producer;
     }
@@ -112,7 +116,9 @@ public class Producer implements AutoCloseable {
      * @param message
      */
     public void produce(KafkaMessageType directoryCreationOrDeletion, DirectoryMessageDTO message) {
-        KafkaMessage kafkaMessage = new KafkaMessage(directoryCreationOrDeletion, null, message, null);
+        KafkaMessage kafkaMessage = new KafkaMessage();
+        kafkaMessage.setMessageType(directoryCreationOrDeletion);
+        kafkaMessage.setDirectoryMessageDTO(message);
         produce(marshalToJSON(kafkaMessage));
     }
 
@@ -122,7 +128,9 @@ public class Producer implements AutoCloseable {
      * @param workTicket
      */
     public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket) {
-        KafkaMessage kafkaMessage = new KafkaMessage(filewriterCreate, workTicket, null, null);
+        KafkaMessage kafkaMessage = new KafkaMessage();
+        kafkaMessage.setMessageType(filewriterCreate);
+        kafkaMessage.setFilewriterWorkTicket(workTicket);
         produce(marshalToJSON(kafkaMessage));
     }
 
@@ -132,7 +140,9 @@ public class Producer implements AutoCloseable {
      * @param processor
      */
     public void produce(KafkaMessageType directoryCreation, String processorGuid) {
-        KafkaMessage kafkaMessage = new KafkaMessage(directoryCreation, null, null, processorGuid);
+        KafkaMessage kafkaMessage = new KafkaMessage();
+        kafkaMessage.setMessageType(directoryCreation);
+        kafkaMessage.setProcessorGuid(processorGuid);
         produce(marshalToJSON(kafkaMessage));
     }
     

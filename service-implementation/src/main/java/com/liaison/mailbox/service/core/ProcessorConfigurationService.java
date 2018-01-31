@@ -201,6 +201,7 @@ public class ProcessorConfigurationService {
                 MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
                 if (processorService != null) {
                     processorService.createLocalPath();
+                    Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, processor.getPguid());
                 }
             }
 
