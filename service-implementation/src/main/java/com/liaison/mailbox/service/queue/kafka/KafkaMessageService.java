@@ -14,6 +14,7 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,8 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 
 public class KafkaMessageService implements Runnable {
@@ -74,27 +77,22 @@ public class KafkaMessageService implements Runnable {
                         processorService.createLocalPath();
                     }*/
                     EntityManager em = null;
-                    EntityTransaction tx = null;
 
-                try {
-                	// Getting the mailbox.
-                    em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
-                    tx = em.getTransaction();
-                    tx.begin();
+                    try {
+                        em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
+                        Processor processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
+                        
+                        if (processor == null) {
+                            throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
+                                    kafkaMessage.getProcessorGuid(), Response.Status.BAD_REQUEST);
+                        }
+                        LOGGER.info("ProcessorName" + processor.getProcsrName());
+                    } finally {
+                        if (em != null) {
+                            em.close();
+                        }
+                    }
 
-                    Processor processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
-                    LOGGER.info("ProcessorName" + processor.getProcsrName());
-                } catch (Exception e) {
-                	if (tx != null && tx.isActive()) {
-                        tx.rollback();
-                    }
-                    throw e;
-                    
-                } finally {
-                    if (em != null) {
-                        em.close();
-                    }
-                }
                 break;
                 default:
                     LOGGER.info("MessageType is not valid.");
