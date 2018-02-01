@@ -146,7 +146,7 @@ public class InitializationServlet extends HttpServlet {
         }
         
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            KafkaConsumerThreadPool.getExecutorService().execute(new KafkaConsumerService());
+            KafkaConsumerThreadPool.getExecutorService().submit(new KafkaConsumerService());
         }
 
 	}

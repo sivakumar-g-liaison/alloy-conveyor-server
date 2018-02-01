@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.queue.kafka;
 import java.io.IOException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
@@ -31,7 +30,9 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
-
+/**
+ * To process message from kafka consumer.
+ */
 public class KafkaMessageService implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(KafkaMessageService.class);
@@ -52,8 +53,6 @@ public class KafkaMessageService implements Runnable {
     @Override
     public void run() {
 
-        LOGGER.info("KafkaMessageService : received message :" + message);
-        /**
         try {
 
             kafkaMessage = JAXBUtility.unmarshalFromJSON(message, KafkaMessage.class);
@@ -94,7 +93,6 @@ public class KafkaMessageService implements Runnable {
         } catch (JAXBException | IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
-        */
     }
     
     /**
@@ -104,6 +102,7 @@ public class KafkaMessageService implements Runnable {
      * @return
      */
     private Processor getProcessor(String processorGuid) {
+        
         EntityManager em = null;
         Processor processor = null;
 
@@ -115,7 +114,6 @@ public class KafkaMessageService implements Runnable {
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
                         kafkaMessage.getProcessorGuid(), Response.Status.BAD_REQUEST);
             }
-
         } finally {
             if (em != null) {
                 em.close();

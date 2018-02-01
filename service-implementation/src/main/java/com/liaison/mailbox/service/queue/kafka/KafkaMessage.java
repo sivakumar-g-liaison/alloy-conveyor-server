@@ -14,6 +14,9 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 
+/**
+ *  Kafka Message
+ */
 public class KafkaMessage {
 
     private KafkaMessageType messageType;
