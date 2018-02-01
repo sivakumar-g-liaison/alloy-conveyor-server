@@ -52,6 +52,8 @@ public class KafkaMessageService implements Runnable {
     @Override
     public void run() {
 
+        LOGGER.info("KafkaMessageService : received message :" + message);
+        /**
         try {
 
             kafkaMessage = JAXBUtility.unmarshalFromJSON(message, KafkaMessage.class);
@@ -92,6 +94,7 @@ public class KafkaMessageService implements Runnable {
         } catch (JAXBException | IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
+        */
     }
     
     /**

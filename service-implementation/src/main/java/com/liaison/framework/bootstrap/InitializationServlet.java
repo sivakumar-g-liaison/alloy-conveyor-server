@@ -65,6 +65,7 @@ public class InitializationServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+    private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
     public void init(ServletConfig config) throws ServletException {
 
@@ -77,7 +78,6 @@ public class InitializationServlet extends HttpServlet {
             logger.info("The provider({}) installed successfully at the order {}", BouncyCastleProvider.PROVIDER_NAME, result);
         }
 
-        DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
 
         // nfs health check
@@ -152,6 +152,9 @@ public class InitializationServlet extends HttpServlet {
 	}
 
     public void destroy() {
-        Producer.getInstance().stop();
+        
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
+            Producer.getInstance().stop();
+        }
     }
 }

@@ -72,6 +72,7 @@ public class Consumer implements AutoCloseable {
 
     @Override
     public void close() {
+        
         if (consumer != null) {
 
             try {

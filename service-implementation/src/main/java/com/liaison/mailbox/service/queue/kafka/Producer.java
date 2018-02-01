@@ -53,6 +53,7 @@ public class Producer {
     }
     
     public static Producer getInstance() {
+        
         if (null == producer) {
             synchronized (Producer.class) {
                 if (null == producer) {
@@ -89,6 +90,7 @@ public class Producer {
     }
 
     public void stop() {
+        
         if (kafkaProducer != null) {
 
             try {
