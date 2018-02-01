@@ -28,11 +28,9 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
-import com.liaison.mailbox.service.queue.kafka.KafkaConsumerService;
+import com.liaison.mailbox.service.queue.kafka.Consumer;
 import com.liaison.mailbox.service.queue.kafka.Producer;
-import com.liaison.mailbox.service.thread.pool.KafkaConsumerThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -40,7 +38,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-
 import java.net.URL;
 import java.security.Security;
 
@@ -66,6 +63,7 @@ public class InitializationServlet extends HttpServlet {
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
+    private Consumer consumer = null;
 
     public void init(ServletConfig config) throws ServletException {
 
@@ -146,7 +144,8 @@ public class InitializationServlet extends HttpServlet {
         }
         
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            KafkaConsumerThreadPool.getExecutorService().submit(new KafkaConsumerService());
+            consumer = new Consumer();
+            consumer.consume();
         }
 
 	}
@@ -155,6 +154,9 @@ public class InitializationServlet extends HttpServlet {
         
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
             Producer.getInstance().stop();
+            if (null != consumer) {
+                consumer.shutdown();
+            }
         }
     }
 }

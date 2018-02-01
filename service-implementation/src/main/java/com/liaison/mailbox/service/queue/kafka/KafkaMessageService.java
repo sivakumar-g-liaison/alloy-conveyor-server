@@ -53,7 +53,8 @@ public class KafkaMessageService implements Runnable {
     @Override
     public void run() {
 
-        try {
+        LOGGER.info("KafkaMessageService : received message type :" + message);
+ /*       try {
 
             kafkaMessage = JAXBUtility.unmarshalFromJSON(message, KafkaMessage.class);
             
@@ -65,9 +66,8 @@ public class KafkaMessageService implements Runnable {
                     LOGGER.debug("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFilewriterWorkTicket().getFileName());
                     FileWriter fileWriter = new FileWriter(getProcessor(kafkaMessage.getProcessorGuid()));
                     fileWriter.writeReplicateData(kafkaMessage.getFilewriterWorkTicket());
-                    
                     break;
-                    
+
                 case USERACCOUNT_CREATE:
                     LOGGER.debug("KAFKA_CONSUMER: USERACCOUNT_CREATE" + kafkaMessage.getDirectoryMessageDTO().getOperationType());
                     new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
@@ -92,7 +92,7 @@ public class KafkaMessageService implements Runnable {
             }
         } catch (JAXBException | IOException e) {
             LOGGER.error(e.getMessage(), e);
-        }
+        }*/
     }
     
     /**
