@@ -15,9 +15,11 @@ import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.health.check.threadpool.ThreadPoolCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.WakeupException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -84,37 +86,56 @@ public class Consumer {
         consumer = new KafkaConsumer<>(getProperties());
         timeout = 200;
         consumer.subscribe(Collections.singletonList(STREAM));
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                shutdown();
+                executorService.shutdown();
+                try {
+                    executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        });
     }
 
     public void consume() {
+
         executorService.submit((Runnable) () -> {
-            //while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(timeout);
-                for (ConsumerRecord<String, String> record : records) {
-                    executorService.submit(new KafkaMessageService(record.value()));
+            try {
+                while (true) {
+                    ConsumerRecords<String, String> records = consumer.poll(timeout);
+                    for (ConsumerRecord<String, String> record : records) {
+                        executorService.submit(new KafkaMessageService(record.value()));
+                    }
                 }
-            //}
+            } catch (WakeupException e) {
+                // do nothing we are shutting down
+                LOG.error("MapR Streams consumer shutting down!" + e.getMessage(), e);
+            } finally {
+                try {
+                    consumer.unsubscribe();
+                    consumer.close();
+                    LOG.info("MapR Streams consumer successfully closed!");
+                } catch (Exception e) {
+                    LOG.error("An error occurred while closing MapR Streams consumer. " + e.getMessage(), e);
+                    // Retry once
+                    try {
+                        consumer.close();
+                        LOG.info("MapR Streams consumer successfully closed!");
+                    } catch (Exception ex) {
+                        LOG.error("An error occurred while closing MapR Streams consumer. " + ex.getMessage(), e);
+                    }
+                }
+            }
         });
     }
 
     public void shutdown() {
-
         if (consumer != null) {
-
-            try {
-                consumer.unsubscribe();
-                consumer.close();
-                LOG.info("MapR Streams consumer successfully closed!");
-            } catch (Exception e) {
-                LOG.error("An error occurred while closing MapR Streams consumer. " + e.getMessage(), e);
-                // Retry once
-                try {
-                    consumer.close();
-                    LOG.info("MapR Streams consumer successfully closed!");
-                } catch (Exception ex) {
-                    LOG.error("An error occurred while closing MapR Streams consumer. " + ex.getMessage(), e);
-                }
-            }
+            consumer.wakeup();
         }
     }
 

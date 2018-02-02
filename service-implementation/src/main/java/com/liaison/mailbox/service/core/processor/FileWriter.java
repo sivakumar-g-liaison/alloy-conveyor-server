@@ -206,6 +206,37 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         }
         return processorPayloadLocation;
     }
+    
+    /**
+     * get payload location from the workticket if it is given or processor configuration
+     *
+     * @param targetDirectory
+     * @param mode
+     * @return payload location
+     * @throws IOException
+     */
+
+    public String getReplicatePayloadLocation(String targetDirectory, String mode) throws IOException {
+        //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
+        //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
+        //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
+        String processorPayloadLocation;
+        if (MailBoxUtil.isEmpty(targetDirectory)) {
+            processorPayloadLocation = getFileWriteLocation();
+            createPathIfNotAvailable(processorPayloadLocation);
+        } else {
+
+            if (!MailBoxUtil.isEmpty(mode)
+                    && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
+                createPathIfNotAvailable(targetDirectory);
+                processorPayloadLocation = targetDirectory;
+            } else {
+                processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
+                createPathIfNotAvailable(processorPayloadLocation);
+            }
+        }
+        return processorPayloadLocation;
+    }
 
     /**
 	 * This Method create local folders if not available.
@@ -284,80 +315,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		}
 
 	}
-	
-	/**
-	 * Method to replicate data.
-	 * 
-	 * @param workTicket
-	 * @throws IOException
-	 */
-	public void writeReplicateData(WorkTicket workTicket) throws IOException {
-	    
-	    InputStream payload = null;
-	    String processorPayloadLocation = null;
-	    
-	    try {
-	        
-            payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI());
-            if (null == payload) {
-                LOG.error("Failed to retrieve payload from spectrum");
-                throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
-            }
-
-            processorPayloadLocation = getPayloadLocation(workTicket);
-            if (null == processorPayloadLocation) {
-                LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
-                throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
-            }
-            
-            String isOverwrite = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase();
-            String fileName = workTicket.getFileName();
-            
-            writeReplicateDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-            
-	    } finally {
-            if (payload != null) {
-                payload.close();
-            }
-        }
-	    
-	}
-	
-    /**
-     * method to write the given inputstream to given location
-     *
-     * @param response payload
-     * @param targetLocation location to write the payload
-     * @param filename file name 
-     * @param isOverwrite
-     * @return true if it is successfully written the file to the location, otherwise false
-     * @throws IOException
-     */
-    private boolean writeReplicateDataToGivenLocation(InputStream response, String targetLocation, String filename, String isOverwrite) throws IOException {
-
-        LOG.debug("Replication started writing given inputstream to given location {}", targetLocation);
-
-        File file = new File(targetLocation + File.separatorChar + filename);
-
-        if (file.exists()) {
-
-            if (MailBoxConstants.OVERWRITE_FALSE.equals(isOverwrite)) {
-                return false;
-            } else if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
-                persistReplicateFile(response, file);
-                return true;
-            } else {
-
-                throw new MailBoxServicesException("The replication file(" + filename + ") exists at the location - " + targetLocation,
-                        Response.Status.BAD_REQUEST);
-            }
-        } else {
-
-            persistReplicateFile(response, file);
-            return true;
-        }
-
-    }
 
     /**
      * method to set the file size to workticket and persist the file 
@@ -385,21 +342,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 configurationInstance.getProcessorType().name(),
                 this.isDirectUploadEnabled());
         
-    }
-    
-    /**
-     * method to persist the file for replication 
-     * 
-     * @param response
-     * @param file
-     * @throws IOException
-     */
-    private void persistReplicateFile(InputStream response, File file) throws IOException {
-        
-        //write the file
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            IOUtils.copy(response, outputStream);
-        }
     }
 
     /**

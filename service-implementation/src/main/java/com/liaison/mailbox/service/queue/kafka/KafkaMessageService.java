@@ -18,12 +18,17 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -54,7 +59,7 @@ public class KafkaMessageService implements Runnable {
     public void run() {
 
         LOGGER.info("KafkaMessageService : received message type :" + message);
- /*       try {
+        try {
 
             kafkaMessage = JAXBUtility.unmarshalFromJSON(message, KafkaMessage.class);
             
@@ -63,9 +68,13 @@ public class KafkaMessageService implements Runnable {
             switch (kafkaMessage.getMessageType()) {
                 
                 case FILEWRITER_CREATE:
-                    LOGGER.debug("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFilewriterWorkTicket().getFileName());
-                    FileWriter fileWriter = new FileWriter(getProcessor(kafkaMessage.getProcessorGuid()));
-                    fileWriter.writeReplicateData(kafkaMessage.getFilewriterWorkTicket());
+                    LOGGER.debug("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFileWriterMsg());
+                    try {
+                        FileStageReplicationService fileStageReplicationService = new FileStageReplicationService();
+                        fileStageReplicationService.stage(kafkaMessage.getFileWriterMsg());
+                    } catch (Throwable e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
                     break;
 
                 case USERACCOUNT_CREATE:
@@ -80,7 +89,8 @@ public class KafkaMessageService implements Runnable {
                     
                 case DIRECTORY_CREATION:
                     LOGGER.debug("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getProcessorGuid());
-                    MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(getProcessor(kafkaMessage.getProcessorGuid()));
+                    Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, kafkaMessage.getProcessorGuid());
+                    MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
                     if (processorService != null) {
                         processorService.createLocalPath();
                     }
@@ -92,35 +102,7 @@ public class KafkaMessageService implements Runnable {
             }
         } catch (JAXBException | IOException e) {
             LOGGER.error(e.getMessage(), e);
-        }*/
-    }
-    
-    /**
-     * Method to return processor by using processor guid.
-     * 
-     * @param processorGuid
-     * @return
-     */
-    private Processor getProcessor(String processorGuid) {
-        
-        EntityManager em = null;
-        Processor processor = null;
-
-        try {
-            em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
-            processor = em.find(Processor.class, kafkaMessage.getProcessorGuid());
-
-            if (processor == null) {
-                throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
-                        kafkaMessage.getProcessorGuid(), Response.Status.BAD_REQUEST);
-            }
-        } finally {
-            if (em != null) {
-                em.close();
-            }
         }
-
-        return processor;
     }
 
 }

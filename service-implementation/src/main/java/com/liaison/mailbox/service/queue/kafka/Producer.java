@@ -14,6 +14,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
@@ -22,12 +23,21 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
+import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
+import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
+import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
+import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY;
+import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY_MODE;
+import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_TOPIC_NAME;
@@ -37,6 +47,7 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERVERS;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER_DEFAULT;
+
 
 public class Producer {
 
@@ -128,12 +139,23 @@ public class Producer {
      * @param filewriterCreate
      * @param processorGuid
      * @param workTicket
+     * @throws JSONException 
      */
-    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket, String processorGuid) {
+    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket, String processorGuid) throws JSONException {
+        
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(filewriterCreate);
-        kafkaMessage.setFilewriterWorkTicket(workTicket);
-        kafkaMessage.setProcessorGuid(processorGuid);
+        
+        JSONObject requestObj = new JSONObject();
+        requestObj.put(URI, workTicket.getPayloadURI());
+        requestObj.put(GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+        requestObj.put(KEY_PROCESSOR_ID, processorGuid);
+        requestObj.put(KEY_TARGET_DIRECTORY, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY).toString());
+        requestObj.put(KEY_TARGET_DIRECTORY_MODE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE).toString());
+        requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
+        requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());
+        
+        kafkaMessage.setFileWriterMsg(requestObj.toString());
         produce(marshalToJSON(kafkaMessage));
     }
 

@@ -10,17 +10,16 @@
 
 package com.liaison.mailbox.service.queue.kafka;
 
-import com.liaison.dto.queue.WorkTicket;
-import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
+import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 
 /**
- *  Kafka Message
+ * Kafka Message
  */
 public class KafkaMessage {
 
     private KafkaMessageType messageType;
-    private WorkTicket filewriterWorkTicket;
+    private String fileWriterMsg;
     private DirectoryMessageDTO directoryMessageDTO;
     private String processorGuid;
 
@@ -40,12 +39,12 @@ public class KafkaMessage {
         this.directoryMessageDTO = directoryMessageDTO;
     }
 
-    public WorkTicket getFilewriterWorkTicket() {
-        return filewriterWorkTicket;
+    public String getFileWriterMsg() {
+        return fileWriterMsg;
     }
 
-    public void setFilewriterWorkTicket(WorkTicket filewriterWorkTicket) {
-        this.filewriterWorkTicket = filewriterWorkTicket;
+    public void setFileWriterMsg(String fileWriterMsg) {
+        this.fileWriterMsg = fileWriterMsg;
     }
 
     public KafkaMessageType getMessageType() {

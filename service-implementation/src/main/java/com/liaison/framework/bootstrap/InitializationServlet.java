@@ -154,9 +154,6 @@ public class InitializationServlet extends HttpServlet {
         
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
             Producer.getInstance().stop();
-            if (null != consumer) {
-                consumer.shutdown();
-            }
         }
     }
 }
