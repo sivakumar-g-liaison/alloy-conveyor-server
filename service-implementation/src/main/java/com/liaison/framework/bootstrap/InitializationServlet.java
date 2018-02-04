@@ -152,6 +152,7 @@ public class InitializationServlet extends HttpServlet {
 
     public void destroy() {
 
+        //Shutdown the kafa producer gracefully
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
             Producer.getInstance().stop();
         }

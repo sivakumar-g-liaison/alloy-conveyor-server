@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.queue.kafka;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
+import com.liaison.threadmanagement.LiaisonExecutorServiceManager;
 import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -46,7 +47,6 @@ public class Consumer extends ThreadPoolExecutor {
             + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME);
     private static final String AUTO_OFFSET_RESET_DEFAULT = "latest";
 
-
     private static final int DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE = 10;
     private static final int DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES = 1;
 
@@ -57,85 +57,79 @@ public class Consumer extends ThreadPoolExecutor {
 
     private static int keepAlive = CONFIGURATION.getInt(PROPERTY_KAFKA_CONSUMER_KEEPALIVE_MINUTES, DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES);
 
-    private static int kafkaConsumerThreadPoolSize;
-    private static int corePoolSize;
+    private static int KAKFA_CONSUMER_THREAD_POOL_SIZE;
+    private static int CORE_POOL_SIZE;
 
     private static int timeout;
     private static KafkaConsumer<String, String> consumer = null;
 
     static {
-        kafkaConsumerThreadPoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_THREADPOOL_SIZE, DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE);
-        int defaultCorePoolSize = Math.round(kafkaConsumerThreadPoolSize/2);
-        corePoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_COREPOOLSIZE, defaultCorePoolSize);
+        KAKFA_CONSUMER_THREAD_POOL_SIZE = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_THREADPOOL_SIZE, DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE);
+        int defaultCorePoolSize = Math.round(KAKFA_CONSUMER_THREAD_POOL_SIZE /2);
+        CORE_POOL_SIZE = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_COREPOOLSIZE, defaultCorePoolSize);
     }
 
     public Consumer() {
 
-        super(corePoolSize, kafkaConsumerThreadPoolSize, keepAlive, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+        super(CORE_POOL_SIZE, KAKFA_CONSUMER_THREAD_POOL_SIZE, keepAlive, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
         LiaisonExecutorServiceDetail esd = new LiaisonExecutorServiceDetail(KAFKA_CONSUMER_THREADPOOL_NAME, this);
         LiaisonExecutorServiceRegistrar.INSTANCE.registerExecutor(KAFKA_CONSUMER_THREADPOOL_NAME, esd);
 
         consumer = new KafkaConsumer<>(getProperties());
+        //TODO read it from the properties
         timeout = 200;
         consumer.subscribe(Collections.singletonList(STREAM));
-        
-        /*Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                shutdown();
-                this.shutdown();
-                try {
-                    executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+
+        //Shutdown hook to sotp the kakfa consumer during JMS shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                LiaisonExecutorServiceManager.INSTANCE.bleed(KAFKA_CONSUMER_THREADPOOL_NAME);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                LOG.info("Consumer Shutdown hook called");
             }
-        });*/
+        }));
     }
 
     public void consume() {
 
-        this.submit(() -> {
+        submit(() -> {
             try {
                 while (true) {
                     ConsumerRecords<String, String> records = consumer.poll(timeout);
                     for (ConsumerRecord<String, String> record : records) {
-                        this.submit(new KafkaMessageService(record.value()));
+                        submit(new KafkaMessageService(record.value()));
                     }
                 }
             } catch (WakeupException e) {
                 // do nothing we are shutting down
-                LOG.error("MapR Streams consumer shutting down!" + e.getMessage(), e);
-            } finally {
-                try {
-                    consumer.unsubscribe();
-                    consumer.close();
-                    LOG.info("MapR Streams consumer successfully closed!");
-                } catch (Exception e) {
-                    LOG.error("An error occurred while closing MapR Streams consumer. " + e.getMessage(), e);
-                    // Retry once
-                    try {
-                        consumer.close();
-                        LOG.info("MapR Streams consumer successfully closed!");
-                    } catch (Exception ex) {
-                        LOG.error("An error occurred while closing MapR Streams consumer. " + ex.getMessage(), e);
-                    }
-                }
+                LOG.error("MapR Streams consumer shutting down!");
             }
         });
-    }
-
-    private void shutdownConsumer() {
-        if (consumer != null) {
-            consumer.wakeup();
-        }
     }
 
     @Override
     public void shutdown() {
 
-        // shutting dow the consumer
-        this.shutdownConsumer();
+        // shutting down the consumer
+        if (consumer != null) {
+            try {
+                consumer.unsubscribe();
+                consumer.close();
+                LOG.info("MapR Streams consumer successfully closed!");
+            } catch (Exception e) {
+                LOG.error("An error occurred while closing MapR Streams consumer. " + e.getMessage(), e);
+                // Retry once
+                try {
+                    consumer.close();
+                    LOG.info("MapR Streams consumer successfully closed!");
+                } catch (Exception ex) {
+                    LOG.error("An error occurred while closing MapR Streams consumer. " + ex.getMessage(), e);
+                }
+            }
+        }
+        //shutting down the executor service
         super.shutdown();
     }
 

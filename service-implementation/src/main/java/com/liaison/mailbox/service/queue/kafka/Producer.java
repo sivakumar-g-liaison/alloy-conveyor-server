@@ -59,9 +59,7 @@ public class Producer {
 
     private static Producer producer = null;
     
-    private Producer() {
-        
-    }
+    private Producer() {}
     
     public static Producer getInstance() {
         
@@ -124,8 +122,8 @@ public class Producer {
 
     /**
      * To send execute Directory Operation details.
-     * @param directoryCreation
-     * @param message
+     * @param directoryCreationOrDeletion type of the message
+     * @param message directory message dto
      */
     public void produce(KafkaMessageType directoryCreationOrDeletion, DirectoryMessageDTO message) {
         KafkaMessage kafkaMessage = new KafkaMessage();
@@ -136,15 +134,15 @@ public class Producer {
 
     /**
      * To send workticket for filewriter operation
-     * @param filewriterCreate
+     * @param kafkaMessageType
      * @param processorGuid
      * @param workTicket
      * @throws JSONException 
      */
-    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket, String processorGuid) throws JSONException {
+    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid) throws JSONException {
         
         KafkaMessage kafkaMessage = new KafkaMessage();
-        kafkaMessage.setMessageType(filewriterCreate);
+        kafkaMessage.setMessageType(kafkaMessageType);
         
         JSONObject requestObj = new JSONObject();
         requestObj.put(URI, workTicket.getPayloadURI());
