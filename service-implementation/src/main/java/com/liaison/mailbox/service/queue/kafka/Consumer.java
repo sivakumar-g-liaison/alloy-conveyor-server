@@ -12,10 +12,8 @@ package com.liaison.mailbox.service.queue.kafka;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
-import com.liaison.health.check.threadpool.ThreadPoolCheck;
-import com.liaison.health.core.LiaisonHealthCheckRegistry;
-import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
-
+import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
+import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -25,7 +23,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET;
@@ -39,7 +38,7 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERV
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
 
-public class Consumer {
+public class Consumer extends ThreadPoolExecutor {
 
     private static final Logger LOG = LogManager.getLogger(Consumer.class);
     private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
@@ -58,57 +57,50 @@ public class Consumer {
 
     private static int keepAlive = CONFIGURATION.getInt(PROPERTY_KAFKA_CONSUMER_KEEPALIVE_MINUTES, DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES);
 
-    private static ExecutorService executorService;
     private static int kafkaConsumerThreadPoolSize;
     private static int corePoolSize;
 
     private static int timeout;
     private static KafkaConsumer<String, String> consumer = null;
 
-    public Consumer() {
-
+    static {
         kafkaConsumerThreadPoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_THREADPOOL_SIZE, DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE);
-
         int defaultCorePoolSize = Math.round(kafkaConsumerThreadPoolSize/2);
         corePoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_COREPOOLSIZE, defaultCorePoolSize);
+    }
 
-        // keep pool trimmed to half during slack time for resource cleanup
-        executorService = LiaisonExecutorServiceBuilder.newExecutorService(
-                KAFKA_CONSUMER_THREADPOOL_NAME,
-                corePoolSize,
-                kafkaConsumerThreadPoolSize,
-                keepAlive,
-                TimeUnit.MINUTES);
+    public Consumer() {
 
-        // threadpool check
-        LiaisonHealthCheckRegistry.INSTANCE.register(KAFKA_CONSUMER_THREADPOOL_NAME + "_check", new ThreadPoolCheck(KAFKA_CONSUMER_THREADPOOL_NAME, 20));
+        super(corePoolSize, kafkaConsumerThreadPoolSize, keepAlive, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+        LiaisonExecutorServiceDetail esd = new LiaisonExecutorServiceDetail(KAFKA_CONSUMER_THREADPOOL_NAME, this);
+        LiaisonExecutorServiceRegistrar.INSTANCE.registerExecutor(KAFKA_CONSUMER_THREADPOOL_NAME, esd);
 
         consumer = new KafkaConsumer<>(getProperties());
         timeout = 200;
         consumer.subscribe(Collections.singletonList(STREAM));
         
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        /*Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 shutdown();
-                executorService.shutdown();
+                this.shutdown();
                 try {
                     executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
-        });
+        });*/
     }
 
     public void consume() {
 
-        executorService.submit((Runnable) () -> {
+        this.submit(() -> {
             try {
                 while (true) {
                     ConsumerRecords<String, String> records = consumer.poll(timeout);
                     for (ConsumerRecord<String, String> record : records) {
-                        executorService.submit(new KafkaMessageService(record.value()));
+                        this.submit(new KafkaMessageService(record.value()));
                     }
                 }
             } catch (WakeupException e) {
@@ -133,10 +125,18 @@ public class Consumer {
         });
     }
 
-    public void shutdown() {
+    private void shutdownConsumer() {
         if (consumer != null) {
             consumer.wakeup();
         }
+    }
+
+    @Override
+    public void shutdown() {
+
+        // shutting dow the consumer
+        this.shutdownConsumer();
+        super.shutdown();
     }
 
     private static Properties getProperties() {

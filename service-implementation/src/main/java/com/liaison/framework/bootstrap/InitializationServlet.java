@@ -151,7 +151,7 @@ public class InitializationServlet extends HttpServlet {
 	}
 
     public void destroy() {
-        
+
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
             Producer.getInstance().stop();
         }
