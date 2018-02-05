@@ -166,9 +166,16 @@ public class FileStageReplicationService implements Runnable {
     private void persistFile(InputStream response, File file) throws IOException {
         
         //write the file
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        FileOutputStream outputStream = null;
+        
+        try {
+            outputStream = new FileOutputStream(file);
             IOUtils.copy(response, outputStream);
             LOGGER.info("Staged the file successfully - datacenter");
+        } finally {
+            if (null != outputStream) {
+                outputStream.close();
+            }
         }
     }
 

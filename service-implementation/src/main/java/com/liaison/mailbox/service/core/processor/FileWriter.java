@@ -183,18 +183,30 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * @throws IOException
      */
     private String getPayloadLocation(WorkTicket workTicket) throws IOException {
+        String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
+        String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
+        return getPayloadLocation(targetDirectory, mode);
+    }
+    
+    /**
+     * get payload location from the workticket if it is given or processor configuration
+     *
+     * @param targetDirectory
+     * @param mode
+     * @return payload location
+     * @throws IOException
+     */
 
+    private String getPayloadLocation(String targetDirectory, String mode) throws IOException {
         //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
         //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
         //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
         String processorPayloadLocation;
-        String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
         if (MailBoxUtil.isEmpty(targetDirectory)) {
             processorPayloadLocation = getFileWriteLocation();
             createPathIfNotAvailable(processorPayloadLocation);
         } else {
 
-            String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
             if (!MailBoxUtil.isEmpty(mode)
                     && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
                 createPathIfNotAvailable(targetDirectory);
@@ -217,25 +229,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      */
 
     public String getReplicatePayloadLocation(String targetDirectory, String mode) throws IOException {
-        //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
-        //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
-        //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
-        String processorPayloadLocation;
-        if (MailBoxUtil.isEmpty(targetDirectory)) {
-            processorPayloadLocation = getFileWriteLocation();
-            createPathIfNotAvailable(processorPayloadLocation);
-        } else {
-
-            if (!MailBoxUtil.isEmpty(mode)
-                    && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
-                createPathIfNotAvailable(targetDirectory);
-                processorPayloadLocation = targetDirectory;
-            } else {
-                processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
-                createPathIfNotAvailable(processorPayloadLocation);
-            }
-        }
-        return processorPayloadLocation;
+        return getPayloadLocation(targetDirectory, mode);
     }
 
     /**
@@ -328,9 +322,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
         
         //write the file
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
+        } finally {
+            if (null != outputStream) {
+                outputStream.close();
+            }
         }
 
         //To add more details in staged file

@@ -59,9 +59,7 @@ public class Producer {
 
     private static Producer producer = null;
     
-    private Producer() {
-        
-    }
+    private Producer() {}
     
     public static Producer getInstance() {
         
@@ -124,27 +122,27 @@ public class Producer {
 
     /**
      * To send execute Directory Operation details.
-     * @param directoryCreation
-     * @param message
+     * @param kafkaMessageType type of the message
+     * @param message directory message dto
      */
-    public void produce(KafkaMessageType directoryCreationOrDeletion, DirectoryMessageDTO message) {
+    public void produce(KafkaMessageType kafkaMessageType, DirectoryMessageDTO message) {
         KafkaMessage kafkaMessage = new KafkaMessage();
-        kafkaMessage.setMessageType(directoryCreationOrDeletion);
+        kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setDirectoryMessageDTO(message);
         produce(marshalToJSON(kafkaMessage));
     }
 
     /**
      * To send workticket for filewriter operation
-     * @param filewriterCreate
+     * @param kafkaMessageType
      * @param processorGuid
      * @param workTicket
      * @throws JSONException 
      */
-    public void produce(KafkaMessageType filewriterCreate, WorkTicket workTicket, String processorGuid) throws JSONException {
+    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid) throws JSONException {
         
         KafkaMessage kafkaMessage = new KafkaMessage();
-        kafkaMessage.setMessageType(filewriterCreate);
+        kafkaMessage.setMessageType(kafkaMessageType);
         
         JSONObject requestObj = new JSONObject();
         requestObj.put(URI, workTicket.getPayloadURI());
@@ -161,12 +159,12 @@ public class Producer {
 
     /**
      * To send local folders creation details.
-     * @param directoryCreation
+     * @param kafkaMessageType
      * @param processorGuid
      */
-    public void produce(KafkaMessageType directoryCreation, String processorGuid) {
+    public void produce(KafkaMessageType kafkaMessageType, String processorGuid) {
         KafkaMessage kafkaMessage = new KafkaMessage();
-        kafkaMessage.setMessageType(directoryCreation);
+        kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setProcessorGuid(processorGuid);
         produce(marshalToJSON(kafkaMessage));
     }
