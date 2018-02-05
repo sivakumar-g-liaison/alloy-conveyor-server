@@ -80,7 +80,7 @@ public class Consumer extends ThreadPoolExecutor {
         timeout = 200;
         consumer.subscribe(Collections.singletonList(STREAM));
 
-        //Shutdown hook to sotp the kakfa consumer during JMS shutdown
+        //Shutdown hook to stop the kakfa consumer during JMS shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 LiaisonExecutorServiceManager.INSTANCE.bleed(KAFKA_CONSUMER_THREADPOOL_NAME);
