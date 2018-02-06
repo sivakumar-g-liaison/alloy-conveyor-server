@@ -35,6 +35,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_DELAY;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_MAX_COUNT;
@@ -45,6 +48,7 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY;
 import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY_MODE;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 
 
@@ -71,7 +75,7 @@ public class FileStageReplicationService implements Runnable {
     }
 
     public FileStageReplicationService() {
-        
+
     }
     
     public FileStageReplicationService(String message) {
@@ -90,28 +94,29 @@ public class FileStageReplicationService implements Runnable {
     /**
      * Staged the files which is posted from other dc
      *
-     * @param requestString message string from the queue
+     * @param requestMessage message string from the queue
      */
-    public void stage(String requestString) throws JSONException, ClientUnavailableException, IOException {
+    public void stage(String requestMessage) throws JSONException, ClientUnavailableException, IOException {
 
-        JSONObject requestObj = new JSONObject(requestString);
-        String fs2uri = (String) requestObj.get(URI);
-        String globalProcessId = (String) requestObj.get(GLOBAL_PROCESS_ID);
-        String processorId = (String) requestObj.get(KEY_PROCESSOR_ID);
-        String targetDirectory = (String) requestObj.get(KEY_TARGET_DIRECTORY);
-        String mode = (String) requestObj.get(KEY_TARGET_DIRECTORY_MODE);
-        String fileName = (String) requestObj.get(KEY_FILE_NAME);
-        String isOverwrite = (String) requestObj.get(KEY_OVERWRITE);
+        JSONObject requestObj = new JSONObject(requestMessage);
+        String fs2uri = requestObj.getString(URI);
+        String globalProcessId = requestObj.getString(GLOBAL_PROCESS_ID);
+        String processorId = requestObj.getString(KEY_PROCESSOR_ID);
+        String targetDirectory = requestObj.getString(KEY_TARGET_DIRECTORY);
+        String mode = requestObj.getString(KEY_TARGET_DIRECTORY_MODE);
+        String fileName = requestObj.getString(KEY_FILE_NAME);
+        String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
+        String isOverwrite = requestObj.getString(KEY_OVERWRITE);
         InputStream payload = null;
-        
+
         int retry = (int) requestObj.get(RETRY_COUNT);
 
         if (retry > MAX_RETRY_COUNT) {
-            LOGGER.warn("Reached maximum retry and dropping this message - {}", message);
+            LOGGER.warn("Reached maximum retry and dropping this message - {}", requestMessage);
             return;
         }
         requestObj.put(RETRY_COUNT, ++retry);
-        requestString = requestObj.toString();
+        requestMessage = requestObj.toString();
 
         //Initial Check
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
@@ -120,32 +125,35 @@ public class FileStageReplicationService implements Runnable {
         if (null == stagedFile) {
             //Staged file is not replicated so adding back to queue with delay
             LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter");
-            FileStageReplicationSendQueue.getInstance().sendMessage(requestString, DELAY);
+            FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
         } else {
 
             try {
-                
+
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
-                
-                Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, processorId);
-                FileWriter fileWriter = new FileWriter(processor);
-                String processorPayloadLocation = fileWriter.getReplicatePayloadLocation(targetDirectory, mode);
+
+                Path path = Paths.get(processorPayloadLocation);
+                if (Files.notExists(path)) {
+                    Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, processorId);
+                    FileWriter fileWriter = new FileWriter(processor);
+                    processorPayloadLocation = fileWriter.getReplicatePayloadLocation(targetDirectory, mode);
+                }
 
                 File file = new File(processorPayloadLocation + File.separatorChar + fileName);
                 payload = StorageUtilities.retrievePayload(fs2uri);
 
-                if (file.exists()) {
+                if (null != file && file.exists()) {
                     if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
                         persistFile(payload, file);
                     }
                 } else {
                     persistFile(payload, file);
                 }
-                
+
             } catch (MailBoxServicesException | IllegalArgumentException e) {
                 // Payload doesn't exist in BOSS so adding back to queue with delay
                 LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
-                FileStageReplicationSendQueue.getInstance().sendMessage(requestString, DELAY);
+                FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
             } finally {
                 ThreadContext.clearMap();
                 if (null != payload) {
@@ -155,16 +163,16 @@ public class FileStageReplicationService implements Runnable {
         }
 
     }
-    
+
     /**
-     * method to persist the file for replication 
-     * 
+     * method to persist the file for replication
+     *
      * @param response
      * @param file
      * @throws IOException
      */
     private void persistFile(InputStream response, File file) throws IOException {
-        
+
         //write the file
         FileOutputStream outputStream = null;
         

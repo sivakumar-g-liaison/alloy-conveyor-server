@@ -100,6 +100,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
                         throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
                     }
+                    
+                    createPathIfNotAvailable(processorPayloadLocation);
 
                     // write the payload retrieved from spectrum to the configured location of processor
                     LOG.info("Started writing payload to {} and the filename is {}", processorPayloadLocation, fileName);
@@ -107,7 +109,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket, configurationInstance.getPguid());
+                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket, configurationInstance.getPguid(), processorPayloadLocation);
                         }
                     } else {
 
@@ -141,6 +143,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 //do remote uploader operation
                 processorPayloadLocation = getPayloadLocation(workTicket);
+                createPathIfNotAvailable(processorPayloadLocation);
                 LOG.info("Started staging payload in staged file table and payload location {} and the filename is {}", processorPayloadLocation, fileName);
                 writeStatus = addAnEntryToStagedFile(processorPayloadLocation, fileName, workTicket);
 
@@ -204,16 +207,13 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         String processorPayloadLocation;
         if (MailBoxUtil.isEmpty(targetDirectory)) {
             processorPayloadLocation = getFileWriteLocation();
-            createPathIfNotAvailable(processorPayloadLocation);
         } else {
 
             if (!MailBoxUtil.isEmpty(mode)
                     && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
-                createPathIfNotAvailable(targetDirectory);
                 processorPayloadLocation = targetDirectory;
             } else {
                 processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
-                createPathIfNotAvailable(processorPayloadLocation);
             }
         }
         return processorPayloadLocation;

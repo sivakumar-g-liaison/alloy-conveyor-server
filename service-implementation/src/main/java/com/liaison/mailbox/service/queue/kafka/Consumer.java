@@ -39,6 +39,10 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERV
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
 
+/**
+ * Kafka consumer to consume message from topic.
+ *
+ */
 public class Consumer extends ThreadPoolExecutor {
 
     private static final Logger LOG = LogManager.getLogger(Consumer.class);
@@ -49,24 +53,27 @@ public class Consumer extends ThreadPoolExecutor {
 
     private static final int DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE = 10;
     private static final int DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES = 1;
+    private static final int DEFAULT_KAFKA_CONSUMER_TIMEOUT = 200;
 
     private static final String PROPERTY_KAFKA_CONSUMER_THREADPOOL_SIZE = "com.liaison.mailbox.kafka.consumer.threadpool.size";
     private static final String PROPERTY_KAFKA_CONSUMER_KEEPALIVE_MINUTES = "com.liaison.mailbox.kafka.consumer.threadpool.keepalive.minutes";
     private static final String PROPERTY_KAFKA_CONSUMER_COREPOOLSIZE = "com.liaison.mailbox.kafka.consumer.threadpool.corepoolsize";
+    private static final String PROPERTY_KAFKA_CONSUMER_TIMEOUT = "kafka.consumer.timeout";
     private static final String KAFKA_CONSUMER_THREADPOOL_NAME = "g2-pool-kafka-consumer";
 
     private static int keepAlive = CONFIGURATION.getInt(PROPERTY_KAFKA_CONSUMER_KEEPALIVE_MINUTES, DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES);
 
     private static int KAKFA_CONSUMER_THREAD_POOL_SIZE;
     private static int CORE_POOL_SIZE;
-
-    private static int timeout;
+    private static int TIMEOUT;
+    
     private static KafkaConsumer<String, String> consumer = null;
 
     static {
         KAKFA_CONSUMER_THREAD_POOL_SIZE = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_THREADPOOL_SIZE, DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE);
         int defaultCorePoolSize = Math.round(KAKFA_CONSUMER_THREAD_POOL_SIZE /2);
         CORE_POOL_SIZE = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_COREPOOLSIZE, defaultCorePoolSize);
+        TIMEOUT = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_KAFKA_CONSUMER_TIMEOUT, DEFAULT_KAFKA_CONSUMER_TIMEOUT);
     }
 
     public Consumer() {
@@ -76,8 +83,6 @@ public class Consumer extends ThreadPoolExecutor {
         LiaisonExecutorServiceRegistrar.INSTANCE.registerExecutor(KAFKA_CONSUMER_THREADPOOL_NAME, esd);
 
         consumer = new KafkaConsumer<>(getProperties());
-        //TODO read it from the properties
-        timeout = 200;
         consumer.subscribe(Collections.singletonList(STREAM));
 
         //Shutdown hook to stop the kakfa consumer during JMS shutdown
@@ -97,7 +102,7 @@ public class Consumer extends ThreadPoolExecutor {
         submit(() -> {
             try {
                 while (true) {
-                    ConsumerRecords<String, String> records = consumer.poll(timeout);
+                    ConsumerRecords<String, String> records = consumer.poll(TIMEOUT);
                     for (ConsumerRecord<String, String> record : records) {
                         submit(new KafkaMessageService(record.value()));
                     }

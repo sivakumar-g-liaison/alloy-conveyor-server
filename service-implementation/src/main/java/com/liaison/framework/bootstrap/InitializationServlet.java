@@ -63,7 +63,6 @@ public class InitializationServlet extends HttpServlet {
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
-    private Consumer consumer = null;
 
     public void init(ServletConfig config) throws ServletException {
 
@@ -144,8 +143,7 @@ public class InitializationServlet extends HttpServlet {
         }
         
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            consumer = new Consumer();
-            consumer.consume();
+            new Consumer().consume();
         }
 
 	}

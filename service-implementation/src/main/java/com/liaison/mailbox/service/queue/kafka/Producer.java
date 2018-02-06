@@ -33,6 +33,7 @@ import javax.xml.bind.JAXBException;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY;
@@ -48,7 +49,9 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERV
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER_DEFAULT;
 
-
+/**
+ * To produce message to Kafka
+ */
 public class Producer {
 
     private static final Logger LOG = LogManager.getLogger(Producer.class);
@@ -73,6 +76,11 @@ public class Producer {
         return producer;
     }
     
+    /**
+     * Send message to topic
+     * 
+     * @param message
+     */
     public void produce(String message) {
         
         if (MailBoxUtil.isEmpty(message)) {
@@ -98,6 +106,9 @@ public class Producer {
         return producerProperties;
     }
 
+    /**
+     * To stop send request to the kafka producer.
+     */
     public void stop() {
         
         if (kafkaProducer != null) {
@@ -137,9 +148,10 @@ public class Producer {
      * @param kafkaMessageType
      * @param processorGuid
      * @param workTicket
+     * @param payloadLocation
      * @throws JSONException 
      */
-    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid) throws JSONException {
+    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid, String payloadLocation) throws JSONException {
         
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
@@ -151,6 +163,7 @@ public class Producer {
         requestObj.put(KEY_TARGET_DIRECTORY, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY).toString());
         requestObj.put(KEY_TARGET_DIRECTORY_MODE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE).toString());
         requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
+        requestObj.put(KEY_FILE_PATH, workTicket.getFileName());
         requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());
         
         kafkaMessage.setFileWriterMsg(requestObj.toString());
