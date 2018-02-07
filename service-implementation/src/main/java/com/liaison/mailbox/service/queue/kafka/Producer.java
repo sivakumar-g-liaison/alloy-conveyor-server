@@ -160,8 +160,6 @@ public class Producer {
         requestObj.put(URI, workTicket.getPayloadURI());
         requestObj.put(GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
         requestObj.put(KEY_PROCESSOR_ID, processorGuid);
-        requestObj.put(KEY_TARGET_DIRECTORY, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY).toString());
-        requestObj.put(KEY_TARGET_DIRECTORY_MODE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE).toString());
         requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
         requestObj.put(KEY_FILE_PATH, workTicket.getFileName());
         requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());

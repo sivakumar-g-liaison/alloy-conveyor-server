@@ -102,8 +102,6 @@ public class FileStageReplicationService implements Runnable {
         String fs2uri = requestObj.getString(URI);
         String globalProcessId = requestObj.getString(GLOBAL_PROCESS_ID);
         String processorId = requestObj.getString(KEY_PROCESSOR_ID);
-        String targetDirectory = requestObj.getString(KEY_TARGET_DIRECTORY);
-        String mode = requestObj.getString(KEY_TARGET_DIRECTORY_MODE);
         String fileName = requestObj.getString(KEY_FILE_NAME);
         String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
         String isOverwrite = requestObj.getString(KEY_OVERWRITE);
@@ -136,7 +134,7 @@ public class FileStageReplicationService implements Runnable {
                 if (Files.notExists(path)) {
                     Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, processorId);
                     FileWriter fileWriter = new FileWriter(processor);
-                    processorPayloadLocation = fileWriter.getReplicatePayloadLocation(targetDirectory, mode);
+                    fileWriter.createPathIfNotAvailable(processorPayloadLocation);
                 }
 
                 File file = new File(processorPayloadLocation + File.separatorChar + fileName);

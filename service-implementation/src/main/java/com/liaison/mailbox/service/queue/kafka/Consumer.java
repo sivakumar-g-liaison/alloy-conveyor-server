@@ -85,7 +85,7 @@ public class Consumer extends ThreadPoolExecutor {
         consumer = new KafkaConsumer<>(getProperties());
         consumer.subscribe(Collections.singletonList(STREAM));
 
-        //Shutdown hook to stop the kakfa consumer during JMS shutdown
+        //Shutdown hook to stop the kakfa consumer during JVM shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 LiaisonExecutorServiceManager.INSTANCE.bleed(KAFKA_CONSUMER_THREADPOOL_NAME);

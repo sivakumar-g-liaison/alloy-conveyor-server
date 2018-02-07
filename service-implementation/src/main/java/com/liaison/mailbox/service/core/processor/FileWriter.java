@@ -18,14 +18,15 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -100,8 +101,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         LOG.error("payload or filewrite location not configured for processor {}", configurationInstance.getProcsrName());
                         throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
                     }
-                    
-                    createPathIfNotAvailable(processorPayloadLocation);
 
                     // write the payload retrieved from spectrum to the configured location of processor
                     LOG.info("Started writing payload to {} and the filename is {}", processorPayloadLocation, fileName);
@@ -143,7 +142,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 //do remote uploader operation
                 processorPayloadLocation = getPayloadLocation(workTicket);
-                createPathIfNotAvailable(processorPayloadLocation);
                 LOG.info("Started staging payload in staged file table and payload location {} and the filename is {}", processorPayloadLocation, fileName);
                 writeStatus = addAnEntryToStagedFile(processorPayloadLocation, fileName, workTicket);
 
@@ -186,50 +184,28 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * @throws IOException
      */
     private String getPayloadLocation(WorkTicket workTicket) throws IOException {
-        String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
-        String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
-        return getPayloadLocation(targetDirectory, mode);
-    }
-    
-    /**
-     * get payload location from the workticket if it is given or processor configuration
-     *
-     * @param targetDirectory
-     * @param mode
-     * @return payload location
-     * @throws IOException
-     */
 
-    private String getPayloadLocation(String targetDirectory, String mode) throws IOException {
         //Supports targetDirectory from the workticket if it is available otherwise it would use the configured payload location.
         //It takes decision based on mode, either to append the path to the payload location or ignore the payload location and use the targetDirectory.
         //The only allowed location to write the paylaod is /data/(sftp/ftp/ftps)/**/(inbox/outbox)
         String processorPayloadLocation;
+        String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
         if (MailBoxUtil.isEmpty(targetDirectory)) {
             processorPayloadLocation = getFileWriteLocation();
+            createPathIfNotAvailable(processorPayloadLocation);
         } else {
 
+            String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
             if (!MailBoxUtil.isEmpty(mode)
                     && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
+                createPathIfNotAvailable(targetDirectory);
                 processorPayloadLocation = targetDirectory;
             } else {
                 processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
+                createPathIfNotAvailable(processorPayloadLocation);
             }
         }
         return processorPayloadLocation;
-    }
-    
-    /**
-     * get payload location from the workticket if it is given or processor configuration
-     *
-     * @param targetDirectory
-     * @param mode
-     * @return payload location
-     * @throws IOException
-     */
-
-    public String getReplicatePayloadLocation(String targetDirectory, String mode) throws IOException {
-        return getPayloadLocation(targetDirectory, mode);
     }
 
     /**
@@ -322,15 +298,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
         
         //write the file
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(file);
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
-        } finally {
-            if (null != outputStream) {
-                outputStream.close();
-            }
         }
 
         //To add more details in staged file
