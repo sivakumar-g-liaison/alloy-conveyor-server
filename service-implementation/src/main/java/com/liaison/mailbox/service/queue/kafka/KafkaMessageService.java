@@ -12,28 +12,18 @@ package com.liaison.mailbox.service.queue.kafka;
 
 import java.io.IOException;
 
-import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
-import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
-import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.directory.DirectoryService;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * To process message from kafka consumer.

@@ -15,6 +15,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
@@ -36,12 +37,11 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
-import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY;
-import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY_MODE;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 import static com.liaison.mailbox.MailBoxConstants.URI;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_TOPIC_NAME;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_TOPIC_NAME_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_TOPIC_NAME_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER_DEFAULT;
@@ -57,12 +57,21 @@ public class Producer {
     private static final Logger LOG = LogManager.getLogger(Producer.class);
     private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
     private static KafkaProducer<String, String> kafkaProducer;
-    private static String TOPIC_NAME = configuration.getString(KAFKA_STREAM)
-            + configuration.getString(KAFKA_PRODUCER_TOPIC_NAME);
+    private static String TOPIC_NAME;
 
     private static Producer producer = null;
     
-    private Producer() {}
+    private Producer() {
+        
+        String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        
+        // We have to check relay and legacy relay; No need for check conveyor.
+        if (DeploymentType.RELAY.getValue().equals(deploymentType)) {
+            TOPIC_NAME = configuration.getString(KAFKA_STREAM) + configuration.getString(KAFKA_PRODUCER_TOPIC_NAME_DEFAULT);
+        } else {
+            TOPIC_NAME = configuration.getString(KAFKA_STREAM) + configuration.getString(KAFKA_PRODUCER_TOPIC_NAME_LOWSECURE);
+        }
+    }
     
     public static Producer getInstance() {
         
@@ -83,6 +92,10 @@ public class Producer {
      */
     public void produce(String message) {
         
+        if (configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
+            throw new RuntimeException(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
+        }
+        
         if (MailBoxUtil.isEmpty(message)) {
             throw new RuntimeException("Unable to send message to topic " + TOPIC_NAME + ". " + " Message is empty");
         }
@@ -100,7 +113,7 @@ public class Producer {
     private static Properties getProperties() {
 
         Properties producerProperties = new Properties();
-        producerProperties.setProperty(SERVERS, configuration.getString(KAFKA_CONSUMER_PREFIX + SERVERS));
+        producerProperties.setProperty(SERVERS, configuration.getString(KAFKA_PRODUCER_PREFIX + SERVERS));
         producerProperties.setProperty(KEY_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + KEY_SERIALIZER, KEY_SERIALIZER_DEFAULT));
         producerProperties.setProperty(VALUE_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + VALUE_SERIALIZER, VALUE_SERIALIZER_DEFAULT));
         return producerProperties;

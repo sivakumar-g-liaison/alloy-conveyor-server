@@ -12,9 +12,12 @@ package com.liaison.mailbox.service.queue.kafka;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
 import com.liaison.threadmanagement.LiaisonExecutorServiceManager;
 import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -31,7 +34,8 @@ import java.util.concurrent.TimeUnit;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.GROUP_ID;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_PREFIX;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER_DEFAULT;
@@ -48,7 +52,9 @@ public class Consumer extends ThreadPoolExecutor {
     private static final Logger LOG = LogManager.getLogger(Consumer.class);
     private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
     private static final String STREAM = CONFIGURATION.getString(KAFKA_STREAM)
-            + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME);
+            + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_DEFAULT);
+    private static final String STREAM_LEGACY = CONFIGURATION.getString(KAFKA_STREAM)
+            + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_LOWSECURE);
     private static final String AUTO_OFFSET_RESET_DEFAULT = "latest";
 
     private static final int DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE = 10;
@@ -83,8 +89,15 @@ public class Consumer extends ThreadPoolExecutor {
         LiaisonExecutorServiceRegistrar.INSTANCE.registerExecutor(KAFKA_CONSUMER_THREADPOOL_NAME, esd);
 
         consumer = new KafkaConsumer<>(getProperties());
-        consumer.subscribe(Collections.singletonList(STREAM));
 
+        // It will called if the type is not conveyor. We have to check relay and legacy relay;
+        String deploymentType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
+        if (DeploymentType.RELAY.getValue().equals(deploymentType)) {
+            consumer.subscribe(Collections.singletonList(STREAM));
+        } else {
+            consumer.subscribe(Collections.singletonList(STREAM_LEGACY));
+        }
+        
         //Shutdown hook to stop the kakfa consumer during JVM shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {

@@ -142,7 +142,8 @@ public class InitializationServlet extends HttpServlet {
             }
         }
         
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)
+                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
             new Consumer().consume();
         }
 
