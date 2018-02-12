@@ -1,4 +1,4 @@
-5.1.0-SNAPSHOT
+5.1.5
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
 * GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1
