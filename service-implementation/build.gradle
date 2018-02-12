@@ -210,7 +210,7 @@ dependencies {
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.11'
 
-	workTicket 'com.liaison.dto:dto:3.+'
+	workTicket 'com.liaison.dto:dto:5.+'
 	
 	compile ("com.liaison.commons.message.glass:glass-message-lib:7.+")
 
