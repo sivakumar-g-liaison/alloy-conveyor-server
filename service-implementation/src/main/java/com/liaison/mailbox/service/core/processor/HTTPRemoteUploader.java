@@ -14,8 +14,11 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -25,21 +28,26 @@ import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods
@@ -79,7 +87,6 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             if (MailBoxConstants.POST.equals(httpVerb) || MailBoxConstants.PUT.equals(httpVerb)) {
 
                 //Checks the local path has files to upload
-                String path = validateLocalPath();
                 boolean recursiveSubdirectories = httpUploaderStaticProperties.isRecurseSubDirectories();
                 setDirectUpload(httpUploaderStaticProperties.isDirectUpload());
 
@@ -87,7 +94,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                         ? getFilesToUpload(recursiveSubdirectories)
                         : getRelayFiles(recursiveSubdirectories);
                 if (files == null || files.length == 0) {
-                    LOGGER.info(constructMessage("The given payload location {} doesn't have files to upload."), path);
+                    LOGGER.info(constructMessage("Storage location is empty for the processor {}.", configurationInstance.getProcsrName()));
                     return;
                 }
 
@@ -145,8 +152,10 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             request.inputData(contentStream, contentType);
 
             response = request.execute();
-            LOGGER.debug(constructMessage("The response code received is {} for a request {} "),
+            LOGGER.info(constructMessage("The response code received is {}, response data is {} and response reason is {} for a request file {}"),
                     response.getStatusCode(),
+                    responseStream.toString(),
+                    response.getReasonPhrease(),
                     file.getName());
             if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
 
@@ -179,8 +188,8 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
      */
     private void uploadFile(RelayFile file) throws IOException, IllegalAccessException, LiaisonException {
 
-        HTTPRequest request = null;
-        HTTPResponse response = null;
+        HTTPRequest request;
+        HTTPResponse response;
 
         // retrieve required properties
         HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
@@ -199,15 +208,26 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             request.inputData(contentStream, contentType);
 
             response = request.execute();
-            LOGGER.debug(constructMessage("The response code received is {} for a request {} "),
+            LOGGER.info(constructMessage("The response code received is {}, response data is {} and response reason is {} for a request file {}"),
                     response.getStatusCode(),
+                    responseStream.toString(),
+                    response.getReasonPhrease(),
                     file.getName());
             if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
 
                 LOGGER.warn(constructMessage("The response code received is {} "), response.getStatusCode());
                 LOGGER.warn(constructMessage("Execution failure for "), file.getAbsolutePath());
                 String msg = String.format("Failed to upload a file %s  status code received %s and the reason is %s", file.getName(), response.getStatusCode(), response.getReasonPhrease());
+
                 logToLens(msg, file, ExecutionState.FAILED);
+                boolean retry = httpUploaderStaticProperties.getExecution().equalsIgnoreCase(MailBoxConstants.EXECUTE);
+                if (!retry) {
+                    StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+                    StagedFile stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
+                    stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                    stagedFileDAO.merge(stagedFile);
+                }
+
                 throw new RuntimeException(msg);
 
             } else {
@@ -217,7 +237,15 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                 String msg = "File " +
                         file.getName() +
                         " uploaded successfully";
+                LOGGER.info(msg);
                 logToLens(msg, file, ExecutionState.COMPLETED);
+
+                boolean isPersistResponsePayload = httpUploaderStaticProperties.isSaveResponsePayload();
+                if (isPersistResponsePayload) {
+                    String responseUri = persistResponse(responseStream, file);
+                    this.setResponseFs2Uri(responseUri);
+                }
+
                 totalNumberOfProcessedFiles++;
             }
         } finally {
@@ -236,7 +264,6 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                 }
             }
         }
-
     }
 
     @Override
@@ -270,9 +297,13 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
     }
 
     @Override
-    public void doDirectUpload(String fileName, String folderPath, String globalProcessId) {
+    public void doDirectUpload(WorkTicket workticket) {
 
         try {
+
+            String fileName = workticket.getFileName();
+            String folderPath = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
+            String globalProcessId = workticket.getGlobalProcessId();
 
             boolean isHandOverExecutionToJavaScript;
             int scriptExecutionTimeout;
@@ -297,16 +328,15 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                         fileName,
                         folderPath);
 
-                if (this.canUseFileSystem()) {
-                    uploadFile(new File(folderPath + File.separatorChar + fileName));
-                } else {
+                //always do not use file system for http remote uploader
+                StagedFileDAO dao = new StagedFileDAOBase();
+                StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
 
-                    StagedFileDAO dao = new StagedFileDAOBase();
-                    StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
-
-                    RelayFile file = new RelayFile();
-                    file.copy(stagedFile);
-                    uploadFile(file);
+                RelayFile file = new RelayFile();
+                file.copy(stagedFile);
+                uploadFile(file);
+                if (this.getResponseFs2Uri() != null) {
+                    workticket.getAdditionalContext().put(MailBoxConstants.RESPONSE_FS2_URI, this.getResponseFs2Uri());
                 }
 
             }
@@ -317,8 +347,49 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
     }
 
     @Override
+    protected boolean canUseFileSystem() {
+        return false;
+    };
+    
+    @Override
     protected int getScriptExecutionTimeout() throws IOException, IllegalAccessException {
         return ((HTTPUploaderPropertiesDTO) getProperties()).getScriptExecutionTimeout();
+    }
+    
+    @Override
+    public RelayFile[] getRelayFiles(boolean recurseSubDirs) {
+
+         RelayFile file = null;
+         StagedFileDAO dao = new StagedFileDAOBase();
+         List<StagedFile> stagedFiles;
+
+         //for javascript direct upload
+         if (getFileName() != null
+                 && isDirectUpload()) {
+
+             RelayFile[] fileArray = new RelayFile[1];
+             StagedFile stagedFile = dao.findStagedFileByProcessorIdAndFileName(this.configurationInstance.getPguid(), getFileName());
+
+             file = new RelayFile();
+             file.copy(stagedFile);
+             fileArray[0] = file;
+
+             return fileArray;
+         }
+         
+         //default profile invocation
+         stagedFiles = dao.findStagedFilesByProcessorId(this.configurationInstance.getPguid());
+
+         List<RelayFile> files = new ArrayList<>();
+         for (StagedFile stagedFile : stagedFiles) {
+
+             file = new RelayFile();
+             file.copy(stagedFile);
+             files.add(file);
+             stagedFileMap.put(file.getAbsolutePath(), stagedFile);
+         }
+
+         return files.toArray(new RelayFile[files.size()]);
     }
 
 }

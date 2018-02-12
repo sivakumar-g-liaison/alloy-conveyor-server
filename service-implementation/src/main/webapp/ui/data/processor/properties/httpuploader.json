@@ -256,64 +256,42 @@
 	      	}
 	      },
 	      {
-	      	"name": "useFileSystem",
-	      	"displayName":"Use File System",
-	      	"type":"select",
-	      	"value":"true",
-	      	"mandatory":true,
-	      	"dynamic":false,
-	      	"valueProvided":false,
-	      	"defaultValue":"true",
-	      	"validationRules":null,
-	      	"options":[
-	      		"false",
-	      		"true"
-	      	]
-	      }
+	        "name":"execution",
+	        "displayName" : "Execution",
+	        "value":"Infinite",
+	        "type":"select",
+	        "mandatory":false,
+	        "dynamic":false,
+	        "valueProvided":false,
+	        "defaultValue":"Infinite",
+	        "validationRules": null,
+	        "options":["Once","Infinite"]           
+		},
+		{
+	        "name":"saveResponsePayload",
+	        "displayName" : "SaveResponsePayload",
+	        "value":"true",
+	        "type":"select",
+	        "mandatory":false,
+	        "dynamic":false,
+	        "valueProvided":false,
+	        "defaultValue":"true",
+	        "validationRules": null,
+	        "options":["false","true"]           
+		}
       ],
-      "folderProperties":[
-         {
-            "folderURI":"",
-            "folderDisplayType":"Remote Target Location",
-            "folderType":"RESPONSE_LOCATION",
-            "folderDesc":"",
-            "mandatory":false,
-            "readOnly":false,
-            "valueProvided":false,
-            "validationRules":{
-               "folderURIPattern":"",
-               "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
-               "minLength":"",
-               "maxLength":"250"
-            }
-         },
-         {
-            "folderURI":"",
-            "folderDisplayType":"Local Payload Location",
-            "folderType":"PAYLOAD_LOCATION",
-            "folderDesc":"",
-            "mandatory":false,
-            "readOnly":false,
-            "valueProvided":false,
-            "validationRules":{
-               "folderURIPattern":"",
-               "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
-               "minLength":"",
-               "maxLength":"250"
-            }
-         }
-      ],
+      "folderProperties":[],
       "credentialProperties":[
-         {
-            "credentialURI":"",
-            "credentialType":"LOGIN_CREDENTIAL",
-            "credentialDisplayType":"Login Credential",
-            "userId":"",
-            "password":"",
-            "idpType":"",
-            "idpURI":"",
-            "valueProvided":false
-         }
-      ]
+          {
+             "credentialURI":"",
+             "credentialType":"LOGIN_CREDENTIAL",
+             "credentialDisplayType":"Login Credential",
+             "userId":"",
+             "password":"",
+             "idpType":"",
+             "idpURI":"",
+             "valueProvided":false
+          }
+       ]
    }
 }

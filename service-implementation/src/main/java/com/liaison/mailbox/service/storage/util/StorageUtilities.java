@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.storage.util;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
@@ -36,8 +37,10 @@ import org.apache.logging.log4j.Logger;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -434,6 +437,9 @@ public class StorageUtilities {
         if (null != httpListenerProperties.get(MailBoxConstants.CONTENT_TYPE)) {
             fs2Header.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), httpListenerProperties.get(MailBoxConstants.CONTENT_TYPE));
         }
+        if (null != workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TENANCY_KEY)) {
+            fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TENANCY_KEY));
+        }
         LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
         return fs2Header;
@@ -522,5 +528,95 @@ public class StorageUtilities {
             throw new RuntimeException("Failed to get the meta data.", e);
         }
         return metaSnapshot.getPayloadSize();
+    }
+    
+    /**
+     * 
+     * @param payload
+     * @param workTicket
+     * @param httpListenerProperties
+     * @return
+     */
+    public static FS2MetaSnapshot persistPayload(ByteArrayOutputStream payload, WorkTicket workTicket, Map<String, String> httpListenerProperties) {
+
+        try {
+
+            FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+            String uri = FS2_URI_MBX_PAYLOAD + workTicket.getGlobalProcessId() + "." + UUIDGen.getCustomUUID();
+
+            // persists the message in spectrum.
+            LOGGER.debug("Persist the payload **");
+            URI requestUri = createPayloadURI(uri, true, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
+
+            // fetch the metdata includes payload size            
+            FS2MetaSnapshot metaSnapshot;
+            OutputStream persistedOutputStream = null;
+
+            try {
+
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, null);
+                persistedOutputStream = FS2.getFS2PayloadOutputStream(requestUri, false);
+                persistedOutputStream.write(payload.toByteArray());
+            } finally {
+                if (persistedOutputStream != null) {
+                    persistedOutputStream.close();
+                }
+                if (payload != null) {
+                    payload.close();
+                }
+            }
+
+            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
+            return metaSnapshot;
+
+        } catch (FS2ObjectAlreadyExistsException e) {
+            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+
+        } catch (FS2Exception | IOException e) {
+            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     *
+     * @param payload
+     * @param workTicket
+     * @param httpListenerProperties
+     * @return
+     */
+    public static FS2MetaSnapshot persistPayload(InputStream payload, WorkTicket workTicket, Map<String, String> httpListenerProperties) {
+
+        try {
+
+            FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+            String uri = FS2_URI_MBX_PAYLOAD + workTicket.getGlobalProcessId() + "." + UUIDGen.getCustomUUID();
+
+            // persists the message in spectrum.
+            LOGGER.debug("Persist the payload **");
+            URI requestUri = createPayloadURI(uri, true, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
+
+            // fetch the metdata includes payload size
+            FS2MetaSnapshot metaSnapshot;
+            try {
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
+            } finally {
+                if (payload != null) {
+                    payload.close();
+                }
+            }
+
+            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
+            return metaSnapshot;
+
+        } catch (FS2ObjectAlreadyExistsException e) {
+            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+
+        } catch (FS2Exception | IOException e) {
+            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 }

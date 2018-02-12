@@ -17,6 +17,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -315,6 +318,84 @@ public class MailBoxUtilTest {
         Assert.assertEquals(httpsURLWithoutPort + ":" + MailBoxConstants.HTTPS_PORT, propertiesDTO.getUrl());
         Assert.assertEquals(MailBoxConstants.HTTPS_PORT, propertiesDTO.getPort());
         
+    }
+
+    /**
+     * Method to test valid processor type and protocol for HTTP Uploader.
+     * 
+     */
+    @Test
+    public void testValidHttpOrHttpsRemoteUploader() {
+
+        boolean isvalid;
+        Processor proces = constructUploaderProcessor();
+
+        proces.setProcsrProtocol(MailBoxConstants.HTTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, true);
+
+        proces.setProcsrProtocol(MailBoxConstants.HTTPS);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, true);
+    }
+
+    /**
+     * Method to test Invalid processor type and protocol for HTTP Uploader.
+     * 
+     */
+    @Test
+    public void testInvalidHttpOrHttpsRemoteUploader() {
+
+        boolean isvalid;
+        Processor proces;
+        
+        // uploader
+        proces = constructUploaderProcessor();
+        
+        proces.setProcsrProtocol(MailBoxConstants.SFTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+
+        proces.setProcsrProtocol(MailBoxConstants.FTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+
+        proces.setProcsrProtocol(MailBoxConstants.FTPS);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+        
+        // downloader
+        proces = constructDownloaderProcessor();
+
+        proces.setProcsrProtocol(MailBoxConstants.SFTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+
+        proces.setProcsrProtocol(MailBoxConstants.FTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+
+        proces.setProcsrProtocol(MailBoxConstants.FTPS);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+
+        proces.setProcsrProtocol(MailBoxConstants.HTTP);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+ 
+        proces.setProcsrProtocol(MailBoxConstants.HTTPS);
+        isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
+        Assert.assertEquals(isvalid, false);
+    }
+    
+    private Processor constructUploaderProcessor() {
+        ProcessorType foundProcessorType = ProcessorType.findByName(ProcessorType.REMOTEUPLOADER.getCode());
+        return Processor.processorInstanceFactory(foundProcessorType);
+    }
+
+    private Processor constructDownloaderProcessor() {
+        ProcessorType foundProcessorType = ProcessorType.findByName(ProcessorType.REMOTEDOWNLOADER.getCode());
+        return Processor.processorInstanceFactory(foundProcessorType);
     }
     
 }

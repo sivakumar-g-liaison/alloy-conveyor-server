@@ -274,7 +274,13 @@ public class ProcessorDTO {
 
                     String value = MailBoxConstants.LENS_VISIBLE.equals(property.getValue()) ? Boolean.toString(true) : Boolean.toString(false);
                     property.setValue(value);
-                    break;
+                    continue;
+                }
+                if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType()) &&
+                         (Protocol.findByCode(processor.getProcsrProtocol()).equals(Protocol.HTTP) || 
+                                Protocol.findByCode(processor.getProcsrProtocol()).equals(Protocol.HTTPS)) &&
+                        MailBoxConstants.USE_FILE_SYSTEM.equals(property.getName())) {
+                    property.setValue(Boolean.toString(false));
                 }
             }
             ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);

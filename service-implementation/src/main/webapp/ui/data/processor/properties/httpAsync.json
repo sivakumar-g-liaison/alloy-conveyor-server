@@ -1,7 +1,7 @@
 {
   "processorDefinition": {
-    "type":"HTTPASYNC",
-    "displayName":"HTTPASYNCPROCESSOR",
+    "type":"HTTPSYNCASYNC",
+    "displayName":"HTTPSYNCASYNC",
     "protocol":"",
     "handOverExecutionToJavaScript":false,
     "staticProperties": [
@@ -18,7 +18,7 @@
             "validationRules":{
                "pattern":"",
                "minLength": "",
-			  "maxLength": "2048"
+               "maxLength": "2048"
             }
          },
          {
@@ -44,7 +44,7 @@
             "defaultValue":"Invisible",
             "validationRules": null,
             "options":["Invisible","Visible"]           
- 		},
+ 		 },
         {
             "name":"httpListenerAuthCheckRequired",
             "displayName" : "HTTP Listener Auth Check Required",

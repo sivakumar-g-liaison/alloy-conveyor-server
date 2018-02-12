@@ -61,6 +61,7 @@ import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
+import static com.liaison.mailbox.MailBoxConstants.RESPONSE_FS2_URI;
 import static com.liaison.mailbox.MailBoxConstants.RESUME;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
 
@@ -486,8 +487,7 @@ public class MailBoxService implements Runnable {
 
         directUpload = true;
         RemoteUploaderI directUploader = MailBoxProcessorFactory.getUploaderInstance(processor);
-        String path = workticket.getAdditionalContext().get(KEY_FILE_PATH).toString();
-        directUploader.doDirectUpload(workticket.getFileName(), path, workticket.getGlobalProcessId());
+        directUploader.doDirectUpload(workticket);
     }
 
     /**
@@ -503,11 +503,15 @@ public class MailBoxService implements Runnable {
         workResult.setPipelineId(workTicket.getPipelineId());
         workResult.setProcessId(workTicket.getGlobalProcessId());
         workResult.setTaskId(workTicket.getTaskId());
-        workResult.addHeader(KEY_MESSAGE_CONTEXT_URI, (String) workTicket.getAdditionalContextItem(KEY_MESSAGE_CONTEXT_URI));
+        workResult.addHeader(KEY_MESSAGE_CONTEXT_URI, workTicket.getAdditionalContextItem(KEY_MESSAGE_CONTEXT_URI));
 
         if (null != e) {
             workResult.setStatus(500);
             workResult.setErrorMessage(e.getMessage());
+        }
+
+        if (workTicket.getAdditionalContextItem(RESPONSE_FS2_URI) != null) {
+            workResult.setPayloadURI(workTicket.getAdditionalContextItem(RESPONSE_FS2_URI));
         }
 
         return workResult;

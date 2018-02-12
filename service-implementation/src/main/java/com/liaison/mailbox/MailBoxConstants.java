@@ -506,4 +506,7 @@ public interface MailBoxConstants {
     String URI = "uri";
     String RETRY_COUNT = "retry";
 
+    String RESPONSE_FS2_URI = "response_fs2_uri";
+
+    String EXECUTE = "infinite";
 }

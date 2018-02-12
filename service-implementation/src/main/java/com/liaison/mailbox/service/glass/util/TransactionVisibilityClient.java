@@ -52,7 +52,6 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
-	private static final String ADMIN_ERROR_DETAILS = "admin_errordetails";
 
 	private TransactionVisibilityAPI visibilityAPI;
 
@@ -62,107 +61,61 @@ public class TransactionVisibilityClient {
         visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 
 		visibilityAPI.getAdditionalInformation().clear();
-		List<MapItemType> additionalInformation = visibilityAPI.getAdditionalInformation();
-
-		// Log TransactionVisibilityAPI
-		MapItemType item;
 
 		if (!MailBoxUtil.isEmpty(message.getExecutionId())) {
-			item = new MapItemType();
-			item.setKey(PROCESSOR_EXEC_ID);
-			item.setValue(message.getExecutionId());
-			additionalInformation.add(item);
+			GlassMessageUtil.addAdditionalInformation(visibilityAPI, PROCESSOR_EXEC_ID, message.getExecutionId());
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getMailboxId())) {
-			item = new MapItemType();
-			item.setKey(MAILBOX_ID);
-			item.setValue(message.getMailboxId());
-			additionalInformation.add(item);
+			GlassMessageUtil.addAdditionalInformation(visibilityAPI, MAILBOX_ID, message.getMailboxId());
 		}
 		
 		if (!MailBoxUtil.isEmpty(message.getMailboxName())) {
-			item = new MapItemType();
-			item.setKey(MAILBOX_NAME);
-			item.setValue(message.getMailboxName());
-			additionalInformation.add(item);
+			GlassMessageUtil.addAdditionalInformation(visibilityAPI, MAILBOX_NAME, message.getMailboxName());
 		}
 
 		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
-			item = new MapItemType();
-			item.setKey(PROCESSOR_ID);
-			item.setValue(message.getProcessorId());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, PROCESSOR_ID, message.getProcessorId());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getTenancyKey())) {
-			item = new MapItemType();
-			item.setKey(TENANCY_KEY);
-			item.setValue(message.getTenancyKey());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, TENANCY_KEY, message.getTenancyKey());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getServiceInstandId())) {
-			item = new MapItemType();
-			item.setKey(SIID);
-			item.setValue(message.getServiceInstandId());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, SIID, message.getServiceInstandId());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getInboundPipelineId())) {
-			item = new MapItemType();
-			item.setKey(INBOUND_PIPELINE_ID);
-			item.setValue(message.getInboundPipelineId());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, INBOUND_PIPELINE_ID, message.getInboundPipelineId());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundPipelineId())) {
-			item = new MapItemType();
-			item.setKey(OUTBOUND_PIPELINE_ID);
-			item.setValue(message.getOutboundPipelineId());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, OUTBOUND_PIPELINE_ID, message.getOutboundPipelineId());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getTransferProfileName())) {
-			item = new MapItemType();
-			item.setKey(TRANSFER_PROFILE_NAME);
-			item.setValue(message.getTransferProfileName());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, TRANSFER_PROFILE_NAME, message.getTransferProfileName());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getStagedFileId())) {
-			item = new MapItemType();
-			item.setKey(STAGED_FILE_ID);
-			item.setValue(message.getStagedFileId());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, STAGED_FILE_ID, message.getStagedFileId());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getMeta())) {
-			item = new MapItemType();
-			item.setKey(META);
-			item.setValue(message.getMeta());
-			additionalInformation.add(item);
-		}
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, META, message.getMeta());
+        }
 
 		if (!MailBoxUtil.isEmpty(message.getInboundFileName())) {
-            item = new MapItemType();
-            item.setKey(INBOUND_FILE_NAME);
-            item.setValue(message.getInboundFileName());
-            additionalInformation.add(item);
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, INBOUND_FILE_NAME, message.getInboundFileName());
         }
 
 		if (!MailBoxUtil.isEmpty(message.getOutboundFileName())) {
-            item = new MapItemType();
-            item.setKey(OUTBOUND_FILE_NAME);
-            item.setValue(message.getOutboundFileName());
-            additionalInformation.add(item);
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, OUTBOUND_FILE_NAME, message.getOutboundFileName());
         }
 
         if (!MailBoxUtil.isEmpty(message.getAdminErrorDetails())) {
-            item = new MapItemType();
-            item.setKey(ADMIN_ERROR_DETAILS);
-            item.setValue(message.getAdminErrorDetails());
-            additionalInformation.add(item);
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, GlassMessageUtil.ADMIN_ERROR_DETAILS, message.getAdminErrorDetails());
         }
 
         if (!MailBoxUtil.isEmpty(message.getSenderIp())) {

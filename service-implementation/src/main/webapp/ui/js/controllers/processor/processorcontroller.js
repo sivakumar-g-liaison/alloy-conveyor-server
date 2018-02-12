@@ -95,6 +95,8 @@ var rest = myApp.controller(
                 $scope.isProcessorTypeFileWriter = false;
                 // to disable protocol for file writer
                 $scope.isProcessorTypeDropbox = false;
+                // to disable folder for http remote Uploader
+                $scope.isProcessorTypeHTTPRemoteUploader = false;
                 
                 //Model for Add MB
                 addRequest = $scope.addRequest = {
@@ -184,7 +186,10 @@ var rest = myApp.controller(
                     $scope.secureSupportedProtocols = $scope.supportedProtocols;
                     $scope.processorData.supportedProtocols.options = $scope.secureSupportedProtocols;
                 }
-                $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+                
+                if ($scope.procsrType.value === 'REMOTEDOWNLOADER' || $scope.procsrType.value === 'REMOTEUPLOADER') {
+                    $scope.processor.protocol = $scope.processorData.supportedProtocols.options[0];
+                }
             }
 
             $scope.loadOrigin();
@@ -410,6 +415,9 @@ var rest = myApp.controller(
 									
 				} else {
 					$scope.showTruststoreSection = false;
+				}
+				if($scope.processor.protocol.value === "HTTP" || $scope.processor.protocol.value === "HTTPS") {
+					$scope.isProcessorTypeHTTPRemoteUploader = true;	
 				}
 				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
 				
@@ -1209,8 +1217,20 @@ var rest = myApp.controller(
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
                       });
                       $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
-                      break;	
-                  case "HTTPSYNCPROCESSOR": 
+                      break;
+				  case "HTTPSYNCPROCESSOR":
+				  	$scope.isProcessorTypeSweeper = false;
+				  	$scope.isProcessorTypeConditionalSweeper = false;
+				  	$scope.isProcessorTypeHTTPListener = true;
+				  	$scope.isProcessorTypeFileWriter = false;
+				  	$scope.isProcessorTypeDropbox = false;
+				  	$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+				  	$rootScope.restService.get('data/processor/properties/httpSync.json', function (data) {
+				  	    $scope.separateProperties(data.processorDefinition.staticProperties);
+				  	    $scope.processorCredProperties = data.processorDefinition.credentialProperties;				  	      
+				  	});
+				  	$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+				  	break;
 				  case "HTTPASYNCPROCESSOR": 				 
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeConditionalSweeper = false;
@@ -1218,7 +1238,7 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
 					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
-					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
+					$rootScope.restService.get('data/processor/properties/httpAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
 					  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
@@ -1302,7 +1322,7 @@ var rest = myApp.controller(
 								break;
 							case "HTTP":
 							case "HTTPS":
-								$rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
+								 $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {
 								  $scope.separateProperties(data.processorDefinition.staticProperties);
 								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
@@ -1337,7 +1357,8 @@ var rest = myApp.controller(
 							break;
 						case "HTTP":
 						case "HTTPS":					
-							$rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
+							$rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {
+							  $scope.isProcessorTypeHTTPRemoteUploader = true;
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
 							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 							  $scope.processorCredProperties = data.processorDefinition.credentialProperties;

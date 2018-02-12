@@ -360,7 +360,9 @@ var rest = myApp.controller(
 				  case "REMOTEDOWNLOADER":
 				  case "REMOTEUPLOADER":				  
 					$scope.isProcessorTypeSweeper = false;
-					$scope.isProcessorTypeHTTPListener = false;
+					if($scope.selectedProcessorType === 'HTTP' || $scope.selectedProcessorType === 'HTTPS') {
+						$scope.isProcessorTypeHTTPRemoteUploader = true;
+					}
 					$scope.isProcessorTypeDropbox = false;
 					$scope.isProcessorTypeFileWriter = false;
                     break;                  

@@ -57,6 +57,12 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
     StagedFile findStagedFilesByProcessorId(String processorId, String targetLocation, String fileName);
 
+    StagedFile findStagedFileByProcessorIdAndGpid(String processorId, String gpid);
+
+    List<StagedFile> findStagedFilesByProcessorId(String processorId);
+    
+    StagedFile findStagedFileByProcessorIdAndFileName(String processorId, String fileName);
+
     /**
      * constructs staged file entity from workticket and persists it
      *
@@ -166,5 +172,31 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" SET STATUS =:" + STATUS)
             .append(" WHERE PROCESSOR_GUID =:")
             .append(PROCESSOR_ID).toString();
-
+   
+    String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
+            .append("SELECT sf FROM StagedFile sf")
+            .append(" WHERE sf.processorId =:")
+            .append(PROCESSOR_ID)
+            .append(" AND sf.globalProcessId =:")
+            .append(GLOBAL_PROCESS_ID)
+            .append(" AND sf.stagedFileStatus IN (:")
+            .append(STATUS)
+            .append(")").toString();
+    
+    String FIND_STAGED_FILE_BY_PROCESSID = new StringBuilder()
+            .append("SELECT sf FROM StagedFile sf")
+            .append(" WHERE sf.processorId =:")
+            .append(PROCESSOR_ID)
+            .append(" AND sf.stagedFileStatus IN (:")
+            .append(STATUS)
+            .append(")").toString();
+    
+    String FIND_STAGED_FILES_BY_PROCESSID_AND_NAME = new StringBuilder()
+            .append("SELECT sf FROM StagedFile sf")
+            .append(" WHERE sf.processorId =:")
+            .append(PROCESSOR_ID)
+            .append(" AND sf.stagedFileStatus IN (:")
+            .append(STATUS)
+            .append(") AND sf.fileName =:")
+            .append(FILE_NAME).toString();
 }
