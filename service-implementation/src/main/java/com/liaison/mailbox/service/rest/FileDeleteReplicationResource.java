@@ -8,6 +8,7 @@
  */
 package com.liaison.mailbox.service.rest;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
@@ -15,6 +16,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.mailbox.service.core.FileDeleteReplicationService;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 
 /**
@@ -40,6 +43,7 @@ public class FileDeleteReplicationResource extends AuditedResource {
     private static final Logger logger = LogManager.getLogger(FileDeleteReplicationResource.class);
 
     @POST
+    @AccessDescriptor(skipFilter = true)
     public Response handleFileDeleteReplication(@Context HttpServletRequest request) throws IOException {
 
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
