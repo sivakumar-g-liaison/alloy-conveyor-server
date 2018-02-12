@@ -1,3 +1,14 @@
+5.1.0-SNAPSHOT
+---------------
+* GMB-1056 - HTTP Remote Uploader Improvements
+* GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1
+* GMB-1076 - FTP Protocol type is set when selecting the cluster type is set as Low secure.
+* GLASS-13 : Use GlassMessageUtil to add admin error details and also node information 
+    * By using the GlassMessageUtil, we can add more logic to additional information just by modifying the library
+* GMB-1075 - HTTP Async Processor: Socket Timeout Value deleted permanently from processor properties screen
+* GMB-1078 - URL generated in the Mailbox processor is incomplete
+* GMB-1085 - Log the response status code and data in Kibana
+
 5.1.4
 ---------------
 * GGT-1532-Update com.liaison.acl.skipList in the properties
@@ -23,14 +34,6 @@
 * tomcat scripts updates
 * GMB-1062 - Provision to enter the socket timeout in http sync processor - updated socket timeout validation
 * GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1 
-* GMB-1056 - HTTP Remote Uploader Improvements
-* GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1
-* GMB-1076 - FTP Protocol type is set when selecting the cluster type is set as Low secure.
-* GLASS-13 : Use GlassMessageUtil to add admin error details and also node information 
-    * By using the GlassMessageUtil, we can add more logic to additional information just by modifying the library
-* GMB-1075 - HTTP Async Processor: Socket Timeout Value deleted permanently from processor properties screen
-* GMB-1078 - URL generated in the Mailbox processor is incomplete
-* GMB-1085 - Log the response status code and data in Kibana
 
 5.0.1
 ---------------
