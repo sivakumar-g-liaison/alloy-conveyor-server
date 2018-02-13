@@ -1508,4 +1508,11 @@ public class ProcessorConfigurationService {
     public void updateProcessDc() {
         new ProcessorConfigurationDAOBase().updateProcessDc();
     }
+    
+    /**
+     * This method is used to update the downloader process_dc
+     */
+    public void updateDownloaderProcessDc(String currentDC, String updateDC) {
+        new ProcessorConfigurationDAOBase().updateProcessDc();
+    }
 }

@@ -1175,4 +1175,39 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         
     }
+    
+    /**
+     * updater the process_Dc
+     */
+    public void updateDownloaderProcessDc(String currentDC, String updateDC) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processor PROCESS_DC
+            // TODO
+            entityManager.createNativeQuery(UPDATE_DOWNLOADER_PROCESS_DC)
+                  .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                  .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        
+    }
 }

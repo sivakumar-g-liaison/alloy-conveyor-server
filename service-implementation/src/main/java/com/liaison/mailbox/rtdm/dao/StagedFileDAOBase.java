@@ -521,4 +521,35 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         entity.setOriginatingDc(DATACENTER_NAME);
         super.persist(entity);
     }
+    
+    /**
+     * Update the StagedFile process dc
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateStagedFileProcessDC(String currentDC,  String updatedDC) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            // TODO 
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
 }

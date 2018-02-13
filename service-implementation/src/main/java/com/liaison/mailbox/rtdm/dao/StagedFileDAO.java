@@ -104,6 +104,13 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param status
      */
     void updateStagedFileStatusByProcessorId( String processorId,  String status);
+    
+    /**
+     * Update the stagedFile processDC
+     * @param currentDC
+     * @param updatedDC
+     */
+    void updateStagedFileProcessDC(String currentDC,  String updatedDC);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -168,6 +175,13 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" order by sf.createdDate desc");
     
     String UPDATE_STAGED_FILE_STATUS_BY_PROCESSORID = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET STATUS =:" + STATUS)
+            .append(" WHERE PROCESSOR_GUID =:")
+            .append(PROCESSOR_ID).toString();
+    
+    // TODO update the query
+    String UPDATE_STAGED_FILE_PROCESS_DC = new StringBuilder()
             .append("UPDATE STAGED_FILE")
             .append(" SET STATUS =:" + STATUS)
             .append(" WHERE PROCESSOR_GUID =:")

@@ -290,6 +290,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * 
      */
     void updateProcessDc();
+    
+    /**
+     * Update the process_dc to current_dc where the process_dc is null
+     * 
+     */
+    void updateDownloaderProcessDc(String currentDC, String updateDC);
 
     /**
      * Retrieve the all datacenters
@@ -378,6 +384,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(UPDATE_SIZE).toString();
     
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET PROCESS_DC =:" + DATACENTER)
+            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+    
+    // TODO
+    String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
     
