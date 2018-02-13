@@ -257,6 +257,7 @@ public class ProcessorDTO {
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
+                // TODO downloader -current DC, other - ALL
                 processor.setProcessDc(MailBoxUtil.DATACENTER_NAME);
             }
             // Set the protocol

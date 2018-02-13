@@ -90,6 +90,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .append(" AND processor.clusterType =:")
                     .append(MailBoxConstants.CLUSTER_TYPE);
 
+            // TODO change query to fethc the processor based on currentDC and ALL
             if (!SKIP_PROCESS_DC) {
                 query.append(" AND processor.processDc =:").append(MailBoxConstants.PROCESS_DC);
             }
