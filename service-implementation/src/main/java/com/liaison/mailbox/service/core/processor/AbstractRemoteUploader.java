@@ -312,6 +312,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 && isDirectUpload()) {
 
             RelayFile[] fileArray = new RelayFile[1];
+            // TODO get staged file based on processing_DC
             StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
 
             file = new RelayFile();

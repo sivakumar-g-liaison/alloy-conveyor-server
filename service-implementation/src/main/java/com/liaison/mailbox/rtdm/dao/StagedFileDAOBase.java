@@ -509,7 +509,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                 tx.rollback();
             }
             throw e;
-        } finally {
+        } finally { 
             if (null != entityManager) {
                 entityManager.close();
             }
@@ -519,6 +519,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     @Override
     public void persist(StagedFile entity) {
         entity.setOriginatingDc(DATACENTER_NAME);
+        // TODO add processing DC
         super.persist(entity);
     }
 }

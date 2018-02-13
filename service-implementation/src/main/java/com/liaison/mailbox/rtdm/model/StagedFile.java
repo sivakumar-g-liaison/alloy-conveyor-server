@@ -48,6 +48,7 @@ import java.sql.Timestamp;
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
                         + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
+        //  TODO Query to retrieve stagedfile based on processing_DC
 })
 public class StagedFile implements Identifiable {
 
@@ -70,6 +71,8 @@ public class StagedFile implements Identifiable {
     private Timestamp modifiedDate;
     private String originatingDc;
     private String clusterType;
+    private String processingDC;
+    // todo
 
     public StagedFile() {
     }

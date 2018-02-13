@@ -36,6 +36,7 @@ public class StagedFileDTO {
 	private String createdDate;
 	private String modifiedDate;
     private String clusterType;
+    private String processingDC; // todo
 
 	public StagedFileDTO() {
 	}

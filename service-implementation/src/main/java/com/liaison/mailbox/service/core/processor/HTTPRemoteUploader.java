@@ -368,6 +368,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                  && isDirectUpload()) {
 
              RelayFile[] fileArray = new RelayFile[1];
+             // TODO get staged file based on processing_DC
              StagedFile stagedFile = dao.findStagedFileByProcessorIdAndFileName(this.configurationInstance.getPguid(), getFileName());
 
              file = new RelayFile();
@@ -378,6 +379,7 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
          }
          
          //default profile invocation
+         // TODO get staged file based on processing_DC
          stagedFiles = dao.findStagedFilesByProcessorId(this.configurationInstance.getPguid());
 
          List<RelayFile> files = new ArrayList<>();
