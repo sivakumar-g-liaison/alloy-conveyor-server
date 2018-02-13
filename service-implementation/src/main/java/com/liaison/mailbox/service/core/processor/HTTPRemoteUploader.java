@@ -152,8 +152,10 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             request.inputData(contentStream, contentType);
 
             response = request.execute();
-            LOGGER.debug(constructMessage("The response code received is {} for a request {} "),
+            LOGGER.info(constructMessage("The response code received is {}, response data is {} and response reason is {} for a request file {}"),
                     response.getStatusCode(),
+                    responseStream.toString(),
+                    response.getReasonPhrease(),
                     file.getName());
             if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
 
@@ -206,8 +208,10 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
             request.inputData(contentStream, contentType);
 
             response = request.execute();
-            LOGGER.debug(constructMessage("The response code received is {} for a request {} "),
+            LOGGER.info(constructMessage("The response code received is {}, response data is {} and response reason is {} for a request file {}"),
                     response.getStatusCode(),
+                    responseStream.toString(),
+                    response.getReasonPhrease(),
                     file.getName());
             if (!MailBoxUtil.isSuccessful(response.getStatusCode())) {
 
