@@ -1,3 +1,7 @@
+5.1.6
+---------------
+* GMB-1056 - HTTP Remote Uploader Improvements - Log Changes
+
 5.1.5
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
