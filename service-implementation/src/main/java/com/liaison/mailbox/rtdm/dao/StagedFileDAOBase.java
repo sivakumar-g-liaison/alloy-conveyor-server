@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
+
 /**
  * This will fetch the Staged file details. 
  *
@@ -322,6 +325,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE_BY_PROCESSID)
                     .setParameter(PROCESSOR_ID, processId)
                     .setParameter(STATUS, statuses)
+                    .setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
                     .getResultList();
 
             return stagedFiles;
@@ -350,6 +354,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(STATUS, statuses)
+                    .setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
                     .getResultList();
 
             return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
@@ -425,19 +430,35 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      */
     @Override
     public StagedFile findStagedFileByGpid(String gpid) {
+        return findStagedFileByGpid(gpid, true);
+    }
+    
+    /**
+     * Returns staged file
+     * @param isSkipProcessDc 
+     */
+    @Override
+    public StagedFile findStagedFileByGpid(String gpid, boolean isSkipProcessDc) {
 
         EntityManager entityManager = null;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            List<?> files = entityManager
-                    .createNamedQuery(FIND_BY_GPID)
-                    .setParameter(GLOBAL_PROCESS_ID, gpid)
-                    .setParameter(STATUS, EntityStatus.INACTIVE.name())
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
-                    .getResultList();
+            
+            Query query;
+            if (isSkipProcessDc) {
+                 query = entityManager.createNamedQuery(FIND_BY_GPID); 
+            } else {
+                query = entityManager.createNamedQuery(FIND_BY_GPID_BY_PROCESS_DC);
+                query.setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER));
+            }
+            
+            query.setParameter(GLOBAL_PROCESS_ID, gpid);
+            query.setParameter(STATUS, EntityStatus.INACTIVE.name());
+            query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
 
+            List<?> files = query.getResultList();
             if (files != null && !files.isEmpty()) {
                 return (StagedFile) files.get(0);
             }
@@ -509,7 +530,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                 tx.rollback();
             }
             throw e;
-        } finally { 
+        } finally {
             if (null != entityManager) {
                 entityManager.close();
             }
@@ -518,8 +539,9 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
     @Override
     public void persist(StagedFile entity) {
+        
         entity.setOriginatingDc(DATACENTER_NAME);
-        // TODO add processing DC
+        entity.setProcessDc(DATACENTER_NAME);
         super.persist(entity);
     }
 }
