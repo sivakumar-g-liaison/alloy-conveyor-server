@@ -59,6 +59,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String IGNORE_DATACENTERS = "datacenters";
     String UPDATE_SIZE = "updatesize";
     String DATACENTER_NAME = "datacenter_name";
+    String PROCESS_DC = "process_dc";
 
     /**
      * Constants for getProcessor Class
