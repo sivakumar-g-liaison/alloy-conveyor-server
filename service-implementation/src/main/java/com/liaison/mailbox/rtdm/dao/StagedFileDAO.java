@@ -28,6 +28,7 @@ import java.util.Map;
 public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
     String FIND_BY_GPID = "StagedFile.findByGpid";
+    String FIND_BY_GPID_BY_PROCESS_DC = "StagedFile.findByGpidByProcessDc";
 
     String FILE_NAME = "fileName";
     String GUID = "file_guid";
@@ -42,6 +43,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
     String MODIFIED_DATE = "modifiedDate";
     String STAGED_FILE_IDS = "stagedFile_ids";
+    String PROCESS_DC = "process_dc";
 
     /**
      * Method to retrieve the list of all staged files of given mailbox ids
@@ -87,6 +89,14 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @return staged file
      */
     StagedFile findStagedFileByGpid(String gpid);
+    
+    /**
+     * get staged file by gpid
+     * @param gpid global process id
+     * @param isSkipProcessDc Skip ProcessDc
+     * @return staged file
+     */
+    StagedFile findStagedFileByGpid(String gpid, boolean isSkipProcessDc);
 
     /**
      * Returns staged file entries by filename and file path for file writer processor
@@ -189,6 +199,9 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(PROCESSOR_ID)
             .append(" AND sf.stagedFileStatus IN (:")
             .append(STATUS)
+            .append(")")
+            .append(" AND sf.processDc IN (:")
+            .append(PROCESS_DC)
             .append(")").toString();
     
     String FIND_STAGED_FILES_BY_PROCESSID_AND_NAME = new StringBuilder()
@@ -198,5 +211,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" AND sf.stagedFileStatus IN (:")
             .append(STATUS)
             .append(") AND sf.fileName =:")
-            .append(FILE_NAME).toString();
+            .append(FILE_NAME)
+            .append(" AND sf.processDc IN (:")
+            .append(PROCESS_DC)
+            .append(")").toString();
 }
