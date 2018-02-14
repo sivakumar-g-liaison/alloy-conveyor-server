@@ -44,6 +44,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
     String LAST_EXECUTION_DATE = "lastExecutionDate";
     String NODE_IN_USE = "nodeInUse";
     String MODIFIED_DATE = "modifiedDate";
+    String ORIGINATING_DC = "originating_dc";
 
     String GET_PROCESSOR_EXECUTION_STATE_FOR_UPDATE = "SELECT PGUID, EXEC_STATUS FROM PROCESSOR_EXEC_STATE STATE"
             + " WHERE STATE.PROCESSOR_ID =:" + PROCESSOR_ID

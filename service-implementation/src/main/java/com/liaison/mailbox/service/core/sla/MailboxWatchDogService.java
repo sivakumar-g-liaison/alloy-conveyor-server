@@ -10,6 +10,10 @@
 
 package com.liaison.mailbox.service.core.sla;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
+
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.mailbox.MailBoxConstants;
@@ -79,7 +83,8 @@ public class MailboxWatchDogService {
             .append(" WHERE sf.STATUS in ('ACTIVE', 'FAILED')")
             .append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
             .append(" AND sf.CLUSTER_TYPE IN (?1)")
-            .append(" AND pes.EXEC_STATUS != 'PROCESSING'");
+            .append(" AND pes.EXEC_STATUS != 'PROCESSING'")
+            .append(" AND sf.PROCESS_DC IN (?2)");
 
 	private String uniqueId;
 
@@ -126,6 +131,7 @@ public class MailboxWatchDogService {
             List<StagedFile> stagedFiles = em
                     .createNativeQuery(QUERY_STRING.toString(), StagedFile.class)
                     .setParameter(1, MailBoxUtil.CLUSTER_TYPE)
+                    .setParameter(2, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
                     .getResultList();
 
             List<GlassMessageDTO> glassMessageDTOs = new ArrayList<>();
