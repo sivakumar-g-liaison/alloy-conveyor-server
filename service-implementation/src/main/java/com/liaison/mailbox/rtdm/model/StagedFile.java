@@ -25,6 +25,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import java.sql.Timestamp;
 
 /**
@@ -48,7 +49,6 @@ import java.sql.Timestamp;
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
                         + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
-        //  TODO Query to retrieve stagedfile based on processing_DC
 })
 public class StagedFile implements Identifiable {
 
@@ -71,8 +71,7 @@ public class StagedFile implements Identifiable {
     private Timestamp modifiedDate;
     private String originatingDc;
     private String clusterType;
-    private String processingDC;
-    // todo
+    private String processDc;
 
     public StagedFile() {
     }
@@ -236,6 +235,16 @@ public class StagedFile implements Identifiable {
 
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
+    }
+    
+    
+    @Column(name = "PROCESS_DC", length = 32)
+    public String getProcessDc() {
+        return processDc;
+    }
+
+    public void setProcessDc(String processDc) {
+        this.processDc = processDc;
     }
 
     @Override

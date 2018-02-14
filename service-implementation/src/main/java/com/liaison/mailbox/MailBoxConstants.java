@@ -496,6 +496,7 @@ public interface MailBoxConstants {
 
     //process Dc
     String PROCESS_DC = "process_dc";
+    String ALL_DATACENTER = "ALL";
 
     String MANIFEST_DTO = "manifest_dto";
     String TRIGGER_FILE = "Trigger File";
