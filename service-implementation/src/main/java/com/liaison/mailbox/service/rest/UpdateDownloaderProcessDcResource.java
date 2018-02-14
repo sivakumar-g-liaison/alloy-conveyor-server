@@ -10,12 +10,13 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,19 +26,20 @@ import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessDCRequestDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
- * This is the gateway for the profile configuration services.
+ * This is the gateway for update process dc.
  * 
- * @author OFS
  */
 @AppConfigurationResource
 @Path("config/downloader/updateprocessdc")
@@ -45,7 +47,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 public class UpdateDownloaderProcessDcResource extends AuditedResource {
 
 	/**
-	 * REST method to update the process_dc column of PROCESSOR table
+	 * REST method to update the process_dc column of PROCESSOR(REMOTEDOWNLOADER) and StagedFile table
 	 * 
 	 * @param request
 	 * @return
@@ -55,20 +57,24 @@ public class UpdateDownloaderProcessDcResource extends AuditedResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response updateProcessDc(@Context final HttpServletRequest request,
-	        @QueryParam(value = "current_dc") final @ApiParam(name = "current_dc", required = true, value = "Existing dc") String current_dc,
-	        @QueryParam(value = "updated_dc") final @ApiParam(name = "updated_dc", required = true, value = "DC to update") String updated_dc) {
+	public Response updateProcessDc(@Context final HttpServletRequest request) {
 	    
 	    // create the worker delegate to perform the business logic
 	    AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 	        @Override
 	        public Object call() {
 	            
-                // updates datacenter of downloder processor
-	            // TODO processing_dc values from Rest request body
-                new ProcessorConfigurationService().updateDownloaderProcessDc(current_dc, updated_dc);
-                new StagedFileDAOBase().updateStagedFileProcessDC(current_dc, updated_dc);
-                return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+                // updates process_dc of downloder processor and staged file
+	            try {
+                    String requestString = getRequestBody(request);
+                    UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = MailBoxUtil.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
+                    new ProcessorConfigurationService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
+                    new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(), updateProcessorDCRequestDTO.getNewProcessDC());
+                    
+                    return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Update the process_DC " + e.getMessage(), e);
+                }
 	        }
 	    };
 	    worker.actionLabel = "UpdateDownloaderProcessDcResource.updateProcessDc()";

@@ -42,6 +42,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
     String MODIFIED_DATE = "modifiedDate";
     String STAGED_FILE_IDS = "stagedFile_ids";
+    String EXISTING_PROCESS_DC = "existing_process_dc";
+    String NEW_PROCESS_DC = "new_process_dc";
 
     /**
      * Method to retrieve the list of all staged files of given mailbox ids
@@ -107,10 +109,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     
     /**
      * Update the stagedFile processDC
-     * @param currentDC
-     * @param updatedDC
+     * @param existingProcessDC
+     * @param newProcessDC
      */
-    void updateStagedFileProcessDC(String currentDC,  String updatedDC);
+    void updateStagedFileProcessDC(String existingProcessDC,  String newProcessDC);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -180,12 +182,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" WHERE PROCESSOR_GUID =:")
             .append(PROCESSOR_ID).toString();
     
-    // TODO update the query
-    String UPDATE_STAGED_FILE_PROCESS_DC = new StringBuilder()
+    String UPDATE_STAGED_FILE_BY_PROCESS_DC = new StringBuilder()
             .append("UPDATE STAGED_FILE")
-            .append(" SET STATUS =:" + STATUS)
-            .append(" WHERE PROCESSOR_GUID =:")
-            .append(PROCESSOR_ID).toString();
+            .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
+            .append(" WHERE PROCESS_DC =:"+ EXISTING_PROCESS_DC).toString();
    
     String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")

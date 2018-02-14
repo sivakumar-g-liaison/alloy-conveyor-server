@@ -16,6 +16,7 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 import java.util.List;
@@ -59,6 +60,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String IGNORE_DATACENTERS = "datacenters";
     String UPDATE_SIZE = "updatesize";
     String DATACENTER_NAME = "datacenter_name";
+    String EXISTING_PROCESS_DC = "existing_process_dc";
+    String NEW_PROCESS_DC = "new_process_dc";
 
     /**
      * Constants for getProcessor Class
@@ -292,10 +295,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     void updateProcessDc();
     
     /**
-     * Update the process_dc to current_dc where the process_dc is null
-     * 
+     * Update the existing ProcessDC to new ProcessDC for downloader processor.
+     * @param existingProcessDC
+     * @param newProcessDC
      */
-    void updateDownloaderProcessDc(String currentDC, String updateDC);
+    void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC);
 
     /**
      * Retrieve the all datacenters
@@ -387,10 +391,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
     
-    // TODO
     String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
-            .append(" SET PROCESS_DC =:" + DATACENTER)
-            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+            .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
+            .append(" WHERE TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name())
+            .append(" AND STATUS <> 'DELETED'")
+            .append(" AND PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
     
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString();

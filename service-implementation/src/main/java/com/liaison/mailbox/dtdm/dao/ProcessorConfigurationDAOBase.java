@@ -1177,9 +1177,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
-     * updater the process_Dc
+     * updater the downloader process_Dc
      */
-    public void updateDownloaderProcessDc(String currentDC, String updateDC) {
+    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -1190,9 +1190,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             tx.begin();
             
             //update the Processor PROCESS_DC
-            // TODO
             entityManager.createNativeQuery(UPDATE_DOWNLOADER_PROCESS_DC)
-                  .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                  .setParameter(NEW_PROCESS_DC, newProcessDC)
+                  .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
                   .executeUpdate();
             
             //commits the transaction

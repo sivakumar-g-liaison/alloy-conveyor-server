@@ -1512,7 +1512,7 @@ public class ProcessorConfigurationService {
     /**
      * This method is used to update the downloader process_dc
      */
-    public void updateDownloaderProcessDc(String currentDC, String updateDC) {
-        new ProcessorConfigurationDAOBase().updateProcessDc();
+    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
+        new ProcessorConfigurationDAOBase().updateDownloaderProcessDc(existingProcessDC, newProcessDC);
     }
 }
