@@ -82,9 +82,9 @@ public class MailboxWatchDogService {
             .append(" WHERE sf.STATUS in ('ACTIVE', 'FAILED')")
             .append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
             .append(" AND sf.CLUSTER_TYPE IN (?1)")
-            .append(" AND pes.EXEC_STATUS != 'PROCESSING'")
             .append(" AND sf.PROCESS_DC =:")
-            .append(PROCESS_DC);
+            .append(PROCESS_DC)
+            .append(" AND pes.EXEC_STATUS != 'PROCESSING'");
     
 	private String uniqueId;
 

@@ -9,10 +9,8 @@
  */
 package com.liaison.mailbox.service.dto.configuration.request;
 
-
 /**
  * DTO that contains the existing and new process_dc
- * 
  */
 public class UpdateProcessDCRequestDTO {
 
@@ -34,5 +32,4 @@ public class UpdateProcessDCRequestDTO {
     public void setNewProcessDC(String newProcessDC) {
         this.newProcessDC = newProcessDC;
     }
-
 }

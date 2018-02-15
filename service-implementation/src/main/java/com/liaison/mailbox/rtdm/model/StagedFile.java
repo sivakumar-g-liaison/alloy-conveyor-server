@@ -244,7 +244,7 @@ public class StagedFile implements Identifiable {
         this.clusterType = clusterType;
     }
     
-    @Column(name = "PROCESS_DC", length = 32)
+    @Column(name = "PROCESS_DC", length = 16)
     public String getProcessDc() {
         return processDc;
     }
