@@ -1314,6 +1314,43 @@ public class ProcessorConfigurationService {
     }
     
     /**
+     * This method support to downloader processoraffinity This is to split the traffic
+     * for the processor that need to run different datacenters to support
+     * active active
+     * 
+     * @param request
+     */
+    public void supportDownloaderProcessorAffinity(String request) {
+
+        LOGGER.debug("Enter into supportDownloaderProcessorAffinity () ");
+        try {
+            
+            //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
+            //fetch processor count
+            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+            long processorCount = dao.getDownloadProcessorCount();
+            if (0 == processorCount) {
+                LOGGER.info("No processor exist");
+                return;
+            }            
+            List<String> processedDC = new ArrayList<String>();            
+            for (String dc : datacenterMap.keySet()) {
+                
+                processedDC.add(dc);
+                int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);                
+                dao.updateDownloaderDatacenter(dc, processedDC, readyToProcessCount);
+            }
+
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+        
+        LOGGER.debug("Exit from supportDownloaderProcessorAffinity () ");
+    }
+    
+    /**
      * Method fetch the Datacenter's and corresponding processors details.
      * 
      * @return GetDatacenterResponseDTO

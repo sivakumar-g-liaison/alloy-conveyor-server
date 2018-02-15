@@ -161,6 +161,13 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @return list of processors count
      */
     long getProcessorCount();
+    
+    /**
+     * Retrieves downloader processors count
+     *
+     * @return list of downloader processors count
+     */
+    long getDownloadProcessorCount();
 
     /**
      * Retrieves processors by mailbox guid and processor name
@@ -288,6 +295,15 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @param updateSize
      */
     void updateDatacenter(String dc, List<String> processedDC, int processSize);
+    
+    /**
+     * Update the Downloader Datacenter
+     * 
+     * @param dc
+     * @param ignoreDatacenters
+     * @param updateSize
+     */
+    void updateDownloaderDatacenter(String dc, List<String> processedDC, int processSize);
 
     /**
      * Update the process_dc to current_dc where the process_dc is null
@@ -388,6 +404,13 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
             .append(UPDATE_SIZE).toString();
     
+    String UPDATE_DOWNLOAD_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET PROCESS_DC =:" + DATACENTER)
+            .append(" WHERE TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name())
+            .append(" AND (PROCESS_DC NOT IN (:" + IGNORE_DATACENTERS + ")")
+            .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
+            .append(UPDATE_SIZE).toString();
+    
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
@@ -400,6 +423,10 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString();
+
+    String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
+            .append(" WHERE STATUS <> 'DELETED' ")
+            .append(" AND TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name()).toString();
     
     String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString(); 

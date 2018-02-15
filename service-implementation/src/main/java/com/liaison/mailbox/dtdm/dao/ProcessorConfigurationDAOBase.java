@@ -1057,6 +1057,45 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
+     * Update the download processor Datacenter
+     * 
+     * @param dc
+     * @param processedDC
+     * @param updateSize
+     */
+    public void updateDownloaderDatacenter(String dc,  List<String> processedDC, int updateSize) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processor PROCESS_DC
+            entityManager.createNativeQuery(UPDATE_DOWNLOAD_PROCESS_DC)
+                .setParameter(DATACENTER, dc)
+                .setParameter(IGNORE_DATACENTERS, processedDC)
+                .setParameter(UPDATE_SIZE, updateSize)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+    
+    /**
      * Method retrieve the processors count.
      */
     @Override
@@ -1069,6 +1108,31 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             count = ((BigDecimal) entityManager.createNativeQuery(PROCESSOR_COUNT)
+                      .getSingleResult()).longValue();
+            
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Method retrieve the processors count.
+     */
+    @Override
+    public long getDownloadProcessorCount() {
+
+        EntityManager entityManager = null;
+        long count;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            count = ((BigDecimal) entityManager.createNativeQuery(DOWNLOAD_PROCESSOR_COUNT)
                       .getSingleResult()).longValue();
             
         } catch (Exception e) {
