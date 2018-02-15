@@ -822,8 +822,8 @@ public class MailBoxUtil {
      */
     public static boolean isHttpOrHttpsRemoteUploader(Processor configurationInstance) {
         return (ProcessorType.REMOTEUPLOADER.equals(configurationInstance.getProcessorType()) && 
-                (Protocol.HTTP.equals(Protocol.findByName(configurationInstance.getProcsrProtocol())) ||
-                Protocol.HTTPS.equals(Protocol.findByName(configurationInstance.getProcsrProtocol()))));
+                (Protocol.HTTP.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol())) ||
+                Protocol.HTTPS.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))));
     }
 
 }
