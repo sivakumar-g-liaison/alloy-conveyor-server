@@ -28,7 +28,6 @@ import java.util.Map;
 public interface StagedFileDAO extends GenericDAO<StagedFile> {
 
     String FIND_BY_GPID = "StagedFile.findByGpid";
-    String FIND_BY_GPID_BY_PROCESS_DC = "StagedFile.findByGpidByProcessDc";
 
     String FILE_NAME = "fileName";
     String GUID = "file_guid";
@@ -89,14 +88,6 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @return staged file
      */
     StagedFile findStagedFileByGpid(String gpid);
-    
-    /**
-     * get staged file by gpid
-     * @param gpid global process id
-     * @param isSkipProcessDc Skip ProcessDc
-     * @return staged file
-     */
-    StagedFile findStagedFileByGpid(String gpid, boolean isSkipProcessDc);
 
     /**
      * Returns staged file entries by filename and file path for file writer processor

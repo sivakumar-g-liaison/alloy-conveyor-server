@@ -421,21 +421,13 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
         return stagedFiles;
     }
-
-    /**
-     * Returns staged file
-     */
-    @Override
-    public StagedFile findStagedFileByGpid(String gpid) {
-        return findStagedFileByGpid(gpid, true);
-    }
     
     /**
      * Returns staged file
      * @param isSkipProcessDc 
      */
     @Override
-    public StagedFile findStagedFileByGpid(String gpid, boolean isSkipProcessDc) {
+    public StagedFile findStagedFileByGpid(String gpid) {
 
         EntityManager entityManager = null;
 
@@ -443,18 +435,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             
-            Query query;
-            if (isSkipProcessDc) {
-                 query = entityManager.createNamedQuery(FIND_BY_GPID); 
-            } else {
-                query = entityManager.createNamedQuery(FIND_BY_GPID_BY_PROCESS_DC);
-                query.setParameter(PROCESS_DC, DATACENTER_NAME);
-            }
-            
-            query.setParameter(GLOBAL_PROCESS_ID, gpid);
-            query.setParameter(STATUS, EntityStatus.INACTIVE.name());
-            query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
-            List<?> files = query.setMaxResults(1).getResultList();
+            List<?> files = entityManager.createNamedQuery(FIND_BY_GPID)
+                    .setParameter(PROCESS_DC, DATACENTER_NAME)
+                    .setParameter(GLOBAL_PROCESS_ID, gpid)
+                    .setParameter(STATUS, EntityStatus.INACTIVE.name())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .setMaxResults(1).getResultList();
             if (files != null && !files.isEmpty()) {
                 return (StagedFile) files.get(0);
             }
