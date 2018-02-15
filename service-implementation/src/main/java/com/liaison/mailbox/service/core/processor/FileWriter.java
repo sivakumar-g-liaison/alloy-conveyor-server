@@ -133,10 +133,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 writeStatus = addAnEntryToStagedFile(null, null, workTicket);
 
                 if (writeStatus) {
-                    LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", workTicket.getPayloadURI());
+                    LOG.info("Payload is successfully staged to STAGED_FILE ");
                 } 
                 message = (writeStatus ? "Added an entry in STAGED FILE for the file - " : "File already exists in STAGED_FILE - ")
-                        + workTicket.getPayloadURI()
+                        + fileName + " - "
                         + workTicket.getGlobalProcessId();
             } else {
 
