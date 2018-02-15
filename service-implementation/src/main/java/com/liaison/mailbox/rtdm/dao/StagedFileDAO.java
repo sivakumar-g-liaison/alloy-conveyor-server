@@ -200,9 +200,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" AND sf.stagedFileStatus IN (:")
             .append(STATUS)
             .append(")")
-            .append(" AND sf.processDc IN (:")
-            .append(PROCESS_DC)
-            .append(")").toString();
+            .append(" AND sf.processDc =:")
+            .append(PROCESS_DC).toString();
     
     String FIND_STAGED_FILES_BY_PROCESSID_AND_NAME = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")
@@ -212,7 +211,6 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(STATUS)
             .append(") AND sf.fileName =:")
             .append(FILE_NAME)
-            .append(" AND sf.processDc IN (:")
-            .append(PROCESS_DC)
-            .append(")").toString();
+            .append(" AND sf.processDc =:")
+            .append(PROCESS_DC).toString();
 }
