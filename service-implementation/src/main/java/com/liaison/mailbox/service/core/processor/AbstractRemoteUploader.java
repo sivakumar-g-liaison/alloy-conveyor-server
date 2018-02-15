@@ -10,7 +10,6 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -30,21 +29,13 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.liaison.mailbox.MailBoxConstants.FTPS;
-import static com.liaison.mailbox.MailBoxConstants.HTTP;
-import static com.liaison.mailbox.MailBoxConstants.HTTPS;
-import static com.liaison.mailbox.MailBoxConstants.SFTP;
 
 /**
  * Created by VNagarajan on 6/3/2016.
@@ -312,7 +303,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
                 && isDirectUpload()) {
 
             RelayFile[] fileArray = new RelayFile[1];
-            StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId);
+            StagedFile stagedFile = dao.findStagedFileByGpid(globalProcessId, false);
 
             file = new RelayFile();
             file.copy(stagedFile);

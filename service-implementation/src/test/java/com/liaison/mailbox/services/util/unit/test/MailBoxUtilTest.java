@@ -330,11 +330,11 @@ public class MailBoxUtilTest {
         boolean isvalid;
         Processor proces = constructUploaderProcessor();
 
-        proces.setProcsrProtocol(MailBoxConstants.HTTP);
+        proces.setProcsrProtocol(MailBoxConstants.HTTP.toLowerCase());
         isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
         Assert.assertEquals(isvalid, true);
 
-        proces.setProcsrProtocol(MailBoxConstants.HTTPS);
+        proces.setProcsrProtocol(MailBoxConstants.HTTPS.toLowerCase());
         isvalid = MailBoxUtil.isHttpOrHttpsRemoteUploader(proces);
         Assert.assertEquals(isvalid, true);
     }

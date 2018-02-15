@@ -365,6 +365,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                     .createNamedQuery(FIND_EXECUTING_PROCESSOR_WITH_TRIGGERED_PERIOD)
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
                     .setParameter(MODIFIED_DATE, date)
+                    .setParameter(ORIGINATING_DC, DATACENTER_NAME)
                     .getResultList();
         } finally {
             if (null != entityManager) {

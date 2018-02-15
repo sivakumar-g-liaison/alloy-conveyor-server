@@ -15,7 +15,6 @@ import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
@@ -29,7 +28,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUp
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.io.FileUtils;

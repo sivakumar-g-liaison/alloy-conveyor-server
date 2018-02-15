@@ -25,6 +25,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import java.sql.Timestamp;
 
 /**
@@ -47,6 +48,13 @@ import java.sql.Timestamp;
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
                         + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
+                        + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
+        
+        @NamedQuery(name = StagedFileDAO.FIND_BY_GPID_BY_PROCESS_DC,
+                query = "select sf from StagedFile sf"
+                        + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
+                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
+                        + " AND sf.processDc =:" + StagedFileDAO.PROCESS_DC
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE)
 })
 public class StagedFile implements Identifiable {
@@ -70,6 +78,7 @@ public class StagedFile implements Identifiable {
     private Timestamp modifiedDate;
     private String originatingDc;
     private String clusterType;
+    private String processDc;
 
     public StagedFile() {
     }
@@ -233,6 +242,15 @@ public class StagedFile implements Identifiable {
 
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
+    }
+    
+    @Column(name = "PROCESS_DC", length = 32)
+    public String getProcessDc() {
+        return processDc;
+    }
+
+    public void setProcessDc(String processDc) {
+        this.processDc = processDc;
     }
 
     @Override
