@@ -182,7 +182,7 @@ public class StagedFileDTO {
         this.processDc = processDc;
     }
     
-    /**
+	/**
 	 * Copies the file details from file to dto.
 	 * 
 	 * @param file

@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.service.core.sla;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
 import com.liaison.commons.jpa.DAOUtil;
@@ -77,6 +75,7 @@ public class MailboxWatchDogService {
 	private static final String EMAIL_NOTIFICATION_COUNT_PATTERN= "^[0-9]*$";
 	private static final String MINUTES = "MINUTES";
 	private static final String HOURS = "HOURS";
+	private static final String PROCESS_DC = "process_dc";
 
     private static StringBuilder QUERY_STRING = new StringBuilder().append("SELECT sf.* FROM STAGED_FILE sf")
             .append(" INNER JOIN PROCESSOR_EXEC_STATE pes ON sf.PROCESSOR_GUID = pes.PROCESSOR_ID")
@@ -84,8 +83,9 @@ public class MailboxWatchDogService {
             .append(" AND sf.PROCESSOR_TYPE IN ('FILEWRITER', 'REMOTEUPLOADER')")
             .append(" AND sf.CLUSTER_TYPE IN (?1)")
             .append(" AND pes.EXEC_STATUS != 'PROCESSING'")
-            .append(" AND sf.PROCESS_DC IN (?2)");
-
+            .append(" AND sf.PROCESS_DC =:")
+            .append(PROCESS_DC);
+    
 	private String uniqueId;
 
     private String constructMessage(String... messages) {
@@ -131,7 +131,7 @@ public class MailboxWatchDogService {
             List<StagedFile> stagedFiles = em
                     .createNativeQuery(QUERY_STRING.toString(), StagedFile.class)
                     .setParameter(1, MailBoxUtil.CLUSTER_TYPE)
-                    .setParameter(2, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
+                    .setParameter(PROCESS_DC, DATACENTER_NAME)
                     .getResultList();
 
             List<GlassMessageDTO> glassMessageDTOs = new ArrayList<>();

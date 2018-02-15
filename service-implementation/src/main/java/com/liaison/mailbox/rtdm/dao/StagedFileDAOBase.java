@@ -31,9 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
-
 /**
  * This will fetch the Staged file details. 
  *
@@ -325,7 +322,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE_BY_PROCESSID)
                     .setParameter(PROCESSOR_ID, processId)
                     .setParameter(STATUS, statuses)
-                    .setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
+                    .setParameter(PROCESS_DC, DATACENTER_NAME)
                     .getResultList();
 
             return stagedFiles;
@@ -354,8 +351,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(STATUS, statuses)
-                    .setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER))
-                    .getResultList();
+                    .setParameter(PROCESS_DC, DATACENTER_NAME)
+                    .setMaxResults(1).getResultList();
 
             return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
         } finally {
@@ -451,14 +448,13 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                  query = entityManager.createNamedQuery(FIND_BY_GPID); 
             } else {
                 query = entityManager.createNamedQuery(FIND_BY_GPID_BY_PROCESS_DC);
-                query.setParameter(PROCESS_DC, newArrayList(DATACENTER_NAME, ALL_DATACENTER));
+                query.setParameter(PROCESS_DC, DATACENTER_NAME);
             }
             
             query.setParameter(GLOBAL_PROCESS_ID, gpid);
             query.setParameter(STATUS, EntityStatus.INACTIVE.name());
             query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
-
-            List<?> files = query.getResultList();
+            List<?> files = query.setMaxResults(1).getResultList();
             if (files != null && !files.isEmpty()) {
                 return (StagedFile) files.get(0);
             }
@@ -530,7 +526,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                 tx.rollback();
             }
             throw e;
-        } finally { 
+        } finally {
             if (null != entityManager) {
                 entityManager.close();
             }
