@@ -51,6 +51,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
 /**
  * Data Transfer Object for processor details.
@@ -256,8 +257,12 @@ public class ProcessorDTO {
 
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
-                processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
-                processor.setProcessDc(MailBoxUtil.DATACENTER_NAME);
+                processor.setOriginatingDc(DATACENTER_NAME);
+                if (processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+                    processor.setProcessDc(DATACENTER_NAME);
+                } else {
+                    processor.setProcessDc(MailBoxConstants.ALL_DATACENTER);
+                }
             }
             // Set the protocol
             Protocol protocol = Protocol.findByName(this.getProtocol());

@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import static com.liaison.mailbox.service.util.MailBoxUtil.SKIP_PROCESS_DC;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.StringUtil;
@@ -49,6 +47,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -89,12 +89,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .append(" AND processor.procsrStatus = :")
                     .append(STATUS)
                     .append(" AND processor.clusterType =:")
-                    .append(MailBoxConstants.CLUSTER_TYPE);
+                    .append(MailBoxConstants.CLUSTER_TYPE)
+                    .append(" AND processor.processDc IN (:")
+                    .append(PROCESS_DC)
+                    .append(")");
 
-            if (!SKIP_PROCESS_DC) {
-                query.append(" AND processor.processDc =:").append(MailBoxConstants.PROCESS_DC);
-            }
-            
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 query.append(" AND mailbox.mbxName NOT LIKE :").append(MBX_NAME);
             }
@@ -106,7 +105,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             Query processorQuery = entityManager.createQuery(query.toString())
                     .setParameter(PROF_NAME, profileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.value())
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, MailBoxConstants.ALL_DATACENTER));
 
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 processorQuery.setParameter(MBX_NAME, mbxNamePattern);
@@ -114,10 +114,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             if (!MailBoxUtil.isEmpty(shardKey)) {
                 processorQuery.setParameter(SHARD_KEY, shardKey);
-            }
-
-            if (!SKIP_PROCESS_DC) {
-                processorQuery.setParameter(MailBoxConstants.PROCESS_DC, MailBoxUtil.DATACENTER_NAME);
             }
             
             @SuppressWarnings("unchecked")
