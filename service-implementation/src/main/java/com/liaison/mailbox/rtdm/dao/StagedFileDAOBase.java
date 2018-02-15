@@ -421,10 +421,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
         return stagedFiles;
     }
-    
+
     /**
      * Returns staged file
-     * @param isSkipProcessDc 
+     * @param gpid 
      */
     @Override
     public StagedFile findStagedFileByGpid(String gpid) {
