@@ -9,13 +9,11 @@
  */
 package com.liaison.mailbox.service.dto.configuration.request;
 
-import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
  * DTO that contains the existing and new process_dc
  * 
  */
-@JsonRootName("updateProcessDCRequest")
 public class UpdateProcessDCRequestDTO {
 
     private String existingProcessDC;

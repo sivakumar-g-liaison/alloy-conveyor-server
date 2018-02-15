@@ -1513,6 +1513,10 @@ public class ProcessorConfigurationService {
      * This method is used to update the downloader process_dc
      */
     public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
+        
+        if (MailBoxUtil.isEmpty(existingProcessDC) || MailBoxUtil.isEmpty(newProcessDC)) {
+            throw new MailBoxConfigurationServicesException(Messages.PROCESS_DC_EMPTY, Response.Status.BAD_REQUEST);
+        }
         new ProcessorConfigurationDAOBase().updateDownloaderProcessDc(existingProcessDC, newProcessDC);
     }
 }

@@ -198,7 +198,8 @@ public enum Messages {
 
     INVALID_PROCESSOR_ID("The given processor %s does not exist in the RuntimeProcessors."),
     
-    FILE_WRITER_SUCCESS_MESSAGE("File is picked up by the customer or other process");
+    FILE_WRITER_SUCCESS_MESSAGE("File is picked up by the customer or other process"),
+    PROCESS_DC_EMPTY("Process DC value cannot be empty");
 
     private String value;
 

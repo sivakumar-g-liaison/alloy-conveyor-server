@@ -93,7 +93,8 @@ public class Producer {
     public void produce(String message) {
         
         if (configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            throw new RuntimeException(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
+            LOG.error(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
+            return;
         }
         
         if (MailBoxUtil.isEmpty(message)) {
