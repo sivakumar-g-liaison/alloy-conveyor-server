@@ -1,5 +1,5 @@
 --
--- Copyright 2016 Liaison Technologies, Inc.
+-- Copyright 2018 Liaison Technologies, Inc.
 -- This software is the confidential and proprietary information of
 -- Liaison Technologies, Inc. ("Confidential Information").  You shall
 -- not disclose such Confidential Information and shall use it only in
@@ -8,7 +8,7 @@
 --
 
 /**
- * Adding new column "PROCESSING_DC" in the table "STAGED_FILE"
+ * Adding new column "PROCESS_DC" in the table "STAGED_FILE"
  */
 DECLARE
   v_column_exists number := 0;

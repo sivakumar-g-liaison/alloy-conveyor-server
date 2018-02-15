@@ -258,7 +258,7 @@ public class ProcessorDTO {
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(DATACENTER_NAME);
-                if (processor.getProcessorType().name().equals(ProcessorType.REMOTEDOWNLOADER)) {
+                if (processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
                     processor.setProcessDc(DATACENTER_NAME);
                 } else {
                     processor.setProcessDc(MailBoxConstants.ALL_DATACENTER);

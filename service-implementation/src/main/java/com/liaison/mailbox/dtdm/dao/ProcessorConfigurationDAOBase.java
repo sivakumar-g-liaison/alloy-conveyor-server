@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
  *
@@ -99,15 +101,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 query.append(" AND mailbox.shardKey LIKE :").append(SHARD_KEY);
             }
 
-            List<String> processDcList = new ArrayList<>();
-            processDcList.add(MailBoxUtil.DATACENTER_NAME);
-            processDcList.add(MailBoxConstants.ALL_DATACENTER);
-            
             Query processorQuery = entityManager.createQuery(query.toString())
                     .setParameter(PROF_NAME, profileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.value())
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
-                    .setParameter(PROCESS_DC, processDcList);
+                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, MailBoxConstants.ALL_DATACENTER));
 
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 processorQuery.setParameter(MBX_NAME, mbxNamePattern);
