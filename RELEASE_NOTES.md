@@ -1,3 +1,10 @@
+5.1.7
+---------------
+* GMB-1056 - HTTP Remote Uploader Improvements
+    * Execution type fix - once or infinite
+    * LENS logging for the invalid url case
+    * Try all the files and upload successful files
+
 5.1.6
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements - Log Changes
