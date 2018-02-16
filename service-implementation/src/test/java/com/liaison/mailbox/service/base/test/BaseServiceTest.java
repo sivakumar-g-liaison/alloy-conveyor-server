@@ -98,6 +98,7 @@ public abstract class BaseServiceTest {
                 System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
                 System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
                 System.setProperty("archaius.deployment.stack", prop.getProperty("STACK"));
+                System.setProperty("archaius.deployment.datacenter", "local");
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             } catch (Exception e) {
 
@@ -108,6 +109,7 @@ public abstract class BaseServiceTest {
                 System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
                 System.setProperty("archaius.deployment.environment", "dev");
                 System.setProperty("archaius.deployment.stack", "default");
+                System.setProperty("archaius.deployment.datacenter", "local");
                 System.setProperty("com.liaison.secure.properties.path", "invalid");
             }
         }
