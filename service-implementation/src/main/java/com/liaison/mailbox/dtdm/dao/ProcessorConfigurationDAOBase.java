@@ -27,7 +27,6 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
@@ -1256,7 +1255,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                   .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
                   .executeUpdate();
             
-            new StagedFileDAOBase().updateStagedFileProcessDC(existingProcessDC, newProcessDC);
             //commits the transaction
             tx.commit();
         

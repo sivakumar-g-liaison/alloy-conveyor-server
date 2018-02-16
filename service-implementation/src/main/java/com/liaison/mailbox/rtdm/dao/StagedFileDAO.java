@@ -186,7 +186,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String UPDATE_STAGED_FILE_BY_PROCESS_DC = new StringBuilder()
             .append("UPDATE STAGED_FILE")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
-            .append(" WHERE PROCESS_DC =:"+ EXISTING_PROCESS_DC).toString();
+            .append(" WHERE PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
    
     String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")

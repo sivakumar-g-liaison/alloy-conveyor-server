@@ -21,6 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
@@ -28,10 +29,11 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.framework.AppConfigurationResource;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessDCRequestDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -97,10 +99,11 @@ public class UpdateProcessDcResource extends AuditedResource {
                 // updates process_dc of downloder processor and staged file
                 try {
                     String requestString = getRequestBody(request);
-                    UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = MailBoxUtil.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
+                    UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = JAXBUtility.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
                     new ProcessorConfigurationService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
+                    new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
                     return marshalResponse(200, MediaType.APPLICATION_JSON, "Success");
-                } catch (IOException e) {
+                } catch (IOException | JAXBException e) {
                     throw new LiaisonRuntimeException("Unable to Update the process_DC " + e.getMessage(), e);
                 }
             }

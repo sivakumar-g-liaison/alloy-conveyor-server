@@ -406,7 +406,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String UPDATE_DOWNLOAD_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
-            .append(" WHERE TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name())
+            .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
             .append(" AND (PROCESS_DC NOT IN (:" + IGNORE_DATACENTERS + ")")
             .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
             .append(UPDATE_SIZE).toString();
@@ -417,7 +417,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
-            .append(" WHERE TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name())
+            .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
             .append(" AND STATUS <> 'DELETED'")
             .append(" AND PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
     
@@ -426,7 +426,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
     String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")
-            .append(" AND TYPE =:" + ProcessorType.REMOTEDOWNLOADER.name()).toString();
+            .append(" AND TYPE = 'REMOTEDOWNLOADER'").toString();
     
     String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString(); 
