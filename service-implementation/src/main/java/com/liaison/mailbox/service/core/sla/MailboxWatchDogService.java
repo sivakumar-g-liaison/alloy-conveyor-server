@@ -85,7 +85,7 @@ public class MailboxWatchDogService {
             .append(" AND sf.PROCESS_DC =:")
             .append(PROCESS_DC)
             .append(" AND pes.EXEC_STATUS != 'PROCESSING'");
-    
+
 	private String uniqueId;
 
     private String constructMessage(String... messages) {

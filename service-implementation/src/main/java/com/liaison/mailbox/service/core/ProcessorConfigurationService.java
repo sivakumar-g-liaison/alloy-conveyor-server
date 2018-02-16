@@ -1301,12 +1301,17 @@ public class ProcessorConfigurationService {
             List<String> processedDC = new ArrayList<String>();            
             for (String dc : datacenterMap.keySet()) {                
                 
+                if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
+                    throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+                }
                 processedDC.add(dc);
                 int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);                
                 dao.updateDatacenter(dc, processedDC, readyToProcessCount);
             }
 
-        } catch (Exception exception) {
+        } catch (NumberFormatException exception) {
+            throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
         
@@ -1338,12 +1343,17 @@ public class ProcessorConfigurationService {
             List<String> processedDC = new ArrayList<String>();            
             for (String dc : datacenterMap.keySet()) {
                 
+                if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
+                    throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+                }
                 processedDC.add(dc);
                 int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);                
                 dao.updateDownloaderDatacenter(dc, processedDC, readyToProcessCount);
             }
 
-        } catch (Exception exception) {
+        } catch (NumberFormatException exception) {
+            throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
         
