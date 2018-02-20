@@ -63,6 +63,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String PROCESS_DC = "process_dc";
     String EXISTING_PROCESS_DC = "existing_process_dc";
     String NEW_PROCESS_DC = "new_process_dc";
+    String CLUSTER_TYPE = "cluster_type";
 
     /**
      * Constants for getProcessor Class
@@ -167,7 +168,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      *
      * @return list of downloader processors count
      */
-    long getDownloadProcessorCount();
+    long getDownloadProcessorCount(String clusterType);
 
     /**
      * Retrieves processors by mailbox guid and processor name
@@ -302,8 +303,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @param dc
      * @param ignoreDatacenters
      * @param updateSize
+     * @param clusterType
      */
-    void updateDownloaderDatacenter(String dc, List<String> processedDC, int processSize);
+    void updateDownloaderDatacenter(String dc, List<String> processedDC, int processSize, String clusterType);
 
     /**
      * Update the process_dc to current_dc where the process_dc is null
@@ -407,6 +409,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String UPDATE_DOWNLOAD_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
+            .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
             .append(" AND (PROCESS_DC NOT IN (:" + IGNORE_DATACENTERS + ")")
             .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
             .append(UPDATE_SIZE).toString();
@@ -426,6 +429,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
     String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")
+            .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
             .append(" AND TYPE = 'REMOTEDOWNLOADER'").toString();
     
     String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")

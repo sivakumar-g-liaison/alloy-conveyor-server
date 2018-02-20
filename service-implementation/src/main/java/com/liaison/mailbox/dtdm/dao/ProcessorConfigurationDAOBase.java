@@ -1061,8 +1061,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * @param dc
      * @param processedDC
      * @param updateSize
+     * @param clusterType
      */
-    public void updateDownloaderDatacenter(String dc,  List<String> processedDC, int updateSize) {
+    public void updateDownloaderDatacenter(String dc,  List<String> processedDC, int updateSize, String clusterType) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -1077,6 +1078,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 .setParameter(DATACENTER, dc)
                 .setParameter(IGNORE_DATACENTERS, processedDC)
                 .setParameter(UPDATE_SIZE, updateSize)
+                .setParameter(CLUSTER_TYPE, clusterType)
                 .executeUpdate();
             
             //commits the transaction
@@ -1123,7 +1125,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * Method retrieve the processors count.
      */
     @Override
-    public long getDownloadProcessorCount() {
+    public long getDownloadProcessorCount(String clusterType) {
 
         EntityManager entityManager = null;
         long count;
@@ -1132,6 +1134,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             count = ((BigDecimal) entityManager.createNativeQuery(DOWNLOAD_PROCESSOR_COUNT)
+                      .setParameter(CLUSTER_TYPE, clusterType)
                       .getSingleResult()).longValue();
             
         } catch (Exception e) {

@@ -1333,22 +1333,12 @@ public class ProcessorConfigurationService {
             //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
-            //fetch processor count
-            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-            long processorCount = dao.getDownloadProcessorCount();
-            if (0 == processorCount) {
-                LOGGER.info("No processor exist");
-                return;
-            }            
-            List<String> processedDC = new ArrayList<String>();            
-            for (String dc : datacenterMap.keySet()) {
-                
-                if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
-                    throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-                }
-                processedDC.add(dc);
-                int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);                
-                dao.updateDownloaderDatacenter(dc, processedDC, readyToProcessCount);
+            
+            if (MailBoxConstants.SECURE.equals(MailBoxUtil.CLUSTER_TYPE)) {
+                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.SECURE);
+                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
+            } else {
+                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
             }
 
         } catch (NumberFormatException exception) {
@@ -1358,6 +1348,33 @@ public class ProcessorConfigurationService {
         }
         
         LOGGER.debug("Exit from supportDownloaderProcessorAffinity () ");
+    }
+    
+    /**
+     * Updates the data center by cluster type
+     * 
+     * @param datacenterMap
+     * @param clusterType
+     */
+    private void updateDownloaderDatacenter(Map<String, String> datacenterMap, String clusterType) {
+
+        // fetch processor count
+        ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+        long processorCount = dao.getDownloadProcessorCount(clusterType);
+        if (0 == processorCount) {
+            LOGGER.info("No download processor exist for cluster type " + clusterType);
+            return;
+        }
+        List<String> processedDC = new ArrayList<String>();
+        for (String dc : datacenterMap.keySet()) {
+
+            if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
+                throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+            }
+            processedDC.add(dc);
+            int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
+            dao.updateDownloaderDatacenter(dc, processedDC, readyToProcessCount, clusterType);
+        }
     }
     
     /**
