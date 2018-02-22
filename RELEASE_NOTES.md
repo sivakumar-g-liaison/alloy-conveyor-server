@@ -1,3 +1,6 @@
+5.2.0-SNAPSHOT
+---------------
+
 5.1.7
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
