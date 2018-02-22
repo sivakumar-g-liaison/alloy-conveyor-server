@@ -1120,11 +1120,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
-     * Method retrieve the processors guid.
+     * Method retrieve the processors guids.
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> getDownloadProcessorCount(String clusterType) {
+    public List<String> getDownloadProcessorGuids(String clusterType) {
 
         EntityManager entityManager = null;
         List<String> results;
@@ -1132,7 +1132,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            results =  entityManager.createNativeQuery(DOWNLOAD_PROCESSOR_COUNT)
+            results =  entityManager.createNativeQuery(GET_DOWNLOAD_PROCESSOR_GUIDS)
                       .setParameter(CLUSTER_TYPE, clusterType)
                       .getResultList();
             

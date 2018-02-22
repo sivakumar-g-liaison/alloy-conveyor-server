@@ -1360,7 +1360,7 @@ public class ProcessorConfigurationService {
 
         // fetch processor count
         ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-        List<String> processorGuids = dao.getDownloadProcessorCount(clusterType);
+        List<String> processorGuids = dao.getDownloadProcessorGuids(clusterType);
         int processorCount = processorGuids.size();
         
         if (0 == processorCount) {
@@ -1385,13 +1385,11 @@ public class ProcessorConfigurationService {
             } else {
                 toIndex = fromIndex + (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
             }
-            
-            if (fromIndex >= toIndex) {
-                return;
+
+            if (fromIndex <= toIndex) {
+                subList = processorGuids.subList(fromIndex, toIndex);
+                dao.updateDownloaderDatacenter(dc, subList);
             }
-            
-            subList = processorGuids.subList(fromIndex, toIndex);
-            dao.updateDownloaderDatacenter(dc, subList);
             fromIndex = toIndex;
         }
     }

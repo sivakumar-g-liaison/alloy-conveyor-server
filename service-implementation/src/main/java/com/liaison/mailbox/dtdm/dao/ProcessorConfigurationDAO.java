@@ -169,7 +169,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      *
      * @return list of downloader processors guid
      */
-    List<String> getDownloadProcessorCount(String clusterType);
+    List<String> getDownloadProcessorGuids(String clusterType);
 
     /**
      * Retrieves processors by mailbox guid and processor name
@@ -422,7 +422,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString();
 
-    String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
+    String GET_DOWNLOAD_PROCESSOR_GUIDS = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")
             .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
             .append(" AND TYPE = 'REMOTEDOWNLOADER'").toString();
