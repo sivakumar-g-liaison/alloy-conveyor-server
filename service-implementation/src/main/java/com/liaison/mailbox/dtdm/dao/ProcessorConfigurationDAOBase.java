@@ -1056,14 +1056,14 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
-     * Update the download processor Datacenter
+     * Update the download processor Datacenter by processor guid
      * 
      * @param dc
      * @param processedDC
      * @param updateSize
      * @param clusterType
      */
-    public void updateDownloaderDatacenter(String dc,  List<String> processedDC, int updateSize, String clusterType) {
+    public void updateDownloaderDatacenter(String dc,  List<String> processorGuids) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -1076,9 +1076,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_DOWNLOAD_PROCESS_DC)
                 .setParameter(DATACENTER, dc)
-                .setParameter(IGNORE_DATACENTERS, processedDC)
-                .setParameter(UPDATE_SIZE, updateSize)
-                .setParameter(CLUSTER_TYPE, clusterType)
+                .setParameter(PGUIDS, processorGuids)
                 .executeUpdate();
             
             //commits the transaction
@@ -1122,20 +1120,21 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
-     * Method retrieve the processors count.
+     * Method retrieve the processors guid.
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public long getDownloadProcessorCount(String clusterType) {
+    public List<String> getDownloadProcessorCount(String clusterType) {
 
         EntityManager entityManager = null;
-        long count;
+        List<String> results;
 
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            count = ((BigDecimal) entityManager.createNativeQuery(DOWNLOAD_PROCESSOR_COUNT)
+            results =  entityManager.createNativeQuery(DOWNLOAD_PROCESSOR_COUNT)
                       .setParameter(CLUSTER_TYPE, clusterType)
-                      .getSingleResult()).longValue();
+                      .getResultList();
             
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -1144,7 +1143,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        return count;
+        return results;
     }
     
     /**

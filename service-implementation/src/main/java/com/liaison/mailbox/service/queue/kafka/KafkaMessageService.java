@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
@@ -38,7 +39,8 @@ public class KafkaMessageService implements Runnable {
         FILEWRITER_CREATE,
         USERACCOUNT_CREATE,
         USERACCOUNT_DELETE,
-        DIRECTORY_CREATION
+        DIRECTORY_CREATION,
+        FILE_DELETE
     }
 
     public KafkaMessageService(String message) {
@@ -84,6 +86,12 @@ public class KafkaMessageService implements Runnable {
                         processorService.createLocalPath();
                     }
                     break;
+                    
+                case FILE_DELETE:
+                    LOGGER.debug("KAFKA_CONSUMER: FILE_DELETE" + kafkaMessage.getProcessorGuid());
+                    new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage.getFileDeleteMessage());
+                    break;
+                    
                 
                 default:
                     LOGGER.info("MessageType is not valid.");

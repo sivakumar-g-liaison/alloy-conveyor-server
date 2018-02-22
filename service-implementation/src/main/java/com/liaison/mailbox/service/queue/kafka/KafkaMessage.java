@@ -22,6 +22,7 @@ public class KafkaMessage {
     private String fileWriterMsg;
     private DirectoryMessageDTO directoryMessageDTO;
     private String processorGuid;
+    private String fileDeleteMessage;
 
     public String getProcessorGuid() {
         return processorGuid;
@@ -53,5 +54,13 @@ public class KafkaMessage {
 
     public void setMessageType(KafkaMessageType directoryCreation) {
         this.messageType = directoryCreation;
+    }
+
+    public String getFileDeleteMessage() {
+        return fileDeleteMessage;
+    }
+
+    public void setFileDeleteMessage(String fileDeleteMessage) {
+        this.fileDeleteMessage = fileDeleteMessage;
     }
 }

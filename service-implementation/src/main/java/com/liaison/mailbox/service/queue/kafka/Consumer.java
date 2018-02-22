@@ -25,7 +25,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -42,6 +42,8 @@ import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.SERVERS;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT_LOWSECURE;
 
 /**
  * Kafka consumer to consume message from topic.
@@ -55,6 +57,10 @@ public class Consumer extends ThreadPoolExecutor {
             + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_DEFAULT);
     private static final String STREAM_LEGACY = CONFIGURATION.getString(KAFKA_STREAM)
             + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_LOWSECURE);
+    private static final String FS_EVENT_STREAM = CONFIGURATION.getString(KAFKA_STREAM)
+            + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT);
+    private static final String FS_EVENT_STREAM_LEGACY = CONFIGURATION.getString(KAFKA_STREAM)
+            + CONFIGURATION.getString(KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT_LOWSECURE);
     private static final String AUTO_OFFSET_RESET_DEFAULT = "latest";
 
     private static final int DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE = 10;
@@ -93,9 +99,9 @@ public class Consumer extends ThreadPoolExecutor {
         // It will called if the type is not conveyor. We have to check relay and legacy relay;
         String deploymentType = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
         if (DeploymentType.RELAY.getValue().equals(deploymentType)) {
-            consumer.subscribe(Collections.singletonList(STREAM));
+            consumer.subscribe(Arrays.asList(STREAM, FS_EVENT_STREAM));
         } else {
-            consumer.subscribe(Collections.singletonList(STREAM_LEGACY));
+            consumer.subscribe(Arrays.asList(STREAM_LEGACY, FS_EVENT_STREAM_LEGACY));
         }
         
         //Shutdown hook to stop the kakfa consumer during JVM shutdown

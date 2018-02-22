@@ -46,6 +46,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String STATUS_DELETE = "status_delete";
     String SHARD_KEY = "shard_key";
     String PGUID = "pguid";
+    String PGUIDS = "pguids";
     String SERV_INST_ID = "proc_serv_inst_id";
     String PROCESSOR_TYPE = "processor_type";
     String PRCSR_NAME = "prcsr_name";
@@ -164,11 +165,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     long getProcessorCount();
     
     /**
-     * Retrieves downloader processors count
+     * Retrieves downloader processors guid
      *
-     * @return list of downloader processors count
+     * @return list of downloader processors guid
      */
-    long getDownloadProcessorCount(String clusterType);
+    List<String> getDownloadProcessorCount(String clusterType);
 
     /**
      * Retrieves processors by mailbox guid and processor name
@@ -298,14 +299,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     void updateDatacenter(String dc, List<String> processedDC, int processSize);
     
     /**
-     * Update the Downloader Datacenter
+     * Update the Downloader Datacenter by processor guid
      * 
      * @param dc
-     * @param ignoreDatacenters
-     * @param updateSize
-     * @param clusterType
+     * @param processorGuids
      */
-    void updateDownloaderDatacenter(String dc, List<String> processedDC, int processSize, String clusterType);
+    void updateDownloaderDatacenter(String dc, List<String> processorGuids);
 
     /**
      * Update the process_dc to current_dc where the process_dc is null
@@ -408,11 +407,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String UPDATE_DOWNLOAD_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
-            .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
-            .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
-            .append(" AND (PROCESS_DC NOT IN (:" + IGNORE_DATACENTERS + ")")
-            .append(" OR PROCESS_DC IS NULL) AND STATUS <> 'DELETED' AND rownum <= :")
-            .append(UPDATE_SIZE).toString();
+            .append(" WHERE PGUID IN (:" + PGUIDS + ")").toString();
     
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
@@ -427,7 +422,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString();
 
-    String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
+    String DOWNLOAD_PROCESSOR_COUNT = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")
             .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
             .append(" AND TYPE = 'REMOTEDOWNLOADER'").toString();

@@ -13,11 +13,16 @@ package com.liaison.mailbox.service.queue.kafka;
 public interface QueueServiceConstants {
 
     String KAFKA_STREAM = "kafka.stream";
-    
-    String KAFKA_CONSUMER_TOPIC_NAME_DEFAULT ="kafka.consumer.topic.name.default";
-    String KAFKA_PRODUCER_TOPIC_NAME_DEFAULT ="kafka.producer.topic.name.default";
-    String KAFKA_CONSUMER_TOPIC_NAME_LOWSECURE ="kafka.consumer.topic.name.lowsecure";
-    String KAFKA_PRODUCER_TOPIC_NAME_LOWSECURE ="kafka.producer.topic.name.lowsecure";
+
+    String KAFKA_CONSUMER_TOPIC_NAME_DEFAULT = "kafka.consumer.topic.name.default";
+    String KAFKA_PRODUCER_TOPIC_NAME_DEFAULT = "kafka.producer.topic.name.default";
+    String KAFKA_CONSUMER_TOPIC_NAME_LOWSECURE = "kafka.consumer.topic.name.lowsecure";
+    String KAFKA_PRODUCER_TOPIC_NAME_LOWSECURE = "kafka.producer.topic.name.lowsecure";
+
+    String KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT = "kafka.consumer.topic.name.fs.event";
+    String KAFKA_PRODUCER_TOPIC_NAME_FS_EVENT = "kafka.producer.topic.name.fs.event";
+    String KAFKA_CONSUMER_TOPIC_NAME_FS_EVENT_LOWSECURE = "kafka.consumer.topic.name.fs.event.lowsecure";
+    String KAFKA_PRODUCER_TOPIC_NAME_FS_EVENT_LOWSECURE = "kafka.producer.topic.name.fs.event.lowsecure";
 
     String KAFKA_CONSUMER_PREFIX = "kafka.consumer.";
     String SERVERS = "bootstrap.servers";

@@ -1360,20 +1360,39 @@ public class ProcessorConfigurationService {
 
         // fetch processor count
         ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-        long processorCount = dao.getDownloadProcessorCount(clusterType);
+        List<String> processorGuids = dao.getDownloadProcessorCount(clusterType);
+        int processorCount = processorGuids.size();
+        
         if (0 == processorCount) {
             LOGGER.info("No download processor exist for cluster type " + clusterType);
             return;
         }
-        List<String> processedDC = new ArrayList<String>();
+        
+        List<String> subList;
+        int fromIndex = 0;
+        int toIndex;
+        int updateCount = 0;
+        
         for (String dc : datacenterMap.keySet()) {
 
             if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
                 throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
             }
-            processedDC.add(dc);
-            int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
-            dao.updateDownloaderDatacenter(dc, processedDC, readyToProcessCount, clusterType);
+            
+            updateCount ++;
+            if (updateCount == datacenterMap.size()) {
+                toIndex = processorCount - 1;
+            } else {
+                toIndex = fromIndex + (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
+            }
+            
+            if (fromIndex >= toIndex) {
+                return;
+            }
+            
+            subList = processorGuids.subList(fromIndex, toIndex);
+            dao.updateDownloaderDatacenter(dc, subList);
+            fromIndex = toIndex;
         }
     }
     
