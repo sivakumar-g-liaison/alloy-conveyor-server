@@ -104,6 +104,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
                         try {
                             ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, ((RelayFile) file).getGlobalProcessId());
                             uploadFile((RelayFile) file);
+                        } catch (Exception e) {
+                            //Proceed with next file if any
+                            LOGGER.error("Error occurred during http(s) upload - " + e.getMessage(), e);
                         } finally {
                             ThreadContext.clearMap();
                         }
@@ -215,19 +218,9 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 LOGGER.warn(constructMessage("The response code received is {} "), response.getStatusCode());
                 LOGGER.warn(constructMessage("Execution failure for "), file.getAbsolutePath());
-                String msg = String.format("Failed to upload a file %s  status code received %s and the reason is %s", file.getName(), response.getStatusCode(), response.getReasonPhrease());
-
-                logToLens(msg, file, ExecutionState.FAILED);
-                boolean retry = httpUploaderStaticProperties.getExecution().equalsIgnoreCase(MailBoxConstants.EXECUTE);
-                if (!retry) {
-                    StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-                    StagedFile stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
-                    stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-                    stagedFileDAO.merge(stagedFile);
-                }
-
+                String msg = String.format("Failed to upload a file %s  status code received %s and the reason is %s",
+                        file.getName(), response.getStatusCode(), response.getReasonPhrease());
                 throw new RuntimeException(msg);
-
             } else {
 
                 // deletes the file if it is staged using file system
@@ -246,6 +239,20 @@ public class HTTPRemoteUploader extends AbstractRemoteUploader {
 
                 totalNumberOfProcessedFiles++;
             }
+        } catch(Exception e) {
+
+            logToLens(e.getMessage(), file, ExecutionState.FAILED);
+
+            // inactive the staged file entry based on the execute property
+            boolean retry = MailBoxConstants.EXECUTE.equalsIgnoreCase(httpUploaderStaticProperties.getExecution());
+            if (!retry) {
+                StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+                StagedFile stagedFile = stagedFileDAO.findStagedFileByGpid(file.getGlobalProcessId());
+                stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+                stagedFileDAO.merge(stagedFile);
+            }
+
+            throw e;
         } finally {
             if (contentStream != null) {
                 try {
