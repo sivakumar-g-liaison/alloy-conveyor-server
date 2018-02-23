@@ -84,7 +84,46 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
         // hand the delegate to the framework for calling
         return process(request, worker);
     }
-    
+
+    /**
+     * REST method support to the downloader processoraffinity.
+     *
+     * @param request
+     *            HttpServletRequest, injected with context annotation
+     * @return Response Object
+     */
+    @PUT
+    @ApiOperation(value = "Support downloader processor affinity", notes = "Support downloader processor affinity", position = 1)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+    public Response supportDownloadProcessorAffinity(@Context final HttpServletRequest request) {
+
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
+
+                String requestString;
+                try {
+                    requestString = getRequestBody(request);
+                    // updates datacenter of downloader processors
+                    ProcessorConfigurationService service = new ProcessorConfigurationService();
+                    service.supportDownloaderProcessorAffinity(requestString);
+                    return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+                    
+                } catch (IOException e) {
+                    throw new LiaisonRuntimeException("Unable to Process Request. " + e.getMessage(), e);
+                }
+
+            }
+        };
+        worker.actionLabel = "MailBoxProcessorAffinityResource.supportDownloadProcessorAffinity()";
+
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
+
     /**
      * REST method to retrieve a datacenter and corresponding processors details.
      *

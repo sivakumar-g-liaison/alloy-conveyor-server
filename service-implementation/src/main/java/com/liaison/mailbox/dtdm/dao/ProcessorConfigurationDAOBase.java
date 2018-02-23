@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import static com.liaison.mailbox.service.util.MailBoxUtil.SKIP_PROCESS_DC;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.StringUtil;
@@ -48,6 +46,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -88,12 +88,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .append(" AND processor.procsrStatus = :")
                     .append(STATUS)
                     .append(" AND processor.clusterType =:")
-                    .append(MailBoxConstants.CLUSTER_TYPE);
+                    .append(MailBoxConstants.CLUSTER_TYPE)
+                    .append(" AND processor.processDc IN (:")
+                    .append(PROCESS_DC)
+                    .append(")");
 
-            if (!SKIP_PROCESS_DC) {
-                query.append(" AND processor.processDc =:").append(MailBoxConstants.PROCESS_DC);
-            }
-            
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 query.append(" AND mailbox.mbxName NOT LIKE :").append(MBX_NAME);
             }
@@ -105,7 +104,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             Query processorQuery = entityManager.createQuery(query.toString())
                     .setParameter(PROF_NAME, profileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.value())
-                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, MailBoxConstants.ALL_DATACENTER));
 
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 processorQuery.setParameter(MBX_NAME, mbxNamePattern);
@@ -113,10 +113,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             if (!MailBoxUtil.isEmpty(shardKey)) {
                 processorQuery.setParameter(SHARD_KEY, shardKey);
-            }
-
-            if (!SKIP_PROCESS_DC) {
-                processorQuery.setParameter(MailBoxConstants.PROCESS_DC, MailBoxUtil.DATACENTER_NAME);
             }
             
             @SuppressWarnings("unchecked")
@@ -1060,6 +1056,45 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
     
     /**
+     * Update the download processor Datacenter by processor guid
+     * 
+     * @param dc
+     * @param processedDC
+     * @param updateSize
+     * @param clusterType
+     */
+    public void updateDownloaderDatacenter(String dc,  List<String> processorGuids) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processor PROCESS_DC
+            entityManager.createNativeQuery(UPDATE_DOWNLOAD_PROCESS_DC)
+                .setParameter(DATACENTER, dc)
+                .setParameter(PGUIDS, processorGuids)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+    
+    /**
      * Method retrieve the processors count.
      */
     @Override
@@ -1082,6 +1117,33 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
         return count;
+    }
+    
+    /**
+     * Method retrieve the processors guids.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getDownloadProcessorGuids(String clusterType) {
+
+        EntityManager entityManager = null;
+        List<String> results;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results =  entityManager.createNativeQuery(GET_DOWNLOAD_PROCESSOR_GUIDS)
+                      .setParameter(CLUSTER_TYPE, clusterType)
+                      .getResultList();
+            
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return results;
     }
     
     /**
@@ -1158,6 +1220,41 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_PROCESS_DC_TO_CURRENT_DC)
                   .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                  .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        
+    }
+    
+    /**
+     * updater the downloader process_Dc
+     */
+    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processor PROCESS_DC
+            entityManager.createNativeQuery(UPDATE_DOWNLOADER_PROCESS_DC)
+                  .setParameter(NEW_PROCESS_DC, newProcessDC)
+                  .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
                   .executeUpdate();
             
             //commits the transaction

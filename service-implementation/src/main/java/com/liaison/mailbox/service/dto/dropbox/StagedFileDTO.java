@@ -36,7 +36,8 @@ public class StagedFileDTO {
 	private String createdDate;
 	private String modifiedDate;
     private String clusterType;
-
+    private String processDc;
+    
 	public StagedFileDTO() {
 	}
 
@@ -172,7 +173,15 @@ public class StagedFileDTO {
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
     }
+    
+    public String getProcessDc() {
+        return processDc;
+    }
 
+    public void setProcessDc(String processDc) {
+        this.processDc = processDc;
+    }
+    
 	/**
 	 * Copies the file details from file to dto.
 	 * 

@@ -1,5 +1,11 @@
 5.2.0-SNAPSHOT
 ---------------
+* MapR Stream - Kafka implementation
+* GMB-1088 - The remote uploader always has to pick up the current datacenter files based on processing_dc
+* GMB-1089 - Watchdog service cleanup based on processingDC
+* GMB-1090 - Process downloader based on processing DC
+* GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
+* GMB-901 - MAPR Intergration - REST endpoint to receive notification from system for file delete operation
 
 5.1.7
 ---------------

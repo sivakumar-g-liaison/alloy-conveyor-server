@@ -12,14 +12,18 @@ package com.liaison.mailbox.service.directory;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -52,7 +56,7 @@ public class DirectoryService implements Runnable {
     @Override
     public void run() {
         try {
-            this.executeDirectoryOperation(JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class));
+            this.executeDirectoryOperation(JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class), true);
         } catch (JAXBException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -123,14 +127,21 @@ public class DirectoryService implements Runnable {
      * Based on operation type invokes create/delete methods.
      *
      * @param message message from the queue
+     * @param isProduceKafkaMessage
      * @throws IOException
      */
-    public void executeDirectoryOperation(DirectoryMessageDTO message) throws IOException {
+    public void executeDirectoryOperation(DirectoryMessageDTO message, boolean isProduceKafkaMessage) throws IOException {
 
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
             invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
+            if (isProduceKafkaMessage) {
+                Producer.getInstance().produce(KafkaMessageType.USERACCOUNT_CREATE, message);
+            }
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());
+            if (isProduceKafkaMessage) {
+                Producer.getInstance().produce(KafkaMessageType.USERACCOUNT_DELETE, message);
+            }
         } else {
             throw new RuntimeException("Invalid operation");
         }

@@ -25,6 +25,8 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -105,6 +107,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
+                        if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
+                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket, configurationInstance.getPguid(), processorPayloadLocation);
+                        }
                     } else {
 
                         LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);

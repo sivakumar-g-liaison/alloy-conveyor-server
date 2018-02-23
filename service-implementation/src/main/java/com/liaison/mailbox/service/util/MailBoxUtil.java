@@ -100,7 +100,6 @@ public class MailBoxUtil {
     private static final float DAYS_IN_YEAR = 365;
 
     public static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
-    public static final boolean SKIP_PROCESS_DC = CONFIGURATION.getBoolean(MailBoxConstants.PROPERTY_SKIP_PROCESS_DC_CHECK, true);
 
     /**
      * Initialize the cluster type.

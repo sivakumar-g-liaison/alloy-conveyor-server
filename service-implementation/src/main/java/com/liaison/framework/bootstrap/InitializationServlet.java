@@ -28,6 +28,8 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
+import com.liaison.mailbox.service.queue.kafka.Consumer;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +43,7 @@ import java.security.Security;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 
 
 /**
@@ -59,6 +62,7 @@ public class InitializationServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
+    private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
     public void init(ServletConfig config) throws ServletException {
 
@@ -71,7 +75,6 @@ public class InitializationServlet extends HttpServlet {
             logger.info("The provider({}) installed successfully at the order {}", BouncyCastleProvider.PROVIDER_NAME, result);
         }
 
-        DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
 
         // nfs health check
@@ -138,7 +141,19 @@ public class InitializationServlet extends HttpServlet {
                 logger.error("Unable to register http sb sync pool", e);
             }
         }
+        
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)
+                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
+            new Consumer().consume();
+        }
 
 	}
 
+    public void destroy() {
+
+        //Shutdown the kafa producer gracefully
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
+            Producer.getInstance().stop();
+        }
+    }
 }

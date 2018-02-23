@@ -185,9 +185,6 @@ public interface MailBoxConstants {
     // "LOW_SECURE_RELAY" or "CONVEYOR"
     String DEPLOYMENT_TYPE = "com.liaison.deployment.type";
 
-    // Active-Active property to enable process dc check
-    String PROPERTY_SKIP_PROCESS_DC_CHECK = "com.liaison.mailbox.skip.process.dc.check";
-
     String MAILBOX = "MailBox";
     String PROCESSOR_STATUS = "Processor Status";
     String INTERRUPT_SIGNAL = "Interrupt Signal";
@@ -496,6 +493,7 @@ public interface MailBoxConstants {
 
     //process Dc
     String PROCESS_DC = "process_dc";
+    String ALL_DATACENTER = "ALL";
 
     String MANIFEST_DTO = "manifest_dto";
     String TRIGGER_FILE = "Trigger File";
@@ -509,4 +507,6 @@ public interface MailBoxConstants {
     String RESPONSE_FS2_URI = "response_fs2_uri";
 
     String EXECUTE = "infinite";
+
+    String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 }

@@ -40,7 +40,7 @@ public class DirectoryServiceTest extends BaseServiceTest {
         messageDTO.setOperationType(DirectoryOperationTypes.CREATE.value());
         messageDTO.setUserName("test");
 
-        service.executeDirectoryOperation(messageDTO);
+        service.executeDirectoryOperation(messageDTO, false);
     }
     
     /**
@@ -56,6 +56,6 @@ public class DirectoryServiceTest extends BaseServiceTest {
         messageDTO.setOperationType(DirectoryOperationTypes.DELETE.value());
         messageDTO.setUserName("test");
         
-        service.executeDirectoryOperation(messageDTO);
+        service.executeDirectoryOperation(messageDTO, false);
     }
 }
