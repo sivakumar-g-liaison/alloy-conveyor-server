@@ -1,4 +1,18 @@
-5.1.0-SNAPSHOT
+5.2.0-SNAPSHOT
+---------------
+
+5.1.7
+---------------
+* GMB-1056 - HTTP Remote Uploader Improvements
+    * Execution type fix - once or infinite
+    * LENS logging for the invalid url case
+    * Try all the files and upload successful files
+
+5.1.6
+---------------
+* GMB-1056 - HTTP Remote Uploader Improvements - Log Changes
+
+5.1.5
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
 * GMB-1064, GMB-1065 - JSCH 0.1.54 causing issues for the kex alg diffie-hellman-group-exchange-sha1
