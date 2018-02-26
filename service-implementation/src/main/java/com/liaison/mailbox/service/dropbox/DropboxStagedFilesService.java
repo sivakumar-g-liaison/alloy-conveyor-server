@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.dropbox;
 
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.util.ISO8601Util;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -33,14 +34,18 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +63,9 @@ public class DropboxStagedFilesService extends DropboxBaseService {
 
 	private static final String STAGED_FILES = "Staged Files";
 	public static final String STAGED_FILE = "Staged File";
+	private static final String DOWNLOADED_BY = "downloadedBy=";
+	private static final String DOWNLOADED_TIME = "downloadedTime=";
+	private static final String SEPARATOR = ";";
 
 	/**
 	 * Method to retrieve all staged files of the mailboxes linked to tenancy keys available in the manifest
@@ -236,7 +244,7 @@ public class DropboxStagedFilesService extends DropboxBaseService {
 		}
 	}
 
-	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid, boolean hardDelete)
+	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid, boolean hardDelete, String loginId)
 			throws IOException, JAXBException {
 
 		LOG.debug("Entering into drop staged files service.");
@@ -260,6 +268,8 @@ public class DropboxStagedFilesService extends DropboxBaseService {
         } else {
             // UnStaging the stagedFile by changing its status to INACTIVE
             unStagingFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+            // adding the file downloaded time and downloaded by information
+            unStagingFile.setFileMetaData(constructFileMetaData(unStagingFile.getFileMetaData(), loginId));
             stagedFileDAO.merge(unStagingFile);
         }
 
@@ -274,4 +284,8 @@ public class DropboxStagedFilesService extends DropboxBaseService {
 		return dropBoxUnStagedResponse;
 	}
 
+	private String constructFileMetaData(String fileMetaData, String loginId) {	    
+	    String downloadedTime = new ISO8601Util().fromTimestamp(new Timestamp(new Date().getTime()));	    
+	    return fileMetaData + SEPARATOR + DOWNLOADED_BY + loginId + SEPARATOR +  DOWNLOADED_TIME + downloadedTime;
+	}
 }

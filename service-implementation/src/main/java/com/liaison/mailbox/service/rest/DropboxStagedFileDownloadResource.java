@@ -211,7 +211,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     GEMManifestResponse manifestResponse = new Gson().fromJson(manifestJson, GEMManifestResponse.class);
 
                     DropBoxUnStagedFileResponseDTO dropBoxUnStagedFileResponseDTO =
-                            stagedFileService.getDroppedStagedFileResponse(manifestResponse.getManifest(), stagedFileId, Boolean.parseBoolean(hardDelete));
+                            stagedFileService.getDroppedStagedFileResponse(manifestResponse.getManifest(), stagedFileId, Boolean.parseBoolean(hardDelete), loginId);
 
                     // response message construction
                     String responseBody = MailBoxUtil.marshalToJSON(dropBoxUnStagedFileResponseDTO);

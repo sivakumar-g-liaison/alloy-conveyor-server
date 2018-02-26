@@ -29,6 +29,7 @@
 * GMB-1075 - HTTP Async Processor: Socket Timeout Value deleted permanently from processor properties screen
 * GMB-1078 - URL generated in the Mailbox processor is incomplete
 * GMB-1085 - Log the response status code and data in Kibana
+* GWUD-159 - Show user info of the file downloader
 
 5.1.4
 ---------------
