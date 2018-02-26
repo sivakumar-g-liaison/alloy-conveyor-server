@@ -6,6 +6,7 @@
 * GMB-1090 - Process downloader based on processing DC
 * GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
 * GMB-901 - MAPR Intergration - REST endpoint to receive notification from system for file delete operation
+* Removed newly added Indexes for STAGED_FILE and PROCESSOR_EXEC_STATE to check in STAGING
 
 5.1.7
 ---------------
