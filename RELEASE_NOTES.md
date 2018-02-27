@@ -1,3 +1,8 @@
+5.1.8
+---------------
+* new rpm with fs2 11.1.2
+    * There is non backward compatible changes introduced on GSB-3170
+
 5.1.7
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
