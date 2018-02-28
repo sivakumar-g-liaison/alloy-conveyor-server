@@ -1,4 +1,4 @@
-5.2.0-SNAPSHOT
+5.2.0
 ---------------
 * MapR Stream - Kafka implementation
 * GMB-1088 - The remote uploader always has to pick up the current datacenter files based on processing_dc
