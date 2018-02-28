@@ -8,6 +8,11 @@
 * GMB-901 - MAPR Intergration - REST endpoint to receive notification from system for file delete operation
 * Removed newly added Indexes for STAGED_FILE and PROCESSOR_EXEC_STATE to check in STAGING
 
+5.1.8
+---------------
+* new rpm with fs2 11.1.2
+    * There is non backward compatible changes introduced on GSB-3170
+
 5.1.7
 ---------------
 * GMB-1056 - HTTP Remote Uploader Improvements
