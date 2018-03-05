@@ -1,3 +1,6 @@
+5.3.0-SNAPSHOT
+---------------
+
 5.2.0
 ---------------
 * MapR Stream - Kafka implementation
