@@ -508,6 +508,8 @@ public class MailBoxService implements Runnable {
         if (null != e) {
             workResult.setStatus(500);
             workResult.setErrorMessage(e.getMessage());
+        } else {
+            workResult.setStatus(200);
         }
 
         if (workTicket.getAdditionalContextItem(RESPONSE_FS2_URI) != null) {
