@@ -1087,7 +1087,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     protected String validateLocalPath() {
 
         String path = getPayloadURI();
-        if (MailBoxUtil.isEmpty(path)) {
+        if (MailBoxUtil.isEmpty(path) && !directUploadEnabled) {
             throw new MailBoxServicesException("The given local path is Empty.", Response.Status.CONFLICT);
         }
         return path;

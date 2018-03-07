@@ -825,4 +825,36 @@ public class MailBoxUtil {
                 Protocol.HTTPS.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))));
     }
 
+    /**
+     * To validate process dc list 
+     * @param datacenterMap
+     * @return
+     */
+    public static boolean validateProcessDc(Map<String, String> datacenterMap) {
+    	
+        for (String key : datacenterMap.keySet()) {
+            if (!CONFIGURATION.getList(MailBoxConstants.PROCESS_DC_LIST).contains(key)) {
+                return false;
+            } 
+        }
+        
+        return true;
+    }
+
+    /**
+     * Get the Process dc to update
+     * @param datacenterMap
+     * @return
+     */
+    public static String getDcToUpdate(Map<String, String> datacenterMap) {
+
+        for (String key : datacenterMap.keySet()) {
+            if ("100".equals(datacenterMap.get(key))) {
+                return key;
+            }
+        }
+        
+        return null;
+    }
+
 }

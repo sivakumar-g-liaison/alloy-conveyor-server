@@ -1323,16 +1323,14 @@ public class ProcessorConfigurationService {
      * for the processor that need to run different datacenters to support
      * active active
      * 
-     * @param request
+     * @param datacenterMap
      */
-    public void supportDownloaderProcessorAffinity(String request) {
+    public void supportDownloaderProcessorAffinity(Map<String, String> datacenterMap) {
 
         LOGGER.debug("Enter into supportDownloaderProcessorAffinity () ");
         try {
             
             //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
             
             if (MailBoxConstants.SECURE.equals(MailBoxUtil.CLUSTER_TYPE)) {
                 updateDownloaderDatacenter(datacenterMap, MailBoxConstants.SECURE);
@@ -1343,8 +1341,6 @@ public class ProcessorConfigurationService {
 
         } catch (NumberFormatException exception) {
             throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
         }
         
         LOGGER.debug("Exit from supportDownloaderProcessorAffinity () ");
@@ -1386,7 +1382,7 @@ public class ProcessorConfigurationService {
                 toIndex = fromIndex + (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
             }
 
-            if (fromIndex <= toIndex) {
+            if (toIndex > 0 && fromIndex <= toIndex) {
                 subList = processorGuids.subList(fromIndex, toIndex);
                 dao.updateDownloaderDatacenter(dc, subList);
             }

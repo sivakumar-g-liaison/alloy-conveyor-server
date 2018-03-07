@@ -115,6 +115,12 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      */
     void updateStagedFileProcessDC(String existingProcessDC,  String newProcessDC);
 
+    /**
+     * Update the stagedFile processDC
+     * @param newProcessDC
+     */
+    void updateStagedFileProcessDC(String newProcessDC);
+
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
             .append(PROCESSOR_ID)
@@ -145,6 +151,16 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(PROCESSOR_ID)
             .append(" and sf.filePath =:")
             .append(FILE_PATH)
+            .append(" and sf.stagedFileStatus IN (:")
+            .append(StagedFileDAO.STATUS)
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
+    
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) =:")
+            .append(PROCESSOR_ID)
             .append(" and sf.stagedFileStatus IN (:")
             .append(StagedFileDAO.STATUS)
             .append(")")
@@ -187,6 +203,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append("UPDATE STAGED_FILE")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
             .append(" WHERE PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
+    
+    String UPDATE_STAGED_FILE_PROCESS_DC = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC).toString();
    
     String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")
