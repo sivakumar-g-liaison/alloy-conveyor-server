@@ -27,10 +27,13 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -252,6 +255,10 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         StagedFileDAO dao = new StagedFileDAOBase();
         List<File> files = new ArrayList<>();
         List<StagedFile> stagedFiles;
+        String localFilePath = validateLocalPath();
+        if (!MailBoxUtil.isEmpty(localFilePath)) {
+        	localFilePath = new File(localFilePath).getPath();
+        }
 
         //for javascript direct upload
         if (getFileName() != null
@@ -266,7 +273,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         //default profile invocation
         stagedFiles = dao.findStagedFilesForUploader(
                 this.configurationInstance.getPguid(),
-                new File(validateLocalPath()).getPath(),
+                localFilePath,
                 isDirectUpload(),
                 recurseSubDirs);
 
@@ -296,6 +303,10 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         RelayFile file = null;
         StagedFileDAO dao = new StagedFileDAOBase();
         List<StagedFile> stagedFiles;
+        String localFilePath = validateLocalPath();
+        if (!MailBoxUtil.isEmpty(localFilePath)) {
+        	localFilePath = new File(localFilePath).getPath();
+        }
 
         //for javascript direct upload
         if (getFileName() != null
@@ -315,7 +326,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         //default profile invocation
         stagedFiles = dao.findStagedFilesForUploader(
                 this.configurationInstance.getPguid(),
-                new File(validateLocalPath()).getPath(),
+                localFilePath,
                 isDirectUpload(),
                 recurseSubDirs);
 

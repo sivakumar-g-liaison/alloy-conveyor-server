@@ -383,12 +383,16 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                 statuses.add(EntityStatus.ACTIVE.name());
 
                 //to retrieve failed files for profile invocation if direct upload is enabled
-                if (recurseSubDir) {
-                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
-                    query.setParameter(FILE_PATH, filePath + "%");
+                if (MailBoxUtil.isEmpty(filePath)) {
+                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_DIR_UPLOAD.toString());
                 } else {
-                    query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
-                    query.setParameter(FILE_PATH, filePath);
+                    if (recurseSubDir) {
+                        query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE.toString());
+                        query.setParameter(FILE_PATH, filePath + "%");
+                    } else {
+                        query = entityManager.createQuery(GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD.toString());
+                        query.setParameter(FILE_PATH, filePath);
+                    }	
                 }
 
                 query.setParameter(STATUS, statuses);

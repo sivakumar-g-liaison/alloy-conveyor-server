@@ -1,5 +1,6 @@
 5.3.0-SNAPSHOT
 ---------------
+* GMB-1095 - Modify the uploader logic where local directory is not mandatory
 * GMB-1096 - Need to set the success status while constructing workresult.	
 
 5.2.0

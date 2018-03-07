@@ -151,6 +151,16 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
             .append(")");
+    
+    StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
+            .append(" where (sf.processorId) =:")
+            .append(PROCESSOR_ID)
+            .append(" and sf.stagedFileStatus IN (:")
+            .append(StagedFileDAO.STATUS)
+            .append(")")
+            .append(" AND sf.clusterType =:")
+            .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) =:")
