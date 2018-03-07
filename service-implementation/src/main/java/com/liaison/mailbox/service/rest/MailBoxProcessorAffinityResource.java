@@ -11,6 +11,10 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -23,6 +27,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -30,7 +37,9 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -107,10 +116,31 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
                 String requestString;
                 try {
                     requestString = getRequestBody(request);
-                    // updates datacenter of downloader processors
-                    ProcessorConfigurationService service = new ProcessorConfigurationService();
-                    service.supportDownloaderProcessorAffinity(requestString);
-                    return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, String> datacenterMap = mapper.readValue(requestString, new TypeReference<HashMap<String, Object>>() {});
+                    
+                    if (MailBoxUtil.validateProcessDc(datacenterMap)) {
+                        
+                        List<Integer> dataCenterMapValues = datacenterMap.values().stream().map(Integer::parseInt).collect(Collectors.toList());
+                        int sum = dataCenterMapValues.stream().mapToInt(v -> v).sum();
+                        
+                        if (sum > 100) {
+                            return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
+                        }
+                        // updates datacenter of downloader processors
+                        ProcessorConfigurationService service = new ProcessorConfigurationService();
+                        service.supportDownloaderProcessorAffinity(datacenterMap);
+                        
+                        String dcToUpdate = MailBoxUtil.getDcToUpdate(datacenterMap);
+                        if (!MailBoxUtil.isEmpty(dcToUpdate)) {
+                        	// updates datacenter of stagedFile
+                            new StagedFileDAOBase().updateStagedFileProcessDC(dcToUpdate);
+                        }
+                        
+                        return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
+                    } else {
+                    	return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Process Dc doesn't exist");
+                    }
                     
                 } catch (IOException e) {
                     throw new LiaisonRuntimeException("Unable to Process Request. " + e.getMessage(), e);

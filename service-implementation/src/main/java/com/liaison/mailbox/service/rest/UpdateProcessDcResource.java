@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -30,7 +31,9 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.framework.AppConfigurationResource;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessDCRequestDTO;
@@ -57,7 +60,7 @@ public class UpdateProcessDcResource extends AuditedResource {
 	@POST
 	@ApiOperation(value = "update the process_dc", notes = "update the process_dc", position = 1)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
 	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
 	public Response updateProcessDc(@Context final HttpServletRequest request) {
 	    
@@ -69,7 +72,7 @@ public class UpdateProcessDcResource extends AuditedResource {
                 // updates datacenter of processors
                 ProcessorConfigurationService service = new ProcessorConfigurationService();
                 service.updateProcessDc();
-                return marshalResponse(200, MediaType.APPLICATION_JSON, "Success");
+                return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 	        }
 	    };
 	    worker.actionLabel = "UpdateProcessDcResource.updateProcessDc()";
@@ -87,7 +90,7 @@ public class UpdateProcessDcResource extends AuditedResource {
     @PUT
     @ApiOperation(value = "update the process_dc", notes = "update the process_dc", position = 1)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
     public Response updateDownloaderProcessDc(@Context final HttpServletRequest request) {
         
@@ -99,10 +102,16 @@ public class UpdateProcessDcResource extends AuditedResource {
                 // updates process_dc of downloder processor and staged file
                 try {
                     String requestString = getRequestBody(request);
+                    List<Object> processDcList = LiaisonArchaiusConfiguration.getInstance().getList(MailBoxConstants.PROCESS_DC_LIST);
                     UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = JAXBUtility.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
-                    new ProcessorConfigurationService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
-                    new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
-                    return marshalResponse(200, MediaType.APPLICATION_JSON, "Success");
+                    if (processDcList.contains(updateProcessorDCRequestDTO.getExistingProcessDC())
+                    		&& processDcList.contains(updateProcessorDCRequestDTO.getNewProcessDC())) {
+                    	new ProcessorConfigurationService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
+                    	new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
+                    	return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
+                    } else {
+                    	return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
+                    }
                 } catch (IOException | JAXBException e) {
                     throw new LiaisonRuntimeException("Unable to Update the process_DC " + e.getMessage(), e);
                 }
