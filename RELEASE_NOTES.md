@@ -1,7 +1,8 @@
 5.3.0-SNAPSHOT
 ---------------
 * GMB-1095 - Modify the uploader logic where local directory is not mandatory
-* GMB-1096 - Need to set the success status while constructing workresult.	
+* GMB-1096 - Need to set the success status while constructing workresult.
+* GMB-1097 - Null pointer exception if the sweeper directory is not available.	
 
 5.2.0
 ---------------

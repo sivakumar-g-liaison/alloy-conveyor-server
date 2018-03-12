@@ -423,6 +423,13 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * @throws IOException
      */
     private String findInprogressTriggerFile(String payloadLocation) throws IOException {
+
+        //Validate the given payload location
+        Path rootPath = Paths.get(payloadLocation);
+        if (!Files.isDirectory(rootPath)) {
+            throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+        }
+
         String[] inProgressFiles =  new File(payloadLocation)
             .list( (File dirToFilter, String filename) -> filename.endsWith(MailBoxConstants.INPROGRESS_EXTENTION) );
         return inProgressFiles.length > 0 ? inProgressFiles[0] : null;
