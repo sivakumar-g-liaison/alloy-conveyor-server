@@ -146,6 +146,41 @@ public class StorageUtilities {
         }
     }
 
+    public static FS2MetaSnapshot persistPayload(InputStream payload, Map<String, String> httpListenerProperties, String triggerFileGlobalProcessId) {
+    	
+        try {
+        	
+            boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
+            String uri = FS2_URI_MBX_PAYLOAD + triggerFileGlobalProcessId;
+
+            // persists the message in spectrum.
+            LOGGER.debug("Persist the payload **");
+            URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
+
+            // fetch the metdata includes payload size
+            FS2MetaSnapshot metaSnapshot;
+            FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
+            
+            try {
+                metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
+            } finally {
+                if (payload != null) {
+                    payload.close();
+                }
+            }
+
+            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
+            return metaSnapshot;
+
+    	} catch (FS2ObjectAlreadyExistsException e) {
+            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+        } catch (FS2Exception | IOException e) {
+            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
     /**
      * A helper method to persist the payload into spectrum(secure/unsecure)/boss(secure/unsecure) and file system.
      *

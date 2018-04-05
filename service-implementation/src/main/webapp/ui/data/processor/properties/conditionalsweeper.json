@@ -106,6 +106,21 @@
                "pattern": "\/^(?!.*(inp|INP|Inp|iNp|inP|INp|iNP|InP)).*$\/"
             }
          },
+         {
+            "name":"sweepSubDirectories",
+            "displayName":"Sweep Sub Directories",
+            "value":"false",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
+         },
          {  
             "name":"contentType",
             "displayName":"Content Type",

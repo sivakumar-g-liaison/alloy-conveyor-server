@@ -13,6 +13,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
@@ -27,6 +28,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -41,8 +43,10 @@ import javax.xml.bind.JAXBException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.DirectoryStream;
@@ -320,9 +324,25 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
         triggerFileContentDto.setFilePathStatusIndex(map);
         triggerFileContentDto.setParentGlobalProcessId(MailBoxUtil.getGUID());
-        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
 
         File triggerFile = new File(triggerFileNameWithPath);
+        
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+
+        // persist payload in spectrum
+        try (InputStream payloadToPersist = new FileInputStream(triggerFile)) {
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId());
+            triggerFileContentDto.setTriggerFileUri(metaSnapshot.getURI().toString());
+        } catch (Exception e) {
+        	throw new RuntimeException(e);
+        }
+
+        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
+        
         triggerFile.renameTo(new File(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION));
         this.setTriggerFilePath(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION);
 
@@ -401,10 +421,18 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
                 // Sweep Directories if the property is set to true
                 if (Files.isDirectory(file)) {
-                    listFiles(files, file);
+                    if (staticProp.isSweepSubDirectories()) {
+                        listFiles(files, file);
+                    }
                     continue;
                 }
 
+                if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
+                    files.add(file);
+                    continue;
+                }
+                
                 // To prevent adding trigger file
                 if (!triggerFileNameWithPath.equals(rootPath + File.separator + file.getFileName())) {
                     files.add(file);
@@ -473,6 +501,13 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         WorkTicketGroup workTicketGroup = new WorkTicketGroup();
         List<WorkTicket> workTicketsInGroup = new ArrayList<WorkTicket>();
         workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
+        int totalFileCount = workTickets.size();
+        int currentFileCount = 0;
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
+        String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile())
+                ? MailBoxConstants.TRIGGER_FILE_REGEX
+                : staticProp.getTriggerFile();
 
         for (WorkTicket workTicket : workTickets) {
 
@@ -480,6 +515,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicket,
                     staticProp.getPayloadSizeThreshold(),
                     staticProp.getNumOfFilesThreshold());
+            currentFileCount = currentFileCount + 1;
+            
+            Map<String, Object> additionalContext = workTicket.getAdditionalContext();
+            additionalContext.put(MailBoxConstants.KEY_FILE_COUNT, currentFileCount+ "/" + totalFileCount);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_NAME, triggerFileName);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID, relatedTransactionId);
+            additionalContext.put(MailBoxConstants.KEY_FILE_GROUP, true);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_URI, relatedTransactionDto.getTriggerFileUri());
+            workTicket.setAdditionalContext(additionalContext);
             
             if (canAddToGroup) {
                 workTicketGroup.getWorkTicketGroup().add(workTicket);
