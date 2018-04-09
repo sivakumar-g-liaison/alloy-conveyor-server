@@ -155,7 +155,38 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         return stagedFiles;
     }
 
+    @Override
+    public List<StagedFile> findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId) {
+    	
+    	List<StagedFile> stagedFiles = new ArrayList<>();
+        EntityManager entityManager = null;
 
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            String query = "select sf from StagedFile sf" +
+                    " where sf.parentGlobalProcessId in (:" +
+                    PARENT_GLOBAL_PROCESS_ID +
+                    ")";
+
+            List<?> files = entityManager
+                    .createQuery(query)
+                    .setParameter(PARENT_GLOBAL_PROCESS_ID, parentGlobalProcessId)
+                    .getResultList();
+
+            for (Object file : files) {
+                stagedFiles.add((StagedFile) file);
+            }
+
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return stagedFiles;
+    }
+    
     /**
      *Method to number of staged files based on search criteria
      *
