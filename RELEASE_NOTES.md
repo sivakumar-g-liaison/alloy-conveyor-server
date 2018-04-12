@@ -1,15 +1,19 @@
+5.2.2
+---------------
+* GMB-1097 - Null pointer exception if the sweeper directory is not available.	
+* MapR Stream - Kafka implementation
+* GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
+
 5.2.1
 ---------------
 * GMB-1095 - Modify the uploader logic where local directory is not mandatory
-* GMB-1096 - Need to set the success status while constructing workresult.	
+* GMB-1096 - Need to set the success status while constructing workresult.
 
 5.2.0
 ---------------
-* MapR Stream - Kafka implementation
 * GMB-1088 - The remote uploader always has to pick up the current datacenter files based on processing_dc
 * GMB-1089 - Watchdog service cleanup based on processingDC
 * GMB-1090 - Process downloader based on processing DC
-* GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
 * GMB-901 - MAPR Intergration - REST endpoint to receive notification from system for file delete operation
 * Removed newly added Indexes for STAGED_FILE and PROCESSOR_EXEC_STATE to check in STAGING
 
