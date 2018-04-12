@@ -164,22 +164,15 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-            String query = "select sf from StagedFile sf" +
-                    " where sf.parentGlobalProcessId in (:" +
-                    PARENT_GLOBAL_PROCESS_ID +
-                    ")";
-
             List<?> files = entityManager
-                    .createQuery(query)
+                    .createQuery(FIND_STAGED_FILES_BY_PARENT_GLOBAL_PROCESS_ID)
                     .setParameter(PARENT_GLOBAL_PROCESS_ID, parentGlobalProcessId)
                     .getResultList();
 
             for (Object file : files) {
                 stagedFiles.add((StagedFile) file);
             }
-
         } finally {
-
             if (null != entityManager) {
                 entityManager.close();
             }

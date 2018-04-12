@@ -146,7 +146,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                                     outputStream = new FileOutputStream(triggerFile);
                                     IOUtils.copy(triggerFilePayload, outputStream);
                                 } catch (IOException e) {
-                                	throw new RuntimeException(e);
+                                    throw new RuntimeException(e);
                                 } finally {
                                     if (outputStream != null) {
                                         outputStream.close();
@@ -340,9 +340,17 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
         
         //write the file
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+    	FileOutputStream outputStream = null;
+        try {
+        	outputStream = new FileOutputStream(file);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
+        } catch (Exception e) {
+        	 throw new RuntimeException(e);
+        } finally {
+        	if (outputStream != null) {
+        		outputStream.close();
+        	}
         }
 
         //To add more details in staged file

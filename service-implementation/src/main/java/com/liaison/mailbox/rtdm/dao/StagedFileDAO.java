@@ -243,4 +243,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_NAME)
             .append(" AND sf.processDc =:")
             .append(PROCESS_DC).toString();
+    
+    String FIND_STAGED_FILES_BY_PARENT_GLOBAL_PROCESS_ID = new StringBuilder()
+            .append("select sf from StagedFile sf")
+            .append(" where sf.parentGlobalProcessId in (:")
+            .append(PARENT_GLOBAL_PROCESS_ID)
+            .append(")").toString();
 }

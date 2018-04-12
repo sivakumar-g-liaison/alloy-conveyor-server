@@ -334,7 +334,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
         // persist payload in spectrum
-        try (InputStream payloadToPersist = new FileInputStream(triggerFile)) {
+        try { 
+            InputStream payloadToPersist = new FileInputStream(triggerFile);
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId());
             triggerFileContentDto.setTriggerFileUri(metaSnapshot.getURI().toString());
         } catch (Exception e) {
@@ -420,10 +421,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             for (Path file : stream) {
 
                 // Sweep Directories if the property is set to true
-                if (Files.isDirectory(file)) {
-                    if (staticProp.isSweepSubDirectories()) {
-                        listFiles(files, file);
-                    }
+                if (Files.isDirectory(file) && staticProp.isSweepSubDirectories()) {
+                    listFiles(files, file);
                     continue;
                 }
 
