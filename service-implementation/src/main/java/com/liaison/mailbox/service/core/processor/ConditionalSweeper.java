@@ -428,8 +428,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                 }
 
                 if (MailBoxUtil.validateLastModifiedTolerance(file)) {
-                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So added in the in-progress list."), file.toString());
-                    files.add(file);
+                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So file is not added to the list"), file.toString());
                     continue;
                 }
                 
@@ -515,10 +514,10 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicket,
                     staticProp.getPayloadSizeThreshold(),
                     staticProp.getNumOfFilesThreshold());
-            currentFileCount = currentFileCount + 1;
+            currentFileCount++;
             
             Map<String, Object> additionalContext = workTicket.getAdditionalContext();
-            additionalContext.put(MailBoxConstants.KEY_FILE_COUNT, currentFileCount+ "/" + totalFileCount);
+            additionalContext.put(MailBoxConstants.KEY_FILE_COUNT, currentFileCount + MailBoxConstants.FILE_COUNT_SEPARATOR + totalFileCount);
             additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_NAME, triggerFileName);
             additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID, relatedTransactionId);
             additionalContext.put(MailBoxConstants.KEY_FILE_GROUP, true);

@@ -146,6 +146,14 @@ public class StorageUtilities {
         }
     }
 
+    /**
+     * A helper method to persist the payload into spectrum and file system.
+     * 
+     * @param payload                     input payload
+     * @param httpListenerProperties      additional properties
+     * @param triggerFileGlobalProcessId  Parent global process Id
+     * @return
+     */
     public static FS2MetaSnapshot persistPayload(InputStream payload, Map<String, String> httpListenerProperties, String triggerFileGlobalProcessId) {
     	
         try {
@@ -173,10 +181,8 @@ public class StorageUtilities {
             return metaSnapshot;
 
     	} catch (FS2ObjectAlreadyExistsException e) {
-            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
             throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
         } catch (FS2Exception | IOException e) {
-            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
             throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }

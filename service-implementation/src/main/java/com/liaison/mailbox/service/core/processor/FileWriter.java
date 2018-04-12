@@ -120,10 +120,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     }
                     if (Boolean.valueOf(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP).toString())) {
 
-                    	StagedFileDAOBase dao = new StagedFileDAOBase();
+                        StagedFileDAOBase dao = new StagedFileDAOBase();
                         List<StagedFile> stagedFiles = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
                         String fileCount = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_COUNT).toString();
-                        int totalCount = Integer.parseInt(fileCount.split("/")[1]);
+                        int totalCount = Integer.parseInt(fileCount.split(MailBoxConstants.FILE_COUNT_SEPARATOR)[1]);
     				    
                         //get payload from spectrum
                         if (totalCount == stagedFiles.size()) {
@@ -141,11 +141,16 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                             } else {
                             	
                             	triggerFilePayload = StorageUtilities.retrievePayload(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
-                                try {
-                                	FileOutputStream outputStream = new FileOutputStream(triggerFile);
+                            	FileOutputStream outputStream = null;
+                            	try {
+                                    outputStream = new FileOutputStream(triggerFile);
                                     IOUtils.copy(triggerFilePayload, outputStream);
                                 } catch (IOException e) {
                                 	throw new RuntimeException(e);
+                                } finally {
+                                    if (outputStream != null) {
+                                        outputStream.close();
+                                    }
                                 }
                             }
                        }
