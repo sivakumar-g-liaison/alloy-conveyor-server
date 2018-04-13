@@ -35,6 +35,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -196,9 +198,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
         if (!CollectionUtils.isEmpty(groupedFilePathList)) {
             
+            String pipeLineID = getPipeLineID();
+            
             for (List<Path> filePaths : groupedFilePathList) {
                 
-                workTickets = generateWorkTickets(filePaths, getPipeLineID());
+                workTickets = generateWorkTickets(filePaths, pipeLineID);
                 if (!workTickets.isEmpty()) {
                     
                     emptyFilesCheckInWorkTicket(workTickets, workTicketsToPost, staticProp.isAllowEmptyFiles());
@@ -208,12 +212,38 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicketsToPost.clear();
                 }
             }
+            
+            postToSweeperQueue(constructBatchWorkticket());
         } else {
             LOGGER.warn("javascript filter api returned empty results");
         }
 
         // deleting .INP trigger file after swept the files in the list.
         delete(triggerFileNameWithPath);
+    }
+    
+    /**
+     * Method to construct batch work ticket.
+     * 
+     * @return json string of the workTicket
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException 
+     */
+    private String constructBatchWorkticket()
+            throws JsonGenerationException, JsonMappingException, JAXBException, IOException, IllegalAccessException {
+        
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(relatedTransactionDto.getParentGlobalProcessId());
+        workTicket.setPipelineId(getPipeLineID());
+        workTicket.setPayloadURI(relatedTransactionDto.getTriggerFileUri());
+        workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
+        
+        return JAXBUtility.marshalToJSON(workTicket);
     }
 
     /**
