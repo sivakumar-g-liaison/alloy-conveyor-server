@@ -1,3 +1,8 @@
+5.2.3
+---------------
+* Reverted the migration script changes(6d963a9ab692c88dde919746572e509ca42f099a)
+* MAPR Service Ticket location added in the start up file
+
 5.2.2
 ---------------
 * GMB-1097 - Null pointer exception if the sweeper directory is not available.	
