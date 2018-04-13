@@ -707,7 +707,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 		activeFilesList.clear();//Clearing the recently updated files after the second call.
 		files = filterFiles(files);
-		
+
 		return generateWorkTickets(files);
 	}
 

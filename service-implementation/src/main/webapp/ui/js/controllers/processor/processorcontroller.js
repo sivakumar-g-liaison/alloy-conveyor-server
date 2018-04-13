@@ -399,12 +399,14 @@ var rest = myApp.controller(
                 
                 if ($scope.processor.protocol.value === 'SWEEPER') {
                     $scope.isProcessorTypeSweeper = true;
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                 } else {
                     $scope.isProcessorTypeSweeper = false;
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
                 if ($scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
                     $scope.isProcessorTypeConditionalSweeper = true;
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                 } else {
                     $scope.isProcessorTypeConditionalSweeper = false;
                     $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
@@ -1202,7 +1204,7 @@ var rest = myApp.controller(
 					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
 					$scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
 					break;
                   case "CONDITIONALSWEEPER":
                       $scope.isProcessorTypeSweeper = false;
@@ -1216,7 +1218,7 @@ var rest = myApp.controller(
                       $scope.separateFolderProperties(data.processorDefinition.folderProperties); 
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
                       });
-                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
+                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                       break;
 				  case "HTTPSYNCPROCESSOR":
 				  	$scope.isProcessorTypeSweeper = false;
