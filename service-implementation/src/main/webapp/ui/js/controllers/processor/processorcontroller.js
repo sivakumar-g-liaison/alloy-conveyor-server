@@ -399,18 +399,22 @@ var rest = myApp.controller(
                 
                 if ($scope.processor.protocol.value === 'SWEEPER') {
                     $scope.isProcessorTypeSweeper = true;
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                 } else {
                     $scope.isProcessorTypeSweeper = false;
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
+                
                 if ($scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
                     $scope.isProcessorTypeConditionalSweeper = true;
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                 } else {
                     $scope.isProcessorTypeConditionalSweeper = false;
+                }
+                
+                if ($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
+                } else {
                     $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
+                
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 					$scope.showTruststoreSection = true;	
