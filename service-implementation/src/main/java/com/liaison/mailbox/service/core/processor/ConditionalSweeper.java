@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -45,7 +46,6 @@ import javax.xml.bind.JAXBException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -242,6 +242,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         workTicket.setPipelineId(getPipeLineID());
         workTicket.setPayloadURI(relatedTransactionDto.getTriggerFileUri());
         workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
+        workTicket.setProcessMode(ProcessMode.ASYNC);
         
         return JAXBUtility.marshalToJSON(workTicket);
     }
@@ -356,6 +357,22 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         triggerFileContentDto.setParentGlobalProcessId(MailBoxUtil.getGUID());
 
         File triggerFile = new File(triggerFileNameWithPath);
+        persistTriggerFile(triggerFile, triggerFileContentDto);
+        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
+        
+        triggerFile.renameTo(new File(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION));
+        this.setTriggerFilePath(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION);
+
+        LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
+        return result;
+    }
+    
+    /**
+     * Persist the trigger file
+     * @param triggerFile
+     * @param triggerFileContentDto
+     */
+    private void persistTriggerFile(File triggerFile, TriggerFileContentDTO triggerFileContentDto) {
         
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
@@ -366,19 +383,12 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         // persist payload in spectrum
         try { 
             InputStream payloadToPersist = new FileInputStream(triggerFile);
+            // payloadToPersist stream is closed in StorageUtilities.persistPayload method
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId());
             triggerFileContentDto.setTriggerFileUri(metaSnapshot.getURI().toString());
         } catch (Exception e) {
-        	throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
-
-        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
-        
-        triggerFile.renameTo(new File(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION));
-        this.setTriggerFilePath(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION);
-
-        LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
-        return result;
     }
 
     /**
