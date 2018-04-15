@@ -11,8 +11,10 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
@@ -27,12 +29,15 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -43,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.DirectoryStream;
@@ -192,9 +198,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
         if (!CollectionUtils.isEmpty(groupedFilePathList)) {
             
+            String pipeLineID = getPipeLineID();
+            
             for (List<Path> filePaths : groupedFilePathList) {
                 
-                workTickets = generateWorkTickets(filePaths, getPipeLineID());
+                workTickets = generateWorkTickets(filePaths, pipeLineID);
                 if (!workTickets.isEmpty()) {
                     
                     emptyFilesCheckInWorkTicket(workTickets, workTicketsToPost, staticProp.isAllowEmptyFiles());
@@ -204,12 +212,39 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicketsToPost.clear();
                 }
             }
+            
+            postToSweeperQueue(constructBatchWorkticket());
         } else {
             LOGGER.warn("javascript filter api returned empty results");
         }
 
         // deleting .INP trigger file after swept the files in the list.
         delete(triggerFileNameWithPath);
+    }
+    
+    /**
+     * Method to construct batch work ticket.
+     * 
+     * @return json string of the workTicket
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws IllegalAccessException 
+     */
+    private String constructBatchWorkticket()
+            throws JsonGenerationException, JsonMappingException, JAXBException, IOException, IllegalAccessException {
+        
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(relatedTransactionDto.getParentGlobalProcessId());
+        workTicket.setPipelineId(getPipeLineID());
+        workTicket.setPayloadURI(relatedTransactionDto.getTriggerFileUri());
+        workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
+        workTicket.setProcessMode(ProcessMode.ASYNC);
+        
+        return JAXBUtility.marshalToJSON(workTicket);
     }
 
     /**
@@ -320,14 +355,40 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
         triggerFileContentDto.setFilePathStatusIndex(map);
         triggerFileContentDto.setParentGlobalProcessId(MailBoxUtil.getGUID());
-        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
 
         File triggerFile = new File(triggerFileNameWithPath);
+        persistTriggerFile(triggerFile, triggerFileContentDto);
+        writeMapToFile(triggerFileContentDto, triggerFileNameWithPath);
+        
         triggerFile.renameTo(new File(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION));
         this.setTriggerFilePath(triggerFileNameWithPath + MailBoxConstants.INPROGRESS_EXTENTION);
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
         return result;
+    }
+    
+    /**
+     * Persist the trigger file
+     * @param triggerFile
+     * @param triggerFileContentDto
+     */
+    private void persistTriggerFile(File triggerFile, TriggerFileContentDTO triggerFileContentDto) {
+        
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+
+        // persist payload in spectrum
+        try { 
+            InputStream payloadToPersist = new FileInputStream(triggerFile);
+            // payloadToPersist stream is closed in StorageUtilities.persistPayload method
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId());
+            triggerFileContentDto.setTriggerFileUri(metaSnapshot.getURI().toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -400,11 +461,16 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             for (Path file : stream) {
 
                 // Sweep Directories if the property is set to true
-                if (Files.isDirectory(file)) {
+                if (Files.isDirectory(file) && staticProp.isSweepSubDirectories()) {
                     listFiles(files, file);
                     continue;
                 }
 
+                if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+                    LOGGER.info(constructMessage("The file {} is modified within tolerance. So file is not added to the list"), file.toString());
+                    continue;
+                }
+                
                 // To prevent adding trigger file
                 if (!triggerFileNameWithPath.equals(rootPath + File.separator + file.getFileName())) {
                     files.add(file);
@@ -473,6 +539,13 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         WorkTicketGroup workTicketGroup = new WorkTicketGroup();
         List<WorkTicket> workTicketsInGroup = new ArrayList<WorkTicket>();
         workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
+        int totalFileCount = workTickets.size();
+        int currentFileCount = 0;
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
+        String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile())
+                ? MailBoxConstants.TRIGGER_FILE_REGEX
+                : staticProp.getTriggerFile();
 
         for (WorkTicket workTicket : workTickets) {
 
@@ -480,6 +553,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicket,
                     staticProp.getPayloadSizeThreshold(),
                     staticProp.getNumOfFilesThreshold());
+            currentFileCount++;
+            
+            Map<String, Object> additionalContext = workTicket.getAdditionalContext();
+            additionalContext.put(MailBoxConstants.KEY_FILE_COUNT, currentFileCount + MailBoxConstants.FILE_COUNT_SEPARATOR + totalFileCount);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_NAME, triggerFileName);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID, relatedTransactionId);
+            additionalContext.put(MailBoxConstants.KEY_FILE_GROUP, true);
+            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_URI, relatedTransactionDto.getTriggerFileUri());
+            workTicket.setAdditionalContext(additionalContext);
             
             if (canAddToGroup) {
                 workTicketGroup.getWorkTicketGroup().add(workTicket);

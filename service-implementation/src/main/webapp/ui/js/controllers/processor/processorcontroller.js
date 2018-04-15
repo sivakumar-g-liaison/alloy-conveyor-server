@@ -402,13 +402,19 @@ var rest = myApp.controller(
                 } else {
                     $scope.isProcessorTypeSweeper = false;
                 }
+                
                 if ($scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
                     $scope.isProcessorTypeConditionalSweeper = true;
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
                 } else {
                     $scope.isProcessorTypeConditionalSweeper = false;
+                }
+                
+                if ($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
+                } else {
                     $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
+                
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 					$scope.showTruststoreSection = true;	
@@ -1202,7 +1208,7 @@ var rest = myApp.controller(
 					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
 					$scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
 					break;
                   case "CONDITIONALSWEEPER":
                       $scope.isProcessorTypeSweeper = false;
@@ -1216,7 +1222,7 @@ var rest = myApp.controller(
                       $scope.separateFolderProperties(data.processorDefinition.folderProperties); 
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
                       });
-                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxConditionalSweeper.supportedJavaScriptCheckBox;
+                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
                       break;
 				  case "HTTPSYNCPROCESSOR":
 				  	$scope.isProcessorTypeSweeper = false;

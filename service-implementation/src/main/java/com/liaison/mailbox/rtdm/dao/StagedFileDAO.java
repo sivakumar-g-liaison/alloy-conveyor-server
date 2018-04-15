@@ -45,6 +45,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String PROCESS_DC = "process_dc";
     String EXISTING_PROCESS_DC = "existing_process_dc";
     String NEW_PROCESS_DC = "new_process_dc";
+    String PARENT_GLOBAL_PROCESS_ID = "parent_global_process_id";
 
     /**
      * Method to retrieve the list of all staged files of given mailbox ids
@@ -65,6 +66,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     List<StagedFile> findStagedFilesByProcessorId(String processorId);
     
     StagedFile findStagedFileByProcessorIdAndFileName(String processorId, String fileName);
+    
+    List<StagedFile> findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId);
 
     /**
      * constructs staged file entity from workticket and persists it
@@ -240,4 +243,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(FILE_NAME)
             .append(" AND sf.processDc =:")
             .append(PROCESS_DC).toString();
+    
+    String FIND_STAGED_FILES_BY_PARENT_GLOBAL_PROCESS_ID = new StringBuilder()
+            .append("select sf from StagedFile sf")
+            .append(" where sf.parentGlobalProcessId in (:")
+            .append(PARENT_GLOBAL_PROCESS_ID)
+            .append(")").toString();
 }

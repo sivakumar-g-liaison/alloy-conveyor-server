@@ -74,6 +74,7 @@ public class StagedFile implements Identifiable {
     private String originatingDc;
     private String clusterType;
     private String processDc;
+    private String parentGlobalProcessId;
 
     public StagedFile() {
     }
@@ -247,6 +248,15 @@ public class StagedFile implements Identifiable {
     public void setProcessDc(String processDc) {
         this.processDc = processDc;
     }
+    
+    @Column(name = "PARENT_GLOBAL_PROCESS_ID", length = 32)
+    public String getParentGlobalProcessId() {
+    	return parentGlobalProcessId;
+    }
+    
+    public void setParentGlobalProcessId(String parentGlobalProcessId) {
+    	this.parentGlobalProcessId = parentGlobalProcessId;
+    }
 
     @Override
     @Transient
@@ -315,6 +325,7 @@ public class StagedFile implements Identifiable {
         this.setModifiedDate(timestamp);
         this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
         this.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        this.setParentGlobalProcessId(stagedFileDto.getParentGlobalProcessId());
     }
 
     @Transient

@@ -24,6 +24,8 @@ public class TriggerFileContentDTO implements Serializable {
     private String parentGlobalProcessId;
 
     private Map<String, String> filePathStatusIndex;
+    
+    private String triggerFileUri;
 
     public String getParentGlobalProcessId() {
         return parentGlobalProcessId;
@@ -39,5 +41,13 @@ public class TriggerFileContentDTO implements Serializable {
 
     public void setFilePathStatusIndex(Map<String, String> filePathStatusIndex) {
         this.filePathStatusIndex = filePathStatusIndex;
+    }
+    
+    public String getTriggerFileUri() {
+        return triggerFileUri;
+    }
+
+    public void setTriggerFileUri(String triggerFileUri) {
+        this.triggerFileUri = triggerFileUri;
     }
 }

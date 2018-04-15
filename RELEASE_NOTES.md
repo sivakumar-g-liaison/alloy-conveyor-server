@@ -3,6 +3,9 @@
 * GMB-1095 - Modify the uploader logic where local directory is not mandatory
 * GMB-1096 - Need to set the success status while constructing workresult.
 * GMB-1097 - Null pointer exception if the sweeper directory is not available.	
+* GMB-1100 - Conditional Sweeper and Trigger property
+* GMB-1102 - Directory Transfer to publish Batch transaction to SB.
+* GMB-1103 - Directory and Conditional Sweeper enhancements
 
 5.2.0
 ---------------

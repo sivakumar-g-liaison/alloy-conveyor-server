@@ -18,7 +18,6 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -41,6 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * This will place and manages the file with respect to the given location.
@@ -116,7 +116,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         //To avoid staged file entry
                         workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                     }
-
+                    
+                    writeTriggerFile(workTicket, processorPayloadLocation);
                 } finally {
                     if (payload != null) {
                         payload.close();
@@ -175,6 +176,59 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         }
 
 	}
+	
+	/**
+	 * Writes the trigger file
+	 * 
+	 * @param workTicket
+	 * @param processorPayloadLocation
+	 * @throws IOException
+	 */
+    private void writeTriggerFile(WorkTicket workTicket, String processorPayloadLocation) throws IOException {
+
+        if (null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP)
+                && Boolean.valueOf(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP).toString())) {
+            
+            StagedFileDAOBase dao = new StagedFileDAOBase();
+            List<StagedFile> stagedFiles = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+            String fileCount = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_COUNT).toString();
+            int totalCount = Integer.parseInt(fileCount.split(MailBoxConstants.FILE_COUNT_SEPARATOR)[1]);
+
+            // get payload from spectrum
+            if (totalCount == stagedFiles.size()) {
+
+                File triggerFile = new File(processorPayloadLocation + File.separatorChar + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+
+                // write the trigger file
+                if (StorageUtilities.getPayloadSize(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString()) == 0) {
+
+                    if (triggerFile.exists()) {
+                        triggerFile.delete();
+                    }
+                    triggerFile.createNewFile();
+                } else {
+
+                    InputStream triggerFilePayload = null;
+                    FileOutputStream outputStream = null;
+                    try {
+                        triggerFilePayload = StorageUtilities.retrievePayload(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
+                        outputStream = new FileOutputStream(triggerFile);
+                        IOUtils.copy(triggerFilePayload, outputStream);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+
+                        if (outputStream != null) {
+                            outputStream.close();
+                        }
+                        if (triggerFilePayload != null) {
+                            triggerFilePayload.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * get payload location from the workticket if it is given or processor configuration
@@ -266,7 +320,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
 					//In-activate the old entity
 					stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.name());
-	        		dao.merge(stagedFile);
+					if (null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID)) {
+					    stagedFile.setParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+					}
+					dao.merge(stagedFile);
                     logDuplicateStatus(stagedFile.getFileName(), stagedFile.getFilePath(), stagedFile.getGlobalProcessId(), workTicket.getGlobalProcessId());
 				}
 
@@ -298,9 +355,17 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
         
         //write the file
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
         }
 
         //To add more details in staged file
