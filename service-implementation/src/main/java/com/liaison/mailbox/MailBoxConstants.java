@@ -519,4 +519,5 @@ public interface MailBoxConstants {
     String PROCESS_DC_LIST = "com.liaison.mailbox.processdc.list";
     
     String FILE_COUNT_SEPARATOR = "/";
+
 }
