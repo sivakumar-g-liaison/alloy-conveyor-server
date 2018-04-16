@@ -1,9 +1,17 @@
+5.3.0-SNAPSHOT
+---------------
+
+5.2.5
+---------------
+* GMB-912 - File writer to replicate file across the DC - added missed retry count
+* GMB-1103 - Added index for parent gpid in Staged File table
+
 5.2.4
 ---------------
 * GMB-1100 - Conditional Sweeper and Trigger property
 * GMB-1102 - Directory Transfer to publish Batch transaction to SB.
 * GMB-1103 - Directory and Conditional Sweeper enhancements
- 
+
 5.2.3
 ---------------
 * Reverted the migration script changes(6d963a9ab692c88dde919746572e509ca42f099a)
