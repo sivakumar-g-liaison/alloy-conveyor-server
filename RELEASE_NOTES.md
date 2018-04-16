@@ -1,21 +1,18 @@
 5.3.0-SNAPSHOT
 ---------------
 
+5.2.4
+---------------
+* GMB-1100 - Conditional Sweeper and Trigger property
+* GMB-1102 - Directory Transfer to publish Batch transaction to SB.
+* GMB-1103 - Directory and Conditional Sweeper enhancements
+
 5.2.3
 ---------------
 * Reverted the migration script changes(6d963a9ab692c88dde919746572e509ca42f099a)
 * MAPR Service Ticket location added in the start up file
 
 5.2.2
----------------
-* GMB-1095 - Modify the uploader logic where local directory is not mandatory
-* GMB-1096 - Need to set the success status while constructing workresult.
-* GMB-1097 - Null pointer exception if the sweeper directory is not available.	
-* GMB-1100 - Conditional Sweeper and Trigger property
-* GMB-1102 - Directory Transfer to publish Batch transaction to SB.
-* GMB-1103 - Directory and Conditional Sweeper enhancements
-
-5.2.0
 ---------------
 * GMB-1097 - Null pointer exception if the sweeper directory is not available.	
 * MapR Stream - Kafka implementation
