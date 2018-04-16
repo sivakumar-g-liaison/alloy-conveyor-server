@@ -38,6 +38,7 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
@@ -170,14 +171,13 @@ public class Producer {
      * @param kafkaMessageType
      * @param processorGuid
      * @param workTicket
-     * @param payloadLocation
-     * @throws JSONException 
+     * @throws JSONException
      */
-    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid, String payloadLocation) throws JSONException {
-        
+    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid) throws JSONException {
+
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
-        
+
         JSONObject requestObj = new JSONObject();
         requestObj.put(URI, workTicket.getPayloadURI());
         requestObj.put(GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
@@ -185,7 +185,8 @@ public class Producer {
         requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
         requestObj.put(KEY_FILE_PATH, workTicket.getFileName());
         requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());
-        
+        requestObj.put(RETRY_COUNT, 0);
+
         kafkaMessage.setFileWriterMsg(requestObj.toString());
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_CREATE);
     }
