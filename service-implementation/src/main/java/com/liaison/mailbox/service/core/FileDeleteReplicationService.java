@@ -42,32 +42,32 @@ public class FileDeleteReplicationService {
     private static final Logger LOGGER = LogManager.getLogger(FileDeleteReplicationService.class);
     private static final String PATH = "object_path";
     private static final String USER_SID = "user_sid";
-    
+
     /**
      * Method to in-activate staged file entry and update lens status.
      * 
      * @param requestString
      */
     public void inactivateStageFileAndUpdateLens(String requestString) {
-        
+
         try {
             JSONObject reqeustObj = new JSONObject(requestString);
             String path = (String) reqeustObj.get(PATH);
             String sId = (String) reqeustObj.get(USER_SID);
             String filePath = path.substring(0, path.lastIndexOf("/"));
             String fileName = path.substring(path.lastIndexOf("/") + 1);
-            
+
             StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
             StagedFile deletedStagedFile= stagedFileDAO.findStagedFilesForFileWriterByFileNameAndPath(filePath, fileName);
             
             if (null != deletedStagedFile) {
                 ThreadContext.clearMap();
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, deletedStagedFile.getGPID());
-                
+
                 deletedStagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
                 deletedStagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
                 stagedFileDAO.merge(deletedStagedFile);
-                
+
                 GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
                 glassMessageDTO.setGlobalProcessId(deletedStagedFile.getGPID());
                 glassMessageDTO.setProcessorType(ProcessorType.findByName(deletedStagedFile.getProcessorType()));
@@ -79,7 +79,7 @@ public class FileDeleteReplicationService {
                 glassMessageDTO.setMessage("File is picked/deleted by the customer and the uid is " + sId);
                 glassMessageDTO.setPipelineId(null);
                 glassMessageDTO.setFirstCornerTimeStamp(null);
-                
+
                 MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
                 LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
             } else {
