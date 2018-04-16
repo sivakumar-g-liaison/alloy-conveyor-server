@@ -1,6 +1,3 @@
-5.3.0-SNAPSHOT
----------------
-
 5.2.5
 ---------------
 * GMB-912 - File writer to replicate file across the DC - added missed retry count
