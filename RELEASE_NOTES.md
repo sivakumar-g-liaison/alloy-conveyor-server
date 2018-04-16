@@ -4,6 +4,7 @@
 5.2.5
 ---------------
 * GMB-912 - File writer to replicate file across the DC - added missed retry count
+* GMB-1103 - Added index for parent gpid in Staged File table
 
 5.2.4
 ---------------
@@ -18,7 +19,7 @@
 
 5.2.2
 ---------------
-* GMB-1097 - Null pointer exception if the sweeper directory is not available.	
+* GMB-1097 - Null pointer exception if the sweeper directory is not available.
 * MapR Stream - Kafka implementation
 * GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
 
