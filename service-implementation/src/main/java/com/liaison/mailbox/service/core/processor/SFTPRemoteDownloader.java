@@ -36,6 +36,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDo
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -281,17 +282,18 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	/**
-	 * This Method create local folders if not available.
+	 * This Method create local folders if not available and returns the path.
 	 *
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override
-	public void createLocalPath() {
+	public String createLocalPath() {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getWriteResponseURI();
-			createPathIfNotAvailable(configuredPath);
+			DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+			return configuredPath;
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
