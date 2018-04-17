@@ -18,6 +18,6 @@ public interface MailBoxProcessorI {
 
 	public void runProcessor(Object object);
 
-	public void createLocalPath();
+	public String createLocalPath();
 
 }
