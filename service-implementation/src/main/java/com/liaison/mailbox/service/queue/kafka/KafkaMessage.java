@@ -21,16 +21,8 @@ public class KafkaMessage {
     private KafkaMessageType messageType;
     private String fileWriterMsg;
     private DirectoryMessageDTO directoryMessageDTO;
-    private String processorGuid;
     private String fileDeleteMessage;
-
-    public String getProcessorGuid() {
-        return processorGuid;
-    }
-
-    public void setProcessorGuid(String processorGuid) {
-        this.processorGuid = processorGuid;
-    }
+    private String dirAbsolutePath;
 
     public DirectoryMessageDTO getDirectoryMessageDTO() {
         return directoryMessageDTO;
@@ -62,5 +54,13 @@ public class KafkaMessage {
 
     public void setFileDeleteMessage(String fileDeleteMessage) {
         this.fileDeleteMessage = fileDeleteMessage;
+    }
+
+    public String getDirAbsolutePath() {
+        return dirAbsolutePath;
+    }
+
+    public void setDirAbsolutePath(String dirAbsolutePath) {
+        this.dirAbsolutePath = dirAbsolutePath;
     }
 }

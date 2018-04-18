@@ -11,17 +11,16 @@
 package com.liaison.mailbox.service.queue.kafka;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.directory.DirectoryService;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 
 /**
@@ -72,15 +71,11 @@ public class KafkaMessageService implements Runnable {
                     new DirectoryService("").executeDirectoryOperation(kafkaMessage.getDirectoryMessageDTO(), false);
                     break;
                 case DIRECTORY_CREATION:
-                    LOGGER.debug("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getProcessorGuid());
-                    Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, kafkaMessage.getProcessorGuid());
-                    MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-                    if (processorService != null) {
-                        processorService.createLocalPath();
-                    }
+                    LOGGER.debug("KAFKA_CONSUMER: DIRECTORY_CREATION" + kafkaMessage.getDirAbsolutePath());
+                    DirectoryCreationUtil.createPathIfNotAvailable(kafkaMessage.getDirAbsolutePath());
                     break;
                 case FILE_DELETE:
-                    LOGGER.debug("KAFKA_CONSUMER: FILE_DELETE" + kafkaMessage.getProcessorGuid());
+                    LOGGER.debug("KAFKA_CONSUMER: FILE_DELETE" + kafkaMessage.getFileDeleteMessage());
                     new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage.getFileDeleteMessage());
                     break;
                 default:

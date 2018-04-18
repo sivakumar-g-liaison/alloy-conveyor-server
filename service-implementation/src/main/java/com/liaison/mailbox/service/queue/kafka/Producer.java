@@ -181,7 +181,6 @@ public class Producer {
         JSONObject requestObj = new JSONObject();
         requestObj.put(URI, workTicket.getPayloadURI());
         requestObj.put(GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
-        requestObj.put(KEY_PROCESSOR_ID, processorGuid);
         requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
         requestObj.put(KEY_FILE_PATH, workTicket.getFileName());
         requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());
@@ -194,12 +193,12 @@ public class Producer {
     /**
      * To send local folders creation details.
      * @param kafkaMessageType
-     * @param processorGuid
+     * @param dirAbsolutePath
      */
-    public void produce(KafkaMessageType kafkaMessageType, String processorGuid) {
+    public void produce(KafkaMessageType kafkaMessageType, String dirAbsolutePath) {
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
-        kafkaMessage.setProcessorGuid(processorGuid);
+        kafkaMessage.setDirAbsolutePath(dirAbsolutePath);
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_CREATE);
     }
     
