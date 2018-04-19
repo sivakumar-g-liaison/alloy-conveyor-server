@@ -382,11 +382,11 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             }
 
         } catch (Exception e) {
-        	 throw new RuntimeException(e);
+            throw new RuntimeException(e);
         } finally {
-        	if (outputStream != null) {
-        		outputStream.close();
-        	}
+            if (outputStream != null) {
+                outputStream.close();
+            }
         }
 
         //To add more details in staged file
