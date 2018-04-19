@@ -18,6 +18,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -40,6 +41,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -226,8 +228,32 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         }
                     }
                 }
+                
+                persistTriggerFileEntry(workTicket, processorPayloadLocation);
             }
         }
+    }
+
+    /**
+     * To persist trigger file entry in staged file.
+     * For Shell MFT changes : GMB-1100
+     * 
+     * @param workTicket
+     * @param processorPayloadLocation 
+     */
+    private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
+
+        StagedFile stagedFile = new StagedFile();
+        Timestamp timestamp = MailBoxUtil.getTimestamp();
+        stagedFile.setPguid(MailBoxUtil.getGUID());
+        stagedFile.setCreatedDate(timestamp);
+        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        stagedFile.setParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+        stagedFile.setProcessorId(configurationInstance.getPguid());
+        stagedFile.setFilePath(processorPayloadLocation);
+        
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.persist(stagedFile);
     }
 
     /**

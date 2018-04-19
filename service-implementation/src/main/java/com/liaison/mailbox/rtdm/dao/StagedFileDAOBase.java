@@ -179,6 +179,34 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
         return stagedFiles;
     }
+
+    /**
+     * Returns staged file entries by filename and file path for file writer processor.
+     *
+     */
+    @Override
+    public StagedFile findTriggerFileStagedFile(String filePath, String fileName, String processorId) {
+
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_AND_PROCESSOR_ID)
+                    .setParameter(FILE_PATH, filePath)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(TYPE, ProcessorType.FILEWRITER.getCode())
+                    .getResultList();
+
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
+            }
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
     
     /**
      *Method to number of staged files based on search criteria
