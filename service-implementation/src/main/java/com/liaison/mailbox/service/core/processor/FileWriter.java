@@ -367,18 +367,18 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             //add status indicator if specified to indicate that uploading is in progress
             FileWriterPropertiesDTO staticProp = (FileWriterPropertiesDTO) getProperties();
             String statusIndicator = staticProp.getFileTransferStatusIndicator();
-            String stagingFileName = (!MailBoxUtil.isEmpty(statusIndicator))
-                    ? file.getAbsolutePath() + "." + statusIndicator
-                    : file.getAbsolutePath();
+            String stagingFileName = (MailBoxUtil.isEmpty(statusIndicator))
+                    ? file.getAbsolutePath()
+                    : file.getAbsolutePath() + MailBoxConstants.DOT_OPERATOR + statusIndicator;
             File stagingFile = new File(stagingFileName);
 
             outputStream = new FileOutputStream(stagingFile);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
             
-         // Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+            // Renames the uploaded file to original extension if the fileStatusIndicator is given by User
             if (!MailBoxUtil.isEmpty(statusIndicator)) {
-            	Files.move(stagingFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.move(stagingFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
 
         } catch (Exception e) {
