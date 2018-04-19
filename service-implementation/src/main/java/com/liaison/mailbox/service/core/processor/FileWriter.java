@@ -28,6 +28,7 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -272,34 +273,35 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         String targetDirectory = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY);
         if (MailBoxUtil.isEmpty(targetDirectory)) {
             processorPayloadLocation = getFileWriteLocation();
-            createPathIfNotAvailable(processorPayloadLocation);
+            DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
         } else {
 
             String mode = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_TARGET_DIRECTORY_MODE);
             if (!MailBoxUtil.isEmpty(mode)
                     && MailBoxConstants.TARGET_DIRECTORY_MODE_OVERWRITE.equals(mode)) {
-                createPathIfNotAvailable(targetDirectory);
+                DirectoryCreationUtil.createPathIfNotAvailable(targetDirectory);
                 processorPayloadLocation = targetDirectory;
             } else {
                 processorPayloadLocation = getFileWriteLocation() + File.separatorChar + targetDirectory;
-                createPathIfNotAvailable(processorPayloadLocation);
+                DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
             }
         }
         return processorPayloadLocation;
     }
 
     /**
-	 * This Method create local folders if not available.
+	 * This Method create local folders if not available and returns the path.
 	 *
 	 * * @param processorDTO it have details of processor
 	 *
 	 */
 	@Override
-	public void createLocalPath() {
+	public String createLocalPath() {
 		String configuredPath = null;
 		try {
 			configuredPath = getFileWriteLocation();
-			createPathIfNotAvailable(configuredPath);
+			DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+			return configuredPath;
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
