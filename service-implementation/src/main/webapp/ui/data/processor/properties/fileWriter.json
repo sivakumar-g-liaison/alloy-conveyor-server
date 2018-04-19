@@ -20,7 +20,19 @@
 	      		"minLength": "",
 	      		"maxLength": ""
 	      	}
-	      } 
+	      },
+	      {
+            "name":"fileTransferStatusIndicator",
+            "displayName":"File Transfer Status Indicator",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"png",
+            "validationRules":null
+         } 
     ],
     "folderProperties":[
 		  {

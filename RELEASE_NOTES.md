@@ -1,6 +1,6 @@
-5.2.6
+5.3.0-SNAPSHOT
 ---------------
-* GMB-1106 New Queue for Legacy Relay Replication
+*GMB -1108 FileWriter to have similar 'File transfer indicator' as RemoteUploader has
 
 5.2.6
 ---------------
