@@ -200,8 +200,8 @@ public class ProcessorConfigurationService {
             if (processorDTO.isCreateConfiguredLocation()) {
                 MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
                 if (processorService != null) {
-                    processorService.createLocalPath();
-                    Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, processor.getPguid());
+                    String createdLocalPath = processorService.createLocalPath();
+                    Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
                 }
             }
 
@@ -550,8 +550,8 @@ public class ProcessorConfigurationService {
 			if (processorDTO.isCreateConfiguredLocation()) {
 				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
-					processorService.createLocalPath();
-					Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, processor.getPguid());
+					String createdLocalPath = processorService.createLocalPath();
+					Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
 				}
 			}
 
