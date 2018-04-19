@@ -8,12 +8,6 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import static com.liaison.mailbox.MailBoxConstants.FTP;
-import static com.liaison.mailbox.MailBoxConstants.FTPS;
-import static com.liaison.mailbox.MailBoxConstants.HTTP;
-import static com.liaison.mailbox.MailBoxConstants.HTTPS;
-import static com.liaison.mailbox.MailBoxConstants.SFTP;
-
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
@@ -27,7 +21,6 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -352,13 +345,16 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
    
     /**
-     * Get relay file from staged file DB.
+     * Get relay file details from staged file DB.
+     * 
+     * @param triggerFileName
+     * @return file
      */
     @Override
     public File getTriggerFile(String triggerFileName) {
         
         StagedFileDAO dao = new StagedFileDAOBase();
-        StagedFile stagedFile = dao.findTriggerFileStagedFile(getPayloadURI(), triggerFileName, this.configurationInstance.getPguid());
+        StagedFile stagedFile = dao.findStagedFileForTriggerFile(getPayloadURI(), triggerFileName, this.configurationInstance.getPguid());
         File file = Paths.get(stagedFile.getFilePath() + File.separator + stagedFile.getFileName()).toFile();
         
         return file;

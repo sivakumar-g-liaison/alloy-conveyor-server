@@ -185,16 +185,16 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      *
      */
     @Override
-    public StagedFile findTriggerFileStagedFile(String filePath, String fileName, String processorId) {
+    public StagedFile findStagedFileForTriggerFile(String filePath, String fileName, String processorId) {
 
         EntityManager entityManager = null;
 
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_AND_PROCESSOR_ID)
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_FOR_TRIGGER_FILE)
                     .setParameter(FILE_PATH, filePath)
                     .setParameter(FILE_NAME, fileName)
-                    .setParameter(TYPE, ProcessorType.FILEWRITER.getCode())
+                    .setParameter(PROCESSOR_ID, processorId)
                     .getResultList();
 
             if (files != null && !files.isEmpty()) {

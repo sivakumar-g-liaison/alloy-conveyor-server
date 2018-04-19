@@ -44,11 +44,11 @@ import java.sql.Timestamp;
                         + " AND sf.processorType =:" + StagedFileDAO.TYPE
                         + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
-       @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_AND_PROCESSOR_ID,
+       @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_FOR_TRIGGER_FILE,
                 query = "SELECT sf FROM StagedFile sf"
                         + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
                         + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
-                        + " AND sf.globalProcessId =:" + StagedFileDAO.PROCESSOR_ID),
+                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID),
         @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID

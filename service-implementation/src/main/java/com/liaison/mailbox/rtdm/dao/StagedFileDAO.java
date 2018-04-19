@@ -40,7 +40,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
     String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
-    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_AND_PROCESSOR_ID = "StagedFile.findTriggerFileStagedFile";
+    String GET_STAGED_FILE_FOR_TRIGGER_FILE = "StagedFile.findStagedFileForTriggerFile";
     String MODIFIED_DATE = "modifiedDate";
     String STAGED_FILE_IDS = "stagedFile_ids";
     String PROCESS_DC = "process_dc";
@@ -70,7 +70,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     
     List<StagedFile> findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId);
     
-    StagedFile findTriggerFileStagedFile(String filePath, String fileName, String processorId);
+    StagedFile findStagedFileForTriggerFile(String filePath, String fileName, String processorId);
 
     /**
      * constructs staged file entity from workticket and persists it
