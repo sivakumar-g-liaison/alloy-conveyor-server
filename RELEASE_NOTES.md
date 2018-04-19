@@ -2,6 +2,10 @@
 ---------------
 * GMB-1106 New Queue for Legacy Relay Replication
 
+5.2.6
+---------------
+* GMB-1106 New Queue for Legacy Relay Replication
+
 5.2.5
 ---------------
 * GMB-912 - File writer to replicate file across the DC - added missed retry count
