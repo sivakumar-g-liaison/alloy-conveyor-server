@@ -20,6 +20,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -40,6 +41,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
@@ -357,15 +361,30 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         //write the file
         FileOutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream(file);
+
+            //add status indicator if specified to indicate that uploading is in progress
+            FileWriterPropertiesDTO staticProp = (FileWriterPropertiesDTO) getProperties();
+            String statusIndicator = staticProp.getFileTransferStatusIndicator();
+            String stagingFileName = (!MailBoxUtil.isEmpty(statusIndicator))
+                    ? file.getAbsolutePath() + "." + statusIndicator
+                    : file.getAbsolutePath();
+            File stagingFile = new File(stagingFileName);
+
+            outputStream = new FileOutputStream(stagingFile);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (outputStream != null) {
-                outputStream.close();
+            
+         // Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+            if (!MailBoxUtil.isEmpty(statusIndicator)) {
+            	Files.move(stagingFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
+
+        } catch (Exception e) {
+        	 throw new RuntimeException(e);
+        } finally {
+        	if (outputStream != null) {
+        		outputStream.close();
+        	}
         }
 
         //To add more details in staged file
