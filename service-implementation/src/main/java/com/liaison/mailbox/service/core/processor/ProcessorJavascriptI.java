@@ -72,6 +72,27 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
     File getTriggerFile(String triggerFileName);
 
     /**
+     * Returns the relay trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    RelayFile getRelayTriggerFile(String triggerFileName);
+    
+    /**
+     * Delete the trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    void deleteTriggerFile(File triggerFile);
+
+    /**
+     * Delete the relay trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    void deleteTriggerRelayFile(RelayFile relayFile);
+
+    /**
      * Returns the location to write the payload
      *
      * @return

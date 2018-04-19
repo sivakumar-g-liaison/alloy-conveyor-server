@@ -359,6 +359,24 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         
         return file;
     }
+   
+    @Override
+    public RelayFile getRelayTriggerFile(String triggerFileName) {
+        // TODO 
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteTriggerFile(File triggerFile) {
+        // TODO
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteTriggerRelayFile(RelayFile relayFile) {
+        // TODO
+        throw new RuntimeException("Not implemented");
+    }
     
     /**
      * This method gets script execution timeout set at profile configuration.

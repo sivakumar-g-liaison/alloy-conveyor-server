@@ -975,6 +975,21 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public File getTriggerFile(String triggerFileName) {
         throw new RuntimeException("Not implemented");
     }
+    
+    @Override
+    public RelayFile getRelayTriggerFile(String triggerFileName) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteTriggerFile(File triggerFile) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteTriggerRelayFile(RelayFile relayFile) {
+        throw new RuntimeException("Not implemented");
+    }
 
     /**
      * validates remote path

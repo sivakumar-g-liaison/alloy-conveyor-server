@@ -21,6 +21,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -43,6 +44,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
@@ -245,13 +248,13 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
 
         StagedFile stagedFile = new StagedFile();
-        Timestamp timestamp = MailBoxUtil.getTimestamp();
         stagedFile.setPguid(MailBoxUtil.getGUID());
-        stagedFile.setCreatedDate(timestamp);
-        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
-        stagedFile.setParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+        stagedFile.setCreatedDate(MailBoxUtil.getTimestamp());
         stagedFile.setProcessorId(configurationInstance.getPguid());
+        stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
         stagedFile.setFilePath(processorPayloadLocation);
+        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
         
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         stagedFileDAO.persist(stagedFile);
@@ -385,9 +388,24 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         //write the file
         FileOutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream(file);
+
+            //add status indicator if specified to indicate that uploading is in progress
+            FileWriterPropertiesDTO staticProp = (FileWriterPropertiesDTO) getProperties();
+            String statusIndicator = staticProp.getFileTransferStatusIndicator();
+            String stagingFileName = (MailBoxUtil.isEmpty(statusIndicator))
+                    ? file.getAbsolutePath()
+                    : file.getAbsolutePath() + MailBoxConstants.DOT_OPERATOR + statusIndicator;
+            File stagingFile = new File(stagingFileName);
+
+            outputStream = new FileOutputStream(stagingFile);
             long fileSize = (long) IOUtils.copy(response, outputStream);
             workTicket.setPayloadSize(fileSize);
+            
+            // Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+            if (!MailBoxUtil.isEmpty(statusIndicator)) {
+                Files.move(stagingFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
