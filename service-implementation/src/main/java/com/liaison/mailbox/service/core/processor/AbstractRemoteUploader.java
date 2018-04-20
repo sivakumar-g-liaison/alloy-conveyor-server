@@ -12,7 +12,9 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -368,8 +370,11 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     @Override
     public void deleteTriggerFile(File triggerFile) {
-        // TODO
-        throw new RuntimeException("Not implemented");
+         
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateTrigerFileStagedFileStatus(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFile.getName(), getPayloadURI());
+        
+        triggerFile.delete();
     }
 
     @Override

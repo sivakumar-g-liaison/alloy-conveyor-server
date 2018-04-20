@@ -575,6 +575,45 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
     }
 
+    /**
+     * Update the StagedFile Status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateTrigerFileStagedFileStatus(String processorId,  String status, String fileName, String filePath) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_STAGED_FILE_STATUS_BY_PROCESSORID)
+                .setParameter(STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .setParameter(FILE_NAME, fileName)
+                .setParameter(FILE_PATH, filePath)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+
     @Override
     public void persist(StagedFile entity) {
         

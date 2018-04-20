@@ -461,8 +461,10 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             for (Path file : stream) {
 
                 // Sweep Directories if the property is set to true
-                if (Files.isDirectory(file) && staticProp.isSweepSubDirectories()) {
-                    listFiles(files, file);
+                if (Files.isDirectory(file)) {
+                    if (staticProp.isSweepSubDirectories()) {
+                        listFiles(files, file);
+                    }
                     continue;
                 }
 

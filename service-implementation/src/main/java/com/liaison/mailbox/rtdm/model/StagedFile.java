@@ -48,7 +48,8 @@ import java.sql.Timestamp;
                 query = "SELECT sf FROM StagedFile sf"
                         + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
                         + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
-                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID),
+                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID
+                        + " AND sf.stagedFileStatus =:" + StagedFileDAO.STATUS),
         @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
