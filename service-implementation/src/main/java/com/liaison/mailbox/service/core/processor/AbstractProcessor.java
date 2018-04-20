@@ -52,6 +52,7 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -60,6 +61,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -966,6 +968,26 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     @Override
     public RelayFile[] getRelayFiles(boolean recurseSubDirs) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public File getTriggerFile(String triggerFileName) {
+        throw new RuntimeException("Not implemented");
+    }
+    
+    @Override
+    public RelayFile getRelayTriggerFile(String triggerFileName) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteTriggerFile(File triggerFile) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void deleteRelayTriggerFile(RelayFile relayFile) {
         throw new RuntimeException("Not implemented");
     }
 

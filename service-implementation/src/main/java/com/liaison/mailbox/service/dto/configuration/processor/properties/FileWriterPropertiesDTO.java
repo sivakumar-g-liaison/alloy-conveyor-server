@@ -23,6 +23,7 @@ import com.liaison.mailbox.service.validation.PatternValidation;
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="staticProperties")
 public class FileWriterPropertiesDTO extends StaticProcessorPropertiesDTO {
     private int staleFileTTL;
+    private String fileTransferStatusIndicator;
 
     @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
     public int getStaleFileTTL() {
@@ -33,4 +34,11 @@ public class FileWriterPropertiesDTO extends StaticProcessorPropertiesDTO {
         this.staleFileTTL = staleFileTTL;
     }
     
+    public String getFileTransferStatusIndicator() {
+        return fileTransferStatusIndicator;
+    }
+
+    public void setFileTransferStatusIndicator(String fileTransferStatusIndicator) {
+        this.fileTransferStatusIndicator = fileTransferStatusIndicator;
+    }
 }

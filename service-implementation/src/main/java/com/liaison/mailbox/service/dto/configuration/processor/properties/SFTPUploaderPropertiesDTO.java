@@ -48,6 +48,7 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
 	private int scriptExecutionTimeout;
     private int staleFileTTL;
     private boolean useFileSystem = true;
+    private String triggerFile;
 	
 	public String getUrl() {
 		return url;
@@ -179,6 +180,12 @@ public class SFTPUploaderPropertiesDTO  extends StaticProcessorPropertiesDTO {
     }
     public void setUseFileSystem(boolean useFileSystem) {
         this.useFileSystem = useFileSystem;
+    }
+    public String getTriggerFile() {
+        return triggerFile;
+    }
+    public void setTriggerFile(String triggerFile) {
+        this.triggerFile = triggerFile;
     }
 
 }

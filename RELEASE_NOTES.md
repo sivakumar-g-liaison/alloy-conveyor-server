@@ -1,3 +1,8 @@
+5.2.7
+---------------
+* GMB-1108 - FileWriter to have similar 'File transfer indicator' as RemoteUploader has
+* GMB-1103 - Remote Uploader Changes for Trigger File
+
 5.2.6
 ---------------
 * GMB-1106 New Queue for Legacy Relay Replication

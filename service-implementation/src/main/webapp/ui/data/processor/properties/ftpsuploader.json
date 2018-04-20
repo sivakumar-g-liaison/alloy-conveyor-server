@@ -279,7 +279,20 @@
 	      		"false",
 	      		"true"
 	      	]
-	      }
+	      },
+	      {  
+            "name":"triggerFile",
+            "displayName":"Trigger File",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "validationRules":{
+               "pattern": "\/^(?!.*(inp|INP|Inp|iNp|inP|INp|iNP|InP)).*$\/"
+            }
+         }
       ],
       "folderProperties":[
 		   {

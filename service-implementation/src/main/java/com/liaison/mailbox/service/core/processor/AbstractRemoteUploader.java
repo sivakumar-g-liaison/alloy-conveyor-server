@@ -12,7 +12,9 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -342,6 +344,55 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
 
         return files.toArray(new RelayFile[files.size()]);
+    }
+   
+    /**
+     * Get relay file details from staged file DB.
+     * 
+     * @param triggerFileName
+     * @return file
+     */
+    @Override
+    public File getTriggerFile(String triggerFileName) {
+        
+        StagedFileDAO dao = new StagedFileDAOBase();
+        StagedFile stagedFile = dao.findStagedFileForTriggerFile(getPayloadURI(), triggerFileName, this.configurationInstance.getPguid());
+        File file = Paths.get(stagedFile.getFilePath() + File.separator + stagedFile.getFileName()).toFile();
+        
+        return file;
+    }
+   
+    @Override
+    public RelayFile getRelayTriggerFile(String triggerFileName) {
+
+        StagedFileDAO dao = new StagedFileDAOBase();
+        StagedFile stagedFile = dao.findStagedFileForRelayTriggerFile(this.configurationInstance.getPguid(), triggerFileName);
+        
+        RelayFile file = new RelayFile();
+        file.copy(stagedFile);
+        return file;
+    }
+
+    @Override
+    public void deleteTriggerFile(File triggerFile) {
+         
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateTrigerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFile.getName(), getPayloadURI());
+        
+        triggerFile.delete();
+    }
+
+    @Override
+    public void deleteRelayTriggerFile(RelayFile relayFile) {
+        
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateRelayTrigerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), relayFile.getName());
+
+        try {
+            relayFile.delete();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
