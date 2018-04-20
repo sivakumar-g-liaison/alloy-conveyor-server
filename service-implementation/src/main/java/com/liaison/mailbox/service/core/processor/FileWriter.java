@@ -22,6 +22,9 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
+import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -43,7 +46,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -390,8 +392,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         try {
 
             //add status indicator if specified to indicate that uploading is in progress
-            FileWriterPropertiesDTO staticProp = (FileWriterPropertiesDTO) getProperties();
-            String statusIndicator = staticProp.getFileTransferStatusIndicator();
+            String statusIndicator = getStatusIndicator();
             String stagingFileName = (MailBoxUtil.isEmpty(statusIndicator))
                     ? file.getAbsolutePath()
                     : file.getAbsolutePath() + MailBoxConstants.DOT_OPERATOR + statusIndicator;
@@ -423,6 +424,23 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 configurationInstance.getProcessorType().name(),
                 this.isDirectUploadEnabled());
         
+    }
+
+    private String getStatusIndicator() throws IOException, IllegalAccessException {
+
+        if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
+            return ((FileWriterPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
+        } else if (ProcessorType.REMOTEUPLOADER.equals(configurationInstance.getProcessorType())) {
+
+            if (Protocol.SFTP.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))) {
+                return ((SFTPUploaderPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
+            } else if (Protocol.FTPS.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))
+                    || Protocol.FTP.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))) {
+                return ((FTPUploaderPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
+            }
+        }
+
+        return null;
     }
 
     /**

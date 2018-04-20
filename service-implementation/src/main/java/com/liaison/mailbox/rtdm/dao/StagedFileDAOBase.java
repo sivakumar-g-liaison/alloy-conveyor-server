@@ -195,6 +195,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(FILE_PATH, filePath)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
                     .getResultList();
 
             if (files != null && !files.isEmpty()) {
@@ -581,7 +582,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * @param processorId
      * @param status
      */
-    public void updateTrigerFileStagedFileStatus(String processorId,  String status, String fileName, String filePath) {
+    public void updateTrigerFileStatusInStagedFile(String processorId,  String status, String fileName, String filePath) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -592,7 +593,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             tx.begin();
             
             //update the StagedFile Status
-            entityManager.createNativeQuery(UPDATE_STAGED_FILE_STATUS_BY_PROCESSORID)
+            entityManager.createNativeQuery(UPDATE_TRIGGER_FILE_STATUS_IN_STAGED_FILE)
                 .setParameter(STATUS, status)
                 .setParameter(PROCESSOR_ID, processorId)
                 .setParameter(FILE_NAME, fileName)

@@ -372,7 +372,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     public void deleteTriggerFile(File triggerFile) {
          
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        stagedFileDAO.updateTrigerFileStagedFileStatus(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFile.getName(), getPayloadURI());
+        stagedFileDAO.updateTrigerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFile.getName(), getPayloadURI());
         
         triggerFile.delete();
     }
