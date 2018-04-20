@@ -22,9 +22,6 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
-import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
@@ -48,6 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -251,12 +249,17 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
         StagedFile stagedFile = new StagedFile();
         stagedFile.setPguid(MailBoxUtil.getGUID());
-        stagedFile.setCreatedDate(MailBoxUtil.getTimestamp());
+        Timestamp timeStamp = MailBoxUtil.getTimestamp();
+        stagedFile.setCreatedDate(timeStamp);
+        stagedFile.setModifiedDate(timeStamp);
         stagedFile.setProcessorId(configurationInstance.getPguid());
+        stagedFile.setGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
         stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
         stagedFile.setFilePath(processorPayloadLocation);
         stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
+        stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
         stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
                 ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
         
