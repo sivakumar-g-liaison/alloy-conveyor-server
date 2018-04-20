@@ -260,6 +260,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
         stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
+        stagedFile.setFileSize("0");
         stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
                 ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
         
@@ -431,6 +432,14 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         
     }
 
+    /**
+     * It returns the file transfer status indicator string.
+     * It only applicable for filewriter.
+     * 
+     * @return
+     * @throws IOException
+     * @throws IllegalAccessException
+     */
     private String getStatusIndicator() throws IOException, IllegalAccessException {
 
         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {

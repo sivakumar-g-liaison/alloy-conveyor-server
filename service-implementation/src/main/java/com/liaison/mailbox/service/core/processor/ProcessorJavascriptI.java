@@ -90,7 +90,7 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * 
      * @return
      */
-    void deleteTriggerRelayFile(RelayFile relayFile);
+    void deleteRelayTriggerFile(RelayFile relayFile);
 
     /**
      * Returns the location to write the payload

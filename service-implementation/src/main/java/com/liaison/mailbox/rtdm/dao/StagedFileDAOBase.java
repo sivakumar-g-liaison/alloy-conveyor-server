@@ -214,14 +214,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      *
      */
     @Override
-    public StagedFile findStagedFileByProcessorIdAndTirggerFileName(String processorId, String fileName) {
+    public StagedFile findStagedFileForRelayTriggerFile(String processorId, String fileName) {
 
         EntityManager entityManager = null;
 
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            List<?> files = entityManager.createNamedQuery(FIND_STAGED_FILE_BY_PROCESSOR_ID_AND_TRIGGER_FILE_NAME)
-            		.setParameter(PROCESSOR_ID, processorId)
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE)
+                    .setParameter(PROCESSOR_ID, processorId)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.name())
                     .getResultList();
@@ -605,7 +605,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     }
 
     /**
-     * Update the StagedFile Status by processorId
+     * Update the StagedFile Status for trigger file entry
      * 
      * @param processorId
      * @param status
@@ -644,7 +644,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     }
 
     /**
-     * Update the StagedFile Status by processorId
+     * Update the StagedFile Status for relay trigger file entry
      * 
      * @param processorId
      * @param status

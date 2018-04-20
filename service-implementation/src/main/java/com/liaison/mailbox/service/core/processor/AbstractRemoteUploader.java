@@ -357,9 +357,8 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         
         StagedFileDAO dao = new StagedFileDAOBase();
         StagedFile stagedFile = dao.findStagedFileForTriggerFile(getPayloadURI(), triggerFileName, this.configurationInstance.getPguid());
-        LOGGER.info("getTriggerFile : getPayloadURI()" + getPayloadURI() + ", triggerFileName" + triggerFileName);
         File file = Paths.get(stagedFile.getFilePath() + File.separator + stagedFile.getFileName()).toFile();
-        LOGGER.info("getTriggerFile : file" + file.getName());
+        
         return file;
     }
    
@@ -367,7 +366,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     public RelayFile getRelayTriggerFile(String triggerFileName) {
 
         StagedFileDAO dao = new StagedFileDAOBase();
-        StagedFile stagedFile = dao.findStagedFileByProcessorIdAndTirggerFileName(this.configurationInstance.getPguid(), triggerFileName);
+        StagedFile stagedFile = dao.findStagedFileForRelayTriggerFile(this.configurationInstance.getPguid(), triggerFileName);
         
         RelayFile file = new RelayFile();
         file.copy(stagedFile);
@@ -384,7 +383,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
 
     @Override
-    public void deleteTriggerRelayFile(RelayFile relayFile) {
+    public void deleteRelayTriggerFile(RelayFile relayFile) {
         
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         stagedFileDAO.updateRelayTrigerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), relayFile.getName());

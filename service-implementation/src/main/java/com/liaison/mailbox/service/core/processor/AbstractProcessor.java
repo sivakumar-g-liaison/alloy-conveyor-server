@@ -987,7 +987,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     }
 
     @Override
-    public void deleteTriggerRelayFile(RelayFile relayFile) {
+    public void deleteRelayTriggerFile(RelayFile relayFile) {
         throw new RuntimeException("Not implemented");
     }
 

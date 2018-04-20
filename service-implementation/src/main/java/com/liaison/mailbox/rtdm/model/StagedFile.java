@@ -50,6 +50,11 @@ import java.sql.Timestamp;
                         + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
                         + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID
                         + " AND sf.stagedFileStatus =:" + StagedFileDAO.STATUS),
+      @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE,
+                query = "SELECT sf FROM StagedFile sf"
+                        + " WHERE sf.fileName =:" + StagedFileDAO.FILE_NAME
+                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID
+                        + " AND sf.stagedFileStatus =:" + StagedFileDAO.STATUS),
         @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
