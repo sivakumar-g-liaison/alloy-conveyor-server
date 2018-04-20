@@ -210,6 +210,34 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     }
     
     /**
+     * Returns staged file entries by filename and file path for file writer processor.
+     *
+     */
+    @Override
+    public StagedFile findStagedFileByProcessorIdAndTirggerFileName(String processorId, String fileName) {
+
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<?> files = entityManager.createNamedQuery(FIND_STAGED_FILE_BY_PROCESSOR_ID_AND_TRIGGER_FILE_NAME)
+            		.setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .getResultList();
+
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
+            }
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
+    
+    /**
      *Method to number of staged files based on search criteria
      *
      */
@@ -615,6 +643,44 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
     }
 
+    /**
+     * Update the StagedFile Status by processorId
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateRelayTrigerFileStatusInStagedFile(String processorId,  String status, String fileName) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_RELAY_TRIGGER_FILE_STATUS_IN_STAGED_FILE)
+                .setParameter(STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .setParameter(FILE_NAME, fileName)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+    
     @Override
     public void persist(StagedFile entity) {
         

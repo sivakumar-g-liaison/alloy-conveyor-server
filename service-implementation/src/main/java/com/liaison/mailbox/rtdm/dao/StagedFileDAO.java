@@ -71,6 +71,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     List<StagedFile> findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId);
     
     StagedFile findStagedFileForTriggerFile(String filePath, String fileName, String processorId);
+    
+    StagedFile findStagedFileByProcessorIdAndTirggerFileName(String processorId, String triggerFileName);
 
     /**
      * constructs staged file entity from workticket and persists it
@@ -136,6 +138,14 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param newProcessDC
      */
     void updateStagedFileProcessDC(String newProcessDC);
+    
+    /**
+     * 
+     * Update trigger file entry status in StagedFile
+     * @param processorId
+     * @param fileName
+     */
+    void updateRelayTrigerFileStatusInStagedFile(String processorId, String status, String fileName);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -272,4 +282,19 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(" where sf.parentGlobalProcessId in (:")
             .append(PARENT_GLOBAL_PROCESS_ID)
             .append(")").toString();
+
+    String FIND_STAGED_FILE_BY_PROCESSOR_ID_AND_TRIGGER_FILE_NAME = new StringBuilder()
+            .append("SELECT sf FROM StagedFile sf")
+            .append(" WHERE sf.processorId =:")
+            .append(PROCESSOR_ID)
+            .append(" AND sf.fileName =:")
+            .append(FILE_NAME).toString();
+    
+    String UPDATE_RELAY_TRIGGER_FILE_STATUS_IN_STAGED_FILE = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET STATUS =:" + STATUS)
+            .append(" WHERE PROCESSOR_GUID =:")
+            .append(PROCESSOR_ID)
+            .append(" AND FILE_NAME =:")
+            .append(FILE_NAME).toString();
 }

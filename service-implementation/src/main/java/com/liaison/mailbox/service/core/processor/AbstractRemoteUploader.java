@@ -364,8 +364,13 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
    
     @Override
     public RelayFile getRelayTriggerFile(String triggerFileName) {
-        // TODO 
-        throw new RuntimeException("Not implemented");
+
+        StagedFileDAO dao = new StagedFileDAOBase();
+        StagedFile stagedFile = dao.findStagedFileByProcessorIdAndTirggerFileName(this.configurationInstance.getPguid(), triggerFileName);
+        
+        RelayFile file = new RelayFile();
+        file.copy(stagedFile);
+        return file;
     }
 
     @Override
@@ -379,8 +384,14 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
     @Override
     public void deleteTriggerRelayFile(RelayFile relayFile) {
-        // TODO
-        throw new RuntimeException("Not implemented");
+    	StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateRelayTrigerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), relayFile.getName());
+        
+        try {
+			relayFile.delete();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
     
     /**
