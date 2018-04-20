@@ -18,6 +18,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
@@ -43,8 +44,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -231,8 +232,40 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         }
                     }
                 }
+                
+                persistTriggerFileEntry(workTicket, processorPayloadLocation);
             }
         }
+    }
+
+    /**
+     * To persist trigger file entry in staged file.
+     * For Shell MFT changes : GMB-1100
+     * 
+     * @param workTicket
+     * @param processorPayloadLocation 
+     */
+    private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
+
+        StagedFile stagedFile = new StagedFile();
+        stagedFile.setPguid(MailBoxUtil.getGUID());
+        Timestamp timeStamp = MailBoxUtil.getTimestamp();
+        stagedFile.setCreatedDate(timeStamp);
+        stagedFile.setModifiedDate(timeStamp);
+        stagedFile.setProcessorId(configurationInstance.getPguid());
+        stagedFile.setGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+        stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
+        stagedFile.setFilePath(processorPayloadLocation);
+        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
+        stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
+        stagedFile.setFileSize("0");
+        stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
+                ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
+        
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.persist(stagedFile);
     }
 
     /**
@@ -365,8 +398,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         try {
 
             //add status indicator if specified to indicate that uploading is in progress
-            FileWriterPropertiesDTO staticProp = (FileWriterPropertiesDTO) getProperties();
-            String statusIndicator = staticProp.getFileTransferStatusIndicator();
+            String statusIndicator = getStatusIndicator();
             String stagingFileName = (MailBoxUtil.isEmpty(statusIndicator))
                     ? file.getAbsolutePath()
                     : file.getAbsolutePath() + MailBoxConstants.DOT_OPERATOR + statusIndicator;
@@ -398,6 +430,22 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 configurationInstance.getProcessorType().name(),
                 this.isDirectUploadEnabled());
         
+    }
+
+    /**
+     * It returns the file transfer status indicator string.
+     * It only applicable for filewriter.
+     * 
+     * @return
+     * @throws IOException
+     * @throws IllegalAccessException
+     */
+    private String getStatusIndicator() throws IOException, IllegalAccessException {
+
+        if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
+            return ((FileWriterPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
+        }
+        return null;
     }
 
     /**
