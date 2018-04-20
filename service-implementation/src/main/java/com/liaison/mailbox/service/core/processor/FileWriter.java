@@ -257,6 +257,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setFilePath(processorPayloadLocation);
         stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
+        stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
+                ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
         
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         stagedFileDAO.persist(stagedFile);
