@@ -432,16 +432,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
             return ((FileWriterPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
-        } else if (ProcessorType.REMOTEUPLOADER.equals(configurationInstance.getProcessorType())) {
-
-            if (Protocol.SFTP.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))) {
-                return ((SFTPUploaderPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
-            } else if (Protocol.FTPS.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))
-                    || Protocol.FTP.equals(Protocol.findByCode(configurationInstance.getProcsrProtocol()))) {
-                return ((FTPUploaderPropertiesDTO) getProperties()).getFileTransferStatusIndicator();
-            }
         }
-
         return null;
     }
 
