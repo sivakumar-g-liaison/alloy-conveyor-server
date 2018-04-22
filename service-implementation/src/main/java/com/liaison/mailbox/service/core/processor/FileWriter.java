@@ -123,6 +123,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                     }
 
+                    // For conditional sweeper: If canUseFileSystem is true:
+                    // Write the trigger file in the disc location if all the files are processed in the file group.
+                    // And persist the file entry in staged file
                     if (isAllFilesProcessedInFileGroup(workTicket, processorPayloadLocation)) {
                         writeTriggerFile(workTicket, processorPayloadLocation);
                         persistTriggerFileEntry(workTicket, processorPayloadLocation);
@@ -163,6 +166,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                 }
 
+                // For conditional sweeper: If canUseFileSystem is false:
+                // Persist the file entry in staged file
                 if (isAllFilesProcessedInFileGroup(workTicket, processorPayloadLocation)) {
                     persistTriggerFileEntry(workTicket, processorPayloadLocation);
                 }
@@ -279,6 +284,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
         stagedFile.setFileSize("0");
+        stagedFile.setParentGlobalProcessId(MailBoxConstants.TRIGGER_FILE);
         stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
                 ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
         
