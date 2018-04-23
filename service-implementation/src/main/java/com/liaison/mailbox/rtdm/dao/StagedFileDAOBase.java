@@ -603,7 +603,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * @param processorId
      * @param status
      */
-    public void updateTrigerFileStatusInStagedFile(String processorId,  String status, String fileName, String filePath) {
+    public void updateTriggerFileStatusInStagedFile(String processorId, String status, String fileName, String filePath) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -642,7 +642,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * @param processorId
      * @param status
      */
-    public void updateRelayTrigerFileStatusInStagedFile(String processorId,  String status, String fileName) {
+    public void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;

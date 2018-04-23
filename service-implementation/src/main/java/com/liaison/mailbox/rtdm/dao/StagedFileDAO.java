@@ -125,7 +125,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param filePath 
      * @param fileName 
      */
-    void updateTrigerFileStatusInStagedFile( String processorId,  String status, String fileName, String filePath);
+    void updateTriggerFileStatusInStagedFile(String processorId, String status, String fileName, String filePath);
     
     /**
      * Update the stagedFile processDC
@@ -146,7 +146,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param processorId
      * @param fileName
      */
-    void updateRelayTrigerFileStatusInStagedFile(String processorId, String status, String fileName);
+    void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")

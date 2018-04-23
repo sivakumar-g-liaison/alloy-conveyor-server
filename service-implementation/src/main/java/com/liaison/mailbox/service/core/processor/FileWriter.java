@@ -258,10 +258,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        //Ignore if the trigger file is already staged in the current batch
         StagedFile sf = stagedFileDAO.findStagedFileByGpid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
         if (null != sf) {
             return;
         }
+
+        //Overwrite the existing trigger file based on the processor guid and trigger file name
+        String triggerFileName = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString();
+        stagedFileDAO.updateRelayTriggerFileStatusInStagedFile(configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFileName);
 
         //Persist Stated File
         StagedFile stagedFile = new StagedFile();
@@ -273,7 +278,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
         stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
         stagedFile.setFilePath(processorPayloadLocation);
-        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        stagedFile.setFileName(triggerFileName);
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
         stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
