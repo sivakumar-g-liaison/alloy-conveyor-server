@@ -121,16 +121,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                     }
 
-                    // For conditional sweeper: If canUseFileSystem is true:
-                    // Write the trigger file in the disc location if all the files are processed in the file group.
-                    // And persist the file entry in staged file
-                    if (isAllFilesProcessedInFileGroup(workTicket)) {
-                        LOG.info("LOOKS LIKE ALL FILES ARE PROCESSED");
-                        writeTriggerFile(workTicket, processorPayloadLocation);
-                        LOG.info("WRITTEN TRIGGER FILE");
-                        persistTriggerFileEntry(workTicket, processorPayloadLocation);
-                        LOG.info("PERSISTED TRIGGER FILE ENTRY IN THE STAGED FILE");
-                    }
                 } finally {
                     if (payload != null) {
                         payload.close();
@@ -161,17 +151,16 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 if (writeStatus) {
                     LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", processorPayloadLocation);
+
+                    // For conditional sweeper: If canUseFileSystem is false:
+                    // Persist the file entry in staged file
+                    if (isAllFilesProcessedInFileGroup(workTicket)) {
+                        persistTriggerFileEntry(workTicket, processorPayloadLocation);
+                    }
                 } else {
                     //To avoid staged file entry
                     LOG.info("File {} already exists at STAGED_FILE with location {} and should not be overwritten", fileName, processorPayloadLocation);
                     workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
-                }
-
-                // For conditional sweeper: If canUseFileSystem is false:
-                // Persist the file entry in staged file
-                if (isAllFilesProcessedInFileGroup(workTicket)) {
-                    LOG.info("LOOKS LIKE ALL FILES ARE PROCESSED");
-                    persistTriggerFileEntry(workTicket, processorPayloadLocation);
                 }
 
                 message = (writeStatus ? "Added an entry in STAGED FILE for the file - " : "File already exists in STAGED_FILE - ")
@@ -250,10 +239,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 && Boolean.valueOf(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP).toString())) {
 
             StagedFileDAOBase dao = new StagedFileDAOBase();
-            List<StagedFile> stagedFiles = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+            long dbCount = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
             String fileCount = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_COUNT).toString();
             int totalCount = Integer.parseInt(fileCount.split(MailBoxConstants.FILE_COUNT_SEPARATOR)[1]);
-            return totalCount == stagedFiles.size();
+            return totalCount == dbCount;
         }
 
         return false;
@@ -268,6 +257,13 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      */
     private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
 
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile sf = stagedFileDAO.findStagedFileByGpid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+        if (null != sf) {
+            return;
+        }
+
+        //Persist Stated File
         StagedFile stagedFile = new StagedFile();
         stagedFile.setPguid(MailBoxUtil.getGUID());
         Timestamp timeStamp = MailBoxUtil.getTimestamp();
@@ -283,10 +279,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
         stagedFile.setFileSize("0");
         stagedFile.setParentGlobalProcessId(MailBoxConstants.TRIGGER_FILE);
+        stagedFile.setProcessorType(configurationInstance.getProcessorType().name());
         stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
                 ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
-        
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         stagedFileDAO.persist(stagedFile);
     }
 
@@ -451,7 +446,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 configurationInstance.getPguid(),
                 configurationInstance.getProcessorType().name(),
                 this.isDirectUploadEnabled());
-        
+
+        // For conditional sweeper: If canUseFileSystem is true:
+        // Write the trigger file in the disc location if all the files are processed in the file group.
+        // And persist the file entry in staged file
+        if (isAllFilesProcessedInFileGroup(workTicket)) {
+            writeTriggerFile(workTicket, file.getParent());
+            persistTriggerFileEntry(workTicket, file.getParent());
+        }
+
     }
 
     /**
