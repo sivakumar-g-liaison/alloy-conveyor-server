@@ -31,14 +31,12 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -126,9 +124,12 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     // For conditional sweeper: If canUseFileSystem is true:
                     // Write the trigger file in the disc location if all the files are processed in the file group.
                     // And persist the file entry in staged file
-                    if (isAllFilesProcessedInFileGroup(workTicket, processorPayloadLocation)) {
+                    if (isAllFilesProcessedInFileGroup(workTicket)) {
+                        LOG.info("LOOKS LIKE ALL FILES ARE PROCESSED");
                         writeTriggerFile(workTicket, processorPayloadLocation);
+                        LOG.info("WRITTEN TRIGGER FILE");
                         persistTriggerFileEntry(workTicket, processorPayloadLocation);
+                        LOG.info("PERSISTED TRIGGER FILE ENTRY IN THE STAGED FILE");
                     }
                 } finally {
                     if (payload != null) {
@@ -168,7 +169,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 // For conditional sweeper: If canUseFileSystem is false:
                 // Persist the file entry in staged file
-                if (isAllFilesProcessedInFileGroup(workTicket, processorPayloadLocation)) {
+                if (isAllFilesProcessedInFileGroup(workTicket)) {
+                    LOG.info("LOOKS LIKE ALL FILES ARE PROCESSED");
                     persistTriggerFileEntry(workTicket, processorPayloadLocation);
                 }
 
@@ -240,10 +242,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * else returns false;
      * 
      * @param workTicket
-     * @param processorPayloadLocation
      * @return boolean
      */
-    private boolean isAllFilesProcessedInFileGroup(WorkTicket workTicket, String processorPayloadLocation) {
+    private boolean isAllFilesProcessedInFileGroup(WorkTicket workTicket) {
 
         if (null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP)
                 && Boolean.valueOf(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP).toString())) {
@@ -252,10 +253,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             List<StagedFile> stagedFiles = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
             String fileCount = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_COUNT).toString();
             int totalCount = Integer.parseInt(fileCount.split(MailBoxConstants.FILE_COUNT_SEPARATOR)[1]);
-
-            if (totalCount == stagedFiles.size()) {
-                return true;
-            }
+            return totalCount == stagedFiles.size();
         }
 
         return false;
