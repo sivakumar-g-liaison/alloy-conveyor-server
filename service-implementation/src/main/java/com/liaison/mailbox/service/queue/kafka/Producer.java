@@ -19,7 +19,6 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.logging.log4j.LogManager;
@@ -27,27 +26,29 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Properties;
-
-import javax.xml.bind.JAXBException;
 
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
-import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_PRODUCER_STREAM;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.META_MAX_AGE_MS;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.META_MAX_AGE_MS_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.STREAMS_BUFFER_MAX_TIME_MS;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.STREAMS_BUFFER_MAX_TIME_MS_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_SERIALIZER_DEFAULT;
 
@@ -84,6 +85,7 @@ public class Producer {
             synchronized (Producer.class) {
                 if (null == producer) {
                     producer = new Producer();
+                    kafkaProducer = new KafkaProducer<>(getProperties());
                 }
             }
         }
@@ -97,20 +99,18 @@ public class Producer {
      * @param topicName
      */
     private void produce(String message, String topicName) {
-        
+
         if (configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
             LOG.error(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
             return;
         }
-        
+
         if (MailBoxUtil.isEmpty(message)) {
             throw new RuntimeException("Unable to send message to topic " + topicName + ". " + " Message is empty");
         }
 
-        LOG.info("MapR Streams PRODUCER message to send" + message);
-
+        LOG.info("MapR Streams PRODUCER message to send {}", message);
         try {
-            kafkaProducer = new KafkaProducer<>(getProperties());
             kafkaProducer.send(new ProducerRecord<>(topicName, message));
         } catch (Exception e) {
             throw new RuntimeException("Unable to send message to topic " + topicName + ". " + e.getMessage(), e);
@@ -123,8 +123,11 @@ public class Producer {
         
         // The client will make use of all servers irrespective of which servers are specified here for bootstrapping
         // Refer here for more details : https://kafka.apache.org/documentation/
-        producerProperties.setProperty(KEY_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + KEY_SERIALIZER, KEY_SERIALIZER_DEFAULT));
-        producerProperties.setProperty(VALUE_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + VALUE_SERIALIZER, VALUE_SERIALIZER_DEFAULT));
+        producerProperties.put(KEY_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + KEY_SERIALIZER, KEY_SERIALIZER_DEFAULT));
+        producerProperties.put(VALUE_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + VALUE_SERIALIZER, VALUE_SERIALIZER_DEFAULT));
+        producerProperties.put(STREAMS_BUFFER_MAX_TIME_MS, configuration.getInt(KAFKA_PRODUCER_PREFIX + STREAMS_BUFFER_MAX_TIME_MS, STREAMS_BUFFER_MAX_TIME_MS_DEFAULT));
+        producerProperties.put(META_MAX_AGE_MS, configuration.getInt(KAFKA_PRODUCER_PREFIX + META_MAX_AGE_MS, META_MAX_AGE_MS_DEFAULT));
+
         return producerProperties;
     }
 
@@ -169,11 +172,10 @@ public class Producer {
     /**
      * To send workticket for filewriter operation
      * @param kafkaMessageType
-     * @param processorGuid
      * @param workTicket
      * @throws JSONException
      */
-    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket, String processorGuid) throws JSONException {
+    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket) throws JSONException {
 
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
@@ -182,7 +184,7 @@ public class Producer {
         requestObj.put(URI, workTicket.getPayloadURI());
         requestObj.put(GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
         requestObj.put(KEY_FILE_NAME, workTicket.getFileName());
-        requestObj.put(KEY_FILE_PATH, workTicket.getFileName());
+        requestObj.put(KEY_FILE_PATH, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH).toString());
         requestObj.put(KEY_OVERWRITE, workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE).toString().toLowerCase());
         requestObj.put(RETRY_COUNT, 0);
 
@@ -203,7 +205,7 @@ public class Producer {
     }
     
     private String marshalToJSON(KafkaMessage kafkaMessage) {
-        
+
         try {
             return JAXBUtility.marshalToJSON(kafkaMessage);
         } catch (JAXBException | IOException e) {

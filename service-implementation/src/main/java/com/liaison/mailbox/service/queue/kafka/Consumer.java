@@ -17,7 +17,6 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.threadmanagement.LiaisonExecutorServiceDetail;
 import com.liaison.threadmanagement.LiaisonExecutorServiceManager;
 import com.liaison.threadmanagement.LiaisonExecutorServiceRegistrar;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -31,21 +30,26 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_COMMIT_INTERVAL_MS;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_COMMIT_INTERVAL_MS_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.GROUP_ID;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_PREFIX;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_CONSUMER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_FILE_EVENT_READER_CONSUMER_STREAM;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_CONSUMER_STREAM;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_FS_EVENT_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_FS_EVENT_LOWSECURE;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.MAX_PARTITION_FETCH_BYTES;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.MAX_PARTITION_FETCH_BYTES_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
 
 /**
  * Kafka consumer to consume message from topic.
@@ -69,8 +73,6 @@ public class Consumer extends ThreadPoolExecutor {
     private static final String FS_EVENT_STREAM_LEGACY = CONFIGURATION.getString(KAFKA_FILE_EVENT_READER_CONSUMER_STREAM)
             + CONFIGURATION.getString(KAFKA_TOPIC_NAME_FS_EVENT_LOWSECURE);
     
-    private static final String AUTO_OFFSET_RESET_DEFAULT = "latest";
-
     private static final int DEFAULT_KAFKA_CONSUMER_THREAD_POOL_SIZE = 10;
     private static final int DEFAULT_KAFKA_CONSUMER_KEEPALIVE_MINUTES = 1;
     private static final int DEFAULT_KAFKA_CONSUMER_TIMEOUT = 200;
@@ -173,7 +175,7 @@ public class Consumer extends ThreadPoolExecutor {
         properties.put(KEY_DESERIALIZER, CONFIGURATION.getString(KAFKA_CONSUMER_PREFIX + KEY_DESERIALIZER, KEY_DESERIALIZER_DEFAULT));
         properties.put(VALUE_DESERIALIZER, CONFIGURATION.getString(KAFKA_CONSUMER_PREFIX + VALUE_DESERIALIZER, VALUE_DESERIALIZER_DEFAULT));
         properties.put(AUTO_OFFSET_RESET, CONFIGURATION.getString(KAFKA_CONSUMER_PREFIX + AUTO_OFFSET_RESET, AUTO_OFFSET_RESET_DEFAULT));
-        properties.setProperty(GROUP_ID, CONFIGURATION.getString(KAFKA_CONSUMER_PREFIX + GROUP_ID));
+        properties.put(GROUP_ID, CONFIGURATION.getString(KAFKA_CONSUMER_PREFIX + GROUP_ID));
 
         return properties;
     }

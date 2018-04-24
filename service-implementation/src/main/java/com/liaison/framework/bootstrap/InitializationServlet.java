@@ -96,6 +96,13 @@ public class InitializationServlet extends HttpServlet {
     	// Update the status from "PROCESSING" to "FAILED" for the current node.
         ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
 
+        //Initialize the Kafka Producer and Consumer before the Queue
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)
+                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
+            new Consumer().consume();
+            Producer.getInstance();
+        }
+
         //QUEUE and TOPIC consumers initialization
         QueueAndTopicProcessInitializer.initialize();
 
@@ -140,11 +147,6 @@ public class InitializationServlet extends HttpServlet {
             } catch (Exception e) {
                 logger.error("Unable to register http sb sync pool", e);
             }
-        }
-        
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)
-                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
-            new Consumer().consume();
         }
 
 	}

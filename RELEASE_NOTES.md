@@ -1,3 +1,7 @@
+5.2.9
+---------------
+* GMB-1111 - File writer throwing "Out of Memory" error when running1000 transactions
+
 5.2.8
 ---------------
 * GMB-1103 - Remote Uploader Changes for Trigger File

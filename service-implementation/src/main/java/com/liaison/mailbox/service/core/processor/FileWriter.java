@@ -44,7 +44,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * This will place and manages the file with respect to the given location.
@@ -112,7 +111,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket, configurationInstance.getPguid());
+                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
                         }
                     } else {
 
