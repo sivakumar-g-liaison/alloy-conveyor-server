@@ -1,3 +1,7 @@
+5.2.10
+---------------
+* GMB-901 - File delete operation refinements
+
 5.2.9
 ---------------
 * GMB-1111 - File writer throwing "Out of Memory" error when running1000 transactions

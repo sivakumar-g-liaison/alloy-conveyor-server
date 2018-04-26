@@ -23,6 +23,7 @@ public class KafkaMessage {
     private DirectoryMessageDTO directoryMessageDTO;
     private String fileDeleteMessage;
     private String dirAbsolutePath;
+    private String datacenter;
 
     public DirectoryMessageDTO getDirectoryMessageDTO() {
         return directoryMessageDTO;
@@ -62,5 +63,13 @@ public class KafkaMessage {
 
     public void setDirAbsolutePath(String dirAbsolutePath) {
         this.dirAbsolutePath = dirAbsolutePath;
+    }
+
+    public String getDatacenter() {
+        return datacenter;
+    }
+
+    public void setDatacenter(String datacenter) {
+        this.datacenter = datacenter;
     }
 }
