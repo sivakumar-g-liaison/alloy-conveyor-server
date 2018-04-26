@@ -76,7 +76,7 @@ public class KafkaMessageService implements Runnable {
                     break;
                 case FILE_DELETE:
                     LOGGER.debug("KAFKA_CONSUMER: FILE_DELETE" + kafkaMessage.getFileDeleteMessage());
-                    new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage.getFileDeleteMessage());
+                    new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage);
                     break;
                 default:
                     LOGGER.info("MessageType is not valid.");

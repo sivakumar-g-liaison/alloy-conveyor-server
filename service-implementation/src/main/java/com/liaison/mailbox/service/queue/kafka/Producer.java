@@ -201,6 +201,21 @@ public class Producer {
         kafkaMessage.setDirAbsolutePath(dirAbsolutePath);
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_CREATE);
     }
+
+    /**
+     * Sends file delete notification to other datacenter
+     *
+     * @param kafkaMessageType
+     * @param deleteMessage
+     * @param datacenter
+     */
+    public void produce(KafkaMessageType kafkaMessageType, String deleteMessage, String datacenter) {
+        KafkaMessage kafkaMessage = new KafkaMessage();
+        kafkaMessage.setMessageType(kafkaMessageType);
+        kafkaMessage.setFileDeleteMessage(deleteMessage);
+        kafkaMessage.setDatacenter(datacenter);
+        produce(marshalToJSON(kafkaMessage), TOPIC_NAME_DELETE);
+    }
     
     private String marshalToJSON(KafkaMessage kafkaMessage) {
         
