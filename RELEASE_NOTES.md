@@ -1,6 +1,19 @@
-5.3.0-SNAPSHOT
+5.2.10
 ---------------
-*GMB -1108 FileWriter to have similar 'File transfer indicator' as RemoteUploader has
+* GMB-901 - File delete operation refinements
+
+5.2.9
+---------------
+* GMB-1111 - File writer throwing "Out of Memory" error when running1000 transactions
+
+5.2.8
+---------------
+* GMB-1103 - Remote Uploader Changes for Trigger File
+
+5.2.7
+---------------
+* GMB-1108 - FileWriter to have similar 'File transfer indicator' as RemoteUploader has
+* GMB-1103 - Remote Uploader Changes for Trigger File
 
 5.2.6
 ---------------
