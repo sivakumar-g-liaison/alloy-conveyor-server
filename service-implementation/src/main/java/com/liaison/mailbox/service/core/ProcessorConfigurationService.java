@@ -201,7 +201,7 @@ public class ProcessorConfigurationService {
                 MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
                 if (processorService != null) {
                     String createdLocalPath = processorService.createLocalPath();
-                    Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
+                    Producer.produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
                 }
             }
 
@@ -551,7 +551,7 @@ public class ProcessorConfigurationService {
 				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
 					String createdLocalPath = processorService.createLocalPath();
-					Producer.getInstance().produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
+					Producer.produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
 				}
 			}
 

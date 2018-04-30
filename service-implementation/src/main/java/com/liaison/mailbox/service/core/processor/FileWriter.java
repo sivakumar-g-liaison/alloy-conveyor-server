@@ -111,7 +111,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
+                            Producer.produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
                         }
                     } else {
 

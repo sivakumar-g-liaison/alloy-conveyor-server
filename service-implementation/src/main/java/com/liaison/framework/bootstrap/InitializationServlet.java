@@ -64,7 +64,7 @@ public class InitializationServlet extends HttpServlet {
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -100,7 +100,11 @@ public class InitializationServlet extends HttpServlet {
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)
                 && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
             new Consumer().consume();
-            Producer.getInstance();
+            try {
+                Class.forName(Producer.class.getName());
+            } catch (ClassNotFoundException e) {
+                logger.error("Unable to load Producer class", e);
+            }
         }
 
         //QUEUE and TOPIC consumers initialization
@@ -154,8 +158,8 @@ public class InitializationServlet extends HttpServlet {
     public void destroy() {
 
         //Shutdown the kafa producer gracefully
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            Producer.getInstance().stop();
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
+            Producer.stop();
         }
     }
 }
