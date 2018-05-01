@@ -96,7 +96,7 @@ public class FileDeleteReplicationService {
                 LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
 
                 //Post the deleted message to other datacenter
-                Producer.getInstance().produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+                Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
             } else {
                 LOGGER.info("File " + fileName + " in location " + filePath + " is might be deleted by WatchDogService");
             }

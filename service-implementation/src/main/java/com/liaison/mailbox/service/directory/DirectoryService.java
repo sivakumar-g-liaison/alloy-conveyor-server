@@ -135,12 +135,12 @@ public class DirectoryService implements Runnable {
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
             invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
             if (isProduceKafkaMessage) {
-                Producer.getInstance().produce(KafkaMessageType.USERACCOUNT_CREATE, message);
+                Producer.produce(KafkaMessageType.USERACCOUNT_CREATE, message);
             }
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());
             if (isProduceKafkaMessage) {
-                Producer.getInstance().produce(KafkaMessageType.USERACCOUNT_DELETE, message);
+                Producer.produce(KafkaMessageType.USERACCOUNT_DELETE, message);
             }
         } else {
             throw new RuntimeException("Invalid operation");

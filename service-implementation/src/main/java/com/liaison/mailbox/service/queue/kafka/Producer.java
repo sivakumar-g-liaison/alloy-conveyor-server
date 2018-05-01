@@ -59,16 +59,14 @@ public class Producer {
 
     private static final Logger LOG = LogManager.getLogger(Producer.class);
     private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
-    private static KafkaProducer<String, String> kafkaProducer;
+    private static KafkaProducer<String, String> KAFKA_PRODUCER;
     private static String TOPIC_NAME_CREATE;
     private static String TOPIC_NAME_DELETE;
 
-    private static Producer producer = null;
+    static {
 
-    private Producer() {
-        
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-        
+
         // We have to check relay and legacy relay; No need for check conveyor.
         if (DeploymentType.RELAY.getValue().equals(deploymentType)) {
             TOPIC_NAME_CREATE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
@@ -77,31 +75,22 @@ public class Producer {
             TOPIC_NAME_CREATE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_LOWSECURE);
             TOPIC_NAME_DELETE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_DELETE_LOWSECURE);
         }
-    }
-    
-    public static Producer getInstance() {
-        
-        if (null == producer) {
-            synchronized (Producer.class) {
-                if (null == producer) {
-                    producer = new Producer();
-                    kafkaProducer = new KafkaProducer<>(getProperties());
-                }
-            }
+
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
+            KAFKA_PRODUCER = new KafkaProducer<>(getProperties());
         }
-        return producer;
     }
-    
+
     /**
      * Send message to topic
-     * 
+     *
      * @param message
      * @param topicName
      */
-    private void produce(String message, String topicName) {
+    private static void produce(String message, String topicName) {
 
-        if (configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            LOG.error(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
+        if (configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
+            LOG.warn(" SKIP_KAFKA_QUEUE is enabled: Unable to send message to topic");
             return;
         }
 
@@ -111,7 +100,7 @@ public class Producer {
 
         LOG.info("MapR Streams PRODUCER message to send {}", message);
         try {
-            kafkaProducer.send(new ProducerRecord<>(topicName, message));
+            KAFKA_PRODUCER.send(new ProducerRecord<>(topicName, message));
         } catch (Exception e) {
             throw new RuntimeException("Unable to send message to topic " + topicName + ". " + e.getMessage(), e);
         }
@@ -120,7 +109,7 @@ public class Producer {
     private static Properties getProperties() {
 
         Properties producerProperties = new Properties();
-        
+
         // The client will make use of all servers irrespective of which servers are specified here for bootstrapping
         // Refer here for more details : https://kafka.apache.org/documentation/
         producerProperties.put(KEY_SERIALIZER, configuration.getString(KAFKA_PRODUCER_PREFIX + KEY_SERIALIZER, KEY_SERIALIZER_DEFAULT));
@@ -134,18 +123,18 @@ public class Producer {
     /**
      * To stop send request to the kafka producer.
      */
-    public void stop() {
-        
-        if (kafkaProducer != null) {
+    public static void stop() {
+
+        if (KAFKA_PRODUCER != null) {
 
             try {
-                kafkaProducer.close();
+                KAFKA_PRODUCER.close();
                 LOG.info("MapR Streams PRODUCER successfully flushed and closed!");
             } catch (Exception e) {
                 LOG.error("An error occurred while flushing/closing MapR Streams PRODUCER. " + e.getMessage(), e);
                 // Retry once
                 try {
-                    kafkaProducer.close();
+                    KAFKA_PRODUCER.close();
                     LOG.info("MapR Streams PRODUCER successfully flushed and closed after retry!");
                 } catch (Exception ex) {
                     LOG.error("An error occurred while flushing/closing MapR Streams PRODUCER. " + ex.getMessage(), e);
@@ -158,10 +147,11 @@ public class Producer {
 
     /**
      * To send execute Directory Operation details.
+     *
      * @param kafkaMessageType type of the message
-     * @param message directory message dto
+     * @param message          directory message dto
      */
-    public void produce(KafkaMessageType kafkaMessageType, DirectoryMessageDTO message) {
+    public static void produce(KafkaMessageType kafkaMessageType, DirectoryMessageDTO message) {
 
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
@@ -171,11 +161,12 @@ public class Producer {
 
     /**
      * To send workticket for filewriter operation
+     *
      * @param kafkaMessageType
      * @param workTicket
      * @throws JSONException
      */
-    public void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket) throws JSONException {
+    public static void produce(KafkaMessageType kafkaMessageType, WorkTicket workTicket) throws JSONException {
 
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
@@ -194,10 +185,11 @@ public class Producer {
 
     /**
      * To send local folders creation details.
+     *
      * @param kafkaMessageType
      * @param dirAbsolutePath
      */
-    public void produce(KafkaMessageType kafkaMessageType, String dirAbsolutePath) {
+    public static void produce(KafkaMessageType kafkaMessageType, String dirAbsolutePath) {
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setDirAbsolutePath(dirAbsolutePath);
@@ -211,15 +203,15 @@ public class Producer {
      * @param deleteMessage
      * @param datacenter
      */
-    public void produce(KafkaMessageType kafkaMessageType, String deleteMessage, String datacenter) {
+    public static void produce(KafkaMessageType kafkaMessageType, String deleteMessage, String datacenter) {
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setFileDeleteMessage(deleteMessage);
         kafkaMessage.setDatacenter(datacenter);
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_DELETE);
     }
-    
-    private String marshalToJSON(KafkaMessage kafkaMessage) {
+
+    private static String marshalToJSON(KafkaMessage kafkaMessage) {
 
         try {
             return JAXBUtility.marshalToJSON(kafkaMessage);
