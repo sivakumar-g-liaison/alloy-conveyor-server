@@ -75,6 +75,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     
     StagedFile findStagedFileForRelayTriggerFile(String processorId, String triggerFileName);
 
+    StagedFile findStagedFilesByGlobalProcessIdWithoutProcessDc(String parentGlobalProcessId);
+
     /**
      * constructs staged file entity from workticket and persists it
      *
@@ -282,6 +284,12 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append("select count(sf.pguid) from StagedFile sf")
             .append(" where sf.parentGlobalProcessId =:")
             .append(PARENT_GLOBAL_PROCESS_ID).toString();
+
+    String FIND_STAGED_FILE_BY_GLOBAL_PROCESS_ID_WITHOUT_PROCESS_DC = new StringBuilder()
+            .append("select sf from StagedFile sf")
+            .append(" where sf.globalProcessId =:")
+            .append(GLOBAL_PROCESS_ID)
+            .toString();
 
     String UPDATE_RELAY_TRIGGER_FILE_STATUS_IN_STAGED_FILE = new StringBuilder()
             .append("UPDATE STAGED_FILE")
