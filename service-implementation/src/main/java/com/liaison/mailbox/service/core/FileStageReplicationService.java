@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
@@ -103,7 +104,6 @@ public class FileStageReplicationService implements Runnable {
         InputStream payload = null;
 
         int retry = (int) requestObj.get(RETRY_COUNT);
-
         if (retry > MAX_RETRY_COUNT) {
             LOGGER.warn("Reached maximum retry and dropping this message - {}", requestMessage);
             return;
@@ -113,27 +113,30 @@ public class FileStageReplicationService implements Runnable {
 
         //Initial Check
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFileByGpid(globalProcessId);
-
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
         if (null == stagedFile) {
             //Staged file is not replicated so adding back to queue with delay
-            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter");
+            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
             FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
         } else {
+
+            if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
+                LOGGER.warn("Staged file is inactive status and there is no need to stage it - {}", globalProcessId);
+                return;
+            }
 
             try {
 
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
-
                 Path path = Paths.get(processorPayloadLocation);
                 if (Files.notExists(path)) {
                     DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
                 }
 
                 File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+                LOGGER.info("downloading the payload {} and the gpid is {}", fs2uri, globalProcessId);
                 payload = StorageUtilities.retrievePayload(fs2uri);
-
-                if (null != file && file.exists()) {
+                if (file.exists()) {
                     if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
                         persistFile(payload, file);
                     }
@@ -143,7 +146,7 @@ public class FileStageReplicationService implements Runnable {
 
             } catch (MailBoxServicesException | IllegalArgumentException e) {
                 // Payload doesn't exist in BOSS so adding back to queue with delay
-                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
+                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
                 FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
             } finally {
                 ThreadContext.clearMap();
