@@ -134,6 +134,7 @@ public class FileStageReplicationService implements Runnable {
                 }
 
                 File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+                LOGGER.info("downloading the payload {} and the gpid is {}", fs2uri, globalProcessId);
                 payload = StorageUtilities.retrievePayload(fs2uri);
                 if (file.exists()) {
                     if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
