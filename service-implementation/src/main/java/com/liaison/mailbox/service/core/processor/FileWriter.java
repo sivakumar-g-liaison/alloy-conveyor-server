@@ -31,14 +31,12 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +44,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * This will place and manages the file with respect to the given location.
@@ -114,7 +111,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
                         if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            Producer.getInstance().produce(KafkaMessageType.FILEWRITER_CREATE, workTicket, configurationInstance.getPguid());
+                            Producer.produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
                         }
                     } else {
 
@@ -122,8 +119,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         //To avoid staged file entry
                         workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
                     }
-                    
-                    writeTriggerFile(workTicket, processorPayloadLocation);
+
                 } finally {
                     if (payload != null) {
                         payload.close();
@@ -154,6 +150,12 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
                 if (writeStatus) {
                     LOG.info("Payload is successfully staged to STAGED_FILE with the location {}", processorPayloadLocation);
+
+                    // For conditional sweeper: If canUseFileSystem is false:
+                    // Persist the file entry in staged file
+                    if (isAllFilesProcessedInFileGroup(workTicket)) {
+                        persistTriggerFileEntry(workTicket, processorPayloadLocation);
+                    }
                 } else {
                     //To avoid staged file entry
                     LOG.info("File {} already exists at STAGED_FILE with location {} and should not be overwritten", fileName, processorPayloadLocation);
@@ -183,59 +185,66 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
 	}
 	
-	/**
-	 * Writes the trigger file
-	 * 
-	 * @param workTicket
-	 * @param processorPayloadLocation
-	 * @throws IOException
-	 */
+    /**
+     * Writes the trigger file
+     * 
+     * @param workTicket
+     * @param processorPayloadLocation
+     * @throws IOException
+     */
     private void writeTriggerFile(WorkTicket workTicket, String processorPayloadLocation) throws IOException {
+
+        File triggerFile = new File(processorPayloadLocation + File.separatorChar + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+
+        // write the trigger file
+        if (StorageUtilities.getPayloadSize(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString()) == 0) {
+
+            if (triggerFile.exists()) {
+                triggerFile.delete();
+            }
+            triggerFile.createNewFile();
+        } else {
+
+            InputStream triggerFilePayload = null;
+            FileOutputStream outputStream = null;
+            try {
+                triggerFilePayload = StorageUtilities.retrievePayload(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
+                outputStream = new FileOutputStream(triggerFile);
+                IOUtils.copy(triggerFilePayload, outputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+                if (triggerFilePayload != null) {
+                    triggerFilePayload.close();
+                }
+            }
+        }
+    }
+    
+    /**
+     * If all the file entries related with the file group are persists returns true;
+     * else returns false;
+     * 
+     * @param workTicket
+     * @return boolean
+     */
+    private boolean isAllFilesProcessedInFileGroup(WorkTicket workTicket) {
 
         if (null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP)
                 && Boolean.valueOf(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_GROUP).toString())) {
-            
+
             StagedFileDAOBase dao = new StagedFileDAOBase();
-            List<StagedFile> stagedFiles = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+            long dbCount = dao.findStagedFilesByParentGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
             String fileCount = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_COUNT).toString();
             int totalCount = Integer.parseInt(fileCount.split(MailBoxConstants.FILE_COUNT_SEPARATOR)[1]);
-
-            // get payload from spectrum
-            if (totalCount == stagedFiles.size()) {
-
-                File triggerFile = new File(processorPayloadLocation + File.separatorChar + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
-
-                // write the trigger file
-                if (StorageUtilities.getPayloadSize(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString()) == 0) {
-
-                    if (triggerFile.exists()) {
-                        triggerFile.delete();
-                    }
-                    triggerFile.createNewFile();
-                } else {
-
-                    InputStream triggerFilePayload = null;
-                    FileOutputStream outputStream = null;
-                    try {
-                        triggerFilePayload = StorageUtilities.retrievePayload(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
-                        outputStream = new FileOutputStream(triggerFile);
-                        IOUtils.copy(triggerFilePayload, outputStream);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-
-                        if (outputStream != null) {
-                            outputStream.close();
-                        }
-                        if (triggerFilePayload != null) {
-                            triggerFilePayload.close();
-                        }
-                    }
-                }
-                
-                persistTriggerFileEntry(workTicket, processorPayloadLocation);
-            }
+            return totalCount == dbCount;
         }
+
+        return false;
     }
 
     /**
@@ -247,6 +256,18 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      */
     private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
 
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        //Ignore if the trigger file is already staged in the current batch
+        StagedFile sf = stagedFileDAO.findStagedFileByGpid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
+        if (null != sf) {
+            return;
+        }
+
+        //Overwrite the existing trigger file based on the processor guid and trigger file name
+        String triggerFileName = workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString();
+        stagedFileDAO.updateRelayTriggerFileStatusInStagedFile(configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFileName);
+
+        //Persist Stated File
         StagedFile stagedFile = new StagedFile();
         stagedFile.setPguid(MailBoxUtil.getGUID());
         Timestamp timeStamp = MailBoxUtil.getTimestamp();
@@ -256,15 +277,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
         stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
         stagedFile.setFilePath(processorPayloadLocation);
-        stagedFile.setFileName(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        stagedFile.setFileName(triggerFileName);
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
         stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         stagedFile.setProcessDc(MailBoxUtil.DATACENTER_NAME);
         stagedFile.setFileSize("0");
+        stagedFile.setParentGlobalProcessId(MailBoxConstants.TRIGGER_FILE);
+        stagedFile.setProcessorType(configurationInstance.getProcessorType().name());
         stagedFile.setMailboxId((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
                 ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
-        
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         stagedFileDAO.persist(stagedFile);
     }
 
@@ -429,7 +450,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                 configurationInstance.getPguid(),
                 configurationInstance.getProcessorType().name(),
                 this.isDirectUploadEnabled());
-        
+
+        // For conditional sweeper: If canUseFileSystem is true:
+        // Write the trigger file in the disc location if all the files are processed in the file group.
+        // And persist the file entry in staged file
+        if (isAllFilesProcessedInFileGroup(workTicket)) {
+            writeTriggerFile(workTicket, file.getParent());
+            persistTriggerFileEntry(workTicket, file.getParent());
+        }
+
     }
 
     /**

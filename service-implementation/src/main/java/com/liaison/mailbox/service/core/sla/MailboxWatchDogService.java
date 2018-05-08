@@ -14,6 +14,8 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.logging.LogTags;
+import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -34,6 +36,7 @@ import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -206,19 +209,33 @@ public class MailboxWatchDogService {
                     continue;
                 }
 
-                GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-                glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-                glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
-                glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
-                glassMessageDTO.setFileName(fileName);
-                glassMessageDTO.setFilePath(filePath);
-                glassMessageDTO.setFileLength(0);
-                glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                glassMessageDTO.setMessage("File is picked up by the customer or another process");
-                glassMessageDTO.setPipelineId(null);
-                glassMessageDTO.setFirstCornerTimeStamp(null);
+                // For conditional sweeper trigger file case, We are only updating the activity status.
+                if (!MailBoxUtil.isEmpty(stagedFile.getParentGlobalProcessId())
+                        && MailBoxConstants.TRIGGER_FILE.equals(stagedFile.getParentGlobalProcessId().trim())) {
+                    
+                    GlassMessage glassMessage = new GlassMessage();
+                    glassMessage.setGlobalPId(stagedFile.getGPID());
+                    glassMessage.setOutboundFileName(fileName);
+                    glassMessage.setProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
+                    glassMessage.setProcessId(UUIDGen.getCustomUUID());
+                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "Trigger File is picked up by the customer or another process", stagedFile.getProcessorType());
+                } else {
+                    
+                    GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+                    glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+                    glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+                    glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
+                    glassMessageDTO.setFileName(fileName);
+                    glassMessageDTO.setFilePath(filePath);
+                    glassMessageDTO.setFileLength(0);
+                    glassMessageDTO.setStatus(ExecutionState.COMPLETED);
+                    glassMessageDTO.setMessage("File is picked up by the customer or another process");
+                    glassMessageDTO.setPipelineId(null);
+                    glassMessageDTO.setFirstCornerTimeStamp(null);
 
-                glassMessageDTOs.add(glassMessageDTO);
+                    glassMessageDTOs.add(glassMessageDTO);
+                }
+
                 inactiveStagedFile(stagedFile, updatedStatusList);
 
 			}

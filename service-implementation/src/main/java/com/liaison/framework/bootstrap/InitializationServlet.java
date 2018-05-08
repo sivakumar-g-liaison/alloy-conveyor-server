@@ -64,7 +64,7 @@ public class InitializationServlet extends HttpServlet {
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -95,6 +95,17 @@ public class InitializationServlet extends HttpServlet {
     	// Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
     	// Update the status from "PROCESSING" to "FAILED" for the current node.
         ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
+
+        //Initialize the Kafka Producer and Consumer before the Queue
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)
+                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
+            new Consumer().consume();
+            try {
+                Class.forName(Producer.class.getName());
+            } catch (ClassNotFoundException e) {
+                logger.error("Unable to load Producer class", e);
+            }
+        }
 
         //QUEUE and TOPIC consumers initialization
         QueueAndTopicProcessInitializer.initialize();
@@ -141,19 +152,14 @@ public class InitializationServlet extends HttpServlet {
                 logger.error("Unable to register http sb sync pool", e);
             }
         }
-        
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)
-                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
-            new Consumer().consume();
-        }
 
 	}
 
     public void destroy() {
 
         //Shutdown the kafa producer gracefully
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, false)) {
-            Producer.getInstance().stop();
+        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
+            Producer.stop();
         }
     }
 }

@@ -21,6 +21,7 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.collections.CollectionUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -156,28 +157,43 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     }
 
     @Override
-    public List<StagedFile> findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId) {
+    public long findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId) {
     	
-    	List<StagedFile> stagedFiles = new ArrayList<>();
         EntityManager entityManager = null;
-
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
-            List<?> files = entityManager
+            return (long) entityManager
                     .createQuery(FIND_STAGED_FILES_BY_PARENT_GLOBAL_PROCESS_ID)
                     .setParameter(PARENT_GLOBAL_PROCESS_ID, parentGlobalProcessId)
-                    .getResultList();
-
-            for (Object file : files) {
-                stagedFiles.add((StagedFile) file);
-            }
+                    .getSingleResult();
         } finally {
             if (null != entityManager) {
                 entityManager.close();
             }
         }
-        return stagedFiles;
+    }
+
+    @Override
+    public StagedFile findStagedFilesByGlobalProcessIdWithoutProcessDc(String globalProcessId) {
+
+        EntityManager entityManager = null;
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<StagedFile> stagedFiles = entityManager
+                    .createQuery(FIND_STAGED_FILE_BY_GLOBAL_PROCESS_ID_WITHOUT_PROCESS_DC, StagedFile.class)
+                    .setParameter(GLOBAL_PROCESS_ID, globalProcessId).getResultList();
+
+            if (CollectionUtils.isEmpty(stagedFiles)) {
+                return null;
+            }
+            return stagedFiles.get(0);
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
     }
 
     /**
@@ -519,7 +535,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            
+
             List<?> files = entityManager.createNamedQuery(FIND_BY_GPID)
                     .setParameter(PROCESS_DC, DATACENTER_NAME)
                     .setParameter(GLOBAL_PROCESS_ID, gpid)
@@ -610,7 +626,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * @param processorId
      * @param status
      */
-    public void updateTrigerFileStatusInStagedFile(String processorId,  String status, String fileName, String filePath) {
+    public void updateTriggerFileStatusInStagedFile(String processorId, String status, String fileName, String filePath) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -649,7 +665,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * @param processorId
      * @param status
      */
-    public void updateRelayTrigerFileStatusInStagedFile(String processorId,  String status, String fileName) {
+    public void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
