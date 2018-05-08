@@ -1,3 +1,6 @@
+5.3.0-SNAPSHOT
+---------------
+
 5.2.12
 ---------------
 * GMB-901 - File Create replication fixes
