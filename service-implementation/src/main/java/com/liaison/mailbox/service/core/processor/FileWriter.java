@@ -194,15 +194,21 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      */
     private void writeTriggerFile(WorkTicket workTicket, String processorPayloadLocation) throws IOException {
 
-        File triggerFile = new File(processorPayloadLocation + File.separatorChar + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString());
+        String configuredPayloadLocation = getFileWriteLocation();
+        String path = MailBoxUtil.isEmpty(configuredPayloadLocation) ? processorPayloadLocation : configuredPayloadLocation
+                + File.separatorChar
+                + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString();
+        File triggerFile = new File(path);
 
         // write the trigger file
         if (StorageUtilities.getPayloadSize(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString()) == 0) {
 
             if (triggerFile.exists()) {
-                triggerFile.delete();
+                boolean deleted = triggerFile.delete();
+                LOG.info("deleted the existing file {}", deleted);
             }
-            triggerFile.createNewFile();
+            boolean created = triggerFile.createNewFile();
+            LOG.debug("created the trigger file {} and the path is {}", created, path);
         } else {
 
             InputStream triggerFilePayload = null;
@@ -256,6 +262,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      */
     private void persistTriggerFileEntry(WorkTicket workTicket, String processorPayloadLocation) {
 
+        String configuredPayloadLocation = getFileWriteLocation();
+        String path = MailBoxUtil.isEmpty(configuredPayloadLocation) ? processorPayloadLocation : configuredPayloadLocation;
+
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         //Ignore if the trigger file is already staged in the current batch
         StagedFile sf = stagedFileDAO.findStagedFileByGpid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
@@ -276,7 +285,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         stagedFile.setProcessorId(configurationInstance.getPguid());
         stagedFile.setGlobalProcessId(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString());
         stagedFile.setStagedFileStatus(EntityStatus.ACTIVE.name());
-        stagedFile.setFilePath(processorPayloadLocation);
+        stagedFile.setFilePath(path);
         stagedFile.setFileName(triggerFileName);
         stagedFile.setSpectrumUri(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
         stagedFile.setClusterType(MailBoxUtil.CLUSTER_TYPE);

@@ -128,7 +128,7 @@ public class FTPSClient {
 			return ftpsRequest;
 
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
-				| MailBoxServicesException | SymmetricAlgorithmException | CertificateException
+				| MailBoxServicesException | CertificateException
 				| KeyStoreException | NoSuchAlgorithmException | JsonParseException
 				| IllegalAccessException e) {
 			throw new RuntimeException(e);
