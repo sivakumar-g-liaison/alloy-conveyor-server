@@ -81,11 +81,7 @@ public class FileStageReplicationService implements Runnable {
 
     @Override
     public void run() {
-        try {
-            this.stage(getMessage());
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        this.stage(getMessage());
     }
 
     /**
@@ -93,67 +89,74 @@ public class FileStageReplicationService implements Runnable {
      *
      * @param requestMessage message string from the queue
      */
-    public void stage(String requestMessage) throws JSONException, ClientUnavailableException, IOException {
+    public void stage(String requestMessage) {
 
-        JSONObject requestObj = new JSONObject(requestMessage);
-        String fs2uri = requestObj.getString(URI);
-        String globalProcessId = requestObj.getString(GLOBAL_PROCESS_ID);
-        String fileName = requestObj.getString(KEY_FILE_NAME);
-        String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
-        String isOverwrite = requestObj.getString(KEY_OVERWRITE);
-        InputStream payload = null;
+        try {
 
-        int retry = (int) requestObj.get(RETRY_COUNT);
-        if (retry > MAX_RETRY_COUNT) {
-            LOGGER.warn("Reached maximum retry and dropping this message - {}", requestMessage);
-            return;
-        }
-        requestObj.put(RETRY_COUNT, ++retry);
-        requestMessage = requestObj.toString();
+            JSONObject requestObj = new JSONObject(requestMessage);
+            String fs2uri = requestObj.getString(URI);
+            String globalProcessId = requestObj.getString(GLOBAL_PROCESS_ID);
+            String fileName = requestObj.getString(KEY_FILE_NAME);
+            String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
+            String isOverwrite = requestObj.getString(KEY_OVERWRITE);
+            InputStream payload = null;
 
-        //Initial Check
-        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
-        if (null == stagedFile) {
-            //Staged file is not replicated so adding back to queue with delay
-            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
-            FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
-        } else {
-
-            if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
-                LOGGER.warn("Staged file is inactive status and there is no need to stage it - {}", globalProcessId);
+            int retry = (int) requestObj.get(RETRY_COUNT);
+            if (retry > MAX_RETRY_COUNT) {
+                LOGGER.warn("Reached maximum retry and dropping this message - {}", requestMessage);
                 return;
             }
+            requestObj.put(RETRY_COUNT, ++retry);
+            requestMessage = requestObj.toString();
 
-            try {
+            //Initial Check
+            StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+            StagedFile stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
+            if (null == stagedFile) {
+                //Staged file is not replicated so adding back to queue with delay
+                LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
+                FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+            } else {
 
-                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
-                Path path = Paths.get(processorPayloadLocation);
-                if (Files.notExists(path)) {
-                    DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
+                if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
+                    LOGGER.warn("Staged file is inactive status and there is no need to stage it - {}", globalProcessId);
+                    return;
                 }
 
-                File file = new File(processorPayloadLocation + File.separatorChar + fileName);
-                LOGGER.info("downloading the payload {} and the gpid is {}", fs2uri, globalProcessId);
-                payload = StorageUtilities.retrievePayload(fs2uri);
-                if (file.exists()) {
-                    if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
+                try {
+
+                    ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
+                    Path path = Paths.get(processorPayloadLocation);
+                    if (Files.notExists(path)) {
+                        DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
+                    }
+
+                    File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+                    LOGGER.info("downloading the payload {} and the gpid is {}", fs2uri, globalProcessId);
+                    payload = StorageUtilities.retrievePayload(fs2uri);
+                    if (file.exists()) {
+                        if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
+                            persistFile(payload, file);
+                        }
+                    } else {
                         persistFile(payload, file);
                     }
-                } else {
-                    persistFile(payload, file);
-                }
 
-            } catch (MailBoxServicesException | IllegalArgumentException e) {
-                // Payload doesn't exist in BOSS so adding back to queue with delay
-                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
-                FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
-            } finally {
-                ThreadContext.clearMap();
-                if (null != payload) {
-                    payload.close();
+                } catch (MailBoxServicesException | IllegalArgumentException e) {
+                    // Payload doesn't exist in BOSS so adding back to queue with delay
+                    LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
+                    FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+                } catch (Throwable e) {
+                    LOGGER.error(e.getMessage(), e);
+                } finally {
+                    ThreadContext.clearMap();
+                    if (null != payload) {
+                        payload.close();
+                    }
                 }
             }
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
         }
 
     }
