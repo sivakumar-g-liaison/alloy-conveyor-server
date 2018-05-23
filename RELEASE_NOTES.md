@@ -1,5 +1,6 @@
 5.3.0-SNAPSHOT
 ---------------
+* Added EU properties
 
 5.2.12
 ---------------
