@@ -1,16 +1,68 @@
 5.3.0-SNAPSHOT
 ---------------
+* Added EU properties
+
+5.2.12
+---------------
+* GMB-901 - File Create replication fixes
+
+5.2.11
+---------------
+* GMB-1111 - File writer throwing "Out of Memory" error when running1000 transactions - More refinements
+
+5.2.10
+---------------
+* GMB-901 - File delete operation refinements
+
+5.2.9
+---------------
+* GMB-1111 - File writer throwing "Out of Memory" error when running1000 transactions
+
+5.2.8
+---------------
+* GMB-1103 - Remote Uploader Changes for Trigger File
+
+5.2.7
+---------------
+* GMB-1108 - FileWriter to have similar 'File transfer indicator' as RemoteUploader has
+* GMB-1103 - Remote Uploader Changes for Trigger File
+
+5.2.6
+---------------
+* GMB-1106 New Queue for Legacy Relay Replication
+
+5.2.5
+---------------
+* GMB-912 - File writer to replicate file across the DC - added missed retry count
+* GMB-1103 - Added index for parent gpid in Staged File table
+
+5.2.4
+---------------
+* GMB-1100 - Conditional Sweeper and Trigger property
+* GMB-1102 - Directory Transfer to publish Batch transaction to SB.
+* GMB-1103 - Directory and Conditional Sweeper enhancements
+
+5.2.3
+---------------
+* Reverted the migration script changes(6d963a9ab692c88dde919746572e509ca42f099a)
+* MAPR Service Ticket location added in the start up file
+
+5.2.2
+---------------
+* GMB-1097 - Null pointer exception if the sweeper directory is not available.
+* MapR Stream - Kafka implementation
+* GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
+
+5.2.1
+---------------
 * GMB-1095 - Modify the uploader logic where local directory is not mandatory
 * GMB-1096 - Need to set the success status while constructing workresult.
-* GMB-1097 - Null pointer exception if the sweeper directory is not available.	
 
 5.2.0
 ---------------
-* MapR Stream - Kafka implementation
 * GMB-1088 - The remote uploader always has to pick up the current datacenter files based on processing_dc
 * GMB-1089 - Watchdog service cleanup based on processingDC
 * GMB-1090 - Process downloader based on processing DC
-* GMB-1091 - Update the processingDc column of the Remote downloaders during Datacenter switch
 * GMB-901 - MAPR Intergration - REST endpoint to receive notification from system for file delete operation
 * Removed newly added Indexes for STAGED_FILE and PROCESSOR_EXEC_STATE to check in STAGING
 

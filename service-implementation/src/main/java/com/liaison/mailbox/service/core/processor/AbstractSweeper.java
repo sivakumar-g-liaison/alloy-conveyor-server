@@ -59,6 +59,7 @@ import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -232,15 +233,16 @@ public abstract class AbstractSweeper extends AbstractProcessor {
     }
 
     /**
-     * This Method create local folders if not available.
+     * This Method create local folders if not available and returns the path.
      */
     @Override
-    public void createLocalPath() {
+    public String createLocalPath() {
 
         String configuredPath = null;
         try {
             configuredPath = getPayloadURI();
-            createPathIfNotAvailable(configuredPath);
+            DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+            return configuredPath;
 
         } catch (IOException e) {
             throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,

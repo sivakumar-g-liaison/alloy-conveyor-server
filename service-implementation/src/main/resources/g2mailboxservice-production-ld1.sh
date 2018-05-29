@@ -7,7 +7,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_ID
 
 # Make all loggers ASYNC
 export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
- 
+
 # Include Log Location (line number and file of origin)
 # This might be too slow for production, but is really great while in beta.
 # Note, this is included as property in case we need to build an interface
@@ -22,7 +22,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$ENVIRONMENT.xml"
 # Shortcode for APP_NAME:
 export SYSLOG_APPNAME="g2mailboxservice"
-export SYSLOG_HOST="audit-syslog-server"
+export SYSLOG_HOST="10.216.20.9"
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
@@ -32,7 +32,7 @@ export SYSLOG_FACILITY="Local0"
 export SYSLOG_ROLLING_SIZE="250 MB"
 export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=128
- 
+
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
 
@@ -40,8 +40,8 @@ export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep 
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
- 
-export LOGSTASHMACHINE=at4u-vplstash.liaison.prod
+
+export LOGSTASHMACHINE=ld1p-lvlogst01.liaison.lia2
 export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 

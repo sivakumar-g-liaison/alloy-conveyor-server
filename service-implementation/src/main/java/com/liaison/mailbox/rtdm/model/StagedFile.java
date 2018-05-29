@@ -44,7 +44,17 @@ import java.sql.Timestamp;
                         + " AND sf.processorType =:" + StagedFileDAO.TYPE
                         + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
-        
+       @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_FOR_TRIGGER_FILE,
+                query = "SELECT sf FROM StagedFile sf"
+                        + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
+                        + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
+                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID
+                        + " AND sf.stagedFileStatus =:" + StagedFileDAO.STATUS),
+      @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE,
+                query = "SELECT sf FROM StagedFile sf"
+                        + " WHERE sf.fileName =:" + StagedFileDAO.FILE_NAME
+                        + " AND sf.processorId =:" + StagedFileDAO.PROCESSOR_ID
+                        + " AND sf.stagedFileStatus =:" + StagedFileDAO.STATUS),
         @NamedQuery(name = StagedFileDAO.FIND_BY_GPID,
                 query = "select sf from StagedFile sf"
                         + " WHERE (sf.globalProcessId) =:" + StagedFileDAO.GLOBAL_PROCESS_ID
@@ -74,6 +84,7 @@ public class StagedFile implements Identifiable {
     private String originatingDc;
     private String clusterType;
     private String processDc;
+    private String parentGlobalProcessId;
 
     public StagedFile() {
     }
@@ -247,6 +258,15 @@ public class StagedFile implements Identifiable {
     public void setProcessDc(String processDc) {
         this.processDc = processDc;
     }
+    
+    @Column(name = "PARENT_GLOBAL_PROCESS_ID", length = 32)
+    public String getParentGlobalProcessId() {
+    	return parentGlobalProcessId;
+    }
+    
+    public void setParentGlobalProcessId(String parentGlobalProcessId) {
+    	this.parentGlobalProcessId = parentGlobalProcessId;
+    }
 
     @Override
     @Transient
@@ -315,6 +335,7 @@ public class StagedFile implements Identifiable {
         this.setModifiedDate(timestamp);
         this.setGlobalProcessId(stagedFileDto.getGlobalProcessId());
         this.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        this.setParentGlobalProcessId(stagedFileDto.getParentGlobalProcessId());
     }
 
     @Transient

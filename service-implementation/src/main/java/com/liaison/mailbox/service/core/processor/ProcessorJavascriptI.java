@@ -18,6 +18,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -62,6 +63,34 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @return
      */
     RelayFile[] getRelayFiles(boolean recurseSubDirs);
+    
+    /**
+     * Returns the trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    File getTriggerFile(String triggerFileName);
+
+    /**
+     * Returns the relay trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    RelayFile getRelayTriggerFile(String triggerFileName);
+    
+    /**
+     * Delete the trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    void deleteTriggerFile(File triggerFile);
+
+    /**
+     * Delete the relay trigger file from the configured payload location.
+     * 
+     * @return
+     */
+    void deleteRelayTriggerFile(RelayFile relayFile);
 
     /**
      * Returns the location to write the payload

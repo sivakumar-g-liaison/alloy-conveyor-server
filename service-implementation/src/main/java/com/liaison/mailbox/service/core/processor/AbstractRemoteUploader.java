@@ -13,6 +13,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -27,6 +28,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.logging.log4j.LogManager;
@@ -221,15 +223,16 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
 
     /**
-     * Creates local folders if not available.
+     * Creates local folders if not available and returns the path.
      */
     @Override
-    public void createLocalPath() {
+    public String createLocalPath() {
 
         String configuredPath = null;
         try {
             configuredPath = getPayloadURI();
-            createPathIfNotAvailable(configuredPath);
+            DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+            return configuredPath;
 
         } catch (IOException e) {
             throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED, configuredPath,
@@ -340,6 +343,52 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
         }
 
         return files.toArray(new RelayFile[files.size()]);
+    }
+   
+    /**
+     * Get relay file details from staged file DB.
+     * 
+     * @param triggerFileName
+     * @return file
+     */
+    @Override
+    public File getTriggerFile(String triggerFileName) {
+
+        StagedFileDAO dao = new StagedFileDAOBase();
+        StagedFile stagedFile = dao.findStagedFileForTriggerFile(getPayloadURI(), triggerFileName, this.configurationInstance.getPguid());
+        return Paths.get(stagedFile.getFilePath() + File.separator + stagedFile.getFileName()).toFile();
+    }
+   
+    @Override
+    public RelayFile getRelayTriggerFile(String triggerFileName) {
+
+        StagedFileDAO dao = new StagedFileDAOBase();
+        StagedFile stagedFile = dao.findStagedFileForRelayTriggerFile(this.configurationInstance.getPguid(), triggerFileName);
+
+        RelayFile file = new RelayFile();
+        file.copy(stagedFile);
+        return file;
+    }
+
+    @Override
+    public void deleteTriggerFile(File triggerFile) {
+         
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateTriggerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), triggerFile.getName(), getPayloadURI());
+        triggerFile.delete();
+    }
+
+    @Override
+    public void deleteRelayTriggerFile(RelayFile relayFile) {
+        
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        stagedFileDAO.updateRelayTriggerFileStatusInStagedFile(this.configurationInstance.getPguid(), EntityStatus.INACTIVE.name(), relayFile.getName());
+
+        try {
+            relayFile.delete();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**

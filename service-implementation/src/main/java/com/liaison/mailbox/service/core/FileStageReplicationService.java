@@ -13,15 +13,14 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.FileStageReplicationSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -45,8 +44,6 @@ import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
-import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY;
-import static com.liaison.mailbox.MailBoxConstants.KEY_TARGET_DIRECTORY_MODE;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
@@ -101,14 +98,12 @@ public class FileStageReplicationService implements Runnable {
         JSONObject requestObj = new JSONObject(requestMessage);
         String fs2uri = requestObj.getString(URI);
         String globalProcessId = requestObj.getString(GLOBAL_PROCESS_ID);
-        String processorId = requestObj.getString(KEY_PROCESSOR_ID);
         String fileName = requestObj.getString(KEY_FILE_NAME);
         String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
         String isOverwrite = requestObj.getString(KEY_OVERWRITE);
         InputStream payload = null;
 
         int retry = (int) requestObj.get(RETRY_COUNT);
-
         if (retry > MAX_RETRY_COUNT) {
             LOGGER.warn("Reached maximum retry and dropping this message - {}", requestMessage);
             return;
@@ -118,29 +113,30 @@ public class FileStageReplicationService implements Runnable {
 
         //Initial Check
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-        StagedFile stagedFile = stagedFileDAO.findStagedFileByGpid(globalProcessId);
-
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
         if (null == stagedFile) {
             //Staged file is not replicated so adding back to queue with delay
-            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter");
+            LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
             FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
         } else {
+
+            if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
+                LOGGER.warn("Staged file is inactive status and there is no need to stage it - {}", globalProcessId);
+                return;
+            }
 
             try {
 
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
-
                 Path path = Paths.get(processorPayloadLocation);
                 if (Files.notExists(path)) {
-                    Processor processor = new ProcessorConfigurationDAOBase().find(Processor.class, processorId);
-                    FileWriter fileWriter = new FileWriter(processor);
-                    fileWriter.createPathIfNotAvailable(processorPayloadLocation);
+                    DirectoryCreationUtil.createPathIfNotAvailable(processorPayloadLocation);
                 }
 
                 File file = new File(processorPayloadLocation + File.separatorChar + fileName);
+                LOGGER.info("downloading the payload {} and the gpid is {}", fs2uri, globalProcessId);
                 payload = StorageUtilities.retrievePayload(fs2uri);
-
-                if (null != file && file.exists()) {
+                if (file.exists()) {
                     if (MailBoxConstants.OVERWRITE_TRUE.equals(isOverwrite)) {
                         persistFile(payload, file);
                     }
@@ -150,7 +146,7 @@ public class FileStageReplicationService implements Runnable {
 
             } catch (MailBoxServicesException | IllegalArgumentException e) {
                 // Payload doesn't exist in BOSS so adding back to queue with delay
-                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter");
+                LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
                 FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
             } finally {
                 ThreadContext.clearMap();

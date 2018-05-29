@@ -37,6 +37,7 @@ public class StagedFileDTO {
 	private String modifiedDate;
     private String clusterType;
     private String processDc;
+    private String parentGlobalProcessId;
     
 	public StagedFileDTO() {
 	}
@@ -52,6 +53,8 @@ public class StagedFileDTO {
 		this.setMeta(workTicket.getHeader(MailBoxConstants.UPLOAD_META));
 		this.setStatus(EntityStatus.ACTIVE.value());
 		this.setGlobalProcessId(workTicket.getGlobalProcessId());
+		this.setParentGlobalProcessId(null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID) 
+				? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString() : null);
 	}
 
 	public String getId() {
@@ -182,6 +185,14 @@ public class StagedFileDTO {
         this.processDc = processDc;
     }
     
+    public String getParentGlobalProcessId() {
+        return parentGlobalProcessId;
+    }
+
+    public void setParentGlobalProcessId(String parentGlobalProcessId) {
+        this.parentGlobalProcessId = parentGlobalProcessId;
+    }
+    
 	/**
 	 * Copies the file details from file to dto.
 	 * 
@@ -204,6 +215,7 @@ public class StagedFileDTO {
 		this.setExpirationTime(file.getExpirationTime().toString());
 		this.setId(file.getPguid());
         this.setClusterType(file.getClusterType());
+        this.setParentGlobalProcessId(file.getParentGlobalProcessId());
     }
 
 }

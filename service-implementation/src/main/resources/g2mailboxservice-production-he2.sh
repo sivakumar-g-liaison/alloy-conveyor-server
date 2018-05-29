@@ -5,9 +5,6 @@
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$ENVIRONMENT"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_ID"
 
-# Path to secure property file. The secure properties file must be manually copied to deployment server.
-export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.configurationSource.additionalUrls=file:///secure/tomcat/secure.properties"
-
 # Make all loggers ASYNC
 export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 
@@ -24,8 +21,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$ENVIRONMENT.xml"
 # Shortcode for APP_NAME:
-export SYSLOG_APPNAME="GMB"
-export SYSLOG_HOST="ld1p-sysl01.liaison.lia2"
+export SYSLOG_APPNAME="g2mailboxservice"
+export SYSLOG_HOST="audit-syslog-server"
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
@@ -35,7 +32,7 @@ export SYSLOG_FACILITY="Local0"
 export SYSLOG_ROLLING_SIZE="250 MB"
 export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=128
- 
+
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
 
@@ -44,7 +41,7 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
 
-export LOGSTASHMACHINE=ld1p-vplstash.liaison.lia2
+export LOGSTASHMACHINE=he2p-lvlogst01.liaison.lia2
 export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 
@@ -57,3 +54,5 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
 
+# MAPR Service Ticket
+export MAPR_TICKETFILE_LOCATION=/var/mapr/g2app-mapr-service-ticket

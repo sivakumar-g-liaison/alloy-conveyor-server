@@ -38,7 +38,9 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +52,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -398,7 +401,9 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<Path> result = new ArrayList<>();
         listFiles(result, rootPath, staticProp);
 
+        result = filterFiles(result);
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
+        
 		return generateWorkTickets(result);
 	}
 
@@ -463,55 +468,50 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		return this.pipelineId;
 	}
 
-	/**
-	 * Grouping the files based on the payload threshold and no of files threshold.
-	 *
-	 * @param workTickets Group of all workTickets in a WorkTicketGroup.
-	 * @param staticProp sweeper properties
-	 * @return workticket group
-	 * @throws IllegalAccessException
-	 * @throws IOException
-	 */
-	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalAccessException, IOException {
+    /**
+     * Grouping the files based on the payload threshold and no of files threshold.
+     *
+     * @param workTickets Group of all workTickets in a WorkTicketGroup.
+     * @param staticProp sweeper properties
+     * @return workticket group
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalAccessException, IOException {
 
-		String groupingJsPath = configurationInstance.getJavaScriptUri();
-		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
+        List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
-		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
-			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, PROCESS, workTickets, LOGGER);
-		} else {
+        if (workTickets.isEmpty()) {
+            LOGGER.info(constructMessage("There are no files available in the directory."));
+        }
 
-			if (workTickets.isEmpty()) {
-				LOGGER.info(constructMessage("There are no files available in the directory."));
-			}
-			
-			sortWorkTicket(workTickets, staticProp.getSort());
-			WorkTicketGroup workTicketGroup = new WorkTicketGroup();
-			List <WorkTicket> workTicketsInGroup = new ArrayList <WorkTicket>();
-			workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-			for (WorkTicket workTicket : workTickets) {
+        sortWorkTicket(workTickets, staticProp.getSort());
+        WorkTicketGroup workTicketGroup = new WorkTicketGroup();
+        List<WorkTicket> workTicketsInGroup = new ArrayList<WorkTicket>();
+        workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
 
-				if (canAddToGroup(workTicketGroup, workTicket, staticProp)) {
-					workTicketGroup.getWorkTicketGroup().add(workTicket);
-				} else {
+        for (WorkTicket workTicket : workTickets) {
 
-					if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-						workTicketGroups.add(workTicketGroup);
-					}
-					workTicketGroup = new WorkTicketGroup();
-					workTicketsInGroup = new ArrayList <WorkTicket>();
-					workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-					workTicketGroup.getWorkTicketGroup().add(workTicket);
+            if (canAddToGroup(workTicketGroup, workTicket, staticProp)) {
+                workTicketGroup.getWorkTicketGroup().add(workTicket);
+            } else {
 
-				}
-			}
+                if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
+                    workTicketGroups.add(workTicketGroup);
+                }
+                workTicketGroup = new WorkTicketGroup();
+                workTicketsInGroup = new ArrayList<WorkTicket>();
+                workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
+                workTicketGroup.getWorkTicketGroup().add(workTicket);
+            }
+        }
 
-			if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-				workTicketGroups.add(workTicketGroup);
-			}
-		}
-		return workTicketGroups;
-	}
+        if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
+            workTicketGroups.add(workTicketGroup);
+        }
+
+        return workTicketGroups;
+    }
 
 	/**
 	 * Method to sort work tickets based on name/size/date
@@ -707,6 +707,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		}
 
 		activeFilesList.clear();//Clearing the recently updated files after the second call.
+		files = filterFiles(files);
+
 		return generateWorkTickets(files);
 	}
 
@@ -786,18 +788,19 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	/**
-	 * This Method create local folders if not available.
+	 * This Method create local folders if not available and returns the path.
 	 *
 	 * * @param processorDTO it have details of processor
 	 *
 	 */
 	@Override
-	public void createLocalPath() {
+	public String createLocalPath() {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getPayloadURI();
-			createPathIfNotAvailable(configuredPath);
+			DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+			return configuredPath;
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
@@ -954,5 +957,26 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      */
     private boolean isPayloadValid(WorkTicket workTicket) {
         return !(0 == workTicket.getPayloadSize());
+    }
+    
+    /**
+     * Filter file paths for directory sweeper if javascript execution is enabled
+     * 
+     * @param files
+     * @return list of file path
+     * @throws IOException 
+     * @throws IllegalAccessException 
+     */
+    @SuppressWarnings("unchecked")
+    protected List<Path> filterFiles(List<Path> files) throws IllegalAccessException, IOException {
+
+        String groupingJsPath = configurationInstance.getJavaScriptUri();
+        boolean isFilterFileUsingJavaScript = getProperties().isHandOverExecutionToJavaScript();
+
+        if (isFilterFileUsingJavaScript && !MailBoxUtil.isEmpty(groupingJsPath)) {
+            return (List<Path>) JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, MailBoxConstants.FILTER, this, files);
+        }
+
+        return files;
     }
 }

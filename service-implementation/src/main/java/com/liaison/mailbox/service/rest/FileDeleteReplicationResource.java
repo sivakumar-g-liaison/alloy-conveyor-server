@@ -14,9 +14,11 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 
+import com.liaison.mailbox.service.queue.kafka.KafkaMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,6 +30,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
 import java.io.IOException;
 
@@ -44,17 +47,17 @@ public class FileDeleteReplicationResource extends AuditedResource {
 
     @POST
     @AccessDescriptor(skipFilter = true)
-    public Response handleFileDeleteReplication(@Context HttpServletRequest request) throws IOException {
+    public Response handleFileDeleteReplication(@Context HttpServletRequest request) {
 
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
             @Override
-            public Object call() {
+            public Object call() throws JAXBException {
                 String requestString;
                 try {
                     requestString = getRequestBody(request);
                     logger.info(requestString);
                     FileDeleteReplicationService deleteService = new FileDeleteReplicationService();
-                    deleteService.inactivateStageFileAndUpdateLens(requestString);
+                    deleteService.inactivateStageFileAndUpdateLens(JAXBUtility.unmarshalFromJSON(requestString, KafkaMessage.class));
                 } catch (IOException e) {
                     throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage(), e);
                 }

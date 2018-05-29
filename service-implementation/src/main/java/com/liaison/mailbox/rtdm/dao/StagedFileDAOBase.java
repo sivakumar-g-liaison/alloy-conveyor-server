@@ -21,6 +21,7 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.collections.CollectionUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -155,7 +156,103 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         return stagedFiles;
     }
 
+    @Override
+    public long findStagedFilesByParentGlobalProcessId(String parentGlobalProcessId) {
+    	
+        EntityManager entityManager = null;
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
+            return (long) entityManager
+                    .createQuery(FIND_STAGED_FILES_BY_PARENT_GLOBAL_PROCESS_ID)
+                    .setParameter(PARENT_GLOBAL_PROCESS_ID, parentGlobalProcessId)
+                    .getSingleResult();
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+
+    @Override
+    public StagedFile findStagedFilesByGlobalProcessIdWithoutProcessDc(String globalProcessId) {
+
+        EntityManager entityManager = null;
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<StagedFile> stagedFiles = entityManager
+                    .createQuery(FIND_STAGED_FILE_BY_GLOBAL_PROCESS_ID_WITHOUT_PROCESS_DC, StagedFile.class)
+                    .setParameter(GLOBAL_PROCESS_ID, globalProcessId).getResultList();
+
+            if (CollectionUtils.isEmpty(stagedFiles)) {
+                return null;
+            }
+            return stagedFiles.get(0);
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+
+    /**
+     * Returns staged file entries by filename and file path for file writer processor.
+     *
+     */
+    @Override
+    public StagedFile findStagedFileForTriggerFile(String filePath, String fileName, String processorId) {
+
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_FOR_TRIGGER_FILE)
+                    .setParameter(FILE_PATH, filePath)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .getResultList();
+
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
+            }
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Returns staged file entries by filename and file path for file writer processor.
+     *
+     */
+    @Override
+    public StagedFile findStagedFileForRelayTriggerFile(String processorId, String fileName) {
+
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE)
+                    .setParameter(PROCESSOR_ID, processorId)
+                    .setParameter(FILE_NAME, fileName)
+                    .setParameter(STATUS, EntityStatus.ACTIVE.name())
+                    .getResultList();
+
+            if (files != null && !files.isEmpty()) {
+                return (StagedFile) files.get(0);
+            }
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        return null;
+    }
+    
     /**
      *Method to number of staged files based on search criteria
      *
@@ -438,7 +535,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            
+
             List<?> files = entityManager.createNamedQuery(FIND_BY_GPID)
                     .setParameter(PROCESS_DC, DATACENTER_NAME)
                     .setParameter(GLOBAL_PROCESS_ID, gpid)
@@ -523,6 +620,83 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
         }
     }
 
+    /**
+     * Update the StagedFile Status for trigger file entry
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateTriggerFileStatusInStagedFile(String processorId, String status, String fileName, String filePath) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_TRIGGER_FILE_STATUS_IN_STAGED_FILE)
+                .setParameter(STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .setParameter(FILE_NAME, fileName)
+                .setParameter(FILE_PATH, filePath)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+
+    /**
+     * Update the StagedFile Status for relay trigger file entry
+     * 
+     * @param processorId
+     * @param status
+     */
+    public void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_RELAY_TRIGGER_FILE_STATUS_IN_STAGED_FILE)
+                .setParameter(STATUS, status)
+                .setParameter(PROCESSOR_ID, processorId)
+                .setParameter(FILE_NAME, fileName)
+                .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+    
     @Override
     public void persist(StagedFile entity) {
         

@@ -172,8 +172,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
     // load java script checkbox details
     $rootScope.javaScriptCheckBox = loadFile('data/javaScriptCheckBox.json');
 
-    // load java script checkbox details for conditional sweeper
-    $rootScope.javaScriptCheckBoxConditionalSweeper = loadFile('data/javaScriptCheckBoxConSweeper.json');
+    // load java script checkbox details for sweeper and conditional sweeper
+    $rootScope.javaScriptCheckBoxSweeper = loadFile('data/javaScriptCheckBoxSweeper.json');
 
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");

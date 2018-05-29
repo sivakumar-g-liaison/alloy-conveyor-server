@@ -25,7 +25,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$ENVIRONMENT.xml"
 # Shortcode for APP_NAME:
 export SYSLOG_APPNAME="GMB"
-export SYSLOG_HOST="at4p-sysl01.liaison.prod"
+export SYSLOG_HOST="10.152.20.9"
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
@@ -56,3 +56,6 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
+
+# MAPR Service Ticket
+export MAPR_TICKETFILE_LOCATION=/var/mapr/g2app-mapr-service-ticket

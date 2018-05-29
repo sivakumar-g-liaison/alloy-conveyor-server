@@ -153,6 +153,12 @@ public interface MailBoxConstants {
     String SOCKET_TIMEOUT = "socketTimeout";
     String PROCSR_STATUS = "procsrStatus";
     String MAILBOX_STATUS = "mbxStatus";
+    String KEY_FILE_GROUP = "fileGroup";
+    String KEY_FILE_COUNT = "fileCount";
+    String KEY_TRIGGER_FILE_NAME = "triggerFileName";
+    String KEY_TRIGGER_FILE_PARENT_GPID = "triggerFileParentGpid";
+    String KEY_TRIGGER_FILE_URI = "triggerFileUri";
+    String KEY_IS_BATCH_TRANSACTION = "isBatchTransaction";
 
     String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 
@@ -509,6 +515,10 @@ public interface MailBoxConstants {
     String EXECUTE = "infinite";
 
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
-    
+
     String PROCESS_DC_LIST = "com.liaison.mailbox.processdc.list";
+    
+    String FILE_COUNT_SEPARATOR = "/";
+    String DOT_OPERATOR = ".";
+
 }
