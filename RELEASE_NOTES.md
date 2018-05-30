@@ -2,6 +2,7 @@
 ---------------
 * Added EU properties
 * GMB-1115 - UI to update the process dc of the processor
+* GMB-1116 - Replicate remote uploader files when it is using file system
 
 5.2.13
 ---------------
