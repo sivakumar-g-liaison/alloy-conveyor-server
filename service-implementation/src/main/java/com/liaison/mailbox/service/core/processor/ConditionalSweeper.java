@@ -31,7 +31,6 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,7 +42,6 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -57,6 +55,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,6 +258,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
     private void asyncSweeper(List<WorkTicket> workTickets)
             throws IllegalAccessException, IOException, JAXBException, JSONException {
 
+        final Date lensStatusDate = new Date();
+
         // Read from mailbox property - grouping js location
         List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
@@ -303,7 +304,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     try {
                         ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
 
-                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, relatedTransactionId);
+                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, relatedTransactionId, lensStatusDate);
                         LOGGER.info(constructMessage("Global PID",
                                 seperator,
                                 wrkTicket.getGlobalProcessId(),
@@ -592,10 +593,9 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * 
      * @param workTickets
      * @throws IOException
-     * @throws IllegalAccessException
      */
     private void emptyFilesCheckInWorkTicket(List<WorkTicket> workTickets, List<WorkTicket> workTicketsToPost, boolean isAllowEmptyFiles)
-            throws JAXBException, JSONException, IOException, IllegalAccessException {
+            throws IOException {
 
         if (!isAllowEmptyFiles) {
 
@@ -617,7 +617,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     }
 
                     LOGGER.warn(constructMessage("The file {} is empty and empty files not allowed"), workTicket.getFileName());
-                    logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR, relatedTransactionId);
+                    logToLens(workTicket, null, ExecutionState.VALIDATION_ERROR, relatedTransactionId, null);
                     String filePath = String.valueOf((Object) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
                     delete(filePath);
                     deletedFileStatus.put(filePath, EntityStatus.INACTIVE.name());
