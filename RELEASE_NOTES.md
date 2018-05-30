@@ -2,6 +2,10 @@
 ---------------
 * Added EU properties
 
+5.2.13
+---------------
+* GMB-1114 - Trigger file gets written to wherever the "last" file goes
+
 5.2.12
 ---------------
 * GMB-901 - File Create replication fixes

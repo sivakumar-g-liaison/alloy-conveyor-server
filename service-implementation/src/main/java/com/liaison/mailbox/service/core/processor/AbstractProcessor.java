@@ -52,7 +52,6 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -61,7 +60,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -353,7 +351,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws MailBoxConfigurationServicesException
      * @throws MailBoxServicesException
      */
-    public String getFileWriteLocation() throws MailBoxServicesException, IOException {
+    public String getFileWriteLocation() {
 
         if (configurationInstance.getFolders() != null) {
 
@@ -398,10 +396,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * call back method to write the response back to MailBox from JS
      *
      * @throws MailBoxServicesException
-     * @throws URISyntaxException
      * @throws IOException
      */
-    public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, MailBoxServicesException {
+    public void writeResponseToMailBox(ByteArrayOutputStream response) throws IOException, MailBoxServicesException {
 
         LOGGER.debug("Started writing response");
         String processorName = MailBoxConstants.PROCESSOR;
@@ -418,11 +415,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * call back method to write the file response back to MailBox from JS
      *
      * @throws MailBoxServicesException
-     * @throws URISyntaxException
      * @throws IOException
      */
     public void writeResponseToMailBox(ByteArrayOutputStream response, String filename)
-            throws URISyntaxException, IOException, MailBoxServicesException {
+            throws IOException, MailBoxServicesException {
 
         LOGGER.debug("Started writing response");
         String responseLocation = getWriteResponseURI();
@@ -480,9 +476,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      *
      * @param file directory path
      * @param payloadLocation payload location
-     * @throws IOException
      */
-    protected void deleteDirectory(File file, String payloadLocation) throws IOException {
+    protected void deleteDirectory(File file, String payloadLocation) {
 
         if (file.isDirectory()) {
 
@@ -632,9 +627,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      *
      * @return String URI
      * @throws MailBoxServicesException
-     * @throws SymmetricAlgorithmException
      */
-    public Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException, SymmetricAlgorithmException {
+    public Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException {
 
         if (configurationInstance.getCredentials() != null) {
 
@@ -656,10 +650,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      *
      * @param fileName The source location
      * @throws IOException
-     * @throws URISyntaxException
      * @throws MailBoxServicesException
      */
-    public void createResponseDirectory(String fileName) throws URISyntaxException, IOException, MailBoxServicesException {
+    public void createResponseDirectory(String fileName) throws IOException, MailBoxServicesException {
 
         LOGGER.debug("Started writing response");
 
