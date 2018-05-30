@@ -70,6 +70,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/processor/searchprocessor.html',
             controller: 'SearchProcessorCntrlr'
         });
+        $routeProvider.when('/mailbox/getProcessorDc', {
+            templateUrl: 'partials/processor/updateProcessorDc.html',
+            controller: 'UpdateProcessorDcCntrlr'
+        });
         $routeProvider.when('/mailbox/getexecutingprocessors', {
             templateUrl: 'partials/processor/executingprocessors.html',
             controller: 'executingprocessorsCntrlr'
@@ -190,7 +194,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
         processorLowSecureAsyncUrlDisplayPrefix: "",
 		defaultScriptTemplateName: "",
 	    deployAsDropbox:false,
-	    clusterTypes:[]
+	    clusterTypes:[],
+	    dataCenters:[]
 	};
 
     var responseJson = loadFile($rootScope.base_url + '/serviceconfigurations');
@@ -208,6 +213,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
             $rootScope.javaProperties.defaultScriptTemplateName = properties.defaultScriptTemplateName;
             $rootScope.javaProperties.deployAsDropbox = properties.deployAsDropbox;
             $rootScope.javaProperties.clusterTypes = properties.clusterTypes;
+            $rootScope.javaProperties.dataCenters = properties.dataCenters;
+            $rootScope.javaProperties.dataCenters.push("ALL");
 
             var deploymentType = properties.deploymentType;
             if ('CONVEYOR' === deploymentType) {

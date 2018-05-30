@@ -1237,6 +1237,44 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         
     }
+
+    /**
+     * updater the process_Dc by guid
+     * 
+     * @param guid
+     * @param dataCenter
+     */
+    public void updateProcessDcByGuid(String guid, String dataCenter) {
+        
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+            
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+            
+            //update the Processor PROCESS_DC
+            entityManager.createNativeQuery(UPDATE_PROCESS_DC_BY_GUID)
+                  .setParameter(DATACENTER, dataCenter)
+                  .setParameter(PGUID, guid)
+                  .executeUpdate();
+            
+            //commits the transaction
+            tx.commit();
+        
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+        
+    }
     
     /**
      * updater the downloader process_Dc

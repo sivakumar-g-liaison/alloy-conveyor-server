@@ -67,6 +67,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -683,6 +684,7 @@ public class MailBoxConfigurationService {
             dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
             dto.setClusterTypes(MailBoxUtil.getClusterTypes());
             dto.setDeploymentType(MailBoxUtil.DEPLOYMENT_TYPE);
+            dto.setDataCenters(Arrays.asList(config.getStringArray(MailBoxConstants.PROCESS_DC_LIST)));
 
             serviceResponse.setProperties(dto);
             serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));

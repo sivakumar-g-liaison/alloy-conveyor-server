@@ -1,6 +1,7 @@
 5.3.0-SNAPSHOT
 ---------------
 * Added EU properties
+* GMB-1115 - UI to update the process dc of the processor
 
 5.2.13
 ---------------
