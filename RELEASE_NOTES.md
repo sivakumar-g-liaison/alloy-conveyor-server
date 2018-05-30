@@ -1,3 +1,7 @@
+5.3.1
+---------------
+* GGT-1581 - PX1 US UAT and PROD properties update
+
 5.3.0-SNAPSHOT
 ---------------
 * Added EU properties
