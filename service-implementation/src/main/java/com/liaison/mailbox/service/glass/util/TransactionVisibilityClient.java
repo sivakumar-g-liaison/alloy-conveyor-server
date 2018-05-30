@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.glass.util;
 
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.MapItemType;
 import com.liaison.commons.message.glass.dom.StatusCode;
 import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
@@ -23,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Java wrapper client for logging messages in LENS.
@@ -33,8 +31,6 @@ import java.util.List;
 public class TransactionVisibilityClient {
 
 	private static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
-	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
-	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
 
 	private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 	private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
@@ -57,7 +53,9 @@ public class TransactionVisibilityClient {
 
 	public void logToGlass(GlassMessage message) {
 
-        visibilityAPI = new TransactionVisibilityAPI(message.getGlobalPId());
+        visibilityAPI = (message.getStatusDate() == null)
+                ? new TransactionVisibilityAPI(message.getGlobalPId())
+                : new TransactionVisibilityAPI(message.getGlobalPId(), message.getStatusDate().getTime());
         visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 
 		visibilityAPI.getAdditionalInformation().clear();
@@ -154,8 +152,12 @@ public class TransactionVisibilityClient {
 
 		visibilityAPI.setId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
-	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
-		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+        if (message.getStatusDate() == null) {
+            visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+        } else {
+            visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(message.getStatusDate()));
+        }
+        visibilityAPI.getAndIncrementVersion();
 
         if (message.getSenderId() != null && message.getSenderName() != null) {
             visibilityAPI.setSenderId(message.getSenderId());
