@@ -8,13 +8,18 @@ g2-mailbox code base is common for three different micro services called Relay, 
 
 The application user should be g2_env_app_svc not the regular tomcat user and the user should have permisison to access the NFS locations and execute shell scripts for machine account directory creations.
 
+Conveyor Server would run with tomcat user and there is not need of special user
+
 ### Network Shares
 
-NFS Mounts
+NFS Mounts for Relay
 */data/http
-*/data/ftp
+*/data/ftp (secured one and customers won't use it due to complicance)
 */data/ftps
 */data/sftp
+
+NFS Mounts for Legacy Relay
+*/data/ftp (unsecured one and customers would use it)
 
 LUKS Mounted Share
 */secure/tomcat
@@ -61,7 +66,7 @@ Migration with flyway:
 gradlew flywayMigrate -PdbServerName=<db server host> -PdbServerService=<service name> -PdbSchemaNamePrefix=<user prefix> -PdbSchemaNameMoniker=<moniker> -PdbaPassword=<owner password>
 ```
 
-## Special Instructions
+#### Special Instructions
 The DB Migration is not required for Legacy Relay since it is using the same DB of the Relay.
 
 ### Service Dependencies
@@ -71,6 +76,8 @@ The DB Migration is not required for Legacy Relay since it is using the same DB 
 * Service Broker
 * Key Management
 * Database (Oracle)
+* HornetQ
+* MapR Streams in Active Active Environment
 * Bootstrap server
 
 ### Special Requirements
@@ -97,34 +104,40 @@ No special requirements.
 
 Example content of deployment-context.sh from UAT environment
 Relay:
-> APP_ID=g2mailboxservice
-> ENVIRONMENT=uat
-> STACK=default
-> REGION=us
-> DATACENTER=at4-uat-pres
-> SERVER_ID=at4u-lvmbox01
-> TOMCAT_USER=g2_uat_app_svc
-> TOMCAT_GROUP=g2_uat_app_svc
+```html
+APP_ID=g2mailboxservice
+ENVIRONMENT=uat
+STACK=default
+REGION=us
+DATACENTER=at4-uat-pres
+SERVER_ID=at4u-lvmbox01
+TOMCAT_USER=g2_uat_app_svc
+TOMCAT_GROUP=g2_uat_app_svc
+```
 
 Legacy Relay:
-> APP_ID=g2mailboxservice
-> ENVIRONMENT=uat
-> STACK=lowsecure
-> REGION=us
-> DATACENTER=at4-uat-pres
-> SERVER_ID=at4u-lvmbox01
-> TOMCAT_USER=g2_uat_app_svc
-> TOMCAT_GROUP=g2_uat_app_svc
+```html
+APP_ID=g2mailboxservice
+ENVIRONMENT=uat
+STACK=lowsecure
+REGION=us
+DATACENTER=at4-uat-pres
+SERVER_ID=at4u-lvmbox01
+TOMCAT_USER=g2_uat_app_svc
+TOMCAT_GROUP=g2_uat_app_svc
+```
 
 Conveyor Server:
-> APP_ID=g2mailboxservice
-> ENVIRONMENT=uat
-> STACK=default
-> REGION=us
-> DATACENTER=at4-uat-pres
-> SERVER_ID=at4u-lvmbox01
-> TOMCAT_USER=tomcat
-> TOMCAT_GROUP=tomcat
+```html
+APP_ID=g2mailboxservice
+ENVIRONMENT=uat
+STACK=default
+REGION=us
+DATACENTER=at4-uat-pres
+SERVER_ID=at4u-lvmbox01
+TOMCAT_USER=tomcat
+TOMCAT_GROUP=tomcat
+```
 
 ### Service installation
 
@@ -163,12 +176,16 @@ ps aux | grep tomcat
 df -h
  
 #### install, but report errors listed in the output to dev
-> rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-5.1.9-0.372.RC372.x86_64.rpm
-> rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-conf-5.1.9-0.372.RC372.x86_64.rpm
+```html
+rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-5.1.9-0.372.RC372.x86_64.rpm
+rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-conf-5.1.9-0.372.RC372.x86_64.rpm
+```
  
 #### Verify RPMs installed correctly
+```bash
 alternatives --display g2-service
 alternatives --display g2-service-conf
+```
 
 
 _NOTE:
