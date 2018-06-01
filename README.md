@@ -105,7 +105,7 @@ No special requirements.
 
 Example content of deployment-context.sh from UAT environment
 Relay:
-```html
+```
 APP_ID=g2mailboxservice
 ENVIRONMENT=uat
 STACK=default
@@ -117,7 +117,7 @@ TOMCAT_GROUP=g2_uat_app_svc
 ```
 
 Legacy Relay:
-```html
+```
 APP_ID=g2mailboxservice
 ENVIRONMENT=uat
 STACK=lowsecure
@@ -129,7 +129,7 @@ TOMCAT_GROUP=g2_uat_app_svc
 ```
 
 Conveyor Server:
-```html
+```
 APP_ID=g2mailboxservice
 ENVIRONMENT=uat
 STACK=default
@@ -149,7 +149,7 @@ TOMCAT_GROUP=tomcat
     * sudo rpm -i <downloaded g2-g2mailboxservice-conf package>
 
 Example
-> $ yumdownloader g2-callback-service g2-callback-service-conf
+> $ yumdownloader g2-g2mailboxservice g2-g2mailboxservice-conf
 Run Healthcheck to establish baseline
   
 sudo su -
@@ -183,7 +183,7 @@ rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxs
 ```
  
 #### Verify RPMs installed correctly
-```bash
+```
 alternatives --display g2-service
 alternatives --display g2-service-conf
 ```
@@ -210,4 +210,4 @@ We do see the common errors during bleed operation and this very common. This me
 g2-listener-pool-container-dropboxqueue not registered with com.liaison.threadmanagement.LiaisonExecutorServiceManager
 g2-listener-pool-container-processedpayload not registered with com.liaison.threadmanagement.LiaisonExecutorServiceManager
 ```
-Since it is common code base for threee different micro service, we will not initialize Conveyor Server/Dropbox related pools in Relay and Legacy. Same thing applicable for Conveyor Server where we don't initialize javascript or procesor pools.
+Since it is common code base for three different micro service, we will not initialize Conveyor Server/Dropbox related pools in Relay and Legacy. Same thing applicable for Conveyor Server where we don't initialize javascript or processor pools.
