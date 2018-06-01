@@ -1,196 +1,172 @@
-<div>
 
-<a href="https://travis-ci.org/robertjchristian/service-nucleus">
-<img src="https://travis-ci.org/robertjchristian/service-nucleus.png?branch=master" />
-</a>
+## Prerequisites
 
-</div>
+### Service Users
 
-<h1>service-nucleus</h1>
+The application user should be g2_env_app_svc not the regular tomcat user and the user should have permisison to access the NFS locations and execute shell scripts for machine account directory creations.
 
-Service-Nucleus is largely made up of two core projects, <a href="https://github.com/Netflix/karyon">NetFlix Karyon</a> and <a href="https://github.com/robertjchristian/angular-enterprise-seed">Angular-Enterprise-Seed</a>.
+### Network Shares
 
-### About
-THIS SPECIFIC PROJECT IS FOR OFS PROTOTYPES
-Service-nucleus is a starting point for developing homogenous, SOA/Enterprise-friendly webservices.  It is a fork of the Netflix/karyon project found on github, with added functionality, examples, and a UI.  Out of the box, this project offers:
+NFS Mounts
+*/data/http
+*/data/ftp
+*/data/ftps
+*/data/sftp
 
-* Rich Client-MVC-Based UI built on Angular with:
- * Twitter Bootstrap and FontAwesome styling
- * Pre-built components (modals, pagination, grids, etc)
- * <i>If you are interested only in the UI, check out <a href="https://github.com/robertjchristian/angular-enterprise-seed">Angular-Enterprise-Seed</a>.</i>
-* Java REST webservice development (Jersey stack and working examples)
-* Dynamic webservice development (runtime-deployment of Javascript-defined webservices)
-* Asynchronous logging (Log4J2)
-* Properties management (via Netflix Archaeus)
-* JMX monitoring made easy with annotations, and metrics reporting (via Netflix Servo)
-* Framework-level monitoring (bytes in/out, CPU high water mark, number of requests handled per endpoint, etc)
-* Auditing
- * PCI and Hippa requirements are modeled within the seed framework
- * Custom auditing appender
-* Administrative console
- * Always exposes an administrative console on port 8077, regardless of deployment/container configuration.
+LUKS Mounted Share
+*/secure/tomcat
 
-### Pre-requisites
-* Gradle >= 1.6
-* JDK >= 6
+### Server Parameters
 
-### To run
+#### VM Sizing
 
-* From the project root, "gradle jettyRun"
- * Checkout the admin console at http://localhost:8077
- * Checkout the example REST services at http://localhost:8989/hello-world/v1/
-  * /hello - example of static service (no parameters)
-  * /hello/to/world - example of dynamic query parameter
- * Checkout the dynamic services landing page
-  * localhost:8989/dyn
+This service requires __Large VM__
 
-### To deploy
-* From the project root, "gradle war"
-* Then copy (deploy) to your container of choice
+[VM Sizing Legend: DEV/QA](http://confluence.liaison.tech/display/ARCH/G2+DEV+Integration+Lab+Platform+Configuration+-+Lithia+Springs#G2DEVIntegrationLabPlatformConfiguration-LithiaSprings-VMSizingLegend "VM Sizing Legend: DEV/QA")  
+[VM Sizing Legend: UAT/PROD](http://confluence.liaison.tech/display/INFRA/G2+PROD+Platform+Configuration+-+AT4+-+LithiaSprings "VM Sizing Legend: UAT/PROD")
 
-### Developing a concrete service from the seed
+#### Ports
 
-There are currently four modules within the seed:
+Standard 8989 and 9443
 
-* karyon-admin-web
-* karyon-admin
-* service-framework
-* service-implementation
+#### JVM Requirements
 
-The first two, for admin, are only coupled to the project as source as an artifact of the karyon project, and have not been moved out because they will likely be modified by this project within the near to mid term.
+Bouncy Castle Providers needs to be Required in the Order #5. This is handled in the application start up.
 
-The service-framework module, like the admin modules, contain the homogenous functionality like auditing, servlet filter exception processing, system/generic metrics, and dynamic services.  Likely, for a given implementation, there will be no need to modify this module.
+### Location
 
-The service-implementation module is the module everyone will be concerned with.  Out of the box, it defines a hello-world project with two endpoints (one static and one that takes a template parameter), and a simple health check servlet.  This module is meant to be refactored into a useful service implementation.
+App Tier. F5 required.
 
-### Example
+### Bootstrapping
 
-Let's say you wanted to develop a service called "math" that multiplies two template parameters and returns the result.
+[Bootstrapping guide](http://confluence.liaison.tech/display/ARCH/Step+by+Step+walkthrough+of+Bootstrap+Process+in+UAT "Bootstrapping guide")
 
-#### First step, barebones implementation
-* Get/fork the project, (ie) git clone github:robertjchristian/service-nucleus
- * As a sanity check, perform the steps in "to run" outlined above`
-* nano service-implementation/src/main/java/com/liaison/service/HelloworldResource
- * Copy/paste the helloTo service, including annotations
- * Change path from "to/{name}" to "multiply/{a}/{b}"
- * Change method name to multiply, and the single "name" path parameter interface to take a and b "int" parameters instead
- * Change the response.put call to return the value of a*b instead.
+### Database Provisioning
 
-That's it!
+Provisioning and migration scripts can be found in _g2-mailbox/service-implementation/src/main/resources/db_.
 
-#### Second step, productize
+Two database is required for Relay and one is for Design Time(DTDM) and another one for Runtime(RTDM).
 
-Realistically you will want to productize your service, which basically means fixing up the namespace from hello-world to something more specific to your particular service.  These steps outline that process.  Note that scaffolding is on the near-term roadmap, and will make most or all of these steps obsolete:
+Provisioning with python script:
 
-* Edit ./service-implementation/build.gradle
- * Change project.war.basename from "hello-world" to "math"
- * Change System.setProperty("archaius.deployment.applicationId", "hello-world") to System.setProperty("archaius.deployment.applicationId", "math")
-* Rename ./service-implementation/src/main/resources/hello-world* to use prefix "math" instead.
-* Refactor your package namespace as desired
- * Make sure to update math.properties to reflect any high-level namespace change, ie com.netflix.karyon.server.base.packages=com.liaison
-to com.netflix.karyon.server.base.packages=com.acme
+```
+python provision.py -u <user prefix> -m <moniker> -a <application password> -o <owner password> -s <sys password  -t <tns name>
+```
 
-##### Building LESS
-In addition to the prerequisites outlined above, you'll need npm, less, and uglify-js to build Twtter Bootstrap.
+Migration with flyway:
+```
+gradlew flywayMigrate -PdbServerName=<db server host> -PdbServerService=<service name> -PdbSchemaNamePrefix=<user prefix> -PdbSchemaNameMoniker=<moniker> -PdbaPassword=<owner password>
+```
 
-### Configurable Data Source
+## Special Instructions
+The DB Migration is not required for Legacy Relay since it is using the same DB of the Relay.
 
-If your service will be utilizing an Oracle database for persistence and you'd like to use a container-managed connection pool, follow the directions below.
+### Service Dependencies
 
-CommonsLib (included by Service-Nucleus) has a Custom DataSource Factory that can be used to configure your Data Source Pool at Tomcat Container or Tomcat WEB App Context Level. Through the container declaration, a JNDI name can be automatically bound and available for the Service to use.  Only minimal configuration is actually in the container configuration, most of the DataSource configuration comes from the Liaison Service configuration (accessed via the LiaisonConfigurationFactory and DecryptableConfiguration classes).
+* GEM
+* GUM
+* Service Broker
+* Key Management
+* Database (Oracle)
+* Bootstrap server
 
-These directions assume you are going to deploy inside Tomcat 7.
+### Special Requirements
 
-#### Directions
+* Need the shellscripts to create and delete the machine account directories
+* The shell scripts should be placed under /secure/tomcat/env directory
 
-1. Put ojdbc*.jar and ucp*.jar in {tomcat-home}/lib folder
-2. In your FOO.WAR app, add a context.xml file (see below).
-   This configuration file will set the JNDI name that your connection pool will have.
-3. If you are using JPA, you will need a persistence.xml file (see below).
-   Important to configure a JNDI name matching what is in context.xml.
-4. Configure your application as appropriate for using the LiaisonConfigurationFactory/DecryptableConfiguration classes available in the Commons lib.
-   The following setting values must be provided:
-   a. com.liaison.DB_URL (String)
-   b. com.liaison.DB_USER (String)
-   c. com.liaison.DB_PASSWORD (String; Note: this property should be encrypted)
-   d. com.liaison.DB_CONNECTIONFACTORYCLASSNAME (String)
-   e. com.liaison.DB_MINPOOLSIZE (Integer)
-   f. com.liaison.DB_MAXPOOLSIZE (Integer)
-   There are optional settings to control more of the Connections behavior, see [this document](DataSourceOptionalProperties).
+### Miscellaneous Settings
 
-#### context.xml
-<pre>
-<Context ... >
-    ...
-    <Resource name="jdbc/UCPPool-YOUR_SERVICE_SPECIFIC_NAME_HERE"
-              type="oracle.ucp.jdbc.PoolDataSource"
-              auth="Container"
-              factory="com.liaison.commons.util.datasource.LiaisonConfigurableDataSourceFactory"
-              />
-</Context>
-</pre>
+No special requirements.
 
-#### persistence.xml
-<pre>
-<persistence ... >
-    <persistence-unit ... >
-       ...
-       <properties>
-           <property name="javax.persistence.transactionType" value="JTA"/>
-           <property name="javax.persistence.jtaDataSource" value="java:comp/env/jdbc/UCPPool-YOUR_SERVICE_SPECIFIC_NAME_HERE"/>
-       </properties>
-    </persistence-unit>
-</persistence>
-</pre>
+## Deployment
 
+### Prerequisites
 
-### Keeping up with changes
+1. Keystore and password file for Tomcat SSL
+    * Keystore: /secure/tomcat/tomcatssl.jks
+    * Password file: /secure/tomcat/ssl-password.txt
+2. SSH key and password for bootstrap in /secure/tomcat/.ssh
+3. deployment-context.sh __must__ be in /opt/liaison/components
+    * APP_ID must be callback-service
+    * Other values depends on the environment
+4. g2-java, g2-cacerts-<env> and g2-tomcat RPM packages installed
 
-<h3>Keeping up with changes to Karyon</h3>
+Example content of deployment-context.sh from UAT environment
+Relay:
+> APP_ID=g2mailboxservice
+> ENVIRONMENT=uat
+> STACK=default
+> REGION=us
+> DATACENTER=at4-uat-pres
+> SERVER_ID=at4u-lvmbox01
+> TOMCAT_USER=g2_uat_app_svc
+> TOMCAT_GROUP=g2_uat_app_svc
 
-<pre>
-git remote add --track master karyon git@github.com:Netflix/karyon.git
-git fetch karyon
-git merge karyon/master
-</pre>
+Legacy Relay:
+> APP_ID=g2mailboxservice
+> ENVIRONMENT=uat
+> STACK=lowsecure
+> REGION=us
+> DATACENTER=at4-uat-pres
+> SERVER_ID=at4u-lvmbox01
+> TOMCAT_USER=g2_uat_app_svc
+> TOMCAT_GROUP=g2_uat_app_svc
 
-<h3>Keeping up with changes</h3>
+Conveyor Server:
+> APP_ID=g2mailboxservice
+> ENVIRONMENT=uat
+> STACK=default
+> REGION=us
+> DATACENTER=at4-uat-pres
+> SERVER_ID=at4u-lvmbox01
+> TOMCAT_USER=tomcat
+> TOMCAT_GROUP=tomcat
 
-This project is going to be in flux for the foreseeable future (see roadmap).
+### Service installation
 
-Adding the service-nucleus as a remote tracking branch is a low cost and easy way to stay current. It's recommended to do something like:
+1. Download RPM packages with _yumdownloader_
+    * yumdownloader g2-g2mailboxservice g2-g2mailboxservice-conf
+2. Install downloaded packages with _rpm_
+    * sudo rpm -i <downloaded g2-g2mailboxservice package>
+    * sudo rpm -i <downloaded g2-g2mailboxservice-conf package>
 
-<pre>
-git remote add --track master service-nucleus git@gitlab.com:g2/liaison-service-nucleus.git
-git fetch liaison-service-nucleus
-git merge liaison-service-nucleus/master
-</pre>
-
-<i>Note that similarly, when developing on this project, a remote tracking branch should be setup against NetFlix/karyon.</i>
-
-
-<h3>12/13/2013 - Recent Changes to Service Nucleus</h3>
-1. Merge with HEAD of karyon master:  https://github.com/Netflix/karyon 
-2. AsyncServlet enabled and wired into web.xml 
-3. Upgrade all gradle 1.5 references to 1.6 
-4. Remove dependencies on junit in favor of testing
-5. Delete fs2 source (grab snapshot 0.0.2 jar from nexus and refer to it locally instead i.e. in service-implementation/lib
-6. Deprecate initialization servlet  (should be using HelloWorldComponent.initialize() instead ) 
-7. Add Servlet 3.0
-8. Added swqgger annotations and swagger ui
+Example
+> $ yumdownloader g2-callback-service g2-callback-service-conf
+Run Healthcheck to establish baseline
+  
+sudo su -
+  
+# Look for all thread pools that are in thread-shutdown.conf
+cat /opt/liaison/components/g2-service-conf/properties/thread-shutdown.conf
+ 
+# Compare the pool query to the above, we only care about the pools in the conf.
+# The first section of the report should show the thread-pools as NOT SHUTDOWN.
+service tomcat query
+ 
+# Bleed the service and make sure there are no errors
+service tomcat bleed
+ 
+# Look for all thread pools to be reported as Terminated/Shutdown
+service tomcat query
+ 
+# Stop the service.
+service tomcat stop
+  
+# check it stopped
+ps aux | grep tomcat
+  
+# check there's space
+df
+ 
+# install, but report errors listed in the output to dev
+> rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-5.1.9-0.372.RC372.x86_64.rpm
+> rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-conf-5.1.9-0.372.RC372.x86_64.rpm
+ 
+# Verify RPMs installed correctly
+alternatives --display g2-service
+alternatives --display g2-service-conf
 
 
-### Swagger REST Documentation 
-Located at http://localhost:8989/hello-world/swagger-ui/index.html
-
-#### Swagger-UI Config:
-For release or war deployment edit src/main/webapps/ui/swagger-ui/index.html to point to public api-docs url 
-
-For more info read swagger-ui docs at service-implementation/src/main/webapp/ui/swagger-ui/README.md
-
-<h3>Roadmap</h3>
-* Add thread sandboxing (mainly for dynamic services)
-
-
-
-
+_NOTE:
+Using **yum install g2-callback-service g2-callback-service-conf** will install the latest packages but it will remove previously installed versions_
