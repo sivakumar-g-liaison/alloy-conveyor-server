@@ -13,16 +13,16 @@ Conveyor Server would run with tomcat user and there is not need of special user
 ### Network Shares
 
 NFS Mounts for Relay
-*/data/http
-*/data/ftp (secured one and customers won't use it due to complicance)
-*/data/ftps
-*/data/sftp
+* /data/http
+* /data/ftp (secured one and customers won't use it due to complicance)
+* /data/ftps
+* /data/sftp
 
 NFS Mounts for Legacy Relay
-*/data/ftp (unsecured one and customers would use it)
+* /data/ftp (unsecured one and customers would use it)
 
 LUKS Mounted Share
-*/secure/tomcat
+* /secure/tomcat
 
 ### Server Parameters
 
@@ -39,11 +39,12 @@ Standard 8989 and 9443
 
 #### JVM Requirements
 
-Bouncy Castle Providers needs to be Required in the Order #5. This is handled in the application start up.
+Bouncy Castle Provider needs to be set in the position #5. This is handled in the application start up.
 
 ### Location
-
-App Tier. F5 required.
+* Tier - Web Tier
+* F5 VIP - Required
+* External Public URL - Required
 
 ### Bootstrapping
 
@@ -190,3 +191,23 @@ alternatives --display g2-service-conf
 
 _NOTE:
 Using **yum install g2-g2mailboxservice g2-g2mailboxservice-conf** will install the latest packages but it will remove previously installed versions_
+
+### Thread Shutdown Configuration
+```
+"g2-listener-pool-container-processedpayload" 
+"g2-listener-pool-container-dropboxqueue" 
+"g2-listener-pool-container-processor"
+"g2-pool-async-processing" --block
+"g2-pool-javascript-sandbox" --block
+"g2-piped-apache-client-output-stream-pool" --block
+"g2-pool-spectrum-writer" --block
+"g2-pool-healthcheck-spectrum"
+```
+
+Note:
+We do see the common errors during bleed operation and this very common. This means that pool is not initialized and we can ignore it.
+```
+g2-listener-pool-container-dropboxqueue not registered with com.liaison.threadmanagement.LiaisonExecutorServiceManager
+g2-listener-pool-container-processedpayload not registered with com.liaison.threadmanagement.LiaisonExecutorServiceManager
+```
+Since it is common code base for threee different micro service, we will not initialize Conveyor Server/Dropbox related pools in Relay and Legacy. Same thing applicable for Conveyor Server where we don't initialize javascript or procesor pools.
