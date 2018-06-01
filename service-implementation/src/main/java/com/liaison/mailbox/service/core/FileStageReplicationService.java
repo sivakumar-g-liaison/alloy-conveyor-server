@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.logging.LogTags;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
@@ -21,13 +20,13 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.FileStageReplicationSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
+import com.liaison.mailbox.service.util.FileWriterUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.File;
@@ -43,10 +42,10 @@ import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.URI;
-import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
+import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;;
 
 
 /**
@@ -99,6 +98,7 @@ public class FileStageReplicationService implements Runnable {
             String fileName = requestObj.getString(KEY_FILE_NAME);
             String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
             String isOverwrite = requestObj.getString(KEY_OVERWRITE);
+            boolean isTriggerFile = requestObj.getBoolean(TRIGGER_FILE);
             InputStream payload = null;
 
             int retry = (int) requestObj.get(RETRY_COUNT);
@@ -120,6 +120,11 @@ public class FileStageReplicationService implements Runnable {
 
                 if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
                     LOGGER.warn("Staged file is inactive status and there is no need to stage it - {}", globalProcessId);
+                    return;
+                }
+
+                if (isTriggerFile) {
+                    FileWriterUtil.writeTriggerFile(processorPayloadLocation, fileName, fs2uri);
                     return;
                 }
 
