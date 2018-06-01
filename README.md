@@ -1,4 +1,7 @@
 
+## Introduction
+g2-mailbox code base is common for three different micro services called Relay, Legacy Relay and Conveyor Server. The deployment needs to done on all the three nodes to maintain the common version.
+
 ## Prerequisites
 
 ### Service Users
@@ -137,36 +140,36 @@ Run Healthcheck to establish baseline
   
 sudo su -
   
-# Look for all thread pools that are in thread-shutdown.conf
+#### Look for all thread pools that are in thread-shutdown.conf
 cat /opt/liaison/components/g2-service-conf/properties/thread-shutdown.conf
  
-# Compare the pool query to the above, we only care about the pools in the conf.
-# The first section of the report should show the thread-pools as NOT SHUTDOWN.
+#### Compare the pool query to the above, we only care about the pools in the conf.
+#### The first section of the report should show the thread-pools as NOT SHUTDOWN.
 service tomcat query
  
-# Bleed the service and make sure there are no errors
+#### Bleed the service and make sure there are no errors
 service tomcat bleed
  
-# Look for all thread pools to be reported as Terminated/Shutdown
+#### Look for all thread pools to be reported as Terminated/Shutdown
 service tomcat query
  
-# Stop the service.
+#### Stop the service.
 service tomcat stop
   
-# check it stopped
+#### check it stopped
 ps aux | grep tomcat
   
-# check there's space
-df
+#### check there's space
+df -h
  
-# install, but report errors listed in the output to dev
+#### install, but report errors listed in the output to dev
 > rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-5.1.9-0.372.RC372.x86_64.rpm
 > rpm -ivv --force http://mirror.liaison.prod/g2repo/release2/x86_64/g2-g2mailboxservice-conf-5.1.9-0.372.RC372.x86_64.rpm
  
-# Verify RPMs installed correctly
+#### Verify RPMs installed correctly
 alternatives --display g2-service
 alternatives --display g2-service-conf
 
 
 _NOTE:
-Using **yum install g2-callback-service g2-callback-service-conf** will install the latest packages but it will remove previously installed versions_
+Using **yum install g2-g2mailboxservice g2-g2mailboxservice-conf** will install the latest packages but it will remove previously installed versions_
