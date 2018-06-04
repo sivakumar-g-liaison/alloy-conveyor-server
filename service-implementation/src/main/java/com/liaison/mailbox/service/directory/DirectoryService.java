@@ -12,20 +12,17 @@ package com.liaison.mailbox.service.directory;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.enums.DirectoryOperationTypes;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.JAXBException;
-
 import java.io.File;
-import java.io.IOException;
 
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 
@@ -57,7 +54,7 @@ public class DirectoryService implements Runnable {
     public void run() {
         try {
             this.executeDirectoryOperation(JAXBUtility.unmarshalFromJSON(message, DirectoryMessageDTO.class), true);
-        } catch (JAXBException | IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -67,9 +64,8 @@ public class DirectoryService implements Runnable {
      *
      * @param gatewayType gateway type
      * @param userName username
-     * @throws IOException
      */
-    private void invokeScriptToCreateFolderAndAssignPermission(String gatewayType, String userName) throws IOException {
+    public void invokeScriptToCreateFolderAndAssignPermission(String gatewayType, String userName) {
 
         String folderPath = getHomeFolderPath(gatewayType, userName);
         // Invokes script to create folder and assign permissions
@@ -86,9 +82,8 @@ public class DirectoryService implements Runnable {
      *
      * @param gatewayType gateway type
      * @param userName username
-     * @throws IOException
      */
-    private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) throws IOException {
+    private void invokeScriptToDeleteHomeFolders(String gatewayType, String userName) {
 
         // Invokes script to delete home folders
         // executing the script
@@ -105,9 +100,8 @@ public class DirectoryService implements Runnable {
      * @param gatewayType - gateway type of account0
      * @param userName - account userName
      * @return home folder path
-     * @throws IOException
      */
-    private String getHomeFolderPath(String gatewayType, String userName) throws IOException {
+    private String getHomeFolderPath(String gatewayType, String userName) {
 
         LOGGER.debug("Retrieving home folder path for user {}", userName);
         switch (gatewayType) {
@@ -128,14 +122,17 @@ public class DirectoryService implements Runnable {
      *
      * @param message message from the queue
      * @param isProduceKafkaMessage
-     * @throws IOException
      */
-    public void executeDirectoryOperation(DirectoryMessageDTO message, boolean isProduceKafkaMessage) throws IOException {
+    public void executeDirectoryOperation(DirectoryMessageDTO message, boolean isProduceKafkaMessage) {
 
         if (DirectoryOperationTypes.CREATE.value().equals(message.getOperationType())) {
-            invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
-            if (isProduceKafkaMessage) {
-                Producer.produce(KafkaMessageType.USERACCOUNT_CREATE, message);
+            if (ShellScriptEngineUtil.validateUser(message.getUserName())) {
+                invokeScriptToCreateFolderAndAssignPermission(message.getGatewayType(), message.getUserName().toLowerCase());
+                if (isProduceKafkaMessage) {
+                    Producer.produce(KafkaMessageType.USERACCOUNT_CREATE, message);
+                }
+            } else {
+                new FileStageReplicationService().postDirectoryMessageToQueue(message, 1);
             }
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());

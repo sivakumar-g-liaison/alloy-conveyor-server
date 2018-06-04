@@ -16,6 +16,7 @@ import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
+import com.liaison.mailbox.enums.FailoverMessageType;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
@@ -30,14 +31,15 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Properties;
 
+import static com.liaison.mailbox.MailBoxConstants.FAILOVER_MSG_TYPE;
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
-import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
+import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_PRODUCER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
@@ -209,6 +211,7 @@ public class Producer {
         requestObj.put(KEY_OVERWRITE, overwrite);
         requestObj.put(RETRY_COUNT, 0);
         requestObj.put(TRIGGER_FILE, triggerFile);
+        requestObj.put(FAILOVER_MSG_TYPE, FailoverMessageType.FILE);
 
         kafkaMessage.setFileWriterMsg(requestObj.toString());
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_CREATE);

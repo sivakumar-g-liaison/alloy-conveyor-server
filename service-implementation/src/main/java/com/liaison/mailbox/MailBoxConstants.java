@@ -506,6 +506,8 @@ public interface MailBoxConstants {
 
     String FILE_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.file.stage.replication.retry.delay";
     String FILE_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.file.stage.replication.max.retry.count";
+    String DIRECTORY_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.directory.stage.replication.retry.delay";
+    String DIRECTORY_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.directory.stage.replication.max.retry.count";
 
     String URI = "uri";
     String RETRY_COUNT = "retry";
@@ -521,4 +523,6 @@ public interface MailBoxConstants {
     String FILE_COUNT_SEPARATOR = "/";
     String DOT_OPERATOR = ".";
 
+    String FAILOVER_MSG_TYPE="failoverMessageType";
+    String MESSAGE = "message";
 }
