@@ -51,7 +51,9 @@ public class ShellScriptEngineUtil {
     private static final String ARG_HOME_FOLDER_PATH = "${homeFolderPath}";
     private static final String ARG_USER_GROUP_NAME = "${userGroupName}";
     private static final String ARG_USER_NAME = "${username}";
-    
+    private static final String COMMAND_ID = "id";
+    private static final int EXIT_VALUE = 0;
+
     /**
      * This method executes shell script for creating directories.
      * 
@@ -88,12 +90,12 @@ public class ShellScriptEngineUtil {
             cmdLine.setSubstitutionMap(args);
             
             Executor executor = new DefaultExecutor();
-            executor.setExitValue(0);
+            executor.setExitValue(EXIT_VALUE);
             outputStream = new ByteArrayOutputStream();
             PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
             executor.setStreamHandler(streamHandler);
             int exitValue = executor.execute(cmdLine);
-            if (exitValue == 0) {
+            if (exitValue == EXIT_VALUE) {
                 LOGGER.info("Script executed successfully");
                 LOGGER.info(outputStream.toString());
             } else {
@@ -102,7 +104,7 @@ public class ShellScriptEngineUtil {
             }
             
         } catch (IOException e) {
-            LOGGER.error("Script execution failed " + e.getMessage());
+            LOGGER.error("Script execution failed " + e.getMessage(), e);
         } finally {
             if (outputStream != null) {
                 try {
@@ -146,12 +148,12 @@ public class ShellScriptEngineUtil {
             cmdLine.setSubstitutionMap(args);
             
             Executor executor = new DefaultExecutor();
-            executor.setExitValue(0);
+            executor.setExitValue(EXIT_VALUE);
             outputStream = new ByteArrayOutputStream();
             PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
             executor.setStreamHandler(streamHandler);
             int exitValue = executor.execute(cmdLine);
-            if (exitValue == 0) {
+            if (exitValue == EXIT_VALUE) {
                 LOGGER.info("Deletion Script executed successfully");
                 LOGGER.info(outputStream.toString());
             } else {
@@ -160,7 +162,7 @@ public class ShellScriptEngineUtil {
             }
             
         } catch (IOException e) {
-            LOGGER.error("Script execution failed " + e.getMessage());
+            LOGGER.error("Script execution failed " + e.getMessage(), e);
         } finally {
             if (outputStream != null) {
                 try {
@@ -182,19 +184,19 @@ public class ShellScriptEngineUtil {
             ThreadContext.put(LogTags.USER_PRINCIPAL_ID, username);
 
             Map<String, String> args = new HashMap<>();
-            CommandLine cmdLine = new CommandLine("id");
+            CommandLine cmdLine = new CommandLine(COMMAND_ID);
             LOGGER.debug("Adding command line arguments");
             args.put(USER_NAME, username);
             cmdLine.addArgument(ARG_USER_NAME);
             cmdLine.setSubstitutionMap(args);
 
             Executor executor = new DefaultExecutor();
-            executor.setExitValue(0);
+            executor.setExitValue(EXIT_VALUE);
             outputStream = new ByteArrayOutputStream();
             PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
             executor.setStreamHandler(streamHandler);
             int exitValue = executor.execute(cmdLine);
-            if (exitValue == 0) {
+            if (exitValue == EXIT_VALUE) {
                 LOGGER.info("User validation successful - {}", outputStream.toString());
                 return true;
             } else {
@@ -202,7 +204,7 @@ public class ShellScriptEngineUtil {
             }
 
         } catch (IOException e) {
-            LOGGER.error("Script execution failed " + e.getMessage());
+            LOGGER.error("Script execution failed " + e.getMessage(), e);
         } finally {
             if (outputStream != null) {
                 try {
