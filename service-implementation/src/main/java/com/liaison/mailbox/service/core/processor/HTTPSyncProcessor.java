@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.dto.enums.ProcessMode;
@@ -18,9 +19,11 @@ import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +61,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	private static String SERVICE_BROKER_URI = null;
 	private static int ENV_CONNECTION_TIMEOUT_VALUE = 0;
 	private static int ENV_SOCKET_TIMEOUT_VALUE = 0;
+    private static final String ERROR_MESSAGE = "HTTP Sync Request failed"; 
 
 	private long payloadSize = 0;
 
@@ -85,12 +90,13 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	 * @param workTicket workticket to be posted to SB
 	 * @param httpListenerProperties props
 	 * @param contentType request content type
+     * @param glassMessage 
 	 * @return response
      * @throws Exception
      */
 	public Response processRequest(WorkTicket workTicket,
 								   Map<String, String> httpListenerProperties,
-								   String contentType) throws Exception {
+                                   String contentType, GlassMessage glassMessage) throws Exception {
 
 		logger.info("Starting to forward request to sb");
 
@@ -106,7 +112,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 			// execute request and handle response
 			HTTPResponse response = request.execute();
-			return buildResponse(contentType, response, responseStream.toString());
+            return buildResponse(contentType, response, responseStream.toString(), glassMessage);
 
 		}
 	}
@@ -116,11 +122,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	 *
 	 * @param reqContentType request content type
 	 * @param httpResponse sb response
+     * @param glassMessage 
 	 * @return response
 	 * @throws IOException
      * @throws JAXBException
      */
-	private Response buildResponse(String reqContentType, HTTPResponse httpResponse, String response) throws IOException, JAXBException {
+    private Response buildResponse(String reqContentType, HTTPResponse httpResponse, String response, GlassMessage glassMessage) throws IOException, JAXBException {
 
 		ResponseBuilder builder = Response.ok();
 
@@ -129,7 +136,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		// if the status code is set as 205 the response must not include the entity
 		// reference : https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 		// if entity is null we cannot process the sync response
-		build(builder, response, reqContentType, httpResponse.getStatusCode());
+        build(builder, response, reqContentType, httpResponse.getStatusCode(), glassMessage);
 		return builder.build();
 	}
 
@@ -139,10 +146,11 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	 * @param builder response builder
 	 * @param response response from SB
 	 * @param reqContentType request content type
+     * @param glassMessage 
 	 * @throws IOException
 	 * @throws JAXBException
      */
-	private void build(ResponseBuilder builder, String response, String reqContentType, int status) throws IOException, JAXBException {
+    private void build(ResponseBuilder builder, String response, String reqContentType, int status, GlassMessage glassMessage) throws IOException, JAXBException {
 
 		if (MailBoxUtil.isEmpty(response)) {
 			logger.warn("No response received from service broker");
@@ -212,7 +220,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
                     }
                 }
             } else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+
                 builder.entity(result.getErrorMessage());
+                glassMessage.logProcessingStatus(StatusType.ERROR, ERROR_MESSAGE,
+                        MailBoxConstants.HTTPSYNCPROCESSOR, result.getErrorMessage());
             } else {
                 builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
             }
