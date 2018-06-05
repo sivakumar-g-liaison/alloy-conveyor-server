@@ -6,6 +6,7 @@
 * GMB-1119 - Lifetime Brands LENS Status Research
 * GMB-1121 - Trigger file is not replicated on successful staging.
 * GUM-440 - Retry the directory creation until the user account replicated by Active Directory
+* GSB-3244: setEngineStateToError exposes Message Content in LENS Logs.
 
 5.2.13
 ---------------
