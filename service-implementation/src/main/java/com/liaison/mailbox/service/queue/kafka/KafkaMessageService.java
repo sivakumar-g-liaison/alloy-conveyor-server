@@ -57,7 +57,7 @@ public class KafkaMessageService implements Runnable {
                     LOGGER.debug("KAFKA_CONSUMER: FILEWRITER_CREATE" + kafkaMessage.getFileWriterMsg());
                     try {
                         FileStageReplicationService fileStageReplicationService = new FileStageReplicationService();
-                        fileStageReplicationService.stage(kafkaMessage.getFileWriterMsg());
+                        fileStageReplicationService.doProcess(kafkaMessage.getFileWriterMsg());
                     } catch (Throwable e) {
                         LOGGER.error(e.getMessage(), e);
                     }
@@ -82,7 +82,7 @@ public class KafkaMessageService implements Runnable {
                     LOGGER.info("MessageType is not valid.");
                     break;
             }
-        } catch (JAXBException | IOException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }

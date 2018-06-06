@@ -64,6 +64,7 @@ var rest = myApp.controller(
 			}
 
             $rootScope.gridLoaded = false;
+            var minRespond = true;
             $scope.restService.get($scope.base_url + '/searchprocessor',
                 function (data) {
                     $scope.getPagedDataAsync(data,
@@ -86,6 +87,7 @@ var rest = myApp.controller(
                     prcsrGuid: $scope.prcsrGuid,
                     mbxGuid: $scope.mailboxId,
                     scriptName: $scope.scriptName,
+                    minResponse: minRespond,
                     clusterType: $scope.clusterType
                 }
             );
