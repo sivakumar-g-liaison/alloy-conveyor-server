@@ -7,6 +7,7 @@
 * GMB-1121 - Trigger file is not replicated on successful staging.
 * GUM-440 - Retry the directory creation until the user account replicated by Active Directory
 * GSB-3244: setEngineStateToError exposes Message Content in LENS Logs.
+* GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
 
 5.2.13
 ---------------

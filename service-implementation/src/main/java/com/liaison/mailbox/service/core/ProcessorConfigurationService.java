@@ -950,10 +950,11 @@ public class ProcessorConfigurationService {
 			    return serviceResponse;
 			}
 
+			boolean includeUITemplate = !searchFilter.isMinResponse();
 			ProcessorDTO processorDTO = null;
 			for (Processor processor : processors) {
 				processorDTO = new ProcessorDTO();
-				processorDTO.copyFromEntity(processor, false);
+				processorDTO.copyFromEntity(processor, includeUITemplate);
 				prsDTO.add(processorDTO);
 			}
 			// response message construction
