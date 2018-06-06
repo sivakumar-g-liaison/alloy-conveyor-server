@@ -632,8 +632,8 @@ public class ProcessorPropertyJsonMapper {
 	 * @return String Value of otherRequestHeader
 	 */
 	private static String handleOtherRequestHeaders(List<HTTPOtherRequestHeaderDTO> otherRequestHeaders) {
-		if (otherRequestHeaders == null || otherRequestHeaders.isEmpty()) {
-		    return StringUtils.EMPTY;
+        if (otherRequestHeaders == null || otherRequestHeaders.isEmpty()) {
+            return StringUtils.EMPTY;
         }
 		StringBuilder otherRequestHeader = new StringBuilder();
 		for (HTTPOtherRequestHeaderDTO header : otherRequestHeaders) {
