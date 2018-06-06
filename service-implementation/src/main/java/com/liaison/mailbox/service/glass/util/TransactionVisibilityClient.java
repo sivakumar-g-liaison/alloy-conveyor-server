@@ -48,10 +48,15 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
+	private static final String PURGE_DATE = "purge-date";
 
 	private TransactionVisibilityAPI visibilityAPI;
+	
+    public void logToGlass(GlassMessage message) {
+        logToGlass(message, true);
+    }
 
-	public void logToGlass(GlassMessage message) {
+	public void logToGlass(GlassMessage message, boolean isHandleExecutionState) {
 
         visibilityAPI = (message.getStatusDate() == null)
                 ? new TransactionVisibilityAPI(message.getGlobalPId())
@@ -112,6 +117,10 @@ public class TransactionVisibilityClient {
             GlassMessageUtil.addAdditionalInformation(visibilityAPI, OUTBOUND_FILE_NAME, message.getOutboundFileName());
         }
 
+        if (message.getPurgeDate() != null) {
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, PURGE_DATE, GlassMessageUtil.convertToXMLGregorianCalendar(message.getPurgeDate()).toString());
+        }
+
         if (!MailBoxUtil.isEmpty(message.getAdminErrorDetails())) {
             GlassMessageUtil.addAdditionalInformation(visibilityAPI, GlassMessageUtil.ADMIN_ERROR_DETAILS, message.getAdminErrorDetails());
         }
@@ -148,7 +157,9 @@ public class TransactionVisibilityClient {
 			GlassMessageUtil.logFourthCorner(visibilityAPI, message.getFourthCornerTimestamp().getTimestamp());
 		}
 
-		handleExecutionState(message);
+        if (isHandleExecutionState) {
+            handleExecutionState(message);
+        }
 
 		visibilityAPI.setId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
@@ -174,8 +185,12 @@ public class TransactionVisibilityClient {
         }
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
-		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
-		        message.getGlobalPId(), visibilityAPI.getId());
+        if (isHandleExecutionState) {
+            logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
+                    message.getGlobalPId(), visibilityAPI.getId());
+        } else {
+            logger.info("TransactionVisibilityAPI for GPID :{} and Glass Message Id is {}", message.getGlobalPId(), visibilityAPI.getId());
+        }
 		
 	}
 

@@ -38,6 +38,7 @@ import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.logging.log4j.LogManager;
@@ -184,6 +185,7 @@ public class MailboxWatchDogService {
 
                             Files.delete(Paths.get(filePath + File.separatorChar + fileName));
                             LOGGER.warn(constructMessage("{} : File {} is deleted in the filePath {}"), processor.getPguid(), fileName, filePath);
+                            logPurgeDate(stagedFile);
                             inactiveStagedFile(stagedFile, updatedStatusList);
                         } catch (IOException e) {
                             LOGGER.error(constructMessage("{} : Unable to delete a stale file {} in the filePath {}"), processor.getPguid(), fileName, filePath);
@@ -269,6 +271,24 @@ public class MailboxWatchDogService {
         }
 
 	}
+
+    /**
+     * To log purge date in LENS while stale file cleanup.
+     * 
+     * @param stagedFile
+     */
+    private void logPurgeDate(StagedFile stagedFile) {
+        
+        GlassMessage glassMessage = new GlassMessage();
+        glassMessage.setGlobalPId(stagedFile.getGPID());
+        glassMessage.setPurgeDate(MailBoxUtil.getTimestamp());
+        glassMessage.logProcessingStatus(StatusType.SUCCESS,
+                                        "Stale file handle : File " + stagedFile.getFileName() + " is deleted in the filepath " + stagedFile.getFilePath(),
+                                        stagedFile.getProcessorType());
+
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+        transactionVisibilityClient.logToGlass(glassMessage, false);
+    }
 
     /**
 	 * Method to inactive the stagedFile
