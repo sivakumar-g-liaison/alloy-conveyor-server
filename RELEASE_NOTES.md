@@ -5,6 +5,7 @@
 * GMB-1116 - Replicate remote uploader files when it is using file system
 * GMB-1119 - Lifetime Brands LENS Status Research
 * GMB-1121 - Trigger file is not replicated on successful staging.
+* GC-468 - Unable to Edit HTTP/HTTPS Processor which is created using configurator
 * GUM-440 - Retry the directory creation until the user account replicated by Active Directory
 * GSB-3244: setEngineStateToError exposes Message Content in LENS Logs.
 * GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
