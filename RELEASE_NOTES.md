@@ -10,6 +10,7 @@
 * GSB-3244: setEngineStateToError exposes Message Content in LENS Logs.
 * GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
 * GMB-1086 - Add Watchdog cleanup to lens event log
+* GMB-658 - Mailbox updated with new 'tenancyKey' and invalid 'serviceInstance_pguid'.
 
 5.2.13
 ---------------
