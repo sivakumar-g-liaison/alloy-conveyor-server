@@ -125,9 +125,25 @@ public class MailBoxConfigurationService {
 						Response.Status.CONFLICT);
 			}
 
+            // service instance id validation
+            String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
+            if (MailBoxUtil.isEmpty(response)) {
+                throw new MailBoxConfigurationServicesException(
+                        ID_IS_INVALID,
+                        SERVICE_INSTANCE,
+                        Response.Status.BAD_REQUEST);
+            }
+            
+            // Tenancy key validation
+            if (MailBoxUtil.isEmpty(mailboxDTO.getTenancyKey())) {
+            	throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+            }
+            
+            if (!TenancyKeyUtil.isValidTenancyKeyByGuid(mailboxDTO.getTenancyKey())) {
+            	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
+            }
+
             // validation
-            validateServiceInstanceId(serviceInstanceId);
-            validateTenancyKey(mailboxDTO.getTenancyKey());
             GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
@@ -173,38 +189,6 @@ public class MailBoxConfigurationService {
 		}
 
 	}
-
-    /**
-     * To validate tenancyKey
-     * 
-     * @param serviceInstanceId
-     * @throws IOException
-     * @throws LiaisonException
-     * @throws JSONException
-     */
-    private void validateTenancyKey(String tenancyKey) throws IOException, LiaisonException, JSONException {
-
-        if (MailBoxUtil.isEmpty(tenancyKey)) {
-        	throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
-        }
-
-        if (!TenancyKeyUtil.isValidTenancyKeyByGuid(tenancyKey)) {
-        	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
-        }
-    }
-
-    /**
-     * To validate serviceInstanceId
-     * 
-     * @param serviceInstanceId
-     */
-    private void validateServiceInstanceId(String serviceInstanceId) {
-
-        String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
-        if (MailBoxUtil.isEmpty(response)) {
-            throw new MailBoxConfigurationServicesException(ID_IS_INVALID, SERVICE_INSTANCE, Response.Status.BAD_REQUEST);
-        }
-    }
 
 	/**
 	 * Create Mailbox ServiceInstance Id.
@@ -336,8 +320,6 @@ public class MailBoxConfigurationService {
 			}
 
 			// Validation
-            validateServiceInstanceId(serviceInstanceId);
-            validateTenancyKey(mailboxDTO.getTenancyKey());
 			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
@@ -404,7 +386,7 @@ public class MailBoxConfigurationService {
 			LOG.debug("Exit from revise mailbox.");
 			return serviceResponse;
 
-		} catch (MailBoxConfigurationServicesException | LiaisonException | JSONException e) {
+		} catch (MailBoxConfigurationServicesException e) {
 
 		    if (tx != null && tx.isActive()) {
                 tx.rollback();
