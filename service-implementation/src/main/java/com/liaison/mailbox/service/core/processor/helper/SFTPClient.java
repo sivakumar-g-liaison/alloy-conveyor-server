@@ -53,6 +53,7 @@ public class SFTPClient {
 			String url = null;
 			int connectionTimeout = 0;
 			int retryAttempts = 0;
+			int retryInterval = 0;
 			boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
@@ -61,12 +62,14 @@ public class SFTPClient {
 				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
 				debugTranscript = sftpUploaderStaticProperties.isDebugTranscript();
+				retryInterval = sftpUploaderStaticProperties.getRetryInterval();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO) processor.getProperties();
 				url = sftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
 				debugTranscript = sftpDownloaderStaticProperties.isDebugTranscript();
+				retryInterval = sftpDownloaderStaticProperties.getRetryInterval();
 			}
 
 			// retrieve required properties
@@ -80,6 +83,7 @@ public class SFTPClient {
 			sftpRequest.setTimeout(connectionTimeout);
 			sftpRequest.setStrictHostChecking(false);
 			sftpRequest.setRetryCount(retryAttempts);
+			sftpRequest.setRetryInterval(retryInterval);
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
@@ -123,7 +127,7 @@ public class SFTPClient {
 
 			return sftpRequest;
 		} catch (JAXBException | IOException | LiaisonException | MailBoxServicesException
-				| SymmetricAlgorithmException | IllegalAccessException e) {
+				| IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 

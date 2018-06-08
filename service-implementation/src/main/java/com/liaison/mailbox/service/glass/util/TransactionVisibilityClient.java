@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.glass.util;
 
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.MapItemType;
 import com.liaison.commons.message.glass.dom.StatusCode;
 import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
@@ -23,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Java wrapper client for logging messages in LENS.
@@ -33,8 +31,6 @@ import java.util.List;
 public class TransactionVisibilityClient {
 
 	private static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
-	public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
-	public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
 
 	private static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 	private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
@@ -52,12 +48,19 @@ public class TransactionVisibilityClient {
 	private static final String META = "meta";
 	private static final String INBOUND_FILE_NAME = "inboundfilename";
 	private static final String OUTBOUND_FILE_NAME = "outboundfilename";
+	private static final String PURGE_DATE = "purge-date";
 
 	private TransactionVisibilityAPI visibilityAPI;
+	
+    public void logToGlass(GlassMessage message) {
+        logToGlass(message, true);
+    }
 
-	public void logToGlass(GlassMessage message) {
+	public void logToGlass(GlassMessage message, boolean isHandleExecutionState) {
 
-        visibilityAPI = new TransactionVisibilityAPI(message.getGlobalPId());
+        visibilityAPI = (message.getStatusDate() == null)
+                ? new TransactionVisibilityAPI(message.getGlobalPId())
+                : new TransactionVisibilityAPI(message.getGlobalPId(), message.getStatusDate().getTime());
         visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 
 		visibilityAPI.getAdditionalInformation().clear();
@@ -114,6 +117,10 @@ public class TransactionVisibilityClient {
             GlassMessageUtil.addAdditionalInformation(visibilityAPI, OUTBOUND_FILE_NAME, message.getOutboundFileName());
         }
 
+        if (message.getPurgeDate() != null) {
+            GlassMessageUtil.addAdditionalInformation(visibilityAPI, PURGE_DATE, GlassMessageUtil.convertToXMLGregorianCalendar(message.getPurgeDate()).toString());
+        }
+
         if (!MailBoxUtil.isEmpty(message.getAdminErrorDetails())) {
             GlassMessageUtil.addAdditionalInformation(visibilityAPI, GlassMessageUtil.ADMIN_ERROR_DETAILS, message.getAdminErrorDetails());
         }
@@ -150,12 +157,18 @@ public class TransactionVisibilityClient {
 			GlassMessageUtil.logFourthCorner(visibilityAPI, message.getFourthCornerTimestamp().getTimestamp());
 		}
 
-		handleExecutionState(message);
+        if (isHandleExecutionState) {
+            handleExecutionState(message);
+        }
 
 		visibilityAPI.setId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
-	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
-		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+        if (message.getStatusDate() == null) {
+            visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+        } else {
+            visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(message.getStatusDate()));
+        }
+        visibilityAPI.getAndIncrementVersion();
 
         if (message.getSenderId() != null && message.getSenderName() != null) {
             visibilityAPI.setSenderId(message.getSenderId());
@@ -172,8 +185,12 @@ public class TransactionVisibilityClient {
         }
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
-		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
-		        message.getGlobalPId(), visibilityAPI.getId());
+        if (isHandleExecutionState) {
+            logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
+                    message.getGlobalPId(), visibilityAPI.getId());
+        } else {
+            logger.info("TransactionVisibilityAPI for GPID :{} and Glass Message Id is {}", message.getGlobalPId(), visibilityAPI.getId());
+        }
 		
 	}
 

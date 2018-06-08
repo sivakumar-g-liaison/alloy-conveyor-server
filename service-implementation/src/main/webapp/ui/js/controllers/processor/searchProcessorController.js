@@ -64,6 +64,7 @@ var rest = myApp.controller(
 			}
 
             $rootScope.gridLoaded = false;
+            var minRespond = true;
             $scope.restService.get($scope.base_url + '/searchprocessor',
                 function (data) {
                     $scope.getPagedDataAsync(data,
@@ -86,6 +87,7 @@ var rest = myApp.controller(
                     prcsrGuid: $scope.prcsrGuid,
                     mbxGuid: $scope.mailboxId,
                     scriptName: $scope.scriptName,
+                    minResponse: minRespond,
                     clusterType: $scope.clusterType
                 }
             );
@@ -269,15 +271,15 @@ var rest = myApp.controller(
                 columnDefs: [{
                     field: 'mailboxName',
                     displayName: 'Mailbox Name',
-                    width: "20%"
+                    width: "18%"
                 },{
                     field: 'name',
                     displayName: 'Processor Name',
-                    width: "20%"
+                    width: "18%"
                 }, {
                     field: 'type',
                     displayName: 'Type',
-                    width: "18%",
+                    width: "16%",
                     cellTemplate: 'partials/processor/processor_section_templates/processor_type_field_template.html'                    
                 }, {
                     field: 'protocol',
@@ -287,11 +289,15 @@ var rest = myApp.controller(
                 }, {
                     field: 'status',
                     displayName: 'Processor Status',
-                    width: "12%"                    
+                    width: "10%"                    
                 }, {
                     field: 'mailboxStatus',
                     displayName: 'Mailbox Status',
-                    width: "12%"                    
+                    width: "10%"                    
+                }, {
+                    field: 'processorDC',
+                    displayName: 'Processor DC',
+                    width: "10%"                    
                 }, {
                     displayName: 'Action',
                     sortable: false,

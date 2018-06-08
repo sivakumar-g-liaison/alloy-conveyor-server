@@ -44,6 +44,7 @@ public enum Messages {
     MBX_NON_DELETED_PROCESSOR("There are active processors available for the Mailbox"),
     DELETE_OPERATION_NOT_ALLOWED("Delete operation is not allowed in revise request"),
     INVALID_PROTOCOL_ERROR_MESSAGE(" Protocol %s is not allowed for the processor type %s"),
+    INVALID_PROCESS_TYPE_TO_UPDATE_DC(" Processor DC update is not supported for the processor type %s"),
 
     // generic messages
     CREATE_OPERATION_FAILED("%s creation failed."),

@@ -416,13 +416,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             statuses.add(EntityStatus.FAILED.name());
 
             em = DAOUtil.getEntityManager(persistenceUnitName);
-            List<StagedFile> stagedFiles = em.createQuery(FIND_STAGED_FILE_BY_PROCESSID)
+
+            return (List<StagedFile>) em.createQuery(FIND_STAGED_FILE_BY_PROCESSID)
                     .setParameter(PROCESSOR_ID, processId)
                     .setParameter(STATUS, statuses)
                     .setParameter(PROCESS_DC, DATACENTER_NAME)
                     .getResultList();
-
-            return stagedFiles;
         } finally {
             if (null != em) {
                 em.close();
@@ -509,6 +508,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             query.setParameter(PROCESSOR_ID, processorId);
             query.setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE);
+            query.setParameter(PROCESS_DC, DATACENTER_NAME);
 
             List<?> files = query.getResultList();
             for (Object file : files) {

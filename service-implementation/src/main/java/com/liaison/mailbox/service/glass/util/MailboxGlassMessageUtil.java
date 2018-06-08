@@ -111,6 +111,11 @@ public class MailboxGlassMessageUtil {
                     || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 logProcessingStatus(glassMessage, StatusType.QUEUED, "Workticket queued for file " + fileName);
             }
+
+            //status date
+            if (glassMessageDTO.getStatusDate() != null) {
+                glassMessage.setStatusDate(glassMessageDTO.getStatusDate());
+            }
         } else if (ExecutionState.READY.equals(status)) {
 
             glassMessage.setOutAgent(processProtocol);

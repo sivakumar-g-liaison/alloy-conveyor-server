@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
@@ -70,7 +71,7 @@ public class ProcessorPropertyJsonMapper {
 	private static final String DOT_SEPERATOR = ".";
 	private static final String FILE_FORMAT = "json";
 
-	private static Map<String, String> propertyMapper = null;
+    private static Map<String, String> propertyMapper = null;
 
 	static {
 
@@ -631,13 +632,16 @@ public class ProcessorPropertyJsonMapper {
 	 * @return String Value of otherRequestHeader
 	 */
 	private static String handleOtherRequestHeaders(List<HTTPOtherRequestHeaderDTO> otherRequestHeaders) {
+        if (otherRequestHeaders == null || otherRequestHeaders.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
 		StringBuilder otherRequestHeader = new StringBuilder();
 		for (HTTPOtherRequestHeaderDTO header : otherRequestHeaders) {
 			otherRequestHeader.append(header.getName()).append(":").append(header.getValue()).append(",");
 		}
 
 		String otherRequestHeaderStr = otherRequestHeader.toString();
-		return otherRequestHeaderStr.length() > 0 ? otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 1) : "";
+		return otherRequestHeaderStr.length() > 0 ? otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 1) : StringUtils.EMPTY;
 	}
 
 	/**

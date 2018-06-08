@@ -162,8 +162,7 @@ public class HTTPClient {
 			return request;
 
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
-				| MailBoxServicesException | SymmetricAlgorithmException
-				| KeyStoreException | NoSuchAlgorithmException | JsonParseException
+				| MailBoxServicesException | KeyStoreException | NoSuchAlgorithmException | JsonParseException
 				| CertificateException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
