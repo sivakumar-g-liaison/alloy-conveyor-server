@@ -220,12 +220,14 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
                     }
                 }
             } else if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
-
                 builder.entity(result.getErrorMessage());
-                glassMessage.logProcessingStatus(StatusType.ERROR, ERROR_MESSAGE,
-                        MailBoxConstants.HTTPSYNCPROCESSOR, result.getErrorMessage());
             } else {
                 builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+            }
+
+            if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+                glassMessage.logProcessingStatus(StatusType.ERROR, ERROR_MESSAGE,
+                        MailBoxConstants.HTTPSYNCPROCESSOR, result.getErrorMessage());
             }
         }
     }
