@@ -1,7 +1,3 @@
-5.3.1
----------------
-* GGT-1581 - PX1 US UAT and PROD properties update
-
 5.3.0-SNAPSHOT
 ---------------
 * Added EU properties
@@ -16,6 +12,7 @@
 * GMB-1086 - Add Watchdog cleanup to lens event log
 * GMB-658 - Mailbox updated with new 'tenancyKey' and invalid 'serviceInstance_pguid'.
 * GMB-1101 - Processors' retryInterval-property should be supported
+* GGT-1581 - PX1 US UAT and PROD properties update
 
 5.2.13
 ---------------
