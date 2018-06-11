@@ -107,8 +107,6 @@ public class FileStageReplicationService implements Runnable {
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
-
-
     }
 
     /**
@@ -126,6 +124,7 @@ public class FileStageReplicationService implements Runnable {
             String processorPayloadLocation = requestObj.getString(KEY_FILE_PATH);
             String isOverwrite = requestObj.getString(KEY_OVERWRITE);
             boolean isTriggerFile = requestObj.getBoolean(TRIGGER_FILE);
+
             InputStream payload = null;
 
             int retry = (int) requestObj.get(RETRY_COUNT);
