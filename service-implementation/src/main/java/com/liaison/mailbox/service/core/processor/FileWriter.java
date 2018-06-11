@@ -30,11 +30,13 @@ import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageT
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
+import com.liaison.mailbox.service.util.FileWriterUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -53,6 +55,7 @@ import java.sql.Timestamp;
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
     private static final Logger LOG = LogManager.getLogger(FileWriter.class);
+    private static String VALUE_OVERWRITE = "false";
 
 	@SuppressWarnings("unused")
 	private FileWriter() {
@@ -110,9 +113,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     writeStatus = writeDataToGivenLocation(payload, processorPayloadLocation, fileName, workTicket);
                     if (writeStatus) {
                         LOG.info("Payload is successfully written to {}", processorPayloadLocation);
-                        if (ProcessorType.FILEWRITER.equals(configurationInstance.getProcessorType())) {
-                            Producer.produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
-                        }
+                        Producer.produce(KafkaMessageType.FILEWRITER_CREATE, workTicket);
                     } else {
 
                         LOG.info("File {} already exists at {} and should not be overwritten", fileName, processorPayloadLocation);
@@ -191,44 +192,24 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * @param workTicket
      * @param processorPayloadLocation
      * @throws IOException
+     * @throws JSONException 
      */
-    private void writeTriggerFile(WorkTicket workTicket, String processorPayloadLocation) throws IOException {
+    private void writeTriggerFile(WorkTicket workTicket, String processorPayloadLocation) throws IOException, JSONException {
 
         String configuredPayloadLocation = getFileWriteLocation();
-        String path = MailBoxUtil.isEmpty(configuredPayloadLocation) ? processorPayloadLocation : configuredPayloadLocation
-                + File.separatorChar
-                + workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString();
-        File triggerFile = new File(path);
+        String payloadLocation = MailBoxUtil.isEmpty(configuredPayloadLocation) ? processorPayloadLocation : configuredPayloadLocation;
 
-        // write the trigger file
-        if (StorageUtilities.getPayloadSize(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString()) == 0) {
+        FileWriterUtil.writeTriggerFile(payloadLocation,
+                                        workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString(),
+                                        workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
 
-            if (triggerFile.exists()) {
-                boolean deleted = triggerFile.delete();
-                LOG.info("deleted the existing file {}", deleted);
-            }
-            boolean created = triggerFile.createNewFile();
-            LOG.debug("created the trigger file {} and the path is {}", created, path);
-        } else {
-
-            InputStream triggerFilePayload = null;
-            FileOutputStream outputStream = null;
-            try {
-                triggerFilePayload = StorageUtilities.retrievePayload(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString());
-                outputStream = new FileOutputStream(triggerFile);
-                IOUtils.copy(triggerFilePayload, outputStream);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
-
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-                if (triggerFilePayload != null) {
-                    triggerFilePayload.close();
-                }
-            }
-        }
+        Producer.produce(KafkaMessageType.FILEWRITER_CREATE,
+                        workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_URI).toString(),
+                        workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID).toString(),
+                        workTicket.getAdditionalContext().get(MailBoxConstants.KEY_TRIGGER_FILE_NAME).toString(),
+                        payloadLocation,
+                        VALUE_OVERWRITE,
+                        true);
     }
     
     /**
@@ -368,8 +349,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @param filename file name 
 	 * @return true if it is successfully written the file to the location, otherwise false
 	 * @throws IOException
+     * @throws JSONException 
 	 */
-	private boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException {
+	private boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException, JSONException {
 
 		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
 		StagedFileDAOBase dao = new StagedFileDAOBase();
@@ -420,8 +402,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * @param workTicket
      * @param dao
      * @throws IOException
+     * @throws JSONException 
      */
-    private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException {
+    private void persistFile(InputStream response, File file, WorkTicket workTicket, StagedFileDAOBase dao) throws IOException, JSONException {
         
         //write the file
         FileOutputStream outputStream = null;

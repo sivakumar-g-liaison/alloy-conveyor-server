@@ -85,6 +85,7 @@ public class SFTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
+	@PatternValidation(errorMessage = "Invalid Value for Retry interval", type = MailBoxConstants.PROPERTY_RETRY_INTERVAL)
 	public int getRetryInterval() {
 		return retryInterval;
 	}

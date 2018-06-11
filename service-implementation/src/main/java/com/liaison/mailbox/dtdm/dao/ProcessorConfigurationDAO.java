@@ -16,7 +16,6 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 import java.util.List;
@@ -311,6 +310,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * 
      */
     void updateProcessDc();
+
+    /**
+     * Update the process_dc by guid
+     * 
+     * @param guid
+     * @param dataCenter
+     */
+    void updateProcessDcByGuid(String guid, String dataCenter);
     
     /**
      * Update the existing ProcessDC to new ProcessDC for downloader processor.
@@ -412,6 +419,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+
+    String UPDATE_PROCESS_DC_BY_GUID = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET PROCESS_DC =:" + DATACENTER)
+            .append(" WHERE PGUID =:" + PGUID)
+            .append(" AND STATUS <> 'DELETED'").toString();
     
     String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)

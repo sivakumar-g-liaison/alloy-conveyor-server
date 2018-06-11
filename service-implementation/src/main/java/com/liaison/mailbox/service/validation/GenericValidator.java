@@ -16,10 +16,6 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import com.liaison.dto.enums.ProcessMode;
-
-import com.liaison.mailbox.enums.ClusterType;
-import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +29,8 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.dto.enums.ProcessMode;
+import com.liaison.mailbox.enums.ClusterType;
 
 /**
  * Common validator for all mailbox operations.
@@ -255,7 +253,13 @@ public class GenericValidator {
                     errorMessage.append(annotationDetails.errorMessage());
                 }
             }
+
             if (MailBoxConstants.TRIGGER_FILE.equals(annotationDetails.type()) && isInvalidTriggerFilePattern(value)) {
+                isValidPattern = false;
+                errorMessage.append(annotationDetails.errorMessage());
+            }
+
+            if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_INTERVAL) && !isBetweenRange(value))) {
                 isValidPattern = false;
                 errorMessage.append(annotationDetails.errorMessage());
             }
@@ -281,7 +285,8 @@ public class GenericValidator {
 	 * @return boolean
 	 */
 	private boolean isValidRetryAttemptValue (Object value) {
-		 return value.toString().matches(MailBoxConstants.retryAttemptsRegex);
+	    int range = Integer.valueOf(value.toString()).intValue();
+	    return range <= MailBoxConstants.RETRY_ATTEMPTS_MAX_VALUE  && range >= MailBoxConstants.RETRY_ATTEMPTS_MIN_VALUE;
 	}
 
 	/**
@@ -347,8 +352,8 @@ public class GenericValidator {
 	 * @return boolean
 	 */
 	private boolean isValidNumberOfFilesThreshold(String value) {
-        return value.matches(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_REGX);
-
+	    int range = Integer.valueOf(value.toString()).intValue();
+	    return range <= MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_MAX_VALUE && range >= MailBoxConstants.NUMBER_OF_FILES_THRESHOLD_MIN_VALUE;
 	}
 
 	/**

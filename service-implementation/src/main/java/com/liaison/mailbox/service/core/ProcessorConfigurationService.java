@@ -56,6 +56,7 @@ import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorDCRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
@@ -611,6 +612,52 @@ public class ProcessorConfigurationService {
         }
 
 	}
+	
+	/**
+	 * Method to revise the processor dc
+	 * 
+	 * @param request
+	 * @param userId
+	 * @return The Revise Processor ResponseDTO
+	 */
+    public ReviseProcessorResponseDTO reviseProcessorDC(ReviseProcessorDCRequestDTO request, String userId) {
+        
+        LOGGER.debug("Entering into revising processor dc.");
+        ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
+
+        try {
+
+            String processorGuid = request.getProcessorGuid();
+            String processorDCToUpdate = request.getProcessorDC();
+
+            if (processorGuid == null || processorDCToUpdate == null) {
+                throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+            }
+            
+            if (ProcessorType.HTTPASYNCPROCESSOR.getCode().equals(request.getProcessorType())
+                    || ProcessorType.HTTPSYNCPROCESSOR.getCode().equals(request.getProcessorType())
+                    || ProcessorType.FILEWRITER.getCode().equals(request.getProcessorType())
+                    || ProcessorType.DROPBOXPROCESSOR.getCode().equals(request.getProcessorType())) {
+                throw new MailBoxConfigurationServicesException(Messages.INVALID_PROCESS_TYPE_TO_UPDATE_DC, request.getProcessorType(), Response.Status.BAD_REQUEST);
+            }
+
+            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+            dao.updateProcessDcByGuid(processorGuid, processorDCToUpdate);
+
+            // response message construction
+            ProcessorResponseDTO dto = new ProcessorResponseDTO(processorGuid);
+            serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+            serviceResponse.setProcessor(dto);
+            LOGGER.debug("Exit from revise processor.");
+            return serviceResponse;
+
+        } catch (MailBoxConfigurationServicesException e) {
+
+            LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE, e.getMessage()));
+            return serviceResponse;
+        }
+    }
 
 	/**
 	 * Method for add and update the dynamic processorProperty to Processor entity
@@ -903,10 +950,11 @@ public class ProcessorConfigurationService {
 			    return serviceResponse;
 			}
 
+			boolean includeUITemplate = !searchFilter.isMinResponse();
 			ProcessorDTO processorDTO = null;
 			for (Processor processor : processors) {
 				processorDTO = new ProcessorDTO();
-				processorDTO.copyFromEntity(processor, false);
+				processorDTO.copyFromEntity(processor, includeUITemplate);
 				prsDTO.add(processorDTO);
 			}
 			// response message construction

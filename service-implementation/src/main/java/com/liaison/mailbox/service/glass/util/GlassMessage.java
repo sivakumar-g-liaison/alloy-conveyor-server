@@ -110,6 +110,8 @@ public class GlassMessage {
     private boolean arrivalTime;
     private String adminErrorDetails;
     private String relatedTransactionId;
+    private Date statusDate;
+    private Date purgeDate;
 
     public String getRelatedTransactionId() {
         return relatedTransactionId;
@@ -604,5 +606,21 @@ public class GlassMessage {
     
     public void setAdminErrorDetails(String adminErrorDetails) {
         this.adminErrorDetails = adminErrorDetails;
+    }
+
+    public Date getPurgeDate() {
+        return purgeDate;
+    }
+
+    public void setPurgeDate(Date purgeDate) {
+        this.purgeDate = purgeDate;
+    }
+
+    public Date getStatusDate() {
+        return statusDate;
+    }
+
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
     }
 }

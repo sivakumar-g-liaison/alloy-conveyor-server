@@ -35,6 +35,7 @@ public class PropertiesFileDTO {
 	private boolean deployAsDropbox;
     private List<String> clusterTypes;
     private String deploymentType;
+    private List<String> dataCenters;
     
     public String getProcessorSecureSyncUrlDisplayPrefix() {
         return processorSecureSyncUrlDisplayPrefix;
@@ -98,5 +99,11 @@ public class PropertiesFileDTO {
     }
     public void setDeploymentType(String deploymentType) {
         this.deploymentType = deploymentType;
+    }
+    public List<String> getDataCenters() {
+        return dataCenters;
+    }
+    public void setDataCenters(List<String> dataCenters) {
+        this.dataCenters = dataCenters;
     }
 }

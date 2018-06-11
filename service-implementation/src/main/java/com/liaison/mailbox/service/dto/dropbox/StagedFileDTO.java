@@ -216,6 +216,7 @@ public class StagedFileDTO {
 		this.setId(file.getPguid());
         this.setClusterType(file.getClusterType());
         this.setParentGlobalProcessId(file.getParentGlobalProcessId());
+        this.setProcessDc(file.getProcessDc());
     }
 
 }

@@ -17,14 +17,11 @@ package com.liaison.mailbox;
  */
 public interface MailBoxConstants {
 
-    // pattern for retry attempts validation
-    String retryAttemptsRegex = "^[0-4]$";
+    int RETRY_ATTEMPTS_MIN_VALUE = 0;
+    int RETRY_ATTEMPTS_MAX_VALUE = 5;
 
-    // pattern for timeout validation
-    String TimeoutRegex = "^([0-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$";
-
-    // pattern for number of files validation
-    String NUMBER_OF_FILES_THRESHOLD_REGX = "^0*([0-9]|1[0-9]|2[0-5])$";
+    int NUMBER_OF_FILES_THRESHOLD_MIN_VALUE = 0;
+    int NUMBER_OF_FILES_THRESHOLD_MAX_VALUE = 25;
 
     // Key descriminator values
     /** File datetime format. */
@@ -292,6 +289,7 @@ public interface MailBoxConstants {
     String PROPERTY_SCRIPT_EXECUTION_TIMEOUT = "scriptExecutionTimeout";
     String PROPERTY_STALE_FILE_TTL = "staleFileTTL";
     String PROPERTY_PROCESS_MODE = "processMode";
+    String PROPERTY_RETRY_INTERVAL = "retryInterval";
 
     // Properties for sweeper grouping boundary condition
     String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
@@ -506,6 +504,8 @@ public interface MailBoxConstants {
 
     String FILE_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.file.stage.replication.retry.delay";
     String FILE_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.file.stage.replication.max.retry.count";
+    String DIRECTORY_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.directory.stage.replication.retry.delay";
+    String DIRECTORY_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.directory.stage.replication.max.retry.count";
 
     String URI = "uri";
     String RETRY_COUNT = "retry";
@@ -521,4 +521,6 @@ public interface MailBoxConstants {
     String FILE_COUNT_SEPARATOR = "/";
     String DOT_OPERATOR = ".";
 
+    String FAILOVER_MSG_TYPE="failoverMessageType";
+    String MESSAGE = "message";
 }

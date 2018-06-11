@@ -161,6 +161,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(")")
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(" AND sf.processDc =:")
+            .append(MailBoxConstants.PROCESS_DC)
             .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
@@ -173,6 +175,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(STATUS)
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(" AND sf.processDc =:")
+            .append(MailBoxConstants.PROCESS_DC)
             .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
@@ -185,6 +189,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(")")
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(" AND sf.processDc =:")
+            .append(MailBoxConstants.PROCESS_DC)
             .append(")");
     
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_DIR_UPLOAD = new StringBuilder().append("select sf from StagedFile sf")
@@ -195,6 +201,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(")")
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(" AND sf.processDc =:")
+            .append(MailBoxConstants.PROCESS_DC)
             .append(")");
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_AND_FILE_PATH = new StringBuilder().append("select sf from StagedFile sf")
@@ -206,6 +214,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(StagedFileDAO.STATUS)
             .append(" AND sf.clusterType =:")
             .append(MailBoxConstants.CLUSTER_TYPE)
+            .append(" AND sf.processDc =:")
+            .append(MailBoxConstants.PROCESS_DC)
             .append(")");
 
     StringBuilder FIND_STAGED_FILE = new StringBuilder()

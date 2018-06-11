@@ -291,7 +291,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             }
         }
 
-        return files.toArray(new File[files.size()]);
+        return files.toArray(new File[0]);
     }
 
     /**
@@ -342,7 +342,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
             stagedFileMap.put(file.getAbsolutePath(), stagedFile);
         }
 
-        return files.toArray(new RelayFile[files.size()]);
+        return files.toArray(new RelayFile[0]);
     }
    
     /**

@@ -60,6 +60,7 @@ public class FTPSClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
+			int retryInterval = 0;
 			boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
@@ -69,6 +70,7 @@ public class FTPSClient {
 				socketTimeout = ftpUploaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpUploaderStaticProperties.getRetryAttempts();
 				debugTranscript =  ftpUploaderStaticProperties.isDebugTranscript();
+				retryInterval  = ftpUploaderStaticProperties.getRetryInterval();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)processor.getProperties();
 				url = ftpDownloaderStaticProperties.getUrl();
@@ -76,6 +78,7 @@ public class FTPSClient {
 				socketTimeout = ftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
 				debugTranscript = ftpDownloaderStaticProperties.isDebugTranscript();
+				retryInterval  = ftpDownloaderStaticProperties.getRetryInterval();
 			}
 			// retrieve required properties
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
@@ -89,6 +92,7 @@ public class FTPSClient {
 
 			ftpsRequest.setSocketTimeout(socketTimeout);
 			ftpsRequest.setRetryCount(retryAttempts);
+			ftpsRequest.setRetryInterval(retryInterval);
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
