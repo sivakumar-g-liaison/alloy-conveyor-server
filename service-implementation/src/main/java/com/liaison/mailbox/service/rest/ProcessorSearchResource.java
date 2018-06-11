@@ -17,6 +17,7 @@ package com.liaison.mailbox.service.rest;
  */
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -78,6 +79,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
                                     @QueryParam(value = "scriptName") @ApiParam(name = "scriptName", required = false, value = "scriptName") final String scriptName,
                                     @QueryParam(value = "clusterType") @ApiParam(name = "clusterType", required = false, value = "clusterType") final String clusterType,
+                                    @QueryParam(value = "minResponse") @ApiParam(name = "minResponse", required = false, value = "Minimum Response") final String minResponse,
                                     @QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
 
         // create the worker delegate to perform the business logic
@@ -103,6 +105,7 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setScriptName(scriptName);
                 searchFilter.setClusterType(clusterType);
                 searchFilter.setMatchMode(matchMode);
+                searchFilter.setMinResponse(Boolean.parseBoolean(minResponse));
 
                 // Get all the processors
                 return processor.searchProcessor(searchFilter);

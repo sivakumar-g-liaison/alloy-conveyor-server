@@ -181,6 +181,10 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
                 width: '10%',
                 headerCellTemplate:'partials/filterClusterTypeComboBoxHeaderTemplate.html'
             }, {
+                field: 'processDc',
+                displayName: 'Process DC',
+                width: '10%'
+            }, {
                 displayName: 'Action',
                 width: '12%',
                 sortable: false,

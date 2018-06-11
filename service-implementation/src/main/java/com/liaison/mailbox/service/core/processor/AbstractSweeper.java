@@ -259,7 +259,7 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      * @param state Execution Status
      * @param relatedTransactionId parent global process guid
      */
-    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, String relatedTransactionId) {
+    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, String relatedTransactionId, Date date) {
 
         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         
@@ -289,6 +289,9 @@ public abstract class AbstractSweeper extends AbstractProcessor {
         glassMessageDTO.setRelatedTransactionId(relatedTransactionId);
         if (null != firstCornerTimeStamp) {
             glassMessageDTO.setFirstCornerTimeStamp(firstCornerTimeStamp);
+        }
+        if (null != date) {
+            glassMessageDTO.setStatusDate(date);
         }
 
         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);

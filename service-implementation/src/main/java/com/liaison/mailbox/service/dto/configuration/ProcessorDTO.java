@@ -84,6 +84,7 @@ public class ProcessorDTO {
 	private String modifiedBy;
 	private String modifiedDate;
     private String clusterType;
+    private String processorDc;
     private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
 	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
 	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
@@ -241,6 +242,14 @@ public class ProcessorDTO {
 
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
+    }
+
+    public void setProcessorDC(String processorDC) {
+        this.processorDc = processorDC;
+    }
+
+    public String getProcessorDC() {
+        return processorDc;
     }
 
     /**
@@ -405,6 +414,7 @@ public class ProcessorDTO {
         this.setGuid(processor.getPguid());
         this.setDescription(processor.getProcsrDesc());
         this.setClusterType(processor.getClusterType());
+        this.setProcessorDC(processor.getProcessDc());
 
         String status = processor.getProcsrStatus();
         if (!MailBoxUtil.isEmpty(status)) {

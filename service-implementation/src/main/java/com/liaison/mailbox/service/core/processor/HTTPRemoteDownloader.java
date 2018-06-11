@@ -152,7 +152,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-        } catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException |
+        } catch (MailBoxServicesException | IOException | LiaisonException |
                 IllegalAccessException e) {
             LOGGER.error(constructMessage("Error occurred during http(s) download", seperator, e.getMessage()), e);
             throw new RuntimeException(e);

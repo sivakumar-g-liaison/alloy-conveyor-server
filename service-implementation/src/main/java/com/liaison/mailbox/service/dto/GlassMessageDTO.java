@@ -13,6 +13,8 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 
+import java.util.Date;
+
 public class GlassMessageDTO {
     
     private String globalProcessId;
@@ -28,6 +30,7 @@ public class GlassMessageDTO {
     private String senderIp;
     private String receiverIp;
     private String relatedTransactionId;
+    private Date statusDate;
     
     public String getRelatedTransactionId() {
         return relatedTransactionId;
@@ -110,5 +113,13 @@ public class GlassMessageDTO {
 
     public void setReceiverIp(String receiverIp) {
         this.receiverIp = receiverIp;
+    }
+
+    public Date getStatusDate() {
+        return statusDate;
+    }
+
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
     }
 }

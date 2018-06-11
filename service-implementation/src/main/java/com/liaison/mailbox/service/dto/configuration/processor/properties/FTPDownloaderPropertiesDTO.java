@@ -99,6 +99,7 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setBinary(boolean binary) {
 		this.binary = binary;
 	}
+	@PatternValidation(errorMessage = "Invalid Value for Retry interval", type = MailBoxConstants.PROPERTY_RETRY_INTERVAL)
 	public int getRetryInterval() {
 		return retryInterval;
 	}

@@ -67,6 +67,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -124,25 +125,9 @@ public class MailBoxConfigurationService {
 						Response.Status.CONFLICT);
 			}
 
-            // service instance id validation
-            String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
-            if (MailBoxUtil.isEmpty(response)) {
-                throw new MailBoxConfigurationServicesException(
-                        ID_IS_INVALID,
-                        SERVICE_INSTANCE,
-                        Response.Status.BAD_REQUEST);
-            }
-            
-            // Tenancy key validation
-            if (MailBoxUtil.isEmpty(mailboxDTO.getTenancyKey())) {
-            	throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
-            }
-            
-            if (!TenancyKeyUtil.isValidTenancyKeyByGuid(mailboxDTO.getTenancyKey())) {
-            	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
-            }
-
             // validation
+            validateServiceInstanceId(serviceInstanceId);
+            validateTenancyKey(mailboxDTO.getTenancyKey());
             GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
@@ -188,6 +173,38 @@ public class MailBoxConfigurationService {
 		}
 
 	}
+
+    /**
+     * To validate tenancyKey
+     * 
+     * @param serviceInstanceId
+     * @throws IOException
+     * @throws LiaisonException
+     * @throws JSONException
+     */
+    private void validateTenancyKey(String tenancyKey) throws IOException, LiaisonException, JSONException {
+
+        if (MailBoxUtil.isEmpty(tenancyKey)) {
+        	throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+        }
+
+        if (!TenancyKeyUtil.isValidTenancyKeyByGuid(tenancyKey)) {
+        	throw new MailBoxConfigurationServicesException(Messages.INVALID_TENANCY_KEY, Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * To validate serviceInstanceId
+     * 
+     * @param serviceInstanceId
+     */
+    private void validateServiceInstanceId(String serviceInstanceId) {
+
+        String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
+        if (MailBoxUtil.isEmpty(response)) {
+            throw new MailBoxConfigurationServicesException(ID_IS_INVALID, SERVICE_INSTANCE, Response.Status.BAD_REQUEST);
+        }
+    }
 
 	/**
 	 * Create Mailbox ServiceInstance Id.
@@ -319,6 +336,8 @@ public class MailBoxConfigurationService {
 			}
 
 			// Validation
+            validateServiceInstanceId(serviceInstanceId);
+            validateTenancyKey(mailboxDTO.getTenancyKey());
 			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
@@ -385,7 +404,7 @@ public class MailBoxConfigurationService {
 			LOG.debug("Exit from revise mailbox.");
 			return serviceResponse;
 
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (MailBoxConfigurationServicesException | LiaisonException | JSONException e) {
 
 		    if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -683,6 +702,7 @@ public class MailBoxConfigurationService {
             dto.setDeployAsDropbox(MailBoxUtil.isConveyorType());
             dto.setClusterTypes(MailBoxUtil.getClusterTypes());
             dto.setDeploymentType(MailBoxUtil.DEPLOYMENT_TYPE);
+            dto.setDataCenters(Arrays.asList(config.getStringArray(MailBoxConstants.PROCESS_DC_LIST)));
 
             serviceResponse.setProperties(dto);
             serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
