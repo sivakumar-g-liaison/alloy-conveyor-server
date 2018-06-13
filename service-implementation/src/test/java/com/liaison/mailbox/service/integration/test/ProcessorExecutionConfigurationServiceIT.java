@@ -133,10 +133,12 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(ExecutionState.PROCESSING.name(), result[1]);
         
         ProcessorExecutionConfigurationService runningProcessors = new ProcessorExecutionConfigurationService();
+
         UpdateProcessorExecutionStateResponseDTO runningProcessorDTO = runningProcessors
                 .updateExecutingProcessor(procResponseDTO.getProcessor().getGuId(), "unknown-user", "true");
         
         Assert.assertEquals(Messages.SUCCESS.value(), runningProcessorDTO.getResponse().getStatus());
+
     }
     
     /**

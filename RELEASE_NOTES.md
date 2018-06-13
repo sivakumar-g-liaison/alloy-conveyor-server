@@ -11,6 +11,7 @@
 * GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
 * GMB-1086 - Add Watchdog cleanup to lens event log
 * GMB-1101 - Processors' retryInterval-property should be supported
+* GGT-1581 - PX1 US UAT and PROD properties update
 
 5.2.13
 ---------------
