@@ -58,7 +58,7 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(ExecutionState.PROCESSING.name(), result[1]);
         
         // update the state of executing processor
-        UpdateProcessorExecutionStateResponseDTO executingStateResponse = runningProcessor.updateExecutingProcessor(procGetResponseDTO.getProcessor().getGuid(),"unknown-user");
+        UpdateProcessorExecutionStateResponseDTO executingStateResponse = runningProcessor.updateExecutingProcessor(procGetResponseDTO.getProcessor().getGuid(), "unknown-user", "true");
         Assert.assertEquals(SUCCESS, executingStateResponse.getResponse().getStatus());
     }
     
@@ -94,7 +94,7 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(ExecutionState.PROCESSING.name(), result[1]);
         
         // update the state of executing processor
-        UpdateProcessorExecutionStateResponseDTO executingStateResponse = runningProcessor.updateExecutingProcessor(null,procGetResponseDTO.getProcessor().getModifiedBy());
+        UpdateProcessorExecutionStateResponseDTO executingStateResponse = runningProcessor.updateExecutingProcessor(null, procGetResponseDTO.getProcessor().getModifiedBy(), "true");
         Assert.assertEquals(FAILURE, executingStateResponse.getResponse().getStatus());
     }
     
@@ -133,14 +133,10 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(ExecutionState.PROCESSING.name(), result[1]);
         
         ProcessorExecutionConfigurationService runningProcessors = new ProcessorExecutionConfigurationService();
-        UpdateProcessorExecutionStateResponseDTO runningProcessorDTO =runningProcessors
-                .updateExecutingProcessor(procResponseDTO.getProcessor().getGuId(), "unknown-user");
+        UpdateProcessorExecutionStateResponseDTO runningProcessorDTO = runningProcessors
+                .updateExecutingProcessor(procResponseDTO.getProcessor().getGuId(), "unknown-user", "true");
         
         Assert.assertEquals(Messages.SUCCESS.value(), runningProcessorDTO.getResponse().getStatus());
-        
-        // update the state of executing processor
-        runningProcessorDTO =runningProcessors.updateExecutingProcessor(procResponseDTO.getProcessor().getGuId(), "unknown-user");
-        Assert.assertEquals(FAILURE, runningProcessorDTO.getResponse().getStatus());
     }
     
     /**
@@ -151,7 +147,7 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         
         ProcessorExecutionConfigurationService runningProcessors = new ProcessorExecutionConfigurationService();
         UpdateProcessorExecutionStateResponseDTO runningProcessorDTO =runningProcessors
-                .updateExecutingProcessor(Long.toString(System.currentTimeMillis()), "unknown-user");
+                .updateExecutingProcessor(Long.toString(System.currentTimeMillis()), "unknown-user", "true");
         
         Assert.assertEquals(FAILURE, runningProcessorDTO.getResponse().getStatus());
     }
@@ -286,7 +282,7 @@ public class ProcessorExecutionConfigurationServiceIT extends BaseServiceTest {
         
         // update the state of executing processors to failed
         ProcessorExecutionConfigurationService processorService = new ProcessorExecutionConfigurationService();
-        UpdateProcessorsExecutionStateResponseDTO executingStateResponse = processorService.updateExecutingProcessors(serviceResponse.getProcessorGuids(),"unknown-user","unknown-user");
+        UpdateProcessorsExecutionStateResponseDTO executingStateResponse = processorService.updateExecutingProcessors(serviceResponse.getProcessorGuids(), "unknown-user", "true");
         
         Assert.assertEquals(SUCCESS, executingStateResponse.getResponse().getStatus());
     }

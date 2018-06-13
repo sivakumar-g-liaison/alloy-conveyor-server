@@ -198,7 +198,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
      * @param processorId processor id
      * @param userId user login id
      */
-    public UpdateProcessorExecutionStateResponseDTO updateExecutingProcessor(String processorId, String userId) {
+    public UpdateProcessorExecutionStateResponseDTO updateExecutingProcessor(String processorId, String userId, String updateStatusOnly) {
 
         UpdateProcessorExecutionStateResponseDTO response = new UpdateProcessorExecutionStateResponseDTO();
 
@@ -208,7 +208,7 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
                 throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
             }
 
-            this.interruptAndUpdateStatus(processorId, userId, null);
+            this.interruptAndUpdateStatus(processorId, userId, updateStatusOnly);
             response.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
                     "The processor execution status for processor with id : " + processorId + " is ", Messages.SUCCESS));
             return response;
