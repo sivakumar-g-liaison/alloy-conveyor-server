@@ -83,7 +83,7 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
                 
                 if (!MailBoxUtil.isEmpty(processorId)) {
                     LOG.info("Updates the processor status to failed {}", processorId);
-                    return configService.updateExecutingProcessor(processorId, userId);
+                    return configService.updateExecutingProcessor(processorId, userId, null);
                 } else {
                     
                     String requestString;
