@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -40,11 +41,11 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
  * @author OFS
  *
  */
-public class StorageUtilitiesIT {
+public class StorageUtilitiesIT extends BaseServiceTest {
 
     private static final Logger logger = LogManager.getLogger(StorageUtilitiesIT.class);
 
-    @Test(enabled = false)
+    @Test
     public void testWriteAndReadUnsecurePayload() throws IOException {
 
         String exampleString = "This is the sample string";
@@ -70,7 +71,7 @@ public class StorageUtilitiesIT {
 
     }
 
-    @Test(enabled = false)
+    @Test
     public void testWriteAndReadUnsecurePayloadInBOSS() throws IOException {
 
         String exampleString = "This is the sample string";

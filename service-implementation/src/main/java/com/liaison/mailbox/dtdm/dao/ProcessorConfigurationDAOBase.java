@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -67,7 +68,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      *
      * @param profileName    The profile name.
      * @param mbxNamePattern The MailBox name pattern to exclude
-     * @return The list of processors.
+     * @return The list of processors.getProcessorCount
      */
     @Override
     public List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey) {
@@ -105,7 +106,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(PROF_NAME, profileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.value())
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
-                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, MailBoxConstants.ALL_DATACENTER));
+                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, ALL_DATACENTER));
 
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 processorQuery.setParameter(MBX_NAME, mbxNamePattern);
@@ -1032,6 +1033,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
+
+            //Add ALL in the ignore list
+            processedDC.add(ALL_DATACENTER);
             
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_PROCESS_DC)
@@ -1094,7 +1098,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
     }
     
-    /**
+    /**updateDatacenter
      * Method retrieve the processors count.
      */
     @Override

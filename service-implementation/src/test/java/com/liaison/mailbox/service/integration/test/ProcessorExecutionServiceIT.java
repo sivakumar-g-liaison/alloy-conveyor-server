@@ -58,7 +58,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(enabled = false)
+    @Test
     public void testCreateAndReadHttpProcessorAndDirectUpload() throws Exception {
 
         // Adding the mailbox
@@ -110,7 +110,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(enabled = false)
+    @Test
     public void testCreateAndReadHttpProcessorAndExecute() throws Exception {
 
         // Adding the mailbox
@@ -158,7 +158,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(enabled = false)
+    @Test
     public void testCreateAndReadHttpsProcessorAndExecute() throws Exception {
 
         // Adding the mailbox

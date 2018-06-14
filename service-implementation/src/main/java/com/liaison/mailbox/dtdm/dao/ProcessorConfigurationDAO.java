@@ -292,8 +292,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * Update the Datacenter
      * 
      * @param dc
-     * @param ignoreDatacenters
-     * @param updateSize
+     * @param processedDC
+     * @param processSize
      */
     void updateDatacenter(String dc, List<String> processedDC, int processSize);
     
@@ -432,7 +432,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" AND PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
     
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
-            .append(" WHERE STATUS <> 'DELETED' ").toString();
+            .append(" WHERE STATUS <> 'DELETED' AND PROCESS_DC != 'ALL' ").toString();
 
     String GET_DOWNLOAD_PROCESSOR_GUIDS = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")

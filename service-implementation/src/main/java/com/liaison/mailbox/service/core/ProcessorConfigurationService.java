@@ -1335,7 +1335,7 @@ public class ProcessorConfigurationService {
 
         LOGGER.debug("Enter into supportProcessorAffinity () ");
         try {
-            
+
             //retrieve the datacenetre and value is the % of processor that should run on that DC 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
@@ -1346,9 +1346,9 @@ public class ProcessorConfigurationService {
                 LOGGER.info("No processor exist");
                 return;
             }            
-            List<String> processedDC = new ArrayList<String>();            
+            List<String> processedDC = new ArrayList<>();
             for (String dc : datacenterMap.keySet()) {                
-                
+
                 if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
                     throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
                 }

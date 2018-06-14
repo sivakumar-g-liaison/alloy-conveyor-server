@@ -39,7 +39,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
-    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
+    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH = "StagedFile.findStagedFilesByFileNameAndPath";
     String GET_STAGED_FILE_FOR_TRIGGER_FILE = "StagedFile.findStagedFileForTriggerFile";
     String GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE = "StagedFile.findStagedFileForRelayTriggerFile";
     String MODIFIED_DATE = "modifiedDate";
@@ -109,7 +109,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param fileName name
      * @return staged file
      */
-    StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName);
+    StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, List<String> processorTypes);
     
     /**
      * Update the StagedFile Status by processorId
