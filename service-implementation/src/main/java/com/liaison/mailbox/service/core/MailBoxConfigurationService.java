@@ -344,6 +344,10 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
 
+			if (!mailboxDTO.getTenancyKey().equals(retrievedMailBox.getTenancyKey())) {
+			    throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_UPDATE_NOT_ALLOWED, Response.Status.BAD_REQUEST);
+			}
+
 			if (!mailboxDTO.getName().equals(retrievedMailBox.getMbxName())) {
 				// Getting the mailbox.
 			    MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
