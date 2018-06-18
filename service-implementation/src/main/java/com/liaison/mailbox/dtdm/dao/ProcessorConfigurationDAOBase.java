@@ -68,7 +68,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      *
      * @param profileName    The profile name.
      * @param mbxNamePattern The MailBox name pattern to exclude
-     * @return The list of processors.getProcessorCount
+     * @return The list of processors.
      */
     @Override
     public List<String> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey) {
@@ -1063,11 +1063,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * Update the download processor Datacenter by processor guid
      * 
      * @param dc
-     * @param processedDC
-     * @param updateSize
-     * @param clusterType
+     * @param processorGuids
      */
-    public void updateDownloaderDatacenter(String dc,  List<String> processorGuids) {
+    public void updateProcessorDatacenter(String dc, List<String> processorGuids) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -1128,7 +1126,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> getDownloadProcessorGuids(String clusterType) {
+    public List<String> getProcessorGuids(String clusterType, List<String> processorTypes) {
 
         EntityManager entityManager = null;
         List<String> results;
@@ -1136,8 +1134,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            results =  entityManager.createNativeQuery(GET_DOWNLOAD_PROCESSOR_GUIDS)
+            results =  entityManager.createNativeQuery(GET_PROCESSOR_GUIDS)
                       .setParameter(CLUSTER_TYPE, clusterType)
+                      .setParameter(PROCESSOR_TYPE, processorTypes)
                       .getResultList();
             
         } catch (Exception e) {

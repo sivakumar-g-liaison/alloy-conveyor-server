@@ -74,7 +74,7 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
-
+import com.mapr.org.apache.hadoop.hbase.util.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -84,10 +84,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -1339,6 +1339,17 @@ public class ProcessorConfigurationService {
             //retrieve the datacenetre and value is the % of processor that should run on that DC 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
+
+            if (!MailBoxUtil.validateProcessDc(datacenterMap)) {
+                throw new RuntimeException("Process DC doesn't exist");
+            }
+
+            List<Integer> dataCenterMapValues = datacenterMap.values().stream().map(Integer::parseInt).collect(Collectors.toList());
+            int sum = dataCenterMapValues.stream().mapToInt(v -> v).sum();
+            if (sum > 100) {
+                throw new RuntimeException("Invalid Process Dc value");
+            }
+
             //fetch processor count
             ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
             long processorCount = dao.getProcessorCount();
@@ -1353,8 +1364,17 @@ public class ProcessorConfigurationService {
                     throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
                 }
                 processedDC.add(dc);
-                int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);                
-                dao.updateDatacenter(dc, processedDC, readyToProcessCount);
+                int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
+                if (readyToProcessCount > 0) {
+                    dao.updateDatacenter(dc, processedDC, readyToProcessCount);
+                }
+            }
+
+            //Update Staged file
+            String dcToUpdate = MailBoxUtil.getDcToUpdate(datacenterMap);
+            if (!MailBoxUtil.isEmpty(dcToUpdate)) {
+                // updates datacenter of stagedFile
+                new StagedFileDAOBase().updateStagedFileProcessDC(dcToUpdate);
             }
 
         } catch (NumberFormatException exception) {
@@ -1381,10 +1401,10 @@ public class ProcessorConfigurationService {
             //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
             
             if (MailBoxConstants.SECURE.equals(MailBoxUtil.CLUSTER_TYPE)) {
-                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.SECURE);
-                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
+                updateProcessorDatacenter(datacenterMap, MailBoxConstants.SECURE);
+                updateProcessorDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
             } else {
-                updateDownloaderDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
+                updateProcessorDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
             }
 
         } catch (NumberFormatException exception) {
@@ -1400,11 +1420,13 @@ public class ProcessorConfigurationService {
      * @param datacenterMap
      * @param clusterType
      */
-    private void updateDownloaderDatacenter(Map<String, String> datacenterMap, String clusterType) {
+    private void updateProcessorDatacenter(Map<String, String> datacenterMap, String clusterType) {
 
         // fetch processor count
         ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-        List<String> processorGuids = dao.getDownloadProcessorGuids(clusterType);
+
+        List<String> processorTypes = Arrays.asList(ProcessorType.REMOTEUPLOADER.getCode(), ProcessorType.REMOTEDOWNLOADER.getCode(), ProcessorType.SWEEPER.getCode(), ProcessorType.CONDITIONALSWEEPER.getCode());
+        List<String> processorGuids = dao.getProcessorGuids(clusterType, processorTypes);
         int processorCount = processorGuids.size();
         
         if (0 == processorCount) {
@@ -1412,29 +1434,24 @@ public class ProcessorConfigurationService {
             return;
         }
         
-        List<String> subList;
-        int fromIndex = 0;
-        int toIndex;
-        int updateCount = 0;
-        
+        Map<String, List<String>> countMap = new HashMap<>();
+        int startValue = 0;
         for (String dc : datacenterMap.keySet()) {
 
             if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
                 throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
             }
-            
-            updateCount ++;
-            if (updateCount == datacenterMap.size()) {
-                toIndex = processorCount - 1;
-            } else {
-                toIndex = fromIndex + (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
-            }
+            int count = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
+            countMap.put(dc, processorGuids.subList(startValue, count));
+            startValue = count;
+        }
 
-            if (toIndex > 0 && fromIndex <= toIndex) {
-                subList = processorGuids.subList(fromIndex, toIndex);
-                dao.updateDownloaderDatacenter(dc, subList);
+        List<String> subList;
+        for (String dc : countMap.keySet()) {
+            subList = countMap.get(dc);
+            if (!CollectionUtils.isEmpty(subList)) {
+                dao.updateProcessorDatacenter(dc, subList);
             }
-            fromIndex = toIndex;
         }
     }
     

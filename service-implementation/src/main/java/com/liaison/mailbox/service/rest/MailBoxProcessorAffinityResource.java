@@ -127,6 +127,9 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
                         if (sum > 100) {
                             return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
                         }
+                        if (sum < 100) {
+                            return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
+                        }
                         // updates datacenter of downloader processors
                         ProcessorConfigurationService service = new ProcessorConfigurationService();
                         service.supportDownloaderProcessorAffinity(datacenterMap);

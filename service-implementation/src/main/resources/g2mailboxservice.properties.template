@@ -182,4 +182,4 @@ com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/servic
 # skips the kafka queue initializer and works as standalone server
 com.liaison.skip.kafka.queue=true
 
-com.liaison.mailbox.processdc.list=at4-dev-pres
+com.liaison.mailbox.processdc.list=at4-dev-pres,at4
