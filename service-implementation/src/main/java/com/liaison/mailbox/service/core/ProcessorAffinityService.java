@@ -1,6 +1,6 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
@@ -43,14 +43,14 @@ import static com.liaison.mailbox.MailBoxConstants.TOTAL_PERCENT;
  */
 public class ProcessorAffinityService {
 
-	private static final Logger LOGGER = LogManager.getLogger(ProcessorAffinityService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ProcessorAffinityService.class);
     private static final String DATACENTER_PROCESSOR = "Datacenetres and Processors";
 
     /**
-     * This method support to downloader processor affinity This is to split the traffic
-     * for the processor that need to run different datacenters to support
+     * This is to support ACON processor affinity.
+     * This is to split the traffic for the processor that need to run different datacenters to support
      * active active
-     * 
+     *
      * @param datacenterMap datacenter key and percentage map
      */
     public void supportProcessorProcessorAffinity(Map<String, String> datacenterMap) {
@@ -69,13 +69,13 @@ public class ProcessorAffinityService {
         } catch (NumberFormatException exception) {
             throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
         }
-        
+
         LOGGER.debug("Exit from supportProcessorProcessorAffinity () ");
     }
-    
+
     /**
      * Updates the data center by cluster type
-     * 
+     *
      * @param datacenterMap
      * @param clusterType
      */
@@ -91,7 +91,7 @@ public class ProcessorAffinityService {
         List<String> processorGuids = dao.getProcessorGuids(clusterType, processorTypes);
         int processorCount = processorGuids.size();
         if (0 == processorCount) {
-            LOGGER.info("No download processor exist for cluster type " + clusterType);
+            LOGGER.info("No processor exist for cluster type " + clusterType);
             return;
         }
 
@@ -118,7 +118,7 @@ public class ProcessorAffinityService {
         }
 
         //STAGED_FILE
-        //Update processor dc if it is default switch on the ACON side
+        //Update processor dc if it is any switch on the ACON side
         updateStagedFileProcessDc(datacenterMap, clusterType, dao, uploaderProcessDcMap);
     }
 
@@ -183,61 +183,61 @@ public class ProcessorAffinityService {
         new ProcessorConfigurationDAOBase().updateDownloaderProcessDc(existingProcessDC, newProcessDC);
     }
 
-	/**
-	 * Method fetch the Datacenter's and corresponding processors details.
-	 *
-	 * @return GetDatacenterResponseDTO
-	 */
-	public GetDatacenterResponseDTO getDatacenters() {
+    /**
+     * Method fetch the Datacenter's and corresponding processors details.
+     *
+     * @return GetDatacenterResponseDTO
+     */
+    public GetDatacenterResponseDTO getDatacenters() {
 
-		LOGGER.debug("Enter into getDatacenters () ");
+        LOGGER.debug("Enter into getDatacenters () ");
 
-		GetDatacenterResponseDTO serviceResponse = new GetDatacenterResponseDTO();
+        GetDatacenterResponseDTO serviceResponse = new GetDatacenterResponseDTO();
 
-		try {
+        try {
 
-			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-			List<ProcessorDTO> prsDTOList = null;
-			List<DatacenterDTO> dcDTOList = new ArrayList<>();
-			List<Processor> processors = null;
-			ProcessorDTO processorDTO = null;
-			// fetch the all datacenters
-			List<String> datacenters = dao.getAllDatacenters();
-			DatacenterDTO dcDTO = null;
-			for (String name : datacenters) {
+            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
+            List<ProcessorDTO> prsDTOList = null;
+            List<DatacenterDTO> dcDTOList = new ArrayList<>();
+            List<Processor> processors = null;
+            ProcessorDTO processorDTO = null;
+            // fetch the all datacenters
+            List<String> datacenters = dao.getAllDatacenters();
+            DatacenterDTO dcDTO = null;
+            for (String name : datacenters) {
 
-				if (null == name) {
-					continue;
-				}
-				dcDTO = new DatacenterDTO();
-				dcDTO.setName(name);
-				// fetch the all Processor's
-				processors = dao.findProcessorsByDatacenter(name);
-				prsDTOList = new ArrayList<>();
+                if (null == name) {
+                    continue;
+                }
+                dcDTO = new DatacenterDTO();
+                dcDTO.setName(name);
+                // fetch the all Processor's
+                processors = dao.findProcessorsByDatacenter(name);
+                prsDTOList = new ArrayList<>();
 
-				for (Processor processor : processors) {
-					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor, false);
-					prsDTOList.add(processorDTO);
-				}
+                for (Processor processor : processors) {
+                    processorDTO = new ProcessorDTO();
+                    processorDTO.copyFromEntity(processor, false);
+                    prsDTOList.add(processorDTO);
+                }
 
-				dcDTO.setProcessors(prsDTOList);
-				dcDTO.setTotalItems(prsDTOList.size());
-				dcDTOList.add(dcDTO);
-			}
+                dcDTO.setProcessors(prsDTOList);
+                dcDTO.setTotalItems(prsDTOList.size());
+                dcDTOList.add(dcDTO);
+            }
 
-			serviceResponse.setDatacenetrs(dcDTOList);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, DATACENTER_PROCESSOR,
-					Messages.SUCCESS));
+            serviceResponse.setDatacenetrs(dcDTOList);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, DATACENTER_PROCESSOR,
+                    Messages.SUCCESS));
 
-			LOGGER.debug("Exit from getDatacenters () ");
+            LOGGER.debug("Exit from getDatacenters () ");
 
-		} catch (Exception e) {
-			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, DATACENTER_PROCESSOR,
-					Messages.FAILURE, e.getMessage()));
-		}
+        } catch (Exception e) {
+            LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, DATACENTER_PROCESSOR,
+                    Messages.FAILURE, e.getMessage()));
+        }
 
-		return serviceResponse;
-	}
+        return serviceResponse;
+    }
 }

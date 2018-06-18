@@ -56,14 +56,14 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
     private static final String PROCESS_DC_DOES_NOT_EXIST = "Process Dc doesn't exist";
 
     /**
-     * REST method support to the downloader processoraffinity.
+     * REST method support to the processors affinity.
      *
      * @param request
      *            HttpServletRequest, injected with context annotation
      * @return Response Object
      */
     @PUT
-    @ApiOperation(value = "Support downloader processor affinity", notes = "Support downloader processor affinity", position = 1)
+    @ApiOperation(value = "Support processor affinity", notes = "Support processor affinity", position = 1)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })

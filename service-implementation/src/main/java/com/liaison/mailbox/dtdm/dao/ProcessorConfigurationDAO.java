@@ -166,14 +166,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     /**
      * Retrieves processors guid
      *
-     * @return list of downloader processors guid
+     * @return list of processors guid
      */
     List<String> getProcessorGuids(String clusterType, List<String> processorTypes);
 
     /**
      * Retrieves processors guid and process dc
      *
-     * @return list of downloader processors guid
+     * @return list of processors guid
      */
     Map<String, String> getProcessorDetails(String clusterType, List<String> processorTypes);
 
@@ -305,7 +305,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     void updateDatacenter(String dc, List<String> processedDC, int processSize);
     
     /**
-     * Update the Downloader Datacenter by processor guid
+     * Update the Processor Datacenter by processor guid
      * 
      * @param dc
      * @param processorGuids
