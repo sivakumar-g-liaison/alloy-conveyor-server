@@ -1,8 +1,8 @@
 /**
  * Copyright Liaison Technologies, Inc. All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -43,45 +43,47 @@ import java.util.List;
 
 /**
  * This is the gateway for update process dc.
- * 
+ *
  */
 @AppConfigurationResource
 @Path("process/updateprocessdc")
 @Api(value = "process/updateprocessdc", description = "Gateway for the update the process_dc.")
-public class UpdateProcessDcResource extends AuditedResource {
+public class ProcessDcResource extends AuditedResource {
 
-	/**
-	 * REST method to update the process_dc column of PROCESSOR table
-	 * 
-	 * @param request
-	 * @return
-	 */
-	@POST
-	@ApiOperation(value = "update the process_dc", notes = "update the process_dc", position = 1)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	@ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-	public Response updateProcessDc(@Context final HttpServletRequest request) {
-	    
-	    // create the worker delegate to perform the business logic
-	    AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-	        @Override
-	        public Object call() {
-	            
+    /**
+     * REST method to update the process_dc column of PROCESSOR table and STAGED file table
+     * This is to update the processors for the initial phase of Active Acitve since we move the datacenter name
+     * It will update the current datacenter as the process dcs
+     *
+     * @param request
+     * @return
+     */
+    @POST
+    @ApiOperation(value = "update the process_dc", notes = "update the process_dc", position = 1)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    public Response updateProcessDc(@Context final HttpServletRequest request) {
+
+        // create the worker delegate to perform the business logic
+        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+            @Override
+            public Object call() {
+
                 // updates datacenter of processors
                 new ProcessorAffinityService().updateProcessDc();
                 return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
-	        }
-	    };
-	    worker.actionLabel = "UpdateProcessDcResource.updateProcessDc()";
-	    
-	    // hand the delegate to the framework for calling
-	    return process(request, worker);
-	}
+            }
+        };
+        worker.actionLabel = "ProcessDcResource.updateProcessDc()";
+
+        // hand the delegate to the framework for calling
+        return process(request, worker);
+    }
 
     /**
-     * REST method to update the process_dc column of PROCESSOR(REMOTEDOWNLOADER) and StagedFile table
-     * 
+     * REST method to update the process_dc column of PROCESSORS and STAGED_FILE table
+     *
      * @param request
      * @return
      */
@@ -90,42 +92,42 @@ public class UpdateProcessDcResource extends AuditedResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
-    public Response updateDownloaderProcessDc(@Context final HttpServletRequest request) {
-        
+    public Response updateProcessorsProcessDc(@Context final HttpServletRequest request) {
+
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
             @Override
             public Object call() {
-                
+
                 // updates process_dc of downloder processor and staged file
                 try {
                     String requestString = getRequestBody(request);
                     List<Object> processDcList = LiaisonArchaiusConfiguration.getInstance().getList(MailBoxConstants.PROCESS_DC_LIST);
-                    UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = JAXBUtility.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
-                    if (processDcList.contains(updateProcessorDCRequestDTO.getExistingProcessDC())
-                    		&& processDcList.contains(updateProcessorDCRequestDTO.getNewProcessDC())) {
-                    	new ProcessorAffinityService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
-                    	new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
-                    	return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
+                    UpdateProcessDCRequestDTO dto = JAXBUtility.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
+                    if (processDcList.contains(dto.getExistingProcessDC()) && processDcList.contains(dto.getNewProcessDC())) {
+
+                        new ProcessorAffinityService().updateProcessorProcessDc(dto.getExistingProcessDC(), dto.getNewProcessDC());
+                        new StagedFileDAOBase().updateStagedFileProcessDC(dto.getExistingProcessDC(), dto.getNewProcessDC());
+                        return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
                     } else {
-                    	return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
+                        return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
                     }
                 } catch (IOException | JAXBException e) {
                     throw new LiaisonRuntimeException("Unable to Update the process_DC " + e.getMessage(), e);
                 }
             }
         };
-        worker.actionLabel = "UpdateProcessDcResource.updateDownloaderProcessDc()";
-        
+        worker.actionLabel = "ProcessDcResource.updateProcessorsProcessDc()";
+
         // hand the delegate to the framework for calling
         return process(request, worker);
     }
 
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-	    return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-	            PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-	            HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-	            HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
+    @Override
+    protected AuditStatement getInitialAuditStatement(String actionLabel) {
+        return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+    }
 }

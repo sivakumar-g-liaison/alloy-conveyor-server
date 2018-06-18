@@ -91,7 +91,7 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
                         if (sum < TOTAL_PERCENT) {
                             return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, INVALID_PROCESS_DC_VALUE);
                         }
-                        // updates datacenter of downloader processors
+                        // updates datacenter of processors
                         new ProcessorAffinityService().supportProcessorProcessorAffinity(datacenterMap);
 
                         return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, SUCCESS);
