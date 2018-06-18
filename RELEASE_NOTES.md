@@ -1,5 +1,12 @@
 5.3.0-SNAPSHOT
 ---------------
+* GMB-1116 - Replicate remote uploader files when it is using file system
+    * Delete replication issue fixed
+* GMB-1115 - UI to update the process dc of the processor
+    * ACON integration changes on the affinity API and Staged file updates
+
+5.2.14
+---------------
 * Added EU properties
 * GMB-1115 - UI to update the process dc of the processor
 * GMB-1116 - Replicate remote uploader files when it is using file system

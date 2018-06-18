@@ -558,16 +558,17 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      * Returns staged file entries by filename and file path for file writer processor.
      *
      */
-    public StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName) {
+    @Override
+    public StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, List<String> processorTypes) {
 
         EntityManager entityManager = null;
 
         try {
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER)
+            List<?> files = entityManager.createNamedQuery(GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH)
                     .setParameter(FILE_PATH, filePath)
                     .setParameter(FILE_NAME, fileName)
-                    .setParameter(TYPE, ProcessorType.FILEWRITER.getCode())
+                    .setParameter(TYPE, processorTypes)
                     .setParameter(STATUS, EntityStatus.INACTIVE.value())
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
@@ -745,7 +746,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     
     /**
      * Update the StagedFile process dc
-     * 
+     *
      * @param newProcessDC
      */
     public void updateStagedFileProcessDC(String newProcessDC) {
@@ -760,8 +761,45 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
             // update the StagedFile Status
             entityManager.createNativeQuery(UPDATE_STAGED_FILE_PROCESS_DC)
-                .setParameter(NEW_PROCESS_DC, newProcessDC)
-                .executeUpdate();
+                    .setParameter(NEW_PROCESS_DC, newProcessDC)
+                    .executeUpdate();
+
+            // commits the transaction
+            tx.commit();
+
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+
+    /**
+     * Update the StagedFile process dc
+     *
+     * @param newProcessDC
+     */
+    @Override
+    public void updateStagedFileProcessDCByProcessorGuid(List<String> processorGuids, String newProcessDC) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            // update the StagedFile Status
+            entityManager.createNativeQuery(UPDATE_STAGED_FILE_PROCESS_DC_PROCESSOR_GUID)
+                    .setParameter(NEW_PROCESS_DC, newProcessDC)
+                    .setParameter(PROCESSOR_ID, processorGuids)
+                    .executeUpdate();
 
             // commits the transaction
             tx.commit();
