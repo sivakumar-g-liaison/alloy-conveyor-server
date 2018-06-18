@@ -65,6 +65,7 @@ import javax.ws.rs.core.UriInfo;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -147,7 +148,8 @@ public class HTTPListenerResource extends AuditedResource {
 
 
                 //first corner timestamp
-                ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+                final ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+                final Date statusDate = new Date();
 
                 //GlobalProcess ID
                 String globalProcessId = UUIDGen.getCustomUUID();
@@ -229,6 +231,8 @@ public class HTTPListenerResource extends AuditedResource {
                             pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
+                    // set status date
+                    glassMessage.setStatusDate(statusDate);
                     // Log status running
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR);
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
@@ -388,7 +392,8 @@ public class HTTPListenerResource extends AuditedResource {
 			public Object call() throws Exception {
 
                 //first corner timestamp
-                ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+                final ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+                final Date statusDate = new Date();
 
                 //globalProcessId
                 String globalProcessId = UUIDGen.getCustomUUID();
@@ -466,6 +471,8 @@ public class HTTPListenerResource extends AuditedResource {
                             pipelineId);
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
+                    //set Status Date
+                    glassMessage.setStatusDate(statusDate);
                     // Log status running
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async Request received", MailBoxConstants.HTTPASYNCPROCESSOR);
                     new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING

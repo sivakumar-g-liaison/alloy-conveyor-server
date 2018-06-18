@@ -39,7 +39,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
     String FILE_PATH = "filePath";
     String EXEC_STATUS = "exec_status";
     String MAILBOX_IDS = "mailbox_ids";
-    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER = "StagedFile.findStagedFilesForFileWriterByFileNameAndPath";
+    String GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH = "StagedFile.findStagedFilesByFileNameAndPath";
     String GET_STAGED_FILE_FOR_TRIGGER_FILE = "StagedFile.findStagedFileForTriggerFile";
     String GET_STAGED_FILE_FOR_RELAY_TRIGGER_FILE = "StagedFile.findStagedFileForRelayTriggerFile";
     String MODIFIED_DATE = "modifiedDate";
@@ -109,7 +109,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param fileName name
      * @return staged file
      */
-    StagedFile findStagedFilesForFileWriterByFileNameAndPath(String filePath, String fileName);
+    StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, List<String> processorTypes);
     
     /**
      * Update the StagedFile Status by processorId
@@ -149,6 +149,13 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      * @param fileName
      */
     void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName);
+
+    /**
+     * Updated staged files of the remote uploader
+     * @param processorGuid processor guid
+     * @param newProcessDC new process dc
+     */
+    void updateStagedFileProcessDCByProcessorGuid(List<String> processorGuid, String newProcessDC);
 
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
@@ -258,6 +265,12 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append("UPDATE STAGED_FILE")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
             .append(" WHERE STATUS <> 'INACTIVE'").toString();
+
+    String UPDATE_STAGED_FILE_PROCESS_DC_PROCESSOR_GUID = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
+            .append(" WHERE STATUS <> 'INACTIVE'")
+            .append(" AND PROCESSOR_GUID IN (:" + PROCESSOR_ID + ")").toString();
    
     String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")
@@ -308,4 +321,5 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(PROCESSOR_ID)
             .append(" AND FILE_NAME =:")
             .append(FILE_NAME).toString();
+
 }

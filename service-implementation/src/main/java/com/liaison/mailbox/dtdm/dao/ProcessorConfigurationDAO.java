@@ -164,11 +164,18 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     long getProcessorCount();
     
     /**
-     * Retrieves downloader processors guid
+     * Retrieves processors guid
      *
-     * @return list of downloader processors guid
+     * @return list of processors guid
      */
-    List<String> getDownloadProcessorGuids(String clusterType);
+    List<String> getProcessorGuids(String clusterType, List<String> processorTypes);
+
+    /**
+     * Retrieves processors guid and process dc
+     *
+     * @return list of processors guid
+     */
+    Map<String, String> getProcessorDetails(String clusterType, List<String> processorTypes);
 
     /**
      * Retrieves processors by mailbox guid and processor name
@@ -292,18 +299,18 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * Update the Datacenter
      * 
      * @param dc
-     * @param ignoreDatacenters
-     * @param updateSize
+     * @param processedDC
+     * @param processSize
      */
     void updateDatacenter(String dc, List<String> processedDC, int processSize);
     
     /**
-     * Update the Downloader Datacenter by processor guid
+     * Update the Processor Datacenter by processor guid
      * 
      * @param dc
      * @param processorGuids
      */
-    void updateDownloaderDatacenter(String dc, List<String> processorGuids);
+    void updateProcessorDatacenter(String dc, List<String> processorGuids);
 
     /**
      * Update the process_dc to current_dc where the process_dc is null
@@ -323,8 +330,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * Update the existing ProcessDC to new ProcessDC for downloader processor.
      * @param existingProcessDC
      * @param newProcessDC
+     * @param processorTypes
      */
-    void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC);
+    void updateProcessorProcessDc(String existingProcessDC, String newProcessDC, List<String> processorTypes);
 
     /**
      * Retrieve the all datacenters
@@ -418,26 +426,34 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
-            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
+            .append(" AND PROCESS_DC !='ALL'").toString();
 
     String UPDATE_PROCESS_DC_BY_GUID = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PGUID =:" + PGUID)
             .append(" AND STATUS <> 'DELETED'").toString();
     
-    String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
+    String UPDATE_PROCESSOR_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
-            .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
+            .append(" WHERE TYPE IN (:" + PROCESSOR_TYPE + ")")
             .append(" AND STATUS <> 'DELETED'")
             .append(" AND PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
     
     String PROCESSOR_COUNT = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
-            .append(" WHERE STATUS <> 'DELETED' ").toString();
+            .append(" WHERE STATUS <> 'DELETED' AND PROCESS_DC != 'ALL' ").toString();
 
-    String GET_DOWNLOAD_PROCESSOR_GUIDS = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
+    String GET_PROCESSOR_GUIDS = new StringBuilder().append("SELECT PGUID FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ")
             .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
-            .append(" AND TYPE = 'REMOTEDOWNLOADER'").toString();
+            .append(" AND TYPE in (:" + PROCESSOR_TYPE + ")")
+            .append(" AND PROCESS_DC != 'ALL'").toString();
+
+    String GET_PROCESSOR_DETAILS = new StringBuilder().append("SELECT PGUID, PROCESS_DC FROM PROCESSOR")
+            .append(" WHERE STATUS <> 'DELETED' ")
+            .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
+            .append(" AND TYPE in (:" + PROCESSOR_TYPE + ")")
+            .append(" AND PROCESS_DC != 'ALL'").toString();
     
     String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")
             .append(" WHERE STATUS <> 'DELETED' ").toString(); 

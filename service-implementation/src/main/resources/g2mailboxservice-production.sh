@@ -25,7 +25,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$ENVIRONMENT.xml"
 # Shortcode for APP_NAME:
 export SYSLOG_APPNAME="GMB"
-export SYSLOG_HOST="10.152.20.9"
+#export SYSLOG_HOST Moved to Environment File
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
@@ -43,8 +43,7 @@ export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep 
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
- 
-export LOGSTASHMACHINE=at4p-vplstash.liaison.prod
+
 export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 

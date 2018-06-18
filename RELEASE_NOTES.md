@@ -1,3 +1,13 @@
+5.2.15
+---------------
+* GMB-1116 - Replicate remote uploader files when it is using file system
+    * Delete replication issue fixed
+* GMB-1115 - UI to update the process dc of the processor
+    * ACON integration changes on the affinity API and Staged file updates
+    * Update the process dc of the staged of the Remote Uploader
+* GGT-1581 - PX1 US UAT and PROD properties update
+* GMB-1119 - HTTP Async Clean up    
+
 5.2.14
 ---------------
 * Added EU properties
@@ -11,6 +21,7 @@
 * GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
 * GMB-1086 - Add Watchdog cleanup to lens event log
 * GMB-1101 - Processors' retryInterval-property should be supported
+* GMB-658 Mailbox updated with new 'tenancyKey' and invalid 'serviceInstance_pguid'.
 
 5.2.13
 ---------------

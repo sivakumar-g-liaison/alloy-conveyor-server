@@ -10,26 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -37,32 +17,52 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
-import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.ProcessorAffinityService;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.liaison.mailbox.MailBoxConstants.TOTAL_PERCENT;
 
 /**
  * This is the gateway for the processor affinity support services.
  *
  */
-
 @AppConfigurationResource
 @Path("config/processoraffinity")
 @Api(value = "config/processoraffinity", description = "Gateway for the processor affinity support services.")
 public class MailBoxProcessorAffinityResource extends AuditedResource {
 
+    private static final String INVALID_PROCESS_DC_VALUE = "Invalid Process Dc value";
+    private static final String SUCCESS = "Success";
+    private static final String PROCESS_DC_DOES_NOT_EXIST = "Process Dc doesn't exist";
+
     /**
-     * REST method support to the processoraffinity.
+     * REST method support to the processors affinity.
      *
      * @param request
      *            HttpServletRequest, injected with context annotation
      * @return Response Object
      */
-    @POST
+    @PUT
     @ApiOperation(value = "Support processor affinity", notes = "Support processor affinity", position = 1)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -77,78 +77,35 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
                 String requestString;
                 try {
                     requestString = getRequestBody(request);
-                    // updates datacenter of processors
-                    ProcessorConfigurationService service = new ProcessorConfigurationService();
-                    service.supportProcessorAffinity(requestString);
-                    return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, String> datacenterMap = mapper.readValue(requestString, new TypeReference<HashMap<String, Object>>() {});
+
+                    if (MailBoxUtil.validateProcessDc(datacenterMap)) {
+
+                        List<Integer> dataCenterMapValues = datacenterMap.values().stream().map(Integer::parseInt).collect(Collectors.toList());
+                        int sum = dataCenterMapValues.stream().mapToInt(v -> v).sum();
+
+                        if (sum > TOTAL_PERCENT) {
+                            return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, INVALID_PROCESS_DC_VALUE);
+                        }
+                        if (sum < TOTAL_PERCENT) {
+                            return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, INVALID_PROCESS_DC_VALUE);
+                        }
+                        // updates datacenter of processors
+                        new ProcessorAffinityService().supportProcessorProcessorAffinity(datacenterMap);
+
+                        return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, SUCCESS);
+                    } else {
+                    	return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, PROCESS_DC_DOES_NOT_EXIST);
+                    }
                     
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new LiaisonRuntimeException("Unable to Process Request. " + e.getMessage(), e);
                 }
 
             }
         };
         worker.actionLabel = "MailBoxProcessorAffinityResource.supportProcessorAffinity()";
-
-        // hand the delegate to the framework for calling
-        return process(request, worker);
-    }
-
-    /**
-     * REST method support to the downloader processoraffinity.
-     *
-     * @param request
-     *            HttpServletRequest, injected with context annotation
-     * @return Response Object
-     */
-    @PUT
-    @ApiOperation(value = "Support downloader processor affinity", notes = "Support downloader processor affinity", position = 1)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    @ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-    public Response supportDownloadProcessorAffinity(@Context final HttpServletRequest request) {
-
-        // create the worker delegate to perform the business logic
-        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-            @Override
-            public Object call() {
-
-                String requestString;
-                try {
-                    requestString = getRequestBody(request);
-                    ObjectMapper mapper = new ObjectMapper();
-                    Map<String, String> datacenterMap = mapper.readValue(requestString, new TypeReference<HashMap<String, Object>>() {});
-                    
-                    if (MailBoxUtil.validateProcessDc(datacenterMap)) {
-                        
-                        List<Integer> dataCenterMapValues = datacenterMap.values().stream().map(Integer::parseInt).collect(Collectors.toList());
-                        int sum = dataCenterMapValues.stream().mapToInt(v -> v).sum();
-                        
-                        if (sum > 100) {
-                            return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Invalid Process Dc value");
-                        }
-                        // updates datacenter of downloader processors
-                        ProcessorConfigurationService service = new ProcessorConfigurationService();
-                        service.supportDownloaderProcessorAffinity(datacenterMap);
-                        
-                        String dcToUpdate = MailBoxUtil.getDcToUpdate(datacenterMap);
-                        if (!MailBoxUtil.isEmpty(dcToUpdate)) {
-                        	// updates datacenter of stagedFile
-                            new StagedFileDAOBase().updateStagedFileProcessDC(dcToUpdate);
-                        }
-                        
-                        return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
-                    } else {
-                    	return marshalResponse(Response.Status.BAD_REQUEST.getStatusCode(), MediaType.TEXT_PLAIN, "Process Dc doesn't exist");
-                    }
-                    
-                } catch (IOException e) {
-                    throw new LiaisonRuntimeException("Unable to Process Request. " + e.getMessage(), e);
-                }
-
-            }
-        };
-        worker.actionLabel = "MailBoxProcessorAffinityResource.supportDownloadProcessorAffinity()";
 
         // hand the delegate to the framework for calling
         return process(request, worker);
@@ -171,8 +128,7 @@ public class MailBoxProcessorAffinityResource extends AuditedResource {
             public Object call() {
 
                 // Gets processor details.
-                ProcessorConfigurationService service = new ProcessorConfigurationService();
-                return service.getDatacenters();
+                return new ProcessorAffinityService().getDatacenters();
             }
         };
         worker.actionLabel = "MailBoxProcessorAffinityResource.getDatacenters()";

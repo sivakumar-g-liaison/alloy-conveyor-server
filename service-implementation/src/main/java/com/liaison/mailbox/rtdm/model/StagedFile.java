@@ -37,12 +37,12 @@ import java.sql.Timestamp;
 @Table(name = "STAGED_FILE")
 @NamedQueries({
         @NamedQuery(name = "StagedFile.findAll", query = "SELECT sf FROM StagedFile sf"),
-        @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH_FOR_FILE_WRITER,
+        @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_BY_FILE_NAME_AND_FILE_PATH,
                 query = "SELECT sf FROM StagedFile sf"
                         + " WHERE sf.filePath =:" + StagedFileDAO.FILE_PATH
                         + " AND sf.fileName =:" + StagedFileDAO.FILE_NAME
-                        + " AND sf.processorType =:" + StagedFileDAO.TYPE
-                        + " AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
+                        + " AND sf.processorType in (:" + StagedFileDAO.TYPE
+                        + ") AND sf.stagedFileStatus <>:" + StagedFileDAO.STATUS
                         + " AND sf.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
        @NamedQuery(name = StagedFileDAO.GET_STAGED_FILE_FOR_TRIGGER_FILE,
                 query = "SELECT sf FROM StagedFile sf"

@@ -18,8 +18,10 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.core.MailboxStagedFileService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.core.processor.HTTPRemoteUploader;
@@ -35,6 +37,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -46,6 +49,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -198,6 +202,103 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
         remoteUploader.executeRequest();
     }
 
+    /**
+     * Method to deactivate the staged file with valid data.
+     *
+     * @throws Exception
+     */
+    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    public void testDeactivateStagedFile() throws Exception {
+    	
+    	 // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        //Adding Profile
+        AddProfileRequestDTO profileRequestDTO = new AddProfileRequestDTO();
+        ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+        profileRequestDTO.setProfile(profileDTO);
+
+        ProfileConfigurationService profileService = new ProfileConfigurationService();
+        AddProfileResponseDTO profileResponse = profileService.createProfile(profileRequestDTO);
+        Assert.assertEquals(SUCCESS, profileResponse.getResponse().getStatus());
+
+        createHttpAsyncProcessor(mbxDTO, response);
+        String asynURL = getBASE_URL_RUNTIME() + "/async?mailboxId=" + response.getMailBox().getGuid();
+
+        //Adding the HTTPRemoteUploader processor
+        AddProcessorToMailboxRequestDTO httpUploaderProcRequestDTO = createRemoteUploader(response, profileDTO, asynURL);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO httpUploaderProcResponseDTO = procService.createProcessor(
+                response.getMailBox().getGuid(),
+                httpUploaderProcRequestDTO,
+                serviceInstanceId,
+                httpUploaderProcRequestDTO.getProcessor().getModifiedBy());
+        GetProcessorResponseDTO httpUploaderProcGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), httpUploaderProcResponseDTO.getProcessor().getGuId());
+        Assert.assertEquals(SUCCESS, httpUploaderProcGetResponseDTO.getResponse().getStatus());
+
+        FS2MetaSnapshot metaSnapshot = createFs2URL(LOGGER, response);
+        persistStageFile(metaSnapshot.getURI().toString(), response, httpUploaderProcGetResponseDTO);
+
+        MailboxStagedFileService serviceResponse = new MailboxStagedFileService();
+        StagedFileDAO dao = new StagedFileDAOBase();
+        List<StagedFile> stagedFile = dao.findStagedFilesByProcessorId(httpUploaderProcGetResponseDTO.getProcessor().getGuid());
+        serviceResponse.deactivateStagedFile(stagedFile.get(0).getPguid());
+    }
+
+    /**
+     * Method to deactivate the staged file with Invalid data.
+     *
+     * @throws Exception
+     */
+    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    public void testDeactivateStagedFileWithUnknownStagedFile() throws Exception { 
+    	
+    	 // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, mbxDTO.getModifiedBy());
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        //Adding Profile
+        AddProfileRequestDTO profileRequestDTO = new AddProfileRequestDTO();
+        ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+        profileRequestDTO.setProfile(profileDTO);
+
+        ProfileConfigurationService profileService = new ProfileConfigurationService();
+        AddProfileResponseDTO profileResponse = profileService.createProfile(profileRequestDTO);
+        Assert.assertEquals(SUCCESS, profileResponse.getResponse().getStatus());
+
+        createHttpAsyncProcessor(mbxDTO, response);
+        String asynURL = getBASE_URL_RUNTIME() + "/async?mailboxId=" + response.getMailBox().getGuid();
+
+        //Adding the HTTPRemoteUploader processor
+        AddProcessorToMailboxRequestDTO httpUploaderProcRequestDTO = createRemoteUploader(response, profileDTO, asynURL);
+        ProcessorConfigurationService procService = new ProcessorConfigurationService();
+        AddProcessorToMailboxResponseDTO httpUploaderProcResponseDTO = procService.createProcessor(
+                response.getMailBox().getGuid(),
+                httpUploaderProcRequestDTO,
+                serviceInstanceId,
+                httpUploaderProcRequestDTO.getProcessor().getModifiedBy());
+        GetProcessorResponseDTO httpUploaderProcGetResponseDTO = procService.getProcessor(response.getMailBox().getGuid(), httpUploaderProcResponseDTO.getProcessor().getGuId());
+        Assert.assertEquals(SUCCESS, httpUploaderProcGetResponseDTO.getResponse().getStatus());
+
+        FS2MetaSnapshot metaSnapshot = createFs2URL(LOGGER, response);
+        persistStageFile(metaSnapshot.getURI().toString(), response, httpUploaderProcGetResponseDTO);
+
+        MailboxStagedFileService serviceResponse = new MailboxStagedFileService();
+        StagedFileDAO dao = new StagedFileDAOBase();
+        List<StagedFile> stagedFile = dao.findStagedFilesByProcessorId(httpUploaderProcGetResponseDTO.getProcessor().getGuid());
+        serviceResponse.deactivateStagedFile(stagedFile.get(0).getGlobalProcessId());
+    }
     private AddProcessorToMailboxRequestDTO createRemoteUploader(AddMailBoxResponseDTO response, ProfileDTO profileDTO, String asynURL) throws IOException {
 
         AddProcessorToMailboxRequestDTO httpUploaderProcRequestDTO = MailBoxUtil.unmarshalFromJSON(ServiceUtils.readFileFromClassPath("requests/processor/createuploaderprocessor.json"), AddProcessorToMailboxRequestDTO.class);

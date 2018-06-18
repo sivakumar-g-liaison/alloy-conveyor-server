@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType.FILE_DELETE;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
@@ -71,7 +72,7 @@ public class FileDeleteReplicationService {
             String fileName = path.substring(path.lastIndexOf("/") + 1);
 
             StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-            StagedFile deletedStagedFile = stagedFileDAO.findStagedFilesForFileWriterByFileNameAndPath(filePath, fileName);
+            StagedFile deletedStagedFile = stagedFileDAO.findStagedFilesByFileNameAndPath(filePath, fileName, Arrays.asList(ProcessorType.FILEWRITER.getCode(), ProcessorType.REMOTEUPLOADER.getCode()));
             if (null != deletedStagedFile) {
                 ThreadContext.clearMap();
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, deletedStagedFile.getGPID());
@@ -80,20 +81,25 @@ public class FileDeleteReplicationService {
                 deletedStagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
                 stagedFileDAO.merge(deletedStagedFile);
 
-                GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-                glassMessageDTO.setGlobalProcessId(deletedStagedFile.getGPID());
-                glassMessageDTO.setProcessorType(ProcessorType.findByName(deletedStagedFile.getProcessorType()));
-                glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
-                glassMessageDTO.setFileName(fileName);
-                glassMessageDTO.setFilePath(filePath);
-                glassMessageDTO.setFileLength(0);
-                glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                glassMessageDTO.setMessage("File is picked/deleted by the customer");
-                glassMessageDTO.setPipelineId(null);
-                glassMessageDTO.setFirstCornerTimeStamp(null);
+                if (ProcessorType.FILEWRITER.getCode().equals(deletedStagedFile.getProcessorType())) {
 
-                MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-                LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
+                    GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+                    glassMessageDTO.setGlobalProcessId(deletedStagedFile.getGPID());
+                    glassMessageDTO.setProcessorType(ProcessorType.findByName(deletedStagedFile.getProcessorType()));
+                    glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
+                    glassMessageDTO.setFileName(fileName);
+                    glassMessageDTO.setFilePath(filePath);
+                    glassMessageDTO.setFileLength(0);
+                    glassMessageDTO.setStatus(ExecutionState.COMPLETED);
+                    glassMessageDTO.setMessage("File is picked/deleted by the customer");
+                    glassMessageDTO.setPipelineId(null);
+                    glassMessageDTO.setFirstCornerTimeStamp(null);
+
+                    MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+                    LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
+                } else {
+                    LOGGER.info("The processor type is Remote Uploader and ignoring the glass updates");
+                }
 
                 //Post the deleted message to other datacenter
                 Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);

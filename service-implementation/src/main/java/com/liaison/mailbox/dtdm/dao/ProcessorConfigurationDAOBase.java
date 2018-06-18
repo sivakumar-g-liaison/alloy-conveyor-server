@@ -41,6 +41,7 @@ import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -105,7 +107,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(PROF_NAME, profileName)
                     .setParameter(STATUS, EntityStatus.ACTIVE.value())
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
-                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, MailBoxConstants.ALL_DATACENTER));
+                    .setParameter(PROCESS_DC, newArrayList(MailBoxUtil.DATACENTER_NAME, ALL_DATACENTER));
 
             if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
                 processorQuery.setParameter(MBX_NAME, mbxNamePattern);
@@ -1032,6 +1034,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
+
+            //Add ALL in the ignore list
+            processedDC.add(ALL_DATACENTER);
             
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_PROCESS_DC)
@@ -1059,11 +1064,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * Update the download processor Datacenter by processor guid
      * 
      * @param dc
-     * @param processedDC
-     * @param updateSize
-     * @param clusterType
+     * @param processorGuids
      */
-    public void updateDownloaderDatacenter(String dc,  List<String> processorGuids) {
+    public void updateProcessorDatacenter(String dc, List<String> processorGuids) {
         
         EntityManager entityManager = null;
         EntityTransaction tx = null;
@@ -1094,7 +1097,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
     }
     
-    /**
+    /**updateDatacenter
      * Method retrieve the processors count.
      */
     @Override
@@ -1124,7 +1127,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> getDownloadProcessorGuids(String clusterType) {
+    public List<String> getProcessorGuids(String clusterType, List<String> processorTypes) {
 
         EntityManager entityManager = null;
         List<String> results;
@@ -1132,8 +1135,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         try {
 
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-            results =  entityManager.createNativeQuery(GET_DOWNLOAD_PROCESSOR_GUIDS)
+            results =  entityManager.createNativeQuery(GET_PROCESSOR_GUIDS)
                       .setParameter(CLUSTER_TYPE, clusterType)
+                      .setParameter(PROCESSOR_TYPE, processorTypes)
                       .getResultList();
             
         } catch (Exception e) {
@@ -1144,6 +1148,39 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
         return results;
+    }
+
+    /**
+     * Method retrieve the processors guids.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, String> getProcessorDetails(String clusterType, List<String> processorTypes) {
+
+        EntityManager entityManager = null;
+        List<Object[]> results;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results =  entityManager.createNativeQuery(GET_PROCESSOR_DETAILS)
+                    .setParameter(CLUSTER_TYPE, clusterType)
+                    .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .getResultList();
+
+            Map<String, String> resultMap = new HashMap<>();
+            for (Object[] result : results) {
+                resultMap.put((String) result[0], (String) result[1]);
+            }
+            return resultMap;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
     }
     
     /**
@@ -1203,28 +1240,29 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         return processors;
     }
-    
+
     /**
-     * updater the process_Dc
+     * updater the process_Dc where the process dc is not ALL
      */
+    @Override
     public void updateProcessDc() {
-        
+
         EntityManager entityManager = null;
         EntityTransaction tx = null;
         try {
-            
+
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
-            
+
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_PROCESS_DC_TO_CURRENT_DC)
-                  .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
-                  .executeUpdate();
-            
+                    .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                    .executeUpdate();
+
             //commits the transaction
             tx.commit();
-        
+
         } catch (Exception e) {
             if (null != tx && tx.isActive()) {
                 tx.rollback();
@@ -1235,7 +1273,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        
+
     }
 
     /**
@@ -1244,6 +1282,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * @param guid
      * @param dataCenter
      */
+    @Override
     public void updateProcessDcByGuid(String guid, String dataCenter) {
         
         EntityManager entityManager = null;
@@ -1275,29 +1314,30 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         
     }
-    
+
     /**
      * updater the downloader process_Dc
      */
-    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
-        
+    public void updateProcessorProcessDc(String existingProcessDC, String newProcessDC, List<String> processorTypes) {
+
         EntityManager entityManager = null;
         EntityTransaction tx = null;
         try {
-            
+
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
-            
+
             //update the Processor PROCESS_DC
-            entityManager.createNativeQuery(UPDATE_DOWNLOADER_PROCESS_DC)
-                  .setParameter(NEW_PROCESS_DC, newProcessDC)
-                  .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
-                  .executeUpdate();
-            
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_PROCESS_DC)
+                    .setParameter(NEW_PROCESS_DC, newProcessDC)
+                    .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
+                    .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .executeUpdate();
+
             //commits the transaction
             tx.commit();
-        
+
         } catch (Exception e) {
             if (null != tx && tx.isActive()) {
                 tx.rollback();
@@ -1308,6 +1348,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        
+
     }
 }

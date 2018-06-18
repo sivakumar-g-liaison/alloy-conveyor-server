@@ -129,6 +129,7 @@ public enum Messages {
     INVALID_TENANCY_KEY("Tenancy Key is not available in Global Enterprise Manager"),
     TENANCY_KEY_NOT_AVAILABLE("Tenancy Key is not available in the request."),
     ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the request header."),
+    TENANCY_KEY_UPDATE_NOT_ALLOWED("Tenancy Key update not allowed."),
 
     READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 
