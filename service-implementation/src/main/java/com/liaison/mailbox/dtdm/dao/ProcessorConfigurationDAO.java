@@ -330,8 +330,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * Update the existing ProcessDC to new ProcessDC for downloader processor.
      * @param existingProcessDC
      * @param newProcessDC
+     * @param processorTypes
      */
-    void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC);
+    void updateProcessorProcessDc(String existingProcessDC, String newProcessDC, List<String> processorTypes);
 
     /**
      * Retrieve the all datacenters
@@ -425,16 +426,17 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     
     String UPDATE_PROCESS_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
-            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'").toString();
+            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
+            .append(" AND PROCESS_DC !='ALL'").toString();
 
     String UPDATE_PROCESS_DC_BY_GUID = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PGUID =:" + PGUID)
             .append(" AND STATUS <> 'DELETED'").toString();
     
-    String UPDATE_DOWNLOADER_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
+    String UPDATE_PROCESSOR_PROCESS_DC = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
-            .append(" WHERE TYPE = 'REMOTEDOWNLOADER'")
+            .append(" WHERE TYPE IN (:" + PROCESSOR_TYPE + ")")
             .append(" AND STATUS <> 'DELETED'")
             .append(" AND PROCESS_DC =:" + EXISTING_PROCESS_DC).toString();
     

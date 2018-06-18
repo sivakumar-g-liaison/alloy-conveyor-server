@@ -45,6 +45,10 @@ public class ProcessorAffinityService {
 
     private static final Logger LOGGER = LogManager.getLogger(ProcessorAffinityService.class);
     private static final String DATACENTER_PROCESSOR = "Datacenetres and Processors";
+    private static final List<String> PROCESSOR_TYPES = Arrays.asList(ProcessorType.REMOTEUPLOADER.getCode(),
+            ProcessorType.REMOTEDOWNLOADER.getCode(),
+            ProcessorType.SWEEPER.getCode(),
+            ProcessorType.CONDITIONALSWEEPER.getCode());
 
     /**
      * This is to support ACON processor affinity.
@@ -58,7 +62,7 @@ public class ProcessorAffinityService {
         LOGGER.debug("Enter into supportProcessorProcessorAffinity () ");
         try {
 
-            //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
+            //retrieve the datacenetre and value is the % of processor that should run on that DC
             if (MailBoxConstants.SECURE.equals(MailBoxUtil.CLUSTER_TYPE)) {
                 updateProcessorDatacenter(datacenterMap, MailBoxConstants.SECURE);
                 updateProcessorDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
@@ -83,12 +87,8 @@ public class ProcessorAffinityService {
 
         // fetch processor count
         ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-        List<String> processorTypes = Arrays.asList(ProcessorType.REMOTEUPLOADER.getCode(),
-                ProcessorType.REMOTEDOWNLOADER.getCode(),
-                ProcessorType.SWEEPER.getCode(),
-                ProcessorType.CONDITIONALSWEEPER.getCode());
 
-        List<String> processorGuids = dao.getProcessorGuids(clusterType, processorTypes);
+        List<String> processorGuids = dao.getProcessorGuids(clusterType, PROCESSOR_TYPES);
         int processorCount = processorGuids.size();
         if (0 == processorCount) {
             LOGGER.info("No processor exist for cluster type " + clusterType);
@@ -175,12 +175,12 @@ public class ProcessorAffinityService {
     /**
      * This method is used to update the downloader process_dc
      */
-    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
+    public void updateProcessorProcessDc(String existingProcessDC, String newProcessDC) {
 
         if (MailBoxUtil.isEmpty(existingProcessDC) || MailBoxUtil.isEmpty(newProcessDC)) {
             throw new MailBoxConfigurationServicesException(Messages.PROCESS_DC_EMPTY, Response.Status.BAD_REQUEST);
         }
-        new ProcessorConfigurationDAOBase().updateDownloaderProcessDc(existingProcessDC, newProcessDC);
+        new ProcessorConfigurationDAOBase().updateProcessorProcessDc(existingProcessDC, newProcessDC, PROCESSOR_TYPES);
     }
 
     /**

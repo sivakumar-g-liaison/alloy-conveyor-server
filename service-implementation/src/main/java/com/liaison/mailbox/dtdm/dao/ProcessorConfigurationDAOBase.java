@@ -1240,29 +1240,29 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         return processors;
     }
-    
+
     /**
-     * updater the process_Dc
+     * updater the process_Dc where the process dc is not ALL
      */
     @Override
     public void updateProcessDc() {
-        
+
         EntityManager entityManager = null;
         EntityTransaction tx = null;
         try {
-            
+
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
-            
+
             //update the Processor PROCESS_DC
             entityManager.createNativeQuery(UPDATE_PROCESS_DC_TO_CURRENT_DC)
-                  .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
-                  .executeUpdate();
-            
+                    .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                    .executeUpdate();
+
             //commits the transaction
             tx.commit();
-        
+
         } catch (Exception e) {
             if (null != tx && tx.isActive()) {
                 tx.rollback();
@@ -1273,7 +1273,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        
+
     }
 
     /**
@@ -1314,29 +1314,30 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         
     }
-    
+
     /**
      * updater the downloader process_Dc
      */
-    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
-        
+    public void updateProcessorProcessDc(String existingProcessDC, String newProcessDC, List<String> processorTypes) {
+
         EntityManager entityManager = null;
         EntityTransaction tx = null;
         try {
-            
+
             entityManager = DAOUtil.getEntityManager(persistenceUnitName);
             tx = entityManager.getTransaction();
             tx.begin();
-            
+
             //update the Processor PROCESS_DC
-            entityManager.createNativeQuery(UPDATE_DOWNLOADER_PROCESS_DC)
-                  .setParameter(NEW_PROCESS_DC, newProcessDC)
-                  .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
-                  .executeUpdate();
-            
+            entityManager.createNativeQuery(UPDATE_PROCESSOR_PROCESS_DC)
+                    .setParameter(NEW_PROCESS_DC, newProcessDC)
+                    .setParameter(EXISTING_PROCESS_DC, existingProcessDC)
+                    .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .executeUpdate();
+
             //commits the transaction
             tx.commit();
-        
+
         } catch (Exception e) {
             if (null != tx && tx.isActive()) {
                 tx.rollback();
@@ -1347,6 +1348,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
-        
+
     }
 }

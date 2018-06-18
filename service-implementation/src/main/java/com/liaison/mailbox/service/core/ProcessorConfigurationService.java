@@ -82,7 +82,9 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -91,6 +93,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
 
 
 /**
@@ -626,7 +630,7 @@ public class ProcessorConfigurationService {
             if (processorGuid == null || processorDCToUpdate == null) {
                 throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
             }
-            
+
             if (ProcessorType.HTTPASYNCPROCESSOR.getCode().equals(request.getProcessorType())
                     || ProcessorType.HTTPSYNCPROCESSOR.getCode().equals(request.getProcessorType())
                     || ProcessorType.FILEWRITER.getCode().equals(request.getProcessorType())
@@ -636,6 +640,13 @@ public class ProcessorConfigurationService {
 
             ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
             dao.updateProcessDcByGuid(processorGuid, processorDCToUpdate);
+
+            if (ProcessorType.REMOTEUPLOADER.getCode().equals(request.getProcessorType())) {
+                //Update Staged File Process DC
+                if (!ALL_DATACENTER.equals(processorDCToUpdate)) {
+                    new StagedFileDAOBase().updateStagedFileProcessDCByProcessorGuid(Collections.singletonList(processorGuid), processorDCToUpdate);
+                }
+            }
 
             // response message construction
             ProcessorResponseDTO dto = new ProcessorResponseDTO(processorGuid);

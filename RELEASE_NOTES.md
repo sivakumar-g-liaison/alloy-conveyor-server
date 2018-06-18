@@ -4,6 +4,8 @@
     * Delete replication issue fixed
 * GMB-1115 - UI to update the process dc of the processor
     * ACON integration changes on the affinity API and Staged file updates
+    * Update the process dc of the staged of the Remote Uploader
+* GMB-1119 - HTTP Async Clean up    
 
 5.2.14
 ---------------
