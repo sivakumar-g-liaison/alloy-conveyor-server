@@ -150,6 +150,13 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      */
     void updateRelayTriggerFileStatusInStagedFile(String processorId, String status, String fileName);
 
+    /**
+     * Updated staged files of the remote uploader
+     * @param processorGuid processor guid
+     * @param newProcessDC new process dc
+     */
+    void updateStagedFileProcessDCByProcessorGuid(List<String> processorGuid, String newProcessDC);
+
     StringBuilder GET_STAGED_FILE_BY_PRCSR_GUID_FOR_DIR_UPLOAD_FILE_PATH_RECURSE = new StringBuilder().append("select sf from StagedFile sf")
             .append(" where (sf.processorId) = :")
             .append(PROCESSOR_ID)
@@ -258,6 +265,12 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append("UPDATE STAGED_FILE")
             .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
             .append(" WHERE STATUS <> 'INACTIVE'").toString();
+
+    String UPDATE_STAGED_FILE_PROCESS_DC_PROCESSOR_GUID = new StringBuilder()
+            .append("UPDATE STAGED_FILE")
+            .append(" SET PROCESS_DC =:" + NEW_PROCESS_DC)
+            .append(" WHERE STATUS <> 'INACTIVE'")
+            .append(" AND PROCESSOR_GUID IN (:" + PROCESSOR_ID + ")").toString();
    
     String FIND_STAGED_FILE_BY_GPID_AND_PROCESSID = new StringBuilder()
             .append("SELECT sf FROM StagedFile sf")
@@ -308,4 +321,5 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
             .append(PROCESSOR_ID)
             .append(" AND FILE_NAME =:")
             .append(FILE_NAME).toString();
+
 }

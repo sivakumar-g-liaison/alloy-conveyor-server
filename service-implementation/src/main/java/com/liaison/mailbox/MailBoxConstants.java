@@ -23,6 +23,8 @@ public interface MailBoxConstants {
     int NUMBER_OF_FILES_THRESHOLD_MIN_VALUE = 0;
     int NUMBER_OF_FILES_THRESHOLD_MAX_VALUE = 25;
 
+    int TOTAL_PERCENT = 100;
+
     // Key descriminator values
     /** File datetime format. */
     String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";

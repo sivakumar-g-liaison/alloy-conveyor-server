@@ -47,7 +47,6 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.HTTPListenerHelperDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.DatacenterDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -61,7 +60,6 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ClusterTypeResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetDatacenterResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorIdResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
@@ -74,11 +72,8 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
-import com.mapr.org.apache.hadoop.hbase.util.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -87,7 +82,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -107,7 +101,6 @@ import java.util.stream.Stream;
 public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
-	private static final String DATACENTER_PROCESSOR = "Datacenetres and Processors";
 
 	/**
 	 * Creates processor for the mailbox.
@@ -1325,195 +1318,6 @@ public class ProcessorConfigurationService {
     }
     
     /**
-     * This method support to processoraffinity This is to split the traffic
-     * for the processor that need to run different datacenters to support
-     * active active
-     * 
-     * @param request
-     */
-    public void supportProcessorAffinity(String request) {
-
-        LOGGER.debug("Enter into supportProcessorAffinity () ");
-        try {
-
-            //retrieve the datacenetre and value is the % of processor that should run on that DC 
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> datacenterMap = mapper.readValue(request, new TypeReference<HashMap<String, Object>>() {});
-
-            if (!MailBoxUtil.validateProcessDc(datacenterMap)) {
-                throw new RuntimeException("Process DC doesn't exist");
-            }
-
-            List<Integer> dataCenterMapValues = datacenterMap.values().stream().map(Integer::parseInt).collect(Collectors.toList());
-            int sum = dataCenterMapValues.stream().mapToInt(v -> v).sum();
-            if (sum > 100) {
-                throw new RuntimeException("Invalid Process Dc value");
-            }
-
-            //fetch processor count
-            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-            long processorCount = dao.getProcessorCount();
-            if (0 == processorCount) {
-                LOGGER.info("No processor exist");
-                return;
-            }            
-            List<String> processedDC = new ArrayList<>();
-            for (String dc : datacenterMap.keySet()) {                
-
-                if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
-                    throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-                }
-                processedDC.add(dc);
-                int readyToProcessCount = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
-                if (readyToProcessCount > 0) {
-                    dao.updateDatacenter(dc, processedDC, readyToProcessCount);
-                }
-            }
-
-            //Update Staged file
-            String dcToUpdate = MailBoxUtil.getDcToUpdate(datacenterMap);
-            if (!MailBoxUtil.isEmpty(dcToUpdate)) {
-                // updates datacenter of stagedFile
-                new StagedFileDAOBase().updateStagedFileProcessDC(dcToUpdate);
-            }
-
-        } catch (NumberFormatException exception) {
-            throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-        
-        LOGGER.debug("Exit from supportProcessorAffinity () ");
-    }
-    
-    /**
-     * This method support to downloader processoraffinity This is to split the traffic
-     * for the processor that need to run different datacenters to support
-     * active active
-     * 
-     * @param datacenterMap
-     */
-    public void supportDownloaderProcessorAffinity(Map<String, String> datacenterMap) {
-
-        LOGGER.debug("Enter into supportDownloaderProcessorAffinity () ");
-        try {
-            
-            //retrieve the datacenetre and value is the % of downloader processor that should run on that DC 
-            
-            if (MailBoxConstants.SECURE.equals(MailBoxUtil.CLUSTER_TYPE)) {
-                updateProcessorDatacenter(datacenterMap, MailBoxConstants.SECURE);
-                updateProcessorDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
-            } else {
-                updateProcessorDatacenter(datacenterMap, MailBoxConstants.LOWSECURE);
-            }
-
-        } catch (NumberFormatException exception) {
-            throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-        }
-        
-        LOGGER.debug("Exit from supportDownloaderProcessorAffinity () ");
-    }
-    
-    /**
-     * Updates the data center by cluster type
-     * 
-     * @param datacenterMap
-     * @param clusterType
-     */
-    private void updateProcessorDatacenter(Map<String, String> datacenterMap, String clusterType) {
-
-        // fetch processor count
-        ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-
-        List<String> processorTypes = Arrays.asList(ProcessorType.REMOTEUPLOADER.getCode(), ProcessorType.REMOTEDOWNLOADER.getCode(), ProcessorType.SWEEPER.getCode(), ProcessorType.CONDITIONALSWEEPER.getCode());
-        List<String> processorGuids = dao.getProcessorGuids(clusterType, processorTypes);
-        int processorCount = processorGuids.size();
-        
-        if (0 == processorCount) {
-            LOGGER.info("No download processor exist for cluster type " + clusterType);
-            return;
-        }
-        
-        Map<String, List<String>> countMap = new HashMap<>();
-        int startValue = 0;
-        for (String dc : datacenterMap.keySet()) {
-
-            if (MailBoxUtil.isEmpty(datacenterMap.get(dc))) {
-                throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
-            }
-            int count = (int) Math.ceil((Integer.parseInt(datacenterMap.get(dc)) * processorCount) / 100);
-            countMap.put(dc, processorGuids.subList(startValue, count));
-            startValue = count;
-        }
-
-        List<String> subList;
-        for (String dc : countMap.keySet()) {
-            subList = countMap.get(dc);
-            if (!CollectionUtils.isEmpty(subList)) {
-                dao.updateProcessorDatacenter(dc, subList);
-            }
-        }
-    }
-    
-    /**
-     * Method fetch the Datacenter's and corresponding processors details.
-     * 
-     * @return GetDatacenterResponseDTO
-     */
-    public GetDatacenterResponseDTO getDatacenters() {
-
-        LOGGER.debug("Enter into getDatacenters () ");
-
-        GetDatacenterResponseDTO serviceResponse = new GetDatacenterResponseDTO();
-
-        try {
-
-            ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
-            List<ProcessorDTO> prsDTOList = null;
-            List<DatacenterDTO> dcDTOList = new ArrayList<DatacenterDTO>();
-            List<Processor> processors = null;
-            ProcessorDTO processorDTO = null;
-            // fetch the all datacenters
-            List<String> datacenters = dao.getAllDatacenters();
-            DatacenterDTO dcDTO = null;
-            for (String name : datacenters) {
-
-                if (null == name) {
-                    continue;
-                }
-                dcDTO = new DatacenterDTO();
-                dcDTO.setName(name);
-                // fetch the all Processor's
-                processors = dao.findProcessorsByDatacenter(name);
-                prsDTOList = new ArrayList<ProcessorDTO>();
-
-                for (Processor processor : processors) {
-                    processorDTO = new ProcessorDTO();
-                    processorDTO.copyFromEntity(processor, false);
-                    prsDTOList.add(processorDTO);
-                }
-
-                dcDTO.setProcessors(prsDTOList);
-                dcDTO.setTotalItems(prsDTOList.size());
-                dcDTOList.add(dcDTO);
-            }
-
-            serviceResponse.setDatacenetrs(dcDTOList);
-            serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, DATACENTER_PROCESSOR,
-                    Messages.SUCCESS));
-
-            LOGGER.debug("Exit from getDatacenters () ");
-
-        } catch (Exception e) {
-            LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
-            serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, DATACENTER_PROCESSOR,
-                    Messages.FAILURE, e.getMessage()));
-        }
-
-        return serviceResponse;
-    }
-
-    /**
      * Helper method validate the Processor type by deployment type
      * 
      * @param processorType
@@ -1643,22 +1447,5 @@ public class ProcessorConfigurationService {
                 return false;
         }
     }
-    
-    /**
-     * This method is used to update the process_dc to the current_Dc where the process_dc is null
-     */
-    public void updateProcessDc() {
-        new ProcessorConfigurationDAOBase().updateProcessDc();
-    }
-    
-    /**
-     * This method is used to update the downloader process_dc
-     */
-    public void updateDownloaderProcessDc(String existingProcessDC, String newProcessDC) {
-        
-        if (MailBoxUtil.isEmpty(existingProcessDC) || MailBoxUtil.isEmpty(newProcessDC)) {
-            throw new MailBoxConfigurationServicesException(Messages.PROCESS_DC_EMPTY, Response.Status.BAD_REQUEST);
-        }
-        new ProcessorConfigurationDAOBase().updateDownloaderProcessDc(existingProcessDC, newProcessDC);
-    }
+
 }

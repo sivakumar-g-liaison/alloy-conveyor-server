@@ -15,6 +15,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.ProcessorAffinityService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -39,14 +40,12 @@ import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorRes
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -2080,8 +2079,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testGetDatacenters() throws Exception {
-        ProcessorConfigurationService procService = new ProcessorConfigurationService();
-        GetDatacenterResponseDTO serviceResponse = procService.getDatacenters();
+        GetDatacenterResponseDTO serviceResponse = new ProcessorAffinityService().getDatacenters();
         Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
     }
     

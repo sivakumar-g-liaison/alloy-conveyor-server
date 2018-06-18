@@ -10,20 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -35,12 +21,25 @@ import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
-import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.ProcessorAffinityService;
 import com.liaison.mailbox.service.dto.configuration.request.UpdateProcessDCRequestDTO;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This is the gateway for update process dc.
@@ -70,8 +69,7 @@ public class UpdateProcessDcResource extends AuditedResource {
 	        public Object call() {
 	            
                 // updates datacenter of processors
-                ProcessorConfigurationService service = new ProcessorConfigurationService();
-                service.updateProcessDc();
+                new ProcessorAffinityService().updateProcessDc();
                 return marshalResponse(200, MediaType.TEXT_PLAIN, "Success");
 	        }
 	    };
@@ -106,7 +104,7 @@ public class UpdateProcessDcResource extends AuditedResource {
                     UpdateProcessDCRequestDTO updateProcessorDCRequestDTO = JAXBUtility.unmarshalFromJSON(requestString, UpdateProcessDCRequestDTO.class);
                     if (processDcList.contains(updateProcessorDCRequestDTO.getExistingProcessDC())
                     		&& processDcList.contains(updateProcessorDCRequestDTO.getNewProcessDC())) {
-                    	new ProcessorConfigurationService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
+                    	new ProcessorAffinityService().updateDownloaderProcessDc(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
                     	new StagedFileDAOBase().updateStagedFileProcessDC(updateProcessorDCRequestDTO.getExistingProcessDC(),updateProcessorDCRequestDTO.getNewProcessDC());
                     	return marshalResponse(Response.Status.OK.getStatusCode(), MediaType.TEXT_PLAIN, "Success");
                     } else {

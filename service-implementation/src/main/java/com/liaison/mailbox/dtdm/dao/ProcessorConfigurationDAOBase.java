@@ -41,6 +41,7 @@ import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1148,6 +1149,39 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         return results;
     }
+
+    /**
+     * Method retrieve the processors guids.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, String> getProcessorDetails(String clusterType, List<String> processorTypes) {
+
+        EntityManager entityManager = null;
+        List<Object[]> results;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            results =  entityManager.createNativeQuery(GET_PROCESSOR_DETAILS)
+                    .setParameter(CLUSTER_TYPE, clusterType)
+                    .setParameter(PROCESSOR_TYPE, processorTypes)
+                    .getResultList();
+
+            Map<String, String> resultMap = new HashMap<>();
+            for (Object[] result : results) {
+                resultMap.put((String) result[0], (String) result[1]);
+            }
+            return resultMap;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+    }
     
     /**
      * Method retrieve the processors count.
@@ -1210,6 +1244,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     /**
      * updater the process_Dc
      */
+    @Override
     public void updateProcessDc() {
         
         EntityManager entityManager = null;
@@ -1247,6 +1282,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
      * @param guid
      * @param dataCenter
      */
+    @Override
     public void updateProcessDcByGuid(String guid, String dataCenter) {
         
         EntityManager entityManager = null;
