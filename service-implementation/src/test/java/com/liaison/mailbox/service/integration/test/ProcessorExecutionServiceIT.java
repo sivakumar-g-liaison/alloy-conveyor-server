@@ -207,7 +207,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    @Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
     public void testDeactivateStagedFile() throws Exception {
     	
     	 // Adding the mailbox
@@ -256,7 +256,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    @Test(expectedExceptions = java.lang.RuntimeException.class, enabled = false)
     public void testDeactivateStagedFileWithUnknownStagedFile() throws Exception { 
     	
     	 // Adding the mailbox
