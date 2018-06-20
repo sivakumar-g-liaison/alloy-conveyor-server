@@ -5,7 +5,8 @@
 * GMB-1115 - UI to update the process dc of the processor
     * ACON integration changes on the affinity API and Staged file updates
     * Update the process dc of the staged of the Remote Uploader
-* GMB-1119 - HTTP Async Clean up    
+* GMB-1119 - HTTP Async Clean up
+* GMB-1129 - Mailbox - Staged Files:Process DC value was incorrect in staged Files details screen  
 
 5.2.14
 ---------------
