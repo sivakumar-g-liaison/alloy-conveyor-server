@@ -32,9 +32,9 @@
 	                   </div>
 	                   <div class="modal-body">
 	                       <div class="row">
-	                           <b>File name:</b> {{selectedFile.name}} <br><br>
+	                           <b>File name:</b> <p>{{selectedFile.name}}</p> <br><br>
 	                           <b>File size:</b> {{selectedFile.fileSize}} <br><br>
-	                           <b>File path:</b> {{selectedFile.path}} <br><br>
+	                           <b>File path:</b> <p>{{selectedFile.path}}</p> <br><br>
 	                           <b>Global process id:</b> {{selectedFile.globalProcessId}} <br><br>
 	                           <b>Mailbox id:</b> {{selectedFile.mailboxGuid}} <br><br>
 	                           <div ng-hide="javaProperties.deployAsDropbox"><b>Processor type:</b> {{selectedFile.processorType}} <br><br></div>
@@ -44,7 +44,7 @@
 	                           <b>Created on:</b> {{selectedFile.createdDate}} <br><br>
 	                           <b>Modified on:</b> {{selectedFile.modifiedDate}} <br><br>
                                <b>Cluster Type:</b> {{selectedFile.clusterType}} <br><br>
-                               <b>Process DC:</b> {{selectedFile.clusterType}} <br><br>
+                               <b>Process DC:</b> {{selectedFile.processDc}} <br><br>
 	                       </div>
 	                   </div>
 	                   <div class="modal-footer">

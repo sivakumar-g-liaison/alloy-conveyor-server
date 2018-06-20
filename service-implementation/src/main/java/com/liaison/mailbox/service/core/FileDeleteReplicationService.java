@@ -30,12 +30,14 @@ import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType.FILE_DELETE;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
@@ -72,44 +74,79 @@ public class FileDeleteReplicationService {
             String fileName = path.substring(path.lastIndexOf("/") + 1);
 
             StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-            StagedFile deletedStagedFile = stagedFileDAO.findStagedFilesByFileNameAndPath(filePath, fileName, Arrays.asList(ProcessorType.FILEWRITER.getCode(), ProcessorType.REMOTEUPLOADER.getCode()));
-            if (null != deletedStagedFile) {
+
+            //We do not set the DELETED status in StagedFile and the idea is to get the entities irrespective of the FILE STAGE STATUS
+            StagedFile stagedFile = stagedFileDAO.findStagedFilesByFileNameAndPath(
+                    filePath,
+                    fileName,
+                    EntityStatus.DELETED.value(),
+                    Arrays.asList(ProcessorType.FILEWRITER.getCode(), ProcessorType.REMOTEUPLOADER.getCode()));
+            if (null != stagedFile) {
                 ThreadContext.clearMap();
-                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, deletedStagedFile.getGPID());
+                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, stagedFile.getGPID());
 
-                deletedStagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-                deletedStagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
-                stagedFileDAO.merge(deletedStagedFile);
-
-                if (ProcessorType.FILEWRITER.getCode().equals(deletedStagedFile.getProcessorType())) {
-
-                    GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-                    glassMessageDTO.setGlobalProcessId(deletedStagedFile.getGPID());
-                    glassMessageDTO.setProcessorType(ProcessorType.findByName(deletedStagedFile.getProcessorType()));
-                    glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
-                    glassMessageDTO.setFileName(fileName);
-                    glassMessageDTO.setFilePath(filePath);
-                    glassMessageDTO.setFileLength(0);
-                    glassMessageDTO.setStatus(ExecutionState.COMPLETED);
-                    glassMessageDTO.setMessage("File is picked/deleted by the customer");
-                    glassMessageDTO.setPipelineId(null);
-                    glassMessageDTO.setFirstCornerTimeStamp(null);
-
-                    MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-                    LOGGER.info("Updated LENS status for the file " + deletedStagedFile.getFileName() + " and location is " + deletedStagedFile.getFilePath());
-                } else {
-                    LOGGER.info("The processor type is Remote Uploader and ignoring the glass updates");
+                //handle filewriter logic
+                if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
+                    handleFilewriter(message, filePath, fileName, stagedFileDAO, stagedFile);
+                } else { //handle remote uploader logic
+                    handleRemoteUploader(message, stagedFileDAO, stagedFile);
                 }
-
-                //Post the deleted message to other datacenter
-                Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
             } else {
-                LOGGER.info("File " + fileName + " in location " + filePath + " is might be deleted by WatchDogService");
+                LOGGER.warn("Invalid file path {} and filename {}", filePath, fileName);
             }
 
         } finally {
             ThreadContext.clearMap();
         }
+    }
+
+    private void handleFilewriter(KafkaMessage message, String filePath, String fileName, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
+
+        if (EntityStatus.INACTIVE.value().equals(stagedFile.getStagedFileStatus())) {
+            // Ignore if it is already in-active state
+            LOGGER.info("File " + fileName + " in location " + filePath + " is might be deleted by WatchDogService");
+            return;
+        }
+
+        stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+        stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
+        stagedFileDAO.merge(stagedFile);
+
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+        glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
+        glassMessageDTO.setFileName(fileName);
+        glassMessageDTO.setFilePath(filePath);
+        glassMessageDTO.setFileLength(0);
+        glassMessageDTO.setStatus(ExecutionState.COMPLETED);
+        glassMessageDTO.setMessage("File is picked/deleted by the customer");
+        glassMessageDTO.setPipelineId(null);
+        glassMessageDTO.setFirstCornerTimeStamp(null);
+
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+        LOGGER.info("Updated LENS status for the file " + stagedFile.getFileName() + " and location is " + stagedFile.getFilePath());
+
+        //Post the deleted message to other datacenter
+        Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+    }
+
+    private void handleRemoteUploader(KafkaMessage message, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
+
+        if (EntityStatus.INACTIVE.value().equals(stagedFile.getStagedFileStatus())) {
+            //Post the deleted message to other datacenter
+            if (MailBoxUtil.DATACENTER_NAME.equals(stagedFile.getProcessDc())) {
+                Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+                LOGGER.info("File {} may be deleted by WatchDogService", message.getFileDeleteMessage());
+            }
+        } else {
+
+            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+            stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
+            stagedFileDAO.merge(stagedFile);
+            Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+        }
+
     }
 
     /**

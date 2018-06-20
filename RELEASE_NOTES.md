@@ -1,3 +1,9 @@
+5.2.16
+---------------
+* GMB-1129 - Mailbox - Staged Files:Process DC value was incorrect in staged Files details screen
+* PX1U DB Service name updates
+* GMB-1116 - Replicate remote uploader files when it is using file system - Delete replication issue fixes
+
 5.2.15
 ---------------
 * GMB-1116 - Replicate remote uploader files when it is using file system
