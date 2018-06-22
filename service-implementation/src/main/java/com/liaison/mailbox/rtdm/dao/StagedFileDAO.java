@@ -107,9 +107,10 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
      *
      * @param filePath file path
      * @param fileName name
+     * @param status status to be excluded
      * @return staged file
      */
-    StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, List<String> processorTypes);
+    StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, String status, List<String> processorTypes);
     
     /**
      * Update the StagedFile Status by processorId
