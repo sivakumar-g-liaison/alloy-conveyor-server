@@ -556,10 +556,9 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
     /**
      * Returns staged file entries by filename and file path for file writer processor.
-     *
      */
     @Override
-    public StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, List<String> processorTypes) {
+    public StagedFile findStagedFilesByFileNameAndPath(String filePath, String fileName, String status, List<String> processorTypes) {
 
         EntityManager entityManager = null;
 
@@ -569,7 +568,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
                     .setParameter(FILE_PATH, filePath)
                     .setParameter(FILE_NAME, fileName)
                     .setParameter(TYPE, processorTypes)
-                    .setParameter(STATUS, EntityStatus.INACTIVE.value())
+                    .setParameter(STATUS, status)
                     .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
 
