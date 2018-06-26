@@ -1,5 +1,6 @@
 5.3.0-SNAPSHOT
 ---------------
+* GSB-3232 - Need to increase HTTP processor limit to >10MB
 
 5.2.16
 ---------------
