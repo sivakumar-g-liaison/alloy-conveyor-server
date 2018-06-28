@@ -349,6 +349,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      */
     List<Processor> findProcessorsByDatacenter(String dcName);
 
+
+    /**
+     * Method to update the datacenter
+     */
+    void updateDatacenters(int option);
+
     StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
             .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
             .append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")
@@ -428,6 +434,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
             .append(" AND PROCESS_DC !='ALL'").toString();
+
+    String UPDATE_ORIGINATING_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
+            .append(" SET ORIGINATING_DC =:" + DATACENTER)
+            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
+            .toString();
 
     String UPDATE_PROCESS_DC_BY_GUID = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)

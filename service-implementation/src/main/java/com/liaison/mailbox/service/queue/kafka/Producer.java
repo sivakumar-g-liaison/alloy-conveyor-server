@@ -40,12 +40,11 @@ import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
 import static com.liaison.mailbox.MailBoxConstants.URI;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_LEGACY_RELAY_PRODUCER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_PRODUCER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.META_MAX_AGE_MS;
@@ -75,8 +74,8 @@ public class Producer {
             TOPIC_NAME_CREATE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
             TOPIC_NAME_DELETE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_DELETE_DEFAULT);
         } else {
-            TOPIC_NAME_CREATE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_LOWSECURE);
-            TOPIC_NAME_DELETE = configuration.getString(KAFKA_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_DELETE_LOWSECURE);
+            TOPIC_NAME_CREATE = configuration.getString(KAFKA_LEGACY_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
+            TOPIC_NAME_DELETE = configuration.getString(KAFKA_LEGACY_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_DELETE_DEFAULT);
         }
 
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {

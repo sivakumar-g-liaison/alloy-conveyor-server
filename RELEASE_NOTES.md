@@ -1,3 +1,8 @@
+5.2.17
+---------------
+* Kafka Properties update
+* Migration Service to update originating dc and process dc in processors and staged file
+
 5.2.16
 ---------------
 * GMB-1129 - Mailbox - Staged Files:Process DC value was incorrect in staged Files details screen
