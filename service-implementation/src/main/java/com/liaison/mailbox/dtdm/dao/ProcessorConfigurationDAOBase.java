@@ -1277,6 +1277,50 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
     }
 
     /**
+     * updater the process_Dc where the process dc is not ALL
+     */
+    @Override
+    public void updateDatacenters(int option) {
+
+        EntityManager entityManager = null;
+        EntityTransaction tx = null;
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            tx = entityManager.getTransaction();
+            tx.begin();
+
+            //update the Processor ORIGINATING_DC
+            if (1 == option) {
+                entityManager.createNativeQuery(UPDATE_ORIGINATING_DC_TO_CURRENT_DC)
+                        .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                        .executeUpdate();
+            }
+
+            //update the Processor PROCESS_DC
+            if (2 == option) {
+                entityManager.createNativeQuery(UPDATE_PROCESS_DC_TO_CURRENT_DC)
+                        .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
+                        .executeUpdate();
+            }
+
+            //commits the transaction
+            tx.commit();
+
+        } catch (Exception e) {
+            if (null != tx && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+
+    }
+
+    /**
      * updater the process_Dc by guid
      * 
      * @param guid
