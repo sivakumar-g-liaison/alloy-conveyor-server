@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -47,6 +48,7 @@ public class DatacenterMigrationResource extends AuditedResource {
     @ApiOperation(value = "update the process_dc", notes = "update the process_dc", position = 1)
     @Produces(MediaType.TEXT_PLAIN)
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @AccessDescriptor(skipFilter = true)
     public Response migrate(@Context final HttpServletRequest request,
                             @QueryParam(value = "option") @ApiParam(name = "option", required = true, value = "option to update the dc") final int option) {
 

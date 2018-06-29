@@ -435,11 +435,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
             .append(" AND PROCESS_DC !='ALL'").toString();
 
-    String UPDATE_ORIGINATING_DC_TO_CURRENT_DC = new StringBuilder().append("UPDATE PROCESSOR")
-            .append(" SET ORIGINATING_DC =:" + DATACENTER)
-            .append(" WHERE PROCESS_DC IS NULL AND STATUS <> 'DELETED'")
-            .toString();
-
     String UPDATE_PROCESS_DC_BY_GUID = new StringBuilder().append("UPDATE PROCESSOR")
             .append(" SET PROCESS_DC =:" + DATACENTER)
             .append(" WHERE PGUID =:" + PGUID)

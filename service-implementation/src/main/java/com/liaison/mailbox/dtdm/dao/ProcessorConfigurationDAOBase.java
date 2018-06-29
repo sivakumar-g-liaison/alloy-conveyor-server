@@ -1292,14 +1292,15 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
             //update the Processor ORIGINATING_DC
             if (1 == option) {
-                entityManager.createNativeQuery(UPDATE_ORIGINATING_DC_TO_CURRENT_DC)
+                entityManager.createNativeQuery("UPDATE PROCESSOR SET ORIGINATING_DC =:" + DATACENTER +" WHERE STATUS <> 'DELETED'")
                         .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
                         .executeUpdate();
             }
 
             //update the Processor PROCESS_DC
             if (2 == option) {
-                entityManager.createNativeQuery(UPDATE_PROCESS_DC_TO_CURRENT_DC)
+
+                entityManager.createNativeQuery("UPDATE PROCESSOR SET PROCESS_DC =:" + DATACENTER +" WHERE STATUS <> 'DELETED'" + " AND PROCESS_DC !='ALL'")
                         .setParameter(DATACENTER, MailBoxUtil.DATACENTER_NAME)
                         .executeUpdate();
             }
