@@ -1,3 +1,7 @@
+5.2.18
+---------------
+* Migration Service changes (ACL disabled)
+
 5.2.17
 ---------------
 * Kafka Properties update
