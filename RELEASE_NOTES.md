@@ -1,3 +1,8 @@
+5.3.0-SNAPSHOT
+---------------
+* GSB-3232 - Need to increase HTTP processor limit to >10MB
+* GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
+
 5.2.18
 ---------------
 * Migration Service changes (ACL disabled)
@@ -37,6 +42,8 @@
 * GC-158 - Mailbox:processor list/read operation returns only a small subset of fields
 * GMB-1086 - Add Watchdog cleanup to lens event log
 * GMB-1101 - Processors' retryInterval-property should be supported
+* GGT-1581 - PX1 US UAT and PROD properties update
+* GMB-658 Mailbox updated with new 'tenancyKey' and invalid 'serviceInstance_pguid'.
 
 5.2.13
 ---------------
