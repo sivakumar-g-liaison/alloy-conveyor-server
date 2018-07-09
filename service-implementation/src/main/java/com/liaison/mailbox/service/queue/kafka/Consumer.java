@@ -30,24 +30,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_COMMIT_INTERVAL_MS;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_COMMIT_INTERVAL_MS_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.AUTO_OFFSET_RESET_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.GROUP_ID;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_CONSUMER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_FILE_EVENT_READER_CONSUMER_STREAM;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_LEGACY_RELAY_CONSUMER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_CONSUMER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_FS_EVENT_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_FS_EVENT_LOWSECURE;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_DESERIALIZER_DEFAULT;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.MAX_PARTITION_FETCH_BYTES;
-import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.MAX_PARTITION_FETCH_BYTES_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.VALUE_DESERIALIZER_DEFAULT;
 
@@ -59,15 +54,15 @@ public class Consumer extends ThreadPoolExecutor {
 
     private static final Logger LOG = LogManager.getLogger(Consumer.class);
     private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
-    
+
     private static final String STREAM_CREATE_DEFAULT = CONFIGURATION.getString(KAFKA_RELAY_CONSUMER_STREAM)
             + CONFIGURATION.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
     private static final String STREAM_DELETE_DEFAULT = CONFIGURATION.getString(KAFKA_RELAY_CONSUMER_STREAM)
             + CONFIGURATION.getString(KAFKA_TOPIC_NAME_DELETE_DEFAULT);
-    private static final String STREAM_CREATE_LEGACY = CONFIGURATION.getString(KAFKA_RELAY_CONSUMER_STREAM)
-            + CONFIGURATION.getString(KAFKA_TOPIC_NAME_CREATE_LOWSECURE);
-    private static final String STREAM_DELETE_LEGACY = CONFIGURATION.getString(KAFKA_RELAY_CONSUMER_STREAM)
-            + CONFIGURATION.getString(KAFKA_TOPIC_NAME_DELETE_LOWSECURE);
+    private static final String STREAM_CREATE_LEGACY = CONFIGURATION.getString(KAFKA_LEGACY_RELAY_CONSUMER_STREAM)
+            + CONFIGURATION.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
+    private static final String STREAM_DELETE_LEGACY = CONFIGURATION.getString(KAFKA_LEGACY_RELAY_CONSUMER_STREAM)
+            + CONFIGURATION.getString(KAFKA_TOPIC_NAME_DELETE_DEFAULT);
     private static final String FS_EVENT_STREAM = CONFIGURATION.getString(KAFKA_FILE_EVENT_READER_CONSUMER_STREAM)
             + CONFIGURATION.getString(KAFKA_TOPIC_NAME_FS_EVENT_DEFAULT);
     private static final String FS_EVENT_STREAM_LEGACY = CONFIGURATION.getString(KAFKA_FILE_EVENT_READER_CONSUMER_STREAM)

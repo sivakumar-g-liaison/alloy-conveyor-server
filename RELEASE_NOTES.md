@@ -1,6 +1,16 @@
 5.3.0-SNAPSHOT
 ---------------
 * GSB-3232 - Need to increase HTTP processor limit to >10MB
+* GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
+
+5.2.18
+---------------
+* Migration Service changes (ACL disabled)
+
+5.2.17
+---------------
+* Kafka Properties update
+* Migration Service to update originating dc and process dc in processors and staged file
 
 5.2.16
 ---------------

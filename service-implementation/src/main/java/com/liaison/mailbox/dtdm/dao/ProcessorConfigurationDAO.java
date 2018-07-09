@@ -349,6 +349,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      */
     List<Processor> findProcessorsByDatacenter(String dcName);
 
+
+    /**
+     * Method to update the datacenter
+     */
+    void updateDatacenters(int option);
+
     StringBuilder PROCESSOR_RETRIEVAL_BY_TYPE_AND_MBX_ID_QUERY = new StringBuilder()
             .append("SELECT DISTINCT P.PGUID AS PROCESSOR_GUID, P.TYPE, P.PROTOCOL, P.PROPERTIES, P.STATUS AS PROCSR_STATUS,")
             .append(" PP.NAME AS PROCSR_PROP_NAME, PP.VALUE AS PROC_PROP_VALUE,")

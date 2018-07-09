@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -24,6 +25,7 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,7 +77,7 @@ public class DirectoryCreationUtil {
             throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY, filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
         }
 
-        createFoldersAndAssignProperPermissions(filePathToCreate);
+        createFoldersAndAssignProperPermissionsV2(filePathToCreate);
     }
 
     /**
@@ -84,12 +86,11 @@ public class DirectoryCreationUtil {
      * @param filePathToCreate - file Path which is to be created
      * @throws IOException
      */
-    private static void createFoldersAndAssignProperPermissions(Path filePathToCreate)
-            throws IOException {
+    private static void createFoldersAndAssignProperPermissions(Path filePathToCreate) throws IOException {
 
         FileSystem fileSystem = FileSystems.getDefault();
         Files.createDirectories(filePathToCreate);
-        LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
+        LOGGER.debug("Folders {} created.Starting with Group change.", filePathToCreate);
         UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
         String group = getGroupFor(filePathToCreate.getName(1).toString());
         LOGGER.debug("group  name - {}", group);
@@ -120,5 +121,46 @@ public class DirectoryCreationUtil {
 
     private static String getGroupFor(String protocol) {
         return MailBoxUtil.getEnvironmentProperties().getString(protocol + ".group.name");
+    }
+
+    /**
+     * Method to create the given path and assign proper group and permissions to the created folders
+     *
+     * @param filePathToCreate - file Path which is to be created
+     * @throws IOException
+     */
+    public static void createFoldersAndAssignProperPermissionsV2(Path filePathToCreate) throws IOException {
+
+        FileSystem fileSystem = FileSystems.getDefault();
+        UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
+        String group = getGroupFor(filePathToCreate.getName(1).toString());
+        LOGGER.debug("group  name - {}", group);
+        GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
+        // skip when reaching inbox/outbox
+        Path subPath = getSubPath(filePathToCreate);
+        if (null != subPath) {
+            Path parent = filePathToCreate.subpath(0, 4);
+            for (int i = 0; i < subPath.getNameCount(); i++) {
+                parent = Paths.get(parent.toString(), subPath.getName(i).toString());
+                if (!Files.exists(parent)) {
+                    LOGGER.info("creating directory {}", parent.getFileName());
+                    Files.createDirectories(parent);
+                    LOGGER.info("setting file attribute and permissions {}", parent.getFileName());
+                    Files.getFileAttributeView(parent, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
+                    Files.setPosixFilePermissions(parent, PosixFilePermissions.fromString(FOLDER_PERMISSION));
+                    LOGGER.info("done setting file attribute and permissions {}", parent.getFileName());
+                }
+            }
+        }
+
+        LOGGER.info("Done setting group");
+    }
+
+    private static Path getSubPath(Path path) {
+        if (path.getNameCount() > 4) {
+            return path.subpath(4, path.getNameCount());
+        }
+        return null;
     }
 }

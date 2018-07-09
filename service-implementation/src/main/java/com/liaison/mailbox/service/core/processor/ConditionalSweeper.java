@@ -162,7 +162,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     .filter(p -> (new File(p.toUri()).listFiles().length == 0))
                     .filter(p -> (!new File(p.toUri()).getPath().equals(inputLocation)))
                     .map(Path::toFile)
-                    .forEach(File::delete);
+                    .forEach(file -> LOGGER.info("Deleting the empty directory {} and delete status is {}", file.toPath(), file.delete()));
             }
 
             long endTime = System.currentTimeMillis();

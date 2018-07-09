@@ -748,6 +748,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
      *
      * @param newProcessDC
      */
+    @Override
     public void updateStagedFileProcessDC(String newProcessDC) {
 
         EntityManager entityManager = null;
