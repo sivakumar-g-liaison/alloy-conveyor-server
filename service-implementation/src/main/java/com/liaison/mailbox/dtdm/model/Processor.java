@@ -61,7 +61,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                 query = "SELECT processor FROM Processor processor"
                         + " WHERE processor.processDc = :" + ProcessorConfigurationDAO.DATACENTER_NAME
                         + " AND processor.procsrStatus <> 'DELETED' "
-                        + " AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")"),             
+                        + " AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")"),
+        @NamedQuery(name = ProcessorConfigurationDAO.FIND_SWEEPER_PROCESSORS_FOR_FILE_INGRESS,
+                query = "SELECT processor FROM Processor processor"
+                        + " WHERE processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")"
+                        + " AND processor.procsrStatus <> 'DELETED' "
+                        + " AND processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE), 
         @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX,
                 query = "SELECT processor FROM Processor processor"
                         + " INNER JOIN processor.mailbox mbx" + " WHERE mbx.pguid = :"

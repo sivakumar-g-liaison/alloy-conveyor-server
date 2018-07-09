@@ -39,6 +39,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String FIND_PROCESSOR_BY_NAME = "Processor.findProcessorByName";
     String GET_CLUSTER_TYPE_BY_PROCESSOR_GUID = "Processor.getClusterType";
     String FIND_PROCESSORS_BY_DATACENTER = "Processor.findProcessorsByDatacenter";
+    String FIND_SWEEPER_PROCESSORS_FOR_FILE_INGRESS = "Processor.listSweeperProcessors";
 
     String PROF_NAME = "sch_prof_name";
     String MBX_NAME = "mbx_name";
@@ -388,6 +389,13 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @return list of processors
      */
     List<Processor> findProcessorsByDatacenter(String dcName);
+    
+    /**
+     * Retrieve sweeper processors
+     * 
+     * @return processors
+     */
+    List<Processor> listSweeperProcessors();
 
 
     /**

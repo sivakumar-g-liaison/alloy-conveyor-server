@@ -3,6 +3,7 @@
 * GSB-3232 - Need to increase HTTP processor limit to >10MB
 * GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
 * GMB-919 -Implement Scripts User Interface
+* GMB-1117 - Return list of the stuck files from sweepers
 
 5.2.18
 ---------------

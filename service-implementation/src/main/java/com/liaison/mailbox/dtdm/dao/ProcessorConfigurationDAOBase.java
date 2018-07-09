@@ -46,6 +46,7 @@ import javax.persistence.criteria.ParameterExpression;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1580,5 +1581,36 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             }
         }
 
+    }
+
+    /**
+     * Retrieve sweeper processors.
+     * 
+     * @return  list of processors
+     */
+    @Override
+    public List<Processor> listSweeperProcessors() {
+
+        EntityManager entityManager = null;
+        List<Processor> processors = new ArrayList<>();
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            List<?> proc = entityManager.createNamedQuery(FIND_SWEEPER_PROCESSORS_FOR_FILE_INGRESS)
+                    .setParameter(ProcessorConfigurationDAO.PROCESSOR_TYPE, Arrays.asList(ProcessorType.SWEEPER.getCode(), ProcessorType.CONDITIONALSWEEPER.getCode()))
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .getResultList();
+
+            for (Object processor : proc) {
+                processors.add((Processor) processor);
+            }
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return processors;
     }
 }
