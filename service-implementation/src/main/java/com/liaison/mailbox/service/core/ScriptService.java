@@ -19,12 +19,14 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.gitlab.api.models.GitlabCommit;
 
 import com.liaison.commons.util.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ScriptServiceDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GitlabCommitResponse;
 import com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -210,5 +212,30 @@ public class ScriptService {
 		return uri;
 
 	}
+	
+	/**
+     * Expects format of gitlab:/somepath/somefile
+     *
+     * @param url
+     * @return
+     */
+    public GitlabCommitResponse getFileLastCommitHistory(String url) {
+        
+        GitlabCommit gitlabResponse = null;
+        GitlabCommitResponse serviceResponse = new GitlabCommitResponse();
+
+        url = url.substring(8); // strip off "gitlab:/"
+
+        try {
+            gitlabResponse = gitlab.getFileLastCommitHistory(url);
+            serviceResponse.setGitlabCommit(gitlabResponse);
+            serviceResponse.setStatus(Response.Status.OK.getStatusCode());
+            serviceResponse.setMessage("Commit history retrived successcully");
+        } catch (IOException e) {
+            serviceResponse.setStatus(Response.Status.NOT_FOUND.getStatusCode());
+        }
+        
+        return serviceResponse;
+    }
 
 }

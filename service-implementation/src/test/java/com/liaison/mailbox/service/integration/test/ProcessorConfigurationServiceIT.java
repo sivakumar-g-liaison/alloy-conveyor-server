@@ -1556,7 +1556,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testDeleteProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
-    	
+        
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
@@ -1608,7 +1608,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testReadDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
-    	
+        
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
@@ -1666,8 +1666,8 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testListDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
-    	
-    	// Adding the mailbox
+        
+        // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
         requestDTO.setMailBox(mbxDTO);
@@ -1728,7 +1728,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testTriggerProfileForDeletedProcessor() throws JAXBException, IOException, IllegalAccessException, NoSuchFieldException {
-    	
+        
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
@@ -2145,7 +2145,7 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
      */
     @Test
     public void testGetProcessorNamesWithEmpty() throws Exception {
-    	
+        
         // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
         MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);

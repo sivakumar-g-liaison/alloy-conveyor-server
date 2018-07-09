@@ -2,6 +2,7 @@
 ---------------
 * GSB-3232 - Need to increase HTTP processor limit to >10MB
 * GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
+* GMB-919 -Implement Scripts User Interface
 
 5.2.18
 ---------------
@@ -25,6 +26,8 @@
 * GMB-1115 - UI to update the process dc of the processor
     * ACON integration changes on the affinity API and Staged file updates
     * Update the process dc of the staged of the Remote Uploader
+* GMB-1119 - HTTP Async Clean up   
+* GMB-1129 - Mailbox - Staged Files:Process DC value was incorrect in staged Files details screen
 * GGT-1581 - PX1 US UAT and PROD properties update
 * GMB-1119 - HTTP Async Clean up
 * GMB-658 Mailbox updated with new 'tenancyKey' and invalid 'serviceInstance_pguid'.

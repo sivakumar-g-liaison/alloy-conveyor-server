@@ -158,6 +158,7 @@ public interface MailBoxConstants {
     String KEY_TRIGGER_FILE_PARENT_GPID = "triggerFileParentGpid";
     String KEY_TRIGGER_FILE_URI = "triggerFileUri";
     String KEY_IS_BATCH_TRANSACTION = "isBatchTransaction";
+    String SCRIPT = "Script";
 
     String TARGET_DIRECTORY_MODE_OVERWRITE = "overwrite";
 

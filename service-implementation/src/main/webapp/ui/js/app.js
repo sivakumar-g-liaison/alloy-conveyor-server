@@ -74,6 +74,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/processor/updateProcessorDc.html',
             controller: 'UpdateProcessorDcCntrlr'
         });
+        $routeProvider.when('/mailbox/getProcessorScript', {
+            templateUrl: 'partials/processor/processorScript.html',
+            controller: 'ProcessorScriptCntrlr'
+        });
         $routeProvider.when('/mailbox/getexecutingprocessors', {
             templateUrl: 'partials/processor/executingprocessors.html',
             controller: 'executingprocessorsCntrlr'

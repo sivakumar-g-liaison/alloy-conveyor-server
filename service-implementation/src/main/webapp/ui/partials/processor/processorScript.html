@@ -1,0 +1,67 @@
+<div class="container fade-in">
+   <div class="form-row">
+      <h3 id="title" class="ng-binding">Processor Scripts</h3>
+      <hr/>
+   </div>
+   
+   <!-- Loading image will be shown until grid is loaded -->
+   <div class="loadingSpinner" id="loader" ng-cloak ng-hide="gridLoaded">
+      <h4>Loading Processors...</h4>
+      <img height="96px" src="img/spinner.gif" />
+   </div>
+   <div>
+      <div class="gridStyle" ng-grid="gridOptionsForProcessorScript" ng-if="gridLoaded"></div>
+      <br>
+   </div>
+   <div ng-show="isScriptSelected">
+      <ng-form id="scripTemplateForm" name="scriptTemplate">
+         <hr class="ng-scope">
+         <div style="text-align: center;">
+            <h3 id="scriptSelectedName">{{scriptTemplateName}}</h3>
+         </div>
+         <div class="row">
+            <div class="col-md-3">
+               <div class="form-group">
+                  <div id="gitlabLastModifiedBy" class="control-label"><b>Gitlab Last Modified By</b></div>
+                  {{gitlabLastModifiedBy}}
+               </div>
+            </div>
+            <div class="col-md-3">
+               <div class="form-group">
+                  <div id="gitlablastModified" class="control-label"><b>Gitlab Last Modified Date</b></div>
+                  {{gitlabLastModified | date : "fullDate"}}
+               </div>
+            </div>
+         </div>
+		 <button id="toggleMessage" class="btn btn-primary" style="float: right;" type="button"
+			ng-click="toggle=!toggle">{{toggle ? 'Show Script' :
+			'Hide Script'}}</button>
+			</br>
+		<div ng-hide="toggle">
+			<label> Edit Script </label>
+			<div id="aceEditor" readonly="{{disable}}"
+				ui-ace="{onLoad : scriptContent,
+               theme : 'monokai',
+               useWrapMode : true,
+               showGutter: true,
+               mode: 'json'
+               }"
+				class="editScriptFileModal_ace_editor"></div>
+			<br>
+			<button id="btnSaveFltr" class="btn btn-primary" type="button"
+				style="float: right;" ng-click="save()"
+				ng-disabled="saveScriptFileForm.$invalid || loader">Update
+			</button>
+			<br>
+
+		</div>
+		<br />
+      </ng-form>
+   </div>
+   <div id="processorScriptDetController" ng-controller="processorScriptDetController" ng-if="showItems">
+      <div ng-include="'partials/processor/processorScriptDetail.html'">
+         <h4>Processor Details</h4>
+      </div>
+   </div>
+</div>
+ <script type="text/javascript" src="js/utils/MessageDialog.js"></script>

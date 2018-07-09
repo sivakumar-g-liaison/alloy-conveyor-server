@@ -65,6 +65,7 @@ public class BaseResource {
     public static final String MULTIPLE = "MULTIPLE";
     private static final int MAX_STATUS_CODE = 299;
 	protected static final String HARD_DELETE = "hardDelete";
+    protected static final String SCRIPT_NAME = "scriptName";
 
     protected void auditAttempt(String message) {
 

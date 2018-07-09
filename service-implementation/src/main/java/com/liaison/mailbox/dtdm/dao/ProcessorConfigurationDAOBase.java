@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.StringUtil;
@@ -26,8 +28,11 @@ import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorScriptDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -37,6 +42,7 @@ import org.apache.log4j.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.criteria.ParameterExpression;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,6 +56,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
+import static com.liaison.mailbox.MailBoxConstants.CLUSTER_TYPE;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
@@ -436,6 +443,79 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         return processors;
     }
+    
+    @SuppressWarnings("unchecked")
+    public List<Processor> getScriptLinkedProcessors(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails, String filterText) {
+
+        EntityManager entityManager = null;
+        List<Processor> processors = new ArrayList<>();
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            LOG.debug("Fetching the script linked processor starts.");
+            FilterText filterTextObj = new FilterText();
+
+            StringBuilder query = new StringBuilder(PROCESSOR_RETRIEVAL_BY_SCRIPTURI);
+            if (!MailBoxUtil.isEmpty(filterText)) {
+                GsonBuilder builder = new GsonBuilder();
+                builder.registerTypeAdapter(FilterMatchMode.class, new UppercaseEnumAdapter());
+                filterTextObj = builder.create().fromJson(filterText, FilterText.class);
+            }
+
+            genrateQueryByFilterText(filterTextObj, query);
+            addSortDirections(searchFilter, query);
+
+            processors = entityManager.createQuery(query.toString())
+                    .setParameter(SCRIPT_NAME, searchFilter.getScriptName())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT)).getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        
+        LOG.debug("Fetching the script linked processor ends.");
+        return processors;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<String> getAllScriptURI(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails) {
+
+        EntityManager entityManager = null;
+        List<String> scriptURIList = null;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            StringBuilder query = new StringBuilder(GET_PROCESSOR_JAVASCRIPT_URI);
+            addSortDirectionsByScriptURI(searchFilter,query);
+            
+            LOG.debug("Fetching the script linked processor starts.");
+            scriptURIList = entityManager.createQuery(query.toString())
+                    .setParameter(SCRIPT_NAME, "%" + (MailBoxUtil.isEmpty(searchFilter.getScriptName()) ? "" : searchFilter.getScriptName().toLowerCase()) + "%")
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+                    .getResultList();
+     
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        
+        LOG.debug("Fetching the scriptURI ends.");
+        return scriptURIList;
+    }
 
     private Class<?> getProcessorClass(String processorCode) {
 
@@ -531,9 +611,56 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     query.append(" order by mailbox.mbxStatus ")
                             .append(sortDirection);
                     break;
+                case SORT_GUID:
+                    query.append(" order by processor.pguid ")
+                            .append(sortDirection);
+                    break;
             }
         } else {
             query.append(" order by processor.procsrName");
+        }
+    }
+    
+    private void genrateQueryByFilterText(FilterText filterTextObj, StringBuilder query) {
+
+        if (null != filterTextObj.getFilterTextListObject()) {
+
+            List<FilterObject> searchFilterObjects = filterTextObj.getFilterTextListObject();
+            for (FilterObject entry : searchFilterObjects) {
+
+                String field = entry.getField();
+
+                if (NAME.equals(field)) {
+                    query.append(" AND LOWER(processor.procsrName) LIKE '%").append(entry.getText().toLowerCase())
+                            .append("%' ");
+                } else if (GUID.equals(field)) {
+                    query.append(" AND LOWER(processor.pguid) ='").append(entry.getText().toLowerCase())
+                            .append("' ");
+                }
+
+            }
+        }
+
+    }
+    
+    private void addSortDirectionsByScriptURI(GenericSearchFilterDTO searchFilter, StringBuilder query) {
+
+        String sortDirection = searchFilter.getSortDirection();
+        
+        if (!(StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+            
+            query.append(" order by processor.javaScriptUri ");
+            sortDirection = sortDirection.toLowerCase();
+            switch (sortDirection) {
+                case SORT_ACS:
+                    query.append(sortDirection);
+                    break;
+                case SORT_DESC:
+                    query.append(sortDirection);
+                break;
+            }
+        } else {
+            query.append(" order by processor.javaScriptUri");
         }
     }
 
@@ -587,7 +714,66 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
         return count;
     }
+    
+    @Override
+    public int getFilteredScriptLinkedProcessorsCount(GenericSearchFilterDTO searchDTO) {
 
+        EntityManager entityManager = null;
+        Long totalItems;
+        int count;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            
+            LOG.debug("Fetching the number of processors based on scriptURI starts.");
+            totalItems = ((BigDecimal) entityManager.createNativeQuery(GET_PROCESSOR_COUNT_BY_JAVASCRIPT_URI)
+                    .setParameter(SCRIPT_NAME, searchDTO.getScriptName())
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .getSingleResult()).longValue();
+
+            count = totalItems.intValue();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+
+        LOG.debug("Fetching the processor count ends.");
+        return count;
+    }
+
+    @Override
+    public int getFilteredProcessorsScriptCount(GenericSearchFilterDTO searchDTO) {
+
+        EntityManager entityManager = null;
+        Long totalItems;
+        int count;
+
+        try {
+
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+            LOG.debug("Fetching the script by filters starts.");
+            totalItems = ((BigDecimal) entityManager.createNativeQuery(GET_JAVASCRIPT_URI_COUNT)
+                    .setParameter(SCRIPT_NAME, "%" + (MailBoxUtil.isEmpty(searchDTO.getScriptName()) ? "" : searchDTO.getScriptName().toLowerCase()) + "%")
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
+                    .getSingleResult()).longValue();
+
+            count = totalItems.intValue();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+
+        LOG.debug("Fetching the ScriptURI count ends.");
+        return count;
+    }
     @Override
     public List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO) {
 
@@ -694,7 +880,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         }
         return profileNames;
     }
-
+   
     private void generateQueryBySearchFilters(GenericSearchFilterDTO searchDTO, StringBuilder query) {
 
         List<String> predicateList = new ArrayList<>();

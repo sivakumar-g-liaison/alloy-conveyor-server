@@ -45,6 +45,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Valida
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import javax.naming.NamingException;
 
 /**
@@ -69,6 +70,15 @@ public abstract class BaseServiceTest {
     public static final String LOWSECURE = "LOWSECURE";
     public static final String ACTIVE = "ACTIVE";
     public static final String INACTIVE = "INACTIVE";
+    public static final String VALID_SCRIPT = "ftp123://Scripttest:6060";
+    public static final String INVALID_SCRIPT = "invalid";
+    public static final String EMPTY_SCRIPT = "";
+    public static final String ASC_DIRECTION = "asc";
+    public static final String DESC_DIRECTION = "desc";
+    public static final String SORT_FIELD_PGUID = "pguid";
+    public static final String SORT_FIELD_NAME = "name";
+    public static final String PAGE = "1";
+    public static final String PAGE_SIZE = "25";
 
     public static final String PIPELINE_ID = "B676D412522E4F1FBCE268683A1C977E";
 
@@ -320,12 +330,12 @@ public abstract class BaseServiceTest {
         ProcessorDTO procDTO = new ProcessorDTO();
         procDTO.setMailboxName(mbxDTO.getName());
         procDTO.setLinkedMailboxId(mailboxGuid);
-        procDTO.setName("testProcessor" + System.currentTimeMillis());
+        procDTO.setName("testProcessor123" + System.currentTimeMillis());
         procDTO.setStatus("ACTIVE");
         procDTO.setType("REMOTEDOWNLOADER");
         procDTO.setProtocol("FTP");
         procDTO.setModifiedBy("unknown-user");
-        procDTO.setJavaScriptURI("ftp://test:6060");
+        procDTO.setJavaScriptURI("ftp123://test:6060");
         procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
         return procDTO;
     }

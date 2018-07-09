@@ -17,6 +17,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorScriptDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String EXISTING_PROCESS_DC = "existing_process_dc";
     String NEW_PROCESS_DC = "new_process_dc";
     String CLUSTER_TYPE = "cluster_type";
+    String GUID = "guid";
+    String NAME = "name";
 
     /**
      * Constants for getProcessor Class
@@ -85,6 +88,10 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String SORT_PROTOCOL = "protocol";
     String SORT_STATUS = "status";
     String SORT_MAILBOX_STATUS = "mailboxStatus";
+    String SORT_DIRECTION = "sortDirection";
+    String SORT_ACS = "asc";
+    String SORT_DESC = "desc";
+    String SORT_GUID = "guid";
 
     /**
      * Find by profileName and mailbox name pattern.
@@ -155,6 +162,23 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @return list of processors
      */
     List<Processor> findAllActiveProcessors();
+    
+    /**
+     * Retrieves list of all scriptUI from processors
+     *
+     *@param searchFilter The GenericSearchFilterDTO
+     * @return list of scriptUI
+     */
+    List<String> getAllScriptURI(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
+    
+    /**
+     * Fetch the Processor based on ScriptUI
+     * 
+     * @param searchFilter The GenericSearchFilterDTO
+     * @param pageOffsetDetails
+     * @return List of Processor
+     */
+    List<Processor> getScriptLinkedProcessors(GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails, String filterText);
 
     /**
      * Retrieves processors count
@@ -226,6 +250,22 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      * @return count of filtered processors
      */
     int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
+    
+    /**
+     * Retrieves count of filtered ScriptURI
+     *
+     * @param searchDTO search details
+     * @return count of filtered ScriptURI
+     */
+    int getFilteredProcessorsScriptCount(GenericSearchFilterDTO searchDTO); 
+    
+    /**
+     * Retrieves count of filtered processors based on selected ScriptURI
+     *
+     * @param searchDTO search details
+     * @return count of filtered processors
+     */
+    int getFilteredScriptLinkedProcessorsCount(GenericSearchFilterDTO searchDTO);
 
     /**
      * Retrieves active processor by processor id
@@ -460,8 +500,30 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
             .append(" AND CLUSTER_TYPE =:" + CLUSTER_TYPE)
             .append(" AND TYPE in (:" + PROCESSOR_TYPE + ")")
             .append(" AND PROCESS_DC != 'ALL'").toString();
-    
+
     String GET_ALL_DATACENTERS = new StringBuilder().append("SELECT DISTINCT PROCESS_DC FROM PROCESSOR")
-            .append(" WHERE STATUS <> 'DELETED' ").toString(); 
+            .append(" WHERE STATUS <> 'DELETED' ").toString();
+  
+    StringBuilder PROCESSOR_RETRIEVAL_BY_SCRIPTURI = new StringBuilder().append("SELECT processor FROM Processor processor")
+            .append(" WHERE processor.javaScriptUri =:")
+            .append(SCRIPT_NAME)
+            .append(" AND processor.procsrStatus <> 'DELETED'")
+            .append(" AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")");
+    
+    StringBuilder GET_PROCESSOR_JAVASCRIPT_URI = new StringBuilder().append("SELECT DISTINCT processor.javaScriptUri FROM Processor processor")
+            .append(" WHERE LOWER(processor.javaScriptUri) LIKE :")
+            .append(SCRIPT_NAME)
+            .append(" AND processor.procsrStatus <> 'DELETED'")
+            .append(" AND processor.clusterType IN (:" + MailBoxConstants.CLUSTER_TYPE + ")");
+
+    String GET_PROCESSOR_COUNT_BY_JAVASCRIPT_URI = new StringBuilder().append("SELECT COUNT(STATUS) FROM PROCESSOR")
+            .append(" WHERE STATUS <> 'DELETED' AND JAVASCRIPT_URI =:" + SCRIPT_NAME)
+            .append(" AND CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE).toString();
+    
+    String GET_JAVASCRIPT_URI_COUNT = new StringBuilder().append("SELECT COUNT(DISTINCT JAVASCRIPT_URI) FROM PROCESSOR")
+            .append(" WHERE LOWER(JAVASCRIPT_URI) LIKE :")
+            .append(SCRIPT_NAME)
+            .append(" AND STATUS <> 'DELETED'")
+            .append(" AND CLUSTER_TYPE =:" + MailBoxConstants.CLUSTER_TYPE).toString();
 
 }

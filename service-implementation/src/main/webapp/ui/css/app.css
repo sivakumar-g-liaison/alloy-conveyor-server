@@ -310,6 +310,13 @@ html,input {
   width: 430px;
 }
 
+/*--- file[editScriptFileModal.css] --- */
+
+.editScriptFileModal_ace_editor {
+  height: 440px;
+  width: 1140px;
+}
+
 /*--- file[index.css] --- */
 
 .index_body {
