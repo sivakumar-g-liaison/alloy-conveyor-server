@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -32,7 +31,6 @@ import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
-import com.liaison.mailbox.service.dto.configuration.ProcessorScriptDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -42,8 +40,6 @@ import org.apache.log4j.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
-import javax.persistence.criteria.ParameterExpression;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +53,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
-import static com.liaison.mailbox.MailBoxConstants.CLUSTER_TYPE;
 
 /**
  * Contains the processor fetch informations and  We can retrieve the processor details here.
