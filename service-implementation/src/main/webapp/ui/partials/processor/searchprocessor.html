@@ -34,20 +34,15 @@
                        typeahead="proc.name for proc in getProcessorNames($viewValue) | filter:$viewValue"
                        class="form-control"
                        name="procname"
-                       typeahead-min-length="typeaheadMinLength"/>
-                <div ng-show="formSearchPrcsr.procname.$dirty && formSearchPrcsr.procname.$invalid">
-                    <span id="prcsr-search-nameInvalid-pattern" class="customHide"
-                          ng-class="{ 'help-block-custom' : formSearchPrcsr.procname.$error.pattern}"
+                       ng-required=false ng-minlength= "3" ng-maxlength = "80"/>
+                    <span id="prcsr-search-nameInvalid-pattern" class="error"
                           ng-show="formSearchPrcsr.procname.$error.pattern">Invalid Processor Name.</span>
-                    <span id="prcsr-search-nameInvalid-minlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.minlength}"
+                    <span id="prcsr-search-nameInvalid-minlength" class="error"
                           ng-show="formSearchPrcsr.procname.$error.minlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
-                    <span id="prcsr-search-nameInvalid-maxlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.procname.$error.maxlength}"
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of 3 characters to enable search.</span>
+                    <span id="prcsr-search-nameInvalid-maxlength" class="error"
                           ng-show="formSearchPrcsr.procname.$error.maxlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
-                </div>
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than 80 characters.</span>
             </div>
             <div class="col-md-3">
                 <label for="processortype"> Processor Type </label>
@@ -86,20 +81,15 @@
                        typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
                        class="form-control"
                        name="mbxname"
-                       typeahead-min-length="typeaheadMinLength"/>
-                <div ng-show="formSearchPrcsr.mbxname.$dirty && formSearchPrcsr.mbxname.$invalid">
-                    <span id="prcsr-search-mbxNameInvalid-pattern" class="customHide"
-                          ng-class="{ 'help-block-custom' : formSearchPrcsr.mbxname.$error.pattern}"
+                       ng-required=false ng-minlength= "3" ng-maxlength = "80"/>
+                    <span id="prcsr-search-mbxNameInvalid-pattern" class="error"
                           ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
-                    <span id="prcsr-search-mbxNameInvalid-minlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.minlength}"
+                    <span id="prcsr-search-mbxNameInvalid-minlength" class="error"
                           ng-show="formSearchPrcsr.mbxname.$error.minlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
-                    <span id="mbx-search-mbxNameInvalid-maxlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.maxlength}"
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of 3 characters to enable search.</span>
+                    <span id="mbx-search-mbxNameInvalid-maxlength" class="error"
                           ng-show="formSearchPrcsr.mbxname.$error.maxlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
-                </div>
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than 80 characters.</span>
             </div>
             <div class="col-md-3">
                 <label for="profilename"> Profile </label>
@@ -108,20 +98,15 @@
                        required typeahead="prof.name for prof in getProfileNames($viewValue) | filter:$viewValue"
                        class="form-control"
                        name="profilename"
-                       typeahead-min-length="typeaheadMinLength"/>
-                <div ng-show="formSearchPrcsr.profilename.$dirty && formSearchPrcsr.profilename.$invalid">
-                    <span id="prcsr-search-profileNameInvalid-pattern" class="customHide"
-                          ng-class="{ 'help-block-custom' : formSearchPrcsr.profilename.$error.pattern}"
+                       ng-required=false ng-minlength= "3" ng-maxlength = "80"/>
+                    <span id="prcsr-search-profileNameInvalid-pattern" class="error"
                           ng-show="formSearchPrcsr.profilename.$error.pattern">Invalid Profile Name.</span>
-                    <span id="prcsr-search-profileNameInvalid-minlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.minlength}"
+                    <span id="prcsr-search-profileNameInvalid-minlength" class="error"
                           ng-show="formSearchPrcsr.profilename.$error.minlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{typeaheadMinLength}} characters to enable search.</span>
-                    <span id="prcsr-search-profileNameInvalid-maxlength" class="customHide"
-                          ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.maxlength}"
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of 3 characters to enable search.</span>
+                    <span id="prcsr-search-profileNameInvalid-maxlength" class="error"
                           ng-show="formSearchPrcsr.profilename.$error.maxlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
-                </div>
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than 80 characters.</span>
             </div>
             <div class="col-md-3">
                 <label for="scriptname"> Script Name </label>

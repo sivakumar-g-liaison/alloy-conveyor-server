@@ -4,6 +4,7 @@
 * GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
 * GMB-919 -Implement Scripts User Interface
 * GMB-1117 - Return list of the stuck files from sweepers
+* GMB-1132 - Min-length validation is not working in relay processor search screen
 
 5.2.18
 ---------------
