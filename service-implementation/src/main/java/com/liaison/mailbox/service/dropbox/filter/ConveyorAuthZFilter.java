@@ -15,12 +15,13 @@ import com.liaison.gem.service.client.GEMHelper;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.usermanagement.enums.IdpTypes;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.client.filter.AuthenticationFilter;
 import com.liaison.usermanagement.service.client.filter.UserAuthenticationException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +31,8 @@ import javax.ws.rs.core.Response;
 
 import static com.liaison.mailbox.MailBoxConstants.MANIFEST_DTO;
 import static com.liaison.mailbox.MailBoxConstants.UM_AUTH_TOKEN;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_ENABLE_SSO;
 
 /**
  * AuthenticationFilter for services requires GUM authentication
@@ -39,7 +42,7 @@ import static com.liaison.mailbox.MailBoxConstants.UM_AUTH_TOKEN;
 public class ConveyorAuthZFilter implements ContainerRequestFilter {
 
     private Logger logger = LogManager.getLogger(AuthenticationFilter.class);
-
+    
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
@@ -55,30 +58,40 @@ public class ConveyorAuthZFilter implements ContainerRequestFilter {
         }
 
         //validate token
-        UserManagementClient umClient = new UserManagementClient();
-        umClient.addAccount(IdpTypes.NAME_PASSWORD.name(), loginId, null, authenticationToken);
-
-        //authenticate
-        logger.info("General authentication Filter..");
-        umClient.authenticate();
-
-        if (umClient.isSuccessful()) {
-
-            // validation
-            GEMManifestResponse manifestResponse = GEMHelper.getACLManifestByLoginId(loginId, null);
-            if (manifestResponse == null) {
+        GEMManifestResponse manifestResponse;
+        if (CONFIGURATION.getBoolean(PROPERTY_ENABLE_SSO, true)) {
+            
+            DropboxAuthenticationService authService = new DropboxAuthenticationService();
+            boolean isActive = authService.validateToken(authenticationToken);
+            if (!isActive) {
+                throw new MailBoxServicesException("SSO access token is not valid ", Response.Status.UNAUTHORIZED);
+            }
+            manifestResponse = authService.getManifestBySsoAccessToken(authenticationToken);
+            if (null == manifestResponse) {
                 throw new ACLPermissionCheckRuntimeException(Messages.AUTH_AND_GET_ACL_FAILURE.value());
             }
-
-            requestContext.getHeaders().putSingle(UM_AUTH_TOKEN, authenticationToken);
-            requestContext.getHeaders().putSingle(MANIFEST_DTO, new Gson().toJson(manifestResponse));
-
         } else {
-
-            String message = "Authentication failure : " + umClient.getMessage();
-            logger.error("Authentication failure : " + umClient.getMessage() + ", Failure Message Code : " + umClient.getFailureReasonCode());
-            throw new UserAuthenticationException(message);
-        }
+            
+            UserManagementClient umClient = new UserManagementClient();
+            umClient.addAccount(IdpTypes.NAME_PASSWORD.name(), loginId, null, authenticationToken);
+            //authenticate
+            logger.info("General authentication Filter..");
+            umClient.authenticate();
+            if (umClient.isSuccessful()) {
+                // validation
+                manifestResponse = GEMHelper.getACLManifestByLoginId(loginId, null);
+                if (null == manifestResponse) {
+                    throw new ACLPermissionCheckRuntimeException(Messages.AUTH_AND_GET_ACL_FAILURE.value());
+                }
+            } else {
+                
+                String message = "Authentication failure : " + umClient.getMessage() + ", Failure Message Code : " + umClient.getFailureReasonCode();
+                throw new UserAuthenticationException(message);
+            }
+        } 
+        
+        requestContext.getHeaders().putSingle(UM_AUTH_TOKEN, authenticationToken);
+        requestContext.getHeaders().putSingle(MANIFEST_DTO, new Gson().toJson(manifestResponse));
 
     }
 

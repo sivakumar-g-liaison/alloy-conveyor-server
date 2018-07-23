@@ -25,10 +25,10 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
 
 import com.google.gson.Gson;
 import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZ;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,6 +59,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+
 import org.w3c.www.http.HTTP;
 
 /**
@@ -72,7 +73,7 @@ import org.w3c.www.http.HTTP;
 public class DropboxUploadedFileResource extends AuditedResource {
 
     private static final Logger LOGGER = LogManager.getLogger(DropboxUploadedFileResource.class);
-
+    
     /**
      * REST method to add uploaded file.
      *
@@ -174,17 +175,17 @@ public class DropboxUploadedFileResource extends AuditedResource {
 
                     // constructing authenticate and get manifest request
                     dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
-
+                    
                     // authentication
-                    String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
-                    if (encryptedMbxToken == null) {
+                    String encryptedMbxToken = authService.authenticateToken(authenticationToken, dropboxAuthAndGetManifestRequestDTO);
+                    if (null == encryptedMbxToken) {
                         LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
                         return Response.status(HTTP.UNAUTHORIZED).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
                     }
 
                     // getting manifest
-                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(authenticationToken, dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
                         return Response.status(HTTP.BAD_REQUEST).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).entity(responseEntity).build();
@@ -256,9 +257,8 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO(loginId, null, authenticationToken);
 
                     // authentication
-                    String encryptedMbxToken =
-                            authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
-                    if (encryptedMbxToken == null) {
+                    String encryptedMbxToken = authService.authenticateToken(authenticationToken, dropboxAuthAndGetManifestRequestDTO);
+                    if (null == encryptedMbxToken) {
                         LOGGER.error("Dropbox - user authentication failed");
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE, Messages.FAILURE);
                         return Response.status(HTTP.UNAUTHORIZED)
@@ -268,7 +268,7 @@ public class DropboxUploadedFileResource extends AuditedResource {
                     }
 
                     // getting manifest
-                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+                    GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(authenticationToken, dropboxAuthAndGetManifestRequestDTO);
                     if (manifestResponse == null) {
                         responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE, Messages.FAILURE);
                         return Response.status(HTTP.BAD_REQUEST)

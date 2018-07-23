@@ -1,6 +1,7 @@
 5.3.0-SNAPSHOT
 ---------------
 * GSB-3232 - Need to increase HTTP processor limit to >10MB
+* GWUD-157 - Support SSO
 * GMB-1130 - Write permissions when using File Writer to create new directories and write a file the first time
 * GMB-919 -Implement Scripts User Interface
 * GMB-1117 - Return list of the stuck files from sweepers
@@ -316,7 +317,7 @@
 * GMB-973 - Relay/Relay-Conveyor missing version checker for the URL
 * GMB-971 - Mailbox processors are not displayed while trying to view the processors, on navigating back to mailbox screen.
 * GMB-949 - Processor Execution Screen Improvements
-* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn�t throw exception
 
 4.13.4
 ---------------
@@ -349,7 +350,7 @@
 * GMB-934 - "callback is not a function error" is received in Relay application.
 * GMB-949 - Processor Execution Screen Improvements
 * GMB-942 - org.hibernate.exception.GenericJDBCException: could not inspect JDBC autocommit mode - Added sql for validation
-* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn’t throw exception 
+* GMB-907 - Typeahead calls to config/mailbox/typeAhead/getEntiryByNames.Get shouldn�t throw exception 
 
 4.12.0
 ---------------
