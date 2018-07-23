@@ -132,7 +132,7 @@ public class DirectoryService implements Runnable {
                     Producer.produce(KafkaMessageType.USERACCOUNT_CREATE, message);
                 }
             } else {
-                new FileStageReplicationService().postDirectoryMessageToQueue(message, 1);
+                new FileStageReplicationService().postDirectoryMessageToQueue(message, 1, isProduceKafkaMessage);
             }
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {
             invokeScriptToDeleteHomeFolders(message.getGatewayType(), message.getUserName().toLowerCase());

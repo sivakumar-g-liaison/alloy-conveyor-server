@@ -5,6 +5,7 @@
 * GMB-919 -Implement Scripts User Interface
 * GMB-1117 - Return list of the stuck files from sweepers
 * GMB-1132 - Min-length validation is not working in relay processor search screen
+* GUM-445 - PX1 UAT: User account folder is not replicated
 
 5.2.18
 ---------------
