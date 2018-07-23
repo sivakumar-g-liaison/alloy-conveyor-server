@@ -51,6 +51,7 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
 import static com.liaison.mailbox.MailBoxConstants.MESSAGE;
+import static com.liaison.mailbox.MailBoxConstants.PRODUCE_KAFKA_MESSAGE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
 import static com.liaison.mailbox.MailBoxConstants.URI;
@@ -215,13 +216,14 @@ public class FileStageReplicationService implements Runnable {
         }
     }
 
-    public void postDirectoryMessageToQueue(DirectoryMessageDTO message, int retryCount) {
+    public void postDirectoryMessageToQueue(DirectoryMessageDTO message, int retryCount, boolean isProduceKafkaMessage) {
 
         try {
             JSONObject directoryObject = new JSONObject();
             directoryObject.put(FAILOVER_MSG_TYPE, FailoverMessageType.DIRECTORY);
             directoryObject.put(MESSAGE, JAXBUtility.marshalToJSON(message));
             directoryObject.put(RETRY_COUNT, retryCount);
+            directoryObject.put(PRODUCE_KAFKA_MESSAGE, isProduceKafkaMessage);
             FileStageReplicationSendQueue.getInstance().sendMessage(directoryObject.toString(), DIR_DELAY);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -249,7 +251,7 @@ public class FileStageReplicationService implements Runnable {
             } else {
                 LOGGER.warn("User {} is not replicated yet", dto.getUserName());
                 //post back to queue if AD is not synced yet
-                postDirectoryMessageToQueue(dto, ++retry);
+                postDirectoryMessageToQueue(dto, ++retry, requestObj.getBoolean(PRODUCE_KAFKA_MESSAGE));
             }
 
         } catch (Exception e) {

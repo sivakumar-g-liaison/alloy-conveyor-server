@@ -526,4 +526,5 @@ public interface MailBoxConstants {
 
     String FAILOVER_MSG_TYPE="failoverMessageType";
     String MESSAGE = "message";
+    String PRODUCE_KAFKA_MESSAGE = "produceKafkaMessage";
 }
