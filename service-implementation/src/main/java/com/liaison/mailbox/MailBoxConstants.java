@@ -523,15 +523,15 @@ public interface MailBoxConstants {
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
     String PROCESS_DC_LIST = "com.liaison.mailbox.processdc.list";
-    
+
     DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
-    
+
     // sso properties
     String PROPERTY_ENABLE_SSO = "com.liaison.dropbox.sso.enable";
     String SSO_CLIENT_AUTH_URL = "com.liaison.dropbox.sso.auth.url";
     String SSO_CLIENT_ID = "com.liaison.dropbox.sso.clientId";
     String SSO_CLIENT_SECRET = "com.liaison.dropbox.sso.client.secret";
-    
+
     //SSO constants
     int BYTE_SIZE = 4096;
     String ACL = "acl";
@@ -543,13 +543,44 @@ public interface MailBoxConstants {
     String SIGNATURE_COOKIE_NAME = "signature";
     String TOKEN_TYPE_HINT = "token_type_hint";
     String GROUP_GUID_COOKIE_NAME = "signerPublicKeyGroupGuid";
-    String SSO_USER_INFO_URL = "com.liaison.dropbox.sso.user.info.url";    
-    String TOKEN_AUTHORIZATION  = String.format("%s:%s", CONFIGURATION.getString(SSO_CLIENT_ID), CONFIGURATION.getString(SSO_CLIENT_SECRET));    
-    
+    String SSO_USER_INFO_URL = "com.liaison.dropbox.sso.user.info.url";
+    String TOKEN_AUTHORIZATION  = String.format("%s:%s", CONFIGURATION.getString(SSO_CLIENT_ID), CONFIGURATION.getString(SSO_CLIENT_SECRET));
+
     String FILE_COUNT_SEPARATOR = "/";
     String DOT_OPERATOR = ".";
 
     String FAILOVER_MSG_TYPE="failoverMessageType";
     String MESSAGE = "message";
     String PRODUCE_KAFKA_MESSAGE = "produceKafkaMessage";
+
+    String CONFIGURATION_QUEUE_SERVICE_ENABLED = "com.liaison.queueservice.enabled";
+
+    String SERVICE_BROKER_APP_ID = "service-broker";
+
+    String WORK_RESULT_QUEUE_TOPIC_SUFFIX = "workResult";
+    String WORK_TICKET_QUEUE_TOPIC_SUFFIX = "workTicket";
+
+    String TOPIC_REPLICATION_FAILOVER_RECEIVER_ID = "com.liaison.queueservice.topic.replicationFailover.receiverId";
+    String TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.replicationFailover.topicSuffix.default";
+    String TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.replicationFailover.topicSuffix.additional";
+
+    String TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID = "com.liaison.queueservice.topic.mailboxProcessor.receiverId";
+    String TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.mailboxProcessor.topicSuffix.default";
+    String TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.mailboxProcessor.topicSuffix.additional";
+
+    String TOPIC_SERVICE_BROKER_TO_DROPBOX_RECEIVER_ID = "com.liaison.queueservice.topic.serviceBrokerToDropbox.receiverId";
+    String TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.serviceBrokerToDropbox.topicSuffix.default";
+    String TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.serviceBrokerToDropbox.topicSuffix.additional";
+
+    String TOPIC_SERVICE_BROKER_TO_MAILBOX_RECEIVER_ID = "com.liaison.queueservice.topic.serviceBrokerToMailbox.receiverId";
+    String TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.serviceBrokerToMailbox.topicSuffix.default";
+    String TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.serviceBrokerToMailbox.topicSuffix.additional";
+
+    String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_RECEIVER_ID = "com.liaison.queueservice.topic.userManagementToRelayDirectory.receiverId";
+    String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.userManagementToRelayDirectory.topicSuffix.default";
+    String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.userManagementToRelayDirectory.topicSuffix.additional";
+
+    String TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID = "com.liaison.queueservice.topic.mailboxTopicMessage.receiverId";
+    String TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.mailboxTopicMessage.topicSuffix.default";
+    String TOPIC_MAILBOX_TOPIC_MESSAGE_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.mailboxTopicMessage.topicSuffix.additional";
 }

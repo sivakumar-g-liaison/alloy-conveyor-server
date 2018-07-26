@@ -45,6 +45,7 @@ allprojects {
 
     repositories { 
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-releases' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-snapshots' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
         maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
@@ -100,8 +101,18 @@ subprojects {
         compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-jetty-servlet', version: '2.26'
         compile group: 'org.glassfish.jersey.media', name:'jersey-media-multipart', version:'2.26'
 
+        compile group: 'org.glassfish.hk2', name: 'guice-bridge', version: '2.4.0'
+
         //Inject
         compile group:'org.glassfish.jersey.inject', name:'jersey-hk2', version:'2.26'
+
+        // Pull in the right Guice version to avoid ACL lib/Jersey2 update
+        compile 'com.google.inject:guice:4.1.0'
+        compile 'com.google.inject.extensions:guice-assistedinject:4.1.0'
+        compile 'com.google.inject.extensions:guice-grapher:4.1.0'
+        compile 'com.google.inject.extensions:guice-multibindings:4.1.0'
+        compile 'com.google.inject.extensions:guice-servlet:4.1.0'
+        compile 'com.google.inject:guice:4.1.0'
 
         //jaxrs-message body readers and writers
         compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.8.+"

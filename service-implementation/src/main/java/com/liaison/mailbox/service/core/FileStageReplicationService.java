@@ -12,6 +12,8 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.FailoverMessageType;
@@ -20,6 +22,7 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.sender.FileStageReplicationSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
@@ -47,6 +50,10 @@ import static com.liaison.mailbox.MailBoxConstants.FAILOVER_MSG_TYPE;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_DELAY;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_MAX_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
+import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_RECEIVER_ID;
+import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
@@ -54,8 +61,8 @@ import static com.liaison.mailbox.MailBoxConstants.MESSAGE;
 import static com.liaison.mailbox.MailBoxConstants.PRODUCE_KAFKA_MESSAGE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
-import static com.liaison.mailbox.MailBoxConstants.URI;
 
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 
 /**
  * Service to stage the files posted from other dc
@@ -65,6 +72,8 @@ import static com.liaison.mailbox.MailBoxConstants.URI;
 public class FileStageReplicationService implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(FileStageReplicationService.class);
+
+    private final static DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
 
     private static final Long DELAY = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_DELAY, 10000);
     private static final Long MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_MAX_COUNT, 10);
@@ -142,7 +151,12 @@ public class FileStageReplicationService implements Runnable {
             if (null == stagedFile) {
                 //Staged file is not replicated so adding back to queue with delay
                 LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
-                FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+                if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                    Producer.produceMessageToQS(requestMessage, CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_RECEIVER_ID),
+                            CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX), DELAY);
+                } else {
+                    FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+                }
             } else {
 
                 if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
@@ -177,7 +191,12 @@ public class FileStageReplicationService implements Runnable {
                 } catch (MailBoxServicesException | IllegalArgumentException e) {
                     // Payload doesn't exist in BOSS so adding back to queue with delay
                     LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
-                    FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+                    if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                        Producer.produceMessageToQS(requestMessage, CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_RECEIVER_ID),
+                                CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX), DELAY);
+                    } else {
+                        FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
+                    }
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
                 } finally {
@@ -190,7 +209,6 @@ public class FileStageReplicationService implements Runnable {
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
-
     }
 
     /**

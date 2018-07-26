@@ -13,7 +13,9 @@ package com.liaison.mailbox.service.queue.kafka;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.FailoverMessageType;
@@ -27,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Properties;
@@ -65,6 +68,9 @@ public class Producer {
     private static String TOPIC_NAME_CREATE;
     private static String TOPIC_NAME_DELETE;
 
+    @Inject
+    private static KafkaMessageProcessor kafkaMessageProcessor;
+
     static {
 
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
@@ -80,6 +86,53 @@ public class Producer {
 
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
             KAFKA_PRODUCER = new KafkaProducer<>(getProperties());
+        }
+    }
+
+
+    /**
+     * Send message to Queue Service
+     *  @param message String json workticket
+     * @param receiverId String receiver app id
+     * @param delay
+     */
+    public static void produceMessageToQS(String message, String receiverId, String topicSuffix, long delay) {
+        if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+            try {
+                kafkaMessageProcessor.postToQueue(message, receiverId, topicSuffix, delay);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to send String message to QS. " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void produceWorkResultToQS(WorkResult workResult, String receiverId, String topicSuffix) {
+        if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+            try {
+                kafkaMessageProcessor.postToQueue(workResult, receiverId, topicSuffix);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to send Workresult to QS. " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void produceWorkTicketToQS(WorkTicket workTicket, String receiverId, String topicSuffix) {
+        if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+            try {
+                kafkaMessageProcessor.postToQueue(workTicket, receiverId, topicSuffix);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to send Workticket to QS. " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void produceWorkTicketGroupToQS(WorkTicketGroup workTicketGroup, String receiverId, String topicSuffix) {
+        if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+            try {
+                kafkaMessageProcessor.postToQueue(workTicketGroup, receiverId, topicSuffix);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to send WorkTicketGroup to QS. " + e.getMessage(), e);
+            }
         }
     }
 

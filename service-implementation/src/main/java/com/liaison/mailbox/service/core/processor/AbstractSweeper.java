@@ -8,6 +8,10 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
+import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 import java.io.File;
@@ -32,11 +36,12 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
@@ -126,14 +131,43 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      * @param input
      * The input message to queue.
      */
-    protected void postToSweeperQueue(String input)   {
-
+    protected void postToSweeperQueue(String input, boolean isWorkTicketGroup)   {
         try {
-            SweeperQueueSendClient.getInstance().sendMessage(input);
-        } catch (ClientUnavailableException e) {
+            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                if (isWorkTicketGroup) {
+                    Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(input),
+                            SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
+                } else {
+                    Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(input),
+                            SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
+                }
+            } else {
+                SweeperQueueSendClient.getInstance().sendMessage(input);
+            }
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         LOGGER.debug("Sweeper push postToQueue, message: {}", input);
+    }
+
+    private WorkTicket getWorkTicketFromMessageText(String messageText) {
+        try {
+            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicket.class);
+        } catch (Exception e) {
+            String errorMessage = "Relay: Error while parsing WorkTicket JSON. Input JSON data: " + messageText;
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
+
+    private WorkTicketGroup getWorkTicketGroupFromMessageText(String messageText) {
+        try {
+            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicketGroup.class);
+        } catch (Exception e) {
+            String errorMessage = "Relay: Error while parsing WorkTicketGroup JSON. Input JSON data: " + messageText;
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
+        }
     }
 
     /**

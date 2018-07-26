@@ -13,6 +13,9 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.StringUtil;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -26,6 +29,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecut
 import com.liaison.mailbox.service.dto.configuration.response.UpdateProcessorExecutionStateResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.UpdateProcessorsExecutionStateResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.topic.TopicMessageDTO;
 import com.liaison.mailbox.service.topic.producer.MailBoxTopicMessageProducer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -44,6 +48,8 @@ import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_RECEI
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_UNIT;
 import static com.liaison.mailbox.MailBoxConstants.MAILBOX_STUCK_PROCESSOR_TIME_VALUE;
 import static com.liaison.mailbox.MailBoxConstants.STUCK_PROCESSORS_IN_RELAY;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentProperties;
 
 /**
@@ -51,6 +57,7 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
  */
 public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> implements Runnable {
 
+    private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
     private static final String EXECUTING_PROCESSORS = "running processors";
@@ -313,7 +320,13 @@ public class ProcessorExecutionConfigurationService extends GridServiceRTDM<Proc
 
         try {
             String msgToTopic = JAXBUtility.marshalToJSON(message);
-            MailBoxTopicMessageProducer.getInstance().sendMessage(msgToTopic);
+            // QS producing
+            if (CONFIGURATION.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                Producer.produceMessageToQS(msgToTopic, CONFIGURATION.getString(TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID),
+                        CONFIGURATION.getString(TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX), 0);
+            } else {
+                MailBoxTopicMessageProducer.getInstance().sendMessage(msgToTopic);
+            }
         } catch (JAXBException | IOException | ClientUnavailableException e) {
             throw new RuntimeException(e);
         }

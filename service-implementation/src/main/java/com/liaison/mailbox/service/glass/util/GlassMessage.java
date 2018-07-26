@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.glass.util;
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
 import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
 import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.Status;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.message.glass.dom.TimeStamp;
 import com.liaison.commons.message.glass.dom.TimeStampAPI;
@@ -37,7 +38,7 @@ import java.util.Date;
  * 
  * @author OFS
  */
-public class GlassMessage {
+public class GlassMessage implements IGlassMessage {
 
 	// TimestampLogger
 	public static final String DEFAULT_FIRST_CORNER_NAME = "FIRST CORNER";
@@ -623,4 +624,29 @@ public class GlassMessage {
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
     }
+
+	@Override
+	public void log(StatusType statusType, String description) {
+		log(statusType, description, null);
+	}
+
+	@Override
+	public void log(StatusType statusType, String description, String techDescription) {
+		ActivityStatusAPI activityAPI = new ActivityStatusAPI(getGlobalPId());
+		activityAPI.setProcessId(processId);
+		activityAPI.setPipelineId(getPipelineId());
+
+		Status status = new Status();
+		status.setDescription(description);
+		status.setType(statusType);
+		status.setStatusId(UUIDGen.getCustomUUID());
+		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+		activityAPI.getStatuses().add(status);
+
+		if (techDescription != null) {
+			status.setTechDescription(techDescription);
+		}
+
+		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityAPI);
+	}
 }

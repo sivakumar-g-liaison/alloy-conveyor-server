@@ -56,6 +56,7 @@ import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
  * @author Robert.Christian
  * @version 1.0
  */
+@Deprecated
 public class InitializationServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8418412083748649428L;

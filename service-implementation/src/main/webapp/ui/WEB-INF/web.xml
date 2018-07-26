@@ -17,18 +17,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- Framework initialization servlet, please do not modify -->
-    <servlet>
-    	<servlet-name>InitializationServlet</servlet-name>
-        <servlet-class>com.liaison.framework.bootstrap.InitializationServlet</servlet-class>
-		<load-on-startup>0</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>InitializationServlet</servlet-name>
-        <url-pattern>/init</url-pattern>
-    </servlet-mapping>
-
     <!-- Supports Jersey endpoints, please do not modify -->
     <servlet>
         <servlet-name>StaticRest</servlet-name>
@@ -74,7 +62,7 @@
         <servlet-name>StaticRest</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-    
+
     <servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/config/ui/*</url-pattern>

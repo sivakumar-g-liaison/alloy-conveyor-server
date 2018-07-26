@@ -14,6 +14,8 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -42,6 +44,7 @@ import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResp
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.sender.MailboxToServiceBrokerWorkResultQueue;
 import com.liaison.mailbox.service.queue.sender.ProcessorSendQueue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -56,6 +59,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
@@ -63,6 +67,10 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.RESPONSE_FS2_URI;
 import static com.liaison.mailbox.MailBoxConstants.RESUME;
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.WORK_RESULT_QUEUE_TOPIC_SUFFIX;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
 
 
@@ -78,6 +86,8 @@ public class MailBoxService implements Runnable {
     private String message;
     private boolean directUpload = false;
 	private QueueMessageType messageType;
+
+	private final static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
     public enum QueueMessageType {
         WORKTICKET,
@@ -141,9 +151,16 @@ public class MailBoxService implements Runnable {
                 messages.add(MailBoxUtil.marshalToJSON(request));
             }
 
-            LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[messages.size()]));
             for (String message : messages) {
-                ProcessorSendQueue.getInstance().sendMessage(message);
+                // Produce message to QS service if enabled
+                if (configuration.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                    LOG.debug("ABOUT TO get Producer produce {}", (Object) messages.toArray(new String[messages.size()]));
+                    Producer.produceMessageToQS(message, configuration.getString(TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID),
+                            configuration.getString(TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX), 0L);
+                } else {
+                    LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[messages.size()]));
+                    ProcessorSendQueue.getInstance().sendMessage(message);
+                }
             }
 
             serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));
@@ -364,7 +381,11 @@ public class MailBoxService implements Runnable {
                         && (processor instanceof com.liaison.mailbox.dtdm.model.FileWriter
                         || directUpload)) {
                     WorkResult result = constructWorkResult(workTicket, null);
-                    MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
+                    if (configuration.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                        Producer.produceWorkResultToQS(result, SERVICE_BROKER_APP_ID, WORK_RESULT_QUEUE_TOPIC_SUFFIX);
+                    } else {
+                        MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
+                    }
                 }
 
             } else {
@@ -416,12 +437,15 @@ public class MailBoxService implements Runnable {
                 if (isResume != null && ((Boolean) isResume)) {
                     WorkResult result = constructWorkResult(workTicket, e);
                     try {
-                        MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
-                    } catch (IOException | JAXBException | ClientUnavailableException ioe) {
+                        if (configuration.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                            Producer.produceWorkResultToQS(result, SERVICE_BROKER_APP_ID, WORK_RESULT_QUEUE_TOPIC_SUFFIX);
+                        } else {
+                            MailboxToServiceBrokerWorkResultQueue.getInstance().sendMessage(JAXBUtility.marshalToJSON(result));
+                        }
+                    } catch (RuntimeException | IOException | JAXBException | ClientUnavailableException ioe) {
                         LOG.error(ioe.getMessage(), ioe);
                     }
                 }
-
             }
 
         } finally {

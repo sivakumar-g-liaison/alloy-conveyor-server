@@ -211,8 +211,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicketsToPost.clear();
                 }
             }
-            
-            postToSweeperQueue(constructBatchWorkticket());
+
+            postToSweeperQueue(constructBatchWorkticket(), false);
         } else {
             LOGGER.warn("javascript filter api returned empty results");
         }
@@ -294,7 +294,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
                 String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
                 LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-                postToSweeperQueue(wrkTcktToSbr);
+                postToSweeperQueue(wrkTcktToSbr, true);
 
                 sweptFileStatus = new HashMap<String, String>();
                 // For glass logging
