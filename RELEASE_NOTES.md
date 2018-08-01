@@ -1,4 +1,4 @@
-5.3.1-SNAPSHOT
+5.4.0-SNAPSHOT
 ---------------
 * Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
 
