@@ -8,6 +8,7 @@
 * GMB-1132 - Min-length validation is not working in relay processor search screen
 * GUM-445 - PX1 UAT: User account folder is not replicated
 * GMB-1104 - Queue Service integration + guice module
+* Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
 
 5.2.18
 ---------------
