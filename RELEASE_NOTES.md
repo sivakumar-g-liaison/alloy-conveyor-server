@@ -1,4 +1,8 @@
-5.3.0-SNAPSHOT
+5.3.1-SNAPSHOT
+---------------
+* Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
+
+5.3.0
 ---------------
 * GSB-3232 - Need to increase HTTP processor limit to >10MB
 * GWUD-157 - Support SSO

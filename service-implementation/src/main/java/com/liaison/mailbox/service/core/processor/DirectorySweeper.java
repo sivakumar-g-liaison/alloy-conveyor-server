@@ -36,6 +36,7 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
@@ -74,8 +75,12 @@ import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
+import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 /**
@@ -539,14 +544,29 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * The input message to queue.
 	 */
 	private void postToSweeperQueue(String input)   {
-
         try {
-			SweeperQueueSendClient.getInstance().sendMessage(input);
-		} catch (ClientUnavailableException e) {
-			throw new RuntimeException(e);
-		}
-        LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);
+            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                // Only WorkTicketGroups handled
+                Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(input),
+                        SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
+            } else {
+                SweeperQueueSendClient.getInstance().sendMessage(input);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        LOGGER.debug("Sweeper push postToQueue, message: {}", input);
 	}
+
+    private WorkTicketGroup getWorkTicketGroupFromMessageText(String messageText) {
+        try {
+            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicketGroup.class);
+        } catch (Exception e) {
+            String errorMessage = "Relay: Error while parsing WorkTicketGroup JSON. Input JSON data: " + messageText;
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
+        }
+    }
 
 	/**
 	 * Method to persist the payload and workticket details in spectrum

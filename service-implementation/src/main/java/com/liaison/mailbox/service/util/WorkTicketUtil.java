@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.mailbox.service.queue.kafka.Producer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,11 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
+
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
+import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 
 /**
  * Utilities for WorkTicket.
@@ -54,8 +60,28 @@ public class WorkTicketUtil {
     }
 
     private static void postToQueue(String message) throws Exception {
+        try {
+            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
+                // Only WorkTickets handled
+                Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(message),
+                        SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
+            } else {
+                SweeperQueueSendClient.getInstance().sendMessage(message);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         LOGGER.debug("postToQueue, message: {}", message);
-        SweeperQueueSendClient.getInstance().sendMessage(message);
+    }
+
+    private static WorkTicket getWorkTicketFromMessageText(String messageText) {
+        try {
+            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicket.class);
+        } catch (Exception e) {
+            String errorMessage = "Relay: Error while parsing WorkTicket JSON. Input JSON data: " + messageText;
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
+        }
     }
 
     /**
