@@ -1,6 +1,7 @@
 5.3.1-SNAPSHOT
 ---------------
 * Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
+* Add default QS topic for topic messages
 
 5.3.0
 ---------------
