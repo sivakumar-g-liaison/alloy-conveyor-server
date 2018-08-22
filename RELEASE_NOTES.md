@@ -3,6 +3,7 @@
 * Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
 * Update lib_message_bus to 14.2.1
 * Add default QS topic for topic messages
+* GSP-179: Update processor DC option is not displayed initially in relay
 
 5.3.0
 ---------------
