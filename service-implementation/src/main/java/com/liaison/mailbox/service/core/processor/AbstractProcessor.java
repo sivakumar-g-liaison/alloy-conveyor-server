@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core.processor;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -227,9 +226,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      *
      * @return array of CredentialDTO
      * @throws MailBoxConfigurationServicesException
-     * @throws SymmetricAlgorithmException
      */
-    public CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException {
+    public CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException {
 
         CredentialDTO[] credentialArray = null;
 
@@ -256,10 +254,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * To Retrieve the folder info from the processor
      *
      * @return array of FolderDTO
-     * @throws MailBoxConfigurationServicesException
-     * @throws MailBoxServicesException
      */
-    public FolderDTO[] getFolders() throws MailBoxConfigurationServicesException {
+    public FolderDTO[] getFolders() {
 
         FolderDTO[] folderArray = null;
 
@@ -285,10 +281,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     /**
      * To Retrieve the Payload URI
      *
-     * @throws MailBoxConfigurationServicesException
-     * @throws MailBoxServicesException
      */
-    public String getPayloadURI() throws MailBoxServicesException {
+    public String getPayloadURI() {
 
         if (!MailBoxUtil.isEmpty(payloadLocation)) {
             return payloadLocation;
@@ -808,7 +802,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(dupGpid);
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(fileName);
         glassMessageDTO.setFilePath(filePath);
@@ -835,7 +829,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
             GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
             glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
             glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
             glassMessageDTO.setFileName(file.getName());
             glassMessageDTO.setFilePath(file.getPath());
@@ -1074,5 +1068,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             LOGGER.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    /**
+     * Get category from the properties json
+     * @return category string
+     */
+    protected String getCategory() {
+        return MailBoxUtil.getCategory(configurationInstance.getProcsrProperties());
     }
 }

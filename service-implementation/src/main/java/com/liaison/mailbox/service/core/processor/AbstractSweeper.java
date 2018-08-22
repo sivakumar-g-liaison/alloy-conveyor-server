@@ -312,7 +312,7 @@ public abstract class AbstractSweeper extends AbstractProcessor {
        
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(wrkTicket.getGlobalProcessId());
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(wrkTicket.getFileName());
         glassMessageDTO.setFilePath(filePath);

@@ -30,12 +30,10 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -190,7 +188,7 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(file.getName());
         glassMessageDTO.setFilePath(file.getParent());

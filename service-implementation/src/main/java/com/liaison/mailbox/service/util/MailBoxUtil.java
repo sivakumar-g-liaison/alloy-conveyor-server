@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.liaison.mailbox.MailBoxConstants.CATEGORY;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
@@ -545,6 +546,15 @@ public class MailBoxUtil {
         }
     }
 
+    public static String getCategory(String json) {
+        try {
+            Object o = getJSONObject(json, CATEGORY);
+            return (String) o;
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     /**
      * Reads a value from processor properties
      *
@@ -556,7 +566,7 @@ public class MailBoxUtil {
     private static Object getJSONObject(String json, String key) throws JSONException {
 
         String remotePrcsr = "remoteProcessorProperties";
-        JSONObject obj = null;
+        JSONObject obj;
         if (json.contains(remotePrcsr)) {
             JSONObject innerObj = new JSONObject(json);
             obj = innerObj.getJSONObject(remotePrcsr);

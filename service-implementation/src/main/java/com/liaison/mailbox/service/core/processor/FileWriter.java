@@ -185,7 +185,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         }
 
 	}
-	
+
     /**
      * Writes the trigger file
      * 
@@ -351,7 +351,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @throws IOException
      * @throws JSONException 
 	 */
-	private boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException, JSONException {
+    private boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, WorkTicket workTicket) throws IOException, JSONException {
 
 		LOG.debug("Started writing given inputstream to given location {}", targetLocation);
 		StagedFileDAOBase dao = new StagedFileDAOBase();
@@ -387,7 +387,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 			}
 		} else {
 
-			logToLens(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
+            logToLens(Messages.FILE_WRITER_SUCCESS_MESSAGE.value(), file, ExecutionState.COMPLETED);
 			persistFile(response, file, workTicket, dao);
 			return true;
 		}

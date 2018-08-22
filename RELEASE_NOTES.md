@@ -6,6 +6,10 @@
 * GMB-1158 - Please add the loading icon or progress bar in staged file screen
 * GSP-179: Update processor DC option is not displayed initially in relay
 
+5.3.3
+---------------
+* GMB-1155 - Ability to stop relay processors overwritting LENS "Category
+
 5.3.2
 ---------------
 * FS2 lib upgrade 13.0.0 and Crypto lib upgrade 6.2.0
