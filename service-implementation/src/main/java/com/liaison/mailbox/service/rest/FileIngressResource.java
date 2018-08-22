@@ -28,7 +28,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.service.core.FilesIngressSevice;
+import com.liaison.mailbox.service.core.FilesIngressService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -64,8 +64,8 @@ public class FileIngressResource extends AuditedResource {
             public Object call() {
 
                 LOG.debug("Entering into file ingress resource.");
-                FilesIngressSevice filesIngressSevice = new FilesIngressSevice();
-                return filesIngressSevice.listIngressFiles();
+                FilesIngressService filesIngressService = new FilesIngressService();
+                return filesIngressService.listIngressFiles();
             }
         };
         worker.actionLabel = "FileIngressResource.listIngressFiles()";

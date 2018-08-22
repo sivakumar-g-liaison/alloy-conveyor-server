@@ -6,6 +6,10 @@
 * GMB-1158 - Please add the loading icon or progress bar in staged file screen
 * GSP-179: Update processor DC option is not displayed initially in relay
 
+5.3.1
+---------------
+* GMB-1117 - Return list of the stuck files from sweepers - fix for the path is null
+
 5.3.0
 ---------------
 * GSB-3232 - Need to increase HTTP processor limit to >10MB

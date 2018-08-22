@@ -25,7 +25,7 @@ public class IngressFilesDTO {
     }
 
     public void setPath(String path) {
-        path = path;
+        this.path = path;
     }
 
     public Date getCreatedTime() {
