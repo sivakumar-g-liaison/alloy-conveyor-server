@@ -221,6 +221,7 @@ var rest = myApp.controller('StagedFilesCntrlr', ['$rootScope', '$scope', '$filt
         // Loading the profile details
         $scope.loadStagedFiles = function() {
             setTimeout(function() {
+                $scope.gridLoaded = false;
                 $scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
                     $scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
             }, 100);
