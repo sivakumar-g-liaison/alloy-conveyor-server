@@ -548,11 +548,14 @@ public class MailBoxUtil {
 
     public static String getCategory(String json) {
         try {
-            Object o = getJSONObject(json, CATEGORY);
-            return (String) o;
+            JSONObject o = getJSONObject(json);
+            if (!JSONObject.NULL.equals(o)) {
+                return o.getString(CATEGORY);
+            }
         } catch (JSONException e) {
             return null;
         }
+        return null;
     }
 
     /**
@@ -565,6 +568,18 @@ public class MailBoxUtil {
      */
     private static Object getJSONObject(String json, String key) throws JSONException {
 
+        JSONObject obj = getJSONObject(json);
+        return obj.get(key);
+    }
+
+    /**
+     *  Get JSON Object
+     * @param json
+     * @return
+     * @throws JSONException
+     */
+    private static JSONObject getJSONObject(String json) throws JSONException {
+
         String remotePrcsr = "remoteProcessorProperties";
         JSONObject obj;
         if (json.contains(remotePrcsr)) {
@@ -573,8 +588,7 @@ public class MailBoxUtil {
         } else {
             obj = new JSONObject(json);
         }
-
-        return obj.get(key);
+        return obj;
     }
 
     /**

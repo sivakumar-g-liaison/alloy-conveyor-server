@@ -1,10 +1,14 @@
-5.3.1-SNAPSHOT
+5.4.0-SNAPSHOT
 ---------------
 * Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
 * Update lib_message_bus to 14.2.1
 * Add default QS topic for topic messages
 * GMB-1158 - Please add the loading icon or progress bar in staged file screen
 * GSP-179: Update processor DC option is not displayed initially in relay
+
+5.3.4
+---------------
+* GMB-1155 - Ability to stop relay processors overwritting LENS "Category - Direct upload Scenario
 
 5.3.3
 ---------------
