@@ -554,14 +554,22 @@ public interface MailBoxConstants {
 
     String FAILOVER_MSG_TYPE="failoverMessageType";
     String MESSAGE = "message";
+    String ENABLE_INBOUND_FILE = "com.liaison.mailbox.inboundfile.enabled";
     String PRODUCE_KAFKA_MESSAGE = "produceKafkaMessage";
 
     String CONFIGURATION_QUEUE_SERVICE_ENABLED = "com.liaison.queueservice.enabled";
 
-    String SERVICE_BROKER_APP_ID = "service-broker";
+    String TOPIC_SWEEPER_RECEIVER_ID = "com.liaison.queueservice.topic.sweeper.receiverId";
+    String TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.sweeper.topicSuffix.default";
+    String TOPIC_SWEEPER_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.sweeper.topicSuffix.additional";
 
-    String WORK_RESULT_QUEUE_TOPIC_SUFFIX = "workResult";
-    String WORK_TICKET_QUEUE_TOPIC_SUFFIX = "workTicket";
+    String TOPIC_INBOUND_FILE_RECEIVER_ID = "com.liaison.queueservice.topic.inbound.file.receiverId";
+    String TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.inbound.file.topicSuffix.default";
+    String TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.inbound.file.topicSuffix.additional";
+
+    String TOPIC_RUNNING_PROCESSOR_RECEIVER_ID = "com.liaison.queueservice.topic.running.processor.receiverId";
+    String TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.running.processor.topicSuffix.default";
+    String TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.running.processor.topicSuffix.additional";
 
     String TOPIC_REPLICATION_FAILOVER_RECEIVER_ID = "com.liaison.queueservice.topic.replicationFailover.receiverId";
     String TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.replicationFailover.topicSuffix.default";

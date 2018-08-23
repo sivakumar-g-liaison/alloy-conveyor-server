@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.CATEGORY;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
@@ -101,6 +102,7 @@ public class MailBoxUtil {
     private static final float DAYS_IN_YEAR = 365;
 
     public static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
+    public static final boolean QUEUE_SERVICE_ENABLED = CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false);
 
     /**
      * Initialize the cluster type.

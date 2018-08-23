@@ -22,9 +22,11 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FilterMatchMode;
 import com.liaison.mailbox.enums.UppercaseEnumAdapter;
 import com.liaison.mailbox.rtdm.dao.MailboxRTDMDAO;
+import com.liaison.mailbox.rtdm.model.InboundFile;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,6 +39,7 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,6 +72,7 @@ public abstract class GridServiceRTDM<T> {
 
     public static final String NAME = "name";
     public static final String STATUS = "stagedFileStatus";
+    public static final String INBOUND_FILE_STATUS = "inboundFileStatus";
     public static final String MAILBOX_GUID = "mailboxGuid";
 
     public static class GridResult<T> {
@@ -298,6 +302,8 @@ public abstract class GridServiceRTDM<T> {
             Path<Object> field = null;
             if (NAME.equals(fieldName)) {
                 field = request.get(FILE_NAME);
+            } else if (INBOUND_FILE_STATUS.equals(fieldName)) {
+                field = request.get(FILE_STATUS);
             } else if (FILE_STATUS.equals(fieldName)) {
                 field = request.get(STATUS);
             } else if (MAILBOX_GUID.equals(fieldName)) {
@@ -345,6 +351,8 @@ public abstract class GridServiceRTDM<T> {
                     pathString = request.get(FILE_NAME);
                 } else if (MAILBOX_GUID.equals(field)) {
                     pathString = request.get(MailBoxConstants.KEY_MAILBOX_ID);
+                } else if (INBOUND_FILE_STATUS.equals(field)) {
+                    pathString = request.get(FILE_STATUS);
                 } else if (FILE_STATUS.equals(field)) {
                     pathString = request.get(STATUS);
                 } else {
@@ -355,6 +363,7 @@ public abstract class GridServiceRTDM<T> {
                 if (MailBoxConstants.GLOBAL_PROCESS_ID.equals(field)
                         || MailBoxConstants.KEY_PROCESSOR_ID.equals(field)
                         || MAILBOX_GUID.equals(field)
+                        || INBOUND_FILE_STATUS.equals(field)
                         || FILE_STATUS.equals(field)
                         || CLUSTER_TYPE.equals(field)) {
                     andPredicatesList.add(criteriaBuilder.equal(pathString, parameterExp));
@@ -380,6 +389,9 @@ public abstract class GridServiceRTDM<T> {
             andPredicatesList.add(criteriaBuilder.equal(request.get(EXECUTION_STATUS), ExecutionState.PROCESSING.value()));
         } else if (StagedFile.class.getName().equals(clazz.getName())) {
             pathString = request.get(STATUS);
+            andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name())); 
+        } else if (InboundFile.class.getName().equals(clazz.getName())) {
+            pathString = request.get(FILE_STATUS);
             andPredicatesList.add(criteriaBuilder.notEqual(pathString, EntityStatus.INACTIVE.name())); 
         }
 

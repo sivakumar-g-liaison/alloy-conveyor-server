@@ -93,6 +93,13 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
     void deleteRelayTriggerFile(RelayFile relayFile);
 
     /**
+     * Returns true for sweepers and false for enhanced sweepers
+     * 
+     * @return
+     */
+    boolean isClassicSweeper();
+
+    /**
      * Returns the location to write the payload
      *
      * @return

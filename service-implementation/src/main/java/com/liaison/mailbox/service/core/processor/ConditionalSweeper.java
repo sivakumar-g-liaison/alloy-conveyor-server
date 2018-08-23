@@ -29,8 +29,10 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +44,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -212,7 +215,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                 }
             }
 
-            postToSweeperQueue(constructBatchWorkticket(), false);
+            SweeperQueueSendClient.post(constructBatchWorkticket(), false);
         } else {
             LOGGER.warn("javascript filter api returned empty results");
         }
@@ -294,7 +297,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
                 String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
                 LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-                postToSweeperQueue(wrkTcktToSbr, true);
+                SweeperQueueSendClient.post(wrkTcktToSbr, true);
 
                 sweptFileStatus = new HashMap<String, String>();
                 // For glass logging
@@ -385,7 +388,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         try { 
             InputStream payloadToPersist = new FileInputStream(triggerFile);
             // payloadToPersist stream is closed in StorageUtilities.persistPayload method
-            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId());
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, properties , triggerFileContentDto.getParentGlobalProcessId(), null);
             triggerFileContentDto.setTriggerFileUri(metaSnapshot.getURI().toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -696,6 +699,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
     @Override
     public void cleanup() {
+    }
+
+    @Override
+    public boolean isClassicSweeper() {
+        return true;
     }
 
 }

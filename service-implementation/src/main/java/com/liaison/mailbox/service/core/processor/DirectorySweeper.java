@@ -11,7 +11,6 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
@@ -36,11 +35,11 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +51,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,12 +75,8 @@ import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
-import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
-import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
-import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 /**
@@ -251,7 +247,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
                 String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
                 LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-                postToSweeperQueue(wrkTcktToSbr);
+                SweeperQueueSendClient.post(wrkTcktToSbr, true);
 
                 // For glass logging
                 for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
@@ -534,37 +530,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         } else {
             ISO8601Util dateUtil = new ISO8601Util();
             workTickets.sort(Comparator.comparing(w -> dateUtil.fromDate(w.getCreatedTime())));
-        }
-    }
-
-    /**
-	 * Method to post meta data to rest service/ queue.
-	 *
-	 * @param input
-	 * The input message to queue.
-	 */
-	private void postToSweeperQueue(String input)   {
-        try {
-            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                // Only WorkTicketGroups handled
-                Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(input),
-                        SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
-            } else {
-                SweeperQueueSendClient.getInstance().sendMessage(input);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        LOGGER.debug("Sweeper push postToQueue, message: {}", input);
-	}
-
-    private WorkTicketGroup getWorkTicketGroupFromMessageText(String messageText) {
-        try {
-            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicketGroup.class);
-        } catch (Exception e) {
-            String errorMessage = "Relay: Error while parsing WorkTicketGroup JSON. Input JSON data: " + messageText;
-            LOGGER.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
         }
     }
 
@@ -1001,4 +966,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
         return files;
     }
+
+    @Override
+    public boolean isClassicSweeper() {
+        return true;
+    }
+
 }

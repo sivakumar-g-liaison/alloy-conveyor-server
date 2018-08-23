@@ -151,12 +151,7 @@ public class FileStageReplicationService implements Runnable {
             if (null == stagedFile) {
                 //Staged file is not replicated so adding back to queue with delay
                 LOGGER.warn("Posting back to queue since staged_file isn't replicated - datacenter - gpid {}", globalProcessId);
-                if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                    Producer.produceMessageToQS(requestMessage, CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_RECEIVER_ID),
-                            CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX), DELAY);
-                } else {
-                    FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
-                }
+                FileStageReplicationSendQueue.post(requestMessage, DELAY);
             } else {
 
                 if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus())) {
@@ -191,12 +186,7 @@ public class FileStageReplicationService implements Runnable {
                 } catch (MailBoxServicesException | IllegalArgumentException e) {
                     // Payload doesn't exist in BOSS so adding back to queue with delay
                     LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
-                    if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                        Producer.produceMessageToQS(requestMessage, CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_RECEIVER_ID),
-                                CONFIGURATION.getString(TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX), DELAY);
-                    } else {
-                        FileStageReplicationSendQueue.getInstance().sendMessage(requestMessage, DELAY);
-                    }
+                    FileStageReplicationSendQueue.post(requestMessage, DELAY);
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
                 } finally {
@@ -242,7 +232,7 @@ public class FileStageReplicationService implements Runnable {
             directoryObject.put(MESSAGE, JAXBUtility.marshalToJSON(message));
             directoryObject.put(RETRY_COUNT, retryCount);
             directoryObject.put(PRODUCE_KAFKA_MESSAGE, isProduceKafkaMessage);
-            FileStageReplicationSendQueue.getInstance().sendMessage(directoryObject.toString(), DIR_DELAY);
+            FileStageReplicationSendQueue.post(directoryObject.toString(), DIR_DELAY);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

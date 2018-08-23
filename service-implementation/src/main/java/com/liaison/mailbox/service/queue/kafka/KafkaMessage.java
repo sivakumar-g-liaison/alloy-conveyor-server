@@ -24,6 +24,7 @@ public class KafkaMessage {
     private String fileDeleteMessage;
     private String dirAbsolutePath;
     private String datacenter;
+    private String fileCreateMessage;
 
     public DirectoryMessageDTO getDirectoryMessageDTO() {
         return directoryMessageDTO;
@@ -71,5 +72,13 @@ public class KafkaMessage {
 
     public void setDatacenter(String datacenter) {
         this.datacenter = datacenter;
+    }
+
+    public String getFileCreateMessage() {
+        return fileCreateMessage;
+    }
+
+    public void setFileCreateMessage(String fileCreateMessage) {
+        this.fileCreateMessage = fileCreateMessage;
     }
 }

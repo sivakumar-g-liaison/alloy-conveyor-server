@@ -38,6 +38,7 @@ import com.liaison.mailbox.service.dto.dropbox.FileTransferMetaDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
@@ -306,7 +307,7 @@ public class DropboxFileTransferService {
 
             //sets default organization in the meta data
             setDefaultOrganization(workTicket);
-            WorkTicketUtil.postWrkTcktToQ(workTicket);
+            SweeperQueueSendClient.post(workTicket);
 
             LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
                     "GLOBAL PID",

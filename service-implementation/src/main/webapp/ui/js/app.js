@@ -94,6 +94,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/processor/stagedfiles.html',
             controller: 'StagedFilesCntrlr'
         });
+        $routeProvider.when('/mailbox/getInboundFiles', {
+            templateUrl: 'partials/processor/inboundfiles.html',
+            controller: 'InboundFilesCntrlr'
+        });
         // by default, redirect to site root
         $routeProvider.otherwise({
             redirectTo: '/'

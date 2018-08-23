@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1606,6 +1607,40 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 entityManager.close();
             }
         }
+        return processors;
+    }
+
+    /**
+     * Retrieve sweeper processors by folder uri.
+     * 
+     * @return  list of processors
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Processor> listSweeperProcessorsByFolderUri(String folderUri) {
+
+        EntityManager entityManager = null;
+        List<Processor> processors = new ArrayList<>();
+
+        try {
+
+            LOG.debug("Fetching the sweeper processors starts.");
+            entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+            processors = entityManager.createNamedQuery(FIND_PROCESSOR_BY_TYPE_AND_FOLDER_URI)
+                    .setParameter(ProcessorConfigurationDAO.PROCESSOR_TYPE, Arrays.asList(ProcessorType.SWEEPER.getCode(), ProcessorType.CONDITIONALSWEEPER.getCode()))
+                    .setParameter(ProcessorConfigurationDAO.FOLDER_URI, folderUri + "%")
+                    .setParameter(ProcessorConfigurationDAO.STATUS_DELETE, EntityStatus.DELETED.name())
+                    .getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+
+        LOG.debug("Fetching the sweeper processors ends.");
         return processors;
     }
 }

@@ -118,7 +118,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
     List<String> findNonExecutingProcessors();
 
-    List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+    List<ProcessorExecutionState> findExecutingProcessors();
     
     /**
      * Method to find the executing processor for the period of time.

@@ -10,27 +10,17 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
-import com.liaison.mailbox.service.queue.kafka.Producer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StringUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
-import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
-import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
-import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
+import javax.ws.rs.core.Response;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utilities for WorkTicket.
@@ -52,36 +42,6 @@ public class WorkTicketUtil {
      */
     public static String retrievePipelineId(Map<String, String> httpListenerProperties) {
         return httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
-    }
-
-    public static void postWrkTcktToQ(WorkTicket workTicket) throws Exception {
-        String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
-        postToQueue(workTicketJson);
-    }
-
-    private static void postToQueue(String message) throws Exception {
-        try {
-            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                // Only WorkTickets handled
-                Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(message),
-                        SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
-            } else {
-                SweeperQueueSendClient.getInstance().sendMessage(message);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        LOGGER.debug("postToQueue, message: {}", message);
-    }
-
-    private static WorkTicket getWorkTicketFromMessageText(String messageText) {
-        try {
-            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicket.class);
-        } catch (Exception e) {
-            String errorMessage = "Relay: Error while parsing WorkTicket JSON. Input JSON data: " + messageText;
-            LOGGER.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
-        }
     }
 
     /**
