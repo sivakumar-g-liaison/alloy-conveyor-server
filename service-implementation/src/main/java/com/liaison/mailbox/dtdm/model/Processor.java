@@ -116,7 +116,13 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                         " AND processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE),
         @NamedQuery(name = ProcessorConfigurationDAO.GET_CLUSTER_TYPE_BY_PROCESSOR_GUID,
                 query = "SELECT processor.clusterType FROM Processor processor" +
-                        " WHERE processor.pguid =:" + ProcessorConfigurationDAO.PGUID)
+                        " WHERE processor.pguid =:" + ProcessorConfigurationDAO.PGUID),
+        @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_TYPE_AND_FOLDER_URI,
+                query = "SELECT processor FROM Processor processor" +
+                        " INNER JOIN processor.folders folder" +
+                        " WHERE processor.class IN (:" + ProcessorConfigurationDAO.PROCESSOR_TYPE + ")" +
+                        " AND folder.fldrUri LIKE :" + ProcessorConfigurationDAO.FOLDER_URI +
+                        " AND processor.procsrStatus <> :" + ProcessorConfigurationDAO.STATUS_DELETE)
 })
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {

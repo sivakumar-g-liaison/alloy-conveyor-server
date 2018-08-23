@@ -978,6 +978,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public boolean isClassicSweeper() {
+        throw new RuntimeException("Not implemented");
+    }
+
     /**
      * validates remote path
      *

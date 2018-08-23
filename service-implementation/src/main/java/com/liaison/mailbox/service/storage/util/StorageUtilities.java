@@ -30,12 +30,14 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -152,9 +154,10 @@ public class StorageUtilities {
      * @param payload                     input payload
      * @param httpListenerProperties      additional properties
      * @param triggerFileGlobalProcessId  Parent global process Id
+     * @param tenancyKey 
      * @return
      */
-    public static FS2MetaSnapshot persistPayload(InputStream payload, Map<String, String> httpListenerProperties, String triggerFileGlobalProcessId) {
+    public static FS2MetaSnapshot persistPayload(InputStream payload, Map<String, String> httpListenerProperties, String triggerFileGlobalProcessId, String tenancyKey) {
     	
         try {
         	
@@ -168,7 +171,10 @@ public class StorageUtilities {
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot;
             FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
-            
+            if (null != tenancyKey) {
+                fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
+            }
+
             try {
                 metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
             } finally {

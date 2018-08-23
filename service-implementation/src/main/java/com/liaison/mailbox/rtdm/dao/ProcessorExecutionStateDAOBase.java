@@ -297,7 +297,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     public List<String> findNonExecutingProcessors() {
 
         EntityManager entityManager = null;
-        List<String> nonExecutionProcessors = new ArrayList<>();
+        List<String> nonExecutionProcessors;
 
         try {
 
@@ -316,13 +316,11 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
     }
 
     /**
-     * Method to find the executing processors based on page offset
-     *
-     * @param pageOffsetDetails pagination details
+     * Method to find the executing processors
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<ProcessorExecutionState> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
+    public List<ProcessorExecutionState> findExecutingProcessors() {
 
         EntityManager entityManager = null;
 
@@ -332,8 +330,6 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
             return entityManager
                     .createNamedQuery(FIND_EXECUTING_PROCESSORS)
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
-                    .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-                    .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
                     .getResultList();
 
         } finally {

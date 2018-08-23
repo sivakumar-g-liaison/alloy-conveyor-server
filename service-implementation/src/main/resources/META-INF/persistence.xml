@@ -50,6 +50,8 @@
 		<class>com.liaison.mailbox.rtdm.model.StagedFile</class>
 		<class>com.liaison.mailbox.rtdm.model.RuntimeProcessors</class>
 		<class>com.liaison.mailbox.rtdm.model.UploadedFile</class>
+		<class>com.liaison.mailbox.rtdm.model.Datacenter</class>
+		<class>com.liaison.mailbox.rtdm.model.InboundFile</class>
 		<properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
 			<property name="hibernate.show_sql" value="false"/>

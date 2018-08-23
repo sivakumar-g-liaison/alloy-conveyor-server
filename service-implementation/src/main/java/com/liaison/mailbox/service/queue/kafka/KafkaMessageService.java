@@ -10,18 +10,16 @@
 
 package com.liaison.mailbox.service.queue.kafka;
 
+import com.google.gson.Gson;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
+import com.liaison.mailbox.service.core.InboundFileService;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.xml.bind.JAXBException;
-
-import java.io.IOException;
 
 /**
  * To process message from kafka consumer.
@@ -36,7 +34,8 @@ public class KafkaMessageService implements Runnable {
         USERACCOUNT_CREATE,
         USERACCOUNT_DELETE,
         DIRECTORY_CREATION,
-        FILE_DELETE
+        FILE_DELETE,
+        FILE_CREATE
     }
 
     public KafkaMessageService(String message) {
@@ -77,6 +76,10 @@ public class KafkaMessageService implements Runnable {
                 case FILE_DELETE:
                     LOGGER.debug("KAFKA_CONSUMER: FILE_DELETE" + kafkaMessage.getFileDeleteMessage());
                     new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage);
+                    break;
+                case FILE_CREATE:
+                    LOGGER.debug("KAFKA_CONSUMER: FILE_CREATE" + kafkaMessage.getFileCreateMessage());
+                    new InboundFileService(new Gson().toJson(kafkaMessage)).createInboundFile();
                     break;
                 default:
                     LOGGER.info("MessageType is not valid.");

@@ -8,12 +8,36 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
-import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
-import static com.liaison.mailbox.MailBoxConstants.WORK_TICKET_QUEUE_TOPIC_SUFFIX;
-import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
-import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
+import com.liaison.commons.util.ISO8601Util;
+import com.liaison.dto.enums.ProcessMode;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.dto.queue.WorkTicketGroup;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.rtdm.model.InboundFile;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,45 +51,14 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.mailbox.service.queue.kafka.Producer;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.liaison.commons.util.ISO8601Util;
-import com.liaison.dto.enums.ProcessMode;
-import com.liaison.dto.queue.WorkTicket;
-import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.fs2.metadata.FS2MetaSnapshot;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
-import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.dto.GlassMessageDTO;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
-import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.util.DirectoryCreationUtil;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 
 /**
  * 
@@ -125,51 +118,6 @@ public abstract class AbstractSweeper extends AbstractProcessor {
         }
     }
     
-    /**
-     * Method to post meta data to rest service/ queue.
-     *
-     * @param input
-     * The input message to queue.
-     */
-    protected void postToSweeperQueue(String input, boolean isWorkTicketGroup)   {
-        try {
-            if (CONFIGURATION.getBoolean(CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                if (isWorkTicketGroup) {
-                    Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(input),
-                            SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
-                } else {
-                    Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(input),
-                            SERVICE_BROKER_APP_ID, WORK_TICKET_QUEUE_TOPIC_SUFFIX);
-                }
-            } else {
-                SweeperQueueSendClient.getInstance().sendMessage(input);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        LOGGER.debug("Sweeper push postToQueue, message: {}", input);
-    }
-
-    private WorkTicket getWorkTicketFromMessageText(String messageText) {
-        try {
-            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicket.class);
-        } catch (Exception e) {
-            String errorMessage = "Relay: Error while parsing WorkTicket JSON. Input JSON data: " + messageText;
-            LOGGER.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
-        }
-    }
-
-    private WorkTicketGroup getWorkTicketGroupFromMessageText(String messageText) {
-        try {
-            return JAXBUtility.unmarshalFromJSON(messageText, WorkTicketGroup.class);
-        } catch (Exception e) {
-            String errorMessage = "Relay: Error while parsing WorkTicketGroup JSON. Input JSON data: " + messageText;
-            LOGGER.error(errorMessage, e);
-            throw new RuntimeException(errorMessage, e);
-        }
-    }
-
     /**
      * Method is used to move the file to the sweeped folder.
      *
@@ -245,6 +193,74 @@ public abstract class AbstractSweeper extends AbstractProcessor {
             workTicket.setProcessMode(ProcessMode.ASYNC);
             workTickets.add(workTicket);
             workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+        }
+
+        LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
+
+        return workTickets;
+    }
+
+    /**
+     * Returns List of WorkTickets from Inbound File
+     *
+     * @param inboundFilesToProcess workTickets
+     * @return list of worktickets
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    protected List<WorkTicket> generateWorkTicketsForInboundFile(List<InboundFile> inboundFilesToProcess, String pipelineId) throws IllegalAccessException, IOException {
+
+        List<WorkTicket> workTickets = new ArrayList<>();
+        WorkTicket workTicket = null;
+        Map<String, Object> additionalContext = null;
+        ISO8601Util dateUtil = new ISO8601Util();
+
+        String folderName = null;
+        String fileName = null;
+        Timestamp createdTime = null;
+        Timestamp modifiedTime = null;
+
+        for (InboundFile inboundFile : inboundFilesToProcess) {
+
+            LOGGER.debug("Obtaining file Attributes for path {}", inboundFile.getFilePath());
+            additionalContext = new HashMap<String, Object>();
+
+            workTicket = new WorkTicket();
+            LOGGER.debug("Payload URI {}", inboundFile.getFilePath());
+            workTicket.setPayloadURI(inboundFile.getFilePath());
+            additionalContext.put(MailBoxConstants.KEY_FILE_PATH, inboundFile.getFilePath());
+
+            LOGGER.debug("Pipeline ID {}", pipelineId);
+            workTicket.setPipelineId(pipelineId);
+
+            createdTime = inboundFile.getCreatedDate();
+            LOGGER.debug("Created Time stamp {}", createdTime);
+            workTicket.setCreatedTime(new Date(createdTime.getTime()));
+            workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
+
+            modifiedTime = inboundFile.getFileLasModifiedTime();
+            LOGGER.debug("Modified Time stamp {}", modifiedTime);
+            workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.getTime())));
+
+            LOGGER.debug("Size stamp {}", Long.valueOf(inboundFile.getFileSize()));
+            workTicket.setPayloadSize(Long.valueOf(inboundFile.getFileSize()));
+
+            fileName = inboundFile.getFileName();
+            LOGGER.debug("Filename {}", fileName);
+            workTicket.setFileName(fileName);
+            workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, fileName);
+
+            folderName = inboundFile.getFilePath();
+            LOGGER.debug("Foldername {}", folderName);
+            additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
+            additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+            workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+
+            workTicket.setAdditionalContext(additionalContext);
+            workTicket.setProcessMode(ProcessMode.ASYNC);
+            workTickets.add(workTicket);
+            workTicket.setGlobalProcessId(inboundFile.getPguid());
+            workTicket.setPayloadURI(inboundFile.getFs2Uri());
         }
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
@@ -536,6 +552,36 @@ public abstract class AbstractSweeper extends AbstractProcessor {
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
     }
+
+    /**
+     * overloaded method to persist the workticket
+     *
+     * @param workTicket workticket
+     * @param staticProp
+     * @throws IOException
+     */
+    protected void persistWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws IOException {
+
+        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+        if (!ttlMap.isEmpty()) {
+            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+        }
+
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+
+        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
+        LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
+
+        // persist the workticket
+        StorageUtilities.persistWorkTicket(workTicket, properties);
+    }
     
     /**
      * Grouping file paths
@@ -554,6 +600,30 @@ public abstract class AbstractSweeper extends AbstractProcessor {
 
         if (isFilterFileUsingJavaScript && !MailBoxUtil.isEmpty(groupingJsPath)) {
             groupedFilePath = (List<List<Path>>) JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, MailBoxConstants.FILTER, this, files);
+        } else {
+            groupedFilePath.add(files);
+        }
+
+        return groupedFilePath;
+    }
+
+    /**
+     * Grouping file paths for inbound files
+     * 
+     * @param files
+     * @return list of path list
+     * @throws IOException 
+     * @throws IllegalAccessException 
+     */
+    @SuppressWarnings("unchecked")
+    protected List<List<InboundFile>> groupingFilesForInboundFile(List<InboundFile> files) throws IllegalAccessException, IOException {
+
+        List<List<InboundFile>> groupedFilePath = new ArrayList<>();
+        String groupingJsPath = configurationInstance.getJavaScriptUri();
+        boolean isFilterFileUsingJavaScript = getProperties().isHandOverExecutionToJavaScript();
+
+        if (isFilterFileUsingJavaScript && !MailBoxUtil.isEmpty(groupingJsPath)) {
+            groupedFilePath = (List<List<InboundFile>>) JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, MailBoxConstants.FILTER, this, files);
         } else {
             groupedFilePath.add(files);
         }

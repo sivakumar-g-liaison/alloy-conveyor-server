@@ -5,6 +5,15 @@
 * Add default QS topic for topic messages
 * GMB-1158 - Please add the loading icon or progress bar in staged file screen
 * GSP-179: Update processor DC option is not displayed initially in relay
+* GMB-1147 - Epic to collect the tickets related to Relay Sweeper Improvements
+    * GMB-1141 - Add new queue for Sweeper Improvements
+    * GMB-1148 - ACON Big Switch Changes on Relay running processors
+    * GMB-1149 - Create flyway migration script for the new tables
+    * GMB-1150 - FIle System Notification flow implementation
+    * GMB-1151 - Implement Sweeper flow
+    * GMB-1152 - Conditional Sweeper Flow 
+    * GMB-1153 - Analyze the script changes for sweeper
+    * GMB-1154 - Provide an REST interfact to add inboud files manually 
 
 5.3.4
 ---------------

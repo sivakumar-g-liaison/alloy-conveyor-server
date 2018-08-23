@@ -22,6 +22,7 @@ import com.liaison.mailbox.enums.FailoverMessageType;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +32,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
+
 import java.io.IOException;
 import java.util.Properties;
 
@@ -43,11 +45,13 @@ import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
 import static com.liaison.mailbox.MailBoxConstants.URI;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_FILE_EVENT_READER_CONSUMER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_LEGACY_RELAY_PRODUCER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_PRODUCER_PREFIX;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_RELAY_PRODUCER_STREAM;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_CREATE_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_DELETE_DEFAULT;
+import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KAFKA_TOPIC_NAME_FS_EVENT_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.KEY_SERIALIZER_DEFAULT;
 import static com.liaison.mailbox.service.queue.kafka.QueueServiceConstants.META_MAX_AGE_MS;
@@ -67,6 +71,7 @@ public class Producer {
     private static KafkaProducer<String, String> KAFKA_PRODUCER;
     private static String TOPIC_NAME_CREATE;
     private static String TOPIC_NAME_DELETE;
+    private static String FS_EVENT_STREAM;
 
     @Inject
     private static KafkaMessageProcessor kafkaMessageProcessor;
@@ -83,6 +88,9 @@ public class Producer {
             TOPIC_NAME_CREATE = configuration.getString(KAFKA_LEGACY_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_CREATE_DEFAULT);
             TOPIC_NAME_DELETE = configuration.getString(KAFKA_LEGACY_RELAY_PRODUCER_STREAM) + configuration.getString(KAFKA_TOPIC_NAME_DELETE_DEFAULT);
         }
+
+        FS_EVENT_STREAM = configuration.getString(KAFKA_FILE_EVENT_READER_CONSUMER_STREAM)
+                + configuration.getString(KAFKA_TOPIC_NAME_FS_EVENT_DEFAULT);
 
         if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
             KAFKA_PRODUCER = new KafkaProducer<>(getProperties());
@@ -280,6 +288,19 @@ public class Producer {
         kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setDirAbsolutePath(dirAbsolutePath);
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_CREATE);
+    }
+
+    /**
+     * To send local folders creation details.
+     *
+     * @param kafkaMessageType
+     * @param dirAbsolutePath
+     */
+    public static void produceFile(KafkaMessageType kafkaMessageType, String dirAbsolutePath) {
+        KafkaMessage kafkaMessage = new KafkaMessage();
+        kafkaMessage.setMessageType(kafkaMessageType);
+        kafkaMessage.setFileCreateMessage(dirAbsolutePath);
+        produce(marshalToJSON(kafkaMessage), FS_EVENT_STREAM);
     }
 
     /**

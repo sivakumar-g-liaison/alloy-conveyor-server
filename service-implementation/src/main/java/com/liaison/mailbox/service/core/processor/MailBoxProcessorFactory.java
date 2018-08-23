@@ -10,9 +10,11 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Factory class to instantiate MailBox Processors.
@@ -84,9 +86,19 @@ public class MailBoxProcessorFactory {
 
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
-			mailBoxProcessor = new DirectorySweeper(processor);
+		    boolean isInboundFileEnabled = MailBoxUtil.getEnvironmentProperties().getBoolean(MailBoxConstants.ENABLE_INBOUND_FILE, false);
+		    if (isInboundFileEnabled) {
+		        mailBoxProcessor = new EnhancedDirectorySweeper(processor);
+		    } else {
+		        mailBoxProcessor = new DirectorySweeper(processor);
+		    }
 		} else if (ProcessorType.CONDITIONALSWEEPER.equals(processor.getProcessorType())) {
-			mailBoxProcessor = new ConditionalSweeper(processor);
+		    boolean isInboundFileEnabled = MailBoxUtil.getEnvironmentProperties().getBoolean(MailBoxConstants.ENABLE_INBOUND_FILE, false);
+		    if (isInboundFileEnabled) {
+		        mailBoxProcessor = new EnhancedConditionalSweeper(processor);
+		    } else {
+		        mailBoxProcessor = new ConditionalSweeper(processor);
+		    }
 		} else if (ProcessorType.FILEWRITER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new FileWriter(processor);
 		}

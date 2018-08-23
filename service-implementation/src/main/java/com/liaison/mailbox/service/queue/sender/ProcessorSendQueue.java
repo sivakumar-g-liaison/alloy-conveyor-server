@@ -12,7 +12,18 @@ package com.liaison.mailbox.service.queue.sender;
 
 
 import com.liaison.commons.messagebus.SendClient;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.messagebus.queue.QueueTextSendClient;
+import com.liaison.mailbox.service.queue.kafka.Producer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID;
+import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
+import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
 /**
  * Owner of singleton SendClient for "processor" queue
@@ -21,7 +32,11 @@ import com.liaison.commons.messagebus.queue.QueueTextSendClient;
  */
 public class ProcessorSendQueue implements AutoCloseable {
 
-    public static final String QUEUE_NAME = "processor";
+    private static final Logger LOG = LogManager.getLogger(ProcessorSendQueue.class);
+    private static final String QUEUE_NAME = "processor";
+    private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX);
+    private static final String RECEIVER_ID = CONFIGURATION.getString(TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID);
+
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
     public static SendClient getInstance() {
@@ -35,6 +50,22 @@ public class ProcessorSendQueue implements AutoCloseable {
     @Override
     public void close() throws Exception {
         sendClient.close();
+    }
+
+    public static void post(List<String> messages) throws ClientUnavailableException {
+
+        if (QUEUE_SERVICE_ENABLED) {
+            messages.forEach(message -> {
+                LOG.debug("ABOUT TO get Producer produce {}", (Object) messages.toArray(new String[0]));
+                Producer.produceMessageToQS(message, RECEIVER_ID, TOPIC_SUFFIX, 0L);
+            });
+        } else {
+            for (String message : messages) {
+                LOG.debug("ABOUT TO get ProcessorSendQueue Instance {}", (Object) messages.toArray(new String[0]));
+                getInstance().sendMessage(message);
+            }
+        }
+
     }
 }
 

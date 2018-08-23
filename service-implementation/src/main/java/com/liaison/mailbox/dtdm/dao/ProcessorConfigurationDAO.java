@@ -40,6 +40,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String GET_CLUSTER_TYPE_BY_PROCESSOR_GUID = "Processor.getClusterType";
     String FIND_PROCESSORS_BY_DATACENTER = "Processor.findProcessorsByDatacenter";
     String FIND_SWEEPER_PROCESSORS_FOR_FILE_INGRESS = "Processor.listSweeperProcessors";
+    String FIND_PROCESSOR_BY_TYPE_AND_FOLDER_URI = "Processor.listSweeperProcessorsByFolderUri";
 
     String PROF_NAME = "sch_prof_name";
     String MBX_NAME = "mbx_name";
@@ -397,6 +398,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      */
     List<Processor> listSweeperProcessors();
 
+    /**
+     * Retrieve sweeper processors based on folder path
+     * 
+     * @return processors
+     */
+    List<Processor> listSweeperProcessorsByFolderUri(String folderUri);
 
     /**
      * Method to update the datacenter
