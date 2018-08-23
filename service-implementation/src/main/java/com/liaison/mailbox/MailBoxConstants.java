@@ -520,6 +520,9 @@ public interface MailBoxConstants {
 
     String EXECUTE = "infinite";
 
+    String CATEGORY = "category";
+    String CATEGORY_DEFAULT = "default";
+
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
     String PROCESS_DC_LIST = "com.liaison.mailbox.processdc.list";

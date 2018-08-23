@@ -12,8 +12,11 @@ package com.liaison.mailbox.service.dto;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Date;
+
+import static com.liaison.mailbox.MailBoxConstants.CATEGORY_DEFAULT;
 
 public class GlassMessageDTO {
     
@@ -47,8 +50,10 @@ public class GlassMessageDTO {
     public ProcessorType getProcessorType() {
         return processorType;
     }
-    public void setProcessorType(ProcessorType processorType) {
-        this.processorType = processorType;
+    public void setProcessorType(ProcessorType processorType, String category) {
+        if (StringUtils.isBlank(category) || CATEGORY_DEFAULT.equalsIgnoreCase(category)) {
+            this.processorType = processorType;
+        }
     }
     public String getProcessProtocol() {
         return processProtocol;

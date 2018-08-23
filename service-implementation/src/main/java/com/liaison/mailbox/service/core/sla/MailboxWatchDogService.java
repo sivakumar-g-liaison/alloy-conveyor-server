@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.service.core.sla;
 
-import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
@@ -40,14 +38,12 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.glass.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,6 +57,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
+import static com.liaison.mailbox.service.util.MailBoxUtil.getCategory;
 
 /**
  * Updates LENS status for the customer picked up the files
@@ -225,7 +224,7 @@ public class MailboxWatchDogService {
                     
                     GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
                     glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-                    glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+                    glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), getCategory(processor.getProcsrProperties()));
                     glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
                     glassMessageDTO.setFileName(fileName);
                     glassMessageDTO.setFilePath(filePath);

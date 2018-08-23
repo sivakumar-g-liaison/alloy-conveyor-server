@@ -19,6 +19,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response;
@@ -46,9 +49,9 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
  * Class which does ingress files related services.
  *
  */
-public class FilesIngressSevice {
+public class FilesIngressService {
 
-    private static final Logger LOGGER = LogManager.getLogger(FilesIngressSevice.class);
+    private static final Logger LOGGER = LogManager.getLogger(FilesIngressService.class);
     private static final String INGRESS_FILES = "Ingress files";
 
     /**
@@ -78,14 +81,6 @@ public class FilesIngressSevice {
                     continue;
                 }
 
-                ingressFilesDTO = new ArrayList<>();
-
-                filesIngressProcessorDTO = new FilesIngressProcessorDTO();
-                filesIngressProcessorDTO.setProcessorGuid(processor.getPguid());
-                filesIngressProcessorDTO.setProcessorName(processor.getProcsrName());
-                filesIngressProcessorDTO.setStatus(processor.getProcsrStatus());
-                filesIngressProcessorDTO.setPayloadUri(payloadUri);
-
                 try {
 
                     if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
@@ -96,14 +91,24 @@ public class FilesIngressSevice {
                                 processor.getProcsrProperties(), processor)).isSweepSubDirectories();
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Failed to convert json to processor properties DTO. " + processor.getProcsrProperties());
+                    LOGGER.error("Failed to convert json to processor properties DTO - {} ", processor.getProcsrProperties());
                     continue;
                 }
 
+                ingressFilesDTO = new ArrayList<>();
                 listFiles(ingressFilesDTO, Paths.get(payloadUri), isSweepSubDirectories);
-                filesIngressProcessorDTO.setFiles(ingressFilesDTO);
 
-                filesIngressProcessorList.add(filesIngressProcessorDTO);
+                //just add when there is an file and no need to include all the processor
+                if (!ingressFilesDTO.isEmpty()) {
+
+                    filesIngressProcessorDTO = new FilesIngressProcessorDTO();
+                    filesIngressProcessorDTO.setProcessorGuid(processor.getPguid());
+                    filesIngressProcessorDTO.setProcessorName(processor.getProcsrName());
+                    filesIngressProcessorDTO.setStatus(processor.getProcsrStatus());
+                    filesIngressProcessorDTO.setPayloadUri(payloadUri);
+                    filesIngressProcessorDTO.setFiles(ingressFilesDTO);
+                    filesIngressProcessorList.add(filesIngressProcessorDTO);
+                }
 
             }
 
@@ -172,7 +177,7 @@ public class FilesIngressSevice {
                 ingressFiles.add(ingressFilesDTO);
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to list files", e.getMessage());
+            LOGGER.error("Failed to list files for the directory {} and the error message is  {}", rootPath.toString(), e.getMessage());
         }
     }
 }

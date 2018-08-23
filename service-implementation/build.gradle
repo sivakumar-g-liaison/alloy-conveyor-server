@@ -143,7 +143,7 @@ dependencies {
 	//common gitlab service
 	compile 'com.liaison:lib_gitlab:3.+'
 
-	compile group: "com.liaison", name: "fs2", version: "11.+", changing: true
+	compile group: "com.liaison", name: "fs2", version: "13.+", changing: true
 
 	// currently not used during runtime (inherited dependency from NetFlix)
 	compile 'com.netflix.eureka:eureka-client:1.1.97'

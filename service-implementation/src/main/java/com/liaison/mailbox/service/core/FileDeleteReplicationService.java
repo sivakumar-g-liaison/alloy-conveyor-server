@@ -111,7 +111,7 @@ public class FileDeleteReplicationService {
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()));
+        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), null);
         glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
         glassMessageDTO.setFileName(fileName);
         glassMessageDTO.setFilePath(filePath);
