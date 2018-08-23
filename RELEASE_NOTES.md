@@ -13,7 +13,7 @@
     * GMB-1151 - Implement Sweeper flow
     * GMB-1152 - Conditional Sweeper Flow 
     * GMB-1153 - Analyze the script changes for sweeper
-    * GMB-1154 - Provide an REST interfact to add inboud files manually 
+    * GMB-1154 - Provide an REST interface to add inbound files manually 
 
 5.3.4
 ---------------
