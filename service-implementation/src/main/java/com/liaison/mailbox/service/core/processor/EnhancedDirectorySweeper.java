@@ -395,7 +395,7 @@ public class EnhancedDirectorySweeper extends AbstractProcessor implements MailB
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(workTicket.getGlobalProcessId());
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(workTicket.getFileName());
         glassMessageDTO.setStatus(ExecutionState.FAILED);
@@ -516,7 +516,7 @@ public class EnhancedDirectorySweeper extends AbstractProcessor implements MailB
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(wrkTicket.getGlobalProcessId());
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setFileName(wrkTicket.getFileName());
         glassMessageDTO.setFilePath(filePath);

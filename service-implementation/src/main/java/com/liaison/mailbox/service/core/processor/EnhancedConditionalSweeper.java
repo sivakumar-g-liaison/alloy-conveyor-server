@@ -426,7 +426,7 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(relatedTransactionId);
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
         glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
         glassMessageDTO.setStatus(ExecutionState.QUEUED);
         glassMessageDTO.setPipelineId(pipelineId);

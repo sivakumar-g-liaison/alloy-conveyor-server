@@ -1,4 +1,8 @@
-5.4.0-SNAPSHOT
+5.4.1
+---------------
+GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
+
+5.4.0
 ---------------
 * Added option to use either Queue Service or HornetQ in DirectorySweeper and WorkTicketUtil
 * Update lib_message_bus to 14.2.1
@@ -13,7 +17,7 @@
     * GMB-1151 - Implement Sweeper flow
     * GMB-1152 - Conditional Sweeper Flow 
     * GMB-1153 - Analyze the script changes for sweeper
-    * GMB-1154 - Provide an REST interfact to add inboud files manually 
+    * GMB-1154 - Provide an REST interface to add inbound files manually 
 
 5.3.4
 ---------------

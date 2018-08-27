@@ -45,7 +45,7 @@ public class StorageUtilitiesIT extends BaseServiceTest {
 
     private static final Logger logger = LogManager.getLogger(StorageUtilitiesIT.class);
 
-    @Test
+    @Test(enabled = false)
     public void testWriteAndReadUnsecurePayload() throws IOException {
 
         String exampleString = "This is the sample string";
@@ -71,7 +71,7 @@ public class StorageUtilitiesIT extends BaseServiceTest {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void testWriteAndReadUnsecurePayloadInBOSS() throws IOException {
 
         String exampleString = "This is the sample string";

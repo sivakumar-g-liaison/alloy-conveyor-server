@@ -125,7 +125,7 @@ public class InboundFileService extends GridServiceRTDM<InboundFile> implements 
         }
 
         String fileDirectory = filePath.substring(0, filePath.lastIndexOf(SLASH));
-        String pathToSearch = extractUserPath(fileDirectory);
+        String pathToSearch = extractUserPath(fileDirectory + SLASH);
         ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
         List<Processor> processors = processorDao.listSweeperProcessorsByFolderUri(pathToSearch);
 

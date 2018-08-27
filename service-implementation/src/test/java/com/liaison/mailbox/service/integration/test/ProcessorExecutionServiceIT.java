@@ -62,7 +62,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test(enabled = false)
     public void testCreateAndReadHttpProcessorAndDirectUpload() throws Exception {
 
         // Adding the mailbox
@@ -114,7 +114,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test(enabled = false)
     public void testCreateAndReadHttpProcessorAndExecute() throws Exception {
 
         // Adding the mailbox
@@ -162,7 +162,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test(enabled = false)
     public void testCreateAndReadHttpsProcessorAndExecute() throws Exception {
 
         // Adding the mailbox
@@ -207,7 +207,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    @Test(enabled = false, expectedExceptions = java.lang.RuntimeException.class)
     public void testDeactivateStagedFile() throws Exception {
     	
     	 // Adding the mailbox
@@ -256,7 +256,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      *
      * @throws Exception
      */
-    @Test(expectedExceptions = java.lang.RuntimeException.class)
+    @Test(enabled = false, expectedExceptions = java.lang.RuntimeException.class)
     public void testDeactivateStagedFileWithUnknownStagedFile() throws Exception { 
     	
     	 // Adding the mailbox
