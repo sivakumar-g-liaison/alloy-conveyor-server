@@ -36,6 +36,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class InboundFileServiceTest extends BaseServiceTest {
 
     private static final String DIRECTORY_PATH = "/data/sftp/testuser/inbox/folder1/folder2/folder3/folder4";
+    private static final String FILE_PATH = "/data/sftp/testuser/inbox/";
 
     private static final String FOLDER_URI_ONE = "/data/sftp/testuser/inbox/folder1/folder2";
     private static final String FOLDER_URI_TWO = "/data/sftp/testuser/inbox/folder1/folder2/folder3";
@@ -171,5 +172,16 @@ public class InboundFileServiceTest extends BaseServiceTest {
         processors.add(processorTwo);
         processors.add(processorThree);
         return processors;
+    }
+
+    @Test
+    private void testSimpleCreateInboundFile() {
+
+        InboundFileService service = new InboundFileService();
+        String actualPath = service.extractUserPath(FILE_PATH);
+        String expectedPath = "/data/sftp/testuser/inbox";
+
+        Assert.assertNotNull(actualPath);
+        Assert.assertEquals(actualPath, expectedPath);
     }
 }

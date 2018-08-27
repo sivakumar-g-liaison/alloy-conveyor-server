@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
@@ -62,6 +63,7 @@ public class DatacenterResource extends AuditedResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiImplicitParams({@ApiImplicitParam(name = "request", value = "create  DC", required = true, paramType = "body")})
     @ApiResponses({@ApiResponse(code = 500, message = "Unexpected Service failure.")})
+    @AccessDescriptor(skipFilter = true)
     public Response createDatacenter(@Context final HttpServletRequest request) {
 
         // create the worker delegate to perform the business logic
