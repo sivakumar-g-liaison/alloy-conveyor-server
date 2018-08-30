@@ -5,7 +5,7 @@
   <link href='css/droid.sans.css' rel='stylesheet' type='text/css'/>
   <link href='css/highlight.default.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
-  <script type="text/javascript" src="lib/shred.bundle.js" /></script>  
+  <script src='lib/shred.bundle.js' type='text/javascript'></script>
   <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
   <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
   <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
@@ -21,9 +21,10 @@
   if (appContext.indexOf("/") == 0) 
       appContext = appContext.substring(1, appContext.length );
   	  appContext = appContext.substring(0, appContext.indexOf("/"));
+      var apiDocsUrl = window.location.protocol + "//" + window.location.host + "/" + appContext + "/api-docs";
   	$(function () {
     	window.swaggerUi = new SwaggerUi({
-    	url: "/" + appContext + "/api-docs",
+    	url: apiDocsUrl,
     	dom_id: "swagger-ui-container",
       	supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
       	onComplete: function(swaggerApi, swaggerUi){

@@ -1,6 +1,7 @@
 5.4.1
 ---------------
 GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
+GGT-1417 - Fix to Swagger configuration and Swagger UI.
 
 5.4.0
 ---------------

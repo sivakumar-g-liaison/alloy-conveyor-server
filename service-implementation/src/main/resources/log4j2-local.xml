@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<configuration status="DEBUG" packages="com.liaison.framework.audit.log4j2" verbose="false">
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}"/>
+        </Console>
+        <File name="MyFile" fileName="logs/app.log" ignoreExceptions="false" append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+    </appenders>
+    <loggers>
+        <root level="DEBUG">
+            <appender-ref ref="Console" level="DEBUG"/>
+            <appender-ref ref="MyFile" level="DEBUG"/>
+        </root>
+    </loggers>
+</configuration>
