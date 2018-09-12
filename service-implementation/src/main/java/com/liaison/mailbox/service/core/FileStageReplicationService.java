@@ -12,8 +12,6 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.FailoverMessageType;
@@ -22,7 +20,6 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.sender.FileStageReplicationSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
@@ -50,10 +47,6 @@ import static com.liaison.mailbox.MailBoxConstants.FAILOVER_MSG_TYPE;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_DELAY;
 import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATION_RETRY_MAX_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.GLOBAL_PROCESS_ID;
-import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_NAME;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_OVERWRITE;
@@ -61,8 +54,7 @@ import static com.liaison.mailbox.MailBoxConstants.MESSAGE;
 import static com.liaison.mailbox.MailBoxConstants.PRODUCE_KAFKA_MESSAGE;
 import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
-
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
+import static com.liaison.mailbox.MailBoxConstants.URI;
 
 /**
  * Service to stage the files posted from other dc
@@ -72,8 +64,6 @@ import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_E
 public class FileStageReplicationService implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(FileStageReplicationService.class);
-
-    private final static DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
 
     private static final Long DELAY = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_DELAY, 10000);
     private static final Long MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getLong(FILE_STAGE_REPLICATION_RETRY_MAX_COUNT, 10);

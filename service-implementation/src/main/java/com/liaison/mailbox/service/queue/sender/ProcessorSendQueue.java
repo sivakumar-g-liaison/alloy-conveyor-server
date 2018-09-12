@@ -20,8 +20,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
+import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
@@ -35,7 +35,6 @@ public class ProcessorSendQueue implements AutoCloseable {
     private static final Logger LOG = LogManager.getLogger(ProcessorSendQueue.class);
     private static final String QUEUE_NAME = "processor";
     private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX);
-    private static final String RECEIVER_ID = CONFIGURATION.getString(TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID);
 
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
@@ -57,7 +56,7 @@ public class ProcessorSendQueue implements AutoCloseable {
         if (QUEUE_SERVICE_ENABLED) {
             messages.forEach(message -> {
                 LOG.debug("ABOUT TO get Producer produce {}", (Object) messages.toArray(new String[0]));
-                Producer.produceMessageToQS(message, RECEIVER_ID, TOPIC_SUFFIX, 0L);
+                Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, 0L);
             });
         } else {
             for (String message : messages) {

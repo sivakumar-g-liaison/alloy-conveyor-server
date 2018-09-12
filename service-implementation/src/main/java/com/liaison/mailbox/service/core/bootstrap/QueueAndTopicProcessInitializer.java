@@ -14,7 +14,6 @@ import com.liaison.commons.messagebus.common.KafkaTextMessageProcessor;
 import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumerFactory;
-import com.liaison.commons.messagebus.queue.LiaisonConsumer;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
@@ -38,7 +37,6 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,24 +46,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_RECEIVER_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_RECEIVER_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_RECEIVER_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_RECEIVER_ID;
 
 /**
  * Initializes all queue pollers.
@@ -159,8 +152,7 @@ public class QueueAndTopicProcessInitializer {
                         // Read topics info from properties
                         Map<String, List<String>> serviceBrokerToDropboxConsumerTopics = getConsumerTopics(
                                 TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_SERVICE_BROKER_TO_DROPBOX_RECEIVER_ID);
+                                TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES);
 
                         //Create a consumer instance, add ProcessorAvailabilityMonitor and start a consumer
                         /*LiaisonKafkaConsumer serviceBrokerToDropboxConsumer = liaisonKafkaConsumerFactory.create(serviceBrokerToDropboxProcessor);
@@ -268,8 +260,7 @@ public class QueueAndTopicProcessInitializer {
                         // Read topics info from properties
                         Map<String, List<String>> fileStageReplicationRetryConsumerTopics = getConsumerTopics(
                                 TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_REPLICATION_FAILOVER_RECEIVER_ID);
+                                TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES);
 
                /*         KafkaTextMessageProcessor fileStageReplicationRetryProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, FileStageReplicationRetry.class));
                         LiaisonKafkaConsumer fileStageReplicationRetryConsumer = liaisonKafkaConsumerFactory.create(fileStageReplicationRetryProcessor);
@@ -288,8 +279,7 @@ public class QueueAndTopicProcessInitializer {
                         // Read topics info from properties
                         Map<String, List<String>> mailboxProcessorConsumerTopics = getConsumerTopics(
                                 TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID);
+                                TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
 
                         /*KafkaTextMessageProcessor mailboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, Mailbox.class));
                         LiaisonKafkaConsumer mailboxProcessorConsumer = liaisonKafkaConsumerFactory.create(mailboxProcessor);
@@ -309,8 +299,7 @@ public class QueueAndTopicProcessInitializer {
                         // Read topics info from properties
                         Map<String, List<String>> serviceBrokerToMailboxConsumerTopics = getConsumerTopics(
                                 TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_SERVICE_BROKER_TO_MAILBOX_RECEIVER_ID);
+                                TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES);
                         
                         /*KafkaTextMessageProcessor serviceBrokerToMailboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToMailbox.class));
                         LiaisonKafkaConsumer serviceBrokerToMailboxConsumer = liaisonKafkaConsumerFactory.create(serviceBrokerToMailboxProcessor);
@@ -334,9 +323,7 @@ public class QueueAndTopicProcessInitializer {
 
                         Map<String, List<String>> mailboxTopicMessageConsumerTopics = getConsumerTopics(
                                 TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID);
-
+                                TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
 
                         /*LiaisonConsumer broadcastConsumer = injector.getInstance(Key.get(LiaisonConsumer.class, BroadcastConsumer.class));
                         broadcastConsumer.startConsumer(mailboxTopicMessageConsumerTopics);
@@ -354,8 +341,7 @@ public class QueueAndTopicProcessInitializer {
                         // Read topics info from properties
                         Map<String, List<String>> userManagementToRelayDirectoryConsumerTopics = getConsumerTopics(
                                 TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES,
-                                TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_RECEIVER_ID);
+                                TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES);
 
                         /*KafkaTextMessageProcessor userManagementToRelayDirectoryProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, UserManagementToRelayDirectory.class));
                         LiaisonKafkaConsumer userManagementToRelayDirectoryConsumer = liaisonKafkaConsumerFactory.create(userManagementToRelayDirectoryProcessor);
@@ -407,8 +393,7 @@ public class QueueAndTopicProcessInitializer {
     }
 
     private static Map<String, List<String>> getConsumerTopics(String topicReplicationFailoverDefaultTopicSuffix,
-                                                               String topicReplicationFailoverAdditionalTopicSuffixes,
-                                                               String topicReplicationFailoverReceiverId) {
+                                                               String topicReplicationFailoverAdditionalTopicSuffixes) {
 
         Map<String, List<String>> consumerTopics = new HashMap<>();
         List<String> topicSuffixes = new ArrayList<>();
@@ -417,7 +402,7 @@ public class QueueAndTopicProcessInitializer {
         if (!additionalTopicSuffixes.isEmpty()) {
             topicSuffixes.addAll(additionalTopicSuffixes);
         }
-        consumerTopics.put(configuration.getString(topicReplicationFailoverReceiverId), topicSuffixes);
+        consumerTopics.put(DEPLOYMENT_APP_ID, topicSuffixes);
         return consumerTopics;
     }
 }

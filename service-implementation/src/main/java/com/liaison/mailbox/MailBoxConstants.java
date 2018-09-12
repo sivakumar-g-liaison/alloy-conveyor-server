@@ -12,6 +12,7 @@ package com.liaison.mailbox;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
+import com.liaison.mailbox.enums.DeploymentType;
 
 /**
  * Contains the static variables which we can use globally.
@@ -559,39 +560,34 @@ public interface MailBoxConstants {
 
     String CONFIGURATION_QUEUE_SERVICE_ENABLED = "com.liaison.queueservice.enabled";
 
-    String TOPIC_SWEEPER_RECEIVER_ID = "com.liaison.queueservice.topic.sweeper.receiverId";
     String TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.sweeper.topicSuffix.default";
     String TOPIC_SWEEPER_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.sweeper.topicSuffix.additional";
 
-    String TOPIC_INBOUND_FILE_RECEIVER_ID = "com.liaison.queueservice.topic.inbound.file.receiverId";
     String TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.inbound.file.topicSuffix.default";
     String TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.inbound.file.topicSuffix.additional";
 
-    String TOPIC_RUNNING_PROCESSOR_RECEIVER_ID = "com.liaison.queueservice.topic.running.processor.receiverId";
     String TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.running.processor.topicSuffix.default";
     String TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.running.processor.topicSuffix.additional";
 
-    String TOPIC_REPLICATION_FAILOVER_RECEIVER_ID = "com.liaison.queueservice.topic.replicationFailover.receiverId";
     String TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.replicationFailover.topicSuffix.default";
     String TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.replicationFailover.topicSuffix.additional";
 
-    String TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID = "com.liaison.queueservice.topic.mailboxProcessor.receiverId";
     String TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.mailboxProcessor.topicSuffix.default";
     String TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.mailboxProcessor.topicSuffix.additional";
 
-    String TOPIC_SERVICE_BROKER_TO_DROPBOX_RECEIVER_ID = "com.liaison.queueservice.topic.serviceBrokerToDropbox.receiverId";
     String TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.serviceBrokerToDropbox.topicSuffix.default";
     String TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.serviceBrokerToDropbox.topicSuffix.additional";
 
-    String TOPIC_SERVICE_BROKER_TO_MAILBOX_RECEIVER_ID = "com.liaison.queueservice.topic.serviceBrokerToMailbox.receiverId";
     String TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.serviceBrokerToMailbox.topicSuffix.default";
     String TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.serviceBrokerToMailbox.topicSuffix.additional";
 
-    String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_RECEIVER_ID = "com.liaison.queueservice.topic.userManagementToRelayDirectory.receiverId";
     String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.userManagementToRelayDirectory.topicSuffix.default";
     String TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.userManagementToRelayDirectory.topicSuffix.additional";
 
-    String TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID = "com.liaison.queueservice.topic.mailboxTopicMessage.receiverId";
     String TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.mailboxTopicMessage.topicSuffix.default";
     String TOPIC_MAILBOX_TOPIC_MESSAGE_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.mailboxTopicMessage.topicSuffix.additional";
+
+    // Read deployment app id from properties. It will be used as a senderId for QS
+    String DEPLOYMENT_APP_ID = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue()).toLowerCase();
+    String SERVICE_BROKER_APP_ID = "service-broker";
 }

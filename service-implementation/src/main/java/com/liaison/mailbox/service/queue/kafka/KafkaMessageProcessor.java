@@ -24,13 +24,14 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 
+import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
+
 public class KafkaMessageProcessor implements KafkaTextMessageProcessor {
 
     private static final Logger LOG = LogManager.getLogger(KafkaMessageProcessor.class);
 
     private LiaisonProducer producer;
     private StatusLoggerFactory statusLoggerFactory;
-
 
     @Override
     public void processMessage(String message, String topic) {
@@ -54,11 +55,11 @@ public class KafkaMessageProcessor implements KafkaTextMessageProcessor {
      */
     public void postToQueue(String message, String receiverId, String topicSuffix, long delay) {
         try {
-            producer.produce(receiverId, message, topicSuffix, delay);
+            producer.produce(DEPLOYMENT_APP_ID, receiverId, message, topicSuffix, delay);
         } catch (LiaisonException e) {
-            LOG.error("WorkTicket produce to " + receiverId + " topic failed. Retrying...", e);
+            LOG.error("Message produce to " + receiverId + " topic failed. Retrying...", e);
             try {
-                producer.produce(receiverId, message, topicSuffix);
+                producer.produce(DEPLOYMENT_APP_ID, receiverId, message, topicSuffix);
             } catch (LiaisonException e1) {
                 LOG.error("Produce retry failed. Sending failure event.", e1);
             }
@@ -74,11 +75,11 @@ public class KafkaMessageProcessor implements KafkaTextMessageProcessor {
     public void postToQueue(WorkResult workResult, String receiverId, String topicSuffix) {
 
         try {
-            producer.produce(receiverId, workResult, topicSuffix);
+            producer.produce(DEPLOYMENT_APP_ID, receiverId, workResult, topicSuffix);
         } catch (LiaisonException e) {
-            LOG.error("WorkTicket produce to " + receiverId + " topic failed. Retrying...", e);
+            LOG.error("WorkResult produce to " + receiverId + " topic failed. Retrying...", e);
             try {
-                producer.produce(receiverId, workResult, topicSuffix);
+                producer.produce(DEPLOYMENT_APP_ID, receiverId, workResult, topicSuffix);
             } catch (LiaisonException e1) {
                 LOG.error("Produce retry failed. Sending failure event.", e1);
                 StatusLogger statusLogger = statusLoggerFactory.create(workResult.getProcessId(), workResult.getProcessId(), workResult.getPipelineId());
@@ -95,11 +96,11 @@ public class KafkaMessageProcessor implements KafkaTextMessageProcessor {
      */
     public void postToQueue(WorkTicket workTicket, String receiverId, String topicSuffix) {
         try {
-            producer.produce(receiverId, workTicket, topicSuffix);
+            producer.produce(DEPLOYMENT_APP_ID, receiverId, workTicket, topicSuffix);
         } catch (LiaisonException e) {
             LOG.error("WorkTicket produce to " + receiverId + " topic failed. Retrying...", e);
             try {
-                producer.produce(receiverId, workTicket, topicSuffix);
+                producer.produce(DEPLOYMENT_APP_ID, receiverId, workTicket, topicSuffix);
             } catch (LiaisonException e1) {
                 LOG.error("Produce retry failed. Sending failure event.", e1);
                 StatusLogger statusLogger = statusLoggerFactory.create(workTicket.getGlobalProcessId(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
@@ -116,11 +117,11 @@ public class KafkaMessageProcessor implements KafkaTextMessageProcessor {
      */
     public void postToQueue(WorkTicketGroup workTicketGroup, String receiverId, String topicSuffix) {
         try {
-            producer.produce(receiverId, workTicketGroup, topicSuffix);
+            producer.produce(DEPLOYMENT_APP_ID, receiverId, workTicketGroup, topicSuffix);
         } catch (LiaisonException e) {
             LOG.error("WorkTicketGroup produce to " + receiverId + " topic failed. Retrying...", e);
             try {
-                producer.produce(receiverId, workTicketGroup, topicSuffix);
+                producer.produce(DEPLOYMENT_APP_ID, receiverId, workTicketGroup, topicSuffix);
             } catch (LiaisonException e1) {
                 LOG.error("Produce retry failed. Sending failure event.", e1);
             }
