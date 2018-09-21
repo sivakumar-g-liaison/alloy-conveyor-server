@@ -1,3 +1,7 @@
+5.5.0-SNAPSHOT
+---------------
+* GMB-1163: Use deployment type as a senderId for QS produce calls
+
 5.4.2
 ---------------
 * Property update : changed inbound file enable property as false and in staging-px1 added async url 
@@ -5,6 +9,11 @@
 5.4.1
 ---------------
 * GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
+
+5.4.1
+---------------
+GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
+GGT-1417 - Fix to Swagger configuration and Swagger UI.
 
 5.4.0
 ---------------

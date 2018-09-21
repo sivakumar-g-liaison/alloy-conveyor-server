@@ -9,16 +9,13 @@
 package com.liaison.framework.bootstrap;
 
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.RemoteURLPublicKeyVerifier;
 import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.messagebus.common.KafkaTextMessageProcessor;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
-import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumerFactory;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
@@ -34,12 +31,8 @@ import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitialize
 import com.liaison.mailbox.service.module.GuiceInjector;
 import com.liaison.mailbox.service.queue.kafka.Consumer;
 import com.liaison.mailbox.service.queue.kafka.Producer;
-import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
-import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
-import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.UserManagementToRelayDirectory;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -51,32 +44,14 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.ApplicationPath;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_RECEIVER_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 
 @Singleton
 @ApplicationPath("/*")
@@ -87,6 +62,7 @@ public class RelayApp extends ResourceConfig {
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
+    private static final String PROPERTY_RELAY_CONTEXT_PATH = "/g2mailboxservice";
 
     public static Injector injector;
 
@@ -98,6 +74,8 @@ public class RelayApp extends ResourceConfig {
 
     @Inject
     public RelayApp(final ServiceLocator serviceLocator) {
+
+        configureBootstrap();
 
         logger.info("Registering injectable...");
         GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
@@ -111,7 +89,7 @@ public class RelayApp extends ResourceConfig {
                 "com.liaison.threadmanagement.resources",
                 "com.wordnik.swagger.jersey.listing",
                 "com.fasterxml.jackson.jaxrs.json",
-                "com.fasterxml.jackson.jaxrs.xm");
+                "com.fasterxml.jackson.jaxrs.xml");
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -199,6 +177,25 @@ public class RelayApp extends ResourceConfig {
                 logger.error("Unable to register http sb sync pool", e);
             }
         }
+    }
+
+    private void configureBootstrap() {
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getLocalHost();
+        } catch (final UnknownHostException e) {
+            logger.error("Could not retrieve the ip from this node", e);
+        }
+
+        logger.info("Swagger Configuration IP:"+ ip);
+
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setTitle("Relay API");
+        beanConfig.setDescription("Relay API");
+        beanConfig.setVersion("1.0.0");
+        beanConfig.setBasePath(PROPERTY_RELAY_CONTEXT_PATH);
+        beanConfig.setResourcePackage("com.liaison.mailbox.service.rest");
+        beanConfig.setScan(true);
     }
 
     // TODO: Does this really work?

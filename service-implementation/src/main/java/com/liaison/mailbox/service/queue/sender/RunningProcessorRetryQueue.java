@@ -15,8 +15,8 @@ import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableExcepti
 import com.liaison.commons.messagebus.queue.QueueTextSendClient;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 
+import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_RECEIVER_ID;
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
@@ -25,8 +25,7 @@ public class RunningProcessorRetryQueue implements AutoCloseable {
     private static final String QUEUE_NAME = "runningProcessorRetry";
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
-    private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_RUNNING_PROCESSOR_RECEIVER_ID);
-    private static final String RECEIVER_ID = CONFIGURATION.getString(TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX);
+    private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX);
 
     private static SendClient getInstance() {
         return sendClient;
@@ -42,7 +41,7 @@ public class RunningProcessorRetryQueue implements AutoCloseable {
 
     public static void post(String message, long delay) throws ClientUnavailableException {
         if (QUEUE_SERVICE_ENABLED) {
-            Producer.produceMessageToQS(message, RECEIVER_ID, TOPIC_SUFFIX, delay);
+            Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, delay);
         } else {
             getInstance().sendMessage(message, delay);
         }

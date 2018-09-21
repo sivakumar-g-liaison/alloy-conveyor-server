@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 
 // flyway
 apply plugin: 'jetty'
-apply plugin: 'cargo'
+apply plugin: 'com.bmuschko.cargo'
 apply plugin: 'flyway'
 apply plugin: 'rebel'
 apply plugin: 'license'
@@ -40,7 +40,7 @@ buildscript {
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies {
 		// Cargo Plugin
-		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1'
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.2.3'
 
 		// Flyway Plugin
 		// License: Apache v2
@@ -176,7 +176,7 @@ dependencies {
 	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:3.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
-	compile ('com.liaison.commons:lib_message_bus:14.2.1') {
+	compile ('com.liaison.commons:lib_message_bus:15.+') {
         exclude group: 'org.sonatype.sisu'
     }
 
@@ -304,15 +304,20 @@ cargo {
 	}
 
 	local {
-		homeDir = file(tomcatInstallPath)
-		configHomeDir = file("${buildDir}/cargoLocal")
-		output = file("${buildDir}/tomcat-out.log")
+        homeDir = file(tomcatInstallPath)
+        configHomeDir = file("${buildDir}/cargoLocal")
+        logFile = file("${buildDir}/tomcat-out.log")
+        outputFile = file("${buildDir}/cargo.log")
+        logLevel = 'high'
+        //timeout = 300000
 
-		rmiPort = new Integer(tomcatRmiPort)
-		tomcat.ajpPort = new Integer(tomcatAjpPort)
-		//timeout = 300000
+        rmiPort = new Integer(tomcatRmiPort)
 
-		// set the initial value
+        containerProperties {
+            property 'cargo.tomcat.ajp.port', new Integer(tomcatAjpPort)
+        }
+
+        // set the initial value
 		// MUST HAVE leading spaces for cargo JVM args
 		if(containerJVMArgs) {
 			jvmArgs = " $containerJVMArgs"
@@ -323,8 +328,8 @@ cargo {
 		jvmArgs += " -Darchaius.deployment.stack=${deployStack}"
 		jvmArgs += " -Darchaius.deployment.region=${deployRegion}"
 		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
-        jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
 		jvmArgs += " -Dhttps.protocols=TLSv1.2"
+		jvmArgs += " -Dlog4j.configurationFile=log4j2-local.xml"
 
 		// if containerDebug, append tomcat debug args to jvm args
 		if(project.hasProperty('containerDebug')) {

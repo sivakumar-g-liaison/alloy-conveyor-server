@@ -24,8 +24,8 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
+import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_RECEIVER_ID;
 import static com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer.SKIP_QUEUE_INITIALIZER;
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
@@ -42,7 +42,6 @@ public class SweeperQueueSendClient implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger(SweeperQueueSendClient.class);
 
     private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX);
-    private static final String RECEIVER_ID = CONFIGURATION.getString(TOPIC_SWEEPER_RECEIVER_ID);
 
     private static SendClient SEND_CLIENT = null;
 
@@ -87,10 +86,10 @@ public class SweeperQueueSendClient implements AutoCloseable {
         if (QUEUE_SERVICE_ENABLED) {
             if (isWorkTicketGroup) {
                 Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(message),
-                        RECEIVER_ID, TOPIC_SUFFIX);
+                        SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
             } else {
                 Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(message),
-                        RECEIVER_ID, TOPIC_SUFFIX);
+                        SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
             }
         } else {
             try {
@@ -104,7 +103,7 @@ public class SweeperQueueSendClient implements AutoCloseable {
     public static void post(WorkTicket workticket) {
 
         if (QUEUE_SERVICE_ENABLED) {
-            Producer.produceWorkTicketToQS(workticket, RECEIVER_ID, TOPIC_SUFFIX);
+            Producer.produceWorkTicketToQS(workticket, SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
         } else {
             try {
                 getInstance().sendMessage(JAXBUtility.marshalToJSON(workticket));
