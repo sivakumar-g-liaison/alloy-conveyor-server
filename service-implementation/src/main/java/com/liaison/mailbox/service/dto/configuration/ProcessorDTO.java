@@ -49,8 +49,10 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.liaison.mailbox.service.validation.PatternValidation;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
 /**

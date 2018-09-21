@@ -1,6 +1,8 @@
 5.5.0-SNAPSHOT
 ---------------
+* GMB-1161 - Invalid Mailbox name - blocking soa proxy relay gui editing given mailbox
 * GMB-1163: Use deployment type as a senderId for QS produce calls
+* GGT-1417 - Fix to Swagger configuration and Swagger UI.
 
 5.4.2
 ---------------
@@ -12,8 +14,7 @@
 
 5.4.1
 ---------------
-GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
-GGT-1417 - Fix to Swagger configuration and Swagger UI.
+* GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
 
 5.4.0
 ---------------

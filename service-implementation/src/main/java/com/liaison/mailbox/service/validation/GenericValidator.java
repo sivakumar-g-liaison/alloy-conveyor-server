@@ -263,10 +263,24 @@ public class GenericValidator {
                 isValidPattern = false;
                 errorMessage.append(annotationDetails.errorMessage());
             }
-		}
-		return isValidPattern;
-
-	}
+            
+            if ((annotationDetails.type().equals(MailBoxConstants.NAME_PATTERN)) && !isValidName(value)) {
+                isValidPattern = false;
+                errorMessage.append(annotationDetails.errorMessage());
+            }
+        }
+        return isValidPattern;
+    }
+	
+    /**
+     * Method to validate whether given name matches with pattern
+     * 	
+     * @param value Mailbox name value
+     * @return boolean
+     */
+    private boolean isValidName(Object value) {
+        return value.toString().matches(MailBoxConstants.NAME_INPUT_PATTERN);
+    }
 
     /**
      * Method to validate whether given string is valid trigger file name

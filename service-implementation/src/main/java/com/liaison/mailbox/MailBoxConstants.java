@@ -28,6 +28,10 @@ public interface MailBoxConstants {
     int NUMBER_OF_FILES_THRESHOLD_MAX_VALUE = 25;
 
     int TOTAL_PERCENT = 100;
+    
+    /**Name Format. */ 
+    String NAME_PATTERN = "NamePattern";
+    String NAME_INPUT_PATTERN = "^[a-zA-Z0-9\\-:_.,\\s]+$";
 
     // Key descriminator values
     /** File datetime format. */
