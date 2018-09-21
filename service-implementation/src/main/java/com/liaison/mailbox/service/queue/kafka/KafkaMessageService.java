@@ -12,12 +12,14 @@ package com.liaison.mailbox.service.queue.kafka;
 
 import com.google.gson.Gson;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.core.FileDeleteReplicationService;
 import com.liaison.mailbox.service.core.FileStageReplicationService;
 import com.liaison.mailbox.service.core.InboundFileService;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,8 +80,13 @@ public class KafkaMessageService implements Runnable {
                     new FileDeleteReplicationService().inactivateStageFileAndUpdateLens(kafkaMessage);
                     break;
                 case FILE_CREATE:
-                    LOGGER.debug("KAFKA_CONSUMER: FILE_CREATE" + kafkaMessage.getFileCreateMessage());
-                    new InboundFileService(new Gson().toJson(kafkaMessage)).createInboundFile();
+                    boolean isInboundFileEnabled = MailBoxUtil.getEnvironmentProperties().getBoolean(MailBoxConstants.ENABLE_INBOUND_FILE, false);
+                    if (isInboundFileEnabled) {
+                        LOGGER.debug("KAFKA_CONSUMER: FILE_CREATE" + kafkaMessage.getFileCreateMessage());
+                        new InboundFileService(new Gson().toJson(kafkaMessage)).createInboundFile();
+                    } else {
+                        LOGGER.warn("KAFKA_CONSUMER: FILE_CREATE DISABLED" + kafkaMessage.getFileCreateMessage());
+                    }
                     break;
                 default:
                     LOGGER.info("MessageType is not valid.");
