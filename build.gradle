@@ -59,7 +59,8 @@ allprojects {
             all*.exclude group: 'com.netflix.karyon', module: 'karyon-admin'
             all*.exclude group: 'com.sun.jersey'
             all*.exclude group: 'com.sun.jersey.contribs'
-            all*.exclude group: 'com.wordnik', module: 'swagger-jersey-jaxrs_2.10'
+            exclude module: 'swagger-jersey-jaxrs_2.10'
+            exclude group: 'io.swagger'
 
             //force eureka-client to use 1.1.159
             resolutionStrategy {

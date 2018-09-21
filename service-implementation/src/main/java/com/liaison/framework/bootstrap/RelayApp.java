@@ -32,6 +32,7 @@ import com.liaison.mailbox.service.module.GuiceInjector;
 import com.liaison.mailbox.service.queue.kafka.Consumer;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -43,7 +44,9 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.ApplicationPath;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.Security;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
@@ -59,6 +62,7 @@ public class RelayApp extends ResourceConfig {
 
     private static final String PROPERTY_SERVICE_NFS_MOUNT = "com.liaison.service.nfs.mount";
     private static final DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
+    private static final String PROPERTY_RELAY_CONTEXT_PATH = "/g2mailboxservice";
 
     public static Injector injector;
 
@@ -70,6 +74,8 @@ public class RelayApp extends ResourceConfig {
 
     @Inject
     public RelayApp(final ServiceLocator serviceLocator) {
+
+        configureBootstrap();
 
         logger.info("Registering injectable...");
         GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
@@ -83,7 +89,7 @@ public class RelayApp extends ResourceConfig {
                 "com.liaison.threadmanagement.resources",
                 "com.wordnik.swagger.jersey.listing",
                 "com.fasterxml.jackson.jaxrs.json",
-                "com.fasterxml.jackson.jaxrs.xm");
+                "com.fasterxml.jackson.jaxrs.xml");
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -171,6 +177,25 @@ public class RelayApp extends ResourceConfig {
                 logger.error("Unable to register http sb sync pool", e);
             }
         }
+    }
+
+    private void configureBootstrap() {
+        InetAddress ip = null;
+        try {
+            ip = InetAddress.getLocalHost();
+        } catch (final UnknownHostException e) {
+            logger.error("Could not retrieve the ip from this node", e);
+        }
+
+        logger.info("Swagger Configuration IP:"+ ip);
+
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setTitle("Relay API");
+        beanConfig.setDescription("Relay API");
+        beanConfig.setVersion("1.0.0");
+        beanConfig.setBasePath(PROPERTY_RELAY_CONTEXT_PATH);
+        beanConfig.setResourcePackage("com.liaison.mailbox.service.rest");
+        beanConfig.setScan(true);
     }
 
     // TODO: Does this really work?

@@ -3,6 +3,44 @@
 g2-mailbox code base is common for three different micro services called Relay, Legacy Relay and Conveyor Server. The deployment needs to done on all the three nodes to maintain the common version.
 
 ## Prerequisites
+### Getting Started (Developers)
+Execute the following procedure to run the service.
+
+1. Clone the remote repository [GitHub](https://github.com/LiaisonTechnologies/g2-mailbox).
+  1. Import project [Dev environment setup](https://confluence.liaison.tech/display/ARCH/Dev+Env+Setup+Guide)
+
+1. Build
+```
+   $ ./gradlew build
+```
+Will produce a jar located in service-grammar/build/libs and a war in service-implementation/build/libs.
+
+```
+    $ ./gradlew build cargoRunLocal
+```
+Will build the project, deploy it into Tomcat with the "dev" (see error-notification-dev.properties.template) environment configs and then start Tomcat, waiting on a [CTRL+C] to terminate. Remote debugging is enabled by default and available on port 8080.
+
+```
+$ ./gradlew build cargoRunLocal -PdebugSuspend
+```
+Add the Gradle property "debugSuspend" to make Tomcat wait for a remote debugger (such as your IDE) to attach before starting.
+
+```
+    $ ./start.sh
+```
+Will build the project, deploy it into Tomcat with the "tre-dev-int"
+
+#### Verify build
+
+[UI](http://localhost:8989/g2mailboxservice/config/ui/index.html#/)
+
+[Swagger UI](http://localhost:8989/g2mailboxservice/api-docs/swagger-ui/index.html)
+
+[Metrics](http://localhost:8989/g2mailboxservice/metrics)
+
+[AclResourceMaps](http://localhost:8989/g2mailboxservice/AclResourceMaps)
+
+[swagger.json](http://localhost:8989/g2mailboxservice/api-docs)
 
 ### Service Users
 
