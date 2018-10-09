@@ -125,17 +125,22 @@ public class InboundFileDTO {
      */
     public void copyFromEntity(InboundFile file) {
 
-        this.setCreatedDate(file.getCreatedDate().toString());
+        if (null != file.getCreatedDate()) {
+            this.setCreatedDate(file.getCreatedDate().toString());
+        }
+
         this.setFileName(file.getFileName());
         this.setFilePath(file.getFilePath());
         this.setProcessorId(file.getProcessorId());
         this.setFileSize(file.getFileSize());
         this.setInboundFileStatus(file.getStatus());
-        this.setModifiedDate(file.getModifiedDate().toString());
+
+        if (null != file.getModifiedDate()) {
+            this.setModifiedDate(file.getModifiedDate().toString());
+        }
         this.setPguid(file.getPguid());
         this.setParentGlobalProcessId(file.getParentGlobalProcessId());
         this.setProcessDc(file.getProcessDc());
         this.setCreatedBy(file.getCreatedBy());
     }
-
 }
