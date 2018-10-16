@@ -32,7 +32,6 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +43,6 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -214,7 +212,6 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     workTicketsToPost.clear();
                 }
             }
-
             SweeperQueueSendClient.post(constructBatchWorkticket(), false);
         } else {
             LOGGER.warn("javascript filter api returned empty results");

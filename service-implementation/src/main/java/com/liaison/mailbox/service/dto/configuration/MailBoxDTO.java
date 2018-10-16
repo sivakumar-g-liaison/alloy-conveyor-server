@@ -25,6 +25,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.liaison.mailbox.service.validation.PatternValidation;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -65,6 +66,7 @@ public class MailBoxDTO implements Serializable {
 	}
 
 	@Mandatory(errorMessage = "MailBox name is mandatory.")
+	@PatternValidation(errorMessage = " Given Mailbox Name is invalid.", type = MailBoxConstants.NAME_PATTERN)
 	public String getName() {
 		return name;
 	}

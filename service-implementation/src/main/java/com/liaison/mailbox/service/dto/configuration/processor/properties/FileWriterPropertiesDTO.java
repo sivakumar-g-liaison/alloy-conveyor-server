@@ -24,6 +24,7 @@ import com.liaison.mailbox.service.validation.PatternValidation;
 public class FileWriterPropertiesDTO extends StaticProcessorPropertiesDTO {
     private int staleFileTTL;
     private String fileTransferStatusIndicator;
+    private String category;
 
     @PatternValidation(errorMessage = "Invalid value for TTL", type = MailBoxConstants.PROPERTY_STALE_FILE_TTL)
     public int getStaleFileTTL() {
@@ -40,5 +41,13 @@ public class FileWriterPropertiesDTO extends StaticProcessorPropertiesDTO {
 
     public void setFileTransferStatusIndicator(String fileTransferStatusIndicator) {
         this.fileTransferStatusIndicator = fileTransferStatusIndicator;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -266,8 +266,8 @@
 	        "defaultValue":"Infinite",
 	        "validationRules": null,
 	        "options":["Once","Infinite"]           
-		},
-		{
+		  },
+		  {
 	        "name":"saveResponsePayload",
 	        "displayName" : "SaveResponsePayload",
 	        "value":"true",

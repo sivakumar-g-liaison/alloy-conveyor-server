@@ -132,6 +132,7 @@ public class DirectoryService implements Runnable {
                     Producer.produce(KafkaMessageType.USERACCOUNT_CREATE, message);
                 }
             } else {
+                LOGGER.info("User Validation has failed and going to retry until it syncs with Active Directory");
                 new FileStageReplicationService().postDirectoryMessageToQueue(message, 1, isProduceKafkaMessage);
             }
         } else if (DirectoryOperationTypes.DELETE.value().equals(message.getOperationType())) {

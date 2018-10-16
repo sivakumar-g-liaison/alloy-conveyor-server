@@ -37,7 +37,6 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -257,7 +256,7 @@ public class ProcessorExecutionServiceIT extends BaseServiceTest {
      * @throws Exception
      */
     @Test(enabled = false, expectedExceptions = java.lang.RuntimeException.class)
-    public void testDeactivateStagedFileWithUnknownStagedFile() throws Exception { 
+    public void testDeactivateStagedFileWithUnknownStagedFile() throws Exception {
     	
     	 // Adding the mailbox
         AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();

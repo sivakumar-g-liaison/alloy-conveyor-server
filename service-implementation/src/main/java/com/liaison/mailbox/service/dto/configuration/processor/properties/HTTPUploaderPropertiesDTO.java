@@ -45,6 +45,7 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     private boolean useFileSystem = false;
     private boolean saveResponsePayload;
     private String execution;
+    private String category;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -165,5 +166,11 @@ public class HTTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setExecution(String execution) {
         this.execution = execution;
     }
+    public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
 
 }

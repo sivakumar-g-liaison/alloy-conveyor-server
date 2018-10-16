@@ -27,7 +27,6 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -40,7 +39,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -60,8 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.CATEGORY;
+import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
 import static com.liaison.mailbox.MailBoxConstants.DIRECT_UPLOAD;
 import static com.liaison.mailbox.MailBoxConstants.PIPELINE;
 import static com.liaison.mailbox.MailBoxConstants.PROPERTY_PIPELINEID;
