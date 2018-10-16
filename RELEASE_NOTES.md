@@ -1,13 +1,10 @@
-5.4.3
+5.4.2
 ---------------
 * GGT-1593 Move TRE Lab GitLab
 * GMB-1161 - Invalid Mailbox name - blocking soa proxy relay gui editing given mailbox
 * GMB-1163: Use deployment type as a senderId for QS produce calls
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
-
-5.4.2
----------------
 * Property update : changed inbound file enable property as false and in staging-px1 added async url 
 
 5.4.2
