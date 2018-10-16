@@ -318,37 +318,6 @@ public class MailBoxConfigurationResourceIT extends BaseServiceTest {
     }
 
     /**
-     * Method to test mailBox with invalid Name.
-     */
-    @Test
-    public void testCreateMailBox_WithInvalidName_ShouldFail() throws Exception {
-
-        MailBoxDTO mailBox = new MailBoxDTO();
-        mailBox.setName("MailBox_01 / Test");
-        mailBox.setStatus("ACTIVE");
-        mailBox.setTenancyKey(tenancyKey);
-        mailBox.setClusterType(MailBoxUtil.CLUSTER_TYPE);
-
-        // Adding the mailbox
-        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
-        requestDTO.setMailBox(mailBox);
-
-        String jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-
-        String url = getBASE_URL() + "?sid=" + serviceInstanceId;
-        HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
-        request.addHeader("acl-manifest", aclManifest);
-        request.execute();
-        String jsonResponse = getOutput().toString();
-        logger.info(jsonResponse);
-
-        AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
-        Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
-        Assert.assertEquals(true, responseDTO.getResponse().getMessage().contains(Messages.ERROR_MSG.value()));
-
-    }
-
-    /**
      * Method to test mailBox without Status.
      */
     @Test
