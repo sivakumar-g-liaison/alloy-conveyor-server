@@ -13,8 +13,6 @@ package com.liaison.mailbox.service.core;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.StringUtil;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
@@ -53,7 +51,6 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentPropert
  */
 public class ProcessorExecutionConfigurationService extends GridServiceRTDM<ProcessorExecutionState> implements Runnable {
 
-    private static final DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
     private static final Logger LOG = LogManager.getLogger(ProcessorExecutionConfigurationService.class);
     private static final String PROCESSORS = "Processors";
     private static final String EXECUTING_PROCESSORS = "running processors";

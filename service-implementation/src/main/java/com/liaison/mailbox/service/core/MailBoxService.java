@@ -14,8 +14,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -80,8 +78,6 @@ public class MailBoxService implements Runnable {
     private String message;
     private boolean directUpload = false;
 	private QueueMessageType messageType;
-
-	private final static DecryptableConfiguration configuration = LiaisonArchaiusConfiguration.getInstance();
 
     public enum QueueMessageType {
         WORKTICKET,
@@ -433,6 +429,7 @@ public class MailBoxService implements Runnable {
                         LOG.error(ioe.getMessage(), ioe);
                     }
                 }
+
             }
 
         } finally {

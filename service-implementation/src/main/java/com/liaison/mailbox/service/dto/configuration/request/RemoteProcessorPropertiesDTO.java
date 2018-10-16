@@ -79,6 +79,7 @@ public class RemoteProcessorPropertiesDTO {
     private String sort;
     private boolean saveResponsePayload;
     private String execution;
+    private String category;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -465,4 +466,11 @@ public class RemoteProcessorPropertiesDTO {
         this.execution = execution;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

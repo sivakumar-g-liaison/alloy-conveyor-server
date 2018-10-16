@@ -531,15 +531,15 @@ public interface MailBoxConstants {
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
     String PROCESS_DC_LIST = "com.liaison.mailbox.processdc.list";
-
+    
     DecryptableConfiguration CONFIGURATION = LiaisonArchaiusConfiguration.getInstance();
-
+    
     // sso properties
     String PROPERTY_ENABLE_SSO = "com.liaison.dropbox.sso.enable";
     String SSO_CLIENT_AUTH_URL = "com.liaison.dropbox.sso.auth.url";
     String SSO_CLIENT_ID = "com.liaison.dropbox.sso.clientId";
     String SSO_CLIENT_SECRET = "com.liaison.dropbox.sso.client.secret";
-
+    
     //SSO constants
     int BYTE_SIZE = 4096;
     String ACL = "acl";
@@ -551,9 +551,9 @@ public interface MailBoxConstants {
     String SIGNATURE_COOKIE_NAME = "signature";
     String TOKEN_TYPE_HINT = "token_type_hint";
     String GROUP_GUID_COOKIE_NAME = "signerPublicKeyGroupGuid";
-    String SSO_USER_INFO_URL = "com.liaison.dropbox.sso.user.info.url";
-    String TOKEN_AUTHORIZATION  = String.format("%s:%s", CONFIGURATION.getString(SSO_CLIENT_ID), CONFIGURATION.getString(SSO_CLIENT_SECRET));
-
+    String SSO_USER_INFO_URL = "com.liaison.dropbox.sso.user.info.url";    
+    String TOKEN_AUTHORIZATION  = String.format("%s:%s", CONFIGURATION.getString(SSO_CLIENT_ID), CONFIGURATION.getString(SSO_CLIENT_SECRET));    
+    
     String FILE_COUNT_SEPARATOR = "/";
     String DOT_OPERATOR = ".";
 

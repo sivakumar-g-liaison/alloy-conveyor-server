@@ -56,6 +56,7 @@ import static com.liaison.mailbox.MailBoxConstants.RETRY_COUNT;
 import static com.liaison.mailbox.MailBoxConstants.TRIGGER_FILE;
 import static com.liaison.mailbox.MailBoxConstants.URI;
 
+
 /**
  * Service to stage the files posted from other dc
  *
@@ -189,6 +190,7 @@ public class FileStageReplicationService implements Runnable {
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
         }
+
     }
 
     /**
@@ -222,9 +224,10 @@ public class FileStageReplicationService implements Runnable {
             directoryObject.put(MESSAGE, JAXBUtility.marshalToJSON(message));
             directoryObject.put(RETRY_COUNT, retryCount);
             directoryObject.put(PRODUCE_KAFKA_MESSAGE, isProduceKafkaMessage);
+            LOGGER.info("Directory Message {} is posting to the queue", directoryObject.get(MESSAGE));
             FileStageReplicationSendQueue.post(directoryObject.toString(), DIR_DELAY);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("unable to post message to queue - " + message, e);
         }
     }
 

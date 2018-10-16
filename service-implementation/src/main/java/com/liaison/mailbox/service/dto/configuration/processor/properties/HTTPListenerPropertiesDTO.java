@@ -68,5 +68,4 @@ public class HTTPListenerPropertiesDTO extends StaticProcessorPropertiesDTO {
     public void setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
     }
-
 }

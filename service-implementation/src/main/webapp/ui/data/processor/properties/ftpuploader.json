@@ -319,7 +319,20 @@
             "validationRules":{
                "pattern": "\/^(?!.*(inp|INP|Inp|iNp|inP|INp|iNP|InP)).*$\/"
             }
-         }
+          },
+          {
+            "name":"category",
+            "displayName":"Category",
+            "type":"select",
+            "value":"default",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"default",
+            "validationRules":null,
+            "options":["disabled", "default"]
+          }
       ],
       "folderProperties":[
          {

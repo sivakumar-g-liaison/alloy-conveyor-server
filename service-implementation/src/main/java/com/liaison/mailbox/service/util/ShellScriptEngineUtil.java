@@ -204,7 +204,7 @@ public class ShellScriptEngineUtil {
             }
 
         } catch (IOException e) {
-            LOGGER.error("Script execution failed " + e.getMessage(), e);
+            LOGGER.error("Failed to validate the user. Script execution failed " + e.getMessage(), e);
         } finally {
             if (outputStream != null) {
                 try {

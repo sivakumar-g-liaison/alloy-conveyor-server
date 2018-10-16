@@ -10,19 +10,6 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.MailBoxConstants;
@@ -49,9 +36,19 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.liaison.mailbox.service.validation.Mandatory;
-import com.liaison.mailbox.service.validation.PatternValidation;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 

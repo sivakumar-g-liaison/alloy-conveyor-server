@@ -263,7 +263,7 @@ public class GenericValidator {
                 isValidPattern = false;
                 errorMessage.append(annotationDetails.errorMessage());
             }
-            
+
             if ((annotationDetails.type().equals(MailBoxConstants.NAME_PATTERN)) && !isValidName(value)) {
                 isValidPattern = false;
                 errorMessage.append(annotationDetails.errorMessage());

@@ -51,6 +51,7 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     private int staleFileTTL;
     private boolean useFileSystem = true;
     private String triggerFile;
+    private String category;
 
 	public String getUrl() {
 		return url;
@@ -201,5 +202,11 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
     }
     public void setTriggerFile(String triggerFile) {
         this.triggerFile = triggerFile;
+    }
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
