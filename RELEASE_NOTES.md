@@ -1,3 +1,8 @@
+5.4.3
+---------------
+* GMB-1166 - removed trigger inbound file name from InboundFile search
+* GMB-1171 - Category overwritten in the event status update case
+
 5.4.2
 ---------------
 * GGT-1593 Move TRE Lab GitLab
@@ -6,7 +11,7 @@
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
 * Property update : changed inbound file enable property as false and in staging-px1 added async url
-* GMB-1166 - removed trigger inbound file name from InboundFile search
+
 
 5.4.2
 ---------------
