@@ -5,7 +5,8 @@
 * GMB-1163: Use deployment type as a senderId for QS produce calls
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
-* Property update : changed inbound file enable property as false and in staging-px1 added async url 
+* Property update : changed inbound file enable property as false and in staging-px1 added async url
+* GMB-1166 - removed trigger inbound file name from InboundFile search
 
 5.4.2
 ---------------

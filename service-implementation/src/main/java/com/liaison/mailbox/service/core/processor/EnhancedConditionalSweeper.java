@@ -131,41 +131,41 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
                     : staticProp.getTriggerFile();
             setTriggerFileName(triggerFileName);
 
-            InboundFile inboundFile = inboundFileDAO.findInboundFileForTriggerFile(inputLocation, triggerFileName, MailBoxUtil.DATACENTER_NAME, configurationInstance.getPguid());
+            InboundFile triggerInboundFile = inboundFileDAO.findInboundFileForTriggerFile(inputLocation, triggerFileName, MailBoxUtil.DATACENTER_NAME, configurationInstance.getPguid());
 
-            if (null != inboundFile) {
+            if (null != triggerInboundFile) {
 
                 if (staticProp.isSweepSubDirectories()) {
-                    inboundFiles = inboundFileDAO.findInboundFilesForConditionalSweeperByRecurse(payloadLocation, configurationInstance.getPguid(), triggerFileName, inboundFile.getPguid());
+                    inboundFiles = inboundFileDAO.findInboundFilesForConditionalSweeperByRecurse(payloadLocation, configurationInstance.getPguid(), triggerInboundFile.getPguid());
                 } else {
-                    inboundFiles = inboundFileDAO.findInboundFilesForConditionalSweeper(payloadLocation, configurationInstance.getPguid(), triggerFileName);
+                    inboundFiles = inboundFileDAO.findInboundFilesForConditionalSweeper(payloadLocation, configurationInstance.getPguid(), triggerInboundFile.getPguid());
                 }
 
                 LOGGER.info(constructMessage("InboundFiles size {}"), inboundFiles.size());
                 
                 List<InboundFile> inboundFilesToProcess = new ArrayList<>();
 
-                for (InboundFile file : inboundFiles) {
+                for (InboundFile inboundFile : inboundFiles) {
 
                     if (!inboundFile.getProcessDc().equals(inboundFile.getOriginatingDc())) {
                         if (StorageUtilities.isPayloadExists(inboundFile.getFs2Uri())) {
-                            inboundFilesToProcess.add(file);
+                            inboundFilesToProcess.add(inboundFile);
                         }
                     } else {
-                        inboundFilesToProcess.add(file);
+                        inboundFilesToProcess.add(inboundFile);
                     }
                 }
 
                 // Update conditional sweeper entries parent guid;
 
                 setTriggerFileName(triggerFileName);
-                postToAsyncSweeper(inboundFilesToProcess, postedWorkTickets, inboundFile);
+                postToAsyncSweeper(inboundFilesToProcess, postedWorkTickets, triggerInboundFile);
 
-                inboundFile.setStatus(EntityStatus.INACTIVE.name());
-                inboundFile.setFileName(triggerFileName);
-                inboundFile.setModifiedBy(getReqDTO().getProfileName());
-                inboundFile.setModifiedDate(MailBoxUtil.getTimestamp());
-                inboundFileDAO.merge(inboundFile);
+                triggerInboundFile.setStatus(EntityStatus.INACTIVE.name());
+                triggerInboundFile.setFileName(triggerFileName);
+                triggerInboundFile.setModifiedBy(getReqDTO().getProfileName());
+                triggerInboundFile.setModifiedDate(MailBoxUtil.getTimestamp());
+                inboundFileDAO.merge(triggerInboundFile);
 
                 long endTime = System.currentTimeMillis();
 
