@@ -60,21 +60,20 @@ public interface InboundFileDAO extends GenericDAO<InboundFile> {
      * 
      * @param filePath
      * @param processorGuid
-     * @param triggerFileName
+     * @param triggerFileGuid
      * @return
      */
-    List<InboundFile> findInboundFilesForConditionalSweeper(String filePath, String processorGuid, String triggerFileName);
+    List<InboundFile> findInboundFilesForConditionalSweeper(String filePath, String processorGuid, String triggerFileGuid);
     
     /**
      * Returns list of inbound_file rows for conditional sweeper
      * 
      * @param filePath
      * @param processorGuid
-     * @param triggerFileName
      * @param triggerFileGuid
      * @return inbound_file list
      */
-    List<InboundFile> findInboundFilesForConditionalSweeperByRecurse(String filePath, String processorGuid, String triggerFileName, String triggerFileGuid);
+    List<InboundFile> findInboundFilesForConditionalSweeperByRecurse(String filePath, String processorGuid, String triggerFileGuid);
 
     /**
      * Returns list of inbound_file rows for conditional sweeper inprogress trigger file
@@ -157,8 +156,8 @@ public interface InboundFileDAO extends GenericDAO<InboundFile> {
             MailBoxConstants.PROCESS_DC +
             " AND inbound_file.processorId =:" +
             PROCESSOR_GUID +
-            " AND inbound_file.fileName <>:" +
-            FILE_NAME +
+            " AND inbound_file.pguid <>:" +
+            TRIGGER_FILE_GUID +
             " AND inbound_file.status =:" +
             STATUS;
 
@@ -169,8 +168,6 @@ public interface InboundFileDAO extends GenericDAO<InboundFile> {
             MailBoxConstants.PROCESS_DC +
             " AND inbound_file.processorId =:" +
             PROCESSOR_GUID +
-            " AND inbound_file.fileName <>:" +
-            FILE_NAME +
             " AND inbound_file.pguid <>:" +
             TRIGGER_FILE_GUID +
             " AND inbound_file.status =:" +

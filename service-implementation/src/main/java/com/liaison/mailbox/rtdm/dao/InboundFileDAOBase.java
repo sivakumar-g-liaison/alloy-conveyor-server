@@ -76,7 +76,7 @@ public class InboundFileDAOBase extends GenericDAOBase<InboundFile> implements I
     }
 
     @Override
-    public List<InboundFile> findInboundFilesForConditionalSweeper(String filePath, String processorGuid, String triggerFileName) {
+    public List<InboundFile> findInboundFilesForConditionalSweeper(String filePath, String processorGuid, String triggerFileGuid) {
         
         EntityManager entityManager = null;
         try {
@@ -85,7 +85,7 @@ public class InboundFileDAOBase extends GenericDAOBase<InboundFile> implements I
             
             return entityManager.createQuery(FIND_INBOUND_FILES_FOR_CONDITIONAL_SWEEPER_BY_FILE_PATH, InboundFile.class)
                     .setParameter(FILE_PATH, filePath)
-                    .setParameter(FILE_NAME, triggerFileName)
+                    .setParameter(TRIGGER_FILE_GUID, triggerFileGuid)
                     .setParameter(PROCESSOR_GUID, processorGuid)
                     .setParameter(MailBoxConstants.PROCESS_DC, DATACENTER_NAME)
                     .setParameter(STATUS, EntityStatus.ACTIVE.name())
@@ -119,7 +119,7 @@ public class InboundFileDAOBase extends GenericDAOBase<InboundFile> implements I
     }
 
     @Override
-    public List<InboundFile> findInboundFilesForConditionalSweeperByRecurse(String filePath, String processorGuid, String triggerFileName, String triggerFileGuid) {
+    public List<InboundFile> findInboundFilesForConditionalSweeperByRecurse(String filePath, String processorGuid, String triggerFileGuid) {
 
         EntityManager entityManager = null;
         try {
@@ -128,7 +128,6 @@ public class InboundFileDAOBase extends GenericDAOBase<InboundFile> implements I
 
             return entityManager.createQuery(FIND_INBOUND_FILES_FOR_CONDITIONAL_SWEEPER_BY_FILE_PATH_RECURSE, InboundFile.class)
                     .setParameter(FILE_PATH, filePath + "%")
-                    .setParameter(FILE_NAME, triggerFileName)
                     .setParameter(PROCESSOR_GUID, processorGuid)
                     .setParameter(TRIGGER_FILE_GUID, triggerFileGuid)
                     .setParameter(MailBoxConstants.PROCESS_DC, DATACENTER_NAME)
