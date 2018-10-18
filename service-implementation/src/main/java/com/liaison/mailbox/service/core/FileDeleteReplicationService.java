@@ -27,15 +27,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.text.html.parser.Entity;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 
+import static com.liaison.mailbox.MailBoxConstants.CATEGORY_DISABLED;
 import static com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType.FILE_DELETE;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
@@ -84,7 +83,7 @@ public class FileDeleteReplicationService {
 
                 //handle filewriter logic
                 if (ProcessorType.FILEWRITER.getCode().equals(stagedFile.getProcessorType())) {
-                    handleFilewriter(message, filePath, fileName, stagedFileDAO, stagedFile);
+                    handleFileWriter(message, filePath, fileName, stagedFileDAO, stagedFile);
                 } else { //handle remote uploader logic
                     handleRemoteUploader(message, stagedFileDAO, stagedFile);
                 }
@@ -97,7 +96,7 @@ public class FileDeleteReplicationService {
         }
     }
 
-    private void handleFilewriter(KafkaMessage message, String filePath, String fileName, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
+    private void handleFileWriter(KafkaMessage message, String filePath, String fileName, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
 
         if (EntityStatus.INACTIVE.value().equals(stagedFile.getStagedFileStatus())) {
             // Ignore if it is already in-active state
@@ -111,7 +110,8 @@ public class FileDeleteReplicationService {
 
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
-        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), null);
+        //Post disable for all the filewriter
+        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), CATEGORY_DISABLED);
         glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
         glassMessageDTO.setFileName(fileName);
         glassMessageDTO.setFilePath(filePath);

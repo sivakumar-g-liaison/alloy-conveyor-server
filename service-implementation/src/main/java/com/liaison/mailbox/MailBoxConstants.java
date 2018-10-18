@@ -527,6 +527,7 @@ public interface MailBoxConstants {
 
     String CATEGORY = "category";
     String CATEGORY_DEFAULT = "default";
+    String CATEGORY_DISABLED = "disabled";
 
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
