@@ -132,15 +132,15 @@ public class MailBoxService implements Runnable {
             }
 
             //find non running processors
+            RuntimeProcessorsDAO dao = new RuntimeProcessorsDAOBase();
             if (processorMatchingProfile.size() > MailBoxConstants.MAX_IN_EXP_LIMIT) {
                 Collection<List<String>> subSets = partition(processorMatchingProfile, MailBoxConstants.MAX_IN_EXP_LIMIT);
-                RuntimeProcessorsDAO dao = new RuntimeProcessorsDAOBase();
                 nonExecutingProcessorMatchingProfile = new ArrayList<>();
                 for (List<String> sets : subSets) {
                     nonExecutingProcessorMatchingProfile.addAll(dao.findNonRunningProcessors(sets));
                 }
             } else {
-                nonExecutingProcessorMatchingProfile = new RuntimeProcessorsDAOBase().findNonRunningProcessors(processorMatchingProfile);
+                nonExecutingProcessorMatchingProfile = dao.findNonRunningProcessors(processorMatchingProfile);
             }
             if (nonExecutingProcessorMatchingProfile == null || nonExecutingProcessorMatchingProfile.isEmpty()) {
                 throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);

@@ -884,7 +884,7 @@ public class MailBoxUtil {
         return null;
     }
 
-    public static  <T> Collection<List<T>> partition(List<T> list, int size) {
+    public static <T> Collection<List<T>> partition(List<T> list, int size) {
         final AtomicInteger counter = new AtomicInteger(0);
 
         return list.stream()
