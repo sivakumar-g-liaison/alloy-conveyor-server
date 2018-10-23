@@ -1,3 +1,7 @@
+5.4.3
+---------------
+* GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
+
 5.4.2
 ---------------
 * GGT-1593 Move TRE Lab GitLab

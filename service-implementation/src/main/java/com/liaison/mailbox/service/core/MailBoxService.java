@@ -30,6 +30,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
 import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.processor.FileWriter;
@@ -54,6 +55,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
@@ -64,6 +66,7 @@ import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.RESPONSE_FS2_URI;
 import static com.liaison.mailbox.MailBoxConstants.RESUME;
 import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
+import static com.liaison.mailbox.service.util.MailBoxUtil.partition;
 
 
 /**
@@ -73,7 +76,7 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.getGUID;
  */
 public class MailBoxService implements Runnable {
 
-	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
+    private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
     private static final String PROFILE_NAME = "Profile Name";
     private String message;
     private boolean directUpload = false;
@@ -129,7 +132,16 @@ public class MailBoxService implements Runnable {
             }
 
             //find non running processors
-            nonExecutingProcessorMatchingProfile = new RuntimeProcessorsDAOBase().findNonRunningProcessors(processorMatchingProfile);
+            if (processorMatchingProfile.size() > MailBoxConstants.MAX_IN_EXP_LIMIT) {
+                Collection<List<String>> subSets = partition(processorMatchingProfile, MailBoxConstants.MAX_IN_EXP_LIMIT);
+                RuntimeProcessorsDAO dao = new RuntimeProcessorsDAOBase();
+                nonExecutingProcessorMatchingProfile = new ArrayList<>();
+                for (List<String> sets : subSets) {
+                    nonExecutingProcessorMatchingProfile.addAll(dao.findNonRunningProcessors(sets));
+                }
+            } else {
+                nonExecutingProcessorMatchingProfile = new RuntimeProcessorsDAOBase().findNonRunningProcessors(processorMatchingProfile);
+            }
             if (nonExecutingProcessorMatchingProfile == null || nonExecutingProcessorMatchingProfile.isEmpty()) {
                 throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
             }
