@@ -1,6 +1,11 @@
-5.4.3
+5.4.4
 ---------------
 * GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
+
+5.4.3
+---------------
+* GMB-1166 - removed trigger inbound file name from InboundFile search
+* GMB-1171 - Category overwritten in the event status update case
 
 5.4.2
 ---------------
@@ -10,7 +15,7 @@
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
 * Property update : changed inbound file enable property as false and in staging-px1 added async url
-* GMB-1166 - removed trigger inbound file name from InboundFile search
+
 
 5.4.2
 ---------------
