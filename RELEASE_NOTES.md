@@ -1,3 +1,7 @@
+5.4.4
+---------------
+* GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
+
 5.4.3
 ---------------
 * GMB-1166 - removed trigger inbound file name from InboundFile search
