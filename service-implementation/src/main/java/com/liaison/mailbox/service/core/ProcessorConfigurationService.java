@@ -257,8 +257,7 @@ public class ProcessorConfigurationService {
     /**
      * validates processorDC from Request
      * 
-     * @param processorDTO Processor Request
-     * @return processoorDC 
+     * @return process dc
      */
     private String validateProcessDc(String processDC) {
        
