@@ -83,7 +83,7 @@ public class ProcessorDTO {
 	private String modifiedBy;
 	private String modifiedDate;
     private String clusterType;
-    private String processorDc;
+    private String processorDC;
     private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
 	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
 	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
@@ -244,11 +244,11 @@ public class ProcessorDTO {
     }
 
     public void setProcessorDC(String processorDC) {
-        this.processorDc = processorDC;
+        this.processorDC = processorDC;
     }
 
     public String getProcessorDC() {
-        return processorDc;
+        return processorDC;
     }
 
     /**
@@ -266,13 +266,7 @@ public class ProcessorDTO {
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(DATACENTER_NAME);
-                if (MailBoxUtil.isEmpty(processDC) && processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
-                    processor.setProcessDc(DATACENTER_NAME);
-                } else if (!MailBoxUtil.isEmpty(processDC)) {
-                    processor.setProcessDc(processDC);
-                } else {
-                    processor.setProcessDc(MailBoxConstants.ALL_DATACENTER);
-                }
+                validateAndSetProcessDc(processor, processDC);
             } else {
                 if (!MailBoxUtil.isEmpty(processDC)) {
                     processor.setProcessDc(processDC);
@@ -617,6 +611,17 @@ public class ProcessorDTO {
             }
         }
         return false;
+    }
+
+    public void validateAndSetProcessDc(Processor processor, String processDC) {
+
+        if (MailBoxUtil.isEmpty(processDC) && processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+            processor.setProcessDc(DATACENTER_NAME);
+        } else if (!MailBoxUtil.isEmpty(processDC)) {
+            processor.setProcessDc(processDC);
+        } else {
+            processor.setProcessDc(MailBoxConstants.ALL_DATACENTER);
+        }
     }
 
 }

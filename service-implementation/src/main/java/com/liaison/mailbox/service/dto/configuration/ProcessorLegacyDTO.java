@@ -107,14 +107,19 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
      * @param processor The processor entity
      * @param isCreate  The boolean value use to differentiate create and revise processor operation.
      */
-    public void copyToEntity(Processor processor, boolean isCreate) {
+    @Override
+    public void copyToEntity(Processor processor, boolean isCreate, String processDC) {
 
         try {
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(MailBoxUtil.DATACENTER_NAME);
-                processor.setProcessDc(MailBoxUtil.DATACENTER_NAME);
+                validateAndSetProcessDc(processor, processDC);
                 //processor.setProcsrExecutionStatus(ExecutionState.READY.value());
+            } else {
+                if (!MailBoxUtil.isEmpty(processDC)) {
+                    processor.setProcessDc(processDC);
+                }
             }
 
             RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
@@ -220,7 +225,7 @@ public class ProcessorLegacyDTO extends ProcessorDTO {
      * @param processor entity
      * @throws IOException
      */
-    public void copyFromEntity(Processor processor) throws IOException {
+     public void copyFromEntity(Processor processor) throws IOException {
 
         this.setGuid(processor.getPguid());
         this.setDescription(processor.getProcsrDesc());
