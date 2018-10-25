@@ -1,6 +1,7 @@
 5.4.4
 ---------------
 * GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
+* GMB-1172 - Enable Processor DC setup already via configurator's CDP
 
 5.4.3
 ---------------

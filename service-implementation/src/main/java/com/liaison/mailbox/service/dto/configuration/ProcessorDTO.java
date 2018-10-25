@@ -259,17 +259,23 @@ public class ProcessorDTO {
      * @param isCreate  The boolean value use to differentiate create and revise processor operation.
      * @throws MailBoxConfigurationServicesException
      */
-    public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException {
+    public void copyToEntity(Processor processor, boolean isCreate, String processDC) throws MailBoxConfigurationServicesException {
 
         try {
 
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
                 processor.setOriginatingDc(DATACENTER_NAME);
-                if (processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+                if (MailBoxUtil.isEmpty(processDC) && processor.getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
                     processor.setProcessDc(DATACENTER_NAME);
+                } else if (!MailBoxUtil.isEmpty(processDC)) {
+                    processor.setProcessDc(processDC);
                 } else {
                     processor.setProcessDc(MailBoxConstants.ALL_DATACENTER);
+                }
+            } else {
+                if (!MailBoxUtil.isEmpty(processDC)) {
+                    processor.setProcessDc(processDC);
                 }
             }
             // Set the protocol
