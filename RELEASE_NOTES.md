@@ -1,3 +1,6 @@
+5.5.0-SNAPSHOT
+---------------
+
 5.4.4
 ---------------
 * GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
@@ -17,10 +20,6 @@
 * GMB-1166 : InboundFile issues Fixed.
 * Property update : changed inbound file enable property as false and in staging-px1 added async url
 
-
-5.4.2
----------------
-* Property update : changed inbound file enable property as false and in staging-px1 added async url 
 
 5.4.1
 ---------------

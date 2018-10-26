@@ -20,7 +20,7 @@
     </appenders>
     <loggers>
         <root level="DEBUG">
-            <appender-ref ref="Console" level="DEBUG"/>
+            <appender-ref ref="Console" level="INFO"/>
             <appender-ref ref="MyFile" level="DEBUG"/>
         </root>
     </loggers>
