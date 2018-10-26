@@ -1,3 +1,7 @@
+5.4.5
+---------------
+* GMB-1171 - Category overwritten in the event status update case - Updated the LENS logs section
+
 5.4.4
 ---------------
 * GMB-1173 - Oracle limitation when we are passing variables to in clause(ORA-01795: maximum number of expressions in a list is 1000)
