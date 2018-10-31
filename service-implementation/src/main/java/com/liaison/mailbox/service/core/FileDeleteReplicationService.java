@@ -11,6 +11,9 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.logging.LogTags;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -34,7 +37,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static com.liaison.mailbox.MailBoxConstants.CATEGORY_DISABLED;
 import static com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType.FILE_DELETE;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 
@@ -75,7 +77,7 @@ public class FileDeleteReplicationService {
             StagedFile stagedFile = stagedFileDAO.findStagedFilesByFileNameAndPath(
                     filePath,
                     fileName,
-                    EntityStatus.DELETED.value(),
+                    EntityStatus.INACTIVE.value(),
                     Arrays.asList(ProcessorType.FILEWRITER.getCode(), ProcessorType.REMOTEUPLOADER.getCode()));
             if (null != stagedFile) {
                 ThreadContext.clearMap();
@@ -111,7 +113,12 @@ public class FileDeleteReplicationService {
         GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
         glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
         //Post disable for all the filewriter
-        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), CATEGORY_DISABLED);
+
+        //Get the processor details to update the lens status with proper category
+        ProcessorConfigurationDAO processorConfigurationDAO = new ProcessorConfigurationDAOBase();
+        Processor processor = processorConfigurationDAO.find(Processor.class, stagedFile.getProcessorId());
+
+        glassMessageDTO.setProcessorType(ProcessorType.findByName(stagedFile.getProcessorType()), MailBoxUtil.getCategory(processor.getProcsrProperties()));
         glassMessageDTO.setProcessProtocol(MailBoxUtil.getProtocolFromFilePath(filePath));
         glassMessageDTO.setFileName(fileName);
         glassMessageDTO.setFilePath(filePath);
