@@ -1,6 +1,10 @@
 5.5.0-SNAPSHOT
 ---------------
 
+5.4.6
+---------------
+* GMB-1171 - Category overwritten in the event status update case - Updated the LENS logs section for File Delete Event
+
 5.4.5
 ---------------
 * GMB-1171 - Category overwritten in the event status update case - Updated the LENS logs section
