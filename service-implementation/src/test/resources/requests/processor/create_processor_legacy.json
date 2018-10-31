@@ -4,6 +4,7 @@
       "guid": "",
       "name": "sftp test remote downloader",
       "type": "REMOTEDOWNLOADER",
+      "processorDC": "at4-dev-pres",
       "remoteProcessorProperties": {
         "httpVersion": null,
         "httpVerb": null,

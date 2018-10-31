@@ -45,6 +45,7 @@ public enum Messages {
     DELETE_OPERATION_NOT_ALLOWED("Delete operation is not allowed in revise request"),
     INVALID_PROTOCOL_ERROR_MESSAGE(" Protocol %s is not allowed for the processor type %s"),
     INVALID_PROCESS_TYPE_TO_UPDATE_DC(" Processor DC update is not supported for the processor type %s"),
+    INVALID_PROCESS_DC(" Given Process DC %s is invalid"),
 
     // generic messages
     CREATE_OPERATION_FAILED("%s creation failed."),

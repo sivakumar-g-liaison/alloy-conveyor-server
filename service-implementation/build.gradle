@@ -308,7 +308,7 @@ cargo {
         configHomeDir = file("${buildDir}/cargoLocal")
         logFile = file("${buildDir}/tomcat-out.log")
         outputFile = file("${buildDir}/cargo.log")
-        logLevel = 'high'
+        logLevel = 'low'
         //timeout = 300000
 
         rmiPort = new Integer(tomcatRmiPort)

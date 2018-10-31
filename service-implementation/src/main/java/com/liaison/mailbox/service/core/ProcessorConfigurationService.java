@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -82,7 +83,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -95,6 +95,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.liaison.mailbox.MailBoxConstants.ALL_DATACENTER;
+
 
 
 /**
@@ -190,9 +191,9 @@ public class ProcessorConfigurationService {
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
-			// Instantiate the processor and copying the values from DTO to entity.
-			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
-			processorDTO.copyToEntity(processor, true);
+            // Instantiate the processor and copying the values from DTO to entity.
+            Processor processor = Processor.processorInstanceFactory(foundProcessorType);
+            processorDTO.copyToEntity(processor, true, validateProcessDc(processorDTO.getProcessorDC()));
 
             // create local folders if not available
             if (processorDTO.isCreateConfiguredLocation()) {
@@ -252,6 +253,28 @@ public class ProcessorConfigurationService {
 		}
 
 	}
+
+    /**
+     * validates processorDC from Request
+     * 
+     * @return process dc
+     */
+    private String validateProcessDc(String processDC) {
+       
+        if (!MailBoxUtil.isEmpty(processDC)) {
+            if (processDC.equalsIgnoreCase(ALL_DATACENTER)) {
+                return processDC.toUpperCase();
+            } else {
+                List<Object> processDcList = LiaisonArchaiusConfiguration.getInstance().getList(MailBoxConstants.PROCESS_DC_LIST);
+                if (processDcList.contains(processDC.toLowerCase())) {
+                    return processDC.toLowerCase();
+                } else {
+                    throw new MailBoxConfigurationServicesException(Messages.INVALID_PROCESS_DC, processDC, Response.Status.BAD_REQUEST);
+                }
+            }
+        }
+        return null;
+    }
 
 	/**
 	 * Creates link between scheduleProfileref and processor.
@@ -541,8 +564,12 @@ public class ProcessorConfigurationService {
 			createMailBoxAndProcessorLink(null, request, processor);
 			createScheduleProfileAndProcessorLink(null, request, processor);
 
-			// Copying the new details of the processor and merging.
-			processorDTO.copyToEntity(processor, false);
+            String processDC = null;
+            if (!processor.getProcessDc().equalsIgnoreCase(processorDTO.getProcessorDC())) {
+                processDC = validateProcessDc(processorDTO.getProcessorDC());
+            } 
+            // Copying the new details of the processor and merging.
+            processorDTO.copyToEntity(processor, false, processDC);
 
 			// create local folders if not available
 			if (processorDTO.isCreateConfiguredLocation()) {

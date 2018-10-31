@@ -527,6 +527,7 @@ public interface MailBoxConstants {
 
     String CATEGORY = "category";
     String CATEGORY_DEFAULT = "default";
+    String CATEGORY_DISABLED = "disabled";
 
     String PROPERTY_SKIP_KAFKA_QUEUE = "com.liaison.skip.kafka.queue";
 
@@ -594,4 +595,5 @@ public interface MailBoxConstants {
     // Read deployment app id from properties. It will be used as a senderId for QS
     String DEPLOYMENT_APP_ID = CONFIGURATION.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue()).toLowerCase();
     String SERVICE_BROKER_APP_ID = "service-broker";
+    int MAX_IN_EXP_LIMIT = 900;
 }

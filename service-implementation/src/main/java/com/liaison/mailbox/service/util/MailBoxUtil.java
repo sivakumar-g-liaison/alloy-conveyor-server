@@ -51,12 +51,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.liaison.mailbox.MailBoxConstants.CATEGORY;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED;
@@ -763,12 +766,12 @@ public class MailBoxUtil {
      */
     public static String getProtocolFromFilePath(String filePath) {
 
-        if (filePath.contains(Protocol.FTP.getCode())) {
-            return Protocol.FTP.getCode();
+        if (filePath.contains(Protocol.SFTP.getCode())) {
+            return Protocol.SFTP.getCode();
         } else if (filePath.contains(Protocol.FTPS.getCode())) {
             return Protocol.FTPS.getCode();
-        } else if (filePath.contains(Protocol.SFTP.getCode())) {
-            return Protocol.SFTP.getCode();
+        } else if (filePath.contains(Protocol.FTP.getCode())) {
+            return Protocol.FTP.getCode();
         } else {
             return filePath;
         }
@@ -879,6 +882,14 @@ public class MailBoxUtil {
         }
         
         return null;
+    }
+
+    public static <T> Collection<List<T>> partition(List<T> list, int size) {
+        final AtomicInteger counter = new AtomicInteger(0);
+
+        return list.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size))
+                .values();
     }
 
 }
