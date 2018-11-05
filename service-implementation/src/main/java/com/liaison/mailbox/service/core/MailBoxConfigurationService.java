@@ -126,13 +126,14 @@ public class MailBoxConfigurationService {
 			}
 
             // service instance id validation
-            String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
+            // GMB-1177 - Turnoff the Service Instance Id Validation while creating the mailbox and processor entities 
+            /*String response = ServiceBrokerUtil.getEntity(SERVICE_INSTANCE, serviceInstanceId);
             if (MailBoxUtil.isEmpty(response)) {
                 throw new MailBoxConfigurationServicesException(
                         ID_IS_INVALID,
                         SERVICE_INSTANCE,
                         Response.Status.BAD_REQUEST);
-            }
+            }*/
             
             // Tenancy key validation
             if (MailBoxUtil.isEmpty(mailboxDTO.getTenancyKey())) {

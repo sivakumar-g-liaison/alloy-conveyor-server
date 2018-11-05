@@ -1,5 +1,7 @@
 5.5.0-SNAPSHOT
 ---------------
+* GMB-1177 - Turnoff the Service Instance Id Validation while creating the mailbox and processor entities
+* Updated testcase to pass creation of MailBox with new ServiceInstanceId.
 
 5.4.6
 ---------------
