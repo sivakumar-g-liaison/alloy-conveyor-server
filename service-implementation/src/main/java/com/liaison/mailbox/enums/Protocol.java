@@ -26,6 +26,7 @@ public enum Protocol {
 	HTTPS("https"),
 	SWEEPER("sweeper"),
 	CONDITIONALSWEEPER("conditionalsweeper"),
+	LITEHTTPSYNCPROCESSOR("litehttpsyncprocessor"),
 	HTTPSYNCPROCESSOR("httpsyncprocessor"),
 	HTTPASYNCPROCESSOR("httpasyncprocessor"),
 	FILEWRITER("filewriter"),

@@ -154,7 +154,8 @@ public class ProcessorConfigurationService {
             }
 
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
-            if ((ProcessorType.FILEWRITER.equals(foundProcessorType) 
+            if ((ProcessorType.FILEWRITER.equals(foundProcessorType)
+					|| ProcessorType.LITEHTTPSYNCPROCESSOR.equals(foundProcessorType)
                     || ProcessorType.HTTPSYNCPROCESSOR.equals(foundProcessorType) 
                     || ProcessorType.HTTPASYNCPROCESSOR.equals(foundProcessorType))
                     && !MailBoxUtil.isEmptySet(serviceRequest.getProcessor().getLinkedProfiles())) {
@@ -1369,6 +1370,7 @@ public class ProcessorConfigurationService {
             case MailBoxConstants.LOW_SECURE_RELAY:
                 return Stream.of(ProcessorType.REMOTEDOWNLOADER,
                         ProcessorType.REMOTEUPLOADER,
+                        ProcessorType.LITEHTTPSYNCPROCESSOR,
                         ProcessorType.HTTPASYNCPROCESSOR,
                         ProcessorType.HTTPSYNCPROCESSOR,
                         ProcessorType.SWEEPER,
@@ -1403,6 +1405,7 @@ public class ProcessorConfigurationService {
                         Protocol.HTTP,
                         Protocol.SWEEPER,
                         Protocol.CONDITIONALSWEEPER,
+                        Protocol.LITEHTTPSYNCPROCESSOR,
                         Protocol.HTTPSYNCPROCESSOR,
                         Protocol.HTTPASYNCPROCESSOR,
                         Protocol.FILEWRITER).anyMatch(s -> s.equals(protocol));
@@ -1467,7 +1470,9 @@ public class ProcessorConfigurationService {
                                           Protocol.FTPS,
                                           Protocol.HTTPS,
                                           Protocol.HTTP).anyMatch(s -> s.equals(protocol));
-                    case MailBoxConstants.HTTPASYNCPROCESSOR:
+					case MailBoxConstants.LITEHTTPSYNCPROCESSOR:
+						return Protocol.LITEHTTPSYNCPROCESSOR.equals(protocol);
+					case MailBoxConstants.HTTPASYNCPROCESSOR:
                         return Protocol.HTTPASYNCPROCESSOR.equals(protocol);
                     case MailBoxConstants.HTTPSYNCPROCESSOR:
                         return Protocol.HTTPSYNCPROCESSOR.equals(protocol);

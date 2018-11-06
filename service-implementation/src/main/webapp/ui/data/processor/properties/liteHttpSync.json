@@ -1,0 +1,55 @@
+{
+  "processorDefinition": {
+    "type": "LITEHTTPSYNCPROCESSOR",
+    "displayName": "LITEHTTPSYNCPROCESSOR",
+    "protocol": "",
+    "handOverExecutionToJavaScript": false,
+    "staticProperties": [
+      {
+        "name": "httpListenerPipeLineId",
+        "displayName": "HTTP Listener PipelineId",
+        "value": "",
+        "type": "textarea",
+        "readOnly": false,
+        "mandatory": true,
+        "dynamic": false,
+        "valueProvided": false,
+        "defaultValue": "",
+        "validationRules": {
+          "pattern": "",
+          "minLength": "32",
+          "maxLength": "32"
+        }
+      },
+      {
+        "name": "httpListenerAuthCheckRequired",
+        "displayName": "HTTP Listener Auth Check Required",
+        "value": "true",
+        "type": "select",
+        "mandatory": true,
+        "dynamic": false,
+        "valueProvided": false,
+        "defaultValue": "false",
+        "validationRules": null,
+        "options": [
+          "false",
+          "true"
+        ]
+      },
+      {
+        "name": "add new -->",
+        "displayName": "add new -->",
+        "value": "",
+        "type": "textarea",
+        "readOnly": false,
+        "mandatory": false,
+        "dynamic": true,
+        "valueProvided": false,
+        "defaultValue": "",
+        "validationRules": null
+      }
+    ],
+    "folderProperties": [],
+    "credentialProperties": []
+  }
+}

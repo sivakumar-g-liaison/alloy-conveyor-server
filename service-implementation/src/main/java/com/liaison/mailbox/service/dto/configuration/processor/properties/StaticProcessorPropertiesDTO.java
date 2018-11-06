@@ -30,6 +30,7 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 		@JsonSubTypes.Type(value = ConditionalSweeperPropertiesDTO.class),
 		@JsonSubTypes.Type(value = FileWriterPropertiesDTO.class),
 		@JsonSubTypes.Type(value = DropboxProcessorPropertiesDTO.class),
+		@JsonSubTypes.Type(value = LiteHTTPPropertiesDTO.class),
 		@JsonSubTypes.Type(value = HTTPListenerPropertiesDTO.class) })
 public class StaticProcessorPropertiesDTO {
 

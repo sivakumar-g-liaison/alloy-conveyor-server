@@ -36,6 +36,11 @@
                 "type":"Server"
             },
             {
+                "key":"Lite HTTP Sync Processor",
+                "value":"LITEHTTPSYNCPROCESSOR",
+                "type":"Server"
+            },
+            {
                 "key":"File Writer",
                 "value":"FILEWRITER",
                 "type":"Other"

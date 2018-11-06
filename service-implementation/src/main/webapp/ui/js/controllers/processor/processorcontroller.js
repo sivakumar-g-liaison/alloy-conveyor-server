@@ -379,7 +379,7 @@ var rest = myApp.controller(
 						}
 					}
 				}                
-                if ($scope.processor.protocol.value === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol.value === 'HTTPASYNCPROCESSOR') {
+                if ($scope.processor.protocol.value === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol.value === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol.value === 'LITEHTTPSYNCPROCESSOR') {
                     $scope.isProcessorTypeHTTPListener = true;
                 } else {
                     $scope.isProcessorTypeHTTPListener = false;
@@ -1223,6 +1223,19 @@ var rest = myApp.controller(
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
                       });
                       $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
+                      break;
+                  case "LITEHTTPSYNCPROCESSOR":
+                      $scope.isProcessorTypeSweeper = false;
+                      $scope.isProcessorTypeConditionalSweeper = false;
+                      $scope.isProcessorTypeHTTPListener = true;
+                      $scope.isProcessorTypeFileWriter = false;
+                      $scope.isProcessorTypeDropbox = false;
+                      $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                      $rootScope.restService.get('data/processor/properties/liteHttpSync.json', function (data) {
+                        $scope.separateProperties(data.processorDefinition.staticProperties);
+                        $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+                      });
+                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                       break;
 				  case "HTTPSYNCPROCESSOR":
 				  	$scope.isProcessorTypeSweeper = false;

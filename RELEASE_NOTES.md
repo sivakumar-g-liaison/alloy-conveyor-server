@@ -1,7 +1,10 @@
-5.5.0-SNAPSHOT
+5.5.0
 ---------------
 * GMB-1177 - Turnoff the Service Instance Id Validation while creating the mailbox and processor entities
 * Updated testcase to pass creation of MailBox with new ServiceInstanceId.
+* g2-relay-lite#9: New Relay processor type for Relay Lite
+    * Added new processor type
+    * DB: updated constraint to allow new processor type
 
 5.4.6
 ---------------
