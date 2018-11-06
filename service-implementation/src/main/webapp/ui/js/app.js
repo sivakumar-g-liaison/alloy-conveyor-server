@@ -231,6 +231,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
             } else if ('LOW_SECURE_RELAY' === deploymentType) {
                 $rootScope.initialProcessorData = $rootScope.legacyRelayProcessorData;
                 $rootScope.editProcessorData = $rootScope.editLegacyRelayProcessorData;
+                $rootScope.isLegacy = true;
             } else {
                 $rootScope.initialProcessorData = $rootScope.relayProcessorData;
                 $rootScope.editProcessorData = $rootScope.editRelayProcessorData;

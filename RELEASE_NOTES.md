@@ -1,5 +1,7 @@
 5.5.0-SNAPSHOT
 ---------------
+* GMB-1139 - Legacy Relay Processor should have securePayload default to = false
+* Property update : changed inbound file enable property as false and in staging-px1 added async url 
 * GMB-1177 - Turnoff the Service Instance Id Validation while creating the mailbox and processor entities
 * Updated testcase to pass creation of MailBox with new ServiceInstanceId.
 
@@ -28,12 +30,6 @@
 * GMB-1163: Use deployment type as a senderId for QS produce calls
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
-* Property update : changed inbound file enable property as false and in staging-px1 added async url
-
-
-5.4.1
----------------
-* GMB-1162 - Files are not swept in the /inbox location,getting error message as 'StringIndexOutOfBoundsException:String index out of range: -1'
 
 5.4.1
 ---------------
