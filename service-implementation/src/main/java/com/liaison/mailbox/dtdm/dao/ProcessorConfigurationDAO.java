@@ -75,6 +75,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
      */
     String HTTP_SYNC_PRCSR_CLASS = "httpsyncprocessor";
     String HTTP_ASYNC_PRCSR_CLASS = "httpasyncprocessor";
+    String LITE_HTTP_SYNC_PRCSR_CLASS = "litehttpsyncprocessor";
     String SWEEPER_CLASS = "sweeper";
     String CONDITIONAL_SWEEPER_CLASS = "conditionalsweeper";
     String FILEWRITER_CLASS = "filewriter";
