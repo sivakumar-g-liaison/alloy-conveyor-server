@@ -1197,98 +1197,128 @@ var rest = myApp.controller(
                 $scope.doSend();
                 switch ($scope.selectedProcessorType) {
                   case "SWEEPER":
-					$scope.isProcessorTypeSweeper = true;
-					$scope.isProcessorTypeConditionalSweeper = false;
-					$scope.isProcessorTypeHTTPListener = false;
-					$scope.isProcessorTypeFileWriter = false;
-					$scope.isProcessorTypeDropbox = false;
-					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
-					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
-					$scope.separateProperties(data.processorDefinition.staticProperties);
-					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
-					$scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
-					break;
+                    $scope.isProcessorTypeSweeper = true;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = false;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
+                    var setSweeperData = '';
+                    if ($rootScope.isLegacy) {
+                        setSweeperData = 'data/processor/properties/legacysweeper.json';
+                    } else {
+                        setSweeperData = 'data/processor/properties/sweeper.json';	
+                    }
+                    $rootScope.restService.get(setSweeperData, function (data) {                    
+                        $scope.separateProperties(data.processorDefinition.staticProperties);
+                        $scope.separateFolderProperties(data.processorDefinition.folderProperties);	
+                        $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
+                    break;
                   case "CONDITIONALSWEEPER":
-                      $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeConditionalSweeper = true;
-                      $scope.isProcessorTypeHTTPListener = false;
-                      $scope.isProcessorTypeFileWriter = false;
-                      $scope.isProcessorTypeDropbox = false;
-                      $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
-                      $rootScope.restService.get('data/processor/properties/conditionalsweeper.json', function (data) {                    
-                      $scope.separateProperties(data.processorDefinition.staticProperties);
-                      $scope.separateFolderProperties(data.processorDefinition.folderProperties); 
-                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-                      });
-                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
-                      break;
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = true;
+                    $scope.isProcessorTypeHTTPListener = false;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options,$scope.selectedProcessorType)];
+                    var setConditionalSweeperData = '';
+                    if ($rootScope.isLegacy) {
+                        setConditionalSweeperData = 'data/processor/properties/legacyconditionalsweeper.json';
+                    } else {
+                        setConditionalSweeperData = 'data/processor/properties/conditionalsweeper.json';
+                    }
+                    $rootScope.restService.get(setConditionalSweeperData, function (data) {                    
+                        $scope.separateProperties(data.processorDefinition.staticProperties);
+                        $scope.separateFolderProperties(data.processorDefinition.folderProperties); 
+                        $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
+                    break;
                   case "LITEHTTPSYNCPROCESSOR":
-                      $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeConditionalSweeper = false;
-                      $scope.isProcessorTypeHTTPListener = true;
-                      $scope.isProcessorTypeFileWriter = false;
-                      $scope.isProcessorTypeDropbox = false;
-                      $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
-                      $rootScope.restService.get('data/processor/properties/liteHttpSync.json', function (data) {
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = true;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                    $rootScope.restService.get('data/processor/properties/liteHttpSync.json', function (data) {
                         $scope.separateProperties(data.processorDefinition.staticProperties);
                         $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-                      });
-                      $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
-                      break;
-				  case "HTTPSYNCPROCESSOR":
-				  	$scope.isProcessorTypeSweeper = false;
-				  	$scope.isProcessorTypeConditionalSweeper = false;
-				  	$scope.isProcessorTypeHTTPListener = true;
-				  	$scope.isProcessorTypeFileWriter = false;
-				  	$scope.isProcessorTypeDropbox = false;
-				  	$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
-				  	$rootScope.restService.get('data/processor/properties/httpSync.json', function (data) {
-				  	    $scope.separateProperties(data.processorDefinition.staticProperties);
-				  	    $scope.processorCredProperties = data.processorDefinition.credentialProperties;				  	      
-				  	});
-				  	$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
-				  	break;
-				  case "HTTPASYNCPROCESSOR": 				 
-					$scope.isProcessorTypeSweeper = false;
-					$scope.isProcessorTypeConditionalSweeper = false;
-					$scope.isProcessorTypeHTTPListener = true;
-					$scope.isProcessorTypeFileWriter = false;
-					$scope.isProcessorTypeDropbox = false;
-					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
-					$rootScope.restService.get('data/processor/properties/httpAsync.json', function (data) {						
-					  $scope.separateProperties(data.processorDefinition.staticProperties);
-					  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
-					break;
-				  case "FILEWRITER": 				
-					$scope.isProcessorTypeSweeper = false;
-					$scope.isProcessorTypeConditionalSweeper = false;
-					$scope.isProcessorTypeHTTPListener = false;
-					$scope.isProcessorTypeDropbox = false;
-					$scope.isProcessorTypeFileWriter = true;
-					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];					
-				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {
-				      $scope.separateProperties(data.processorDefinition.staticProperties);				  
-					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+                    break;
+                  case "HTTPSYNCPROCESSOR":
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = true;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                    var setHttpSyncData = '';
+                    if ($rootScope.isLegacy) {
+                        setHttpSyncData = 'data/processor/properties/legacyhttpSync.json';
+                    } else {
+                    	setHttpSyncData = 'data/processor/properties/httpSync.json';
+                    }
+                    $rootScope.restService.get(setHttpSyncData, function (data) {
+                        $scope.separateProperties(data.processorDefinition.staticProperties);
+                        $scope.processorCredProperties = data.processorDefinition.credentialProperties;				  	      
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+                    break;
+                  case "HTTPASYNCPROCESSOR": 				 
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = true;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                    var setHttpAsyncData = '';
+                    if ($rootScope.isLegacy) {
+                        setHttpAsyncData = 'data/processor/properties/legacyhttpAsync.json';
+                    } else {
+                        setHttpAysncData = 'data/processor/properties/httpAsync.json';
+                    }
+                    $rootScope.restService.get(setHttpAsyncData, function (data) {						
+                      $scope.separateProperties(data.processorDefinition.staticProperties);
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+                    break;
+                  case "FILEWRITER":
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.isProcessorTypeFileWriter = true;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {
+                      $scope.separateProperties(data.processorDefinition.staticProperties);				  
+                      $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                     break;
                   case "DROPBOXPROCESSOR":			
-					$scope.isProcessorTypeSweeper = false;
-					$scope.isProcessorTypeConditionalSweeper = false;
-					$scope.isProcessorTypeHTTPListener = false;
-					$scope.isProcessorTypeFileWriter = false;
-					$scope.isProcessorTypeDropbox = true;
-					$scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
-					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
-					  $scope.separateProperties(data.processorDefinition.staticProperties);		
+                    $scope.isProcessorTypeSweeper = false;
+                    $scope.isProcessorTypeConditionalSweeper = false;
+                    $scope.isProcessorTypeHTTPListener = false;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = true;
+                    $scope.processor.protocol = $scope.processorData.supportedProcessors.options[getIndexOfValue($scope.processorData.supportedProcessors.options, $scope.selectedProcessorType)];
+                    var setDropBoxProcessData = '';
+                    if ($rootScope.isLegacy) {
+                        setDropBoxProcessData = 'data/processor/properties/legacydropboxProcessor.json';
+                    } else {
+                        setDropBoxProcessData = 'data/processor/properties/dropboxProcessor.json';											
+                    }
+                    $rootScope.restService.get(setDropBoxProcessData, function (data) {
+                      $scope.separateProperties(data.processorDefinition.staticProperties);		
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});
-					$scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
+                    });
+                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                     break;
 				  default:
 					$scope.resetProtocol($scope.processor.protocol);
