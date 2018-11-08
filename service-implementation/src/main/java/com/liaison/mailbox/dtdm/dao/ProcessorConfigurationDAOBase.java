@@ -20,6 +20,7 @@ import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
+import com.liaison.mailbox.dtdm.model.LiteHTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteDownloader;
@@ -524,6 +525,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 break;
             case HTTP_ASYNC_PRCSR_CLASS:
                 processorClass = HTTPAsyncProcessor.class;
+                break;
+            case LITE_HTTP_SYNC_PRCSR_CLASS:
+                processorClass = LiteHTTPSyncProcessor.class;
                 break;
             case SWEEPER_CLASS:
                 processorClass = Sweeper.class;

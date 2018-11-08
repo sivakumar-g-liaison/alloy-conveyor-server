@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.service.dto.configuration.processor.properties.LiteHTTPPropertiesDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -411,6 +412,8 @@ public class ProcessorPropertyJsonMapper {
 				return new HTTPListenerPropertiesDTO();
 			case HTTPSYNCPROCESSOR:
 				return new HTTPListenerPropertiesDTO();
+			case LITEHTTPSYNCPROCESSOR:
+				return new LiteHTTPPropertiesDTO();
 			case FILEWRITER:
 				return new FileWriterPropertiesDTO();
 
@@ -569,6 +572,8 @@ public class ProcessorPropertyJsonMapper {
 				return new HTTPListenerPropertiesDTO();
 			case HTTPSYNCPROCESSOR:
 				return new HTTPListenerPropertiesDTO();
+			case LITEHTTPSYNCPROCESSOR:
+				return new LiteHTTPPropertiesDTO();
 			case FILEWRITER:
 				return new FileWriterPropertiesDTO();
 		}

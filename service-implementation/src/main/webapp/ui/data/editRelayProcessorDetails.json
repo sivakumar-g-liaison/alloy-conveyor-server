@@ -30,9 +30,14 @@
                 "value":"HTTPASYNCPROCESSOR",
                 "type":"Server"
             },
-            {  
+            {
                 "key":"HTTP Sync Processor",
                 "value":"HTTPSYNCPROCESSOR",
+                "type":"Server"
+            },
+            {
+                "key":"Lite HTTP Sync Processor",
+                "value":"LITEHTTPSYNCPROCESSOR",
                 "type":"Server"
             },
             {

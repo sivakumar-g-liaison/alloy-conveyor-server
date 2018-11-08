@@ -22,6 +22,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.LiteHTTPPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -617,6 +618,8 @@ public class MailBoxUtil {
                 return;
             }
 
+        } else if(obj instanceof LiteHTTPPropertiesDTO) {
+            pipelineId = ((LiteHTTPPropertiesDTO) obj).getHttpListenerPipeLineId();
         } else if (obj instanceof HTTPListenerPropertiesDTO) {
             HTTPListenerPropertiesDTO httPropDTO = (HTTPListenerPropertiesDTO) obj;
             pipelineId = httPropDTO.getHttpListenerPipeLineId();

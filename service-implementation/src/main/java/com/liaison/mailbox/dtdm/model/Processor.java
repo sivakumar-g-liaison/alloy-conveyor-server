@@ -135,6 +135,7 @@ public class Processor implements Identifiable {
 	public static final String TYPE_CONDITIONAL_SWEEPER = "CONDITIONALSWEEPER";
 	public static final String HTTP_ASYNC = "HTTPASYNCPROCESSOR";
 	public static final String HTTP_SYNC = "HTTPSYNCPROCESSOR";
+	public static final String LITE_HTTP_SYNC = "LITEHTTPSYNCPROCESSOR";
 	public static final String TYPE_FILE_WRITER = "FILEWRITER";
 	public static final String TYPE_DROPBOX_PROCESSOR = "DROPBOXPROCESSOR";
 
@@ -448,9 +449,12 @@ public class Processor implements Identifiable {
             case HTTPASYNCPROCESSOR:
                 processor = new HTTPAsyncProcessor();
                 break;
-            case HTTPSYNCPROCESSOR:
-                processor = new HTTPSyncProcessor();
-                break;
+			case HTTPSYNCPROCESSOR:
+				processor = new HTTPSyncProcessor();
+				break;
+			case LITEHTTPSYNCPROCESSOR:
+				processor = new LiteHTTPSyncProcessor();
+				break;
             case FILEWRITER:
                 processor = new FileWriter();
                 break;
