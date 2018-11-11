@@ -7,6 +7,7 @@
 * g2-relay-lite#9: New Relay processor type for Relay Lite
     * Added new processor type
     * DB: updated constraint to allow new processor type
+* GMB-1178 - Add index to the Staging table
 
 5.4.6
 ---------------
