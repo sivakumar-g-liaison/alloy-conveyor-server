@@ -446,12 +446,8 @@ public class StorageUtilities {
             throws Exception {
 
         try (InputStream payloadToPersist = stream) {
-
-            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket,
-                    httpListenerProperties, isDropbox);
-            LOGGER.info("Payload URL for the file {} is {}. File size in bytes {} ", workTicket.getFileName(),
-                    metaSnapshot.getURI().toString(), metaSnapshot.getPayloadSize());
-
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, httpListenerProperties, isDropbox);
+            LOGGER.info("Payload URL for the file {} is {}. File size in bytes {} ", workTicket.getFileName(), metaSnapshot.getURI().toString(), metaSnapshot.getPayloadSize());
             workTicket.setPayloadSize(metaSnapshot.getPayloadSize());
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
         }

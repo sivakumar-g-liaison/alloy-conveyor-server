@@ -161,6 +161,8 @@ public class HTTPListenerResource extends AuditedResource {
                 GlassMessage glassMessage = null;
                 WorkTicket workTicket = null;
 
+                checkContentTypeOrPayloadInRequest(request);
+
                 if (StringUtils.isEmpty(mailboxId) && StringUtils.isEmpty(mailboxName)) {
                     logger.error("HTTP(S)-SYNC : Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
                     throw new RuntimeException("Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
@@ -402,6 +404,8 @@ public class HTTPListenerResource extends AuditedResource {
                 //Fix for GMB-502
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
 
+                checkContentTypeOrPayloadInRequest(request);
+                
 				if (StringUtils.isEmpty(mailboxId) && StringUtils.isEmpty(mailboxName)) {
 					logger.error("HTTP(S)-ASYNC : Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
 					throw new RuntimeException("Mailbox Id (OR) Mailbox Name is not passed as a query param (mailboxId OR mailboxName)");
@@ -541,6 +545,17 @@ public class HTTPListenerResource extends AuditedResource {
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
 	}
+	
+    /**
+     * Checks that either content type or payload has value in request.
+     *  
+     * @param request
+     */
+    private void checkContentTypeOrPayloadInRequest(final HttpServletRequest request) {
+        if (request.getHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase()) == null && request.getContentLength() <= 0) {
+            throw new MailBoxServicesException(Messages.INVALID_HEADER_INFORMATION, Response.Status.NOT_ACCEPTABLE);
+        }
+    }
 
 	/**
      * This method will authenticate and authorize the SYNC and ASYNC processor.

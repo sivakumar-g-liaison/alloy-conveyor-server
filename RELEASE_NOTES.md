@@ -1,5 +1,6 @@
 5.5.0-SNAPSHOT
 ---------------
+* GMB-1176 - Research the way to check the stream is closed or not before posting to fs2 lib
 * GMB-1139 - Legacy Relay Processor should have securePayload default to = false
 * Property update : changed inbound file enable property as false and in staging-px1 added async url 
 * GMB-1177 - Turnoff the Service Instance Id Validation while creating the mailbox and processor entities

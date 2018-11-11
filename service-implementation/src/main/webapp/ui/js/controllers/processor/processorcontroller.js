@@ -1279,7 +1279,7 @@ var rest = myApp.controller(
                     if ($rootScope.isLegacy) {
                         setHttpAsyncData = 'data/processor/properties/legacyhttpAsync.json';
                     } else {
-                        setHttpAysncData = 'data/processor/properties/httpAsync.json';
+                        setHttpAsyncData = 'data/processor/properties/httpAsync.json';
                     }
                     $rootScope.restService.get(setHttpAsyncData, function (data) {						
                       $scope.separateProperties(data.processorDefinition.staticProperties);
