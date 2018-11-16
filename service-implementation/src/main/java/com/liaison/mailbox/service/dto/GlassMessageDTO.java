@@ -34,6 +34,7 @@ public class GlassMessageDTO {
     private String receiverIp;
     private String relatedTransactionId;
     private Date statusDate;
+    private String techDescription;
     
     public String getRelatedTransactionId() {
         return relatedTransactionId;
@@ -126,5 +127,13 @@ public class GlassMessageDTO {
 
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
+    }
+
+    public String getTechDescription() {
+        return techDescription;
+    }
+
+    public void setTechDescription(String techDescription) {
+        this.techDescription = techDescription;
     }
 }

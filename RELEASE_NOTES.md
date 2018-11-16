@@ -36,6 +36,7 @@
 * GMB-1163: Use deployment type as a senderId for QS produce calls
 * GGT-1417 - Fix to Swagger configuration and Swagger UI.
 * GMB-1166 : InboundFile issues Fixed.
+* SUPP-5304 - Alloy Errors not populating in LENS for Alloy Transaction Error Handling
 
 5.4.1
 ---------------

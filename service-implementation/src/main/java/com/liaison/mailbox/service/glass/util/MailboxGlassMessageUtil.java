@@ -78,6 +78,7 @@ public class MailboxGlassMessageUtil {
                     || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
                 glassMessage.setSenderOrganizationDetails(pipelineId);
             }
+            glassMessage.setAdminErrorDetails(glassMessageDTO.getTechDescription());
             logProcessingStatus(glassMessage, StatusType.ERROR, message);
         } else if (ExecutionState.DUPLICATE.equals(status)) {
             glassMessage.setOutAgent(processProtocol);

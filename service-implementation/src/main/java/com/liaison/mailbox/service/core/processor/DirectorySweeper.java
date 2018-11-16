@@ -14,7 +14,6 @@ import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -27,31 +26,23 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.SweeperProcessorService;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
-import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
-import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
-import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.codehaus.jettison.json.JSONException;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,17 +58,18 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SOCKET_TIMEOUT;
 import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
+import static com.liaison.mailbox.service.util.MailBoxUtil.getEnvironmentProperties;
 
 /**
  * DirectorySweeper
@@ -92,26 +84,17 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.DATA_FOLDER_PATTERN;
 public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
     private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
-	private static final String PROCESS = "process";
-	private static final int MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP = 131072;
-	private static final int MAX_NUMBER_OF_FILES_IN_GROUP = 10;
 
     private static final String STALE_FILE_NOTIFICATION_SUBJECT = "Deleting Stale files in Sweeper";
     private static final String STALE_FILE_NOTIFICATION_EMAIL_FILES = "Files :";
     private static final String STALE_FILE_NOTIFICATION_EMAIL_CONTENT = "Deleting stale files in Sweeper named '%s' from the location '%s'";
     private static final String LINE_SEPARATOR = System.lineSeparator();
-    private static final Object SORT_BY_NAME = "Name";
-    private static final Object SORT_BY_SIZE = "Size";
     private static final String WATCH_DOG_SERVICE = "WatchDog Service";
-    private static final String SWEEPER_MULTITHREAD_ENABLED = "com.liaison.mailbox.sweeper.multithread.enabled";
+    private static final String SWEEPER_MULTI_THREAD_ENABLED = "com.liaison.mailbox.sweeper.multi.thread.enabled";
+    private static final boolean IS_SWEEPER_MULTI_THREAD_ENABLED = getEnvironmentProperties().getBoolean(SWEEPER_MULTI_THREAD_ENABLED, true);
 
-    private String pipelineId;
     private List<Path> activeFiles = new ArrayList<>();
     private SweeperPropertiesDTO staticProp;
-
-    public void setPipeLineID(String pipeLineID) {
-		this.pipelineId = pipeLineID;
-	}
 
     public void setStaticProp(SweeperPropertiesDTO staticProp) {
         this.staticProp = staticProp;
@@ -201,7 +184,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             LOGGER.info(constructMessage("Number of files processed {}"), workTicketsToPost.size());
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
-        } catch (MailBoxServicesException | IOException | JAXBException | JSONException | IllegalAccessException e) {
+        } catch (MailBoxServicesException | IOException | IllegalAccessException e) {
             LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
         	throw new RuntimeException(e);
         } finally {
@@ -215,18 +198,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      *
      * @param workTickets worktickets
      * @param staticProp sweeper property
-     * @throws IllegalAccessException
-     * @throws IOException
-     * @throws JAXBException
-     * @throws JSONException
      */
-    private void asyncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp)
-            throws IllegalAccessException, IOException, JAXBException, JSONException {
+    private void asyncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) {
 
         for (WorkTicket workTicket : workTickets) {
-
-            boolean isSweeperMultithreadEnabled = LiaisonArchaiusConfiguration.getInstance().getBoolean(SWEEPER_MULTITHREAD_ENABLED, true);
-            if (isSweeperMultithreadEnabled && SweeperProcessThreadPool.getExecutorService().getActiveCount() < SweeperProcessThreadPool.getExecutorService().getCorePoolSize()) {
+            ThreadPoolExecutor executorService = SweeperProcessThreadPool.getExecutorService();
+            if (IS_SWEEPER_MULTI_THREAD_ENABLED && executorService.getActiveCount() < executorService.getCorePoolSize()) {
                 LOGGER.info(constructMessage("Number of active thread count {}"), SweeperProcessThreadPool.getExecutorService().getActiveCount());
                 SweeperProcessThreadPool.getExecutorService().submit(new SweeperProcessorService(workTicket, configurationInstance, staticProp));
             }  else {
@@ -297,17 +274,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     }
 
                 } catch (Exception e) {
-
-                    GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-                    glassMessageDTO.setGlobalProcessId(workTicket.getGlobalProcessId());
-                    glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
-                    glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-                    glassMessageDTO.setFileName(workTicket.getFileName());
-                    glassMessageDTO.setStatus(ExecutionState.FAILED);
-                    glassMessageDTO.setPipelineId(workTicket.getPipelineId());
-                    glassMessageDTO.setMessage(e.getMessage());
-                    MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-
+                    logSweeperFailedStatus(workTicket, e);
                     throw new RuntimeException(e);
                 }
             }
@@ -417,41 +384,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     }
 
     /**
-	 * Method to get the pipe line id from the remote processor properties.
-	 *
-	 * @return pipelineId
-	 * @throws IllegalAccessException
-	 * @throws IOException
-	 */
-	private String getPipeLineID() throws IOException, IllegalAccessException {
-
-		if (MailBoxUtil.isEmpty(this.pipelineId)) {
-            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
-            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
-        }
-
-		return this.pipelineId;
-	}
-
-	/**
-	 * Method to sort work tickets based on name/size/date
-	 * 
-	 * @param workTickets worktickets
-	 * @param sortType sort type
-	 */
-    private void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
-    
-        if (SORT_BY_NAME.equals(sortType)) {
-             workTickets.sort(Comparator.comparing(WorkTicket::getFileName));
-        } else if(SORT_BY_SIZE.equals(sortType)) {
-            workTickets.sort(Comparator.comparing(WorkTicket::getPayloadSize));
-        } else {
-            ISO8601Util dateUtil = new ISO8601Util();
-            workTickets.sort(Comparator.comparing(w -> dateUtil.fromDate(w.getCreatedTime())));
-        }
-    }
-
-    /**
      * overloaded method to persist the payload and workticket
      *
      * @param staticProp staic properties
@@ -461,23 +393,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private void persistPayloadAndWorkticket(SweeperPropertiesDTO staticProp, WorkTicket workTicket) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
-
-        Map<String, String> properties = new HashMap<>();
-        Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-        if (!ttlMap.isEmpty()) {
-            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
-        }
-
-        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
-        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
-        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
-
-        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
-        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
-        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
-        LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
+        Map<String, String> properties = setProperties(staticProp, workTicket);
 
         // persist payload in spectrum
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
@@ -489,46 +405,46 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         StorageUtilities.persistWorkTicket(workTicket, properties);
     }
 
-	/**
-	 * Method is used to move the file to the sweeped folder.
-	 *
-	 * @param file the file to be deleted
-	 * @throws IOException
-	 */
-	private void delete(String file) throws IOException {
-		Files.deleteIfExists(Paths.get(file));
-	}
+    /**
+     * Method is used to move the file to the sweeped folder.
+     *
+     * @param file the file to be deleted
+     * @throws IOException
+     */
+    private void delete(String file) throws IOException {
+        Files.deleteIfExists(Paths.get(file));
+    }
 
-	/**
-	 * Returns List of WorkTickets from java.io.File
-	 *
-	 * @param result workTickets
-	 * @return list of worktickets
-	 * @throws IllegalAccessException
-	 * @throws IOException
-	 */
-	private List<WorkTicket> generateWorkTickets(List<Path> result) throws IOException, IllegalAccessException {
+    /**
+     * Returns List of WorkTickets from java.io.File
+     *
+     * @param result workTickets
+     * @return list of worktickets
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    private List<WorkTicket> generateWorkTickets(List<Path> result) throws IOException, IllegalAccessException {
 
-		List<WorkTicket> workTickets = new ArrayList<>();
-		WorkTicket workTicket = null;
-		Map<String, Object> additionalContext = null;
-		BasicFileAttributes attr = null;
-		ISO8601Util dateUtil = new ISO8601Util();
+        List<WorkTicket> workTickets = new ArrayList<>();
+        WorkTicket workTicket = null;
+        Map<String, Object> additionalContext = null;
+        BasicFileAttributes attr = null;
+        ISO8601Util dateUtil = new ISO8601Util();
 
-		String folderName = null;
-		String fileName = null;
-		FileTime createdTime = null;
-		FileTime modifiedTime = null;
+        String folderName = null;
+        String fileName = null;
+        FileTime createdTime = null;
+        FileTime modifiedTime = null;
 
-		for (Path path : result) {
+        for (Path path : result) {
 
             LOGGER.debug("Obtaining file Attributes for path {}", path);
             additionalContext = new HashMap<String, Object>();
 
 			workTicket = new WorkTicket();
             LOGGER.debug("Payload URI {}", path.toAbsolutePath().toString());
-			workTicket.setPayloadURI(path.toAbsolutePath().toString());
-			additionalContext.put(MailBoxConstants.KEY_FILE_PATH, path.toAbsolutePath().toString());
+            workTicket.setPayloadURI(path.toAbsolutePath().toString());
+            additionalContext.put(MailBoxConstants.KEY_FILE_PATH, path.toAbsolutePath().toString());
 
             LOGGER.debug("Pipeline ID {}", getPipeLineID());
 			workTicket.setPipelineId(getPipeLineID());
@@ -607,72 +523,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	@Override
 	public void cleanup() {
 	}
-
-	/**
-	 * This Method create local folders if not available and returns the path.
-	 *
-	 * * @param processorDTO it have details of processor
-	 *
-	 */
-	@Override
-	public String createLocalPath() {
-
-		String configuredPath = null;
-		try {
-			configuredPath = getPayloadURI();
-			DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
-			return configuredPath;
-
-		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
-		}
-
-	}
-
-	/**
-	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
-	 *
-     * @param wrkTicket workticket for logging
-	 * @param firstCornerTimeStamp first corner timestamp
-	 * @param state Execution Status
-     */
-    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
-
-        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
-        StringBuilder message;
-        if (ExecutionState.VALIDATION_ERROR.equals(state)) {
-            message = new StringBuilder()
-                .append("File size is empty ")
-                .append(filePath)
-                .append(", and empty files are not allowed");
-        } else {
-            message = new StringBuilder()
-                .append("Starting to sweep input folder ")
-                .append(filePath)
-                .append(" for new files");
-        }
-
-        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-        glassMessageDTO.setGlobalProcessId(wrkTicket.getGlobalProcessId());
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
-        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-        glassMessageDTO.setFileName(wrkTicket.getFileName());
-        glassMessageDTO.setFilePath(filePath);
-        glassMessageDTO.setFileLength(wrkTicket.getPayloadSize());
-        glassMessageDTO.setStatus(state);
-        glassMessageDTO.setMessage(message.toString());
-        glassMessageDTO.setPipelineId(wrkTicket.getPipelineId());
-        if (null != firstCornerTimeStamp) {
-            glassMessageDTO.setFirstCornerTimeStamp(firstCornerTimeStamp);
-        }
-        if (null != date) {
-            glassMessageDTO.setStatusDate(date);
-            LOGGER.debug("The date value is {}", date.getTime());
-        }
-
-        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
-    }
     
     /**
      * Method to clean up stale files in the payload location of sweeper
@@ -770,17 +620,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		EmailNotifier.sendEmail(configurationInstance, emailSubject, body.toString(), true);
 		
 	}
-
-    /**
-     * Verifies the payload size
-     *
-     * @param workTicket workticket
-     * @return true if payload size is not 0
-     */
-    private boolean isPayloadValid(WorkTicket workTicket) {
-        return !(0 == workTicket.getPayloadSize());
-    }
-    
+   
     /**
      * Filter file paths for directory sweeper if javascript execution is enabled
      * 

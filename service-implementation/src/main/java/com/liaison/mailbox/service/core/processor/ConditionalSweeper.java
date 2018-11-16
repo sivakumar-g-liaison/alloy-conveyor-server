@@ -11,7 +11,6 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
-import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -19,7 +18,6 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
@@ -27,7 +25,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Trigge
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
-import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -75,13 +72,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
     private static final Logger LOGGER = LogManager.getLogger(ConditionalSweeper.class);
 
-    private String pipelineId;
     private ConditionalSweeperPropertiesDTO staticProp;
     private String triggerFileNameWithPath;
-
-    public void setPipeLineID(String pipeLineID) {
-        this.pipelineId = pipeLineID;
-    }
 
     public void setStaticProp(ConditionalSweeperPropertiesDTO staticProp) {
         this.staticProp = staticProp;
@@ -232,16 +224,9 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      */
     private String constructBatchWorkticket()
             throws JsonGenerationException, JsonMappingException, JAXBException, IOException, IllegalAccessException {
-        
+
         TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
-        
-        WorkTicket workTicket = new WorkTicket();
-        workTicket.setGlobalProcessId(relatedTransactionDto.getParentGlobalProcessId());
-        workTicket.setPipelineId(getPipeLineID());
-        workTicket.setPayloadURI(relatedTransactionDto.getTriggerFileUri());
-        workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
-        workTicket.setProcessMode(ProcessMode.ASYNC);
-        
+        WorkTicket workTicket = constructWorkTicket(relatedTransactionDto.getParentGlobalProcessId(), relatedTransactionDto.getTriggerFileUri());
         return JAXBUtility.marshalToJSON(workTicket);
     }
 
@@ -249,13 +234,12 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * Async conditional sweeper posts workticket to queue
      *
      * @param workTickets worktickets
-     * @throws IllegalAccessException
      * @throws IOException
      * @throws JAXBException
      * @throws JSONException
      */
     private void asyncSweeper(List<WorkTicket> workTickets)
-            throws IllegalAccessException, IOException, JAXBException, JSONException {
+            throws IOException, JAXBException, JSONException {
 
         final Date lensStatusDate = new Date();
 
@@ -419,10 +403,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
         try (FileInputStream fis = new FileInputStream(new File(filePath));
                 ObjectInputStream ois = new ObjectInputStream(fis)) {
-                TriggerFileContentDTO relatedTransactionDto = new TriggerFileContentDTO();
-                relatedTransactionDto = (TriggerFileContentDTO) ois.readObject();
-
-            return relatedTransactionDto;
+            return (TriggerFileContentDTO) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -467,9 +448,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      * 
      * @param payloadLocation
      * @return fileName
-     * @throws IOException
      */
-    private String findInprogressTriggerFile(String payloadLocation) throws IOException {
+    private String findInprogressTriggerFile(String payloadLocation) {
 
         //Validate the given payload location
         Path rootPath = Paths.get(payloadLocation);
@@ -480,23 +460,6 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         String[] inProgressFiles =  new File(payloadLocation)
             .list( (File dirToFilter, String filename) -> filename.endsWith(MailBoxConstants.INPROGRESS_EXTENTION) );
         return inProgressFiles.length > 0 ? inProgressFiles[0] : null;
-    }
-
-    /**
-     * Method to get the pipe line id from the remote processor properties.
-     *
-     * @return pipelineId
-     * @throws IllegalAccessException
-     * @throws IOException
-     */
-    private String getPipeLineID() throws IOException, IllegalAccessException {
-
-        if (MailBoxUtil.isEmpty(this.pipelineId)) {
-            ConditionalSweeperPropertiesDTO sweeperStaticProperties = (ConditionalSweeperPropertiesDTO) getProperties();
-            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
-        }
-
-        return this.pipelineId;
     }
 
     /**
@@ -581,24 +544,6 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
         
         return updatedFilePath;
-    }
-
-    /**
-     * Logs the TVAPI and ActivityStatus messages to LENS of the parent PGUID. This will be invoked at the end of the transaction.
-     * @param relatedTransactionId
-     * @param pipelineId
-     */
-    protected void logToLens(String relatedTransactionId, String pipelineId) {
-
-        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-        glassMessageDTO.setGlobalProcessId(relatedTransactionId);
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
-        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-        glassMessageDTO.setStatus(ExecutionState.QUEUED);
-        glassMessageDTO.setPipelineId(pipelineId);
-        glassMessageDTO.setMessage("Processed trigger file");
-
-        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     @Override

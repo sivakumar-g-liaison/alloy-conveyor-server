@@ -24,6 +24,7 @@ import com.liaison.mailbox.rtdm.model.InboundFile;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -53,6 +54,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,11 +71,17 @@ public abstract class AbstractSweeper extends AbstractProcessor {
 	
     private static final Logger LOGGER = LogManager.getLogger(AbstractSweeper.class);
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    
+    private String pipelineId;
 
     public AbstractSweeper() {}
     
     public AbstractSweeper(Processor processor) {
         super(processor);
+    }
+
+    public void setPipeLineID(String pipeLineID) {
+        this.pipelineId = pipeLineID;
     }
 
     /**
@@ -109,12 +117,12 @@ public abstract class AbstractSweeper extends AbstractProcessor {
     protected void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
     
         if (MailBoxConstants.SORT_BY_NAME.equals(sortType)) {
-             workTickets.sort((w1, w2) -> w1.getFileName().compareTo(w2.getFileName()));
+             workTickets.sort(Comparator.comparing(WorkTicket::getFileName));
         } else if(MailBoxConstants.SORT_BY_SIZE.equals(sortType)) {
-            workTickets.sort((w1, w2) -> w1.getPayloadSize().compareTo(w2.getPayloadSize()));
+            workTickets.sort(Comparator.comparing(WorkTicket::getPayloadSize));
         } else {
             ISO8601Util dateUtil = new ISO8601Util();
-            workTickets.sort((w1, w2) -> dateUtil.fromDate(w1.getCreatedTime()).compareTo(dateUtil.fromDate(w2.getCreatedTime())));
+            workTickets.sort(Comparator.comparing(w -> dateUtil.fromDate(w.getCreatedTime())));
         }
     }
     
@@ -134,10 +142,9 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      * @param result workTickets
      * @param pipelineId
      * @return list of worktickets
-     * @throws IllegalAccessException
      * @throws IOException
      */
-    protected List<WorkTicket> generateWorkTickets(List<Path> result, String pipelineId) throws IOException, IllegalAccessException {
+    protected List<WorkTicket> generateWorkTickets(List<Path> result, String pipelineId) throws IOException {
 
         List<WorkTicket> workTickets = new ArrayList<>();
         WorkTicket workTicket = null;
@@ -205,10 +212,8 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      *
      * @param inboundFilesToProcess workTickets
      * @return list of worktickets
-     * @throws IllegalAccessException
-     * @throws IOException
      */
-    protected List<WorkTicket> generateWorkTicketsForInboundFile(List<InboundFile> inboundFilesToProcess, String pipelineId) throws IllegalAccessException, IOException {
+    protected List<WorkTicket> generateWorkTicketsForInboundFile(List<InboundFile> inboundFilesToProcess, String pipelineId) {
 
         List<WorkTicket> workTickets = new ArrayList<>();
         WorkTicket workTicket = null;
@@ -267,39 +272,6 @@ public abstract class AbstractSweeper extends AbstractProcessor {
 
         return workTickets;
     }
-    /**
-     * Get the total file size of the group.
-     *
-     * @param workTicketGroup
-     * @return
-     */
-    protected long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
-
-        long size = 0;
-        for (WorkTicket workTicket : workTicketGroup.getWorkTicketGroup()) {
-            size += workTicket.getPayloadSize();
-        }
-        return size;
-    }
-
-    /**
-     * This Method create local folders if not available and returns the path.
-     */
-    @Override
-    public String createLocalPath() {
-
-        String configuredPath = null;
-        try {
-            configuredPath = getPayloadURI();
-            DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
-            return configuredPath;
-
-        } catch (IOException e) {
-            throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-                    configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
-        }
-
-    }
 
     /**
      * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
@@ -352,9 +324,8 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      * Method to clean up stale files in the payload location of sweeper
      * 
      * @param staleFileTTL
-     * @throws IOException
      */
-    public void cleanupStaleFiles(int staleFileTTL) throws IOException {
+    public void cleanupStaleFiles(int staleFileTTL) {
 
         List<String> staleFiles = new ArrayList<>();
         String payloadLocation = getPayloadURI();
@@ -445,77 +416,6 @@ public abstract class AbstractSweeper extends AbstractProcessor {
     }
     
     /**
-     * Verifies the payload size
-     *
-     * @param workTicket workticket
-     * @return true if payload size is not 0
-     */
-    protected boolean isPayloadValid(WorkTicket workTicket) {
-        return !(0 == workTicket.getPayloadSize());
-    }
-    
-    /**
-     * Use to validate the given file can be added in the given group.
-     * 
-     * @param workTicketGroup
-     * @param workTicket
-     * @param payloadSize
-     * @param maxFile
-     * @return true or false based on the size and number of files check
-     */
-    protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, String payloadSize, String maxFile) {
-
-        long maxPayloadSize = 0;
-        long maxNoOfFiles = 0;
-
-        try {
-
-            if (!MailBoxUtil.isEmpty(payloadSize)) {
-                maxPayloadSize = Long.parseLong(payloadSize);
-            }
-            if (!MailBoxUtil.isEmpty(maxFile)) {
-                maxNoOfFiles = Long.parseLong(maxFile);
-            }
-
-        } catch (NumberFormatException e) {
-            throw new MailBoxServicesException("The given threshold size is not a valid one.", Response.Status.CONFLICT);
-        }
-
-        if (maxPayloadSize == 0) {
-            maxPayloadSize = MailBoxConstants.MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP;
-        }
-        if (maxNoOfFiles == 0) {
-            maxNoOfFiles = MailBoxConstants.MAX_NUMBER_OF_FILES_IN_GROUP;
-        }
-
-        if (maxNoOfFiles <= workTicketGroup.getWorkTicketGroup().size()) {
-            return false;
-        }
-
-        if (maxPayloadSize <= (getWorkTicketGroupFileSize(workTicketGroup) + workTicket.getPayloadSize())) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Method to persist the payload and workticket details in spectrum
-     *
-     * @param workTickets WorkTickets list.
-     * @param staticProp
-     * @throws IOException
-     */
-    protected void persistPayloadAndWorkticket(List<WorkTicket> workTickets, SweeperStaticPropertiesDTO staticProp) throws IOException {
-
-        LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
-        for (WorkTicket workTicket : workTickets) {
-            persistPayloadAndWorkticket(workTicket, staticProp);
-        }
-
-        LOGGER.info(constructMessage("Payload and workticket are persisted successfully"));
-    }
-
-    /**
      * overloaded method to persist the payload and workticket
      *
      * @param workTicket workticket
@@ -558,9 +458,8 @@ public abstract class AbstractSweeper extends AbstractProcessor {
      *
      * @param workTicket workticket
      * @param staticProp
-     * @throws IOException
      */
-    protected void persistWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws IOException {
+    protected void persistWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) {
 
         Map<String, String> properties = new HashMap<String, String>();
         Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
@@ -631,4 +530,52 @@ public abstract class AbstractSweeper extends AbstractProcessor {
         return groupedFilePath;
     }
 
+    /**
+     * Logs the TVAPI and ActivityStatus messages to LENS of the parent PGUID. This will be invoked at the end of the transaction.
+     * @param relatedTransactionId
+     * @param pipelineId
+     */
+    protected void logToLens(String relatedTransactionId, String pipelineId) {
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(relatedTransactionId);
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setStatus(ExecutionState.QUEUED);
+        glassMessageDTO.setPipelineId(pipelineId);
+        glassMessageDTO.setMessage("Processed trigger file");
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+    }
+
+    /**
+     * Method to get the pipe line id from the remote processor properties.
+     *
+     * @return pipelineId
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    protected String getPipeLineID() throws IOException, IllegalAccessException {
+        if (MailBoxUtil.isEmpty(this.pipelineId)) {
+            ConditionalSweeperPropertiesDTO sweeperStaticProperties = (ConditionalSweeperPropertiesDTO) getProperties();
+            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
+        }
+         return this.pipelineId;
+    }
+
+    /**
+     * Method to construct workticket
+     * @param parentGlobalProcessId
+     * @param payloadfileUri
+     * @return
+     * @throws IOException
+     * @throws IllegalAccessException
+     */
+    protected WorkTicket constructWorkTicket(String parentGlobalProcessId, String payloadfileUri) throws IOException, IllegalAccessException {
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(parentGlobalProcessId);
+        workTicket.setPipelineId(getPipeLineID());
+        workTicket.setPayloadURI(payloadfileUri);
+        workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
+        workTicket.setProcessMode(ProcessMode.ASYNC);
+        return workTicket;
+    }
 }

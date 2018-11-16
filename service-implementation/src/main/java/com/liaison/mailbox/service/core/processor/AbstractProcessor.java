@@ -13,6 +13,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -44,20 +45,25 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUpl
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -74,6 +80,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.Date;
 
 import static com.liaison.mailbox.MailBoxConstants.FTP;
 import static com.liaison.mailbox.MailBoxConstants.FTPS;
@@ -92,6 +100,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private static final String NO_EMAIL_ADDRESS = "There is no email address configured for this mailbox.";
     private static final String WILD_CARD = "*";
     private static final String DOT = ".";
+    private static final Object SORT_BY_NAME = "Name";
+    private static final Object SORT_BY_SIZE = "Size";
 
     protected static final String seperator = ": ";
 
@@ -109,6 +119,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private boolean directUploadEnabled;
     private boolean useFileSystem;
     private String responseFs2Uri;
+    private String pipelineId;
 
     protected Map<String, StagedFile> stagedFileMap = new HashMap<>();
 
@@ -170,6 +181,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     public void setResponseUri(String uri) {
         this.setResponseFs2Uri(uri);
+    }
+
+    public void setPipeLineID(String pipeLineID) {
+        this.pipelineId = pipeLineID;
     }
 
     /**
@@ -848,7 +863,45 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     }
 
     @Override
+    public void logToLens(String msg, File file, ExecutionState status, Exception e) {
+        LOGGER.info("Entered into log To Lens Method " + configurationInstance.getPguid() + " : " +  file.getParent() + " : " +  file.getName() + " : " +  ExceptionUtils.getStackTrace(e));
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesByProcessorId(configurationInstance.getPguid(), file.getParent(), file.getName());
+         
+        if (null != stagedFile) {
+            LOGGER.info("Staged File Name - {}", stagedFile.getFileName());
+            if (updateStagedFileStatus(status, stagedFileDAO, stagedFile)) {
+                return;
+            }
+            GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+            glassMessageDTO.setGlobalProcessId(stagedFile.getGPID());
+            glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
+            glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+            glassMessageDTO.setFileName(file.getName());
+            glassMessageDTO.setFilePath(file.getPath());
+            glassMessageDTO.setFileLength(file.length());
+            glassMessageDTO.setStatus(status);
+            glassMessageDTO.setMessage(msg);
+            glassMessageDTO.setPipelineId(null);
+            glassMessageDTO.setFirstCornerTimeStamp(null);
+            
+            if (null != e) {
+                glassMessageDTO.setTechDescription(ExceptionUtils.getStackTrace(e));
+                LOGGER.info("Admin error Details -------- {}", glassMessageDTO.getTechDescription());
+            }    
+             //sets receiver ip
+            glassMessageDTO.setReceiverIp(getHost());
+            MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+         }
+    }
+
+    @Override
     public void logToLens(String msg, RelayFile file, ExecutionState status) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    @Override
+    public void logToLens(String msg, RelayFile file, ExecutionState status, Exception e) {
         throw new RuntimeException("Not Implemented");
     }
 
@@ -1081,5 +1134,143 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     protected String getCategory() {
         return MailBoxUtil.getCategory(configurationInstance.getProcsrProperties());
+    }
+
+    /**
+     * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
+     *
+     * @param wrkTicket workticket for logging
+     * @param firstCornerTimeStamp first corner timestamp
+     * @param state Execution Status
+     */
+    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
+         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
+        StringBuilder message;
+        if (ExecutionState.VALIDATION_ERROR.equals(state)) {
+            message = new StringBuilder().append("File size is empty ").append(filePath).append(", and empty files are not allowed");
+        } else {
+            message = new StringBuilder().append("Starting to sweep input folder ").append(filePath).append(" for new files");
+        }
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(wrkTicket.getGlobalProcessId());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(wrkTicket.getFileName());
+        glassMessageDTO.setFilePath(filePath);
+        glassMessageDTO.setFileLength(wrkTicket.getPayloadSize());
+        glassMessageDTO.setStatus(state);
+        glassMessageDTO.setMessage(message.toString());
+        glassMessageDTO.setPipelineId(wrkTicket.getPipelineId());
+        if (null != firstCornerTimeStamp) {
+            glassMessageDTO.setFirstCornerTimeStamp(firstCornerTimeStamp);
+        }
+        if (null != date) {
+            glassMessageDTO.setStatusDate(date);
+            LOGGER.debug("The date value is {}", date.getTime());
+        }
+         MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+    }
+
+    /**
+     * This Method create local folders if not available and returns the path.
+     *
+     * @param processorDTO it have details of processor
+     *
+     */
+    @Override
+    public String createLocalPath() {
+         String configuredPath = null;
+        try {
+            configuredPath = getPayloadURI();
+            DirectoryCreationUtil.createPathIfNotAvailable(configuredPath);
+            return configuredPath;
+         } catch (IOException e) {
+            throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED, configuredPath, Response.Status.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    /**
+     * Method to sort work tickets based on name/size/date
+     * 
+     * @param workTickets worktickets
+     * @param sortType sort type
+     */
+    protected void sortWorkTicket(List<WorkTicket> workTickets, String sortType) {
+    
+        if (SORT_BY_NAME.equals(sortType)) {
+             workTickets.sort(Comparator.comparing(WorkTicket::getFileName));
+        } else if(SORT_BY_SIZE.equals(sortType)) {
+            workTickets.sort(Comparator.comparing(WorkTicket::getPayloadSize));
+        } else {
+            ISO8601Util dateUtil = new ISO8601Util();
+            workTickets.sort(Comparator.comparing(w -> dateUtil.fromDate(w.getCreatedTime())));
+        }
+    }
+
+    /**
+     * Verifies the payload size
+     *
+     * @param workTicket workticket
+     * @return true if payload size is not 0
+     */
+    protected boolean isPayloadValid(WorkTicket workTicket) {
+        return !(0 == workTicket.getPayloadSize());
+    }
+
+    /**
+     * logs sweeper failed status
+     * @param workTicket workticket
+     * @param e exception
+     */
+    protected void logSweeperFailedStatus(WorkTicket workTicket, Exception e) {
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(workTicket.getGlobalProcessId());
+        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
+        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
+        glassMessageDTO.setFileName(workTicket.getFileName());
+        glassMessageDTO.setStatus(ExecutionState.FAILED);
+        glassMessageDTO.setPipelineId(workTicket.getPipelineId());
+        glassMessageDTO.setMessage(e.getMessage());
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
+    }
+
+    /**
+     * Method is used to map the values with Mailbox constants variables.
+     * 
+     * @param staticProp
+     * @param workTicket
+     * @return properties
+     */
+    protected Map<String, String> setProperties(SweeperPropertiesDTO staticProp, WorkTicket workTicket) {
+        Map<String, String> properties = new HashMap<>();
+        Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+        if (!ttlMap.isEmpty()) {
+            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+        }
+         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+         String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
+        LOGGER.info(constructMessage("Sweeping file {}"), workTicket.getPayloadURI());
+        return properties;
+    }
+
+    /**
+     * Method to get the pipe line id from the remote processor properties.
+     *
+     * @return pipelineId
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    protected String getPipeLineID() throws IOException, IllegalAccessException {
+        if (MailBoxUtil.isEmpty(pipelineId)) {
+            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
+            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
+        }
+        return pipelineId;
     }
 }

@@ -279,7 +279,26 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @param msg    Message String to be logged in LENS event log
      * @param file   File corresponding to the log
      * @param status Status of the LENS logging
+     * @param e      Exception
+     */
+    void logToLens(String msg, File file, ExecutionState status, Exception e);
+
+    /**
+     * Method to logs the TVAPI status and activity messages to LENS
+     *
+     * @param msg    Message String to be logged in LENS event log
+     * @param file   File corresponding to the log
+     * @param status Status of the LENS logging
      */
     void logToLens(String msg, RelayFile file, ExecutionState status);
 
+    /**
+     * Method to logs the TVAPI status and activity messages to LENS
+     *
+     * @param msg    Message String to be logged in LENS event log
+     * @param file   File corresponding to the log
+     * @param status Status of the LENS logging
+     * @Param e      Exception
+     */
+    void logToLens(String msg, RelayFile file, ExecutionState status, Exception e);
 }

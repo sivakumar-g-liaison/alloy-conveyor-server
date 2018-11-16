@@ -60,14 +60,9 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
 
     private static final Logger LOGGER = LogManager.getLogger(EnhancedConditionalSweeper.class);
 
-    private String pipelineId;
     private ConditionalSweeperPropertiesDTO staticProp;
     private String triggerFileName;
     private static final int TRIGGER_FILE = 1;
-
-    public void setPipeLineID(String pipeLineID) {
-        this.pipelineId = pipeLineID;
-    }
 
     public void setStaticProp(ConditionalSweeperPropertiesDTO staticProp) {
         this.staticProp = staticProp;
@@ -292,24 +287,7 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
             LOGGER.warn("No files found to process in inprogess list");
         }
     }
-    
-    /**
-     * Method to get the pipe line id from the remote processor properties.
-     *
-     * @return pipelineId
-     * @throws IllegalAccessException
-     * @throws IOException
-     */
-    private String getPipeLineID() throws IOException, IllegalAccessException {
 
-        if (MailBoxUtil.isEmpty(this.pipelineId)) {
-            ConditionalSweeperPropertiesDTO sweeperStaticProperties = (ConditionalSweeperPropertiesDTO) getProperties();
-            this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
-        }
-
-        return this.pipelineId;
-    }
-    
     /**
      * Async conditional sweeper posts workticket to queue for inbound files
      *
@@ -380,13 +358,7 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
      */
     private String constructBatchWorkticket(InboundFile inboundFile) throws IllegalAccessException, IOException, JAXBException {
 
-        WorkTicket workTicket = new WorkTicket();
-        workTicket.setGlobalProcessId(inboundFile.getParentGlobalProcessId());
-        workTicket.setPipelineId(getPipeLineID());
-        workTicket.setPayloadURI(inboundFile.getFs2Uri());
-        workTicket.setAdditionalContext(MailBoxConstants.KEY_IS_BATCH_TRANSACTION, true);
-        workTicket.setProcessMode(ProcessMode.ASYNC);
-
+        WorkTicket workTicket = constructWorkTicket(inboundFile.getParentGlobalProcessId(),  inboundFile.getFs2Uri());
         return JAXBUtility.marshalToJSON(workTicket);
     }
     
@@ -415,24 +387,6 @@ public class EnhancedConditionalSweeper extends AbstractSweeper implements MailB
             workTicket.setAdditionalContext(additionalContext);
         }
 
-    }
-    
-    /**
-     * Logs the TVAPI and ActivityStatus messages to LENS of the parent PGUID. This will be invoked at the end of the transaction.
-     * @param relatedTransactionId
-     * @param pipelineId
-     */
-    protected void logToLens(String relatedTransactionId, String pipelineId) {
-
-        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
-        glassMessageDTO.setGlobalProcessId(relatedTransactionId);
-        glassMessageDTO.setProcessorType(configurationInstance.getProcessorType(), getCategory());
-        glassMessageDTO.setProcessProtocol(configurationInstance.getProcsrProtocol());
-        glassMessageDTO.setStatus(ExecutionState.QUEUED);
-        glassMessageDTO.setPipelineId(pipelineId);
-        glassMessageDTO.setMessage("Processed trigger file");
-
-        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     @Override

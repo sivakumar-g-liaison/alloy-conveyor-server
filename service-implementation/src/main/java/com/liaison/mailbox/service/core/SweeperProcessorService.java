@@ -10,17 +10,6 @@
  
 package com.liaison.mailbox.service.core;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.MediaType;
-
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.dto.queue.WorkTicket;
@@ -36,11 +25,21 @@ import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONObject;
+
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * To process sweeper files in multiple threads
@@ -118,7 +117,7 @@ public class SweeperProcessorService implements Runnable {
     /**
      * Method to persist the payload and workticket details in spectrum
      *
-     * @param workTickets WorkTickets list.
+     * @param workTicket WorkTicket.
      * @param staticProp sweeper properties
      * @throws IOException
      */
