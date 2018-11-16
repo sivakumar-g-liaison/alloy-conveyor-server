@@ -9,6 +9,7 @@
     * Added new processor type
     * DB: updated constraint to allow new processor type
 * GMB-1178 - Add index to the Staging table
+* GMB-1159 - Make the sweeper multithreaded execution
 
 5.4.6
 ---------------

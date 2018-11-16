@@ -13,7 +13,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -260,76 +259,55 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
         final Date lensStatusDate = new Date();
 
-        // Read from mailbox property - grouping js location
-        List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
-
         // first corner timestamp
         ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        Map<String, String> statusMapFromFile = relatedTransactionDto.getFilePathStatusIndex();
+        String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
+        Map<String, String> sweptFileStatus;
 
-        if (workTicketGroups.isEmpty()) {
-            LOGGER.debug("The file group is empty");
-        } else {
-
-            TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
-            Map<String, String> statusMapFromFile = relatedTransactionDto.getFilePathStatusIndex();
-            String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
-            Map<String, String> sweptFileStatus;
-            for (WorkTicketGroup workTicketGroup : workTicketGroups) {
-
-                // Interrupt signal for async sweeper
-                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
-                    LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
-                    return;
-                }
-
-                LOGGER.debug("Persist workticket from workticket group to spectrum");
-                
-                SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-                staticPropertiesDTO.setContentType(staticProp.getContentType());
-                staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
-                staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
-                staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
-                
-                persistPayloadAndWorkticket(workTicketGroup.getWorkTicketGroup(), staticPropertiesDTO);
-
-                String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
-                LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-                SweeperQueueSendClient.post(wrkTcktToSbr, true);
-
-                sweptFileStatus = new HashMap<String, String>();
-                // For glass logging
-                for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
-
-                    // Fish tag global process id
-                    try {
-                        ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
-
-                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, relatedTransactionId, lensStatusDate);
-                        LOGGER.info(constructMessage("Global PID",
-                                seperator,
-                                wrkTicket.getGlobalProcessId(),
-                                " submitted for file ",
-                                wrkTicket.getFileName()));
-
-                        verifyAndDeletePayload(wrkTicket);
-                    } finally {
-                        ThreadContext.clearMap();
-                    }
-
-                    sweptFileStatus.put(wrkTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), EntityStatus.INACTIVE.name());
-                }
-
-                statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), sweptFileStatus.entrySet().stream())
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entry1, entry2) -> entry2));
-                relatedTransactionDto.setFilePathStatusIndex(statusMapFromFile);
-
-                writeMapToFile(relatedTransactionDto, triggerFileNameWithPath);
-
+        for (WorkTicket workTicket : workTickets) {
+            // Interrupt signal for async sweeper
+            if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
+                LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
+                return;
             }
+            LOGGER.debug("Persist workticket from workticket group to spectrum");
+            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+            staticPropertiesDTO.setContentType(staticProp.getContentType());
+            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
+            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
 
-            //post parent gpid
-            logToLens(relatedTransactionDto.getParentGlobalProcessId(), staticProp.getPipeLineID());
+            persistPayloadAndWorkticket(workTicket, staticPropertiesDTO);
+            String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+            SweeperQueueSendClient.post(wrkTcktToSbr, false);
+            sweptFileStatus = new HashMap<String, String>();
+
+            // For glass logging
+            // Fish tag global process id
+            try {
+                ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+                logToLens(workTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, relatedTransactionId, lensStatusDate);
+                LOGGER.info(constructMessage("Global PID",
+                        seperator,
+                        workTicket.getGlobalProcessId(),
+                        " submitted for file ",
+                        workTicket.getFileName()));
+                verifyAndDeletePayload(workTicket);
+            } finally {
+                ThreadContext.clearMap();
+            }
+            sweptFileStatus.put(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), EntityStatus.INACTIVE.name());
+            statusMapFromFile = Stream.concat(statusMapFromFile.entrySet().stream(), sweptFileStatus.entrySet().stream())
+                   .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (entry1, entry2) -> entry2));
+            relatedTransactionDto.setFilePathStatusIndex(statusMapFromFile);
+            writeMapToFile(relatedTransactionDto, triggerFileNameWithPath);
         }
+
+        //post parent gpid
+        logToLens(relatedTransactionDto.getParentGlobalProcessId(), staticProp.getPipeLineID());
     }
 
     /**
@@ -519,72 +497,6 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
 
         return this.pipelineId;
-    }
-
-    /**
-     * Grouping the files based on the payload threshold and no of files threshold.
-     *
-     * @param workTickets Group of all workTickets in a WorkTicketGroup.
-     * @return workticket group
-     * @throws IllegalAccessException
-     * @throws IOException
-     */
-    private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets)
-            throws IllegalAccessException, IOException {
-
-        List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
-
-        if (workTickets.isEmpty()) {
-            LOGGER.info(constructMessage("There are no files available in the directory."));
-        }
-
-        sortWorkTicket(workTickets, staticProp.getSort());
-        WorkTicketGroup workTicketGroup = new WorkTicketGroup();
-        List<WorkTicket> workTicketsInGroup = new ArrayList<WorkTicket>();
-        workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-        int totalFileCount = workTickets.size();
-        int currentFileCount = 0;
-        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
-        String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
-        String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile())
-                ? MailBoxConstants.TRIGGER_FILE_REGEX
-                : staticProp.getTriggerFile();
-
-        for (WorkTicket workTicket : workTickets) {
-
-            boolean canAddToGroup = canAddToGroup(workTicketGroup,
-                    workTicket,
-                    staticProp.getPayloadSizeThreshold(),
-                    staticProp.getNumOfFilesThreshold());
-            currentFileCount++;
-            
-            Map<String, Object> additionalContext = workTicket.getAdditionalContext();
-            additionalContext.put(MailBoxConstants.KEY_FILE_COUNT, currentFileCount + MailBoxConstants.FILE_COUNT_SEPARATOR + totalFileCount);
-            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_NAME, triggerFileName);
-            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID, relatedTransactionId);
-            additionalContext.put(MailBoxConstants.KEY_FILE_GROUP, true);
-            additionalContext.put(MailBoxConstants.KEY_TRIGGER_FILE_URI, relatedTransactionDto.getTriggerFileUri());
-            workTicket.setAdditionalContext(additionalContext);
-            
-            if (canAddToGroup) {
-                workTicketGroup.getWorkTicketGroup().add(workTicket);
-            } else {
-
-                if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-                    workTicketGroups.add(workTicketGroup);
-                }
-                workTicketGroup = new WorkTicketGroup();
-                workTicketsInGroup = new ArrayList<WorkTicket>();
-                workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-                workTicketGroup.getWorkTicketGroup().add(workTicket);
-            }
-        }
-
-        if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-            workTicketGroups.add(workTicketGroup);
-        }
-
-        return workTicketGroups;
     }
 
     /**

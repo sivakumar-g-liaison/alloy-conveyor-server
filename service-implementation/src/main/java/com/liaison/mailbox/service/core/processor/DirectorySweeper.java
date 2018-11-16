@@ -14,9 +14,9 @@ import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -25,6 +25,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.SweeperProcessorService;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -35,8 +36,8 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -45,7 +46,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -103,6 +103,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private static final Object SORT_BY_NAME = "Name";
     private static final Object SORT_BY_SIZE = "Size";
     private static final String WATCH_DOG_SERVICE = "WatchDog Service";
+    private static final String SWEEPER_MULTITHREAD_ENABLED = "com.liaison.mailbox.sweeper.multithread.enabled";
 
     private String pipelineId;
     private List<Path> activeFiles = new ArrayList<>();
@@ -222,53 +223,15 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     private void asyncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp)
             throws IllegalAccessException, IOException, JAXBException, JSONException {
 
-        final Date lensStatusDate = new Date();
+        for (WorkTicket workTicket : workTickets) {
 
-        // Read from mailbox property - grouping js location
-        List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets, staticProp);
-
-        //first corner timestamp
-        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
-
-        if (workTicketGroups.isEmpty()) {
-            LOGGER.debug("The file group is empty");
-        } else {
-
-            for (WorkTicketGroup workTicketGroup : workTicketGroups) {
-
-                //Interrupt signal for async sweeper
-                if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
-                    LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
-                    return;
-                }
-
-                LOGGER.debug("Persist workticket from workticket group to spectrum");
-                persistPayloadAndWorkticket(workTicketGroup.getWorkTicketGroup(), staticProp);
-
-                String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicketGroup);
-                LOGGER.debug(constructMessage("Workticket posted to SB queue.{}"), new JSONObject(wrkTcktToSbr).toString(2));
-                SweeperQueueSendClient.post(wrkTcktToSbr, true);
-
-                // For glass logging
-                for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
-
-                    //Fish tag global process id
-                    try {
-                        ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, wrkTicket.getGlobalProcessId());
-
-                        logToLens(wrkTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, lensStatusDate);
-                        LOGGER.info(constructMessage("Global PID",
-                                seperator,
-                                wrkTicket.getGlobalProcessId(),
-                                " submitted for file ",
-                                wrkTicket.getFileName()));
-
-                        verifyAndDeletePayload(wrkTicket);
-                    } finally {
-                        ThreadContext.clearMap();
-                    }
-
-                }
+            boolean isSweeperMultithreadEnabled = LiaisonArchaiusConfiguration.getInstance().getBoolean(SWEEPER_MULTITHREAD_ENABLED, true);
+            if (isSweeperMultithreadEnabled && SweeperProcessThreadPool.getExecutorService().getActiveCount() < SweeperProcessThreadPool.getExecutorService().getCorePoolSize()) {
+                LOGGER.info(constructMessage("Number of active thread count {}"), SweeperProcessThreadPool.getExecutorService().getActiveCount());
+                SweeperProcessThreadPool.getExecutorService().submit(new SweeperProcessorService(workTicket, configurationInstance, staticProp));
+            }  else {
+                LOGGER.info("Active thread count reached maximum core pool size");
+                new SweeperProcessorService(workTicket, configurationInstance,  staticProp).doProcess(workTicket);
             }
         }
     }
@@ -470,51 +433,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		return this.pipelineId;
 	}
 
-    /**
-     * Grouping the files based on the payload threshold and no of files threshold.
-     *
-     * @param workTickets Group of all workTickets in a WorkTicketGroup.
-     * @param staticProp sweeper properties
-     * @return workticket group
-     * @throws IllegalAccessException
-     * @throws IOException
-     */
-    private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IllegalAccessException, IOException {
-
-        List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
-
-        if (workTickets.isEmpty()) {
-            LOGGER.info(constructMessage("There are no files available in the directory."));
-        }
-
-        sortWorkTicket(workTickets, staticProp.getSort());
-        WorkTicketGroup workTicketGroup = new WorkTicketGroup();
-        List<WorkTicket> workTicketsInGroup = new ArrayList<WorkTicket>();
-        workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-
-        for (WorkTicket workTicket : workTickets) {
-
-            if (canAddToGroup(workTicketGroup, workTicket, staticProp)) {
-                workTicketGroup.getWorkTicketGroup().add(workTicket);
-            } else {
-
-                if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-                    workTicketGroups.add(workTicketGroup);
-                }
-                workTicketGroup = new WorkTicketGroup();
-                workTicketsInGroup = new ArrayList<WorkTicket>();
-                workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
-                workTicketGroup.getWorkTicketGroup().add(workTicket);
-            }
-        }
-
-        if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
-            workTicketGroups.add(workTicketGroup);
-        }
-
-        return workTicketGroups;
-    }
-
 	/**
 	 * Method to sort work tickets based on name/size/date
 	 * 
@@ -532,23 +450,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             workTickets.sort(Comparator.comparing(w -> dateUtil.fromDate(w.getCreatedTime())));
         }
     }
-
-	/**
-	 * Method to persist the payload and workticket details in spectrum
-	 *
-	 * @param workTickets WorkTickets list.
-	 * @param staticProp sweeper properties
-	 * @throws IOException
-	 */
-	private void persistPayloadAndWorkticket(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) throws IOException {
-
-		LOGGER.debug(constructMessage("Persisting paylaod and workticket in spectrum starts"));
-		for (WorkTicket workTicket : workTickets) {
-			persistPayloadAndWorkticket(staticProp, workTicket);
-		}
-
-		LOGGER.info(constructMessage("Payload and workticket are persisted successfully"));
-	}
 
     /**
      * overloaded method to persist the payload and workticket
@@ -696,72 +597,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		files = filterFiles(files);
 
 		return generateWorkTickets(files);
-	}
-
-	/**
-	 * Use to validate the given file can be added in the given group.
-	 *
-	 * @param workTicketGroup workticket group
-	 * @param workTicket workticket
-	 * @param staticProp sweeper properties
-	 * @return true or false based on the size and number of files check
-	 */
-	private Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket, SweeperPropertiesDTO
-            staticProp) {
-
-		long maxPayloadSize = 0;
-		long maxNoOfFiles = 0;
-
-		try {
-
-			// retrieve required properties
-			String payloadSize = staticProp.getPayloadSizeThreshold();
-			String maxFile = staticProp.getNumOfFilesThreshold();
-
-			if (!MailBoxUtil.isEmpty(payloadSize)) {
-				maxPayloadSize = Long.parseLong(payloadSize);
-			}
-			if (!MailBoxUtil.isEmpty(maxFile)) {
-                maxNoOfFiles = Long.parseLong(maxFile);
-            }
-
-		} catch (NumberFormatException e) {
-			throw new MailBoxServicesException("The given threshold size is not a valid one.", Response.Status.CONFLICT);
-		}
-
-		if (maxPayloadSize == 0) {
-			maxPayloadSize = MAX_PAYLOAD_SIZE_IN_WORKTICKET_GROUP;
-		}
-		if (maxNoOfFiles == 0) {
-			maxNoOfFiles = MAX_NUMBER_OF_FILES_IN_GROUP;
-		}
-
-		if (maxNoOfFiles <= workTicketGroup.getWorkTicketGroup().size()) {
-			return false;
-		}
-
-		if (maxPayloadSize <= (getWorkTicketGroupFileSize(workTicketGroup) + workTicket.getPayloadSize())) {
-			return false;
-		}
-		return true;
-	}
-
-
-	/**
-	 * Get the total file size of the group.
-	 *
-	 * @param workTicketGroup
-	 * @return
-	 */
-	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
-
-		long size = 0;
-
-		for (WorkTicket workTicket : workTicketGroup.getWorkTicketGroup()) {
-			size += workTicket.getPayloadSize();
-		}
-
-		return size;
 	}
 
 	@Override
