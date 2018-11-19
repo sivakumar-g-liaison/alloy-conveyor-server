@@ -20,6 +20,8 @@ import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
 import com.liaison.commons.messagebus.kafka.KafkaBroadcastConsumerProvider;
 import com.liaison.commons.messagebus.kafka.KafkaConsumerProvider;
 import com.liaison.commons.messagebus.kafka.LiaisonBroadcastKafkaConsumer;
+import com.liaison.commons.messagebus.kafka.LiaisonConsumerManager;
+import com.liaison.commons.messagebus.kafka.LiaisonConsumerManagerImpl;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumerFactory;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaProducer;
@@ -93,6 +95,7 @@ public class RelayModule extends AbstractModule {
             bind(LiaisonProducer.class).to(LiaisonKafkaProducer.class);
             bind(new TypeLiteral<Consumer<String, String>>() {
             }).toProvider(KafkaConsumerProvider.class);
+            bind(LiaisonConsumerManager.class).to(LiaisonConsumerManagerImpl.class);
 
             install(new FactoryModuleBuilder().implement(StatusLogger.class, GlassLoggerService.class)
                     .build(StatusLoggerFactory.class));

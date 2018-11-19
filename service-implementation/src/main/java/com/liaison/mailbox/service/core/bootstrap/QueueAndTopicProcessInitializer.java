@@ -12,8 +12,9 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.liaison.commons.messagebus.common.KafkaTextMessageProcessor;
 import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
-import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
+import com.liaison.commons.messagebus.kafka.LiaisonConsumerManager;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumerFactory;
+import com.liaison.commons.messagebus.queue.LiaisonConsumer;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
@@ -159,7 +160,6 @@ public class QueueAndTopicProcessInitializer {
                         serviceBrokerToDropboxConsumer.startConsumer(serviceBrokerToDropboxConsumerTopics);
                         serviceBrokerToDropboxConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 serviceBrokerToDropboxConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, ServiceBrokerToDropbox.class));
 
@@ -252,7 +252,6 @@ public class QueueAndTopicProcessInitializer {
                 if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
                     try {
                         Injector injector = GuiceInjector.getInjector();
-                        LiaisonKafkaConsumerFactory liaisonKafkaConsumerFactory = injector.getInstance(LiaisonKafkaConsumerFactory.class);
 
                         // Relay -> Relay file stage replication retry
                         logger.info("Starting FILE_STAGE_REPLICATION_RETRY Listener with QS integration");
@@ -267,7 +266,6 @@ public class QueueAndTopicProcessInitializer {
                         fileStageReplicationRetryConsumer.startConsumer(fileStageReplicationRetryConsumerTopics);
                         fileStageReplicationRetryConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 fileStageReplicationRetryConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, FileStageReplicationRetry.class));
 
@@ -286,7 +284,6 @@ public class QueueAndTopicProcessInitializer {
                         mailboxProcessorConsumer.startConsumer(mailboxProcessorConsumerTopics);
                         mailboxProcessorConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 mailboxProcessorConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, Mailbox.class));
 
@@ -307,7 +304,6 @@ public class QueueAndTopicProcessInitializer {
                         serviceBrokerToMailboxConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
 
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 serviceBrokerToMailboxConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, ServiceBrokerToMailbox.class));
 
@@ -329,7 +325,6 @@ public class QueueAndTopicProcessInitializer {
                         broadcastConsumer.startConsumer(mailboxTopicMessageConsumerTopics);
                         broadcastConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 mailboxTopicMessageConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, BroadcastConsumer.class));
 
@@ -348,7 +343,6 @@ public class QueueAndTopicProcessInitializer {
                         userManagementToRelayDirectoryConsumer.startConsumer(userManagementToRelayDirectoryConsumerTopics);
                         userManagementToRelayDirectoryConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                liaisonKafkaConsumerFactory,
                                 userManagementToRelayDirectoryConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, UserManagementToRelayDirectory.class));
 
@@ -364,11 +358,11 @@ public class QueueAndTopicProcessInitializer {
     }
 
     private static void startConsumer(AsyncProcessThreadPool.AsyncProcessThreadPoolProcessorAvailability asyncProcessThreadPoolProcessorAvailability,
-                                      LiaisonKafkaConsumerFactory liaisonKafkaConsumerFactory,
                                       Map<String, List<String>> consumerTopics,
                                       KafkaTextMessageProcessor kafkaTextMessageProcessor) {
 
-        LiaisonKafkaConsumer consumer = liaisonKafkaConsumerFactory.create(kafkaTextMessageProcessor);
+        LiaisonConsumerManager consumerManager = GuiceInjector.getInjector().getInstance(LiaisonConsumerManager.class);
+        LiaisonConsumer consumer = consumerManager.createConsumer(kafkaTextMessageProcessor);
         consumer.startConsumer(consumerTopics);
         consumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
     }

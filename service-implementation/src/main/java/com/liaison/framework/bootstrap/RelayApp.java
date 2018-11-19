@@ -9,6 +9,7 @@
 package com.liaison.framework.bootstrap;
 
 import com.google.inject.Injector;
+import com.liaison.commons.acl.resource.filter.ValidationFilterFactory;
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.RemoteURLPublicKeyVerifier;
 import com.liaison.commons.acl.util.SignatureVerifier;
@@ -28,6 +29,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
+import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZValidationFilterFactory;
 import com.liaison.mailbox.service.module.GuiceInjector;
 import com.liaison.mailbox.service.queue.kafka.Consumer;
 import com.liaison.mailbox.service.queue.kafka.Producer;
@@ -89,7 +91,10 @@ public class RelayApp extends ResourceConfig {
                 "com.liaison.threadmanagement.resources",
                 "com.wordnik.swagger.jersey.listing",
                 "com.fasterxml.jackson.jaxrs.json",
-                "com.fasterxml.jackson.jaxrs.xml");
+                "com.fasterxml.jackson.jaxrs.xml",
+                "com.liaison.commons.messagebus.rest");
+
+        register(ValidationFilterFactory.class, ConveyorAuthZValidationFilterFactory.class);
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);

@@ -8,31 +8,30 @@
     =========================================================================
     -->
 
+    <servlet>
+        <servlet-name>JerseyResources</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.liaison.framework.bootstrap.RelayApp</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <!-- Framework-level support for guice, please do not modify. -->
     <filter>
-        <filter-name>guiceFilter</filter-name>
+        <filter-name>guice-filter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>guiceFilter</filter-name>
+        <filter-name>guice-filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- Supports Jersey endpoints, please do not modify -->
-    <servlet>
-        <servlet-name>StaticRest</servlet-name>
-        <servlet-class>
-            org.glassfish.jersey.servlet.ServletContainer
-        </servlet-class>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.liaison.mailbox.service.rest;com.liaison.service.resources.acl;com.liaison.threadmanagement.resources;com.wordnik.swagger.jersey.listing;com.fasterxml.jackson.jaxrs.json;com.fasterxml.jackson.jaxrs.xml</param-value>
-         </init-param>
-        <init-param>
-            <param-name>jersey.config.server.provider.classnames</param-name>
-            <param-value>org.glassfish.jersey.jackson.JacksonFeature;com.liaison.commons.acl.resource.filter.ValidationFilterFactory;com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZValidationFilterFactory</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <listener>
+        <listener-class>com.liaison.mailbox.service.module.GuiceListener</listener-class>
+    </listener>
 
     <filter>
         <filter-name>ExceptionFilter</filter-name>
@@ -59,7 +58,7 @@
 
     <!-- Each servlet implementation may map incoming rest requests to a unique base URI -->
     <servlet-mapping>
-        <servlet-name>StaticRest</servlet-name>
+        <servlet-name>JerseyResources</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
