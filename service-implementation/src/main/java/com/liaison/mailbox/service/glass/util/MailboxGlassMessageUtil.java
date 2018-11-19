@@ -70,7 +70,7 @@ public class MailboxGlassMessageUtil {
 
             glassMessage.setOutAgent(processProtocol);
             glassMessage.setOutSize(fileLength);
-            glassMessage.logFourthCornerTimestamp();
+            glassMessage.logSecondCornerTimestamp();
             logProcessingStatus(glassMessage, StatusType.SUCCESS, message);
         } else if (ExecutionState.FAILED.equals(status)) {
 

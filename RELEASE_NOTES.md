@@ -10,6 +10,7 @@
     * DB: updated constraint to allow new processor type
 * GMB-1178 - Add index to the Staging table
 * GMB-1159 - Make the sweeper multithreaded execution
+* GMB-1184 - Four corner logging is not working as expected
 * GMB-1185 - QS: Support for consumer(s) pause/resume
 
 5.4.6

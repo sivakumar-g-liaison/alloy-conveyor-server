@@ -133,6 +133,9 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.setOutAgent(GatewayType.REST);
                     glassMessage.setProcessId(processId);
                     glassMessage.setGlobalPId(getStagedFileGlobalProcessId(spectrumUrl));
+                    
+                    // Log Second Corner Time stamp
+                    glassMessage.logSecondCornerTimestamp();
 
                     // Log time stamp
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
