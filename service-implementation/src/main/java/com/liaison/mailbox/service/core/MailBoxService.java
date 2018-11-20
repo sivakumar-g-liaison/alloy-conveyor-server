@@ -60,6 +60,7 @@ import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
 import static com.liaison.mailbox.MailBoxConstants.FILE_EXISTS;
+import static com.liaison.mailbox.MailBoxConstants.INITIAL_PIPELINE_ID;
 import static com.liaison.mailbox.MailBoxConstants.KEY_FILE_PATH;
 import static com.liaison.mailbox.MailBoxConstants.KEY_MESSAGE_CONTEXT_URI;
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
@@ -534,6 +535,12 @@ public class MailBoxService implements Runnable {
 
         if (workTicket.getAdditionalContextItem(RESPONSE_FS2_URI) != null) {
             workResult.setPayloadURI(workTicket.getAdditionalContextItem(RESPONSE_FS2_URI));
+        }
+
+        //Add an initial pipeline ID info to workResult. QS will use this information in FIFO processing
+        String initialPipelineId = workTicket.getAdditionalContextItem(INITIAL_PIPELINE_ID);
+        if (initialPipelineId != null && !initialPipelineId.isEmpty()) {
+            workResult.addHeader(INITIAL_PIPELINE_ID, initialPipelineId);
         }
 
         return workResult;

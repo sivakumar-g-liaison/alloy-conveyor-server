@@ -12,6 +12,7 @@
 * GMB-1159 - Make the sweeper multithreaded execution
 * GMB-1184 - Four corner logging is not working as expected
 * GMB-1185 - QS: Support for consumer(s) pause/resume
+* GMB-1164: Add an initial pipeline ID info to workResult
 
 5.4.6
 ---------------
