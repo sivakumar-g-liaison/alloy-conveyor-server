@@ -141,7 +141,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             Path triggerFilePath = Paths.get(triggerFileNameWithPath);
             if (Files.exists(triggerFilePath)) {
                 if (MailBoxUtil.validateLastModifiedTolerance(triggerFilePath)) {
-                    throw new MailBoxServicesException(Messages.INVALID_FILE_LAST_MODIFICATION, String.valueOf(MailBoxUtil.CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE)), Response.Status.BAD_REQUEST);
+                    LOGGER.warn(constructMessage("Trigger file is modified within the tolerance limit {} seconds and it will be picked up in the next iteration after the threshold limit"), String.valueOf(MailBoxUtil.CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE)));
+                    return;
                 }
                 filePathList = listFilePathFromPayloadDirectory(inputLocation);
                 postToAsyncSweeper(filePathList, postedWorkTickets);
