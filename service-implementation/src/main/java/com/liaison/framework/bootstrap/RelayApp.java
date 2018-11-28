@@ -94,7 +94,8 @@ public class RelayApp extends ResourceConfig {
                 "com.fasterxml.jackson.jaxrs.xml",
                 "com.liaison.commons.messagebus.rest");
 
-        register(ValidationFilterFactory.class, ConveyorAuthZValidationFilterFactory.class);
+        register(ValidationFilterFactory.class);
+        register(ConveyorAuthZValidationFilterFactory.class);
 
         //GMB-1064 Making sure the BC is before SUNJCE
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
