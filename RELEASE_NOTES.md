@@ -14,6 +14,14 @@
 * GMB-1185 - QS: Support for consumer(s) pause/resume
 * GMB-1164: Add an initial pipeline ID info to workResult
 
+5.4.8
+---------------
+* GMB-1188 - Trigger file for inbound conditional sweep processor is removed but data files not picked up and processed
+
+5.4.7
+---------------
+* GMB-1170 - Transaction delivered to Liaison SFTP, deleted, but the event is still Ready for Pickup
+
 5.4.6
 ---------------
 * GMB-1171 - Category overwritten in the event status update case - Updated the LENS logs section for File Delete Event

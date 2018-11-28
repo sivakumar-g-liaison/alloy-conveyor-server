@@ -138,7 +138,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     : staticProp.getTriggerFile();
             this.setTriggerFilePath(inputLocation + File.separator + triggerFileName);
 
-            if (Files.exists(Paths.get(triggerFileNameWithPath))) {
+            Path triggerFilePath = Paths.get(triggerFileNameWithPath);
+            if (Files.exists(triggerFilePath)) {
+                if (MailBoxUtil.validateLastModifiedTolerance(triggerFilePath)) {
+                    throw new MailBoxServicesException(Messages.INVALID_FILE_LAST_MODIFICATION, String.valueOf(MailBoxUtil.CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE)), Response.Status.BAD_REQUEST);
+                }
                 filePathList = listFilePathFromPayloadDirectory(inputLocation);
                 postToAsyncSweeper(filePathList, postedWorkTickets);
             } else {

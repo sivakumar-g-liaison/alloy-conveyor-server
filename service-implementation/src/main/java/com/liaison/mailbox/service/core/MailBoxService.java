@@ -56,6 +56,7 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.FILEWRITER;
@@ -301,6 +302,7 @@ public class MailBoxService implements Runnable {
     private void executeFileWriter(String request) {
 
 		LOG.info("Consumed WORKTICKET [" + request + "]");
+        Date statusDate = new Date();
 	    String mailboxId = null;
 	    String payloadURI = null;
 	    String processorType = null;
@@ -325,6 +327,7 @@ public class MailBoxService implements Runnable {
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
+            glassMessage.setStatusDate(statusDate);
 
             // validates mandatory value.
             mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);

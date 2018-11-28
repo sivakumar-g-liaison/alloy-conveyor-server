@@ -46,6 +46,7 @@ public enum Messages {
     INVALID_PROTOCOL_ERROR_MESSAGE(" Protocol %s is not allowed for the processor type %s"),
     INVALID_PROCESS_TYPE_TO_UPDATE_DC(" Processor DC update is not supported for the processor type %s"),
     INVALID_PROCESS_DC(" Given Process DC %s is invalid"),
+    INVALID_FILE_LAST_MODIFICATION("Trigger file was last modified within threshold %s seconds."),
     INVALID_HEADER_INFORMATION("Content type and payload are not available in the given request"),
 
     // generic messages
