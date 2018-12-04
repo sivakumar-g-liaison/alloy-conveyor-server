@@ -73,3 +73,4 @@ export LOGSTASH_ROLLING_SIZE="250 MB"
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
+export MAPR_TICKETFILE_LOCATION=/var/mapr/longlivedticket

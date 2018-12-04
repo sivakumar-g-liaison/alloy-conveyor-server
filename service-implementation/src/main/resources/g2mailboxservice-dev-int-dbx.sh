@@ -62,3 +62,4 @@ export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,addre
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
+export MAPR_TICKETFILE_LOCATION=/var/mapr/longlivedticket
