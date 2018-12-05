@@ -20,6 +20,7 @@ import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
 import com.liaison.commons.messagebus.kafka.KafkaBroadcastConsumerProvider;
 import com.liaison.commons.messagebus.kafka.KafkaConsumerProvider;
 import com.liaison.commons.messagebus.kafka.LiaisonBroadcastKafkaConsumer;
+import com.liaison.commons.messagebus.kafka.LiaisonBroadcastKafkaConsumerFactory;
 import com.liaison.commons.messagebus.kafka.LiaisonConsumerManager;
 import com.liaison.commons.messagebus.kafka.LiaisonConsumerManagerImpl;
 import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
@@ -60,7 +61,6 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_D
 public class RelayModule extends AbstractModule {
 
     private static final Logger LOG = LogManager.getLogger(RelayModule.class);
-    private static final String MESSAGE_PROCESSOR = "messageProcessor";
     private static final String GROUP_ID = "groupId";
 
     @Provides
@@ -83,11 +83,9 @@ public class RelayModule extends AbstractModule {
             bind(KafkaTextMessageProcessor.class).annotatedWith(ServiceBrokerToMailbox.class).to(ServiceBrokerToMailboxProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(ServiceBrokerToDropbox.class).to(ServiceBrokerToDropboxProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(UserManagementToRelayDirectory.class).to(UserManagementToRelayDirectoryProcessor.class);
-            bind(KafkaTextMessageProcessor.class).annotatedWith(Names.named(MESSAGE_PROCESSOR)).to(KafkaMessageProcessor.class);
             bind(KafkaTextMessageProcessor.class).to(KafkaMessageProcessor.class);
 
             // Bindings for topic message
-            bind(LiaisonConsumer.class).annotatedWith(BroadcastConsumer.class).to(LiaisonBroadcastKafkaConsumer.class);
             bindConstant().annotatedWith(Names.named(GROUP_ID)).to(provideLiaisonConfiguration().getString(TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX) + "-" + UUIDGen.getCustomUUID());
             bind(new TypeLiteral<Consumer<String, String>>(){}).annotatedWith(BroadcastConsumer.class).toProvider(KafkaBroadcastConsumerProvider.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(BroadcastConsumer.class).to(MailboxTopicMessageProcessor.class);
@@ -102,6 +100,9 @@ public class RelayModule extends AbstractModule {
 
             install(new FactoryModuleBuilder().implement(LiaisonConsumer.class, LiaisonKafkaConsumer.class)
                     .build(LiaisonKafkaConsumerFactory.class));
+
+            install(new FactoryModuleBuilder().implement(LiaisonConsumer.class, LiaisonBroadcastKafkaConsumer.class)
+                    .build(LiaisonBroadcastKafkaConsumerFactory.class));
 
         } else {
             // When queue service usage is disabled, the mock is needed to avoid null binding

@@ -12,6 +12,8 @@
 * GMB-1159 - Make the sweeper multithreaded execution
 * GMB-1184 - Four corner logging is not working as expected
 * GMB-1185 - QS: Support for consumer(s) pause/resume
+* GMB-1164 - Add an initial pipeline ID info to workResult
+* GMB-1189 - Fix: QS broadcast consumer is not properly created
 * GMB-1164: Add an initial pipeline ID info to workResult
 * Property update : Added MAPR ticket file location in g2mailboxservice properties at all environment
 

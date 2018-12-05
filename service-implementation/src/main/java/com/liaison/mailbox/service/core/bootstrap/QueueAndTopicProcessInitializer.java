@@ -13,7 +13,6 @@ import com.google.inject.Key;
 import com.liaison.commons.messagebus.common.KafkaTextMessageProcessor;
 import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
 import com.liaison.commons.messagebus.kafka.LiaisonConsumerManager;
-import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumerFactory;
 import com.liaison.commons.messagebus.queue.LiaisonConsumer;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
 import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
@@ -144,7 +143,6 @@ public class QueueAndTopicProcessInitializer {
                 if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
                     try {
                         Injector injector = GuiceInjector.getInjector();
-                        LiaisonKafkaConsumerFactory liaisonKafkaConsumerFactory = injector.getInstance(LiaisonKafkaConsumerFactory.class);
 
                         // Service-Broker -> DropBox Worktickets
                         logger.info("Starting Dropbox Queue Listener with QS integration");
@@ -326,7 +324,7 @@ public class QueueAndTopicProcessInitializer {
                         broadcastConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
                                 mailboxTopicMessageConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, BroadcastConsumer.class));
+                                getKafkaTextMessageProcessor(injector, BroadcastConsumer.class), true);
 
                         logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener with QS integration");
 
@@ -360,9 +358,21 @@ public class QueueAndTopicProcessInitializer {
     private static void startConsumer(AsyncProcessThreadPool.AsyncProcessThreadPoolProcessorAvailability asyncProcessThreadPoolProcessorAvailability,
                                       Map<String, List<String>> consumerTopics,
                                       KafkaTextMessageProcessor kafkaTextMessageProcessor) {
+        startConsumer(asyncProcessThreadPoolProcessorAvailability, consumerTopics, kafkaTextMessageProcessor, false);
+    }
+
+
+    private static void startConsumer(AsyncProcessThreadPool.AsyncProcessThreadPoolProcessorAvailability asyncProcessThreadPoolProcessorAvailability,
+                                      Map<String, List<String>> consumerTopics,
+                                      KafkaTextMessageProcessor kafkaTextMessageProcessor, boolean isBroadcast) {
 
         LiaisonConsumerManager consumerManager = GuiceInjector.getInjector().getInstance(LiaisonConsumerManager.class);
-        LiaisonConsumer consumer = consumerManager.createConsumer(kafkaTextMessageProcessor);
+        LiaisonConsumer consumer;
+        if (isBroadcast) {
+            consumer = consumerManager.createBroadcastConsumer(kafkaTextMessageProcessor);
+        } else {
+            consumer = consumerManager.createConsumer(kafkaTextMessageProcessor);
+        }
         consumer.startConsumer(consumerTopics);
         consumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
     }
