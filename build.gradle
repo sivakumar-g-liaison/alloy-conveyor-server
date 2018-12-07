@@ -45,6 +45,7 @@ allprojects {
 
     repositories { 
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-releases' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-snapshots' }
         maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
         maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
@@ -75,6 +76,9 @@ allprojects {
                 //javassist:javassist:3.12.1.GA to org.javassist:javassist:3.18.1-GA
                 if (details.requested.group == 'javassist') {
                     details.useTarget 'org.javassist:javassist:3.18.1-GA'
+                }
+                if (details.requested.name == 'acl-commons-lib') {
+                    details.useTarget 'com.liaison.commons.acl:acl-commons-lib:8.2.0'
                 }
             }
 
