@@ -76,9 +76,6 @@ allprojects {
                 if (details.requested.group == 'javassist') {
                     details.useTarget 'org.javassist:javassist:3.18.1-GA'
                 }
-                if (details.requested.name == 'acl-commons-lib') {
-                    details.useTarget 'com.liaison.commons.acl:acl-commons-lib:8.2.0'
-                }
             }
 
             exclude module: 'sisu-guice'
