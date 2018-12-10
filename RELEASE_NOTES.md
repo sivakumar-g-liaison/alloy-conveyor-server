@@ -16,7 +16,7 @@
 * GMB-1189 - Fix: QS broadcast consumer is not properly created
 * GMB-1164: Add an initial pipeline ID info to workResult
 * Property update : Added MAPR ticket file location in g2mailboxservice properties at all environment
-* GQ-305: Support for Kafka consumer thread pool bleed
+* GQ-305: Add support for Kafka consumer thread pool bleed
 
 5.4.9
 ---------------
