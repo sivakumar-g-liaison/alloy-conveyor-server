@@ -39,9 +39,13 @@ import com.liaison.mailbox.service.queue.kafka.KafkaMessageProcessorMock;
 import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetryProcessor;
+import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
+import com.liaison.mailbox.service.queue.kafka.processor.InboundFileProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
 import com.liaison.mailbox.service.queue.kafka.processor.MailboxProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.MailboxTopicMessageProcessor;
+import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
+import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetryProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropboxProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
@@ -83,6 +87,8 @@ public class RelayModule extends AbstractModule {
             bind(KafkaTextMessageProcessor.class).annotatedWith(ServiceBrokerToMailbox.class).to(ServiceBrokerToMailboxProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(ServiceBrokerToDropbox.class).to(ServiceBrokerToDropboxProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(UserManagementToRelayDirectory.class).to(UserManagementToRelayDirectoryProcessor.class);
+            bind(KafkaTextMessageProcessor.class).annotatedWith(InboundFile.class).to(InboundFileProcessor.class);
+            bind(KafkaTextMessageProcessor.class).annotatedWith(RunningProcessorRetry.class).to(RunningProcessorRetryProcessor.class);
             bind(KafkaTextMessageProcessor.class).to(KafkaMessageProcessor.class);
 
             // Bindings for topic message
