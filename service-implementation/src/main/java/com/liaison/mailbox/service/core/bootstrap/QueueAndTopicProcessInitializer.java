@@ -420,6 +420,10 @@ public class QueueAndTopicProcessInitializer {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToMailbox.class));
         } else if (UserManagementToRelayDirectory.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, UserManagementToRelayDirectory.class));
+        } else if (InboundFile.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, InboundFile.class));
+        } else if (RunningProcessorRetry.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
         } else {
