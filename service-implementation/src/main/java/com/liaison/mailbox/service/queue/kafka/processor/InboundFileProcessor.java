@@ -23,6 +23,6 @@ public class InboundFileProcessor implements KafkaTextMessageProcessor {
 
     @Override
     public void logConsumeEvent(String message, String topic) {
-//Cannot log because there's no globalProcessId available
+        //Cannot log because there's no globalProcessId available
     }
 }
