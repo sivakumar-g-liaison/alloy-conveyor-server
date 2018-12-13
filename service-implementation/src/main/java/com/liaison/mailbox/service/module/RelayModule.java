@@ -100,7 +100,7 @@ public class RelayModule extends AbstractModule {
             bind(LiaisonProducer.class).to(LiaisonKafkaProducer.class);
             bind(new TypeLiteral<Consumer<String, String>>() {
             }).toProvider(KafkaConsumerProvider.class);
-            bind(ConsumerResource.class);
+            requestInjection(ConsumerResource.class);
             bind(LiaisonConsumerManager.class).to(LiaisonConsumerManagerImpl.class);
 
             install(new FactoryModuleBuilder().implement(StatusLogger.class, GlassLoggerService.class)
