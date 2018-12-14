@@ -29,7 +29,9 @@ import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueuePro
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectoryQueueProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
+import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
+import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
 import com.liaison.mailbox.service.queue.kafka.processor.UserManagementToRelayDirectory;
@@ -47,12 +49,15 @@ import java.util.List;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES;
@@ -346,6 +351,32 @@ public class QueueAndTopicProcessInitializer {
 
                         logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener with QS integration");
 
+                        logger.info("Starting INBOUND_FILE_QUEUE Listener with QS integration");
+
+                        // Read topics info from properties
+                        Map<String, List<String>> inboundFileConsumerTopics = getConsumerTopics(
+                                TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX,
+                                TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES);
+
+                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
+                                inboundFileConsumerTopics,
+                                getKafkaTextMessageProcessor(injector, InboundFile.class));
+
+                        logger.info("Started INBOUND_FILE_QUEUE Listener with QS integration");
+
+                        logger.info("Starting RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
+
+                        // Read topics info from properties
+                        Map<String, List<String>> runningProcessorRetryConsumerTopics = getConsumerTopics(
+                                TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX,
+                                TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
+
+                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
+                                runningProcessorRetryConsumerTopics,
+                                getKafkaTextMessageProcessor(injector, RunningProcessorRetry.class));
+
+                        logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
+
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
                         //There's no sense to keep app up and running if a consumer doesn't start
@@ -389,6 +420,10 @@ public class QueueAndTopicProcessInitializer {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToMailbox.class));
         } else if (UserManagementToRelayDirectory.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, UserManagementToRelayDirectory.class));
+        } else if (InboundFile.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, InboundFile.class));
+        } else if (RunningProcessorRetry.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
         } else {
