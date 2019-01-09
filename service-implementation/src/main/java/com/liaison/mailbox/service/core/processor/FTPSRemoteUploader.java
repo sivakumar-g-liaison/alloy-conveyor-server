@@ -24,6 +24,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUpl
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -67,6 +68,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
     protected void executeRequest() {
 
         G2FTPSClient ftpsRequest = null;
+        Object[] subFiles = null;
         try {
 
             //validates the local path
@@ -81,7 +83,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
             boolean recursiveSubdirectories = ftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(ftpUploaderStaticProperties.isDirectUpload());
 
-            Object[] subFiles = (this.canUseFileSystem())
+            subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
 
@@ -112,6 +114,7 @@ public class FTPSRemoteUploader extends AbstractRemoteUploader {
 
         } catch (Exception e) {
             LOGGER.error(constructMessage("Error occurred during ftp(s) upload", seperator, e.getMessage()), e);
+            logToLensForConnectingRemoteServer(subFiles, e);
             throw new RuntimeException(e);
         } finally {
             disconnect(ftpsRequest);

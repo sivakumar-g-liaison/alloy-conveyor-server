@@ -24,6 +24,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUp
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -66,6 +67,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
     protected void executeRequest() {
 
         G2SFTPClient sftpRequest = null;
+        Object[] subFiles = null;
         try {
 
             LOGGER.info(constructMessage("Start run"));
@@ -83,7 +85,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
             boolean recursiveSubdirectories = sftpUploaderStaticProperties.isRecurseSubDirectories();
             setDirectUpload(sftpUploaderStaticProperties.isDirectUpload());
 
-            Object[] subFiles = (this.canUseFileSystem())
+            subFiles = (this.canUseFileSystem())
                     ? getFilesToUpload(recursiveSubdirectories)
                     : getRelayFiles(recursiveSubdirectories);
 
@@ -109,6 +111,7 @@ public class SFTPRemoteUploader extends AbstractRemoteUploader {
 
         } catch (Exception e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
+            logToLensForConnectingRemoteServer(subFiles, e);
             throw new RuntimeException(e);
         } finally {
             if (sftpRequest != null) {

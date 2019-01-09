@@ -402,6 +402,23 @@ public abstract class AbstractRemoteUploader extends AbstractProcessor implement
     }
     
     /**
+     * This method is used to log the error message if the connection with remote server is not success
+     *  
+     * @param subFiles - Number of staged files
+     * @param ex       - Exception
+     */
+    public void logToLensForConnectingRemoteServer(Object[] subFiles, Exception ex) {
+
+        for (Object file : subFiles) {
+            if (file instanceof File) {
+                logToLens(ex.getMessage(), (File)file, ExecutionState.FAILED, ex);
+            } else {
+                logToLens(ex.getMessage(), (RelayFile)file, ExecutionState.FAILED, ex);
+            }
+        }
+    }
+    
+    /**
      * This method gets script execution timeout set at profile configuration.
      * If execution takes more than the default time, 
      * script executor uses this.

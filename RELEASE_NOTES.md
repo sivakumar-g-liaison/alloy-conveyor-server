@@ -18,6 +18,7 @@
 * Property update : Added MAPR ticket file location in g2mailboxservice properties at all environment
 * GQ-305: Add support for Kafka consumer thread pool bleed
 * GMB-1192 - Add QS consumers for inbound file and processor retry queues
+* GMB-1191 - For indirect relay Remote Uploader - errrors in file transfer are not reported again transaction involved - LENS status not updated
 
 5.4.9
 ---------------
