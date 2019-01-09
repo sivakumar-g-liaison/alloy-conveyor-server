@@ -1,4 +1,4 @@
-5.5.0-SNAPSHOT
+5.5.0
 ---------------
 * GMB-1176 - Research the way to check the stream is closed or not before posting to fs2 lib
 * GMB-1139 - Legacy Relay Processor should have securePayload default to = false
