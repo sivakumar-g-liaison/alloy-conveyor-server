@@ -19,6 +19,7 @@
 * GQ-305: Add support for Kafka consumer thread pool bleed
 * GMB-1192 - Add QS consumers for inbound file and processor retry queues
 * GMB-1191 - For indirect relay Remote Uploader - errrors in file transfer are not reported again transaction involved - LENS status not updated
+* GMB-1194 - Determine why message did not retry - Remote Uploader using Direct Upload	
 
 5.4.9
 ---------------

@@ -421,6 +421,7 @@ public class MailBoxService implements Runnable {
             //GLASS LOGGING CORNER 4 //
             if (null != glassMessage) {
                 glassMessage.setStatus(ExecutionState.FAILED);
+                glassMessage.setStatusDate(new Date());
                 if (directUpload && null != processorService) {
                     processorService.updateStagedFileStatus(workTicket, EntityStatus.FAILED.name());
                 }
