@@ -91,7 +91,7 @@
             "valueProvided":false,
             "defaultValue":"",
             "validationRules":{
-               "pattern":"\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$\/",
+               "pattern":"\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|1800000)$\/",
                "minLength":"",
                "maxLength":""
             }
@@ -107,7 +107,7 @@
             "valueProvided":false,
             "defaultValue":"",
             "validationRules":{
-               "pattern":"\/^[0-4]$\/",
+               "pattern":"\/^[0-5]$\/",
                "minLength":"",
                "maxLength":""
             }
