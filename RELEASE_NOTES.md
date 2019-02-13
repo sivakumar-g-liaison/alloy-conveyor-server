@@ -1,3 +1,7 @@
+5.5.1-SNAPSHOT
+---------------
+* GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
+
 5.5.0-SNAPSHOT
 ---------------
 * GMB-1176 - Research the way to check the stream is closed or not before posting to fs2 lib
