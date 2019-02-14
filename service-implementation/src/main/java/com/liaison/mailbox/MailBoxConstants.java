@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.enums.DeploymentType;
@@ -599,4 +602,7 @@ public interface MailBoxConstants {
     int MAX_IN_EXP_LIMIT = 900;
 
     String INITIAL_PIPELINE_ID = "INITIAL_PIPELINE_ID";
+    
+    Charset URL_ENCODING = StandardCharsets.UTF_8;
+    
 }

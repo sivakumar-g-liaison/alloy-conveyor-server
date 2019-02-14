@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -198,6 +199,13 @@ public class DropboxStagedFilesService extends DropboxBaseService {
             if (MailBoxUtil.isEmpty(stagedFileDTO.getSpectrumUri())) {
                 throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Payload URI", Response.Status.CONFLICT);
             }
+            
+            try {
+                URLDecoder.decode(stagedFileDTO.getName(), MailBoxConstants.URL_ENCODING.displayName());
+            } catch (Exception e) {
+                throw new MailBoxServicesException(Messages.INVALID_FILE_NAME, Response.Status.BAD_REQUEST);
+            }
+            
             // validation ends
 
 			StagedFileDAO dropboxDao = new StagedFileDAOBase();
