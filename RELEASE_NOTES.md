@@ -1,3 +1,10 @@
+5.5.1
+---------------
+* GMB-1198 - Improve logic for picking HTTP sync/async Processor
+* GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
+* GMB-1159 - Updated MultiSweeper thread logic and Makes the sweeper multithreaded execution
+* GWUD-166 - File name contains percentage breaks the UI functionality
+
 5.5.0
 ---------------
 * GMB-1176 - Research the way to check the stream is closed or not before posting to fs2 lib
@@ -20,6 +27,14 @@
 * GMB-1192 - Add QS consumers for inbound file and processor retry queues
 * GMB-1191 - For indirect relay Remote Uploader - errrors in file transfer are not reported again transaction involved - LENS status not updated
 * GMB-1194 - Determine why message did not retry - Remote Uploader using Direct Upload	
+
+5.4.11
+---------------
+GMB-1203 - do not set the headers when the http content-type is application/x-www-form-urlencoded
+
+5.4.10
+---------------
+* GMB-1170 - Transaction delivered to Liaison SFTP, deleted, but the event is still Ready for Pickup
 
 5.4.9
 ---------------

@@ -308,6 +308,22 @@ public abstract class BaseServiceTest {
         procRequestDTO.setProcessor(procDTO);
         return procRequestDTO;
     }
+    
+    /**
+     * To construct http sycn processor property for revice operation.
+     * @param guid
+     * @param mbxDTO
+     * @return
+     * @throws IOException
+     */
+    public ReviseProcessorRequestDTO constructReviseHTTPSyncProcessorDTO(String guid, MailBoxDTO mbxDTO) throws IOException {
+
+        ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
+        ProcessorDTO procDTO = setHttpSyncProcessorDTO(guid, mbxDTO);
+        constructHttpProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
 
 	/**
      * Construct dummy mailbox DTO for testing.
@@ -354,6 +370,35 @@ public abstract class BaseServiceTest {
         constructHttpProcessorProperties(procDTO);
         procRequestDTO.setProcessor(procDTO);
         return procRequestDTO;
+    }
+
+    /**
+     * Construct dummy Sync Processor DTO for testing.
+     *
+     * @param uniqueValue
+     * @return
+     * @throws IOException
+     */
+    public AddProcessorToMailboxRequestDTO constructHttpSyncProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) throws IOException {
+
+        AddProcessorToMailboxRequestDTO procRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorDTO procDTO = setHttpSyncProcessorDTO(mailboxGuid, mbxDTO);
+        constructHttpProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+    
+    private ProcessorDTO setHttpSyncProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) {
+
+        ProcessorDTO procDTO = new ProcessorDTO();
+        procDTO.setMailboxName(mbxDTO.getName());
+        procDTO.setLinkedMailboxId(mailboxGuid);
+        procDTO.setName("testProcessor" + System.currentTimeMillis());
+        procDTO.setStatus("ACTIVE");
+        procDTO.setType("HTTPSYNCPROCESSOR");
+        procDTO.setProtocol("HTTPSYNCPROCESSOR");
+        procDTO.setClusterType(MailBoxUtil.CLUSTER_TYPE);
+        return procDTO;
     }
 
     private ProcessorDTO setHttpProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) {

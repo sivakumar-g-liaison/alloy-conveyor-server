@@ -250,7 +250,8 @@ public class HTTPListenerResource extends AuditedResource {
 					} else {
 
 						try (InputStream inputStream = new ByteArrayInputStream(new Gson().toJson(formValues).getBytes())) {
-                            workTicket.getHeaders().putAll(formValues);
+                            //GMB-1203
+						    //workTicket.getHeaders().putAll(formValues);
                             StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
                             logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
                         }
@@ -492,7 +493,8 @@ public class HTTPListenerResource extends AuditedResource {
 					} else {
 
 						try (InputStream inputStream = new ByteArrayInputStream(new Gson().toJson(formValues).getBytes())) {
-							workTicket.getHeaders().putAll(formValues);
+							//GMB-1203
+						    //workTicket.getHeaders().putAll(formValues);
 							StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
 							logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
 						}

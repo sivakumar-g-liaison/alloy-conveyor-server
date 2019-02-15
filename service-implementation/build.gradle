@@ -77,9 +77,12 @@ allprojects {
 	 }
 }
 
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/publish-service.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/war.gradle')
-apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/consolidate-testresults.gradle')
+// reference remote url
+def gradleConfBase = 'http://nexus.liaison.dev/content/repositories/g2-releases/com/liaison/g2/gradle'
+def gradleConfVers = '3.1.0'
+apply from: "${gradleConfBase}/publish-service/${gradleConfVers}/publish-service-${gradleConfVers}.gradle"
+apply from: "${gradleConfBase}/war/${gradleConfVers}/war-${gradleConfVers}.gradle"
+apply from: "${gradleConfBase}/consolidate-testresults/${gradleConfVers}/consolidate-testresults-${gradleConfVers}.gradle"
 
 war {
     baseName = rootProject.name

@@ -873,42 +873,47 @@ public class ProcessorConfigurationService {
 									throws IllegalArgumentException, IllegalAccessException, IOException { 
 		
 		Map<String, String> httpListenerProperties = new HashMap<String, String>();
-		for (HTTPListenerHelperDTO httpListenerDetail : httpListnerDetailsDTOs) {
-			
-			Protocol protocol = Protocol.findByCode(httpListenerDetail.getProcsrProtocol());
-			ProcessorType procsrType = ProcessorType.findByCode(httpListenerDetail.getProcsrType());
-			// retrieve required properties
-			HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(httpListenerDetail.getProcsrPropertyJson(), protocol, procsrType, httpListenerDetail.getDynamicProperties());
-			String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
-			boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
-			boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
-			boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
-			int connectionTimeout = httpListenerStaticProperties.getConnectionTimeout();
-			int socketTimeout = httpListenerStaticProperties.getSocketTimeout();
-			
-			httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerDetail.getServiceInstanceId());
-			httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, httpListenerDetail.getTenancyKey());
-			httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
-			httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
-			httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, httpListenerDetail.getMbxId());
-			httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, httpListenerDetail.getMbxName());
-			httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
-			httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
-			httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
-			httpListenerProperties.put(MailBoxConstants.SOCKET_TIMEOUT, String.valueOf(socketTimeout));
-			httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
-			httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
-			if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
-				Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
-				httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));
-			}
-			if (!MailBoxUtil.isEmpty(pipeLineId)) {
-				httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
-			}
-			break;
-		}
-		return httpListenerProperties;
-	}
+        for (HTTPListenerHelperDTO httpListenerDetail : httpListnerDetailsDTOs) {
+
+            if (httpListenerDetail.getProcsrStatus().equals(EntityStatus.ACTIVE.value())) {
+                Protocol protocol = Protocol.findByCode(httpListenerDetail.getProcsrProtocol());
+                ProcessorType procsrType = ProcessorType.findByCode(httpListenerDetail.getProcsrType());
+                // retrieve required properties
+                HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(httpListenerDetail.getProcsrPropertyJson(), protocol, procsrType, httpListenerDetail.getDynamicProperties());
+                String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
+                boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
+                boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+                boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
+                int connectionTimeout = httpListenerStaticProperties.getConnectionTimeout();
+                int socketTimeout = httpListenerStaticProperties.getSocketTimeout();
+
+                httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerDetail.getServiceInstanceId());
+                httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, httpListenerDetail.getTenancyKey());
+                httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+                httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
+                httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, httpListenerDetail.getMbxId());
+                httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, httpListenerDetail.getMbxName());
+                httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
+                httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
+                httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
+                httpListenerProperties.put(MailBoxConstants.SOCKET_TIMEOUT, String.valueOf(socketTimeout));
+                httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
+                httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
+                if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
+                    Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
+                    httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));
+                }
+                if (!MailBoxUtil.isEmpty(pipeLineId)) {
+                    httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
+                }
+                break;
+            } else if (httpListenerDetail.getProcsrStatus().equals(EntityStatus.INACTIVE.value())) {
+                httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
+                httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
+            }
+        }
+        return httpListenerProperties;
+    }
 
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async

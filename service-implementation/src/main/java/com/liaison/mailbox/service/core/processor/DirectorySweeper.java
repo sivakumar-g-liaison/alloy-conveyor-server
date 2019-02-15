@@ -201,14 +201,23 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
      */
     private void asyncSweeper(List<WorkTicket> workTickets, SweeperPropertiesDTO staticProp) {
 
-        for (WorkTicket workTicket : workTickets) {
-            ThreadPoolExecutor executorService = SweeperProcessThreadPool.getExecutorService();
-            if (IS_SWEEPER_MULTI_THREAD_ENABLED && executorService.getActiveCount() < executorService.getCorePoolSize()) {
+        ThreadPoolExecutor executorService = SweeperProcessThreadPool.getExecutorService();
+        if (IS_SWEEPER_MULTI_THREAD_ENABLED) {
+            if (executorService.getActiveCount() < executorService.getCorePoolSize()) {
                 LOGGER.info(constructMessage("Number of active thread count {}"), SweeperProcessThreadPool.getExecutorService().getActiveCount());
-                SweeperProcessThreadPool.getExecutorService().submit(new SweeperProcessorService(workTicket, configurationInstance, staticProp));
-            }  else {
+                for (WorkTicket workTicket : workTickets) {
+                    SweeperProcessThreadPool.getExecutorService().submit(new SweeperProcessorService(workTicket, configurationInstance, staticProp));
+                }
+            } else {
                 LOGGER.info("Active thread count reached maximum core pool size");
-                new SweeperProcessorService(workTicket, configurationInstance,  staticProp).doProcess(workTicket);
+                for (WorkTicket workTicket : workTickets) {
+                    new SweeperProcessorService(workTicket, configurationInstance, staticProp).doProcess(workTicket);
+                }
+            }
+        } else {
+            LOGGER.info("Multisweeper thread isn't enabled and using async thread");
+            for (WorkTicket workTicket : workTickets) {
+                new SweeperProcessorService(workTicket, configurationInstance, staticProp).doProcess(workTicket);
             }
         }
     }
