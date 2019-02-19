@@ -416,6 +416,10 @@ public interface MailBoxConstants {
     // Timeout range min and max
     int TIMEOUT_RANGE_MIN = 0;
     int TIMEOUT_RANGE_MAX = 60000;
+    
+    // Retry Interval range min and max
+    int RETRY_INTERVAL_MIN_VALUE = 1;
+    int RETRY_INTERVAL_MAX_VALUE = 1800000;
 
     int SOCKET_TIMEOUT_MIN = 0;
     int SOCKET_TIMEOUT_MAX = 300000;

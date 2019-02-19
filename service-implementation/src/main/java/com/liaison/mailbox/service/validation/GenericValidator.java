@@ -259,7 +259,7 @@ public class GenericValidator {
                 errorMessage.append(annotationDetails.errorMessage());
             }
 
-            if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_INTERVAL) && !isBetweenRange(value))) {
+            if ((annotationDetails.type().equals(MailBoxConstants.PROPERTY_RETRY_INTERVAL) && !isValidRetryIntervalValue(value))) {
                 isValidPattern = false;
                 errorMessage.append(annotationDetails.errorMessage());
             }
@@ -292,7 +292,7 @@ public class GenericValidator {
          return value.toString().toLowerCase().endsWith(".inp");
     }
     
-	/**
+    /**
 	 * Method to validate whether given string is valid retryAttempt value
 	 *
 	 * @param value retry attempt value
@@ -313,6 +313,17 @@ public class GenericValidator {
 	    int range = Integer.valueOf(value.toString()).intValue();
 		return range <= MailBoxConstants.TIMEOUT_RANGE_MAX  && range >= MailBoxConstants.TIMEOUT_RANGE_MIN;
 	}
+	
+    /**
+     * Method to validate whether given string is valid retryInterval value
+     *
+     * @param value retry interval value
+     * @return boolean
+     */
+    private boolean isValidRetryIntervalValue (Object value) {
+        int range = Integer.valueOf(value.toString()).intValue();
+        return range <= MailBoxConstants.RETRY_INTERVAL_MAX_VALUE  && range >= MailBoxConstants.RETRY_INTERVAL_MIN_VALUE;
+    }
 
 	/**
 	 * Method to validate whether given string is valid timeout value

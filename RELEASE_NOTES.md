@@ -1,7 +1,13 @@
+5.5.2
+---------------
+* GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
+   * Added retry interval validation pattern for downloader processors(ftp, ftps, sftp).
+
 5.5.1
 ---------------
 * GMB-1198 - Improve logic for picking HTTP sync/async Processor
 * GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
+    * Added retry interval validation while processor creation and revision.
 * GMB-1159 - Updated MultiSweeper thread logic and Makes the sweeper multithreaded execution
 * GWUD-166 - File name contains percentage breaks the UI functionality
 
