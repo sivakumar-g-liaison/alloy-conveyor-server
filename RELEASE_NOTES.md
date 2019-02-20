@@ -1,3 +1,8 @@
+5.5.3
+---------------
+* GMB-1208 - Unable to create/edit a processor when the retry interval is not set.
+   * Updated retry interval minimum value range is 0.
+
 5.5.2
 ---------------
 * GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
