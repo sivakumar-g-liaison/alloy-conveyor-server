@@ -11,7 +11,7 @@
             <form name="formSearchMbx" novalidate="">
                 <div class="col-md-3">
                     <label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
-                                                            name="name" ng-pattern="userInputPattern" ng-minLength=5
+                                                            name="name" ng-pattern="mailboxInputPattern" ng-minLength=5
                                                             ng-maxLength=80 class="form-control"/>
                     <div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
                         <span id="mbx-search-nameInvalid-pattern" class="customHide"

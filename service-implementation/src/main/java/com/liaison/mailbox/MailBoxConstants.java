@@ -34,7 +34,7 @@ public interface MailBoxConstants {
 
     /**Name Format. */
     String NAME_PATTERN = "NamePattern";
-    String NAME_INPUT_PATTERN = "^[a-zA-Z0-9\\-:_.,\\s]+$";
+    String NAME_INPUT_PATTERN = "(^[a-zA-Z0-9\\-:_.,\\s])+([[a-zA-Z0-9\\-:_.,\\s@&]*]*)+$";
 
     // Key descriminator values
     /** File datetime format. */

@@ -1,6 +1,8 @@
 5.7.0-SNAPSHOT
 ---------------
 * GMB-1205 - Duplicate Stuck processor notifications
+* GMB-1206 - Modify the pattern of the Mailbox and Processor Names
+* Upgraded the acl commons libraries and sso properties.
 
 5.6.0-SNAPSHOT
 ---------------
@@ -8,7 +10,6 @@
 * GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
 * GMB-1159 - Updated MultiSweeper thread logic and Makes the sweeper multithreaded execution
 * GWUD-166 - File name contains percentage breaks the UI functionality
-* Upgraded the acl commons libraries and sso properties.
 
 5.5.0-SNAPSHOT
 ---------------
