@@ -362,6 +362,7 @@ public class ProcessorExecutionStateDAOBase extends GenericDAOBase<ProcessorExec
                     .setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
                     .setParameter(MODIFIED_DATE, date)
                     .setParameter(ORIGINATING_DC, DATACENTER_NAME)
+                    .setParameter(MailBoxConstants.CLUSTER_TYPE, MailBoxUtil.CLUSTER_TYPE)
                     .getResultList();
         } finally {
             if (null != entityManager) {

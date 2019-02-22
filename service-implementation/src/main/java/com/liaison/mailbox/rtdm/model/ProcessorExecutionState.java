@@ -12,6 +12,7 @@ package com.liaison.mailbox.rtdm.model;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.MailBoxConstants;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -64,9 +65,11 @@ import java.util.Date;
                         + " ORDER BY executionState.lastExecutionDate desc"),
         @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSOR_WITH_TRIGGERED_PERIOD,
                 query = "SELECT executionState FROM ProcessorExecutionState executionState"
+                        + " INNER JOIN executionState.processors runtimeProcessors"
                         + " WHERE executionState.executionStatus = :" + ProcessorExecutionStateDAO.EXEC_STATUS
                         + " AND executionState.modifiedDate <= :" + ProcessorExecutionStateDAO.MODIFIED_DATE
-                        + " AND executionState.originatingDc = :" + ProcessorExecutionStateDAO.ORIGINATING_DC)
+                        + " AND executionState.originatingDc = :" + ProcessorExecutionStateDAO.ORIGINATING_DC
+                        + " AND runtimeProcessors.clusterType = :" + MailBoxConstants.CLUSTER_TYPE)
 })
 public class ProcessorExecutionState implements Identifiable {
 

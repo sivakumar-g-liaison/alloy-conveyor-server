@@ -1,3 +1,7 @@
+5.7.0-SNAPSHOT
+---------------
+* GMB-1205 - Duplicate Stuck processor notifications
+
 5.6.0-SNAPSHOT
 ---------------
 * GMB-1198 - Improve logic for picking HTTP sync/async Processor
