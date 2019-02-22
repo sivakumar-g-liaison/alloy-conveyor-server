@@ -8,6 +8,7 @@
 * GMB-1194 - Updated pattern validation for Determine why message did not retry - Remote Uploader using Direct Upload
 * GMB-1159 - Updated MultiSweeper thread logic and Makes the sweeper multithreaded execution
 * GWUD-166 - File name contains percentage breaks the UI functionality
+* Upgraded the acl commons libraries and sso properties.
 
 5.5.0-SNAPSHOT
 ---------------
