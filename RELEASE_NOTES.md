@@ -4,6 +4,7 @@
 * GMB-1206 - Modify the pattern of the Mailbox and Processor Names
 * Upgraded the acl commons libraries and sso properties.
 * GSB-3413 - Legacy Gateway Remote Uploader won't let me IncludeFiles P4*
+* GGT-1626 - License report generation for dependencies
 
 5.6.0-SNAPSHOT
 ---------------

@@ -50,6 +50,7 @@ allprojects {
         maven { url 'http://nexus.liaison.dev/content/repositories/central' }
         maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
         maven { url 'http://nexus.liaison.dev/content/repositories/mapr' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/gradle-plugins' }
     }
 
     configurations {
@@ -85,6 +86,7 @@ allprojects {
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/slf4j-fix.gradle')
+apply from: file('gradle/license.gradle')
 apply from: urlCache.get('https://at4d-vpgitlab.liaison.dev/g2/gradle-configuration/raw/release/3.x.x/sonarqube.gradle')
 
 task showMeCache << {
