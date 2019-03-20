@@ -94,6 +94,8 @@ public class HTTPListenerResource extends AuditedResource {
     private static final String HTTP_ASYNC_REQUEST_FAILED = "HTTP Async Request Failed: ";
     private static final String HTTP_SYNC_REQUEST_FAILED = "HTTP Sync Request Failed: ";
 
+    private static final int INVALID_PAYLOAD_SIZE = -1;
+
     private Map<String, List<String>> formValues = null;
 
     private void setFormValues(Map<String, List<String>> formValues) {
@@ -154,6 +156,7 @@ public class HTTPListenerResource extends AuditedResource {
                 //GlobalProcess ID
                 String globalProcessId = UUIDGen.getCustomUUID();
                 String pipelineId = null;
+                boolean loggedProcessing = false;
 
                 // Fish tag global process id
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -237,9 +240,13 @@ public class HTTPListenerResource extends AuditedResource {
                     glassMessage.setStatusDate(statusDate);
                     // Log status running
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received", MailBoxConstants.HTTPSYNCPROCESSOR);
-                    new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
-                    //GLASS LOGGING - PROCESSING
-
+                    
+                    if (INVALID_PAYLOAD_SIZE != glassMessage.getInSize()) {
+                        //GLASS LOGGING - PROCESSING WHEN THE PAYLOAD SIZE AVAILABLE
+                         new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
+                         loggedProcessing = true;
+                     } 
+                    
                     // persist payload in spectrum
 					if (formValues == null) {
 
@@ -255,6 +262,13 @@ public class HTTPListenerResource extends AuditedResource {
                             logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
                         }
 					}
+					
+                    if (!loggedProcessing) {
+                        //GLASS LOGGING - PROCESSING WHEN THE PAYLOAD SIZE AVAILABLE AFTER THE PAYLOAD PERSIST
+                        glassMessage.setInSize(workTicket.getPayloadSize());
+                        new TransactionVisibilityClient().logToGlass(glassMessage);
+                        loggedProcessing = true;                        
+                    }
 
                     Response syncResponse = syncProcessor.processRequest(workTicket, httpListenerProperties, request.getContentType(), glassMessage);
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
@@ -297,7 +311,8 @@ public class HTTPListenerResource extends AuditedResource {
                             request,
                             pipelineId,
                             isMailboxIdAvailable,
-                            mailboxInfo);
+                            mailboxInfo,
+                            loggedProcessing);
 
                 } finally {
                     ThreadContext.clearMap();
@@ -400,6 +415,7 @@ public class HTTPListenerResource extends AuditedResource {
                 //globalProcessId
                 String globalProcessId = UUIDGen.getCustomUUID();
                 String pipelineId = null;
+                boolean loggedProcessing = false;
 
                 //Fix for GMB-502
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId);
@@ -479,8 +495,12 @@ public class HTTPListenerResource extends AuditedResource {
                     glassMessage.setStatusDate(statusDate);
                     // Log status running
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async Request received", MailBoxConstants.HTTPASYNCPROCESSOR);
-                    new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
-                    //GLASS LOGGING - PROCESSING
+                    
+                    if (INVALID_PAYLOAD_SIZE != glassMessage.getInSize()) {
+                       //GLASS LOGGING - PROCESSING WHEN THE PAYLOAD SIZE AVAILABLE
+                        new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
+                        loggedProcessing = true;
+                    }                    
 
                     // persist payload in spectrum
 					if (formValues == null) {
@@ -498,6 +518,13 @@ public class HTTPListenerResource extends AuditedResource {
 						}
 					}
 
+					if (!loggedProcessing) {
+					    //GLASS LOGGING - PROCESSING WHEN THE PAYLOAD SIZE AVAILABLE AFTER THE PAYLOAD PERSIST
+					    glassMessage.setInSize(workTicket.getPayloadSize());
+					    new TransactionVisibilityClient().logToGlass(glassMessage);
+					    loggedProcessing = true;					    
+					}
+					
 					workTicket.setProcessMode(ProcessMode.ASYNC);
                     //persists workticket
                     StorageUtilities.persistWorkTicket(workTicket, httpListenerProperties);
@@ -524,7 +551,8 @@ public class HTTPListenerResource extends AuditedResource {
                             request,
                             pipelineId,
                             isMailboxIdAvailable,
-                            mailboxInfo);
+                            mailboxInfo,
+                            loggedProcessing);
                 } finally {
                     ThreadContext.clearMap();
 				}
@@ -712,7 +740,8 @@ public class HTTPListenerResource extends AuditedResource {
                                     HttpServletRequest request,
                                     String pipelineId,
                                     boolean isMailboxIdAvailable,
-                                    String mailboxInfo) {
+                                    String mailboxInfo,
+                                    boolean loggedProcessing) {
 
         GlassMessage glassMessage  = constructGlassMessage(
                 request,
@@ -736,6 +765,8 @@ public class HTTPListenerResource extends AuditedResource {
             glassMessage.setMailboxName(mailboxInfo);
         }
 
+        glassMessage.setArrivalTime(!loggedProcessing);
+        
         //logs activity msg
         glassMessage.logProcessingStatus(
                 StatusType.ERROR,
