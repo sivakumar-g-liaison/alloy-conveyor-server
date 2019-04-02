@@ -18,6 +18,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.sweeper.helper.RelayWildcardFileFilter;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ConditionalSweeperPropertiesDTO;
@@ -28,7 +29,9 @@ import com.liaison.mailbox.service.glass.util.GlassMessage;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -39,7 +42,9 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -133,13 +138,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             }
 
             // get trigger filename from static properties
-            String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile())
-                    ? MailBoxConstants.TRIGGER_FILE_REGEX
-                    : staticProp.getTriggerFile();
+            String triggerFileName = getTriggerFile(inputLocation, staticProp.getTriggerFile(), staticProp.getIncludeFile());
             this.setTriggerFilePath(inputLocation + File.separator + triggerFileName);
 
             Path triggerFilePath = Paths.get(triggerFileNameWithPath);
-            if (Files.exists(triggerFilePath)) {
+            if (!MailBoxUtil.isEmpty(triggerFileName) && Files.exists(triggerFilePath)) {
                 if (MailBoxUtil.validateLastModifiedTolerance(triggerFilePath)) {
                     LOGGER.warn(constructMessage("Trigger file is modified within the tolerance limit {} seconds and it will be picked up in the next iteration after the threshold limit"), String.valueOf(MailBoxUtil.CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE)));
                     return;
@@ -173,6 +176,37 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             // clear the context
             ThreadContext.clearMap();
         }
+    }
+    
+    /**
+     * This method is used to get the trigger file with wild card pattern.
+     * 
+     * @param inputLocation
+     * @param triggerFileName
+     * @param includeFileName
+     * @return
+     */
+    private String getTriggerFile(String inputLocation, String triggerFileName, String includeFileName) {
+        // if trigger name pattern is not empty check with wild card pattern and return last updated file name
+        // else return default 'trigger'
+        if (!MailBoxUtil.isEmpty(triggerFileName)) {
+            
+            String wildcards[] = {triggerFileName, !MailBoxUtil.isEmpty(includeFileName) ? includeFileName : MailBoxConstants.WILD_CARD_PATTERN};
+            FileFilter triggerFileFilter = new RelayWildcardFileFilter(wildcards);
+            List<File> triggerFileList = new ArrayList<File>();
+            
+            try {
+                triggerFileList = Files.list(Paths.get(inputLocation))
+                        .map(Path::toFile)
+                        .filter(file -> triggerFileFilter.accept(file))
+                        .sorted(LastModifiedFileComparator.LASTMODIFIED_REVERSE)
+                        .collect(Collectors.toList());
+            } catch (IOException ex) {
+                throw new RuntimeException("Error listing files in " +inputLocation, ex);
+            }
+            return !triggerFileList.isEmpty() ? triggerFileList.get(0).getName() : null;
+        } 
+        return MailBoxConstants.TRIGGER_FILE_REGEX;
     }
 
     /**
@@ -213,8 +247,11 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             LOGGER.warn("javascript filter api returned empty results");
         }
 
-        // deleting .INP trigger file after swept the files in the list.
-        delete(triggerFileNameWithPath);
+        String deleteTriggerFile = !MailBoxUtil.isEmpty(staticProp.getTriggerFile()) ? staticProp.getTriggerFile() : "";
+        // deleting .INP trigger file after swept the files in the list.  Except wild card pattern trigger file if it is empty other are deleted.
+        if (!deleteTriggerFile.contains(MailBoxConstants.WILD_CARD_PATTERN) || !filePathList.isEmpty()) {
+            delete(triggerFileNameWithPath);
+        }
     }
     
     /**
@@ -314,8 +351,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 
+        // Get include file pattern and trigger file pattern if both are having wild card patterns. 
+        String includeFileName = !MailBoxUtil.isEmpty(staticProp.getIncludeFile()) ? staticProp.getIncludeFile() : MailBoxConstants.WILD_CARD_PATTERN;
+        FileFilter wildcardFileFilter = new RelayWildcardFileFilter(includeFileName);
+        String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile()) ? MailBoxConstants.TRIGGER_FILE_REGEX : staticProp.getTriggerFile();
+        FileFilter triggerFileFilter = new RelayWildcardFileFilter(triggerFileName);
+        
         List<Path> result = new ArrayList<>();
-        listFiles(result, rootPath);
+        // Get payload files matching with include file filter and not matching trigger file 
+        listFiles(result, rootPath, wildcardFileFilter, triggerFileFilter);
 
         Map<String, String> map = new HashMap<>();
         for (Path path : result) {
@@ -419,7 +463,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
      *
      * @param rootPath Sweeper Payload Location
      */
-    private void listFiles(List<Path> files, Path rootPath) {
+    private void listFiles(List<Path> files, Path rootPath, FileFilter wildcardFileFilter, FileFilter triggerFileFilter) {
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
 
@@ -428,7 +472,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                 // Sweep Directories if the property is set to true
                 if (Files.isDirectory(file)) {
                     if (staticProp.isSweepSubDirectories()) {
-                        listFiles(files, file);
+                        listFiles(files, file, wildcardFileFilter, triggerFileFilter);
                     }
                     continue;
                 }
@@ -438,8 +482,9 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
                     continue;
                 }
                 
-                // To prevent adding trigger file
-                if (!triggerFileNameWithPath.equals(rootPath + File.separator + file.getFileName())) {
+                // To prevent adding trigger file and not support with trigger file pattern and support with include file pattern 
+                if (!triggerFileNameWithPath.equals(rootPath + File.separator + file.getFileName()) 
+                        && !triggerFileFilter.accept(file.toFile()) && wildcardFileFilter.accept(file.toFile())) {
                     files.add(file);
                 }
             }

@@ -6,6 +6,7 @@
 * GMB-1193 - LENS Inbound Size is -1 for messages posted with transfer-encoding = chunked header
 * GSB-3413 - Legacy Gateway Remote Uploader won't let me IncludeFiles P4*
 * GGT-1626 - License report generation for dependencies
+* GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename
 
 5.6.0-SNAPSHOT
 ---------------

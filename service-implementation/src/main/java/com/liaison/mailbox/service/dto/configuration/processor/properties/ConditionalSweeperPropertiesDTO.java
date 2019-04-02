@@ -35,6 +35,7 @@ public class ConditionalSweeperPropertiesDTO extends StaticProcessorPropertiesDT
     private String sort;
     private int staleFileTTL;
     private boolean sweepSubDirectories;
+    private String includeFile;
 
     public String getPipeLineID() {
         return pipeLineID;
@@ -133,5 +134,13 @@ public class ConditionalSweeperPropertiesDTO extends StaticProcessorPropertiesDT
 
     public void setSweepSubDirectories(boolean sweepSubDirectories) {
         this.sweepSubDirectories = sweepSubDirectories;
+    }
+
+    public String getIncludeFile() {
+        return includeFile;
+    }
+
+    public void setIncludeFile(String includeFile) {
+        this.includeFile = includeFile;
     }
 }

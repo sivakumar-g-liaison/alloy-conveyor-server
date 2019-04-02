@@ -31,6 +31,9 @@ public interface MailBoxConstants {
     int NUMBER_OF_FILES_THRESHOLD_MAX_VALUE = 25;
 
     int TOTAL_PERCENT = 100;
+    
+    /** include file pattern to accept all files*/
+    String WILD_CARD_PATTERN = "*";
 
     /**Name Format. */
     String NAME_PATTERN = "NamePattern";
