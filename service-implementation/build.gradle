@@ -173,7 +173,7 @@ dependencies {
 	runtime "com.oracle.jdbc:ojdbc8:${oracleVersion}"
 	compile "com.oracle.jdbc:ucp:${oracleVersion}"
 
-	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:3.+'
+	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:4.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
 	compile ('com.liaison.commons:lib_message_bus:17.+') {

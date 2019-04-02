@@ -7,6 +7,7 @@
 * GSB-3413 - Legacy Gateway Remote Uploader won't let me IncludeFiles P4*
 * GGT-1626 - License report generation for dependencies
 * GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename
+* Upgraded the log4j2 and log-stash-JSONlayout libraries.
 
 5.6.0-SNAPSHOT
 ---------------
