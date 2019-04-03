@@ -1,3 +1,6 @@
+5.7.0-SNAPSHOT
+---------------
+
 5.6.0
 ---------------
 * GMB-1205 - Duplicate Stuck processor notifications
