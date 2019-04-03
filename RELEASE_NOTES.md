@@ -1,4 +1,7 @@
-5.6.0-SNAPSHOT
+5.7.0-SNAPSHOT
+---------------
+
+5.6.0
 ---------------
 * GMB-1205 - Duplicate Stuck processor notifications
 * GMB-1206 - Modify the pattern of the Mailbox and Processor Names
