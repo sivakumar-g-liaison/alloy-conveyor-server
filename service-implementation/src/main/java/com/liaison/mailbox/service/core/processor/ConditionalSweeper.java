@@ -247,11 +247,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             LOGGER.warn("javascript filter api returned empty results");
         }
 
-        String deleteTriggerFile = !MailBoxUtil.isEmpty(staticProp.getTriggerFile()) ? staticProp.getTriggerFile() : "";
-        // deleting .INP trigger file after swept the files in the list.  Except wild card pattern trigger file if it is empty other are deleted.
-        if (!deleteTriggerFile.contains(MailBoxConstants.WILD_CARD_PATTERN) || !filePathList.isEmpty()) {
-            delete(triggerFileNameWithPath);
-        }
+        // deleting .INP trigger file after swept the files in the list.
+        delete(triggerFileNameWithPath);
     }
     
     /**

@@ -1,3 +1,7 @@
+5.6.1
+---------------
+* GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename - Updated Inprogress file name functionality.
+
 5.6.0
 ---------------
 * GMB-1205 - Duplicate Stuck processor notifications
