@@ -107,8 +107,8 @@
             }
          },
          {  
-            "name":"includeFile",
-            "displayName":"Include File",
+            "name":"includeFiles",
+            "displayName":"IncludeFiles",
             "type":"textarea",
             "value":"",
             "readOnly":false,

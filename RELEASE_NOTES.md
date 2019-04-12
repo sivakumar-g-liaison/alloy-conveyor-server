@@ -1,6 +1,15 @@
 5.7.0-SNAPSHOT
 ---------------
 
+5.6.2
+---------------
+* GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename.
+   * Updated Include file property and added include file field at legacy conditional sweeper. 
+
+5.6.1
+---------------
+* GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename - Updated Inprogress file name functionality.
+
 5.6.0
 ---------------
 * GMB-1205 - Duplicate Stuck processor notifications
