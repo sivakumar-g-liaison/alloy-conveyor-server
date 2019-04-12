@@ -62,7 +62,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_CONNECTION_TIMEOUT;
@@ -95,6 +99,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
     private List<Path> activeFiles = new ArrayList<>();
     private SweeperPropertiesDTO staticProp;
+    private String inputLocation;
 
     public void setStaticProp(SweeperPropertiesDTO staticProp) {
         this.staticProp = staticProp;
@@ -121,7 +126,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         try {
 
             // Get root from folders input_folder
-            String inputLocation = getPayloadURI();
+            inputLocation = getPayloadURI();
 
             // retrieve required properties
             this.setStaticProp((SweeperPropertiesDTO) getProperties());
@@ -205,8 +210,24 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         if (IS_SWEEPER_MULTI_THREAD_ENABLED) {
             if (executorService.getActiveCount() < executorService.getCorePoolSize()) {
                 LOGGER.info(constructMessage("Number of active thread count {}"), SweeperProcessThreadPool.getExecutorService().getActiveCount());
-                for (WorkTicket workTicket : workTickets) {
-                    SweeperProcessThreadPool.getExecutorService().submit(new SweeperProcessorService(workTicket, configurationInstance, staticProp));
+                List<Callable<String>> sweeperProcessorService = workTickets
+                                                                  .stream()
+                                                                  .map(workTicket -> new SweeperProcessorService(workTicket, configurationInstance, staticProp))
+                                                                  .collect(Collectors.toList());
+
+                try {
+                    List<Future<String>> results = SweeperProcessThreadPool.getExecutorService().invokeAll(sweeperProcessorService);
+                    results.forEach(result -> {
+                        try {
+                            result.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } catch (Exception e) {
+                    //We do handle the exceptions in the SweeperProcessorService
+                    //it wouldn't reach here unless it is interrupted
+                    throw new RuntimeException(e.getMessage(), e);
                 }
             } else {
                 LOGGER.info("Active thread count reached maximum core pool size");
@@ -220,6 +241,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 new SweeperProcessorService(workTicket, configurationInstance, staticProp).doProcess(workTicket);
             }
         }
+
+        if (staticProp.isDeleteEmptyDirectoryAfterSwept()) {
+            deleteEmptyDirectoryAfterSwept(Paths.get(inputLocation));
+        }
+        
     }
 
    /**
@@ -281,13 +307,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                     } else {
                         verifyAndDeletePayload(workTicket);
                     }
+                    
+                    if (staticProp.isDeleteEmptyDirectoryAfterSwept()) {
+                        LOGGER.debug("Entering into sync DeleteSubDirectories");
+                        deleteEmptyDirectoryAfterSwept(Paths.get(inputLocation));
+                    }
 
                 } catch (Exception e) {
                     logSweeperFailedStatus(workTicket, e);
                     throw new RuntimeException(e);
                 }
             }
-
         } catch (IOException e) {
             LOGGER.error(constructMessage("Error occurred in sync sweeper", seperator, e.getMessage()), e);
             throw new RuntimeException(e);
@@ -654,6 +684,28 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
     @Override
     public boolean isClassicSweeper() {
         return true;
+    }
+    
+    /**
+     * Method is used to delete the directories after swept.
+     *
+     * @param directoryName the empty sub directory to be deleted.
+     * @throws IOException
+     */
+    public static void deleteEmptyDirectoryAfterSwept(Path directoryName) {
+
+        File directory = directoryName.toFile();
+        File[] fileList = directory.listFiles();
+
+        if (fileList != null) {
+            for (File file : fileList) {
+                if (file.isDirectory()) {
+                    deleteEmptyDirectoryAfterSwept(file.toPath());
+                    boolean status = file.delete();
+                    LOGGER.info("Delete Empty Directory {},  Status- {}", file.getAbsolutePath(), status);
+                }
+            }
+        }
     }
 
 }

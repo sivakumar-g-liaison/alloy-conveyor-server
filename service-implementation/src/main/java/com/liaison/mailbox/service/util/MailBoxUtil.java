@@ -894,5 +894,4 @@ public class MailBoxUtil {
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / size))
                 .values();
     }
-
 }

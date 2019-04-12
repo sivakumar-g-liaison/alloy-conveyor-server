@@ -1,3 +1,7 @@
+5.6.3
+---------------
+* GMB-1211 - Ability to transfer folder structure via schedule
+
 5.6.2
 ---------------
 * GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename.

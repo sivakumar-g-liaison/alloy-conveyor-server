@@ -40,13 +40,14 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * To process sweeper files in multiple threads
  *
  * @author OFS
  */
-public class SweeperProcessorService implements Runnable {
+public class SweeperProcessorService implements Callable<String> {
     
     private static final Logger LOGGER = LogManager.getLogger(SweeperProcessorService.class);
 
@@ -70,14 +71,15 @@ public class SweeperProcessorService implements Runnable {
     }
 
     @Override
-    public void run() {
-        this.doProcess(getMessage());
+    public String call() {
+        return this.doProcess(getMessage());
     }
 
-    public void doProcess(WorkTicket workTicket) {
+    public String doProcess(WorkTicket workTicket) {
 
         final Date lensStatusDate = new Date();
-        
+
+        String returnValue = workTicket.getFileName();;
         try {
 
             //first corner timestamp
@@ -86,7 +88,7 @@ public class SweeperProcessorService implements Runnable {
             //Interrupt signal for async sweeper
             if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
                 LOGGER.warn("The executor is gracefully interrupted.");
-                return;
+                return returnValue;
             }
             
             LOGGER.debug("Persist workticket from workticket group to spectrum");
@@ -106,11 +108,13 @@ public class SweeperProcessorService implements Runnable {
                         " submitted for file ",
                         workTicket.getFileName());
                  verifyAndDeletePayload(workTicket);
+                 return returnValue;
             } finally {
                 ThreadContext.clearMap();
             }
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
+            return returnValue;
         }
     }
 
@@ -252,4 +256,5 @@ public class SweeperProcessorService implements Runnable {
     private void delete(String file) throws IOException {
         Files.deleteIfExists(Paths.get(file));
     }
- }
+
+}
