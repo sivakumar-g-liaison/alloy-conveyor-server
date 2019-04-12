@@ -1,5 +1,6 @@
-5.7.0-SNAPSHOT
+5.6.3
 ---------------
+* GMB-1211 - Ability to transfer folder structure via schedule
 
 5.6.2
 ---------------
@@ -20,7 +21,7 @@
 * GGT-1626 - License report generation for dependencies
 * GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename
 * Upgraded the log4j2 and log-stash-JSONlayout libraries.
-* GMB-1211 - Ability to transfer folder structure via schedule
+
 
 5.5.3
 ---------------
