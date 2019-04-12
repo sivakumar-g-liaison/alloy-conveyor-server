@@ -138,7 +138,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             }
 
             // get trigger filename from static properties
-            String triggerFileName = getTriggerFile(inputLocation, staticProp.getTriggerFile(), staticProp.getIncludeFile());
+            String triggerFileName = getTriggerFile(inputLocation, staticProp.getTriggerFile(), staticProp.getIncludeFiles());
             this.setTriggerFilePath(inputLocation + File.separator + triggerFileName);
 
             Path triggerFilePath = Paths.get(triggerFileNameWithPath);
@@ -247,11 +247,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             LOGGER.warn("javascript filter api returned empty results");
         }
 
-        String deleteTriggerFile = !MailBoxUtil.isEmpty(staticProp.getTriggerFile()) ? staticProp.getTriggerFile() : "";
-        // deleting .INP trigger file after swept the files in the list.  Except wild card pattern trigger file if it is empty other are deleted.
-        if (!deleteTriggerFile.contains(MailBoxConstants.WILD_CARD_PATTERN) || !filePathList.isEmpty()) {
-            delete(triggerFileNameWithPath);
-        }
+        // deleting .INP trigger file after swept the files in the list.
+        delete(triggerFileNameWithPath);
     }
     
     /**
@@ -352,7 +349,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
 
         // Get include file pattern and trigger file pattern if both are having wild card patterns. 
-        String includeFileName = !MailBoxUtil.isEmpty(staticProp.getIncludeFile()) ? staticProp.getIncludeFile() : MailBoxConstants.WILD_CARD_PATTERN;
+        String includeFileName = !MailBoxUtil.isEmpty(staticProp.getIncludeFiles()) ? staticProp.getIncludeFiles() : MailBoxConstants.WILD_CARD_PATTERN;
         FileFilter wildcardFileFilter = new RelayWildcardFileFilter(includeFileName);
         String triggerFileName = MailBoxUtil.isEmpty(staticProp.getTriggerFile()) ? MailBoxConstants.TRIGGER_FILE_REGEX : staticProp.getTriggerFile();
         FileFilter triggerFileFilter = new RelayWildcardFileFilter(triggerFileName);
