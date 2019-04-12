@@ -22,7 +22,6 @@
 * GMB-1210 - Ability to use wildcard pattern matching when using a Conditional Directory Sweeper - Trigger filename
 * Upgraded the log4j2 and log-stash-JSONlayout libraries.
 
-
 5.5.3
 ---------------
 * GMB-1208 - Unable to create/edit a processor when the retry interval is not set.
