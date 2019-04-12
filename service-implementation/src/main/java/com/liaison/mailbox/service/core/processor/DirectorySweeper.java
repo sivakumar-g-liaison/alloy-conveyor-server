@@ -701,7 +701,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             for (File file : fileList) {
                 if (file.isDirectory()) {
                     deleteEmptyDirectoryAfterSwept(file.toPath());
-                    file.delete();
+                    boolean status = file.delete();
+                    LOGGER.info("Delete Empty Directory {},  Status- {}", file.getAbsolutePath(), status);
                 }
             }
         }
