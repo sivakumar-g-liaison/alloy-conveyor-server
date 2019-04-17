@@ -236,7 +236,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 }
             }
         } else {
-            LOGGER.info("Multisweeper thread isn't enabled and using async thread");
+            LOGGER.debug("Multithreaded sweeper isn't enabled and using async thread");
             for (WorkTicket workTicket : workTickets) {
                 new SweeperProcessorService(workTicket, configurationInstance, staticProp).doProcess(workTicket);
             }

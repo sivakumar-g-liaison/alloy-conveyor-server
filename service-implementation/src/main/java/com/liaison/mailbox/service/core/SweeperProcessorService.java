@@ -90,30 +90,27 @@ public class SweeperProcessorService implements Callable<String> {
                 LOGGER.warn("The executor is gracefully interrupted.");
                 return returnValue;
             }
-            
+
             LOGGER.debug("Persist workticket from workticket group to spectrum");
             persistPayloadAndWorkticket(workTicket, staticProp);
             
             String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(wrkTcktToSbr).toString(2));
             SweeperQueueSendClient.post(wrkTcktToSbr, false);
-            
+
             //Fish tag global process id
             try {
                 ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
                 logToLens(workTicket, firstCornerTimeStamp, ExecutionState.PROCESSING, lensStatusDate);
-                LOGGER.info("Global PID",
-                        seperator,
-                        workTicket.getGlobalProcessId(),
-                        " submitted for file ",
-                        workTicket.getFileName());
-                 verifyAndDeletePayload(workTicket);
-                 return returnValue;
+                LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
+                verifyAndDeletePayload(workTicket);
+                return returnValue;
             } finally {
                 ThreadContext.clearMap();
             }
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
+            String msg = "Failed to sweeper the file "+ returnValue + " and the error message is " + e.getMessage();
+            LOGGER.error(msg, e);
             return returnValue;
         }
     }
@@ -240,11 +237,7 @@ public class SweeperProcessorService implements Callable<String> {
         } else {
             LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath);
         }
-        LOGGER.info("Global PID",
-                seperator,
-                wrkTicket.getGlobalProcessId(),
-                " deleted the file ",
-                wrkTicket.getFileName());
+        LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
     }
 
     /**

@@ -1,3 +1,7 @@
+5.6.4
+---------------
+* GMB-1211 - Ability to transfer folder structure via schedule - Logging Changes
+
 5.6.3
 ---------------
 * GMB-1211 - Ability to transfer folder structure via schedule
