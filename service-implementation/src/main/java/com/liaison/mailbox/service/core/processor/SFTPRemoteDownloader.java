@@ -224,9 +224,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								} else {
 									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 								}
-								sweepfileAndPostWorkticetToSB(downloadedFile, staticProp);
 							}
-							
+							sweepfileAndPostWorkticetToSB(new File(localFileDir + File.separatorChar + currentFileName), staticProp);
 							// Delete the remote files after successful download if user optioned for it
 							if (staticProp.getDeleteFiles()) {
 								sftpRequest.deleteFile(aFile);
