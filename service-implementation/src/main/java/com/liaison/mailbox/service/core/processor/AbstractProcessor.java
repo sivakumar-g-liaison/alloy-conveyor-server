@@ -1289,10 +1289,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public void sweepfileAndPostWorkticetToSB(File file, SFTPDownloaderPropertiesDTO staticProp) {
         
         try {
-            WorkTicket workTicket = constructWorkticket(file);
+            WorkTicket workTicket = constructWorkticket(file, staticProp);
             
-            SweeperPropertiesDTO sweeperPropertiesDTO = new SweeperPropertiesDTO();
-            sweeperPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+            LOGGER.info("Workticket Constructed and Global Processor ID is {}" + workTicket.getGlobalProcessId());
             
             persistWorkticket(workTicket, staticProp);
             
@@ -1308,6 +1307,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private void persistWorkticket(WorkTicket workTicket,
             SFTPDownloaderPropertiesDTO staticProp) throws FileNotFoundException, IOException {
         
+        LOGGER.info("Entered into Persist Workticket");
         File payloadFile = new File(workTicket.getPayloadURI());
         
         Map<String, String> properties = new HashMap<>();
@@ -1324,17 +1324,24 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
         }
+        
+        LOGGER.info("Completed payload Persist");
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
+        
     }
 
-    private WorkTicket constructWorkticket(File file) throws IllegalAccessException, IOException {
+    private WorkTicket constructWorkticket(File file, SFTPDownloaderPropertiesDTO staticProp) throws IllegalAccessException, IOException {
+        
+        LOGGER.info("Entered into construct Workticket");
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-        workTicket.setPipelineId(getPipeLineID());
+        workTicket.setPipelineId(staticProp.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(file.getAbsolutePath().toString());
+        
+        LOGGER.info("Constructed Workticket");
         return workTicket;
     }
 
