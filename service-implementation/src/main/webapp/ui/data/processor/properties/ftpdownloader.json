@@ -238,6 +238,67 @@
 	            "true"
 	        ]
 	      }
+	      {
+	        "name":"directSubmit",
+	        "displayName":"Direct Submit",
+	        "type":"select",
+	        "value":"false",
+	        "mandatory":true,
+	        "dynamic":false,
+	        "valueProvided":false,
+	        "defaultValue":"false",
+	        "validationRules":null,
+	        "options":[
+	            "false",
+	            "true"
+	        ]
+	      },
+	      {
+	         "name":"pipeLineID",
+	         "displayName":"Pipeline Id",
+	         "value":"",
+	         "type":"textarea",
+	         "readOnly":false,
+	         "mandatory":true,
+	         "dynamic":true,
+	         "valueProvided":false,
+	         "defaultValue":"",
+	         "validationRules":{
+	            "pattern":"",
+	            "minLength":"",
+	            "maxLength":"2048"
+	         }
+	      },
+	      {
+	         "name":"securedPayload",
+	         "displayName":"Secured Payload",
+	         "value":"true",
+	         "type":"select",
+	         "mandatory":true,
+	         "dynamic":true,
+	         "valueProvided":false,
+	         "defaultValue":"",
+	         "validationRules":null,
+	         "options":[
+	            "false",
+	            "true"
+	         ]
+	      },
+	      {
+	         "name":"lensVisibility",
+	         "displayName":"LENS Visibility",
+	         "value":"Invisible",
+	         "type":"select",
+	         "mandatory":true,
+	         "dynamic":true,
+	         "valueProvided":false,
+	         "defaultValue":"Invisible",
+	         "validationRules":null,
+	         "options":[
+	            "Invisible",
+	            "Visible"
+	         ]
+	      }
       ],
       "folderProperties":[
 		  {

@@ -40,6 +40,11 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean debugTranscript;
 	private int scriptExecutionTimeout;
 	private boolean includeSubDirectories;
+	private boolean directSubmit;
+	private String pipeLineID;
+	private boolean securedPayload;
+	private boolean lensVisibility;
+	private String processMode = "ASYNC";
 
 	public String getUrl() {
 		return url;
@@ -148,6 +153,36 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setIncludeSubDirectories(boolean includeSubDirectories) {
 	    this.includeSubDirectories = includeSubDirectories;
+	}
+	public boolean isDirectSubmit() {
+	    return directSubmit;
+	}
+	public void setDirectSubmit(boolean directSubmit) {
+	    this.directSubmit = directSubmit;
+	}
+	public String getPipeLineID() {
+	    return pipeLineID;
+	}
+	public void setPipeLineID(String pipeLineID) {
+	    this.pipeLineID = pipeLineID;
+	}
+	public boolean isSecuredPayload() {
+	    return securedPayload;
+	}
+	public void setSecuredPayload(boolean securedPayload) {
+	    this.securedPayload = securedPayload;
+	}
+	public boolean isLensVisibility() {
+	    return lensVisibility;
+	}
+	public void setLensVisibility(boolean lensVisibility) {
+	    this.lensVisibility = lensVisibility;
+	}
+	public String getProcessMode() {
+	    return processMode;
+	}
+	public void setProcessMode(String processMode) {
+	    this.processMode = processMode;
 	}
 
 }

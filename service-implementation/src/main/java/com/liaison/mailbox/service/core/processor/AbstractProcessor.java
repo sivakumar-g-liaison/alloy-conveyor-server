@@ -14,6 +14,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -34,6 +35,7 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.SweeperProcessorService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
@@ -43,6 +45,7 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -51,22 +54,30 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -1272,5 +1283,64 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
         }
         return pipelineId;
+    }
+    
+    @Override
+    public void sweepfileAndPostWorkticetToSB(File file, SFTPDownloaderPropertiesDTO staticProp) {
+        
+        try {
+            WorkTicket workTicket = constructWorkticket(file);
+            
+            SweeperPropertiesDTO sweeperPropertiesDTO = new SweeperPropertiesDTO();
+            sweeperPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+            
+            persistWorkticket(workTicket, staticProp);
+            
+            String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(wrkTcktToSbr).toString(2));
+            SweeperQueueSendClient.post(wrkTcktToSbr, false);
+
+        } catch (IllegalAccessException | IOException | JAXBException | JSONException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    private void persistWorkticket(WorkTicket workTicket,
+            SFTPDownloaderPropertiesDTO staticProp) throws FileNotFoundException, IOException {
+        
+        File payloadFile = new File(workTicket.getPayloadURI());
+        
+        Map<String, String> properties = new HashMap<>();
+
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+        
+        LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
+
+        // persist payload in spectrum
+        try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+        }
+
+        // persist the workticket
+        StorageUtilities.persistWorkTicket(workTicket, properties);
+    }
+
+    private WorkTicket constructWorkticket(File file) throws IllegalAccessException, IOException {
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+        workTicket.setPipelineId(getPipeLineID());
+        workTicket.setProcessMode(ProcessMode.ASYNC);
+        workTicket.setPayloadURI(file.getAbsolutePath().toString());
+        return workTicket;
+    }
+
+    @Override
+    public void sweepFilesAndPostWorkticketsToSB() {
+        // TODO Auto-generated method stub
+        
     }
 }
