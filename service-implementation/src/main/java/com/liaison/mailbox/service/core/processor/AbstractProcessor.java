@@ -83,6 +83,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1311,6 +1313,12 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         File payloadFile = new File(workTicket.getPayloadURI());
         
         Map<String, String> properties = new HashMap<>();
+        Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+        
+        if (!ttlMap.isEmpty()) {
+            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+        }
 
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
@@ -1334,12 +1342,47 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     private WorkTicket constructWorkticket(File file, SFTPDownloaderPropertiesDTO staticProp) throws IllegalAccessException, IOException {
         
+        Map<String, Object> additionalContext = new HashMap<String, Object>();
+
+        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile().toString());
+
+        BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+        LOGGER.debug("File attributes{}", attr);
+
         LOGGER.info("Entered into construct Workticket");
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
         workTicket.setPipelineId(staticProp.getPipeLineID());
+        LOGGER.debug("Pipeline ID {}", getPipeLineID());
+        
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(file.getAbsolutePath().toString());
+        
+        ISO8601Util dateUtil = new ISO8601Util();
+        FileTime createdTime = attr.creationTime();
+        LOGGER.debug("Created Time stamp {}", createdTime);
+        workTicket.setCreatedTime(new Date(createdTime.toMillis()));
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
+
+        FileTime modifiedTime = attr.lastModifiedTime();
+        LOGGER.debug("Modified Time stamp {}", modifiedTime);
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
+        
+        LOGGER.debug("Size stamp {}", attr.size());
+        workTicket.setPayloadSize(attr.size());
+        
+        String fileName = file.getName();
+        LOGGER.debug("Filename {}", fileName);
+        workTicket.setFileName(fileName);
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, fileName);
+
+        String folderName = file.getParent();
+        LOGGER.debug("Foldername {}", folderName);
+        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
+        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+
+        workTicket.setAdditionalContext(additionalContext);
         
         LOGGER.info("Constructed Workticket");
         return workTicket;
