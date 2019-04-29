@@ -1325,15 +1325,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
         properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
         
+        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
-
+        
         // persist payload in spectrum
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
         }
         
-        LOGGER.info("Completed payload Persist");
+        LOGGER.info("Completed payload Persist {}", workTicket.getPayloadURI() );
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
@@ -1353,6 +1356,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
         workTicket.setPipelineId(staticProp.getPipeLineID());
+        
+        LOGGER.info("Pipeline ID : {}", staticProp.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(file.getAbsolutePath().toString());
         
