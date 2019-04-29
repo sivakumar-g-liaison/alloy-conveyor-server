@@ -1353,8 +1353,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
         workTicket.setPipelineId(staticProp.getPipeLineID());
-        LOGGER.debug("Pipeline ID {}", getPipeLineID());
-        
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(file.getAbsolutePath().toString());
         
