@@ -70,6 +70,8 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import scala.tools.jline_embedded.internal.Configuration;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -82,7 +84,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
@@ -1392,8 +1397,48 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     }
 
     @Override
-    public void sweepFilesAndPostWorkticketsToSB() {
-        // TODO Auto-generated method stub
+    public void sweepFilesAndPostWorkticketsToSB(String targetLocation) {
+        LOGGER.info("targetLocation {}", targetLocation);
+        LOGGER.info("setup {}", configurationInstance.getDynamicProperties());
         
+        List<File> files = sweepFiles(targetLocation);
+        try {
+            sweepFilesToSB(files);
+        } catch (IllegalAccessException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sweepFilesToSB(List<File> files) throws IllegalAccessException, IOException {
+
+        SFTPDownloaderPropertiesDTO staticProp = ((SFTPDownloaderPropertiesDTO) getProperties());
+        for(File file:files) {
+            sweepfileAndPostWorkticetToSB(file, staticProp);
+        }
+    }
+
+    private List<File> sweepFiles(String targetLocation) {
+
+        LOGGER.info(constructMessage("Scanning Directory: {}"), targetLocation);
+        Path rootPath = Paths.get(targetLocation);
+        if (!Files.isDirectory(rootPath)) {
+            throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+        }
+
+        List<File> result = new ArrayList<>();
+        return listFiles(result, rootPath);
+    }
+
+    private List<File> listFiles(List<File> files, Path rootPath) {
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
+
+            for (Path file : stream) {
+                files.add(file.toFile());
+            }
+            return files;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

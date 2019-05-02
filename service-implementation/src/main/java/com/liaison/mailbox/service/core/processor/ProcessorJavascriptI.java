@@ -305,6 +305,6 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
     
     void sweepfileAndPostWorkticetToSB(File file, SFTPDownloaderPropertiesDTO staticProp);
     
-    void sweepFilesAndPostWorkticketsToSB();
+    void sweepFilesAndPostWorkticketsToSB(String targetLocation);
 
 }
