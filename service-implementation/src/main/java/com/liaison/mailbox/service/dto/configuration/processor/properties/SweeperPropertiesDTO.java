@@ -43,7 +43,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
     private int staleFileTTL;
     private String processMode = "ASYNC";
     private boolean allowEmptyFiles = true;
-    private boolean deleteEmptyDirectoryAfterSwept;
+    private boolean removeEmptyDirectoryAfterSwept;
 	
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -149,12 +149,12 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
         this.allowEmptyFiles = allowEmptyFiles;
     }
 
-    public boolean isDeleteEmptyDirectoryAfterSwept() {
-        return deleteEmptyDirectoryAfterSwept;
+    public boolean isRemoveEmptyDirectoryAfterSwept() {
+        return removeEmptyDirectoryAfterSwept;
     }
 
-    public void setDeleteEmptyDirectoryAfterSwept(boolean deleteEmptyDirectoryAfterSwept) {
-        this.deleteEmptyDirectoryAfterSwept = deleteEmptyDirectoryAfterSwept;
+    public void setRemoveEmptyDirectoryAfterSwept(boolean removeEmptyDirectoryAfterSwept) {
+        this.removeEmptyDirectoryAfterSwept = removeEmptyDirectoryAfterSwept;
     }
-    
+
 }

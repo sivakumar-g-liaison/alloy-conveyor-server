@@ -31,6 +31,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,6 +80,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
     private ConditionalSweeperPropertiesDTO staticProp;
     private String triggerFileNameWithPath;
+    private String triggerFileNameForWorkTicket;
 
     public void setStaticProp(ConditionalSweeperPropertiesDTO staticProp) {
         this.staticProp = staticProp;
@@ -86,6 +88,14 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
     public void setTriggerFilePath(String triggerFileNameWithPath) {
         this.triggerFileNameWithPath = triggerFileNameWithPath;
+    }
+
+    public void setTriggerFileNameForWorkTicket(String triggerFileNameForWorkTicket) {
+        this.triggerFileNameForWorkTicket = triggerFileNameForWorkTicket;
+    }
+
+    public String getTriggerFileNameForWorkTicket() {
+        return triggerFileNameForWorkTicket;
     }
 
     @SuppressWarnings("unused")
@@ -133,12 +143,14 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             if (!MailBoxUtil.isEmpty(inprogressFileName)) {
 
                 this.setTriggerFilePath(inputLocation + File.separator + inprogressFileName);
+                setTriggerFileNameForWorkTicket(FilenameUtils.removeExtension(inprogressFileName));
                 filePathList = listFilePathFromInProgressTriggerFile();
                 postToAsyncSweeper(filePathList, postedWorkTickets);
             }
 
             // get trigger filename from static properties
             String triggerFileName = getTriggerFile(inputLocation, staticProp.getTriggerFile(), staticProp.getIncludeFiles());
+            setTriggerFileNameForWorkTicket(triggerFileName);
             this.setTriggerFilePath(inputLocation + File.separator + triggerFileName);
 
             Path triggerFilePath = Paths.get(triggerFileNameWithPath);
@@ -190,15 +202,15 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         // if trigger name pattern is not empty check with wild card pattern and return last updated file name
         // else return default 'trigger'
         if (!MailBoxUtil.isEmpty(triggerFileName)) {
-            
-            String wildcards[] = {triggerFileName, !MailBoxUtil.isEmpty(includeFileName) ? includeFileName : MailBoxConstants.WILD_CARD_PATTERN};
+
+            String[] wildcards = {triggerFileName, !MailBoxUtil.isEmpty(includeFileName) ? includeFileName : MailBoxConstants.WILD_CARD_PATTERN};
             FileFilter triggerFileFilter = new RelayWildcardFileFilter(wildcards);
-            List<File> triggerFileList = new ArrayList<File>();
+            List<File> triggerFileList;
             
             try {
                 triggerFileList = Files.list(Paths.get(inputLocation))
                         .map(Path::toFile)
-                        .filter(file -> triggerFileFilter.accept(file))
+                        .filter(triggerFileFilter::accept)
                         .sorted(LastModifiedFileComparator.LASTMODIFIED_REVERSE)
                         .collect(Collectors.toList());
             } catch (IOException ex) {
@@ -289,7 +301,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
         Map<String, String> sweptFileStatus;
 
-        for (WorkTicket workTicket : workTickets) {
+        List<WorkTicket> updatedWorkTickets = addAdditionalDetails(workTickets);
+        for (WorkTicket workTicket : updatedWorkTickets) {
             // Interrupt signal for async sweeper
             if (MailBoxUtil.isInterrupted(Thread.currentThread().getName())) {
                 LOGGER.warn(constructMessage("The executor is gracefully interrupted."));
@@ -331,6 +344,37 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
 
         //post parent gpid
         logToLens(relatedTransactionDto.getParentGlobalProcessId(), staticProp.getPipeLineID());
+    }
+
+    /**
+     * Process the worktickets and set additional contexts
+     *
+     * @param workTickets list of worktickets
+     * @return
+     */
+    private List<WorkTicket> addAdditionalDetails(List<WorkTicket> workTickets) {
+
+        if (workTickets.isEmpty()) {
+            LOGGER.info(constructMessage("There are no files available in the directory."));
+        }
+
+        sortWorkTicket(workTickets, staticProp.getSort());
+        int totalFileCount = workTickets.size();
+        int currentFileCount = 0;
+        TriggerFileContentDTO relatedTransactionDto = readMapFromFile(triggerFileNameWithPath);
+        String relatedTransactionId = relatedTransactionDto.getParentGlobalProcessId();
+
+        for (WorkTicket workTicket : workTickets) {
+
+            currentFileCount++;
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_COUNT, currentFileCount + MailBoxConstants.FILE_COUNT_SEPARATOR + totalFileCount);
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_TRIGGER_FILE_NAME, getTriggerFileNameForWorkTicket());
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_TRIGGER_FILE_PARENT_GPID, relatedTransactionId);
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_GROUP, true);
+            workTicket.setAdditionalContext(MailBoxConstants.KEY_TRIGGER_FILE_URI, relatedTransactionDto.getTriggerFileUri());
+        }
+
+        return workTickets;
     }
 
     /**
@@ -505,7 +549,7 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
         }
 
         String[] inProgressFiles =  new File(payloadLocation)
-            .list( (File dirToFilter, String filename) -> filename.endsWith(MailBoxConstants.INPROGRESS_EXTENTION) );
+            .list( (File dirToFilter, String filename) -> filename.endsWith(MailBoxConstants.INPROGRESS_EXTENTION));
         return inProgressFiles.length > 0 ? inProgressFiles[0] : null;
     }
 

@@ -242,7 +242,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             }
         }
 
-        if (staticProp.isDeleteEmptyDirectoryAfterSwept()) {
+        if (staticProp.isRemoveEmptyDirectoryAfterSwept()) {
             deleteEmptyDirectoryAfterSwept(Paths.get(inputLocation));
         }
         
@@ -308,7 +308,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                         verifyAndDeletePayload(workTicket);
                     }
                     
-                    if (staticProp.isDeleteEmptyDirectoryAfterSwept()) {
+                    if (staticProp.isRemoveEmptyDirectoryAfterSwept()) {
                         LOGGER.debug("Entering into sync DeleteSubDirectories");
                         deleteEmptyDirectoryAfterSwept(Paths.get(inputLocation));
                     }
