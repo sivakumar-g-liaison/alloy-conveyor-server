@@ -1,6 +1,16 @@
 5.7.0-SNAPSHOT
 ---------------
 
+
+5.6.5
+---------------
+* GMB-1211 - - Changed sweeper property name from deleteEmptyDirectoryAfterSwept to removeEmptyDirectoryAfterSwept.
+* GMB-1210 - Conditional Sweeper Trigger file is not staged on the Egress side
+
+5.6.4
+---------------
+* GMB-1211 - Ability to transfer folder structure via schedule - Logging Changes
+
 5.6.3
 ---------------
 * GMB-1211 - Ability to transfer folder structure via schedule
