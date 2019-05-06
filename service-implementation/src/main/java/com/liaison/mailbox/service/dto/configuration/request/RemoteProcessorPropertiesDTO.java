@@ -80,6 +80,7 @@ public class RemoteProcessorPropertiesDTO {
     private boolean saveResponsePayload;
     private String execution;
     private String category;
+    private boolean removeEmptyDirectoryAfterSwept = false;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -473,4 +474,13 @@ public class RemoteProcessorPropertiesDTO {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public boolean isRemoveEmptyDirectoryAfterSwept() {
+        return removeEmptyDirectoryAfterSwept;
+    }
+
+    public void setRemoveEmptyDirectoryAfterSwept(boolean removeEmptyDirectoryAfterSwept) {
+        this.removeEmptyDirectoryAfterSwept = removeEmptyDirectoryAfterSwept;
+    }
+
 }
