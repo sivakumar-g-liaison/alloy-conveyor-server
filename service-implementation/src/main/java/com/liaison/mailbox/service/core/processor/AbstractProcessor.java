@@ -1398,6 +1398,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     @Override
     public void sweepFilesAndPostWorkticketsToSB(String targetLocation) {
+        
         LOGGER.info("targetLocation {}", targetLocation);
         LOGGER.info("setup {}", configurationInstance.getDynamicProperties());
         
