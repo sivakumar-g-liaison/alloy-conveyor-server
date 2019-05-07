@@ -39,6 +39,7 @@ import com.liaison.mailbox.service.core.SweeperProcessorService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -1292,27 +1293,62 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         return pipelineId;
     }
     
+    /**
+     * Method to use single file sweep to spectrum and also post workticket to service broker queue
+     * 
+     * @param file downloaded File
+     * @param staticProp SFTPDownloaderprocessor properties.
+     */
     @Override
-    public void sweepfileAndPostWorkticetToSB(File file, SFTPDownloaderPropertiesDTO staticProp) {
+    public void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp) {
         
         try {
+            
             WorkTicket workTicket = constructWorkticket(file, staticProp);
             
-            LOGGER.info("Workticket Constructed and Global Processor ID is {}" + workTicket.getGlobalProcessId());
+            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , workTicket.getGlobalProcessId());
             
-            persistWorkticket(workTicket, staticProp);
+            persistPayloadAndWorkticketInSpectrum(workTicket, staticProp);
             
             String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(wrkTcktToSbr).toString(2));
             SweeperQueueSendClient.post(wrkTcktToSbr, false);
+            verifyAndDeletePayload(workTicket);
 
         } catch (IllegalAccessException | IOException | JAXBException | JSONException e ) {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * verifies whether the payload persisted in spectrum or not and deletes it
+     *
+     * @param wrkTicket workticket contains payload uri
+     * @throws IOException
+     */
+    private void verifyAndDeletePayload(WorkTicket wrkTicket) throws IOException {
 
-    private void persistWorkticket(WorkTicket workTicket,
-            SFTPDownloaderPropertiesDTO staticProp) throws FileNotFoundException, IOException {
+         String payloadURI = wrkTicket.getPayloadURI();
+         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
+
+         // Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
+         if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
+             LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath.getName());
+             deleteFile(filePath);
+         } else {
+             LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath.getName());
+         }
+         LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
+     }
+
+    /**
+     * This method is used to persist the payload and workticket in spectrum
+     *
+     * @param staticProp staic properties
+     * @param workTicket workticket
+     * @throws IOException
+     */
+    private void persistPayloadAndWorkticketInSpectrum(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws FileNotFoundException, IOException {
         
         LOGGER.info("Entered into Persist Workticket");
         File payloadFile = new File(workTicket.getPayloadURI());
@@ -1348,11 +1384,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         
     }
 
-    private WorkTicket constructWorkticket(File file, SFTPDownloaderPropertiesDTO staticProp) throws IllegalAccessException, IOException {
+    /**
+     * Returns WorkTicket from java.io.File and SFTPDownloaderProperties
+     *
+     * @param java.io.File file
+     * @param SFTPDownloaderPropertiesDTO
+     * @return workticket
+     * @throws IllegalAccessException
+     * @throws IOException
+     */
+    private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp) throws IllegalAccessException, IOException {
         
         Map<String, Object> additionalContext = new HashMap<String, Object>();
 
-        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile().toString());
+        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
 
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
@@ -1396,29 +1441,31 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         return workTicket;
     }
 
+    /**
+     * Method to use list of downloaded files sweeps to spectrum and also post the worktickets to service broker queue
+     * 
+     * @param targetLocation downloaded Location 
+     */
     @Override
-    public void sweepFilesAndPostWorkticketsToSB(String targetLocation) {
-        
-        LOGGER.info("targetLocation {}", targetLocation);
-        LOGGER.info("setup {}", configurationInstance.getDynamicProperties());
-        
-        List<File> files = sweepFiles(targetLocation);
-        try {
-            sweepFilesToSB(files);
-        } catch (IllegalAccessException | IOException e) {
-            e.printStackTrace();
+    public void asyncSweeperProcessForMultipleFiles(String targetLocation, String pipeLineId, boolean securePayload, boolean lensVisibility) {
+
+        List<File> files = getFilesFromDownloadedLocation(targetLocation);
+        SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+        staticPropertiesDTO.setLensVisibility(lensVisibility);
+        staticPropertiesDTO.setPipeLineID(pipeLineId);
+        staticPropertiesDTO.setSecuredPayload(securePayload);
+        for (File file:files) {
+            asyncSweeperProcessForSingleFile(file, staticPropertiesDTO);
         }
     }
 
-    private void sweepFilesToSB(List<File> files) throws IllegalAccessException, IOException {
-
-        SFTPDownloaderPropertiesDTO staticProp = ((SFTPDownloaderPropertiesDTO) getProperties());
-        for(File file:files) {
-            sweepfileAndPostWorkticetToSB(file, staticProp);
-        }
-    }
-
-    private List<File> sweepFiles(String targetLocation) {
+    /**
+     * Pick all the files from local payload location.
+     * 
+     * @param targetLocation
+     * @return fileList
+     */
+    private List<File> getFilesFromDownloadedLocation(String targetLocation) {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), targetLocation);
         Path rootPath = Paths.get(targetLocation);
@@ -1426,18 +1473,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
         }
 
-        List<File> result = new ArrayList<>();
-        return listFiles(result, rootPath);
-    }
-
-    private List<File> listFiles(List<File> files, Path rootPath) {
-
+        List<File> fileList = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
-
             for (Path file : stream) {
-                files.add(file.toFile());
+                fileList.add(file.toFile());
             }
-            return files;
+            LOGGER.info("{} files are picked at downloaded location", fileList.size());
+            return fileList;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

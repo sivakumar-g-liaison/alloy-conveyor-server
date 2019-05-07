@@ -31,6 +31,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -225,7 +226,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 								}
 							}
-							sweepfileAndPostWorkticetToSB(new File(localFileDir + File.separatorChar + currentFileName), staticProp);
+							// async sweeper process if direct submit is true.
+							if (staticProp.isDirectSubmit()) {
+					            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+					            staticPropertiesDTO.setContentType(staticProp.getContentType());
+					            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+					            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
+					            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
+							    asyncSweeperProcessForSingleFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
+							}
 							// Delete the remote files after successful download if user optioned for it
 							if (staticProp.getDeleteFiles()) {
 								sftpRequest.deleteFile(aFile);
