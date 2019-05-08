@@ -1303,18 +1303,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp) {
         
         try {
-            
             WorkTicket workTicket = constructWorkticket(file, staticProp);
-            
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , workTicket.getGlobalProcessId());
-            
             persistPayloadAndWorkticketInSpectrum(workTicket, staticProp);
             
             String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(wrkTcktToSbr).toString(2));
             SweeperQueueSendClient.post(wrkTcktToSbr, false);
             verifyAndDeletePayload(workTicket);
-
         } catch (IllegalAccessException | IOException | JAXBException | JSONException e ) {
             e.printStackTrace();
         }
@@ -1349,13 +1345,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws IOException
      */
     private void persistPayloadAndWorkticketInSpectrum(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws FileNotFoundException, IOException {
-        
+
         LOGGER.info("Entered into Persist Workticket");
         File payloadFile = new File(workTicket.getPayloadURI());
-        
+
         Map<String, String> properties = new HashMap<>();
         Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-        
+
         if (!ttlMap.isEmpty()) {
             Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
             workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
@@ -1365,18 +1361,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
         properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
         properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
-        
+
         String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
-        
+
         // persist payload in spectrum
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
         }
-        
+
         LOGGER.info("Completed payload Persist {}", workTicket.getPayloadURI() );
 
         // persist the workticket
@@ -1444,18 +1440,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     /**
      * Method to use list of downloaded files sweeps to spectrum and also post the worktickets to service broker queue
      * 
-     * @param targetLocation downloaded Location 
+     * @param targetLocation  downloaded Location
+     * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public void asyncSweeperProcessForMultipleFiles(String targetLocation, String pipeLineId, boolean securePayload, boolean lensVisibility) {
+    public void asyncSweeperProcessForMultipleFiles(String targetLocation, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
 
         List<File> files = getFilesFromDownloadedLocation(targetLocation);
-        SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-        staticPropertiesDTO.setLensVisibility(lensVisibility);
-        staticPropertiesDTO.setPipeLineID(pipeLineId);
-        staticPropertiesDTO.setSecuredPayload(securePayload);
         for (File file:files) {
-            asyncSweeperProcessForSingleFile(file, staticPropertiesDTO);
+            asyncSweeperProcessForSingleFile(file, sweeperStaticPropertiesDTO);
         }
     }
 

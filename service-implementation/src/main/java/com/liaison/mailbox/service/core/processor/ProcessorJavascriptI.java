@@ -306,6 +306,6 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
     
     void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp);
     
-    void asyncSweeperProcessForMultipleFiles(String targetLocation, String pipeLineId, boolean securePayload, boolean lensVisibility);
+    void asyncSweeperProcessForMultipleFiles(String targetLocation, SweeperStaticPropertiesDTO staticProp);
 
 }
