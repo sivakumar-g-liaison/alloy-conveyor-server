@@ -1303,6 +1303,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     public void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp) {
         
         try {
+            //construct workticket for downloaded file.
             WorkTicket workTicket = constructWorkticket(file, staticProp);
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , workTicket.getGlobalProcessId());
             persistPayloadAndWorkticketInSpectrum(workTicket, staticProp);
@@ -1445,9 +1446,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public void asyncSweeperProcessForMultipleFiles(String targetLocation, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
-
+        
+        // Pick all files from remote downloader location after remote downloader process done.
         List<File> files = getFilesFromDownloadedLocation(targetLocation);
         for (File file:files) {
+            // sweep each file
             asyncSweeperProcessForSingleFile(file, sweeperStaticPropertiesDTO);
         }
     }

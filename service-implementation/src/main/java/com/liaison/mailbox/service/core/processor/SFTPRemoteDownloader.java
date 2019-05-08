@@ -228,11 +228,13 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 							}
 							// async sweeper process if direct submit is true.
 							if (staticProp.isDirectSubmit()) {
-					            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-					            staticPropertiesDTO.setContentType(staticProp.getContentType());
-					            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
-					            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
-					            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
+							    //Set SFTPRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
+							    SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+							    staticPropertiesDTO.setContentType(staticProp.getContentType());
+							    staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+							    staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
+							    staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
+							    // sweep single file process to SB queue
 							    asyncSweeperProcessForSingleFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
 							}
 							// Delete the remote files after successful download if user optioned for it

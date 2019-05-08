@@ -34,7 +34,6 @@ var process = function(_proc) {
     var g2SftpClient = null;
 
     try {
-
         if (processor_properties.debugTranscript) {
             _proc.sendEmail(null, "DEBUG", "processor_properties_String: " + processor_properties_String, "HTML");
         }
@@ -84,6 +83,13 @@ var process = function(_proc) {
                 // main function start
                 downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo);
                 // main function end
+                if (processor_properties.directSubmit) {
+                	var staticprop = new com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO();
+                	staticprop.setSecuredPayload(processor_proerties.securedPayload);
+                	staticprop.setLensVisibility(processor_proerties.lensVisibility);
+                	staticprop.setPipeLineID(processor_proerties.pipeLineID);
+                	_proc.asyncSweeperProcessForMultipleFiles(targetLocation, staticprop);
+                }
             }
         }
 
