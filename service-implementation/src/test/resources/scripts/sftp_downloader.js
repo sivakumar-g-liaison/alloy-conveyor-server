@@ -81,14 +81,14 @@ var process = function(_proc) {
                 }
             } else {
                 // main function start
-                downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo);
+                var files = downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo);
                 // main function end
                 if (processor_properties.directSubmit) {
                 	var staticprop = new com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO();
-                	staticprop.setSecuredPayload(processor_proerties.securedPayload);
-                	staticprop.setLensVisibility(processor_proerties.lensVisibility);
-                	staticprop.setPipeLineID(processor_proerties.pipeLineID);
-                	_proc.asyncSweeperProcessForMultipleFiles(targetLocation, staticprop);
+                	staticprop.setSecuredPayload(processor_properties.securedPayload);
+                	staticprop.setLensVisibility(processor_properties.lensVisibility);
+                	staticprop.setPipeLineID(processor_properties.pipeLineID);
+                	_proc.sweepFiles(files, staticprop);
                 }
             }
         }
@@ -111,12 +111,13 @@ var process = function(_proc) {
 //
 // Download files from remote server
 //
-function downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo) {
+var downloadFiles = function (g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo) {
 
     var customProperties = _proc.getCustomProperties();
     var fileNamePattern = String(customProperties.getProperty('filename_suffix'));
     var include_filepattern_array = String(customProperties.getProperty('include_filepattern_array'));
     var exclude_filepattern_array = String(customProperties.getProperty('exclude_filepattern_array'));
+    var fileLists = [];
 
     //Validation to check atlease any one this available in the properties
     if (isEmpty(include_filepattern_array) && isEmpty(exclude_filepattern_array)) {
@@ -221,7 +222,7 @@ function downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, pro
                 _proc.logInfo(mboxInfo + " File Rename status is " + renameStatus);
                 if (renameStatus) {
                     _proc.logInfo(mboxInfo + " File renamed successfully");
-
+                    fileLists.push(originalFile(targetLocation, fileName));
                     // for some reason the delete File command duplicates the folder path. trying to go one level higer.
                     //g2SftpClient.changeDirectory("..");
                     // g2SftpClient.changeDirectory(payloadLocation);
@@ -256,6 +257,7 @@ function downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, pro
 
         }
     }
+    return fileLists;
 }
 
 //

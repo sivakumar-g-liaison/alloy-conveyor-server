@@ -303,9 +303,22 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @Param e      Exception
      */
     void logToLens(String msg, RelayFile file, ExecutionState status, Exception e);
-    
-    String sweepFile(File file, SweeperStaticPropertiesDTO staticProp);
-    
-    String[] sweepFiles(File[] fileList, SweeperStaticPropertiesDTO staticProp);
 
+    /**
+     * Method to sweep file after downloading file in payload location.
+     * 
+     * @param file        Downloaded file 
+     * @param staticProp  Sweeper properies
+     * @return GlobalprocessorId
+     */
+    String sweepFile(File file, SweeperStaticPropertiesDTO staticProp);
+
+    /**
+     * Method to sweep files after downloading files in payload location
+     * 
+     * @param fileList   Downloaded Files
+     * @param staticProp Sweeper properties
+     * @return Globalprocessorids
+     */
+    String[] sweepFiles(File[] fileList, SweeperStaticPropertiesDTO staticProp);
 }

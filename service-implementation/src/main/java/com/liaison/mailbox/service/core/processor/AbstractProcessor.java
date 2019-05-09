@@ -35,7 +35,6 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.core.SweeperProcessorService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
@@ -46,7 +45,6 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -57,7 +55,6 @@ import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
@@ -71,8 +68,6 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import scala.tools.jline_embedded.internal.Configuration;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -85,10 +80,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
@@ -1292,36 +1284,37 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         }
         return pipelineId;
     }
-    
+
     /**
-     * Method to use single file sweep to spectrum and also post workticket to service broker queue
+     * Method to use single file sweeps to storage utilities and also post workticket to service broker queue
      * 
      * @param file downloaded File
      * @param staticProp SFTPDownloaderprocessor properties.
      */
     @Override
     public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
-        
+
         String globalProcessorId = null;
         try {
+
             //construct workticket for downloaded file.
             WorkTicket workTicket = constructWorkticket(file, staticProp);
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
-            persistPayloadAndWorkticketInSpectrum(workTicket, staticProp);
-            
-            String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(wrkTcktToSbr).toString(2));
-            SweeperQueueSendClient.post(wrkTcktToSbr, false);
+            persistPayloadAndWorkticketInStorageUtility(workTicket, staticProp);
+
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
             verifyAndDeletePayload(workTicket);
-        } catch (IllegalAccessException | IOException | JAXBException | JSONException e ) {
-            e.printStackTrace();
+        } catch (IllegalAccessException | IOException | JAXBException | JSONException e) {
+            LOGGER.error(constructMessage("Error occurred during sweep file", seperator, e.getMessage()), e);
         }
         return globalProcessorId;
     }
-    
+
     /**
-     * verifies whether the payload persisted in spectrum or not and deletes it
+     * verifies whether the payload persisted in storage utilities or not and deletes it
      *
      * @param wrkTicket workticket contains payload uri
      * @throws IOException
@@ -1331,34 +1324,32 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
          String payloadURI = wrkTicket.getPayloadURI();
          File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
 
-         // Delete the file if it exists in spectrum and should be successfully posted to SB Queue.
+         // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
          if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-             LOGGER.debug("Payload {} exists in spectrum. so deleting the file {}", payloadURI, filePath.getName());
+             LOGGER.debug("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath.getName());
              deleteFile(filePath);
          } else {
-             LOGGER.warn("Payload {} does not exist in spectrum. so file {} is not deleted.", payloadURI, filePath.getName());
+             LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
          }
          LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
      }
 
     /**
-     * This method is used to persist the payload and workticket in spectrum
+     * This method is used to persist the payload and workticket in storage utilities.
      *
      * @param staticProp staic properties
      * @param workTicket workticket
      * @throws IOException
      */
-    private void persistPayloadAndWorkticketInSpectrum(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws FileNotFoundException, IOException {
+    private void persistPayloadAndWorkticketInStorageUtility(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws FileNotFoundException, IOException {
 
-        LOGGER.info("Entered into Persist Workticket");
         File payloadFile = new File(workTicket.getPayloadURI());
-
         Map<String, String> properties = new HashMap<>();
         Map<String, String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
 
         if (!ttlMap.isEmpty()) {
-            Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+            Integer ttlDays = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
         }
 
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
@@ -1371,7 +1362,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        // persist payload in spectrum
+        // persist payload in storage utilities.
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
@@ -1381,11 +1372,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-        
     }
 
     /**
-     * Returns WorkTicket from java.io.File and SFTPDownloaderProperties
+     * This method is used to construct workticket from the given file.
      *
      * @param java.io.File file
      * @param SFTPDownloaderPropertiesDTO
@@ -1396,18 +1386,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp) throws IllegalAccessException, IOException {
         
         Map<String, Object> additionalContext = new HashMap<String, Object>();
-
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
-
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
 
-        LOGGER.info("Entered into construct Workticket");
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
         workTicket.setPipelineId(staticProp.getPipeLineID());
+        LOGGER.debug("Pipeline ID : {}", staticProp.getPipeLineID());
         
-        LOGGER.info("Pipeline ID : {}", staticProp.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(file.getAbsolutePath().toString());
         
@@ -1434,54 +1421,25 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
-
         workTicket.setAdditionalContext(additionalContext);
         
-        LOGGER.info("Constructed Workticket");
         return workTicket;
     }
 
     /**
-     * Method to use list of downloaded files sweeps to spectrum and also post the worktickets to service broker queue
+     * Method to use list of downloaded files sweeps to storage Utilities and also post the worktickets to service broker queue
      * 
-     * @param targetLocation  downloaded Location
+     * @param files  downloaded files
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
     public String[] sweepFiles(File[] files, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
-        
+
         List<String> globalProcessorIds = new ArrayList<String>();
         for (File file:files) {
-            // sweep each file
-            LOGGER.info("File comes from {}", file);
+            // sweep each file and add global processorIds.
             globalProcessorIds.add(sweepFile(file, sweeperStaticPropertiesDTO));
         }
         return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
-    }
-
-    /**
-     * Pick all the files from local payload location.
-     * 
-     * @param targetLocation
-     * @return fileList
-     */
-    private List<File> getFilesFromDownloadedLocation(String targetLocation) {
-
-        LOGGER.info(constructMessage("Scanning Directory: {}"), targetLocation);
-        Path rootPath = Paths.get(targetLocation);
-        if (!Files.isDirectory(rootPath)) {
-            throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
-        }
-
-        List<File> fileList = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
-            for (Path file : stream) {
-                fileList.add(file.toFile());
-            }
-            LOGGER.info("{} files are picked at downloaded location", fileList.size());
-            return fileList;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
