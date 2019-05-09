@@ -1445,12 +1445,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public void asyncSweeperProcessForMultipleFiles(String targetLocation, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
+    public void asyncSweeperProcessForMultipleFiles(List<File> fileList, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
         
         // Pick all files from remote downloader location after remote downloader process done.
-        List<File> files = getFilesFromDownloadedLocation(targetLocation);
-        for (File file:files) {
+//        List<File> files = getFilesFromDownloadedLocation(targetLocation);
+        for (File file:fileList) {
             // sweep each file
+            LOGGER.info("File comes from {}", file);
             asyncSweeperProcessForSingleFile(file, sweeperStaticPropertiesDTO);
         }
     }
