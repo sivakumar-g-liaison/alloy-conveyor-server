@@ -235,7 +235,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 							    staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
 							    staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
 							    // sweep single file process to SB queue
-							    asyncSweeperProcessForSingleFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
+							    String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
+							    LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
 							}
 							// Delete the remote files after successful download if user optioned for it
 							if (staticProp.getDeleteFiles()) {

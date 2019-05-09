@@ -1300,12 +1300,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param staticProp SFTPDownloaderprocessor properties.
      */
     @Override
-    public void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp) {
+    public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
         
+        String globalProcessorId = null;
         try {
             //construct workticket for downloaded file.
             WorkTicket workTicket = constructWorkticket(file, staticProp);
-            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , workTicket.getGlobalProcessId());
+            globalProcessorId = workTicket.getGlobalProcessId();
+            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             persistPayloadAndWorkticketInSpectrum(workTicket, staticProp);
             
             String wrkTcktToSbr = JAXBUtility.marshalToJSON(workTicket);
@@ -1315,6 +1317,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         } catch (IllegalAccessException | IOException | JAXBException | JSONException e ) {
             e.printStackTrace();
         }
+        return globalProcessorId;
     }
     
     /**
@@ -1445,15 +1448,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public void asyncSweeperProcessForMultipleFiles(List<File> fileList, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
+    public String[] sweepFiles(File[] files, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
         
-        // Pick all files from remote downloader location after remote downloader process done.
-//        List<File> files = getFilesFromDownloadedLocation(targetLocation);
-        for (File file:fileList) {
+        List<String> globalProcessorIds = new ArrayList<String>();
+        for (File file:files) {
             // sweep each file
             LOGGER.info("File comes from {}", file);
-            asyncSweeperProcessForSingleFile(file, sweeperStaticPropertiesDTO);
+            globalProcessorIds.add(sweepFile(file, sweeperStaticPropertiesDTO));
         }
+        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
     }
 
     /**

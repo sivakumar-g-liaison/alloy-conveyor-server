@@ -304,8 +304,8 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      */
     void logToLens(String msg, RelayFile file, ExecutionState status, Exception e);
     
-    void asyncSweeperProcessForSingleFile(File file, SweeperStaticPropertiesDTO staticProp);
+    String sweepFile(File file, SweeperStaticPropertiesDTO staticProp);
     
-    void asyncSweeperProcessForMultipleFiles(List<File> fileList, SweeperStaticPropertiesDTO staticProp);
+    String[] sweepFiles(File[] fileList, SweeperStaticPropertiesDTO staticProp);
 
 }
