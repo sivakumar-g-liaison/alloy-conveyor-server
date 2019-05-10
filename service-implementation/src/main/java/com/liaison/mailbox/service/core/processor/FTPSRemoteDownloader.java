@@ -30,6 +30,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -235,6 +236,17 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             }
                         }
 
+                        if (staticProp.isDirectSubmit()) {
+                          //Set FTPSRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
+                            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+                            staticPropertiesDTO.setContentType(staticProp.getContentType());
+                            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+                            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
+                            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
+                            // sweep single file process to SB queue
+                            String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
+                            LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
+                        }
                         // Delete the remote files after successful download if user opt for it
                         if (staticProp.getDeleteFiles()) {
                             ftpClient.deleteFile(file.getName());

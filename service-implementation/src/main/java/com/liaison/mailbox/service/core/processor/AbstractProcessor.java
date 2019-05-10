@@ -1301,7 +1301,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             WorkTicket workTicket = constructWorkticket(file, staticProp);
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
-            persistPayloadAndWorkticketInStorageUtility(workTicket, staticProp);
+            persistPayloadAndWorkticket(workTicket, staticProp);
 
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
@@ -1341,7 +1341,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param workTicket workticket
      * @throws IOException
      */
-    private void persistPayloadAndWorkticketInStorageUtility(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws FileNotFoundException, IOException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
@@ -1368,8 +1368,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
         }
 
-        LOGGER.info("Completed payload Persist {}", workTicket.getPayloadURI() );
-
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
     }
@@ -1387,40 +1385,31 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         
         Map<String, Object> additionalContext = new HashMap<String, Object>();
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
+        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
+        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
+        
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
+        
+        FileTime modifiedTime = attr.lastModifiedTime();
+        LOGGER.debug("Modified Time stamp {}", modifiedTime);
 
-        WorkTicket workTicket = new WorkTicket();
-        workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-        workTicket.setPipelineId(staticProp.getPipeLineID());
-        LOGGER.debug("Pipeline ID : {}", staticProp.getPipeLineID());
-        
-        workTicket.setProcessMode(ProcessMode.ASYNC);
-        workTicket.setPayloadURI(file.getAbsolutePath().toString());
-        
         ISO8601Util dateUtil = new ISO8601Util();
         FileTime createdTime = attr.creationTime();
         LOGGER.debug("Created Time stamp {}", createdTime);
+        
+        WorkTicket workTicket = new WorkTicket();
+        workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+        workTicket.setPipelineId(staticProp.getPipeLineID());
+        workTicket.setProcessMode(ProcessMode.ASYNC);
+        workTicket.setPayloadURI(file.getAbsolutePath().toString());
         workTicket.setCreatedTime(new Date(createdTime.toMillis()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
-
-        FileTime modifiedTime = attr.lastModifiedTime();
-        LOGGER.debug("Modified Time stamp {}", modifiedTime);
         workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
-        
-        LOGGER.debug("Size stamp {}", attr.size());
         workTicket.setPayloadSize(attr.size());
-        
-        String fileName = file.getName();
-        LOGGER.debug("Filename {}", fileName);
-        workTicket.setFileName(fileName);
-        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, fileName);
-
-        String folderName = file.getParent();
-        LOGGER.debug("Foldername {}", folderName);
-        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, configurationInstance.getMailbox().getPguid());
-        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
-        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+        workTicket.setFileName(file.getName());
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, file.getName());
+        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
         workTicket.setAdditionalContext(additionalContext);
         
         return workTicket;

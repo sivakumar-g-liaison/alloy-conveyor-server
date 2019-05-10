@@ -19,6 +19,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -129,6 +130,18 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                                 LOGGER.info("Execution failure for ", entry.getAbsolutePath());
                                 failedStatus = true;
                             } else {
+                                if (httpDownloaderStaticProperties.isDirectSubmit()) {
+                                  //Set SFTPRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
+                                    SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+                                    staticPropertiesDTO.setContentType(httpDownloaderStaticProperties.getContentType());
+                                    staticPropertiesDTO.setLensVisibility(httpDownloaderStaticProperties.isLensVisibility());
+                                    staticPropertiesDTO.setPipeLineID(httpDownloaderStaticProperties.getPipeLineID());
+                                    staticPropertiesDTO.setSecuredPayload(httpDownloaderStaticProperties.isSecuredPayload());
+                                    // sweep single file process to SB queue
+                                    String globalProcessorId = sweepFile(entry, staticPropertiesDTO);
+                                    LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
+                                }
+                                
                                 deleteFile(entry);
                                 totalNumberOfProcessedFiles++;
                             }
