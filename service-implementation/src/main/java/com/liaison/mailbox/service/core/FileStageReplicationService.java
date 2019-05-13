@@ -174,6 +174,10 @@ public class FileStageReplicationService implements Runnable {
                         persistFile(payload, file);
                     }
 
+                    stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
+                    if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus()) && file.exists()) {
+                        file.delete();
+                    }
                 } catch (MailBoxServicesException | IllegalArgumentException e) {
                     // Payload doesn't exist in BOSS so adding back to queue with delay
                     LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
