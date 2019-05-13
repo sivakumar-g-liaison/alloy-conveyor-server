@@ -237,7 +237,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         }
 
                         if (staticProp.isDirectSubmit()) {
-                          //Set FTPSRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
+                            //Set FTPSRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
                             SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
                             staticPropertiesDTO.setContentType(staticProp.getContentType());
                             staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());

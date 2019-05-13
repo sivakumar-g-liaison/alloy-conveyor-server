@@ -131,7 +131,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                                 failedStatus = true;
                             } else {
                                 if (httpDownloaderStaticProperties.isDirectSubmit()) {
-                                  //Set SFTPRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
+                                    //Set SFTPRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
                                     SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
                                     staticPropertiesDTO.setContentType(httpDownloaderStaticProperties.getContentType());
                                     staticPropertiesDTO.setLensVisibility(httpDownloaderStaticProperties.isLensVisibility());
