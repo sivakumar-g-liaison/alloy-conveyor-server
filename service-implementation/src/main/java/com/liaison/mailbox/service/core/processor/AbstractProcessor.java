@@ -44,6 +44,7 @@ import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
@@ -455,6 +456,26 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
         Files.write(file.toPath(), response.toByteArray());
         LOGGER.info("Response is successfully written" + file.getAbsolutePath());
+        
+        HTTPDownloaderPropertiesDTO staticProp = null;
+        try {
+            staticProp = (HTTPDownloaderPropertiesDTO) getProperties();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            LOGGER.debug("Caught exception while getting HTTP Downloader properties");
+        }
+        // async sweeper process if direct submit is true.
+        if (staticProp.isDirectSubmit()) {
+            //Set HTTPDownloaderPropertiesDTO properties into SweeperStaticPropertiesDTO.
+            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
+            staticPropertiesDTO.setContentType(staticProp.getContentType());
+            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
+            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
+            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
+            // sweep single file process to SB queue
+            String globalProcessorId = sweepFile(file, staticPropertiesDTO);
+            LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
+        }
         if (response != null) {
             response.close();
         }

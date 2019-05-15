@@ -130,18 +130,6 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                                 LOGGER.info("Execution failure for ", entry.getAbsolutePath());
                                 failedStatus = true;
                             } else {
-                                if (httpDownloaderStaticProperties.isDirectSubmit()) {
-                                    //Set SFTPRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
-                                    SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-                                    staticPropertiesDTO.setContentType(httpDownloaderStaticProperties.getContentType());
-                                    staticPropertiesDTO.setLensVisibility(httpDownloaderStaticProperties.isLensVisibility());
-                                    staticPropertiesDTO.setPipeLineID(httpDownloaderStaticProperties.getPipeLineID());
-                                    staticPropertiesDTO.setSecuredPayload(httpDownloaderStaticProperties.isSecuredPayload());
-                                    // sweep single file process to SB queue
-                                    String globalProcessorId = sweepFile(entry, staticPropertiesDTO);
-                                    LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
-                                }
-                                
                                 deleteFile(entry);
                                 totalNumberOfProcessedFiles++;
                             }
