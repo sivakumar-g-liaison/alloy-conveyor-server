@@ -1,6 +1,7 @@
-5.7.0-SNAPSHOT
+5.6.6
 ---------------
 * GGT-1670 - Active-Active FILE_DELETE replication issue in EU
+* GMB-1218 - File Descriptor leak in the Conditional Sweeper
 
 5.6.5
 ---------------
