@@ -210,6 +210,8 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             Stream<Path> pathStream = null;
             try {
 
+                //Files.list needs the special attention since it is using DirectoryStream in the back
+                //So, we have use try with resources or close the stream manually to avoid the leak in FileDescriptor
                 pathStream = Files.list(Paths.get(inputLocation));
                 triggerFileList = pathStream
                         .map(Path::toFile)
