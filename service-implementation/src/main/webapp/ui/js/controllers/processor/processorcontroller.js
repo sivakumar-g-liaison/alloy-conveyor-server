@@ -146,16 +146,15 @@ var rest = myApp.controller(
                 };
                 
                 $scope.directSubmit = {
-                         "name":"directSubmit",
-                         "displayName" : "Direct Submit",
-                         "value":"",
-                         "type":"select",
-                         "readOnly":"",
-                         "mandatory":false,
-                         "dynamic":false,
-                         "valueProvided":false,
-                         "validationRules": {}
-                    };
+                    "name":"directSubmit",
+                    "displayName" : "Direct Submit",
+                    "value":"",
+                    "type":"select",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": {}
             	};
                 
                 $scope.modal = {
