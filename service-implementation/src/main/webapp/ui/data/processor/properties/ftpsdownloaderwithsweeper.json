@@ -2,9 +2,10 @@
    "processorDefinition": {
       "type":"REMOTEDOWNLOADER",
       "displayName":"REMOTEDOWNLOADER",
-      "protocol":"FTP",
+      "protocol":"FTPS",
+      "handOverExecutionToJavaScript":false,
       "staticProperties": [
-		  {
+         {
             "name":"add new -->",
             "displayName" : "add new -->",
             "value":"",
@@ -17,7 +18,7 @@
             "validationRules": null        
             
          },
-		  {
+         {
 			"name": "url",
 			"displayName": "URL",
 			"type": "textarea",
@@ -32,8 +33,8 @@
 			  "minLength": "",
 			  "maxLength": ""
 			}
-		  },
-		  {
+		 },
+         {
 			"name": "port",
 			"displayName": "Port",
 			"type": "textarea",
@@ -104,9 +105,9 @@
             "valueProvided":false,
             "defaultValue":"",
             "validationRules": {
-              "pattern": "\/^([1-9][0-9]{0,5}|1[0-7][0-9]{5}|1800000)$\/",
-              "minLength": "",
-              "maxLength": ""
+                "pattern": "\/^([1-9][0-9]{0,5}|1[0-7][0-9]{5}|1800000)$\/",
+                "minLength": "",
+                "maxLength": ""
             }
          },
          {
@@ -120,20 +121,20 @@
             "valueProvided":false,
             "defaultValue":"",
 			"validationRules": {
-			 "pattern": "\/^([1-9][0-9]{0,4}|[1-2][0-9]{5}|300000)$\/",
+			  "pattern": "\/^([1-9][0-9]{0,4}|[1-2][0-9]{5}|300000)$\/",
 			  "minLength": "",
 			  "maxLength": ""
 			}
          },
-        {
+         {
             "name": "passive",
             "displayName": "Passive",
-            "value":"false",
+            "value":"true",
             "type":"select",            
-			"mandatory": false,
+			"mandatory": true,
 			"dynamic": false,
             "valueProvided":false,
-            "defaultValue":"false",
+            "defaultValue":"true",
             "validationRules": null,
             "options":["false","true"]
          },
@@ -161,7 +162,7 @@
             "validationRules": null,
             "options":["false","true"]
 		 },
-		 {
+		  {
 		    "name": "includeFiles",
 		    "displayName": "IncludeFiles",
 		    "type": "textarea",
@@ -183,7 +184,7 @@
 			"valueProvided":false,
 			"validationRules":null
 		},
-		{
+		 {
 	        "name": "fileTransferStatusIndicator",
 	        "displayName": "File Transfer Status Indicator",
 	        "type": "textarea",
@@ -237,6 +238,52 @@
 	            "false",
 	            "true"
 	        ]
+	      },
+	      {
+	         "name":"pipeLineID",
+	         "displayName":"Pipeline Id",
+	         "value":"",
+	         "type":"textarea",
+	         "readOnly":false,
+	         "mandatory":true,
+	         "dynamic":false,
+	         "valueProvided":false,
+	         "defaultValue":"",
+	         "validationRules":{
+	            "pattern":"",
+	            "minLength":"",
+	            "maxLength":"2048"
+	         }
+	      },
+	      {
+	         "name":"securedPayload",
+	         "displayName":"Secured Payload",
+	         "value":"true",
+	         "type":"select",
+	         "mandatory":true,
+	         "dynamic":false,
+	         "valueProvided":false,
+	         "defaultValue":"",
+	         "validationRules":null,
+	         "options":[
+	            "false",
+	            "true"
+	         ]
+	      },
+	      {
+	         "name":"lensVisibility",
+	         "displayName":"LENS Visibility",
+	         "value":"Invisible",
+	         "type":"select",
+	         "mandatory":true,
+	         "dynamic":false,
+	         "valueProvided":false,
+	         "defaultValue":"Invisible",
+	         "validationRules":null,
+	         "options":[
+	            "Invisible",
+	            "Visible"
+	         ]
 	      }
       ],
       "folderProperties":[
@@ -268,7 +315,7 @@
 				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
 				   "minLength": "",
 				   "maxLength": "250"
-			  }   
+			  } 
 		  }
 	   ],
 	   "credentialProperties":[

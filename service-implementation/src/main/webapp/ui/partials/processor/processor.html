@@ -177,6 +177,13 @@
                   </select>
               </div>
             </div>
+            <div class="row form-group">
+            	<div class="col-sm-7 col-md-7">
+            		<span>Direct Submit
+            			<input type="checkbox" ng-model="isDirectSubmit" id="mbx_procsr_directSubmit" ng-click="onChangeDirectSubmit()" ng-show = "showDirectSubmit">
+            		</span>
+            	</div>	
+            </div>
 			</br>
 			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
                 <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
