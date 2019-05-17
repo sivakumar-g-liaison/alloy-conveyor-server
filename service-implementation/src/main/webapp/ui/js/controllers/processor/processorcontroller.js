@@ -144,6 +144,20 @@ var rest = myApp.controller(
 						credentialProperties:[]
                     }
                 };
+                
+                $scope.directSubmit = {
+                         "name":"directSubmit",
+                         "displayName" : "Direct Submit",
+                         "value":"",
+                         "type":"select",
+                         "readOnly":"",
+                         "mandatory":false,
+                         "dynamic":false,
+                         "valueProvided":false,
+                         "validationRules": {}
+                    };
+            	};
+                
                 $scope.modal = {
                     "roleList": '',
                     "uri": ''
