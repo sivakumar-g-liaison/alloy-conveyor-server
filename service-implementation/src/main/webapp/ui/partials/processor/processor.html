@@ -176,13 +176,11 @@
                   <select class="form-control" ng-change="onClusterChange()" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
                   </select>
               </div>
-            </div>
-            <div class="row form-group">
-            	<div class="col-sm-7 col-md-7">
+              <div class="col-sm-6 col-md-6 processor_adjustPaddingTop" ng-show = "showDirectSubmit">
             		<span>Direct Submit
-            			<input type="checkbox" ng-model="isDirectSubmit" id="mbx_procsr_directSubmit" ng-click="onChangeDirectSubmit()" ng-show = "showDirectSubmit">
+            			<input type="checkbox" ng-model="isDirectSubmit" id="mbx_procsr_directSubmit" ng-click="onChangeDirectSubmit()">
             		</span>
-            	</div>	
+            	</div>
             </div>
 			</br>
 			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
@@ -194,7 +192,7 @@
 						<input class="form-control" type="text" id="modifiedById" ng-model="processor.modifiedBy" name="modifiedByName" ng-show = "true" ng-disabled = "true"/>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                <div class="col-sm-6 col-md-6 processor_adjustMarginTop">
                     <div class="form-group">
 						<label for="modifiedDate">
 							Last Modified Date
