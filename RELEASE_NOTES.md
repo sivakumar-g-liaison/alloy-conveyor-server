@@ -1,6 +1,7 @@
 5.7.0-SNAPSHOT
 ---------------
 * GGT-1670 - Active-Active FILE_DELETE replication issue in EU
+* GMB-1217 - Add direct submit from remote downloader
 
 5.6.5
 ---------------

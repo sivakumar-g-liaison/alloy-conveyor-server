@@ -500,7 +500,10 @@ var rest = myApp.controller(
                 			$scope.propertiesAddedToProcessor.splice(i, 1);
                 			i--;
                 		}
-                	}
+                	} else if (property.name === "directSubmit") {
+            			$scope.propertiesAddedToProcessor.splice(i, 1);
+            			i--;
+            		}
                 }
 
             	$scope.propertiesAddedToProcessor.push({
