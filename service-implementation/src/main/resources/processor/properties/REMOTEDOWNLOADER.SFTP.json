@@ -215,6 +215,21 @@
         ]
       },
       {
+        "name":"directSubmit",
+        "displayName":"Direct Submit",
+        "type":"select",
+        "value":"false",
+        "mandatory":true,
+        "dynamic":false,
+        "valueProvided":false,
+        "defaultValue":"false",
+        "validationRules":null,
+        "options":[
+            "false",
+            "true"
+        ]
+      },
+      {
          "name":"pipeLineID",
          "displayName":"Pipeline Id",
          "value":"",
