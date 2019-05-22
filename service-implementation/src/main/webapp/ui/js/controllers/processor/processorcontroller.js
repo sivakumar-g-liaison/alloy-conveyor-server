@@ -539,60 +539,60 @@ var rest = myApp.controller(
             			"validationRules":{}
             		});
             	}
-				$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
-                if (!$scope.$$phase) {
-                    $scope.$apply();
-                };
-			}
+            	$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
+            	if (!$scope.$$phase) {
+            		$scope.$apply();
+            	};
+            }
 
-			$scope.editProcAfterDirectSubmit = function(data, profData, processorId, blockuiFlag) {
+            $scope.editProcAfterDirectSubmit = function(data, profData, processorId, blockuiFlag) {
 
-				$scope.isEdit = true;
-				var procsrId = processorId;                
-				if (blockuiFlag === true) {
-					$scope.block.unblockUI();
-				}
-				
-				$scope.processorData = $scope.editProcessorData;
-				$scope.allProfiles = profData.getProfileResponse.profiles;
-				$scope.clearProps();
-				$scope.processor.guid = data.getProcessorResponse.processor.guid;
-				$scope.processor.name = data.getProcessorResponse.processor.name;
-				$scope.processor.modifiedBy = data.getProcessorResponse.processor.modifiedBy;
-				$scope.processor.modifiedDate = data.getProcessorResponse.processor.modifiedDate;
-											
-				//check if it is the gitlab url
-				if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
-						$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
-						$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
-				}	
-							
-				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
-				
-				$scope.processor.description = data.getProcessorResponse.processor.description;
-				$scope.processor.clusterType = data.getProcessorResponse.processor.clusterType;
-				if (data.getProcessorResponse.processor.status === 'ACTIVE') {
-					$scope.status = $scope.processorData.supportedStatus.options[0];
-				} else if (data.getProcessorResponse.processor.status === 'INACTIVE') {
-					$scope.status = $scope.processorData.supportedStatus.options[1];
-				} else {
-					$scope.status = $scope.processorData.supportedStatus.options[2];
-				}
+                $scope.isEdit = true;
+                var procsrId = processorId;
+                if (blockuiFlag === true) {
+                	$scope.block.unblockUI();
+                }
 
-				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);				
-				$scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);				
-				$scope.selectedProfiles = data.getProcessorResponse.processor.profiles;				
-				//Schedules
-				for (var i = 0; i < $scope.selectedProfiles.length; i++) {
-					// To remove $$hashKey
-					//var profs = angular.fromJson(angular.toJson($scope.allProfiles));
-					for (var j = 0; j < $scope.allProfiles.length; j++) {
-						if ($scope.selectedProfiles[i].id === $scope.allProfiles[j].id) {
-							$scope.allProfiles.splice(j, 1);
-							break;
-						}
-					}
-				}                
+                $scope.processorData = $scope.editProcessorData;
+                $scope.allProfiles = profData.getProfileResponse.profiles;
+                $scope.clearProps();
+                $scope.processor.guid = data.getProcessorResponse.processor.guid;
+                $scope.processor.name = data.getProcessorResponse.processor.name;
+                $scope.processor.modifiedBy = data.getProcessorResponse.processor.modifiedBy;
+                $scope.processor.modifiedDate = data.getProcessorResponse.processor.modifiedDate;
+
+                //check if it is the gitlab url
+                if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
+                	$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                	$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
+                }
+
+                $scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
+
+                $scope.processor.description = data.getProcessorResponse.processor.description;
+                $scope.processor.clusterType = data.getProcessorResponse.processor.clusterType;
+                if (data.getProcessorResponse.processor.status === 'ACTIVE') {
+                	$scope.status = $scope.processorData.supportedStatus.options[0];
+                } else if (data.getProcessorResponse.processor.status === 'INACTIVE') {
+                	$scope.status = $scope.processorData.supportedStatus.options[1];
+                } else {
+                	$scope.status = $scope.processorData.supportedStatus.options[2];
+                }
+
+                $scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
+                $scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);
+                $scope.selectedProfiles = data.getProcessorResponse.processor.profiles;
+                //Schedules
+                for (var i = 0; i < $scope.selectedProfiles.length; i++) {
+                	// To remove $$hashKey
+                	//var profs = angular.fromJson(angular.toJson($scope.allProfiles));
+                	for (var j = 0; j < $scope.allProfiles.length; j++) {
+                		if ($scope.selectedProfiles[i].id === $scope.allProfiles[j].id) {
+                			$scope.allProfiles.splice(j, 1);
+                			break;
+                		}
+                	}
+                }                
                 if ($scope.processor.protocol.value === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol.value === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol.value === 'LITEHTTPSYNCPROCESSOR') {
                     $scope.isProcessorTypeHTTPListener = true;
                 } else {
@@ -638,28 +638,28 @@ var rest = myApp.controller(
                 if($scope.processor.protocol.value === "HTTP" || $scope.processor.protocol.value === "HTTPS") {
                 	$scope.isProcessorTypeHTTPRemoteUploader = true;
                 }
-				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
-				
-				$scope.propertiesAddedToProcessor = [];
-				$scope.availableProperties = [];
-				$scope.folderAddedToProcessor = [];
-				$scope.folderAvailableProperties = [];
-				$scope.processorCredProperties = [];
-				$scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
-				$scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
-				$scope.checkDirectSubmit = false;
+                $scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
                 
-                for (var i = 0; i < $scope.staticProperties.length; i++) {				     
-					 var property = $scope.staticProperties[i];
-					 if (property.mandatory === true || property.valueProvided === true) {
-						 if (property.name === "pipeLineID") {
-							 property.value = $rootScope.pipelineId;
-						 }
-                        $scope.propertiesAddedToProcessor.push(property);
-                     } else {
-                        $scope.availableProperties.push(property);
-                    }
-				}
+                $scope.propertiesAddedToProcessor = [];
+                $scope.availableProperties = [];
+                $scope.folderAddedToProcessor = [];
+                $scope.folderAvailableProperties = [];
+                $scope.processorCredProperties = [];
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
+                $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
+                $scope.checkDirectSubmit = false;
+
+                for (var i = 0; i < $scope.staticProperties.length; i++) {
+                	var property = $scope.staticProperties[i];
+                	if (property.mandatory === true || property.valueProvided === true) {
+                		if (property.name === "pipeLineID") {
+                			property.value = $rootScope.pipelineId;
+                		}
+                		$scope.propertiesAddedToProcessor.push(property);
+                	} else {
+                		$scope.availableProperties.push(property);
+                	}
+                }
 
                 for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
                 	var property = $scope.propertiesAddedToProcessor[i];
@@ -1428,8 +1428,8 @@ var rest = myApp.controller(
 			};
 			
 			$scope.resetProcessorType = function(proceesorType) {
-				
-				$scope.showDirectSubmit = false;
+
+			    $scope.showDirectSubmit = false;
 			    $scope.selectedProcessorType = proceesorType.value;
 			    $scope.initialSetUp();
 			    $scope.clearOldLoginDetails();
@@ -1587,7 +1587,7 @@ var rest = myApp.controller(
 				 }
               	 switch ($scope.selectedProcessorType) {
 				   case "REMOTEDOWNLOADER":
-					   $scope.showDirectSubmit = true;
+				       $scope.showDirectSubmit = true;
 				       switch (protocalName) {
 							case "SFTP":
 								if ($scope.isDirectSubmit) {
