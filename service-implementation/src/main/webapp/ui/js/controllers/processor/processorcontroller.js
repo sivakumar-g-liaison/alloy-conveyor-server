@@ -20,29 +20,18 @@ var rest = myApp.controller(
             //check Direct Submit
             $scope.onChangeDirectSubmit = function() {
             	if ($scope.isDirectSubmit) {
-            		$scope.isDirectSubmit = false;
-            	} else {
-            		$scope.isDirectSubmit = true;
-            	}
-            	
-            	if ($scope.isEdit) {
-            		$scope.editProcAfterDirectSubmit($scope.downloaderData,  $scope.profileData, $scope.processor.guid, true);
-            		$scope.staticProperties = $scope.downloaderData.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
-            		for (var i = 0; i < $scope.staticProperties.length; i++) {
-            			var property = $scope.staticProperties[i];
-            			if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
-            				if (property.value === "true") {
-            					$scope.isDirectSubmit = false;
-            				} else {
-            					$scope.isDirectSubmit = true;
-            				}
-            			}
-            		}
-            	} else {
-            		$scope.resetProtocol($scope.processor.protocol);
-            	}
+                    $scope.isDirectSubmit = false;
+                } else {
+                    $scope.isDirectSubmit = true;
+                }
+
+                if ($scope.isEdit) {
+                    $scope.editProcAfterDirectSubmit($scope.downloaderData,  $scope.profileData, $scope.processor.guid, true);
+                } else {
+                    $scope.resetProtocol($scope.processor.protocol);
+                }
             }
-                 
+
             // variable to show or hide ssh keys section
             $scope.showSSHKeysSection = false;
             // variable to determine enable or disable add ssh keypair button
@@ -475,35 +464,34 @@ var rest = myApp.controller(
                 $scope.processorCredProperties = [];
                 $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
                 $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
-                $scope.checkDirectSubmit = false;
 
                 for (var i = 0; i < $scope.staticProperties.length; i++) {
-                	var property = $scope.staticProperties[i];
-                	if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
-                		if (property.value === "true") {
-                			$scope.isDirectSubmit = true;
-                		} else {
-                			$scope.isDirectSubmit = false;
-                		}
-                	}
-                	if (property.mandatory === true || property.valueProvided === true) {
-                		$scope.propertiesAddedToProcessor.push(property);
-                	} else {
-                		$scope.availableProperties.push(property);
-                	}
+                    var property = $scope.staticProperties[i];
+                    if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
+                        if (property.value === "true") {
+                            $scope.isDirectSubmit = true;
+                        } else {
+                            $scope.isDirectSubmit = false;
+                        }
+                    }
+                    if (property.mandatory === true || property.valueProvided === true) {
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else {
+                        $scope.availableProperties.push(property);
+                    }
                 }
 
                 for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
-                	var property = $scope.propertiesAddedToProcessor[i];
-                	if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
-                		if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
-                			$scope.propertiesAddedToProcessor.splice(i, 1);
-                			i--;
-                		}
-                	} else if (property.name === "directSubmit") {
-            			$scope.propertiesAddedToProcessor.splice(i, 1);
-            			i--;
-            		}
+                    var property = $scope.propertiesAddedToProcessor[i];
+                    if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
+                            $scope.propertiesAddedToProcessor.splice(i, 1);
+                            i--;
+                        }
+                    } else if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
+                        $scope.propertiesAddedToProcessor.splice(i, 1);
+                        i--;
+                    }
                 }
 
             	$scope.propertiesAddedToProcessor.push({
@@ -547,135 +535,39 @@ var rest = myApp.controller(
 
             $scope.editProcAfterDirectSubmit = function(data, profData, processorId, blockuiFlag) {
 
-                $scope.isEdit = true;
-                var procsrId = processorId;
-                if (blockuiFlag === true) {
-                	$scope.block.unblockUI();
-                }
-
                 $scope.processorData = $scope.editProcessorData;
-                $scope.allProfiles = profData.getProfileResponse.profiles;
-                $scope.clearProps();
-                $scope.processor.guid = data.getProcessorResponse.processor.guid;
-                $scope.processor.name = data.getProcessorResponse.processor.name;
-                $scope.processor.modifiedBy = data.getProcessorResponse.processor.modifiedBy;
-                $scope.processor.modifiedDate = data.getProcessorResponse.processor.modifiedDate;
 
-                //check if it is the gitlab url
-                if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
-                	$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
-                	$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
-                }
-
-                $scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
-
-                $scope.processor.description = data.getProcessorResponse.processor.description;
-                $scope.processor.clusterType = data.getProcessorResponse.processor.clusterType;
-                if (data.getProcessorResponse.processor.status === 'ACTIVE') {
-                	$scope.status = $scope.processorData.supportedStatus.options[0];
-                } else if (data.getProcessorResponse.processor.status === 'INACTIVE') {
-                	$scope.status = $scope.processorData.supportedStatus.options[1];
-                } else {
-                	$scope.status = $scope.processorData.supportedStatus.options[2];
-                }
-
-                $scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
-                $scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);
-                $scope.selectedProfiles = data.getProcessorResponse.processor.profiles;
-                //Schedules
-                for (var i = 0; i < $scope.selectedProfiles.length; i++) {
-                	// To remove $$hashKey
-                	//var profs = angular.fromJson(angular.toJson($scope.allProfiles));
-                	for (var j = 0; j < $scope.allProfiles.length; j++) {
-                		if ($scope.selectedProfiles[i].id === $scope.allProfiles[j].id) {
-                			$scope.allProfiles.splice(j, 1);
-                			break;
-                		}
-                	}
-                }                
-                if ($scope.processor.protocol.value === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol.value === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol.value === 'LITEHTTPSYNCPROCESSOR') {
-                    $scope.isProcessorTypeHTTPListener = true;
-                } else {
-                    $scope.isProcessorTypeHTTPListener = false;
-                }
-                
-                if ($scope.processor.protocol.value === 'FILEWRITER') {
-                    $scope.isProcessorTypeFileWriter = true;
-                } else {
-                    $scope.isProcessorTypeFileWriter = false;
-                }
-                
-                if ($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
-                    $scope.isProcessorTypeDropbox = true;
-                } else {
-                    $scope.isProcessorTypeDropbox = false;
-                }
-                
-                if ($scope.processor.protocol.value === 'SWEEPER') {
-                    $scope.isProcessorTypeSweeper = true;
-                } else {
-                    $scope.isProcessorTypeSweeper = false;
-                }
-                
-                if ($scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
-                    $scope.isProcessorTypeConditionalSweeper = true;
-                } else {
-                    $scope.isProcessorTypeConditionalSweeper = false;
-                }
-                
-                if ($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'CONDITIONALSWEEPER') {
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBoxSweeper.supportedJavaScriptCheckBox;
-                } else {
-                    $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
-                }
-
-                //GMB 221
-                if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-                	$scope.showTruststoreSection = true;	
-                } else {
-                	$scope.showTruststoreSection = false;
-                }
-                if($scope.processor.protocol.value === "HTTP" || $scope.processor.protocol.value === "HTTPS") {
-                	$scope.isProcessorTypeHTTPRemoteUploader = true;
-                }
-                $scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
-                
                 $scope.propertiesAddedToProcessor = [];
                 $scope.availableProperties = [];
-                $scope.folderAddedToProcessor = [];
-                $scope.folderAvailableProperties = [];
-                $scope.processorCredProperties = [];
-                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
-                $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
-                $scope.checkDirectSubmit = false;
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
 
                 for (var i = 0; i < $scope.staticProperties.length; i++) {
-                	var property = $scope.staticProperties[i];
-                	if (property.mandatory === true || property.valueProvided === true) {
-                		if (property.name === "pipeLineID") {
-                			property.value = $rootScope.pipelineId;
-                		}
-                		$scope.propertiesAddedToProcessor.push(property);
-                	} else {
-                		$scope.availableProperties.push(property);
-                	}
+                    var property = $scope.staticProperties[i];
+                    if (property.mandatory === true || property.valueProvided === true) {
+                        if (property.name === "pipeLineID") {
+                            property.value = $rootScope.pipelineId;
+                        }
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else {
+                        $scope.availableProperties.push(property);
+                    }
                 }
 
                 for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
-                	var property = $scope.propertiesAddedToProcessor[i];
-                	if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
-                		if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
-                			$scope.propertiesAddedToProcessor.splice(i, 1);
-                			i--;
-                		}
-                	} else if (property.name === "directSubmit") {
-            			$scope.propertiesAddedToProcessor.splice(i, 1);
-            			i--;
-            		}
+                    var property = $scope.propertiesAddedToProcessor[i];
+                    if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
+                            $scope.propertiesAddedToProcessor.splice(i, 1);
+                            i--;
+                        }
+                    } else if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER" ) {
+                        $scope.propertiesAddedToProcessor.splice(i, 1);
+                        i--;
+                    }
                 }
-				
-            	$scope.propertiesAddedToProcessor.push({
-                	
+
+                $scope.propertiesAddedToProcessor.push({
+
                     "name":"",
                     "displayName" : "",
                     "value":"",
@@ -685,36 +577,8 @@ var rest = myApp.controller(
                     "dynamic":false,
                     "valueProvided":false,
                     "validationRules": {}
-                 });               	
-                
-                for (var i = 0; i < $scope.folderProperties.length; i++) {				     
-					 var property = $scope.folderProperties[i];
-					 if (property.mandatory === true || property.valueProvided === true) {
-                       $scope.folderAddedToProcessor.push(property);
-                   } else {
-                       $scope.folderAvailableProperties.push(property);
-                   }
-				}
-				
-				if ($scope.folderProperties.length > 1) {
-				   $scope.folderAddedToProcessor.push({
-				   
-						  "folderURI": "",
-						  "folderDisplayType": "",
-						  "folderType": "",
-						  "folderDesc": "",
-						  "mandatory": false,
-						  "readOnly":false,
-						  "valueProvided":false,
-						  "validationRules":{}
-					  
-					 });      
-				}
-				$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
-                if (!$scope.$$phase) {
-                    $scope.$apply();
-                };
-			}
+                 });
+            }
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
 				$scope.restService.get(url,
@@ -1706,7 +1570,7 @@ var rest = myApp.controller(
                     if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
                         $scope.propertiesAddedToProcessor.push(property);
                     } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)) {
-                    	$scope.availableProperties.push(property);
+                        $scope.availableProperties.push(property);
                     }
                 }
                 
