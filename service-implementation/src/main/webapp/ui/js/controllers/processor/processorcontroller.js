@@ -19,7 +19,7 @@ var rest = myApp.controller(
             }
             //check Direct Submit
             $scope.onChangeDirectSubmit = function() {
-            	if ($scope.isDirectSubmit) {
+                if ($scope.isDirectSubmit) {
                     $scope.isDirectSubmit = false;
                 } else {
                     $scope.isDirectSubmit = true;
@@ -506,31 +506,31 @@ var rest = myApp.controller(
                     "valueProvided":false,
                     "validationRules": {}
                  });
-            	for (var i = 0; i < $scope.folderProperties.length; i++) {
-            		var property = $scope.folderProperties[i];
-            		if (property.mandatory === true || property.valueProvided === true) {
-            			$scope.folderAddedToProcessor.push(property);
-            		} else {
-            			$scope.folderAvailableProperties.push(property);
-            		}
-            	}
+                for (var i = 0; i < $scope.folderProperties.length; i++) {
+                    var property = $scope.folderProperties[i];
+                    if (property.mandatory === true || property.valueProvided === true) {
+                        $scope.folderAddedToProcessor.push(property);
+                    } else {
+                        $scope.folderAvailableProperties.push(property);
+                    }
+                }
             	
             	if ($scope.folderProperties.length > 1) {
-            		$scope.folderAddedToProcessor.push({
-            			"folderURI": "",
-            			"folderDisplayType": "",
-            			"folderType": "",
-            			"folderDesc": "",
-            			"mandatory": false,
-            			"readOnly":false,
-            			"valueProvided":false,
-            			"validationRules":{}
-            		});
-            	}
-            	$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
-            	if (!$scope.$$phase) {
-            		$scope.$apply();
-            	};
+                    $scope.folderAddedToProcessor.push({
+                        "folderURI": "",
+                        "folderDisplayType": "",
+                        "folderType": "",
+                        "folderDesc": "",
+                        "mandatory": false,
+                        "readOnly":false,
+                        "valueProvided":false,
+                        "validationRules":{}
+                    });
+                }
+                $scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                };
             }
 
             $scope.editProcAfterDirectSubmit = function(data, profData, processorId, blockuiFlag) {
@@ -633,7 +633,7 @@ var rest = myApp.controller(
                         $scope.block.unblockUI();
                         if (status === 200) {
     						$scope.scriptIsEdit = false;
-    						$scope.downloaderData = data;
+                            $scope.downloaderData = data;
     						if (data.getProcessorResponse.processor.javaScriptURI != null && 
     						data.getProcessorResponse.processor.javaScriptURI != "") {
     						$scope.scriptIsEdit = true;
@@ -646,7 +646,7 @@ var rest = myApp.controller(
                             $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                                 function (profData) {
                                     
-                            	        $scope.profileData = profData;
+                                        $scope.profileData = profData;
     									var editProcessor = false;
     									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
     										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
@@ -779,8 +779,8 @@ var rest = myApp.controller(
                 }
                 
             	if ($scope.procsrType.value === "REMOTEDOWNLOADER") {
-                	$scope.directSubmit.value = $scope.isDirectSubmit;
-                	$scope.processor.processorPropertiesInTemplateJson.staticProperties.push($scope.directSubmit);
+                    $scope.directSubmit.value = $scope.isDirectSubmit;
+                    $scope.processor.processorPropertiesInTemplateJson.staticProperties.push($scope.directSubmit);
                 }
                 
 				//add folder properties
@@ -1293,7 +1293,7 @@ var rest = myApp.controller(
 			
 			$scope.resetProcessorType = function(proceesorType) {
 
-			    $scope.showDirectSubmit = false;
+                $scope.showDirectSubmit = false;
 			    $scope.selectedProcessorType = proceesorType.value;
 			    $scope.initialSetUp();
 			    $scope.clearOldLoginDetails();
@@ -1451,7 +1451,7 @@ var rest = myApp.controller(
 				 }
               	 switch ($scope.selectedProcessorType) {
 				   case "REMOTEDOWNLOADER":
-				       $scope.showDirectSubmit = true;
+                       $scope.showDirectSubmit = true;
 				       switch (protocalName) {
 							case "SFTP":
 								if ($scope.isDirectSubmit) {
