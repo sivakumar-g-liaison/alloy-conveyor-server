@@ -181,20 +181,20 @@ public class QueueAndTopicProcessInitializer {
                 break;
 
             case RELAY:
-                
-                try {
-
-                    logger.info("Starting RUNNING_PROCESSOR_RETRY_QUEUE Listener");
-                    QueuePooledListenerContainer relativeRelay = new MailboxQueuePooledListenerContainer(RelativeRelayQueueConsumer.class, RELATIVE_RELAY_QUEUE);
-                    relativeRelay.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for inbound file could not be initialized.", e);
-                }
-                
             case LOW_SECURE_RELAY:
 
                 // Initialize processor queue and processedPayload queue
+                
+                try {
+
+                    logger.info("Starting RELATIVE_RELAY_QUEUE Listener");
+                    QueuePooledListenerContainer relativeRelay = new MailboxQueuePooledListenerContainer(RelativeRelayQueueConsumer.class, RELATIVE_RELAY_QUEUE);
+                    relativeRelay.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started RELATIVE_RELAY_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for Reltive relay could not be initialized.", e);
+                }
+                
                 try {
 
                     logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
