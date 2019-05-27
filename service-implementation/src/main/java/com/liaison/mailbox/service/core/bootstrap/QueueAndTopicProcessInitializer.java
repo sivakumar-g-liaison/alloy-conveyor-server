@@ -24,6 +24,7 @@ import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueue
 import com.liaison.mailbox.service.queue.consumer.InboundFileQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
+import com.liaison.mailbox.service.queue.consumer.RelativeRelayQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.RunningProcessorRetryQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
@@ -39,6 +40,7 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,6 +118,7 @@ public class QueueAndTopicProcessInitializer {
     private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
     private static final String INBOUND_FILE_QUEUE = "inboundFile";
     private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
+    private static final String RELATIVE_RELAY_QUEUE = "relativeRelay";
 
     public static void initialize() {
 
@@ -178,6 +181,17 @@ public class QueueAndTopicProcessInitializer {
                 break;
 
             case RELAY:
+                
+                try {
+
+                    logger.info("Starting RUNNING_PROCESSOR_RETRY_QUEUE Listener");
+                    QueuePooledListenerContainer relativeRelay = new MailboxQueuePooledListenerContainer(RelativeRelayQueueConsumer.class, RELATIVE_RELAY_QUEUE);
+                    relativeRelay.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for inbound file could not be initialized.", e);
+                }
+                
             case LOW_SECURE_RELAY:
 
                 // Initialize processor queue and processedPayload queue
@@ -250,7 +264,7 @@ public class QueueAndTopicProcessInitializer {
                 } catch (Exception e) {
                     logger.warn("Queue listener for inbound file could not be initialized.", e);
                 }
-
+                
                 // Start consuming from Queue Service for different processor types
                 if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
                     try {
