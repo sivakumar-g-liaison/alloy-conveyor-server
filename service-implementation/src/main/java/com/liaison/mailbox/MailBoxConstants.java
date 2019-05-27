@@ -582,7 +582,7 @@ public interface MailBoxConstants {
     String TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.inbound.file.topicSuffix.default";
     String TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.inbound.file.topicSuffix.additional";
     
-    String TOPIC_RELATIVE_RELAY_TOPIC_SUFFIX = "com.liaison.queueservice.topic.relative.relay.topicSuffix.default";
+    String TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.relative.relay.topicSuffix.default";
     String TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES = "com.liaison.queueservice.topic.relative.relay.topicSuffix.additional";
 
     String TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX = "com.liaison.queueservice.topic.running.processor.topicSuffix.default";

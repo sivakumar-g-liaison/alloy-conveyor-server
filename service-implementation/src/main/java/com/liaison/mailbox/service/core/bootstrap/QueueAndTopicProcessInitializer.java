@@ -32,6 +32,8 @@ import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectory
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
+import com.liaison.mailbox.service.queue.kafka.processor.RelativeRelay;
+import com.liaison.mailbox.service.queue.kafka.processor.RelativeRelayProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
@@ -66,6 +68,8 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILB
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES;
 
 /**
  * Initializes all queue pollers.
@@ -390,6 +394,19 @@ public class QueueAndTopicProcessInitializer {
                                 getKafkaTextMessageProcessor(injector, RunningProcessorRetry.class));
 
                         logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
+                        
+                        logger.info("Starting RELATIVE_RELAY_QUEUE Listener with QS integration");
+
+                        // Read topics info from properties
+                        Map<String, List<String>> relativeRelayConsumerTopics = getConsumerTopics(
+                                TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX,
+                                TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES);
+
+                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
+                                relativeRelayConsumerTopics,
+                                getKafkaTextMessageProcessor(injector, InboundFile.class));
+
+                        logger.info("Started INBOUND_FILE_QUEUE Listener with QS integration");
 
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
@@ -440,6 +457,8 @@ public class QueueAndTopicProcessInitializer {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
+        } else if (RelativeRelay.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RelativeRelay.class));
         } else {
             throw new RuntimeException("Invalid class - " + clazz);
         }
