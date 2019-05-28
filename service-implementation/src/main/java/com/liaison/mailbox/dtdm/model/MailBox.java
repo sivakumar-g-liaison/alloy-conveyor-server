@@ -169,7 +169,7 @@ public class MailBox implements Identifiable {
 
 	// bi-directional many-to-one association to MailBoxProcessor
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
-			CascadeType.REMOVE, CascadeType.REFRESH })
+			CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	public Set<Processor> getMailboxProcessors() {
 		return this.mailboxProcessors;
 	}
