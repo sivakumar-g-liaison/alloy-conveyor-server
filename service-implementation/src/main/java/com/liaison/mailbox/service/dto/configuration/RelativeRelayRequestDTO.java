@@ -29,10 +29,9 @@ public class RelativeRelayRequestDTO {
         super();
     }
     
-    public RelativeRelayRequestDTO(File file, SweeperStaticPropertiesDTO staticProp, Processor processor) {
+    public RelativeRelayRequestDTO(File file, SweeperStaticPropertiesDTO staticProp) {
         this.file = file;
         this.staticProp = staticProp;
-        this.processor = processor;
     }
 
     public File getFile() {

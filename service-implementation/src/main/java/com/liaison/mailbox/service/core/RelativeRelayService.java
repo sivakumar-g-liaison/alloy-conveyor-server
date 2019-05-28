@@ -41,7 +41,8 @@ public class RelativeRelayService implements Runnable {
 
     private void doProcess() throws Throwable {
 
-        RelativeRelayRequestDTO relateiveRelayRequestDTO = new RelativeRelayRequestDTO(file, staticProp, processor);
+        RelativeRelayRequestDTO relateiveRelayRequestDTO = new RelativeRelayRequestDTO(file, staticProp);
+        relateiveRelayRequestDTO.setProcessor(this.processor);
         LOGGER.info("Relative Relay Downloader details1 {}", file);
         LOGGER.info("RElative Relay static property details {}", staticProp.getPipeLineID());
         LOGGER.info("Processor Details for {}", processor);
