@@ -122,7 +122,8 @@ public class QueueAndTopicProcessInitializer {
     private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
     private static final String INBOUND_FILE_QUEUE = "inboundFile";
     private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
-    private static final String RELATIVE_RELAY_QUEUE = "relativeRelay";
+    private static final String RELATIVE_RELAY_QUEUE = "inboundFile";
+//    private static final String RELATIVE_RELAY_QUEUE = "relativeRelay";
 
     public static void initialize() {
 
