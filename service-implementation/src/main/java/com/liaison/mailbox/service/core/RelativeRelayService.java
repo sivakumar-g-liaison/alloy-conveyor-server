@@ -47,7 +47,6 @@ public class RelativeRelayService implements Runnable {
         LOGGER.info("Processor Details for {}", processor);
         String message = JAXBUtility.marshalToJSON(relateiveRelayRequestDTO);
         
-        LOGGER.info("Message details {}", message);
         RelativeRelaySendQueue.post(message);
     }
 
@@ -55,8 +54,8 @@ public class RelativeRelayService implements Runnable {
     public void run() {
         try {
             doProcess();
-        } catch (Throwable e) {
-           LOGGER.error("Exception caught");
+        } catch (Throwable ex) {
+           LOGGER.error("Exception caught {}", ex.getMessage());
         }
     }
 }
