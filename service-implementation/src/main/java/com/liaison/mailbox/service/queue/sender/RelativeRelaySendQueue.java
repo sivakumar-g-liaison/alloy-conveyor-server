@@ -22,7 +22,8 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 
 public class RelativeRelaySendQueue implements AutoCloseable {
 
-    private static final String QUEUE_NAME = "relativeRelay";
+//    private static final String QUEUE_NAME = "relativeRelay";
+    private static final String QUEUE_NAME = "inboundFile";
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
     private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX);

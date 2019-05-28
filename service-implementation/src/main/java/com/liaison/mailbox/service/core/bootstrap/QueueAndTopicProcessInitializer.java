@@ -404,9 +404,9 @@ public class QueueAndTopicProcessInitializer {
 
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
                                 relativeRelayConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, InboundFile.class));
+                                getKafkaTextMessageProcessor(injector, RelativeRelay.class));
 
-                        logger.info("Started INBOUND_FILE_QUEUE Listener with QS integration");
+                        logger.info("Started RELATIVE_RELAY_QUEUE Listener with QS integration");
 
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
