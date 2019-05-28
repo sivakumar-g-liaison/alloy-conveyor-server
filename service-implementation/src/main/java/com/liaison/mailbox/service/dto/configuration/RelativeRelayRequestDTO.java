@@ -32,6 +32,7 @@ public class RelativeRelayRequestDTO {
     public RelativeRelayRequestDTO(File file, SweeperStaticPropertiesDTO staticProp, Processor processor) {
         this.file = file;
         this.staticProp = staticProp;
+        this.processor = processor;
     }
 
     public File getFile() {
