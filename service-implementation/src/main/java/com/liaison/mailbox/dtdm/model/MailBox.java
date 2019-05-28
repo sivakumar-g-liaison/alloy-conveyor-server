@@ -168,7 +168,7 @@ public class MailBox implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBoxProcessor
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REMOVE, CascadeType.REFRESH })
 	public Set<Processor> getMailboxProcessors() {
 		return this.mailboxProcessors;
