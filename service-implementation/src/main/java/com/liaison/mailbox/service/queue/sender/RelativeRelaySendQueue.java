@@ -48,7 +48,6 @@ public class RelativeRelaySendQueue implements AutoCloseable {
         if (QUEUE_SERVICE_ENABLED) {
             Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, 0L);
         } else {
-            LOG.info("Message beofere Send {}", message);
             getInstance().sendMessage(message);
         }
     }
