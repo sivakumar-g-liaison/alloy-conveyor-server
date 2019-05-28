@@ -42,7 +42,9 @@ public class RelativeRelayService implements Runnable {
     private void doProcess() throws Throwable {
 
         RelativeRelayRequestDTO relateiveRelayRequestDTO = new RelativeRelayRequestDTO(file, staticProp);
-        relateiveRelayRequestDTO.setProcessor(this.processor);
+        relateiveRelayRequestDTO.setMailBoxId(processor.getMailbox().getPguid());
+        relateiveRelayRequestDTO.setDynamicProperties(processor.getDynamicProperties());
+        relateiveRelayRequestDTO.setTtlMap(processor.getTTLUnitAndTTLNumber());
         LOGGER.info("Relative Relay Downloader details1 {}", file);
         LOGGER.info("RElative Relay static property details {}", staticProp.getPipeLineID());
         LOGGER.info("Processor Details for {},  {},  {}", processor.getMailbox().getPguid(), processor.getProcsrName(),  processor.getPguid());

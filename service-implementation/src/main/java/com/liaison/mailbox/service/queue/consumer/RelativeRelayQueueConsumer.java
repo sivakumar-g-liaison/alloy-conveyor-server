@@ -20,6 +20,7 @@ import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -37,6 +38,7 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
@@ -56,10 +58,10 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
             
             LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
             //construct workticket for downloaded file.
-            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getProcessor());
+            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
-            persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getProcessor());
+            persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
             
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
@@ -79,11 +81,11 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
      * @throws IllegalAccessException
      * @throws IOException
      */
-    private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp, Processor processor) throws IllegalAccessException, IOException {
+    private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp, String mailBoxId) throws IllegalAccessException, IOException {
         
         Map<String, Object> additionalContext = new HashMap<String, Object>();
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
-        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, processor.getMailbox().getPguid());
+        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, mailBoxId);
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
         
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
@@ -141,11 +143,11 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
      * @param workTicket workticket
      * @throws IOException
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Processor processor) throws IOException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
-        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
+//        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
 
         if (!ttlMap.isEmpty()) {
             Integer ttlDays = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
@@ -155,7 +157,7 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
         properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(processor.getDynamicProperties()));
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
 
         String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
