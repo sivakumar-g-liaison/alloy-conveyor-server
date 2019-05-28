@@ -15,6 +15,9 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_RELATIVE_RELAY_DEFAULT_
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.commons.messagebus.SendClient;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.messagebus.queue.QueueTextSendClient;
@@ -22,6 +25,7 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 
 public class RelativeRelaySendQueue implements AutoCloseable {
 
+    private static final Logger LOG = LogManager.getLogger(ProcessorSendQueue.class);
 //    private static final String QUEUE_NAME = "relativeRelay";
     private static final String QUEUE_NAME = "inboundFile";
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
@@ -44,6 +48,7 @@ public class RelativeRelaySendQueue implements AutoCloseable {
         if (QUEUE_SERVICE_ENABLED) {
             Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, 0L);
         } else {
+            LOG.info("Message beofere Send {}", message);
             getInstance().sendMessage(message);
         }
     }

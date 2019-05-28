@@ -54,6 +54,7 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         try {
             RelativeRelayRequestDTO relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
             
+            LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
             //construct workticket for downloaded file.
             WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getProcessor());
             globalProcessorId = workTicket.getGlobalProcessId();
