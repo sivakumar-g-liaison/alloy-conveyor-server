@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -74,12 +75,17 @@ public class RelativeRelaySweeperService implements Runnable {
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
             
-            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-            SweeperQueueSendClient.post(workTicketToSb, false);
-            verifyAndDeletePayload(workTicket);
+            if (workTicket.getPayloadURI() !=null ) {
+            	String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            	LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+                SweeperQueueSendClient.post(workTicketToSb, false);
+                verifyAndDeletePayload(workTicket);
+            } else {
+            	throw new RuntimeException("Cannot return payload");
+            }
+            
         } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
-            e.printStackTrace();
+            LOGGER.error("Payload cannot persist and workticket.");
         }
 	}
 	
@@ -175,7 +181,27 @@ public class RelativeRelaySweeperService implements Runnable {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        // persist payload in storage utilities.
+        int retryCount = 0;
+        while (retryCount < 6) {
+        	if (StorageUtilities.getConnection() != null) {
+        		persistPayloadAndWorkTicket(workTicket, properties, payloadFile);
+        		return;
+        	} else {
+        		retryCount++;
+        		LOGGER.info("#################   Number of retryCount ##############   {}   ", retryCount);
+        	}
+        }
+        
+        if (retryCount > 6) {
+        	LOGGER.warn("Reached maximum retry and dropping this message - {}", retryCount);
+            return;
+        }
+    }
+    
+    private void persistPayloadAndWorkTicket(WorkTicket workTicket,
+			Map<String, String> properties, File payloadFile) throws IOException,
+			FileNotFoundException {
+		// persist payload in storage utilities.
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
@@ -183,7 +209,7 @@ public class RelativeRelaySweeperService implements Runnable {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-    }
+	}
 
     /**
      * Deletes the given file

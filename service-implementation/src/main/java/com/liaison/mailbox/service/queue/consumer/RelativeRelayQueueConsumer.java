@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.queue.consumer;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -168,7 +169,27 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        // persist payload in storage utilities.
+        
+        int retryCount = 0;
+        while (retryCount < 6) {
+        	if (StorageUtilities.getConnection() != null) {
+        		persistPayloadAndWorkTicket(workTicket, properties, payloadFile);
+        		return;
+        	} else {
+        		retryCount++;
+        	}
+        }
+        
+        if (retryCount > 6) {
+        	LOGGER.warn("Reached maximum retry and dropping this message - {}", retryCount);
+            return;
+        }
+    }
+
+	private void persistPayloadAndWorkTicket(WorkTicket workTicket,
+			Map<String, String> properties, File payloadFile) throws IOException,
+			FileNotFoundException {
+		// persist payload in storage utilities.
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
@@ -176,7 +197,7 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-    }
+	}
 
     /**
      * Deletes the given file

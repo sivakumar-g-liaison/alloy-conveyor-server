@@ -662,4 +662,13 @@ public class StorageUtilities {
             throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    /**
+     * Method to return FS2 connection.
+     * @return FS2
+     */
+    public static FlexibleStorageSystem getConnection() {
+    	FS2=null;
+    	return FS2;
+    }
 }
