@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue.consumer;
+package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,51 +31,58 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.service.core.MailBoxService;
-import com.liaison.mailbox.service.core.RelativeRelaySweeperService;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.thread.pool.RelativeRelayProcessThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
-    
-    private static final Logger LOGGER = LogManager.getLogger(RelativeRelayQueueConsumer.class);
-    
-    @Override
-    public void processMessage(String message) {
-    	
-    	RelativeRelayProcessThreadPool.getExecutorService().submit(new RelativeRelaySweeperService(message));
-//        String globalProcessorId = null;
-//        try {
-//            RelativeRelayRequestDTO relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
-//            
-//            LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
-//            //construct workticket for downloaded file.
-//            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
-//            globalProcessorId = workTicket.getGlobalProcessId();
-//            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
-//            persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
-//            
-//            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-//            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-//            SweeperQueueSendClient.post(workTicketToSb, false);
-//            verifyAndDeletePayload(workTicket);
-//        } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
-//            e.printStackTrace();
-//        } 
-    }
-    
+public class RelativeRelaySweeperService implements Runnable {
+	
+	private String message;
+	
+	private static final Logger LOGGER = LogManager.getLogger(RelativeRelaySweeperService.class);
+	
+	public RelativeRelaySweeperService() {
+		
+	}
+
+	public RelativeRelaySweeperService(String message) {
+		this.message = message;
+	}
+	
+	@Override
+	public void run() {
+		doProcess();
+	}
+
+	private void doProcess() {
+		String globalProcessorId = null;
+        try {
+            RelativeRelayRequestDTO relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
+            
+            LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
+            //construct workticket for downloaded file.
+            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
+            globalProcessorId = workTicket.getGlobalProcessId();
+            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
+            persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
+            
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
+            verifyAndDeletePayload(workTicket);
+        } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
+            e.printStackTrace();
+        }
+	}
+	
     /**
      * This method is used to construct workticket from the given file.
      *
