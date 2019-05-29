@@ -75,14 +75,14 @@ public class RelativeRelaySweeperService implements Runnable {
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
             
-            if (workTicket.getPayloadURI() !=null ) {
-            	String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            	LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-                SweeperQueueSendClient.post(workTicketToSb, false);
-                verifyAndDeletePayload(workTicket);
-            } else {
-            	throw new RuntimeException("Cannot return payload");
-            }
+//            if (workTicket.getPayloadURI() !=null ) {
+//            	String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+//            	LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+//                SweeperQueueSendClient.post(workTicketToSb, false);
+//                verifyAndDeletePayload(workTicket);
+//            } else {
+//            	throw new RuntimeException("Cannot return payload");
+//            }
             
         } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
             LOGGER.error("Payload cannot persist and workticket.");
@@ -159,8 +159,10 @@ public class RelativeRelaySweeperService implements Runnable {
      * @param staticProp staic properties
      * @param workTicket workticket
      * @throws IOException
+     * @throws JAXBException 
+     * @throws JSONException 
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException, JAXBException, JSONException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
@@ -181,10 +183,14 @@ public class RelativeRelaySweeperService implements Runnable {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        int retryCount = 0;
+        int retryCount = 1;
         while (retryCount < 6) {
         	if (StorageUtilities.getConnection() != null) {
         		persistPayloadAndWorkTicket(workTicket, properties, payloadFile);
+        		String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            	LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+                SweeperQueueSendClient.post(workTicketToSb, false);
+                verifyAndDeletePayload(workTicket);
         		return;
         	} else {
         		retryCount++;
