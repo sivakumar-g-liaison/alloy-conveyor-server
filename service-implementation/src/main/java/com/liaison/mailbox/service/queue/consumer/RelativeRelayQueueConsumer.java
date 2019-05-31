@@ -169,35 +169,8 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        
-        int retryCount = 0;
-        while (retryCount < 6) {
-        	if (StorageUtilities.getConnection() != null) {
-        		persistPayloadAndWorkTicket(workTicket, properties, payloadFile);
-        		return;
-        	} else {
-        		retryCount++;
-        	}
-        }
-        
-        if (retryCount > 6) {
-        	LOGGER.warn("Reached maximum retry and dropping this message - {}", retryCount);
-            return;
-        }
     }
 
-	private void persistPayloadAndWorkTicket(WorkTicket workTicket,
-			Map<String, String> properties, File payloadFile) throws IOException,
-			FileNotFoundException {
-		// persist payload in storage utilities.
-        try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
-            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
-        }
-
-        // persist the workticket
-        StorageUtilities.persistWorkTicket(workTicket, properties);
-	}
 
     /**
      * Deletes the given file
