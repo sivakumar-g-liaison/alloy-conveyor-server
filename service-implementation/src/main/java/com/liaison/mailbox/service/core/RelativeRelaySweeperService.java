@@ -86,7 +86,7 @@ public class RelativeRelaySweeperService implements Runnable {
         } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
             LOGGER.error("Payload cannot persist and workticket.");
         } catch (MailBoxServicesException e) {
-        	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
+        	LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
         	String workTicketToSb = null;
         	try {
 				persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
