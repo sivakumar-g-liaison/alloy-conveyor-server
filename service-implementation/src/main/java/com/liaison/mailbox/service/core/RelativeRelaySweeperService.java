@@ -86,7 +86,7 @@ public class RelativeRelaySweeperService implements Runnable {
         } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
             LOGGER.error("Payload cannot persist and workticket.");
         } catch (MailBoxServicesException e) {
-        	LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
+        	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
         	String workTicketToSb = null;
         	try {
 				persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
@@ -190,7 +190,7 @@ public class RelativeRelaySweeperService implements Runnable {
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
         properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-//        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
 
         String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
