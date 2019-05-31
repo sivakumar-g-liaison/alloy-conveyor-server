@@ -68,8 +68,8 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILB
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_EVENT_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_EVENT_ADDITIONAL_TOPIC_SUFFIXES;
 
 /**
  * Initializes all queue pollers.
@@ -189,7 +189,6 @@ public class QueueAndTopicProcessInitializer {
             case LOW_SECURE_RELAY:
 
                 // Initialize processor queue and processedPayload queue
-                
                 try {
 
                     logger.info("Starting SWEEPER_EVENT_QUEUE Listener");
@@ -396,18 +395,18 @@ public class QueueAndTopicProcessInitializer {
 
                         logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
                         
-                        logger.info("Starting RELATIVE_RELAY_QUEUE Listener with QS integration");
+                        logger.info("Starting SWEEPER_EVENT_QUEUE Listener with QS integration");
 
                         // Read topics info from properties
                         Map<String, List<String>> sweeperEventConsumerTopics = getConsumerTopics(
-                                TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES);
+                                TOPIC_SWEEPER_EVENT_DEFAULT_TOPIC_SUFFIX,
+                                TOPIC_SWEEPER_EVENT_ADDITIONAL_TOPIC_SUFFIXES);
 
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
                                 sweeperEventConsumerTopics,
                                 getKafkaTextMessageProcessor(injector, SweeperEvent.class));
 
-                        logger.info("Started RELATIVE_RELAY_QUEUE Listener with QS integration");
+                        logger.info("Started RSWEEPER_EVENT_QUEUE Listener with QS integration");
 
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
