@@ -40,6 +40,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -65,27 +66,40 @@ public class RelativeRelaySweeperService implements Runnable {
 
 	private void doProcess() {
 		String globalProcessorId = null;
+		RelativeRelayRequestDTO relativeRelayDTO = null;
+		WorkTicket workTicket = null;
         try {
-            RelativeRelayRequestDTO relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
+            relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
             
             LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
             //construct workticket for downloaded file.
-            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
+            workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
             
-//            if (workTicket.getPayloadURI() !=null ) {
-//            	String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-//            	LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-//                SweeperQueueSendClient.post(workTicketToSb, false);
-//                verifyAndDeletePayload(workTicket);
-//            } else {
-//            	throw new RuntimeException("Cannot return payload");
-//            }
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
+            verifyAndDeletePayload(workTicket);
             
         } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
             LOGGER.error("Payload cannot persist and workticket.");
+        } catch (MailBoxServicesException e) {
+        	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
+        	String workTicketToSb = null;
+        	try {
+				persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
+				LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also");
+				workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+				LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+				SweeperQueueSendClient.post(workTicketToSb, false);
+				verifyAndDeletePayload(workTicket);
+			} catch (IOException | JAXBException | JSONException e1) {
+				e1.printStackTrace();
+				LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+				return;
+			}
         }
 	}
 	
@@ -183,31 +197,6 @@ public class RelativeRelaySweeperService implements Runnable {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-        int retryCount = 1;
-        while (retryCount < 6) {
-        	if (StorageUtilities.getConnection() != null) {
-        		persistPayloadAndWorkTicket(workTicket, properties, payloadFile);
-        		String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            	LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-                SweeperQueueSendClient.post(workTicketToSb, false);
-                verifyAndDeletePayload(workTicket);
-        		return;
-        	} else {
-        		retryCount++;
-        		LOGGER.info("#################   Number of retryCount ##############   {}   ", retryCount);
-        	}
-        }
-        
-        if (retryCount > 6) {
-        	LOGGER.warn("Reached maximum retry and dropping this message - {}", retryCount);
-            return;
-        }
-    }
-    
-    private void persistPayloadAndWorkTicket(WorkTicket workTicket,
-			Map<String, String> properties, File payloadFile) throws IOException,
-			FileNotFoundException {
-		// persist payload in storage utilities.
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
@@ -215,8 +204,8 @@ public class RelativeRelaySweeperService implements Runnable {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-	}
-
+    }
+    
     /**
      * Deletes the given file
      * @param file file obj

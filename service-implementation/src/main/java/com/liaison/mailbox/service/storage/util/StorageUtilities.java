@@ -110,22 +110,22 @@ public class StorageUtilities {
         LOGGER.debug("Initializing FS2");
         configureFilesystem();
 
-        FS2 = FS2Factory.newInstance(configuration,
-                (storageId) -> {
-                    if (storageId.getStorageType().equals(SECURE_MONIKER)) {
-                        return new SimpleEncryptionProvider();
-                    }
-
-                    return null;
-                },
-                (storageId) -> {
-                    if (storageId.getStorageType().equals(SECURE_MONIKER)) {
-                        return new KeyManagerKEKProvider();
-                    }
-
-                    return null;
-                },
-                filesystemConfigs);
+//        FS2 = FS2Factory.newInstance(configuration,
+//                (storageId) -> {
+//                    if (storageId.getStorageType().equals(SECURE_MONIKER)) {
+//                        return new SimpleEncryptionProvider();
+//                    }
+//
+//                    return null;
+//                },
+//                (storageId) -> {
+//                    if (storageId.getStorageType().equals(SECURE_MONIKER)) {
+//                        return new KeyManagerKEKProvider();
+//                    }
+//
+//                    return null;
+//                },
+//                filesystemConfigs);
 
         LOGGER.info("FS2 Initialized Successfully ");
     }
