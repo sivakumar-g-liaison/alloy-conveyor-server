@@ -176,7 +176,6 @@ public class StorageUtilities {
             }
 
             try {
-            	FS2 = null;
                 metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
             } finally {
                 if (payload != null) {

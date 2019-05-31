@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.queue.consumer;
+package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,51 +32,82 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.service.core.MailBoxService;
-import com.liaison.mailbox.service.core.RelativeRelaySweeperService;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.thread.pool.RelativeRelayProcessThreadPool;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
-    
-    private static final Logger LOGGER = LogManager.getLogger(RelativeRelayQueueConsumer.class);
-    
-    @Override
-    public void processMessage(String message) {
-    	
-    	RelativeRelayProcessThreadPool.getExecutorService().submit(new RelativeRelaySweeperService(message));
-//        String globalProcessorId = null;
-//        try {
-//            RelativeRelayRequestDTO relativeRelayDTO = JAXBUtility.unmarshalFromJSON(message, RelativeRelayRequestDTO.class);
-//            
-//            LOGGER.info("Processor details in consumer {}", relativeRelayDTO.getProcessor());
-//            //construct workticket for downloaded file.
-//            WorkTicket workTicket = constructWorkticket(relativeRelayDTO.getFile(), relativeRelayDTO.getStaticProp(), relativeRelayDTO.getMailBoxId());
-//            globalProcessorId = workTicket.getGlobalProcessId();
-//            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
-//            persistPayloadAndWorkticket(workTicket, relativeRelayDTO.getStaticProp(), relativeRelayDTO.getTtlMap(), relativeRelayDTO.getDynamicProperties());
-//            
-//            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-//            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-//            SweeperQueueSendClient.post(workTicketToSb, false);
-//            verifyAndDeletePayload(workTicket);
-//        } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
-//            e.printStackTrace();
-//        } 
+public class SweeperEventExecutionService implements Runnable {
+
+    private String message;
+
+    private static final Logger LOGGER = LogManager.getLogger(SweeperEventExecutionService.class);
+
+    public SweeperEventExecutionService() {
+	
     }
-    
+
+    public SweeperEventExecutionService(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void run() {
+        doProcess();
+    }
+
+    private void doProcess() {
+
+        String globalProcessorId = null;
+        SweeperEventRequestDTO sweeperEventDTO = null;
+        WorkTicket workTicket = null;
+        
+        try {
+
+            sweeperEventDTO = JAXBUtility.unmarshalFromJSON(message, SweeperEventRequestDTO.class);
+
+            LOGGER.info("Processor details in consumer {}", sweeperEventDTO.getProcessor());
+            //construct workticket for downloaded file.
+            workTicket = constructWorkticket(sweeperEventDTO.getFile(), sweeperEventDTO.getStaticProp(), sweeperEventDTO.getMailBoxId());
+            globalProcessorId = workTicket.getGlobalProcessId();
+            LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
+            persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
+
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
+            verifyAndDeletePayload(workTicket);
+
+        } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
+            LOGGER.error("Payload cannot persist and workticket.");
+        } catch (MailBoxServicesException e) {
+            
+        	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
+            String workTicketToSb = null;
+            
+            try {
+                
+                persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
+                LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also");
+                workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+                LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+                SweeperQueueSendClient.post(workTicketToSb, false);
+                verifyAndDeletePayload(workTicket);
+            } catch (IOException | JAXBException | JSONException e1) {
+                LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+                return;
+            }
+        }
+    }
+
     /**
      * This method is used to construct workticket from the given file.
      *
@@ -87,22 +118,22 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
      * @throws IOException
      */
     private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp, String mailBoxId) throws IllegalAccessException, IOException {
-        
+
         Map<String, Object> additionalContext = new HashMap<String, Object>();
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, mailBoxId);
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
-        
+
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
-        
+
         FileTime modifiedTime = attr.lastModifiedTime();
         LOGGER.debug("Modified Time stamp {}", modifiedTime);
 
         ISO8601Util dateUtil = new ISO8601Util();
         FileTime createdTime = attr.creationTime();
         LOGGER.debug("Created Time stamp {}", createdTime);
-        
+
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
         workTicket.setPipelineId(staticProp.getPipeLineID());
@@ -116,10 +147,10 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, file.getName());
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
         workTicket.setAdditionalContext(additionalContext);
-        
+
         return workTicket;
     }
-    
+
     /**
      * verifies whether the payload persisted in storage utilities or not and deletes it
      *
@@ -128,17 +159,17 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
      */
     private void verifyAndDeletePayload(WorkTicket wrkTicket) throws IOException {
 
-         String payloadURI = wrkTicket.getPayloadURI();
-         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
+        String payloadURI = wrkTicket.getPayloadURI();
+        File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
 
-         // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
-         if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-             LOGGER.debug("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath.getName());
-             deleteFile(filePath);
-         } else {
-             LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
-         }
-         LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
+        // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
+        if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
+            LOGGER.debug("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath.getName());
+            deleteFile(filePath);
+        } else {
+            LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
+        }
+        LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
      }
 
     /**
@@ -147,8 +178,10 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
      * @param staticProp staic properties
      * @param workTicket workticket
      * @throws IOException
+     * @throws JAXBException 
+     * @throws JSONException 
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException, JAXBException, JSONException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
@@ -169,8 +202,14 @@ public class RelativeRelayQueueConsumer implements QueueTextMessageProcessor {
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
-    }
+        try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
+            FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+        }
 
+        // persist the workticket
+        StorageUtilities.persistWorkTicket(workTicket, properties);
+    }
 
     /**
      * Deletes the given file

@@ -35,7 +35,7 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.core.RelativeRelayService;
+import com.liaison.mailbox.service.core.SweeperEventService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
@@ -43,7 +43,7 @@ import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
-import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
@@ -56,10 +56,10 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.sender.RelativeRelaySendQueue;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.thread.pool.RelativeRelayProcessThreadPool;
+import com.liaison.mailbox.service.thread.pool.SweeperEventProcessThreadPool;
 import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -1335,8 +1335,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 //            SweeperQueueSendClient.post(workTicketToSb, false);
 //            verifyAndDeletePayload(workTicket);
             
-            ThreadPoolExecutor executorService = RelativeRelayProcessThreadPool.getExecutorService();
-            executorService.submit(new RelativeRelayService(file, staticProp, configurationInstance));
+            ThreadPoolExecutor executorService = SweeperEventProcessThreadPool.getExecutorService();
+            executorService.submit(new SweeperEventService(file, staticProp, configurationInstance));
             
 //        } catch (IllegalAccessException | IOException | JAXBException | JSONException e) {
 //            LOGGER.error(constructMessage("Error occurred during sweep file", seperator, e.getMessage()), e);

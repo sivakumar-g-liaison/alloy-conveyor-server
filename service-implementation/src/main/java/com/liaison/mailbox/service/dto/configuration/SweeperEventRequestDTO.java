@@ -20,8 +20,8 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 
-@JsonRootName("relativeRelayRequest")
-public class RelativeRelayRequestDTO {
+@JsonRootName("sweeperEventRequest")
+public class SweeperEventRequestDTO {
 
     private File file;
     private SweeperStaticPropertiesDTO staticProp;
@@ -31,11 +31,11 @@ public class RelativeRelayRequestDTO {
     private Set<ProcessorProperty> dynamicProperties;
     
     @SuppressWarnings("unused")
-    public RelativeRelayRequestDTO() {
+    public SweeperEventRequestDTO() {
         super();
     }
     
-    public RelativeRelayRequestDTO(File file, SweeperStaticPropertiesDTO staticProp) {
+    public SweeperEventRequestDTO(File file, SweeperStaticPropertiesDTO staticProp) {
         this.file = file;
         this.staticProp = staticProp;
     }
@@ -64,28 +64,28 @@ public class RelativeRelayRequestDTO {
         this.processor = processor;
     }
 
-	public String getMailBoxId() {
-		return mailBoxId;
-	}
+    public String getMailBoxId() {
+        return mailBoxId;
+    }
 
-	public void setMailBoxId(String mailBoxId) {
-		this.mailBoxId = mailBoxId;
-	}
+    public void setMailBoxId(String mailBoxId) {
+        this.mailBoxId = mailBoxId;
+    }
 
-	public Map<String, String> getTtlMap() {
-		return ttlMap;
-	}
+    public Map<String, String> getTtlMap() {
+        return ttlMap;
+    }
 
-	public void setTtlMap(Map<String, String> ttlMap) {
-		this.ttlMap = ttlMap;
-	}
+    public void setTtlMap(Map<String, String> ttlMap) {
+        this.ttlMap = ttlMap;
+    }
 
-	public Set<ProcessorProperty> getDynamicProperties() {
-		return dynamicProperties;
-	}
+    public Set<ProcessorProperty> getDynamicProperties() {
+        return dynamicProperties;
+    }
 
-	public void setDynamicProperties(Set<ProcessorProperty> dynamicProperties) {
-		this.dynamicProperties = dynamicProperties;
-	}
+    public void setDynamicProperties(Set<ProcessorProperty> dynamicProperties) {
+        this.dynamicProperties = dynamicProperties;
+    }
     
 }

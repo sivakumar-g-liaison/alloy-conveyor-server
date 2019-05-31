@@ -18,22 +18,22 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.RelativeRelayRequestDTO;
-import com.liaison.mailbox.service.queue.sender.RelativeRelaySendQueue;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 
-public class RelativeRelayService implements Runnable {
+public class SweeperEventService implements Runnable {
 
     private File file;
     private SweeperStaticPropertiesDTO staticProp;
     private Processor processor;
-    
-    private static final Logger LOGGER = LogManager.getLogger(RelativeRelayService.class);
-    
-    public RelativeRelayService() {
-        
+
+    private static final Logger LOGGER = LogManager.getLogger(SweeperEventService.class);
+
+    public SweeperEventService() {
+
     }
 
-    public RelativeRelayService(File file, SweeperStaticPropertiesDTO staticProp, Processor process) {
+    public SweeperEventService(File file, SweeperStaticPropertiesDTO staticProp, Processor process) {
         this.file = file;
         this.staticProp = staticProp;
         this.processor = process;
@@ -41,7 +41,7 @@ public class RelativeRelayService implements Runnable {
 
     private void doProcess() throws Throwable {
 
-        RelativeRelayRequestDTO relateiveRelayRequestDTO = new RelativeRelayRequestDTO(file, staticProp);
+        SweeperEventRequestDTO relateiveRelayRequestDTO = new SweeperEventRequestDTO(file, staticProp);
         relateiveRelayRequestDTO.setMailBoxId(processor.getMailbox().getPguid());
         relateiveRelayRequestDTO.setDynamicProperties(processor.getDynamicProperties());
         relateiveRelayRequestDTO.setTtlMap(processor.getTTLUnitAndTTLNumber());
@@ -49,8 +49,8 @@ public class RelativeRelayService implements Runnable {
         LOGGER.info("RElative Relay static property details {}", staticProp.getPipeLineID());
         LOGGER.info("Processor Details for {},  {},  {}", processor.getMailbox().getPguid(), processor.getProcsrName(),  processor.getPguid());
         String message = JAXBUtility.marshalToJSON(relateiveRelayRequestDTO);
-        
-        RelativeRelaySendQueue.post(message);
+
+        SweeperEventSendQueue.post(message);
     }
 
     @Override

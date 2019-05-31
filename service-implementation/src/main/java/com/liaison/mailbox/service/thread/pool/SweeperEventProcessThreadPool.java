@@ -21,7 +21,7 @@ import com.liaison.health.check.threadpool.ThreadPoolCheck;
 import com.liaison.health.core.LiaisonHealthCheckRegistry;
 import com.liaison.threadmanagement.LiaisonExecutorServiceBuilder;
 
-public class RelativeRelayProcessThreadPool {
+public class SweeperEventProcessThreadPool {
 
     public static final int DEFAULT_RELATIVE_RELAY_PROCESSING_THREAD_POOL_SIZE = 10;
     public static final int DEFAULT_RELATIVE_RELAY_KEEPALIVE_MINUTES = 1;
@@ -36,20 +36,20 @@ public class RelativeRelayProcessThreadPool {
     private static final Logger logger = LogManager.getLogger(SweeperProcessThreadPool.class);
 
     private static ThreadPoolExecutor executorService;
-    private static int relativeRelayProcessingThreadPoolSize;
+    private static int sweeperEventProcessingThreadPoolSize;
     private static int corePoolSize;
 
     static {
-        relativeRelayProcessingThreadPoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_RELATIVE_RELAY_THREADPOOL_SIZE, DEFAULT_RELATIVE_RELAY_PROCESSING_THREAD_POOL_SIZE);
+        sweeperEventProcessingThreadPoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_RELATIVE_RELAY_THREADPOOL_SIZE, DEFAULT_RELATIVE_RELAY_PROCESSING_THREAD_POOL_SIZE);
 
-        int defaultCorePoolSize = Math.round(relativeRelayProcessingThreadPoolSize/2);
+        int defaultCorePoolSize = Math.round(sweeperEventProcessingThreadPoolSize/2);
         corePoolSize = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_RELATIVE_RELAY_COREPOOLSIZE, defaultCorePoolSize);
 
         // keep pool trimmed to half during slack time for resource cleanup
         executorService = (ThreadPoolExecutor) LiaisonExecutorServiceBuilder.newExecutorService(
                 RELATIVE_RELAY_PROCESS_THREADPOOL_NAME, 
                 corePoolSize, 
-                relativeRelayProcessingThreadPoolSize, 
+                sweeperEventProcessingThreadPoolSize, 
                 keepAlive, 
                 TimeUnit.MINUTES);
 
@@ -63,11 +63,11 @@ public class RelativeRelayProcessThreadPool {
     }
 
     public static int getThreadPoolSize() {
-        return relativeRelayProcessingThreadPoolSize;
+        return sweeperEventProcessingThreadPoolSize;
     }
 
     /**
      * ThreadPool should not be instantiated.
      */
-    private RelativeRelayProcessThreadPool() { }
+    private SweeperEventProcessThreadPool() { }
 }

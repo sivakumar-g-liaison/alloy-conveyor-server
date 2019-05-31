@@ -24,7 +24,7 @@ import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueue
 import com.liaison.mailbox.service.queue.consumer.InboundFileQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
-import com.liaison.mailbox.service.queue.consumer.RelativeRelayQueueConsumer;
+import com.liaison.mailbox.service.queue.consumer.SweeperEventQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.RunningProcessorRetryQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
@@ -32,8 +32,8 @@ import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectory
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.RelativeRelay;
-import com.liaison.mailbox.service.queue.kafka.processor.RelativeRelayProcessor;
+import com.liaison.mailbox.service.queue.kafka.processor.SweeperEvent;
+import com.liaison.mailbox.service.queue.kafka.processor.SweeperEventProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
@@ -122,8 +122,8 @@ public class QueueAndTopicProcessInitializer {
     private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
     private static final String INBOUND_FILE_QUEUE = "inboundFile";
     private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
-    private static final String RELATIVE_RELAY_QUEUE = "inboundFile";
-//    private static final String RELATIVE_RELAY_QUEUE = "relativeRelay";
+    private static final String SWEEPER_EVENT_QUEUE = "inboundFile";
+//    private static final String RELATIVE_RELAY_QUEUE = "sweeperEvent";
 
     public static void initialize() {
 
@@ -192,10 +192,10 @@ public class QueueAndTopicProcessInitializer {
                 
                 try {
 
-                    logger.info("Starting RELATIVE_RELAY_QUEUE Listener");
-                    QueuePooledListenerContainer relativeRelay = new MailboxQueuePooledListenerContainer(RelativeRelayQueueConsumer.class, RELATIVE_RELAY_QUEUE);
-                    relativeRelay.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started RELATIVE_RELAY_QUEUE Listener");
+                    logger.info("Starting SWEEPER_EVENT_QUEUE Listener");
+                    QueuePooledListenerContainer sweeperEvent = new MailboxQueuePooledListenerContainer(SweeperEventQueueConsumer.class, SWEEPER_EVENT_QUEUE);
+                    sweeperEvent.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started SWEEPER_EVENT_QUEUE Listener");
                 } catch (Exception e) {
                     logger.warn("Queue listener for Reltive relay could not be initialized.", e);
                 }
@@ -399,13 +399,13 @@ public class QueueAndTopicProcessInitializer {
                         logger.info("Starting RELATIVE_RELAY_QUEUE Listener with QS integration");
 
                         // Read topics info from properties
-                        Map<String, List<String>> relativeRelayConsumerTopics = getConsumerTopics(
+                        Map<String, List<String>> sweeperEventConsumerTopics = getConsumerTopics(
                                 TOPIC_RELATIVE_RELAY_DEFAULT_TOPIC_SUFFIX,
                                 TOPIC_RELATIVE_RELAY_ADDITIONAL_TOPIC_SUFFIXES);
 
                         startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                relativeRelayConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, RelativeRelay.class));
+                                sweeperEventConsumerTopics,
+                                getKafkaTextMessageProcessor(injector, SweeperEvent.class));
 
                         logger.info("Started RELATIVE_RELAY_QUEUE Listener with QS integration");
 
@@ -458,8 +458,8 @@ public class QueueAndTopicProcessInitializer {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
-        } else if (RelativeRelay.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RelativeRelay.class));
+        } else if (SweeperEvent.class == clazz) {
+            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, SweeperEvent.class));
         } else {
             throw new RuntimeException("Invalid class - " + clazz);
         }
