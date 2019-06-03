@@ -75,17 +75,17 @@ public class SweeperEventExecutionService implements Runnable {
             sweeperEventDTO = JAXBUtility.unmarshalFromJSON(message, SweeperEventRequestDTO.class);
 
             //construct workticket for downloaded file.
-            workTicket = constructWorkticket(sweeperEventDTO.getFile(), sweeperEventDTO.getStaticProp(), sweeperEventDTO.getMailBoxId());
+            workTicket = constructWorkticket(sweeperEventDTO);
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             try {
-                persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
+                persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
             } catch (MailBoxServicesException e) {
                 LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
                 String workTicketToSb = null;
 
                 try {
-                    persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
+                    persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
                     workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
                     LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
                     SweeperQueueSendClient.post(workTicketToSb, false);
@@ -118,14 +118,14 @@ public class SweeperEventExecutionService implements Runnable {
      * @throws IllegalAccessException
      * @throws IOException
      */
-    private WorkTicket constructWorkticket(File file, SweeperStaticPropertiesDTO staticProp, String mailBoxId) throws IllegalAccessException, IOException {
+    private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IllegalAccessException, IOException {
 
         Map<String, Object> additionalContext = new HashMap<String, Object>();
-        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, file.getAbsoluteFile());
-        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, mailBoxId);
-        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
+        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, sweeperEventRequestDTO.getFile().getAbsoluteFile());
+        additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
+        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
 
-        BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
 
         FileTime modifiedTime = attr.lastModifiedTime();
@@ -137,16 +137,16 @@ public class SweeperEventExecutionService implements Runnable {
 
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-        workTicket.setPipelineId(staticProp.getPipeLineID());
+        workTicket.setPipelineId(sweeperEventRequestDTO.getStaticProp().getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
-        workTicket.setPayloadURI(file.getAbsolutePath().toString());
+        workTicket.setPayloadURI(sweeperEventRequestDTO.getFile().getAbsolutePath().toString());
         workTicket.setCreatedTime(new Date(createdTime.toMillis()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
         workTicket.setPayloadSize(attr.size());
-        workTicket.setFileName(file.getName());
-        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, file.getName());
-        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, file.getParent());
+        workTicket.setFileName(sweeperEventRequestDTO.getFile().getName());
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, sweeperEventRequestDTO.getFile().getName());
+        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
         workTicket.setAdditionalContext(additionalContext);
 
         return workTicket;
@@ -182,23 +182,22 @@ public class SweeperEventExecutionService implements Runnable {
      * @throws JAXBException 
      * @throws JSONException 
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperStaticPropertiesDTO staticProp, Map<String, String> ttlMap, Set<ProcessorProperty> dynamicProperties) throws IOException, JAXBException, JSONException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException, JAXBException, JSONException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
-//        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
 
-        if (!ttlMap.isEmpty()) {
-            Integer ttlDays = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
+        if (!sweeperEventRequestDTO.getTtlMap().isEmpty()) {
+            Integer ttlDays = Integer.parseInt(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
         }
 
-        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
-        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
-        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperEventRequestDTO.getStaticProp().isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperEventRequestDTO.getStaticProp().isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperEventRequestDTO.getStaticProp().getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(sweeperEventRequestDTO.getDynamicProperties()));
 
-        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        String contentType = MailBoxUtil.isEmpty(sweeperEventRequestDTO.getStaticProp().getContentType()) ? MediaType.TEXT_PLAIN : sweeperEventRequestDTO.getStaticProp().getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
