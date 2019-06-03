@@ -233,18 +233,17 @@ public class StorageUtilities {
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot;
             try {
-            	throw new FS2Exception("Test retry process");
-//                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
-//                LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
-//                        workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
+                LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
+                        workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
             } finally {
                 if (payload != null) {
                     payload.close();
                 }
             }
 
-//            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
-//            return metaSnapshot;
+            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
+            return metaSnapshot;
 
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
