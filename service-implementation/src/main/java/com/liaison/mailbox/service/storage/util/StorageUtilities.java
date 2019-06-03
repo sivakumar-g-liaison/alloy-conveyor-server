@@ -233,8 +233,7 @@ public class StorageUtilities {
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot;
             try {
-            	metaSnapshot = FS2.createObjectEntry(requestUri, null, null, null);
-//                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
                 LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
                         workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
             } finally {
