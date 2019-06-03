@@ -82,22 +82,22 @@ public class SweeperEventExecutionService implements Runnable {
             try {
             	persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
             } catch (MailBoxServicesException e) {
-            	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
+            	LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
                 String workTicketToSb = null;
                 
                 try {
-                	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also -- first time");
+                	LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also -- first time");
                     persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
-                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also");
+                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also");
                     workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
                     LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
                     SweeperQueueSendClient.post(workTicketToSb, false);
                     verifyAndDeletePayload(workTicket);
                 } catch (IOException | JAXBException | JSONException e1) {
-                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     return;
                 } catch (MailBoxServicesException e2) {
-                	LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again--- second time");
+                	LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again--- second time");
                     throw e2;
                 }
             }
@@ -191,19 +191,19 @@ public class SweeperEventExecutionService implements Runnable {
         Map<String, String> properties = new HashMap<>();
 //        Map<String, String> ttlMap = processor.getTTLUnitAndTTLNumber();
 
-//        if (!ttlMap.isEmpty()) {
-//            Integer ttlDays = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-//            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
-//        }
-//
-//        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
-//        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
-//        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
-//        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
-//
-//        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
-//        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
-//        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
+        if (!ttlMap.isEmpty()) {
+            Integer ttlDays = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
+        }
+
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(staticProp.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(staticProp.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, staticProp.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(dynamicProperties));
+
+        String contentType = MailBoxUtil.isEmpty(staticProp.getContentType()) ? MediaType.TEXT_PLAIN : staticProp.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
