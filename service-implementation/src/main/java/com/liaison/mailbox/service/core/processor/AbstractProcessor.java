@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
@@ -1321,9 +1322,21 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
 
+    	SweeperEventRequestDTO relateiveRelayRequestDTO = new SweeperEventRequestDTO(file, staticProp);
+        relateiveRelayRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        relateiveRelayRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
+        relateiveRelayRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        String message = null;
+        try {
+            message = JAXBUtility.marshalToJSON(relateiveRelayRequestDTO);
+            SweeperEventSendQueue.post(message);
+        } catch (Throwable e) {
+            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
+            LOGGER.error(msg, e);
+        }
         String globalProcessorId = null;
-        ThreadPoolExecutor executorService = SweeperEventProcessThreadPool.getExecutorService();
-        executorService.submit(new SweeperEventService(file, staticProp, configurationInstance));
+//        ThreadPoolExecutor executorService = SweeperEventProcessThreadPool.getExecutorService();
+//        executorService.submit(new SweeperEventService(file, staticProp, configurationInstance));
         return globalProcessorId;
     }
 
