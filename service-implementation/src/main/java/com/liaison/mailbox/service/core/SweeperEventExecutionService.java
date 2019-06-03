@@ -69,12 +69,11 @@ public class SweeperEventExecutionService implements Runnable {
         String globalProcessorId = null;
         SweeperEventRequestDTO sweeperEventDTO = null;
         WorkTicket workTicket = null;
-        
+
         try {
 
             sweeperEventDTO = JAXBUtility.unmarshalFromJSON(message, SweeperEventRequestDTO.class);
 
-            LOGGER.info("Processor details in consumer {}", sweeperEventDTO.getProcessor());
             //construct workticket for downloaded file.
             workTicket = constructWorkticket(sweeperEventDTO.getFile(), sweeperEventDTO.getStaticProp(), sweeperEventDTO.getMailBoxId());
             globalProcessorId = workTicket.getGlobalProcessId();
@@ -86,9 +85,7 @@ public class SweeperEventExecutionService implements Runnable {
                 String workTicketToSb = null;
 
                 try {
-                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also -- first time");
                     persistPayloadAndWorkticket(workTicket, sweeperEventDTO.getStaticProp(), sweeperEventDTO.getTtlMap(), sweeperEventDTO.getDynamicProperties());
-                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again and also canno proceed also");
                     workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
                     LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
                     SweeperQueueSendClient.post(workTicketToSb, false);
@@ -97,7 +94,7 @@ public class SweeperEventExecutionService implements Runnable {
                     LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     return;
                 } catch (MailBoxServicesException e2) {
-                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again--- second time");
+                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     throw e2;
                 }
             }

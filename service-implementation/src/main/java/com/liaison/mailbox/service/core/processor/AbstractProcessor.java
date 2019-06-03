@@ -36,7 +36,6 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.core.SweeperEventService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
@@ -1322,11 +1321,12 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
 
-    	SweeperEventRequestDTO relateiveRelayRequestDTO = new SweeperEventRequestDTO(file, staticProp);
+        SweeperEventRequestDTO relateiveRelayRequestDTO = new SweeperEventRequestDTO(file, staticProp);
         relateiveRelayRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
         relateiveRelayRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
         relateiveRelayRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
         String message = null;
+        String globalProcessorId = null;
         try {
             message = JAXBUtility.marshalToJSON(relateiveRelayRequestDTO);
             SweeperEventSendQueue.post(message);
@@ -1334,9 +1334,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
             LOGGER.error(msg, e);
         }
-        String globalProcessorId = null;
-//        ThreadPoolExecutor executorService = SweeperEventProcessThreadPool.getExecutorService();
-//        executorService.submit(new SweeperEventService(file, staticProp, configurationInstance));
         return globalProcessorId;
     }
 
