@@ -52,7 +52,6 @@ import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailboxProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.UserManagementToRelayDirectory;
 import com.liaison.mailbox.service.queue.kafka.processor.UserManagementToRelayDirectoryProcessor;
-
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

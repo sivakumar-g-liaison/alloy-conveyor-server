@@ -48,11 +48,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 public class SweeperEventExecutionService implements Runnable {
 
     private String message;
-
     private static final Logger LOGGER = LogManager.getLogger(SweeperEventExecutionService.class);
 
     public SweeperEventExecutionService() {
-	
     }
 
     public SweeperEventExecutionService(String message) {
@@ -73,7 +71,6 @@ public class SweeperEventExecutionService implements Runnable {
         try {
 
             sweeperEventDTO = JAXBUtility.unmarshalFromJSON(message, SweeperEventRequestDTO.class);
-
             //construct workticket for downloaded file.
             workTicket = constructWorkticket(sweeperEventDTO);
             globalProcessorId = workTicket.getGlobalProcessId();

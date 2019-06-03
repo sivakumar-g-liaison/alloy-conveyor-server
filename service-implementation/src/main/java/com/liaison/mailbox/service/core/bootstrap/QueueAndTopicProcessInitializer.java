@@ -40,7 +40,6 @@ import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
 import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
 import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
