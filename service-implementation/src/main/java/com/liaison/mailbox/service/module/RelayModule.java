@@ -44,8 +44,6 @@ import com.liaison.mailbox.service.queue.kafka.processor.InboundFileProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
 import com.liaison.mailbox.service.queue.kafka.processor.MailboxProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.MailboxTopicMessageProcessor;
-import com.liaison.mailbox.service.queue.kafka.processor.SweeperEvent;
-import com.liaison.mailbox.service.queue.kafka.processor.SweeperEventProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetryProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
@@ -92,7 +90,6 @@ public class RelayModule extends AbstractModule {
             bind(KafkaTextMessageProcessor.class).annotatedWith(UserManagementToRelayDirectory.class).to(UserManagementToRelayDirectoryProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(InboundFile.class).to(InboundFileProcessor.class);
             bind(KafkaTextMessageProcessor.class).annotatedWith(RunningProcessorRetry.class).to(RunningProcessorRetryProcessor.class);
-            bind(KafkaTextMessageProcessor.class).annotatedWith(SweeperEvent.class).to(SweeperEventProcessor.class);
             bind(KafkaTextMessageProcessor.class).to(KafkaMessageProcessor.class);
 
             // Bindings for topic message

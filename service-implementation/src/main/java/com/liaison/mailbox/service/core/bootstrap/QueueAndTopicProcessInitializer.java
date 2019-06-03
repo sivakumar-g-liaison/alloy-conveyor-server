@@ -32,8 +32,6 @@ import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectory
 import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
 import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.SweeperEvent;
-import com.liaison.mailbox.service.queue.kafka.processor.SweeperEventProcessor;
 import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
@@ -268,7 +266,7 @@ public class QueueAndTopicProcessInitializer {
                 } catch (Exception e) {
                     logger.warn("Queue listener for inbound file could not be initialized.", e);
                 }
-                
+
                 // Start consuming from Queue Service for different processor types
                 if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
                     try {
@@ -394,20 +392,6 @@ public class QueueAndTopicProcessInitializer {
                                 getKafkaTextMessageProcessor(injector, RunningProcessorRetry.class));
 
                         logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
-                        
-                        logger.info("Starting SWEEPER_EVENT_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> sweeperEventConsumerTopics = getConsumerTopics(
-                                TOPIC_SWEEPER_EVENT_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_SWEEPER_EVENT_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                sweeperEventConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, SweeperEvent.class));
-
-                        logger.info("Started RSWEEPER_EVENT_QUEUE Listener with QS integration");
-
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
                         //There's no sense to keep app up and running if a consumer doesn't start
@@ -457,8 +441,6 @@ public class QueueAndTopicProcessInitializer {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
-        } else if (SweeperEvent.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, SweeperEvent.class));
         } else {
             throw new RuntimeException("Invalid class - " + clazz);
         }
