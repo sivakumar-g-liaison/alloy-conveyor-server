@@ -467,11 +467,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         try {
             staticProp = (HTTPDownloaderPropertiesDTO) getProperties();
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
             LOGGER.debug("Caught exception while getting HTTP Downloader properties");
         }
         // async sweeper process if direct submit is true.
-        if (staticProp.isDirectSubmit()) {
+        if (staticProp != null && staticProp.isDirectSubmit()) {
             //Set HTTPDownloaderPropertiesDTO properties into SweeperStaticPropertiesDTO.
             SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
             staticPropertiesDTO.setContentType(staticProp.getContentType());
@@ -480,7 +479,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
             // sweep single file process to SB queue
             String globalProcessorId = sweepFile(file, staticPropertiesDTO);
-            LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
+            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
         }
         if (response != null) {
             response.close();
@@ -1321,14 +1320,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
 
-        SweeperEventRequestDTO relateiveRelayRequestDTO = new SweeperEventRequestDTO(file, staticProp);
-        relateiveRelayRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        relateiveRelayRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
-        relateiveRelayRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file, staticProp);
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
         String message = null;
         String globalProcessorId = null;
         try {
-            message = JAXBUtility.marshalToJSON(relateiveRelayRequestDTO);
+            message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
             SweeperEventSendQueue.post(message);
         } catch (Throwable e) {
             String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();

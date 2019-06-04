@@ -120,7 +120,6 @@ public class QueueAndTopicProcessInitializer {
     private static final String INBOUND_FILE_QUEUE = "inboundFile";
     private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
     private static final String SWEEPER_EVENT_QUEUE = "inboundFile";
-//    private static final String RELATIVE_RELAY_QUEUE = "sweeperEvent";
 
     public static void initialize() {
 
@@ -193,7 +192,7 @@ public class QueueAndTopicProcessInitializer {
                     sweeperEvent.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
                     logger.info("Started SWEEPER_EVENT_QUEUE Listener");
                 } catch (Exception e) {
-                    logger.warn("Queue listener for Reltive relay could not be initialized.", e);
+                    logger.error("Queue listener for Sweeper Event Queue could not be initialized.", e);
                 }
                 
                 try {

@@ -14,7 +14,6 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.remote.uploader.RelayFile;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -308,7 +307,7 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * Method to sweep file after downloading file in payload location.
      * 
      * @param file        Downloaded file 
-     * @param staticProp  Sweeper properies
+     * @param staticProp  Sweeper properties
      * @return GlobalprocessorId
      */
     String sweepFile(File file, SweeperStaticPropertiesDTO staticProp);
@@ -318,7 +317,7 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * 
      * @param fileList   Downloaded Files
      * @param staticProp Sweeper properties
-     * @return Globalprocessorids
+     * @return GlobalprocessorIds
      */
     String[] sweepFiles(File[] fileList, SweeperStaticPropertiesDTO staticProp);
 }

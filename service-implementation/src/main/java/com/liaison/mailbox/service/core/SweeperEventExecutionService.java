@@ -1,5 +1,5 @@
 /**
- * Copyright Liaison Technologies, Inc. All rights reserved.
+ * Copyright 2019 Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall
@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -21,7 +20,6 @@ import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -37,8 +35,6 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
@@ -78,14 +74,14 @@ public class SweeperEventExecutionService implements Runnable {
             try {
                 persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
             } catch (MailBoxServicesException e) {
-                LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
+                LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
                 try {
                     persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
-                } catch (IOException | JAXBException | JSONException e1) {
-                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+                } catch (IOException e1) {
+                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     return;
                 } catch (MailBoxServicesException e2) {
-                    LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     throw e2;
                 }
             }
@@ -95,8 +91,8 @@ public class SweeperEventExecutionService implements Runnable {
             SweeperQueueSendClient.post(workTicketToSb, false);
             verifyAndDeletePayload(workTicket);
 
-        } catch (JAXBException | IOException | IllegalAccessException | JSONException e) {
-            LOGGER.error("Payload cannot persist and workticket.");
+        } catch (JAXBException | IOException | JSONException e) {
+            LOGGER.error("Payload cannot persist and workticket or cannot marshal or unmarshal workticket");
         }
     }
 
@@ -109,9 +105,9 @@ public class SweeperEventExecutionService implements Runnable {
      * @throws IllegalAccessException
      * @throws IOException
      */
-    private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IllegalAccessException, IOException {
+    private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
 
-        Map<String, Object> additionalContext = new HashMap<String, Object>();
+        Map<String, Object> additionalContext = new HashMap<>();
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, sweeperEventRequestDTO.getFile().getAbsoluteFile());
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
@@ -149,7 +145,7 @@ public class SweeperEventExecutionService implements Runnable {
      * @param wrkTicket workticket contains payload uri
      * @throws IOException
      */
-    private void verifyAndDeletePayload(WorkTicket wrkTicket) throws IOException {
+    private void verifyAndDeletePayload(WorkTicket wrkTicket) {
 
         String payloadURI = wrkTicket.getPayloadURI();
         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
@@ -173,7 +169,7 @@ public class SweeperEventExecutionService implements Runnable {
      * @throws JAXBException 
      * @throws JSONException 
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException, JAXBException, JSONException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();

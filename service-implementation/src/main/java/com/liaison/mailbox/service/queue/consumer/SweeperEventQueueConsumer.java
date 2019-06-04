@@ -1,5 +1,5 @@
 /**
- * Copyright Liaison Technologies, Inc. All rights reserved.
+ * Copyright 2019 Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall

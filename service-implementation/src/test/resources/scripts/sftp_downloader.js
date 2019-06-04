@@ -84,11 +84,11 @@ var process = function(_proc) {
                 var files = downloadFiles(g2SftpClient, payloadLocation, targetLocation, _proc, processor_properties, mboxInfo);
                 // main function end
                 if (processor_properties.directSubmit) {
-                	var staticprop = new com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO();
-                	staticprop.setSecuredPayload(processor_properties.securedPayload);
-                	staticprop.setLensVisibility(processor_properties.lensVisibility);
-                	staticprop.setPipeLineID(processor_properties.pipeLineID);
-                	_proc.sweepFiles(files, staticprop);
+                    var staticprop = new com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO();
+                    staticprop.setSecuredPayload(processor_properties.securedPayload);
+                    staticprop.setLensVisibility(processor_properties.lensVisibility);
+                    staticprop.setPipeLineID(processor_properties.pipeLineID);
+                    _proc.sweepFiles(files, staticprop);
                 }
             }
         }

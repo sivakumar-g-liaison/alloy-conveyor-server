@@ -245,7 +245,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
                             // sweep single file process to SB queue
                             String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
-                            LOGGER.info("Sweep File Global Processor ID {}",globalProcessorId);
+                            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                         }
                         // Delete the remote files after successful download if user opt for it
                         if (staticProp.getDeleteFiles()) {
