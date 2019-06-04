@@ -79,14 +79,8 @@ public class SweeperEventExecutionService implements Runnable {
                 persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
             } catch (MailBoxServicesException e) {
                 LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket");
-                String workTicketToSb = null;
-
                 try {
                     persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
-                    workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-                    LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-                    SweeperQueueSendClient.post(workTicketToSb, false);
-                    verifyAndDeletePayload(workTicket);
                 } catch (IOException | JAXBException | JSONException e1) {
                     LOGGER.info("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
                     return;
