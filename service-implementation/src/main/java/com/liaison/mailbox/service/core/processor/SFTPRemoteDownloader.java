@@ -351,9 +351,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public String[] sweepFiles(File[] files) {
+    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException{
 
     	LOGGER.info( " Entered into sweep files Locations >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    	staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
         List<String> globalProcessorIds = new ArrayList<String>();
         for (File file:files) {
             // sweep each file and add global processorIds.

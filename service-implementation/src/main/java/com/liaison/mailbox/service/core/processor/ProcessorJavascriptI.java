@@ -316,5 +316,5 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @param fileList   Downloaded Files
      * @return GlobalprocessorIds
      */
-    String[] sweepFiles(File[] fileList);
+    String[] sweepFiles(File[] fileList) throws IllegalAccessException, IOException;
 }

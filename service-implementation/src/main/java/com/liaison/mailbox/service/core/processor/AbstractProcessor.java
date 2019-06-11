@@ -37,7 +37,6 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -1309,7 +1308,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public String[] sweepFiles(File[] files) {
+    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException{
     	throw new RuntimeException("Not Implemented");
     }
 }

@@ -344,10 +344,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * 
      * @param files  downloaded files
      * @param sweeperStaticPropertiesDTO   
+     * @throws IOException 
+     * @throws IllegalAccessException 
      */
     @Override
-    public String[] sweepFiles(File[] files) {
+    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException {
 
+    	staticProp = (FTPDownloaderPropertiesDTO) getProperties();
         List<String> globalProcessorIds = new ArrayList<String>();
         for (File file:files) {
             // sweep each file and add global processorIds.
