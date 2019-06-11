@@ -17,8 +17,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -33,7 +31,6 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
@@ -68,6 +65,11 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	public SFTPRemoteDownloader(Processor processor) {
 		super(processor);
+		try {
+			staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
 	}
 
 	/**
@@ -325,20 +327,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(File file) {
 
-    	LOGGER.info("Entered into sweep File {}, {}, {}", staticProp, configurationInstance, configurationInstance.getMailbox());
-    	String mailBoxId = configurationInstance.getMailbox().getPguid();
-    	Set<ProcessorProperty> dynamicProperty = configurationInstance.getDynamicProperties();
-    	Map<String, String> ttlNumber = configurationInstance.getTTLUnitAndTTLNumber();
-        
-    	SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
         sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
         sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
         sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
         sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-        sweeperEventRequestDTO.setMailBoxId(mailBoxId);
-        sweeperEventRequestDTO.setDynamicProperties(dynamicProperty);
-        sweeperEventRequestDTO.setTtlMap(ttlNumber);
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
         sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
         try {
             String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
@@ -351,22 +348,20 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
-    /**
-     * Method to use list of downloaded files post into sweeper event queue
-     * 
-     * @param files  downloaded files
-     * @param sweeperStaticPropertiesDTO   
-     */
-    @Override
-    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException{
+	/**
+	 * Method to use list of downloaded files post into sweeper event queue
+	 * 
+	 * @param files downloaded files
+	 * @param sweeperStaticPropertiesDTO
+	 */
+	@Override
+	public String[] sweepFiles(File[] files) {
 
-    	LOGGER.info( " Entered into sweep files Locations >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    	staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
-        List<String> globalProcessorIds = new ArrayList<String>();
-        for (File file:files) {
-            // sweep each file and add global processorIds.
-            globalProcessorIds.add(sweepFile(file));
-        }
-        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
-    }
+		List<String> globalProcessorIds = new ArrayList<>();
+		for (File file : files) {
+			// sweep each file and add global processorIds.
+			globalProcessorIds.add(sweepFile(file));
+		}
+		return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
+	}
 }

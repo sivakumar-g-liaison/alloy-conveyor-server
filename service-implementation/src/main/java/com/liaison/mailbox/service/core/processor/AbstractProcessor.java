@@ -1308,7 +1308,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException{
+    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException {
     	throw new RuntimeException("Not Implemented");
     }
 }

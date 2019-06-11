@@ -12,13 +12,8 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Set;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
-
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.dtdm.model.ProcessorProperty;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 
 @JsonRootName("sweeperEventRequest")
 public class SweeperEventRequestDTO {
@@ -28,12 +23,11 @@ public class SweeperEventRequestDTO {
     private boolean isLensVisibility;
     private String globalProcessId;
     private String pipeLineID;
-    private String ContentType;
+    private String contentType;
     private String mailBoxId;
+    private String storageType;
     private Map<String, String> ttlMap;
-    private Set<ProcessorProperty> dynamicProperties;
 
-    @SuppressWarnings("unused")
     public SweeperEventRequestDTO() {
         super();
     }
@@ -58,20 +52,20 @@ public class SweeperEventRequestDTO {
         this.mailBoxId = mailBoxId;
     }
 
-    public Map<String, String> getTtlMap() {
+    public String getStorageType() {
+		return storageType;
+	}
+
+	public void setStorageType(String storageType) {
+		this.storageType = storageType;
+	}
+
+	public Map<String, String> getTtlMap() {
         return ttlMap;
     }
 
     public void setTtlMap(Map<String, String> ttlMap) {
         this.ttlMap = ttlMap;
-    }
-
-    public Set<ProcessorProperty> getDynamicProperties() {
-        return dynamicProperties;
-    }
-
-    public void setDynamicProperties(Set<ProcessorProperty> dynamicProperties) {
-        this.dynamicProperties = dynamicProperties;
     }
 
     public boolean isSecuredPayload() {
@@ -107,11 +101,11 @@ public class SweeperEventRequestDTO {
     }
 
     public String getContentType() {
-        return ContentType;
+        return contentType;
     }
 
     public void setContentType(String contentType) {
-        ContentType = contentType;
+        this.contentType = contentType;
     }
 
 }

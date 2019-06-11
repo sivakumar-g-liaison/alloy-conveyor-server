@@ -285,9 +285,9 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         sweeperEventRequestDTO.setSecuredPayload(httpDownloaderStaticProperties.isSecuredPayload());
         sweeperEventRequestDTO.setContentType(httpDownloaderStaticProperties.getContentType());
         sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
         sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
         sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
         try {
             String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);

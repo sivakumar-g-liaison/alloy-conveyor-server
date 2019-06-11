@@ -182,7 +182,7 @@ public class SweeperEventExecutionService implements Runnable {
         properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperEventRequestDTO.isSecuredPayload()));
         properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperEventRequestDTO.isLensVisibility()));
         properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperEventRequestDTO.getPipeLineID());
-        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(sweeperEventRequestDTO.getDynamicProperties()));
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, sweeperEventRequestDTO.getStorageType());
 
         String contentType = MailBoxUtil.isEmpty(sweeperEventRequestDTO.getContentType()) ? MediaType.TEXT_PLAIN : sweeperEventRequestDTO.getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
