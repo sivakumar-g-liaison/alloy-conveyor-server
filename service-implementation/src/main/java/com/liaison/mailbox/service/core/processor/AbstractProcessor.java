@@ -457,15 +457,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         }
         // async sweeper process if direct submit is true.
         if (staticProp != null && staticProp.isDirectSubmit()) {
-            //Set HTTPDownloaderPropertiesDTO properties into SweeperStaticPropertiesDTO.
-            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-            staticPropertiesDTO.setContentType(staticProp.getContentType());
-            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
-            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
-            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
             // sweep single file process to SB queue
             String globalProcessorId = sweepFile(file);
-            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
+            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
         }
         if (response != null) {
             response.close();
