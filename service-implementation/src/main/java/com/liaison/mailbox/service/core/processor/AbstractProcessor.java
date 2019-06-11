@@ -11,11 +11,9 @@ package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
-import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -43,7 +41,6 @@ import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
-import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
@@ -56,11 +53,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
-import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
-import com.liaison.mailbox.service.thread.pool.SweeperEventProcessThreadPool;
-import com.liaison.mailbox.service.thread.pool.SweeperProcessThreadPool;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
@@ -71,8 +64,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
@@ -80,22 +71,17 @@ import javax.xml.bind.JAXBException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.Comparator;
@@ -478,7 +464,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
             staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
             // sweep single file process to SB queue
-            String globalProcessorId = sweepFile(file, staticPropertiesDTO);
+            String globalProcessorId = sweepFile(file);
             LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
         }
         if (response != null) {
@@ -1318,22 +1304,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param staticProp SFTPDownloaderprocessor properties.
      */
     @Override
-    public String sweepFile(File file, SweeperStaticPropertiesDTO staticProp) {
-
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file, staticProp);
-        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
-        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-        String message = null;
-        String globalProcessorId = null;
-        try {
-            message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
-            SweeperEventSendQueue.post(message);
-        } catch (Throwable e) {
-            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
-            LOGGER.error(msg, e);
-        }
-        return globalProcessorId;
+    public String sweepFile(File file) {
+    	throw new RuntimeException("Not Implemented");
     }
 
     /**
@@ -1343,13 +1315,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param sweeperStaticPropertiesDTO   
      */
     @Override
-    public String[] sweepFiles(File[] files, SweeperStaticPropertiesDTO sweeperStaticPropertiesDTO) {
-
-        List<String> globalProcessorIds = new ArrayList<String>();
-        for (File file:files) {
-            // sweep each file and add global processorIds.
-            globalProcessorIds.add(sweepFile(file, sweeperStaticPropertiesDTO));
-        }
-        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
+    public String[] sweepFiles(File[] files) {
+    	throw new RuntimeException("Not Implemented");
     }
 }

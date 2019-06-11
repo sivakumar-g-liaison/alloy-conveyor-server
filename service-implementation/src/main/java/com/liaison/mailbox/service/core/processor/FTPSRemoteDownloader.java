@@ -15,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -25,17 +27,19 @@ import org.apache.logging.log4j.Logger;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
-import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -53,6 +57,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * Required for JS
      */
     private G2FTPSClient ftpsClient;
+    private FTPDownloaderPropertiesDTO staticProp;
 
     @SuppressWarnings("unused")
     private FTPSRemoteDownloader() {
@@ -161,7 +166,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
         //variable to hold the status of file download request execution
         int statusCode = 0;
         String dirToList = "";
-        FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) getProperties();
+        staticProp = (FTPDownloaderPropertiesDTO) getProperties();
 
         if (!currentDir.equals("")) {
             dirToList += currentDir;
@@ -237,14 +242,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         }
 
                         if (staticProp.isDirectSubmit()) {
-                            //Set FTPSRemoteDownloaderDTO properties into SweeperStaticPropertiesDTO.
-                            SweeperStaticPropertiesDTO staticPropertiesDTO = new SweeperStaticPropertiesDTO();
-                            staticPropertiesDTO.setContentType(staticProp.getContentType());
-                            staticPropertiesDTO.setLensVisibility(staticProp.isLensVisibility());
-                            staticPropertiesDTO.setPipeLineID(staticProp.getPipeLineID());
-                            staticPropertiesDTO.setSecuredPayload(staticProp.isSecuredPayload());
                             // sweep single file process to SB queue
-                            String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName), staticPropertiesDTO);
+                            String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
                             LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                         }
                         // Delete the remote files after successful download if user opt for it
@@ -308,5 +307,52 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
         }
 
+    }
+
+    /**
+     * Method to use single file post into Sweeper event queue for store file into BOSS
+     * 
+     * @param file downloaded File
+     * @return Globalprocessid.
+     */
+    @Override
+    public String sweepFile(File file) {
+
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+        sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
+        sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
+        sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
+        sweeperEventRequestDTO.setContentType(staticProp.getContentType());
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+
+        try {
+            String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
+            SweeperEventSendQueue.post(message);
+        } catch (Throwable e) {
+            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
+            LOGGER.error(msg, e);
+        }
+
+        return sweeperEventRequestDTO.getGlobalProcessId();
+    }
+
+    /**
+     * Method to use list of downloaded files post into sweeper event queue
+     * 
+     * @param files  downloaded files
+     * @param sweeperStaticPropertiesDTO   
+     */
+    @Override
+    public String[] sweepFiles(File[] files) {
+
+        List<String> globalProcessorIds = new ArrayList<String>();
+        for (File file:files) {
+            // sweep each file and add global processorIds.
+            globalProcessorIds.add(sweepFile(file));
+        }
+        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
     }
 }

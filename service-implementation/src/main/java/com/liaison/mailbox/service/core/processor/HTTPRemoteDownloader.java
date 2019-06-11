@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.mailbox.MailBoxConstants;
@@ -19,10 +20,12 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -51,6 +54,8 @@ import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
     private static final Logger LOGGER = LogManager.getLogger(HTTPRemoteDownloader.class);
+
+    private HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties;
 
     @SuppressWarnings("unused")
     private HTTPRemoteDownloader() {
@@ -107,7 +112,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (MailBoxConstants.POST.equals(request.getMethod())
                     || MailBoxConstants.PUT.equals(request.getMethod())) {
 
-                HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
+                httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
 
                 files = getFilesToUpload(false);
                 if (null != files) {
@@ -265,4 +270,50 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         }
     }
 
+    /**
+     * Method to use single file post into Sweeper event queue for store file into BOSS
+     * 
+     * @param file downloaded File
+     * @return Globalprocessid.
+     */
+    @Override
+    public String sweepFile(File file) {
+
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+        sweeperEventRequestDTO.setLensVisibility(httpDownloaderStaticProperties.isLensVisibility());
+        sweeperEventRequestDTO.setPipeLineID(httpDownloaderStaticProperties.getPipeLineID());
+        sweeperEventRequestDTO.setSecuredPayload(httpDownloaderStaticProperties.isSecuredPayload());
+        sweeperEventRequestDTO.setContentType(httpDownloaderStaticProperties.getContentType());
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+
+        try {
+            String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
+            SweeperEventSendQueue.post(message);
+        } catch (Throwable e) {
+            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
+            LOGGER.error(msg, e);
+        }
+
+        return sweeperEventRequestDTO.getGlobalProcessId();
+    }
+
+    /**
+     * Method to use list of downloaded files post into sweeper event queue
+     * 
+     * @param files  downloaded files
+     * @param sweeperStaticPropertiesDTO   
+     */
+    @Override
+    public String[] sweepFiles(File[] files) {
+
+        List<String> globalProcessorIds = new ArrayList<String>();
+        for (File file:files) {
+            // sweep each file and add global processorIds.
+            globalProcessorIds.add(sweepFile(file));
+        }
+        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
+    }
 }

@@ -123,8 +123,8 @@ public class SweeperEventExecutionService implements Runnable {
         LOGGER.debug("Created Time stamp {}", createdTime);
 
         WorkTicket workTicket = new WorkTicket();
-        workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-        workTicket.setPipelineId(sweeperEventRequestDTO.getStaticProp().getPipeLineID());
+        workTicket.setGlobalProcessId(sweeperEventRequestDTO.getGlobalProcessId());
+        workTicket.setPipelineId(sweeperEventRequestDTO.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(sweeperEventRequestDTO.getFile().getAbsolutePath().toString());
         workTicket.setCreatedTime(new Date(createdTime.toMillis()));
@@ -179,12 +179,12 @@ public class SweeperEventExecutionService implements Runnable {
             workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
         }
 
-        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperEventRequestDTO.getStaticProp().isSecuredPayload()));
-        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperEventRequestDTO.getStaticProp().isLensVisibility()));
-        properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperEventRequestDTO.getStaticProp().getPipeLineID());
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperEventRequestDTO.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperEventRequestDTO.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperEventRequestDTO.getPipeLineID());
         properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(sweeperEventRequestDTO.getDynamicProperties()));
 
-        String contentType = MailBoxUtil.isEmpty(sweeperEventRequestDTO.getStaticProp().getContentType()) ? MediaType.TEXT_PLAIN : sweeperEventRequestDTO.getStaticProp().getContentType();
+        String contentType = MailBoxUtil.isEmpty(sweeperEventRequestDTO.getContentType()) ? MediaType.TEXT_PLAIN : sweeperEventRequestDTO.getContentType();
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());

@@ -24,20 +24,22 @@ import com.liaison.mailbox.service.dto.SweeperStaticPropertiesDTO;
 public class SweeperEventRequestDTO {
 
     private File file;
-    private SweeperStaticPropertiesDTO staticProp;
-    private Processor processor;
+    private boolean isSecuredPayload;
+    private boolean isLensVisibility;
+    private String globalProcessId;
+    private String pipeLineID;
+    private String ContentType;
     private String mailBoxId;
     private Map<String, String> ttlMap;
     private Set<ProcessorProperty> dynamicProperties;
-    
+
     @SuppressWarnings("unused")
     public SweeperEventRequestDTO() {
         super();
     }
-    
-    public SweeperEventRequestDTO(File file, SweeperStaticPropertiesDTO staticProp) {
+
+    public SweeperEventRequestDTO(File file) {
         this.file = file;
-        this.staticProp = staticProp;
     }
 
     public File getFile() {
@@ -46,22 +48,6 @@ public class SweeperEventRequestDTO {
 
     public void setFile(File file) {
         this.file = file;
-    }
-
-    public SweeperStaticPropertiesDTO getStaticProp() {
-        return staticProp;
-    }
-
-    public void setStaticProp(SweeperStaticPropertiesDTO staticProp) {
-        this.staticProp = staticProp;
-    }
-
-    public Processor getProcessor() {
-        return processor;
-    }
-
-    public void setProcessor(Processor processor) {
-        this.processor = processor;
     }
 
     public String getMailBoxId() {
@@ -87,5 +73,45 @@ public class SweeperEventRequestDTO {
     public void setDynamicProperties(Set<ProcessorProperty> dynamicProperties) {
         this.dynamicProperties = dynamicProperties;
     }
-    
+
+    public boolean isSecuredPayload() {
+        return isSecuredPayload;
+    }
+
+    public void setSecuredPayload(boolean isSecuredPayload) {
+        this.isSecuredPayload = isSecuredPayload;
+    }
+
+    public boolean isLensVisibility() {
+        return isLensVisibility;
+    }
+
+    public void setLensVisibility(boolean isLensVisibility) {
+        this.isLensVisibility = isLensVisibility;
+    }
+
+    public String getGlobalProcessId() {
+        return globalProcessId;
+    }
+
+    public void setGlobalProcessId(String globalProcessId) {
+        this.globalProcessId = globalProcessId;
+    }
+
+    public String getPipeLineID() {
+        return pipeLineID;
+    }
+
+    public void setPipeLineID(String pipeLineID) {
+        this.pipeLineID = pipeLineID;
+    }
+
+    public String getContentType() {
+        return ContentType;
+    }
+
+    public void setContentType(String contentType) {
+        ContentType = contentType;
+    }
+
 }
