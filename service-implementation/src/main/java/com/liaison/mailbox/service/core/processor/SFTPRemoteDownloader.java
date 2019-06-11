@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -31,6 +33,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
@@ -322,15 +325,19 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(File file) {
 
-    	LOGGER.info("Entered into sweep File {}   ,    {}    ,  {}    ,", staticProp, configurationInstance, configurationInstance.getMailbox());
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+    	LOGGER.info("Entered into sweep File {}, {}, {}", staticProp, configurationInstance, configurationInstance.getMailbox());
+    	String mailBoxId = configurationInstance.getMailbox().getPguid();
+    	Set<ProcessorProperty> dynamicProperty = configurationInstance.getDynamicProperties();
+    	Map<String, String> ttlNumber = configurationInstance.getTTLUnitAndTTLNumber();
+        
+    	SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
         sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
         sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
         sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
         sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setDynamicProperties(configurationInstance.getDynamicProperties());
-        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        sweeperEventRequestDTO.setMailBoxId(mailBoxId);
+        sweeperEventRequestDTO.setDynamicProperties(dynamicProperty);
+        sweeperEventRequestDTO.setTtlMap(ttlNumber);
         sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
 
         try {
