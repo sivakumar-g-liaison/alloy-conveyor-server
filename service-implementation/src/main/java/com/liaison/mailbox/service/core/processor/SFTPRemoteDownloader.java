@@ -322,6 +322,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(File file) {
 
+    	LOGGER.info("Entered into sweep File {}   ,    {}    ,  {}    ,", staticProp, configurationInstance, configurationInstance.getMailbox());
         SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
         sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
         sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
@@ -352,6 +353,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String[] sweepFiles(File[] files) {
 
+    	LOGGER.info( " Entered into sweep files Locations >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         List<String> globalProcessorIds = new ArrayList<String>();
         for (File file:files) {
             // sweep each file and add global processorIds.
