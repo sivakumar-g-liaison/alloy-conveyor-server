@@ -33,8 +33,6 @@ public class SweeperEventProcessThreadPool {
 
     public static int keepAlive = LiaisonArchaiusConfiguration.getInstance().getInt(PROPERTY_SWEEPER_EVENT_KEEPALIVE_MINUTES, DEFAULT_SWEEPER_EVENT_KEEPALIVE_MINUTES);
 
-    private static final Logger logger = LogManager.getLogger(SweeperProcessThreadPool.class);
-
     private static ThreadPoolExecutor executorService;
     private static int sweeperEventProcessingThreadPoolSize;
     private static int corePoolSize;

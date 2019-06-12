@@ -53,14 +53,14 @@ public class SweeperEventRequestDTO {
     }
 
     public String getStorageType() {
-		return storageType;
-	}
+	    return storageType;
+    }
 
-	public void setStorageType(String storageType) {
-		this.storageType = storageType;
-	}
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+    }
 
-	public Map<String, String> getTtlMap() {
+    public Map<String, String> getTtlMap() {
         return ttlMap;
     }
 

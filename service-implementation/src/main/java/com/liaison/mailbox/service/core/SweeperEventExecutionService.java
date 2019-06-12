@@ -166,8 +166,6 @@ public class SweeperEventExecutionService implements Runnable {
      * @param staticProp staic properties
      * @param workTicket workticket
      * @throws IOException
-     * @throws JAXBException 
-     * @throws JSONException 
      */
     private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
 

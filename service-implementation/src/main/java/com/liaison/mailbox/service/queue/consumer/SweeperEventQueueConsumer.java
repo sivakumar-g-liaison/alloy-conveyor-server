@@ -10,16 +10,11 @@
 
 package com.liaison.mailbox.service.queue.consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.messagebus.queue.QueueTextMessageProcessor;
 import com.liaison.mailbox.service.core.SweeperEventExecutionService;
 import com.liaison.mailbox.service.thread.pool.SweeperEventProcessThreadPool;
 
 public class SweeperEventQueueConsumer implements QueueTextMessageProcessor {
-
-    private static final Logger LOGGER = LogManager.getLogger(SweeperEventQueueConsumer.class);
 
     @Override
     public void processMessage(String message) {

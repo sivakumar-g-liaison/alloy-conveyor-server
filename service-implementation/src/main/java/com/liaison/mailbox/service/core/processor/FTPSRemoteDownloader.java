@@ -343,14 +343,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * Method to use list of downloaded files post into sweeper event queue
      * 
      * @param files  downloaded files
-     * @param sweeperStaticPropertiesDTO   
-     * @throws IOException 
-     * @throws IllegalAccessException 
+     * @return globalProcessorIds    
      */
     @Override
-    public String[] sweepFiles(File[] files) throws IllegalAccessException, IOException {
+    public String[] sweepFiles(File[] files) {
 
-    	staticProp = (FTPDownloaderPropertiesDTO) getProperties();
         List<String> globalProcessorIds = new ArrayList<String>();
         for (File file:files) {
             // sweep each file and add global processorIds.
