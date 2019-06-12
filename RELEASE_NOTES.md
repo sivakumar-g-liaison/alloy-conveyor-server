@@ -2,6 +2,7 @@
 ---------------
 * GGT-1670 - Active-Active FILE_DELETE replication issue in EU
 * Added SSO properties for qa-stage, at4s/u/p, px1s/u/p
+* GMB-1228 - Sweeper is pulling the same file at least twice
 * GMB-1217 - Add direct submit from remote downloader
 
 5.6.5

@@ -584,9 +584,13 @@ public class GlassMessage implements IGlassMessage {
      */
     public void setSenderOrganizationDetails(String pipelineId) {
 
-        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
-        this.setSenderId(org.getPguid());
-        this.setSenderName(org.getName());
+        try {
+            OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
+            this.setSenderId(org.getPguid());
+            this.setSenderName(org.getName());
+        } catch (Exception e) {
+            logger.error("Failed to get the Organization Details", e);
+        }
     }
 
     /**
@@ -596,9 +600,13 @@ public class GlassMessage implements IGlassMessage {
      */
     public void setReceiverOrganizationDetails(String pipelineId) {
 
-        OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
-        this.setReceiverId(org.getPguid());
-        this.setReceiverName(org.getName());
+        try {
+            OrganizationDTO org = ServiceBrokerUtil.getOrganizationByPipelineId(pipelineId);
+            this.setReceiverId(org.getPguid());
+            this.setReceiverName(org.getName());
+        } catch (Exception e) {
+            logger.error("Failed to get the Organization Details", e);
+        }
     }
     
     public String getAdminErrorDetails() {
