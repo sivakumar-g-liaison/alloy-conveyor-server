@@ -55,7 +55,6 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +65,6 @@ import org.apache.logging.log4j.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

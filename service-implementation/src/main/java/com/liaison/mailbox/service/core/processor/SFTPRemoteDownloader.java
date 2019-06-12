@@ -57,7 +57,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * Required for JS
      */
 	private G2SFTPClient sftpClient;
-	private SFTPDownloaderPropertiesDTO staticProp;
+    private SFTPDownloaderPropertiesDTO staticProp;
 
 	@SuppressWarnings("unused")
 	private SFTPRemoteDownloader() {
@@ -347,20 +347,20 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
-	/**
-	 * Method to use list of downloaded files post into sweeper event queue
-	 * 
-	 * @param files downloaded files
-	 * @param sweeperStaticPropertiesDTO
-	 */
-	@Override
-	public String[] sweepFiles(File[] files) {
+    /**
+     * Method to use list of downloaded files post into sweeper event queue
+     * 
+     * @param files downloaded files
+     * @param sweeperStaticPropertiesDTO
+     */
+    @Override
+    public String[] sweepFiles(File[] files) {
 
-		List<String> globalProcessorIds = new ArrayList<>();
-		for (File file : files) {
-			// sweep each file and add global processorIds.
-			globalProcessorIds.add(sweepFile(file));
-		}
-		return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
-	}
+        List<String> globalProcessorIds = new ArrayList<>();
+        for (File file : files) {
+            // sweep each file and add global processorIds.
+            globalProcessorIds.add(sweepFile(file));
+        }
+        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
+    }
 }
