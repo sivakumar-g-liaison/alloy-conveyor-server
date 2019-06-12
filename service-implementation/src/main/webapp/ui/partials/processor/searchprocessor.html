@@ -7,23 +7,29 @@
     <form name="formSearchPrcsr" novalidate="">
 
         <div class="row search-form-bottom">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="prcsrguid"> Processor Id </label>
                 <input id="prcsrguid" type="text" ng-model="prcsrGuid"
                        class="form-control"
                        name="prcsrguid"/>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="mailboxguid"> Mailbox Id </label>
                 <input id="mailboxguid" type="text" ng-model="mailboxId"
                        class="form-control"
                        name="mailboxguid"/>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="pipeLine"> Pipeline Id </label>
                 <input id="pipeLine" type="text" ng-model="PrcsrPipelineId"
                        class="form-control"
                        name="pipeline"/>
+            </div>
+            <div class="col-md-3">
+                <label for="idpURI"> KeyGroup Id </label>
+                <input id="idpURI" type="text" ng-model="idpURI"
+                       class="form-control"
+                       name="credsIdpUri"/>
             </div>
         </div>
         <div class="row search-form-bottom">
