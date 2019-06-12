@@ -74,14 +74,11 @@ public class SweeperEventExecutionService implements Runnable {
             try {
                 persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
             } catch (MailBoxServicesException e) {
-                LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket");
+                LOGGER.error("Failed to persist payload and workticket in storage utilities. So retrying again");
                 try {
                     persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
-                } catch (IOException e1) {
-                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
-                    return;
-                } catch (MailBoxServicesException e2) {
-                    LOGGER.error("Persist error cannot persist so retring again for persist payload and workticket and cannot persist retried again");
+                } catch (IOException | MailBoxServicesException e2) {
+                    LOGGER.error("Retrying Failed.  Cannot persist payload and workticket in storage utilities.");
                     throw e2;
                 }
             }
@@ -92,7 +89,7 @@ public class SweeperEventExecutionService implements Runnable {
             verifyAndDeletePayload(workTicket);
 
         } catch (JAXBException | IOException | JSONException e) {
-            LOGGER.error("Payload cannot persist and workticket or cannot marshal or unmarshal workticket");
+            LOGGER.error("Failed to persist payload and workticket or Cannot marshal workticket into JSON.");
         }
     }
 

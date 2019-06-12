@@ -342,6 +342,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         } catch (Throwable e) {
             String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
             LOGGER.error(msg, e);
+            throw new RuntimeException(msg);
         }
 
         return sweeperEventRequestDTO.getGlobalProcessId();
