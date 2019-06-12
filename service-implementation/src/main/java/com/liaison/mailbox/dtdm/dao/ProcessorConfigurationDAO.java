@@ -69,6 +69,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
     String CLUSTER_TYPE = "cluster_type";
     String GUID = "guid";
     String NAME = "name";
+    String IDP_URI = "idp_uri";
 
     /**
      * Constants for getProcessor Class

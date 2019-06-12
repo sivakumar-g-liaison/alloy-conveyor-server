@@ -942,6 +942,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                 predicateList.add(" processor.javaScriptUri " + searchDTO.getMatchMode() + " :" + SCRIPT_NAME);
             }
         }
+        if (!MailBoxUtil.isEmpty(searchDTO.getKeyGroupId())) {
+            query.append(" inner join processor.credentials credentials ");
+            predicateList.add(" credentials.credsIdpUri " + searchDTO.getMatchMode() + " :" + IDP_URI);
+        }
         if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
             predicateList.add("processor.clusterType = :" + MailBoxConstants.CLUSTER_TYPE);
         } else {
@@ -995,6 +999,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             query.setParameter(SCRIPT_NAME, (GenericSearchFilterDTO.MATCH_MODE_LIKE.equals(searchDTO.getMatchMode())) ?
                     "%" + searchDTO.getScriptName().toLowerCase() + "%" :
                     searchDTO.getScriptName());
+        }
+        if (!MailBoxUtil.isEmpty(searchDTO.getKeyGroupId())) {
+            query.setParameter(IDP_URI, searchDTO.getKeyGroupId());
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getClusterType())) {
             query.setParameter(MailBoxConstants.CLUSTER_TYPE, searchDTO.getClusterType());

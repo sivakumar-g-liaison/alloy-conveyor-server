@@ -43,6 +43,7 @@ public class GenericSearchFilterDTO {
 	private String clusterType;
 	private boolean isDisableFilters;
 	private boolean isMinResponse;
+    private String keyGroupId;	
 	
 	public String getMbxGuid() {
 	    return mbxGuid;
@@ -233,4 +234,13 @@ public class GenericSearchFilterDTO {
 	        this.matchMode = MATCH_MODE_LIKE;
 	    }
     }
+
+    public String getKeyGroupId() {
+        return keyGroupId;
+    }
+
+    public void setKeyGroupId(String keyGroupId) {
+        this.keyGroupId = keyGroupId;
+    }
+
 }

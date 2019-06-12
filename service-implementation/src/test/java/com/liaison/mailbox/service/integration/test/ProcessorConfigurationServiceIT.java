@@ -2303,4 +2303,39 @@ public class ProcessorConfigurationServiceIT extends BaseServiceTest {
         Assert.assertEquals(procRequestDTO.getProcessor().getName(), serviceResponse.getProcessor().get(0).getName());
         Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.PROCESSOR)));
     }
+
+
+    /**
+     * Method to search processor by KeyGroup Id
+     */
+    @Test
+    public void testSearchKeyGroupGuid() {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setKeyGroupId("81BA6E36DD444EC4862CF509D0B5C06E");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.READ_SUCCESSFUL.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
+
+    /**
+     * Method to search processor by Unavailable KeyGroup Id
+     */
+    @Test
+    public void testSearchKeyGroupGuidWithUnavailableGuid() {
+
+        ProcessorConfigurationService processor = new ProcessorConfigurationService();
+        GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+        searchFilter.setKeyGroupId("81BA6E36DD444EC4862CF509D0B5C456");
+        searchFilter.setMatchMode(GenericSearchFilterDTO.MATCH_MODE_EQUALS_CHR);
+        GetProcessorResponseDTO serviceResponse = processor.searchProcessor(searchFilter);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
+        Assert.assertTrue(serviceResponse.getResponse().getMessage().contains(Messages.NO_COMPONENT_EXISTS.value().replaceAll("%s", MailBoxConstants.MAILBOX_PROCESSOR)));
+    }
 }

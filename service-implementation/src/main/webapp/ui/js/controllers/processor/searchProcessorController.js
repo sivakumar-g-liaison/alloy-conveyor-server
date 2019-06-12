@@ -87,6 +87,7 @@ var rest = myApp.controller(
                     prcsrGuid: $scope.prcsrGuid,
                     mbxGuid: $scope.mailboxId,
                     scriptName: $scope.scriptName,
+                    idpURI: $scope.idpURI,
                     minResponse: minRespond,
                     clusterType: $scope.clusterType
                 }
@@ -105,6 +106,7 @@ var rest = myApp.controller(
 		$scope.prcsrGuid = null;
 		$scope.mailboxId = null;
 		$scope.scriptName = null;
+        $scope.idpURI = null;
 	}
 
 	// Get Mailbox names for Typeahead display		

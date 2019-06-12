@@ -78,6 +78,7 @@ public class ProcessorSearchResource extends AuditedResource {
                                     @QueryParam(value = "prcsrName") @ApiParam(name = "prcsrName", required = false, value = "prcsrName") final String prcsrName,
                                     @QueryParam(value = "prcsrGuid") @ApiParam(name = "prcsrGuid", required = false, value = "prcsrGuid") final String prcsrGuid,
                                     @QueryParam(value = "scriptName") @ApiParam(name = "scriptName", required = false, value = "scriptName") final String scriptName,
+                                    @QueryParam(value = "idpURI") @ApiParam(name = "idpURI", required = false, value = "idpURI") final String idpURI,                                    
                                     @QueryParam(value = "clusterType") @ApiParam(name = "clusterType", required = false, value = "clusterType") final String clusterType,
                                     @QueryParam(value = "minResponse") @ApiParam(name = "minResponse", required = false, value = "Minimum Response") final String minResponse,
                                     @QueryParam(value = "matchMode") @ApiParam(name = "matchMode", required = false, value = "matchMode") final String matchMode) {
@@ -103,6 +104,7 @@ public class ProcessorSearchResource extends AuditedResource {
                 searchFilter.setProcessorName(prcsrName);
                 searchFilter.setProcessorGuid(prcsrGuid);
                 searchFilter.setScriptName(scriptName);
+                searchFilter.setKeyGroupId(idpURI);
                 searchFilter.setClusterType(clusterType);
                 searchFilter.setMatchMode(matchMode);
                 searchFilter.setMinResponse(Boolean.parseBoolean(minResponse));
