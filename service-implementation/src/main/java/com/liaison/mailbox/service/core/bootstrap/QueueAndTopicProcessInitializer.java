@@ -65,8 +65,6 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILB
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_EVENT_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_EVENT_ADDITIONAL_TOPIC_SUFFIXES;
 
 /**
  * Initializes all queue pollers.

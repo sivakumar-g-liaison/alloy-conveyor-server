@@ -99,10 +99,8 @@ public class SweeperEventExecutionService implements Runnable {
     /**
      * This method is used to construct workticket from the given file.
      *
-     * @param java.io.File file
      * @param SFTPDownloaderPropertiesDTO
      * @return workticket
-     * @throws IllegalAccessException
      * @throws IOException
      */
     private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
@@ -163,7 +161,7 @@ public class SweeperEventExecutionService implements Runnable {
     /**
      * This method is used to persist the payload and workticket in storage utilities.
      *
-     * @param staticProp staic properties
+     * @param sweeperEventRequestDTO staic properties
      * @param workTicket workticket
      * @throws IOException
      */

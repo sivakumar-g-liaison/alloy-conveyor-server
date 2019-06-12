@@ -63,14 +63,14 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	private SFTPRemoteDownloader() {
 	}
 
-	public SFTPRemoteDownloader(Processor processor) {
-		super(processor);
-		try {
-			staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		}
-	}
+    public SFTPRemoteDownloader(Processor processor) {
+        super(processor);
+        try {
+            staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 
 	/**
 	 * Java method to execute the SFTPrequest
@@ -145,7 +145,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		//variable to hold the status of file download request execution
 		int statusCode = 0;
 		String dirToList = "";
-		staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
 
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;

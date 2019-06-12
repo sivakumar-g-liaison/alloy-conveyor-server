@@ -36,7 +36,6 @@ import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -67,10 +66,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
     public FTPSRemoteDownloader(Processor processor) {
         super(processor);
         try {
-			staticProp = (FTPDownloaderPropertiesDTO) getProperties();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		}
+            staticProp = (FTPDownloaderPropertiesDTO) getProperties();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
@@ -172,7 +171,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
         //variable to hold the status of file download request execution
         int statusCode = 0;
         String dirToList = "";
-        staticProp = (FTPDownloaderPropertiesDTO) getProperties();
 
         if (!currentDir.equals("")) {
             dirToList += currentDir;

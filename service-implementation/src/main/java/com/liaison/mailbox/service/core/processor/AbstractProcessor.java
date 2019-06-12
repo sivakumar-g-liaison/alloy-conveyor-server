@@ -42,7 +42,6 @@ import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
@@ -411,16 +410,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws IOException
      */
     public void writeResponseToMailBox(ByteArrayOutputStream response) throws IOException, MailBoxServicesException {
-
-        LOGGER.debug("Started writing response");
-        String processorName = MailBoxConstants.PROCESSOR;
-        if (configurationInstance.getProcsrName() != null) {
-            processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
-        }
-        String fileName = processorName + System.nanoTime();
-
-        writeResponseToMailBox(response, fileName);
-
+        throw new RuntimeException("Not Implemented");
     }
 
     /**
@@ -429,40 +419,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws MailBoxServicesException
      * @throws IOException
      */
-    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename)
-            throws IOException, MailBoxServicesException {
-
-        LOGGER.debug("Started writing response");
-        String responseLocation = getWriteResponseURI();
-
-        if (MailBoxUtil.isEmpty(responseLocation)) {
-            throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
-        }
-
-        File directory = new File(responseLocation);
-        if (!directory.exists()) {
-            Files.createDirectories(directory.toPath());
-        }
-
-        File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-        Files.write(file.toPath(), response.toByteArray());
-        LOGGER.info("Response is successfully written" + file.getAbsolutePath());
-        
-        HTTPDownloaderPropertiesDTO staticProp = null;
-        try {
-            staticProp = (HTTPDownloaderPropertiesDTO) getProperties();
-        } catch (IllegalAccessException e) {
-            LOGGER.debug("Caught exception while getting HTTP Downloader properties");
-        }
-        // async sweeper process if direct submit is true.
-        if (staticProp != null && staticProp.isDirectSubmit()) {
-            // sweep single file process to SB queue
-            String globalProcessorId = sweepFile(file);
-            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
-        }
-        if (response != null) {
-            response.close();
-        }
+    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException, MailBoxServicesException {
+    	throw new RuntimeException("Not Implemented");
     }
 
     /**

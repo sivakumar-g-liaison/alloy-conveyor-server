@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,10 +66,10 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     public HTTPRemoteDownloader(Processor processor) {
         super(processor);
         try {
-        	httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
-		}
+            httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
         // this.configurationInstance = processor;
     }
 
@@ -117,8 +118,6 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (MailBoxConstants.POST.equals(request.getMethod())
                     || MailBoxConstants.PUT.equals(request.getMethod())) {
 
-                httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
-
                 files = getFilesToUpload(false);
                 if (null != files) {
 
@@ -161,8 +160,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-        } catch (MailBoxServicesException | IOException | LiaisonException |
-                IllegalAccessException e) {
+        } catch (MailBoxServicesException | IOException | LiaisonException e) {
             LOGGER.error(constructMessage("Error occurred during http(s) download", seperator, e.getMessage()), e);
             throw new RuntimeException(e);
         }
@@ -272,6 +270,59 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * call back method to write the response back to MailBox from JS
+     *
+     * @throws MailBoxServicesException
+     * @throws IOException
+     */
+    public void writeResponseToMailBox(ByteArrayOutputStream response) throws IOException, MailBoxServicesException {
+
+        LOGGER.debug("Started writing response");
+        String processorName = MailBoxConstants.PROCESSOR;
+        if (configurationInstance.getProcsrName() != null) {
+            processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
+        }
+        String fileName = processorName + System.nanoTime();
+
+        writeResponseToMailBox(response, fileName);
+    }
+
+    /**
+     * call back method to write the file response back to MailBox from JS
+     *
+     * @throws MailBoxServicesException
+     * @throws IOException
+     */
+    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException, MailBoxServicesException {
+
+        LOGGER.debug("Started writing response");
+        String responseLocation = getWriteResponseURI();
+
+        if (MailBoxUtil.isEmpty(responseLocation)) {
+            throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
+        }
+
+        File directory = new File(responseLocation);
+        if (!directory.exists()) {
+            Files.createDirectories(directory.toPath());
+        }
+
+        File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
+        Files.write(file.toPath(), response.toByteArray());
+        LOGGER.info("Response is successfully written" + file.getAbsolutePath());
+
+        // async sweeper process if direct submit is true.
+        if (httpDownloaderStaticProperties.isDirectSubmit()) {
+            // sweep single file process to SB queue
+            String globalProcessorId = sweepFile(file);
+            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
+        }
+        if (response != null) {
+            response.close();
         }
     }
 
