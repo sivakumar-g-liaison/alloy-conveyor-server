@@ -26,7 +26,7 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 public class SweeperEventSendQueue implements AutoCloseable {
 
     private static final Logger LOG = LogManager.getLogger(ProcessorSendQueue.class);
-    private static final String QUEUE_NAME = "inboundFile";
+    private static final String QUEUE_NAME = "sweeperEvent";
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
     private static final String TOPIC_SUFFIX = CONFIGURATION.getString(TOPIC_SWEEPER_EVENT_DEFAULT_TOPIC_SUFFIX);

@@ -117,7 +117,7 @@ public class QueueAndTopicProcessInitializer {
     private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
     private static final String INBOUND_FILE_QUEUE = "inboundFile";
     private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
-    private static final String SWEEPER_EVENT_QUEUE = "inboundFile";
+    private static final String SWEEPER_EVENT_QUEUE = "sweeperEvent";
 
     public static void initialize() {
 
@@ -243,15 +243,15 @@ public class QueueAndTopicProcessInitializer {
                     logger.warn("Queue listener for FILE_STAGE_REPLICATION_RETRY could not be initialized.", e);
                 }
 
-//                try {
-//
-//                    logger.info("Starting INBOUND_FILE_QUEUE Listener");
-//                    QueuePooledListenerContainer inboundFileQueue = new MailboxQueuePooledListenerContainer(InboundFileQueueProcessor.class, INBOUND_FILE_QUEUE);
-//                    inboundFileQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-//                    logger.info("Started INBOUND_FILE_QUEUE Listener");
-//                } catch (Exception e) {
-//                    logger.warn("Queue listener for inbound file could not be initialized.", e);
-//                }
+                try {
+
+                    logger.info("Starting INBOUND_FILE_QUEUE Listener");
+                    QueuePooledListenerContainer inboundFileQueue = new MailboxQueuePooledListenerContainer(InboundFileQueueProcessor.class, INBOUND_FILE_QUEUE);
+                    inboundFileQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started INBOUND_FILE_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.warn("Queue listener for inbound file could not be initialized.", e);
+                }
 
                 try {
 
