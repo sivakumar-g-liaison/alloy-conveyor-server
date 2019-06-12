@@ -64,6 +64,11 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     public HTTPRemoteDownloader(Processor processor) {
         super(processor);
+        try {
+        	httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
         // this.configurationInstance = processor;
     }
 
