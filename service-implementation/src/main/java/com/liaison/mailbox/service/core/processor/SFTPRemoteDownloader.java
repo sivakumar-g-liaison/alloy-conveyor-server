@@ -335,7 +335,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
         sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
         sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+//        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+        sweeperEventRequestDTO.setStorageType(configurationInstance.getDynamicProperties().toString());
         LOGGER.info("Set Storage Type of dynamic Properties >>>>>>>>>>>>>>>>>>>>   {}        ,                 {} ", sweeperEventRequestDTO.getStorageType(), configurationInstance.getDynamicProperties().size());
 
         try {
