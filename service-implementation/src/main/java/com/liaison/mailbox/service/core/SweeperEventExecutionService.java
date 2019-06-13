@@ -113,7 +113,7 @@ public class SweeperEventExecutionService implements Runnable {
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
-        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
+        BasicFileAttributes attr = Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
 
         FileTime modifiedTime = attr.lastModifiedTime();
@@ -127,14 +127,14 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.setGlobalProcessId(sweeperEventRequestDTO.getGlobalProcessId());
         workTicket.setPipelineId(sweeperEventRequestDTO.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
-        workTicket.setPayloadURI(sweeperEventRequestDTO.getFile().getAbsolutePath());
+        workTicket.setPayloadURI(filePath);
         workTicket.setCreatedTime(new Date(createdTime.toMillis()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
         workTicket.setPayloadSize(attr.size());
-        workTicket.setFileName(sweeperEventRequestDTO.getFile().getName());
-        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, sweeperEventRequestDTO.getFile().getName());
-        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
+        workTicket.setFileName(filePath);
+        workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, filePath);
+        workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
         workTicket.setAdditionalContext(additionalContext);
         return workTicket;
     }
