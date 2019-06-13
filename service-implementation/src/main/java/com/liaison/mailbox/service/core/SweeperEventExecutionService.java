@@ -207,6 +207,7 @@ public class SweeperEventExecutionService implements Runnable {
                                              G2SFTPClient sftpClient,
                                              String fileName) throws IOException, LiaisonException {
 
+        LOGGER.info("Entered into Persist Payload Workticket method");
         Map<String, String> properties = new HashMap<>();
         if (!sweeperEventRequestDTO.getTtlMap().isEmpty()) {
             Integer ttlDays = Integer.parseInt(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.TTL_NUMBER));

@@ -383,8 +383,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
 		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
+		LOGGER.info("SweeperEventRequestDTO properties {} , {} , {} , ", staticProp.getPipeLineID(), configurationInstance.getMailbox().getPguid(), MailBoxUtil.getGUID());
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
+			LOGGER.info("Completed Workticket Getting from service");
 			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, fileName);
 			return sweeperEventRequestDTO.getGlobalProcessId();
 		} catch (Exception e) {
