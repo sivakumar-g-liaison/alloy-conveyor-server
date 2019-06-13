@@ -203,7 +203,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         continue;
                     }
 
-                    String globalProcessorId = sweepFile(sftpClient, "/data/sftp/sweep_11/" + dirToList + File.separatorChar + currentFileName);
+                    String globalProcessorId = sweepFile(sftpClient, "/data/sftp/sweep_11" + dirToList + File.separatorChar + currentFileName);
                     LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
 //					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 //							+ statusIndicator : currentFileName;
