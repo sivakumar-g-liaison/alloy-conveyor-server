@@ -228,7 +228,9 @@ public class SweeperEventExecutionService implements Runnable {
         OutputStream outputStream = null;
         try {
             outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
+            LOGGER.info("Completed outputstream ........................ {} , -------------- {} ", fileName, outputStream);
             sftpClient.getFile(fileName, outputStream);
+            LOGGER.info("Completed Get File ..........................");
         } finally {
             if (null != outputStream) {
                 outputStream.close();
