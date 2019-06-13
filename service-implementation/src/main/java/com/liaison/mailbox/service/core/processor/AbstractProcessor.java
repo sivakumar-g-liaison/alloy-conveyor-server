@@ -14,6 +14,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -1145,9 +1146,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     /**
      * This Method create local folders if not available and returns the path.
-     *
-     * @param processorDTO it have details of processor
-     *
      */
     @Override
     public String createLocalPath() {
@@ -1250,7 +1248,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * Method to use single file sweeps to storage utilities and also post workticket to service broker queue
      * 
      * @param file downloaded File
-     * @param staticProp SFTPDownloaderprocessor properties.
      */
     @Override
     public String sweepFile(File file) {
@@ -1261,10 +1258,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * Method to use list of downloaded files sweeps to storage Utilities and also post the worktickets to service broker queue
      * 
      * @param files  downloaded files
-     * @param sweeperStaticPropertiesDTO   
      */
     @Override
     public String[] sweepFiles(File[] files) {
         throw new RuntimeException("Not Implemented");
     }
+
+    @Override
+    public String sweepFile(G2SFTPClient sftpClient, String fileName) {
+        throw new RuntimeException("Not Implemented");
+    }    
 }

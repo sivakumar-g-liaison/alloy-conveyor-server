@@ -255,6 +255,39 @@ public class StorageUtilities {
     }
 
     /**
+     * A helper method to persist the payload into spectrum(secure/unsecure)/boss(secure/unsecure) and file system.
+     *
+     * @param workTicket             wokticket
+     * @param httpListenerProperties additional properties
+     * @return meta snapshot
+     */
+    public static OutputStream getPayloadOutputStream(WorkTicket workTicket, Map<String, String> httpListenerProperties) {
+
+        try {
+
+            String globalProcessorId = workTicket.getGlobalProcessId();
+            boolean isSecure = Boolean.parseBoolean(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
+
+            FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+
+            String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
+            // persists the message in spectrum.
+            LOGGER.debug("Persist the payload **");
+            URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
+
+            // fetch the metdata includes payload size
+            FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, null);;
+            return FS2.getFS2PayloadOutputStream(metaSnapshot.getURI(), false);
+        } catch (FS2ObjectAlreadyExistsException e) {
+            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+        } catch (FS2Exception e) {
+            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
      *
      * @param workTicket workticket

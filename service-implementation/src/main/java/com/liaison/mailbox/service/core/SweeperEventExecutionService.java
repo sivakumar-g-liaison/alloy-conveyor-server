@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -24,6 +25,8 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
@@ -96,16 +99,19 @@ public class SweeperEventExecutionService implements Runnable {
     /**
      * This method is used to construct workticket from the given file.
      *
-     * @param SFTPDownloaderPropertiesDTO
+     * @param sweeperEventRequestDTO
      * @return workticket
      * @throws IOException
      */
     private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
-
+        return getWorkTicket(sweeperEventRequestDTO, sweeperEventRequestDTO.getFile().getAbsolutePath(), sweeperEventRequestDTO.getFile().getParent());
+    }
+    
+    public WorkTicket getWorkTicket(SweeperEventRequestDTO sweeperEventRequestDTO, String filePath, String folderName) throws IOException {
         Map<String, Object> additionalContext = new HashMap<>();
-        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, sweeperEventRequestDTO.getFile().getAbsoluteFile());
+        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, filePath);
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
-        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
+        additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
         BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
@@ -121,7 +127,7 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.setGlobalProcessId(sweeperEventRequestDTO.getGlobalProcessId());
         workTicket.setPipelineId(sweeperEventRequestDTO.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
-        workTicket.setPayloadURI(sweeperEventRequestDTO.getFile().getAbsolutePath().toString());
+        workTicket.setPayloadURI(sweeperEventRequestDTO.getFile().getAbsolutePath());
         workTicket.setCreatedTime(new Date(createdTime.toMillis()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
@@ -130,7 +136,6 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, sweeperEventRequestDTO.getFile().getName());
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFile().getParent());
         workTicket.setAdditionalContext(additionalContext);
-
         return workTicket;
     }
 
@@ -138,9 +143,8 @@ public class SweeperEventExecutionService implements Runnable {
      * verifies whether the payload persisted in storage utilities or not and deletes it
      *
      * @param wrkTicket workticket contains payload uri
-     * @throws IOException
      */
-    private void verifyAndDeletePayload(WorkTicket wrkTicket) {
+    public void verifyAndDeletePayload(WorkTicket wrkTicket) {
 
         String payloadURI = wrkTicket.getPayloadURI();
         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
@@ -162,7 +166,7 @@ public class SweeperEventExecutionService implements Runnable {
      * @param workTicket workticket
      * @throws IOException
      */
-    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
+    public void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();
@@ -185,6 +189,49 @@ public class SweeperEventExecutionService implements Runnable {
         try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
             FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+        }
+
+        // persist the workticket
+        StorageUtilities.persistWorkTicket(workTicket, properties);
+    }
+
+    /**
+     * This method is used to persist the payload and workticket in storage utilities.
+     *
+     * @param sweeperEventRequestDTO staic properties
+     * @param workTicket workticket
+     * @throws IOException
+     */
+    public void persistPayloadAndWorkticket(WorkTicket workTicket,
+                                             SweeperEventRequestDTO sweeperEventRequestDTO,
+                                             G2SFTPClient sftpClient,
+                                             String fileName) throws IOException, LiaisonException {
+
+        Map<String, String> properties = new HashMap<>();
+        if (!sweeperEventRequestDTO.getTtlMap().isEmpty()) {
+            Integer ttlDays = Integer.parseInt(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.TTL_NUMBER));
+            workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlDays));
+        }
+
+        properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperEventRequestDTO.isSecuredPayload()));
+        properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperEventRequestDTO.isLensVisibility()));
+        properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperEventRequestDTO.getPipeLineID());
+        properties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, sweeperEventRequestDTO.getStorageType());
+
+        String contentType = MailBoxUtil.isEmpty(sweeperEventRequestDTO.getContentType()) ? MediaType.TEXT_PLAIN : sweeperEventRequestDTO.getContentType();
+        properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
+        workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
+        LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
+
+
+        OutputStream outputStream = null;
+        try {
+            outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
+            sftpClient.getFile(fileName, outputStream);
+        } finally {
+            if (null != outputStream) {
+                outputStream.close();
+            }
         }
 
         // persist the workticket
