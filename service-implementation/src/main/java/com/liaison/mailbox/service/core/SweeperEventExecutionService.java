@@ -234,7 +234,7 @@ public class SweeperEventExecutionService implements Runnable {
                 outputStream.close();
             }
         }
-
+        LOGGER.info("Completed Payload Persisted");
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
     }

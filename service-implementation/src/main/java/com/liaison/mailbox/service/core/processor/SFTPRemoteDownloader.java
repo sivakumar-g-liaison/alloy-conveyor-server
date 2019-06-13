@@ -203,7 +203,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         continue;
                     }
 
-                    String globalProcessorId = sweepFile(sftpClient, localFileDir + File.separatorChar + currentFileName);
+                    String globalProcessorId = sweepFile(sftpClient, dirToList + File.separatorChar + currentFileName);
                     LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
 //					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 //							+ statusIndicator : currentFileName;
@@ -384,7 +384,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 		sweeperEventRequestDTO.setFile(new File(fileName));
 
-		LOGGER.info("SweeperEventRequestDTO properties {} , {} , {} , ", staticProp.getPipeLineID(), configurationInstance.getMailbox().getPguid(), MailBoxUtil.getGUID());
+		LOGGER.info("SweeperEventRequestDTO properties {} , {} , {} ", staticProp.getPipeLineID(), configurationInstance.getMailbox().getPguid(), MailBoxUtil.getGUID());
+		LOGGER.info("SweeperEventRequestDTO properties file name, folder path {} , {}, {}  ", fileName, sweeperEventRequestDTO.getFile().getName(), sweeperEventRequestDTO.getFile().getAbsolutePath());
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
 			LOGGER.info("Completed Workticket Getting from service");
