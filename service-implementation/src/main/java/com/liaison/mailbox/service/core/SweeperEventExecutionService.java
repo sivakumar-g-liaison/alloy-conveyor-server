@@ -115,25 +115,25 @@ public class SweeperEventExecutionService implements Runnable {
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
-        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
-        LOGGER.debug("File attributes{}", attr);
-
-        FileTime modifiedTime = attr.lastModifiedTime();
-        LOGGER.debug("Modified Time stamp {}", modifiedTime);
-
+//        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
+//        LOGGER.debug("File attributes{}", attr);
+//
+//        FileTime modifiedTime = attr.lastModifiedTime();
+//        LOGGER.debug("Modified Time stamp {}", modifiedTime);
+//
         ISO8601Util dateUtil = new ISO8601Util();
-        FileTime createdTime = attr.creationTime();
-        LOGGER.debug("Created Time stamp {}", createdTime);
+//        FileTime createdTime = attr.creationTime();
+//        LOGGER.debug("Created Time stamp {}", createdTime);
 
         WorkTicket workTicket = new WorkTicket();
         workTicket.setGlobalProcessId(sweeperEventRequestDTO.getGlobalProcessId());
         workTicket.setPipelineId(sweeperEventRequestDTO.getPipeLineID());
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(filePath);
-        workTicket.setCreatedTime(new Date(createdTime.toMillis()));
+//        workTicket.setCreatedTime(new Date(createdTime.toMillis()));
         workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
-        workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
-        workTicket.setPayloadSize(attr.size());
+//        workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
+//        workTicket.setPayloadSize(attr.size());
         workTicket.setFileName(filePath);
         workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, filePath);
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
