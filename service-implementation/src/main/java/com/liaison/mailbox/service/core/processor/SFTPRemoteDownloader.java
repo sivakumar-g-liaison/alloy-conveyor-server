@@ -203,8 +203,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         continue;
                     }
 
-                    String globalProcessorId = sweepFile(sftpClient, "/data/sftp/sweep_11" + dirToList + File.separatorChar + aFile);
-                    LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
 					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
@@ -220,6 +218,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 						LOGGER.info("File Out pur stream data ............... -> {}, {}", fos, localDir);
 						statusCode = sftpRequest.getFile(currentFileName, bos);
 						LOGGER.info("File name before sweepe file   ------ {} , {}", currentFileName, bos);
+						String globalProcessorId = sweepFile(sftpClient, "/data/sftp/sweep_11" + dirToList + File.separatorChar + aFile);
+	                    LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
 //						// Check whether the file downloaded successfully if so rename it.
 //						if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 //
