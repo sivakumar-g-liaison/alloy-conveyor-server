@@ -384,7 +384,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
 		LOGGER.info("SweeperEventRequestDTO properties {} , {} , {} ", staticProp.getPipeLineID(), configurationInstance.getMailbox().getPguid(), MailBoxUtil.getGUID());
-		LOGGER.info("SweeperEventRequestDTO properties file name, folder path {} , {}, {}  ", fileName, sweeperEventRequestDTO.getFile().getName(), sweeperEventRequestDTO.getFile().getAbsolutePath());
+		LOGGER.info("SweeperEventRequestDTO properties file name, folder path {} , {}, {}  ", fileName, fileName, "");
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
 			LOGGER.info("Completed Workticket Getting from service");
