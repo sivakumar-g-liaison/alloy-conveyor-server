@@ -205,19 +205,21 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
                     String globalProcessorId = sweepFile(sftpClient, "/data/sftp/sweep_11" + dirToList + File.separatorChar + aFile);
                     LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
-//					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
-//							+ statusIndicator : currentFileName;
-//					String localDir = localFileDir + File.separatorChar + downloadingFileName;
-//					sftpRequest.changeDirectory(dirToList);
-//					createResponseDirectory(localDir);
-//
-//					try {// GSB-1337,GSB-1336
-//
-//						fos = new FileOutputStream(localDir);
-//						bos = new BufferedOutputStream(fos);
-//						LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
-//								currentFileName, currentDir, localFileDir);
-//						statusCode = sftpRequest.getFile(currentFileName, bos);
+					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
+							+ statusIndicator : currentFileName;
+					String localDir = localFileDir + File.separatorChar + downloadingFileName;
+					sftpRequest.changeDirectory(dirToList);
+					createResponseDirectory(localDir);
+
+					try {// GSB-1337,GSB-1336
+
+						fos = new FileOutputStream(localDir);
+						bos = new BufferedOutputStream(fos);
+						LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
+								currentFileName, currentDir, localFileDir);
+						LOGGER.info("File Out pur stream data ............... -> {}, {}", fos, localDir);
+						statusCode = sftpRequest.getFile(currentFileName, bos);
+						LOGGER.info("File name before sweepe file   ------ {} , {}", currentFileName, bos);
 //						// Check whether the file downloaded successfully if so rename it.
 //						if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 //
@@ -249,11 +251,11 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 //								LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
 //							}
 //						}
-//					} finally {
-//						if (bos != null) bos.close();
-//						if (fos != null) fos.close();
-//					}
-//
+					} finally {
+						if (bos != null) bos.close();
+						if (fos != null) fos.close();
+					}
+
 				}
 			}
 		}

@@ -227,11 +227,11 @@ public class SweeperEventExecutionService implements Runnable {
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
 
-        BufferedOutputStream outputStream = null;
+        OutputStream outputStream = null;
         try {
-            outputStream = (BufferedOutputStream)StorageUtilities.getPayloadOutputStream(workTicket, properties);
+            outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
             LOGGER.info("Completed outputstream ........................ {} , -------------- {} ", fileName, outputStream);
-            sftpClient.getFile(fileName, outputStream);
+            sftpClient.getFile(sweeperEventRequestDTO.getFile().getName(), outputStream);
             LOGGER.info("Completed Get File ..........................");
         } finally {
             if (null != outputStream) {
