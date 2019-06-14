@@ -203,7 +203,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         continue;
                     }
 
-                    String globalProcessorId = sweepFile(sftpClient, currentFileName);
+                    String globalProcessorId = sweepFile(sftpClient, dirToList + File.separatorChar + aFile);
                     LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
 //					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 //							+ statusIndicator : currentFileName;
@@ -373,7 +373,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     	SweeperEventExecutionService service = new SweeperEventExecutionService();
 
-		SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO();
+		SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(new File(fileName));
 		sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
 		sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
 		sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
@@ -387,8 +387,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		LOGGER.info("SweeperEventRequestDTO properties file name, folder path {} , {}, {}  ", fileName, fileName, "");
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
-			LOGGER.info("Completed Workticket Getting from service");
-			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, fileName);
+			LOGGER.info("Completed Workticket Getting from service ------------- {}", sweeperEventRequestDTO.getFile().getName());
+			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
 			return sweeperEventRequestDTO.getGlobalProcessId();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
