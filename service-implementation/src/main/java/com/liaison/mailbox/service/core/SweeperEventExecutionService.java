@@ -131,7 +131,7 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.setProcessMode(ProcessMode.ASYNC);
         workTicket.setPayloadURI(filePath);
 //        workTicket.setCreatedTime(new Date(createdTime.toMillis()));
-        workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
+//        workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
 //        workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
 //        workTicket.setPayloadSize(attr.size());
         workTicket.setFileName(filePath);
