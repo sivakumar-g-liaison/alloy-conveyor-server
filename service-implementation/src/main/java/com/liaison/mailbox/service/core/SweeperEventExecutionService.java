@@ -115,13 +115,14 @@ public class SweeperEventExecutionService implements Runnable {
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
+        //Commented for sweepFile(GSFTPFilenmae, filename)
 //        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
 //        LOGGER.debug("File attributes{}", attr);
 //
 //        FileTime modifiedTime = attr.lastModifiedTime();
 //        LOGGER.debug("Modified Time stamp {}", modifiedTime);
 //
-        ISO8601Util dateUtil = new ISO8601Util();
+//        ISO8601Util dateUtil = new ISO8601Util();
 //        FileTime createdTime = attr.creationTime();
 //        LOGGER.debug("Created Time stamp {}", createdTime);
 
@@ -209,7 +210,6 @@ public class SweeperEventExecutionService implements Runnable {
                                              G2SFTPClient sftpClient,
                                              String fileName) throws IOException, LiaisonException {
 
-        LOGGER.info("Entered into Persist Payload Workticket method");
         Map<String, String> properties = new HashMap<>();
         if (!sweeperEventRequestDTO.getTtlMap().isEmpty()) {
             Integer ttlDays = Integer.parseInt(sweeperEventRequestDTO.getTtlMap().get(MailBoxConstants.TTL_NUMBER));
@@ -230,15 +230,12 @@ public class SweeperEventExecutionService implements Runnable {
         OutputStream outputStream = null;
         try {
             outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
-            LOGGER.info("Completed outputstream ........................ {} , -------------- {} ", fileName, outputStream);
             sftpClient.getFile(sweeperEventRequestDTO.getFile().getName(), outputStream);
-            LOGGER.info("Completed Get File ..........................");
         } finally {
             if (null != outputStream) {
                 outputStream.close();
             }
         }
-        LOGGER.info("Completed Payload Persisted");
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
     }

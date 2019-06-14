@@ -274,10 +274,8 @@ public class StorageUtilities {
             // persists the message in spectrum.
             LOGGER.debug("Persist the payload **");
             URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
-            LOGGER.info("Request URI.........    {}", requestUri);
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, null);;
-            LOGGER.info("MetaSnapshot URI.........    {}", metaSnapshot.getURI());
             workTicket.setPayloadURI(metaSnapshot.getURI().toString());
             return FS2.getFS2PayloadOutputStream(metaSnapshot.getURI(), false);
         } catch (FS2ObjectAlreadyExistsException e) {

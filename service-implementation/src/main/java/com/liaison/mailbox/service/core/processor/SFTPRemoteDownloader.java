@@ -212,53 +212,48 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
 					sftpRequest.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
-					String globalProcessorId = sweepFile(sftpClient, dirToList + File.separatorChar + aFile);
-                    LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
-//					try {// GSB-1337,GSB-1336
-//
-//						fos = new FileOutputStream(localDir);
-//						bos = new BufferedOutputStream(fos);
-//						LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
-//								currentFileName, currentDir, localFileDir);
-//						LOGGER.info("File Out pur stream data ............... -> {}, {}", fos, localDir);
-//						statusCode = sftpRequest.getFile(currentFileName, bos);
-//						LOGGER.info("File name before sweepe file   ------ {} , {}", currentFileName, bos);
-						
-//						// Check whether the file downloaded successfully if so rename it.
-//						if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
-//
-//							totalNumberOfProcessedFiles++;
-//							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
-//							if (fos != null) fos.close();
-//							if (bos != null) bos.close();
-//
-//							// Renames the downloaded file to original extension once the fileStatusIndicator is given by User
-//							if (!MailBoxUtil.isEmpty(statusIndicator)) {
-//								File downloadedFile = new File(localDir);
-//								File currentFile = new File(localFileDir + File.separatorChar + currentFileName);
-//								boolean renameStatus = downloadedFile.renameTo(currentFile);
-//								if (renameStatus) {
-//									LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
-//								} else {
-//									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
-//								}
-//							}
-//                            // async sweeper process if direct submit is true.
-//                            if (staticProp.isDirectSubmit()) {
-//                                // sweep single file process to SB queue
-//                                String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
-//                                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
-//                            }
-//							// Delete the remote files after successful download if user optioned for it
-//							if (staticProp.getDeleteFiles()) {
-//								sftpRequest.deleteFile(aFile);
-//								LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
-//							}
-//						}
-//					} finally {
-//						if (bos != null) bos.close();
-//						if (fos != null) fos.close();
-//					}
+					try {// GSB-1337,GSB-1336
+
+						fos = new FileOutputStream(localDir);
+						bos = new BufferedOutputStream(fos);
+						LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
+								currentFileName, currentDir, localFileDir);
+						statusCode = sftpRequest.getFile(currentFileName, bos);
+						// Check whether the file downloaded successfully if so rename it.
+						if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+
+							totalNumberOfProcessedFiles++;
+							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
+							if (fos != null) fos.close();
+							if (bos != null) bos.close();
+
+							// Renames the downloaded file to original extension once the fileStatusIndicator is given by User
+							if (!MailBoxUtil.isEmpty(statusIndicator)) {
+								File downloadedFile = new File(localDir);
+								File currentFile = new File(localFileDir + File.separatorChar + currentFileName);
+								boolean renameStatus = downloadedFile.renameTo(currentFile);
+								if (renameStatus) {
+									LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
+								} else {
+									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
+								}
+							}
+                            // async sweeper process if direct submit is true.
+                            if (staticProp.isDirectSubmit()) {
+                                // sweep single file process to SB queue
+                                String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
+                                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
+                            }
+							// Delete the remote files after successful download if user optioned for it
+							if (staticProp.getDeleteFiles()) {
+								sftpRequest.deleteFile(aFile);
+								LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
+							}
+						}
+					} finally {
+						if (bos != null) bos.close();
+						if (fos != null) fos.close();
+					}
 
 				}
 			}
@@ -389,11 +384,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
 		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
-		LOGGER.info("SweeperEventRequestDTO properties {} , {} , {} ", staticProp.getPipeLineID(), configurationInstance.getMailbox().getPguid(), MailBoxUtil.getGUID());
-		LOGGER.info("SweeperEventRequestDTO properties file name, folder path {} , {}, {}  ", fileName, fileName, "");
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
-			LOGGER.info("Completed Workticket Getting from service ------------- {}", sweeperEventRequestDTO.getFile().getName());
 			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
 			
 			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
