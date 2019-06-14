@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import javax.xml.bind.JAXBException;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
@@ -225,9 +227,9 @@ public class SweeperEventExecutionService implements Runnable {
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 
 
-        OutputStream outputStream = null;
+        BufferedOutputStream outputStream = null;
         try {
-            outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
+            outputStream = (BufferedOutputStream)StorageUtilities.getPayloadOutputStream(workTicket, properties);
             LOGGER.info("Completed outputstream ........................ {} , -------------- {} ", fileName, outputStream);
             sftpClient.getFile(fileName, outputStream);
             LOGGER.info("Completed Get File ..........................");
