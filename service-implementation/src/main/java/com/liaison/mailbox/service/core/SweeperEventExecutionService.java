@@ -113,7 +113,7 @@ public class SweeperEventExecutionService implements Runnable {
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
-        BasicFileAttributes attr = Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
+        BasicFileAttributes attr = Files.readAttributes(sweeperEventRequestDTO.getFile().toPath(), BasicFileAttributes.class);
         LOGGER.debug("File attributes{}", attr);
 
         FileTime modifiedTime = attr.lastModifiedTime();
