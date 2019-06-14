@@ -20,10 +20,13 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.service.core.SweeperEventExecutionService;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
@@ -41,6 +44,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -391,6 +395,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
 			LOGGER.info("Completed Workticket Getting from service ------------- {}", sweeperEventRequestDTO.getFile().getName());
 			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
+			
+			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
 			return sweeperEventRequestDTO.getGlobalProcessId();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);

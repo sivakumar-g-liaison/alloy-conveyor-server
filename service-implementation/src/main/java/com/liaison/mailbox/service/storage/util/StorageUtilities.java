@@ -278,6 +278,7 @@ public class StorageUtilities {
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, null);;
             LOGGER.info("MetaSnapshot URI.........    {}", metaSnapshot.getURI());
+            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
             return FS2.getFS2PayloadOutputStream(metaSnapshot.getURI(), false);
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
