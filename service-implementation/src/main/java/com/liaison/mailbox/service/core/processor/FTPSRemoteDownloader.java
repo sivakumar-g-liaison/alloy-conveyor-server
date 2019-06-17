@@ -24,14 +24,18 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.SweeperEventExecutionService;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -40,6 +44,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -360,4 +365,33 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
         }
         return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
     }
+    
+
+    @Override
+    public String sweepFile(G2SFTPClient ftpsClient, String fileName) {
+
+    	SweeperEventExecutionService service = new SweeperEventExecutionService();
+
+		SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(new File(fileName));
+		sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
+		sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
+		sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
+		sweeperEventRequestDTO.setContentType(staticProp.getContentType());
+		sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+		sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+		sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+
+		try {
+			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
+			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, ftpsClient, sweeperEventRequestDTO.getFile().getName());
+			
+			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
+			return sweeperEventRequestDTO.getGlobalProcessId();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
 }
