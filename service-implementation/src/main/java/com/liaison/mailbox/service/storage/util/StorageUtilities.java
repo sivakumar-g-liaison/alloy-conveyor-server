@@ -201,6 +201,7 @@ public class StorageUtilities {
      * @param httpListenerProperties additional properties
      * @param isDropbox              boolean to denote the use case
      * @return meta snapshot
+     * @throws IOException 
      */
     public static FS2MetaSnapshot persistPayload(InputStream payload, WorkTicket workTicket,
                                                  Map<String, String> httpListenerProperties, boolean isDropbox) {
@@ -232,24 +233,23 @@ public class StorageUtilities {
 
             // fetch the metdata includes payload size
             FS2MetaSnapshot metaSnapshot = null;
-            throw new FS2Exception();
-//            try {
-//                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
-//                LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
-//                        workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
-//            } finally {
-//                if (payload != null) {
-//                    payload.close();
-//                }
-//            }
-//
-//            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
-//            return metaSnapshot;
+            try {
+                metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
+                LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
+                        workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
+            } finally {
+                if (payload != null) {
+                    payload.close();
+                }
+            }
+
+            LOGGER.debug("Successfully persist the payload in fs2 storage to url {} ", requestUri);
+            return metaSnapshot;
 
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
             throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
-        } catch (FS2Exception e) {
+        } catch (FS2Exception | IOException e) {
             LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
             throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
         }
