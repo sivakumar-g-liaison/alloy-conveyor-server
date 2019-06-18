@@ -1256,8 +1256,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public String sweepFile(File file) {
-        //throw new RuntimeException("Not Implemented");
-
 
         SweeperEventRequestDTO sweeperEventRequestDTO = null;
         try {
