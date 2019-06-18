@@ -99,6 +99,7 @@ public class SweeperEventExecutionService implements Runnable {
                 } catch (ClientUnavailableException cue) {
                     //do not do anything
                     LOGGER.error("Unable to post message to hornetq", cue);
+                    throw cue;
                 }
             }
 
@@ -107,7 +108,7 @@ public class SweeperEventExecutionService implements Runnable {
             SweeperQueueSendClient.post(workTicketToSb, false);
             verifyAndDeletePayload(workTicket);
 
-        } catch (JAXBException | IOException | JSONException e) {
+        } catch (JAXBException | IOException | JSONException | ClientUnavailableException e) {
             LOGGER.error("Failed to persist payload and workticket or Cannot marshal workticket into JSON.");
         }
     }
