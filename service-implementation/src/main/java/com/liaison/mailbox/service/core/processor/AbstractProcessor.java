@@ -12,8 +12,8 @@ package com.liaison.mailbox.service.core.processor;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
-import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -68,8 +68,8 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -80,14 +80,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.Comparator;
-import java.util.Date;
 
 import static com.liaison.mailbox.MailBoxConstants.FTP;
 import static com.liaison.mailbox.MailBoxConstants.FTPS;
@@ -1257,12 +1257,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(File file) {
 
-        SweeperEventRequestDTO sweeperEventRequestDTO = null;
+        SweeperEventRequestDTO sweeperEventRequestDTO;
         try {
             StaticProcessorPropertiesDTO dto = getProperties();
             if (dto instanceof SFTPDownloaderPropertiesDTO) {
                 SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
+                        file.getAbsolutePath(),
+                        file.length(),
+                        file.lastModified(),
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
@@ -1273,7 +1276,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                         configurationInstance.getTTLUnitAndTTLNumber());
             } else if (dto instanceof FTPDownloaderPropertiesDTO) {
                 FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
+                        file.getAbsolutePath(),
+                        file.length(),
+                        file.lastModified(),
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
@@ -1284,7 +1290,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                         configurationInstance.getTTLUnitAndTTLNumber());
             } else if (dto instanceof HTTPDownloaderPropertiesDTO) {
                 HTTPDownloaderPropertiesDTO staticProp = (HTTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
+                        file.getAbsolutePath(),
+                        file.length(),
+                        file.lastModified(),
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
@@ -1330,7 +1339,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         throw new RuntimeException("Not Implemented");
     }
 
-    protected SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
+    protected SweeperEventRequestDTO getSweeperEventRequestDTO(String fileName,
+                                                     String filePath,
+                                                     long size,
+                                                     long modifiedTime,
                                                      boolean lensVisibility,
                                                      String pipelineId,
                                                      boolean securePayload,
@@ -1340,7 +1352,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
                                                      String storageType,
                                                      Map<String, String> ttlMap) {
 
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO();
         sweeperEventRequestDTO.setLensVisibility(lensVisibility);
         sweeperEventRequestDTO.setPipeLineID(pipelineId);
         sweeperEventRequestDTO.setSecuredPayload(securePayload);
@@ -1349,6 +1361,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         sweeperEventRequestDTO.setTtlMap(ttlMap);
         sweeperEventRequestDTO.setGlobalProcessId(gpid);
         sweeperEventRequestDTO.setStorageType(storageType);
+        sweeperEventRequestDTO.setFileName(filePath + File.separatorChar + fileName);
+        sweeperEventRequestDTO.setFilePath(filePath);
+        sweeperEventRequestDTO.setSize(size);
+        sweeperEventRequestDTO.setModifiedTime(new ISO8601Util().fromDate(new Date(modifiedTime)));
         return sweeperEventRequestDTO;
     }
 }

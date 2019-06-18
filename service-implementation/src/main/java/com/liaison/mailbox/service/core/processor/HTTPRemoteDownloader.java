@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.mailbox.MailBoxConstants;
@@ -20,21 +19,17 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
-import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -297,79 +292,37 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * @throws MailBoxServicesException
      * @throws IOException
      */
-    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException, MailBoxServicesException {
-
-        LOGGER.debug("Started writing response");
-        String responseLocation = getWriteResponseURI();
-
-        if (MailBoxUtil.isEmpty(responseLocation)) {
-            throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
-        }
-
-        File directory = new File(responseLocation);
-        if (!directory.exists()) {
-            Files.createDirectories(directory.toPath());
-        }
-
-        File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-        Files.write(file.toPath(), response.toByteArray());
-        LOGGER.info("Response is successfully written" + file.getAbsolutePath());
-
-        // async sweeper process if direct submit is true.
-        if (httpDownloaderStaticProperties.isDirectSubmit()) {
-            // sweep single file process to SB queue
-            String globalProcessorId = sweepFile(file);
-            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
-        }
-        if (response != null) {
-            response.close();
-        }
-    }
-
-    /**
-     * Method to use single file post into Sweeper event queue for store file into BOSS
-     * 
-     * @param file downloaded File
-     * @return Globalprocessid.
-     */
-    @Override
-    public String sweepFile(File file) {
-
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
-        sweeperEventRequestDTO.setLensVisibility(httpDownloaderStaticProperties.isLensVisibility());
-        sweeperEventRequestDTO.setPipeLineID(httpDownloaderStaticProperties.getPipeLineID());
-        sweeperEventRequestDTO.setSecuredPayload(httpDownloaderStaticProperties.isSecuredPayload());
-        sweeperEventRequestDTO.setContentType(httpDownloaderStaticProperties.getContentType());
-        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException {
 
         try {
-            String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
-            SweeperEventSendQueue.post(message);
-        } catch (Throwable e) {
-            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
-            LOGGER.error(msg, e);
-            throw new RuntimeException(msg);
-        }
 
-        return sweeperEventRequestDTO.getGlobalProcessId();
+            LOGGER.debug("Started writing response");
+            String responseLocation = getWriteResponseURI();
+
+            if (MailBoxUtil.isEmpty(responseLocation)) {
+                throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
+            }
+
+            File directory = new File(responseLocation);
+            if (!directory.exists()) {
+                Files.createDirectories(directory.toPath());
+            }
+
+            File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
+            Files.write(file.toPath(), response.toByteArray());
+            LOGGER.info("Response is successfully written" + file.getAbsolutePath());
+
+            // async sweeper process if direct submit is true.
+            if (httpDownloaderStaticProperties.isDirectSubmit()) {
+                // sweep single file process to SB queue
+                String globalProcessorId = sweepFile(file);
+                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
+            }
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
-    /**
-     * Method to use list of downloaded files post into sweeper event queue
-     * 
-     * @param files  downloaded files
-     */
-    @Override
-    public String[] sweepFiles(File[] files) {
-
-        List<String> globalProcessorIds = new ArrayList<>();
-        for (File file:files) {
-            // sweep each file and add global processorIds.
-            globalProcessorIds.add(sweepFile(file));
-        }
-        return globalProcessorIds.toArray(new String[0]);
-    }
 }

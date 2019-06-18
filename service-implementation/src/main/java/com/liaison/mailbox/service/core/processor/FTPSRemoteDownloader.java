@@ -9,29 +9,10 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
-
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -44,10 +25,22 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDow
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
+
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 
 /**
  * FTPS remote downloader to perform pull operation, also it has support methods
@@ -320,30 +313,36 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
     }
 
     @Override
-    public String sweepFile(G2SFTPClient ftpsClient, String fileName) {
+    public String sweepFile(G2FTPSClient ftpsClient, String fileName) {
 
         SweeperEventExecutionService service = new SweeperEventExecutionService();
 
-        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(new File(fileName),
-                staticProp.isLensVisibility(),
-                staticProp.getPipeLineID(),
-                staticProp.isSecuredPayload(),
-                staticProp.getContentType(),
-                configurationInstance.getMailbox().getPguid(),
-                MailBoxUtil.getGUID(),
-                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                configurationInstance.getTTLUnitAndTTLNumber());
-
         try {
-            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
-            new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, ftpsClient, sweeperEventRequestDTO.getFile().getName());
-            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
 
+            FTPFile ftpFile = ftpsClient.getNative().mlistFile(fileName);
+
+            SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
+                    ftpsClient.getNative().printWorkingDirectory(),
+                    ftpFile.getSize(),
+                    ftpFile.getTimestamp().getTimeInMillis(),
+                    staticProp.isLensVisibility(),
+                    staticProp.getPipeLineID(),
+                    staticProp.isSecuredPayload(),
+                    staticProp.getContentType(),
+                    configurationInstance.getMailbox().getPguid(),
+                    MailBoxUtil.getGUID(),
+                    MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                    configurationInstance.getTTLUnitAndTTLNumber());
+
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
+            new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, fileName);
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
             return sweeperEventRequestDTO.getGlobalProcessId();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+
     }
 }

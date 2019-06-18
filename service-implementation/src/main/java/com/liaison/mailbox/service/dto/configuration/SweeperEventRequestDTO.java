@@ -10,15 +10,17 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import java.io.File;
-import java.util.Map;
-
 import org.codehaus.jackson.map.annotate.JsonRootName;
+
+import java.util.Map;
 
 @JsonRootName("sweeperEventRequest")
 public class SweeperEventRequestDTO {
 
-    private File file;
+    private String fileName;
+    private String filePath;
+    private String modifiedTime;
+    private long size=-1;
     private boolean isSecuredPayload;
     private boolean isLensVisibility;
     private String globalProcessId;
@@ -31,18 +33,6 @@ public class SweeperEventRequestDTO {
 
     public SweeperEventRequestDTO() {
         super();
-    }
-
-    public SweeperEventRequestDTO(File file) {
-        this.file = file;
-    }
-
-    public File getFile() {
-        return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
     }
 
     public String getMailBoxId() {
@@ -115,5 +105,37 @@ public class SweeperEventRequestDTO {
 
     public void setRetryCount(int retryCount) {
         this.retryCount = retryCount;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getModifiedTime() {
+        return modifiedTime;
+    }
+
+    public void setModifiedTime(String modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 }
