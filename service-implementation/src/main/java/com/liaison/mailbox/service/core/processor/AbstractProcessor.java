@@ -1361,7 +1361,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         sweeperEventRequestDTO.setTtlMap(ttlMap);
         sweeperEventRequestDTO.setGlobalProcessId(gpid);
         sweeperEventRequestDTO.setStorageType(storageType);
-        sweeperEventRequestDTO.setFileName(filePath + File.separatorChar + fileName);
+        sweeperEventRequestDTO.setFileName(fileName);
         sweeperEventRequestDTO.setFilePath(filePath);
         sweeperEventRequestDTO.setSize(size);
         sweeperEventRequestDTO.setModifiedTime(new ISO8601Util().fromDate(new Date(modifiedTime)));

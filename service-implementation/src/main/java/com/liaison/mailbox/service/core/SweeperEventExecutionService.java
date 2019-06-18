@@ -122,7 +122,7 @@ public class SweeperEventExecutionService implements Runnable {
      */
     public WorkTicket getWorkTicket(SweeperEventRequestDTO sweeperEventRequestDTO) {
         Map<String, Object> additionalContext = new HashMap<>();
-        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, sweeperEventRequestDTO.getFilePath());
+        additionalContext.put(MailBoxConstants.KEY_FILE_PATH, sweeperEventRequestDTO.getFilePath() + File.separatorChar + sweeperEventRequestDTO.getFileName());
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
         additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFilePath());
 
@@ -166,26 +166,27 @@ public class SweeperEventExecutionService implements Runnable {
      * @param workTicket workticket
      * @throws IOException
      */
-    public void persistPayloadAndWorkticket(WorkTicket workTicket,
+    public int persistPayloadAndWorkticket(WorkTicket workTicket,
                                              SweeperEventRequestDTO sweeperEventRequestDTO,
                                              G2SFTPClient sftpClient,
                                              G2FTPSClient g2FTPSClient,
                                              String fileName) throws IOException, LiaisonException {
 
-        File payloadFile = new File(workTicket.getFileName());
         Map<String, String> properties = getProperties(workTicket, sweeperEventRequestDTO);
-        LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
+        LOGGER.info("Sweeping file {}", workTicket.getFileName());
 
         OutputStream outputStream = null;
+        int statusCode=0;
         try {
             if (null != sftpClient) {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
-                sftpClient.getFile(fileName, outputStream);
+                statusCode = sftpClient.getFile(fileName, outputStream);
             } else if (null != g2FTPSClient) {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
-                g2FTPSClient.getFile(fileName, outputStream);
+                statusCode = g2FTPSClient.getFile(fileName, outputStream);
             } else {
                 //payloadToPersist is closed in the StorageUtilities
+                File payloadFile = new File(sweeperEventRequestDTO.getFilePath() + File.separatorChar + sweeperEventRequestDTO.getFileName());
                 InputStream payloadToPersist = new FileInputStream(payloadFile);
                 FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
                 workTicket.setPayloadURI(metaSnapshot.getURI().toString());
@@ -198,6 +199,7 @@ public class SweeperEventExecutionService implements Runnable {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
+        return statusCode;
     }
 
     public Map<String, String> getProperties(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) {

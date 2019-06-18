@@ -199,55 +199,55 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
                 } else {
 
-                    String currentFileName = aFile;
                     // Check if the file to be uploaded is included or not excluded
                     if(!checkFileIncludeOrExclude(staticProp.getIncludedFiles(),
-                            currentFileName,
+                            aFile,
                             staticProp.getExcludedFiles())) {
                         continue;
                     }
 
-                    String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
-                            + statusIndicator : currentFileName;
+                    String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? aFile + "."
+                            + statusIndicator : aFile;
                     String localDir = localFileDir + File.separatorChar + downloadingFileName;
                     sftpRequest.changeDirectory(dirToList);
                     createResponseDirectory(localDir);
+
                     try {// GSB-1337,GSB-1336
 
                         fos = new FileOutputStream(localDir);
                         bos = new BufferedOutputStream(fos);
                         LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
-                                currentFileName, currentDir, localFileDir);
-                        statusCode = sftpRequest.getFile(currentFileName, bos);
+                                aFile, currentDir, localFileDir);
+                        statusCode = sftpRequest.getFile(aFile, bos);
                         // Check whether the file downloaded successfully if so rename it.
                         if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 
                             totalNumberOfProcessedFiles++;
-                            LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
+                            LOGGER.info(constructMessage("File {} downloaded successfully"), aFile);
                             if (fos != null) fos.close();
                             if (bos != null) bos.close();
 
                             // Renames the downloaded file to original extension once the fileStatusIndicator is given by User
                             if (!MailBoxUtil.isEmpty(statusIndicator)) {
                                 File downloadedFile = new File(localDir);
-                                File currentFile = new File(localFileDir + File.separatorChar + currentFileName);
+                                File currentFile = new File(localFileDir + File.separatorChar + aFile);
                                 boolean renameStatus = downloadedFile.renameTo(currentFile);
                                 if (renameStatus) {
-                                    LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
+                                    LOGGER.info(constructMessage("File {} renamed successfully"), aFile);
                                 } else {
-                                    LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
+                                    LOGGER.info(constructMessage("File {} renaming failed"), aFile);
                                 }
-                            }
-                            // async sweeper process if direct submit is true.
-                            if (staticProp.isDirectSubmit()) {
-                                // sweep single file process to SB queue
-                                String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
-                                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                             }
                             // Delete the remote files after successful download if user optioned for it
                             if (staticProp.getDeleteFiles()) {
                                 sftpRequest.deleteFile(aFile);
-                                LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
+                                LOGGER.info("File {} deleted successfully in the remote location", aFile);
+                            }
+                            // async sweeper process if direct submit is true.
+                            if (staticProp.isDirectSubmit()) {
+                                // sweep single file process to SB queue
+                                String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + aFile));
+                                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                             }
                         }
                     } finally {
@@ -330,7 +330,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             SftpATTRS fileAttribute = sftpClient.getNative().stat(fileName);
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
-                    sftpClient.getNative().lpwd(),
+                    sftpClient.getNative().pwd(),
                     fileAttribute.getSize(),
                     TimeUnit.SECONDS.convert(fileAttribute.getMTime(), TimeUnit.MILLISECONDS),
                     staticProp.isLensVisibility(),
@@ -343,7 +343,16 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     configurationInstance.getTTLUnitAndTTLNumber());
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
-			service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, fileName);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, fileName);
+            if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+                // Delete the remote files after successful download if user optioned for it
+                if (staticProp.getDeleteFiles()) {
+                    sftpClient.deleteFile(fileName);
+                    LOGGER.info("File {} deleted successfully in the remote location", fileName);
+                }
+            } else {
+                throw new RuntimeException("File download status is not successful - " + statusCode);
+            }
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);

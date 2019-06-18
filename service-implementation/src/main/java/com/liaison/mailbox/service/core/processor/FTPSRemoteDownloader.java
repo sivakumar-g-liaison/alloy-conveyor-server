@@ -244,15 +244,15 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             }
                         }
 
-                        if (staticProp.isDirectSubmit()) {
-                            // sweep single file process to SB queue
-                            String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
-                            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
-                        }
                         // Delete the remote files after successful download if user opt for it
                         if (staticProp.getDeleteFiles()) {
                             ftpClient.deleteFile(file.getName());
                             LOGGER.info(constructMessage("File {} deleted successfully in the remote location"), currentFileName);
+                        }
+                        if (staticProp.isDirectSubmit()) {
+                            // sweep single file process to SB queue
+                            String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
+                            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                         }
                     }
 
@@ -335,7 +335,17 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     configurationInstance.getTTLUnitAndTTLNumber());
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
-            new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, fileName);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, fileName);
+            if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+                // Delete the remote files after successful download if user optioned for it
+                if (staticProp.getDeleteFiles()) {
+                    ftpsClient.deleteFile(fileName);
+                    LOGGER.info("File {} deleted successfully in the remote location", fileName);
+                }
+            } else {
+                throw new RuntimeException("File download status is not successful - " + statusCode);
+            }
+
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
