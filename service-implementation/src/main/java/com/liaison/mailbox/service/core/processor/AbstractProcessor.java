@@ -1263,7 +1263,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             if (dto instanceof SFTPDownloaderPropertiesDTO) {
                 SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) dto;
                 sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getAbsolutePath(),
+                        file.getParent(),
                         file.length(),
                         file.lastModified(),
                         staticProp.isLensVisibility(),
@@ -1277,7 +1277,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             } else if (dto instanceof FTPDownloaderPropertiesDTO) {
                 FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) dto;
                 sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getAbsolutePath(),
+                        file.getParent(),
                         file.length(),
                         file.lastModified(),
                         staticProp.isLensVisibility(),
@@ -1291,7 +1291,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             } else if (dto instanceof HTTPDownloaderPropertiesDTO) {
                 HTTPDownloaderPropertiesDTO staticProp = (HTTPDownloaderPropertiesDTO) dto;
                 sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getAbsolutePath(),
+                        file.getParent(),
                         file.length(),
                         file.lastModified(),
                         staticProp.isLensVisibility(),
