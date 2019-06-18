@@ -72,12 +72,16 @@ public class SweeperEventExecutionService implements Runnable {
             try {
                 persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
             } catch (Exception e) {
-                //replacing the guid since sometimes payload can be persisted half and failed
-                sweeperEventDTO.setGlobalProcessId(UUIDGen.getCustomUUID());
-                //Increasing retry count
-                sweeperEventDTO.setRetryCount(sweeperEventDTO.getRetryCount()+1);
+                //TODO check retry maximum and drop the message
+                // maximum retry count is 10
+                // 60000 is milliseconds is the delay and read it from the properties
+                // com.liaison.sweeper.event.retry.count & com.liaison.sweeper.event.retry.delay
                 try {
-                    SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO));
+                    //replacing the guid since sometimes payload can be persisted half and failed
+                    sweeperEventDTO.setGlobalProcessId(UUIDGen.getCustomUUID());
+                    //Increasing retry count
+                    sweeperEventDTO.setRetryCount(sweeperEventDTO.getRetryCount()+1);
+                    SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO), 60000);
                 } catch (ClientUnavailableException cue) {
                     //do not do anything
                     LOGGER.error("Unable to post message to hornetq", cue);

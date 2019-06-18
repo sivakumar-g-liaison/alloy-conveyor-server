@@ -330,15 +330,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(File file) {
 
-		SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
-				staticProp.isLensVisibility(),
-				staticProp.getPipeLineID(),
-				staticProp.isSecuredPayload(),
-				staticProp.getContentType(),
-				configurationInstance.getMailbox().getPguid(),
-				MailBoxUtil.getGUID(),
-				MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-				configurationInstance.getTTLUnitAndTTLNumber());
+        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                staticProp.isLensVisibility(),
+                staticProp.getPipeLineID(),
+                staticProp.isSecuredPayload(),
+                staticProp.getContentType(),
+                configurationInstance.getMailbox().getPguid(),
+                MailBoxUtil.getGUID(),
+                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                configurationInstance.getTTLUnitAndTTLNumber());
 
         try {
             String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
@@ -352,32 +352,32 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
-	@Override
-	public String sweepFile(G2SFTPClient sftpClient, String fileName) {
+    @Override
+    public String sweepFile(G2SFTPClient sftpClient, String fileName) {
 
-		SweeperEventExecutionService service = new SweeperEventExecutionService();
+        SweeperEventExecutionService service = new SweeperEventExecutionService();
 
-		SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(new File(fileName),
-				staticProp.isLensVisibility(),
-				staticProp.getPipeLineID(),
-				staticProp.isSecuredPayload(),
-				staticProp.getContentType(),
-				configurationInstance.getMailbox().getPguid(),
-				MailBoxUtil.getGUID(),
-				MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-				configurationInstance.getTTLUnitAndTTLNumber());
+        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(new File(fileName),
+                staticProp.isLensVisibility(),
+                staticProp.getPipeLineID(),
+                staticProp.isSecuredPayload(),
+                staticProp.getContentType(),
+                configurationInstance.getMailbox().getPguid(),
+                MailBoxUtil.getGUID(),
+                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                configurationInstance.getTTLUnitAndTTLNumber());
 
 
-		try {
-			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
-			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
+        try {
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
+            new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
 
-			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-			LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-			SweeperQueueSendClient.post(workTicketToSb, false);
-			return sweeperEventRequestDTO.getGlobalProcessId();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            SweeperQueueSendClient.post(workTicketToSb, false);
+            return sweeperEventRequestDTO.getGlobalProcessId();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

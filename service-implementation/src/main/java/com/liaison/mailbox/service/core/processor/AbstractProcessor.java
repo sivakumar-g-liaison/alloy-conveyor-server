@@ -1280,7 +1280,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         throw new RuntimeException("Not Implemented");
     }
 
-    public SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
+    protected SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
                                                             boolean lensVisibility,
                                                             String pipelineId,
                                                             boolean securePayload,
