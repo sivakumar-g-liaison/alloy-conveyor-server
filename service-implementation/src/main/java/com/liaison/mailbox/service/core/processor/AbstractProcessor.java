@@ -41,6 +41,7 @@ import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
@@ -1251,7 +1252,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public String sweepFile(File file) {
-    	throw new RuntimeException("Not Implemented");
+        throw new RuntimeException("Not Implemented");
     }
 
     /**
@@ -1261,11 +1262,43 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public String[] sweepFiles(File[] files) {
-        throw new RuntimeException("Not Implemented");
+        List<String> globalProcessorIds = new ArrayList<>();
+        for (File file : files) {
+            // sweep each file and add global processorIds.
+            globalProcessorIds.add(sweepFile(file));
+        }
+        return globalProcessorIds.toArray(new String[0]);
     }
 
     @Override
     public String sweepFile(G2SFTPClient sftpClient, String fileName) {
         throw new RuntimeException("Not Implemented");
-    }    
+    }
+
+    @Override
+    public String sweepFile(G2FTPSClient sftpClient, String fileName) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    public SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
+                                                            boolean lensVisibility,
+                                                            String pipelineId,
+                                                            boolean securePayload,
+                                                            String contentType,
+                                                            String mailboxGuid,
+                                                            String gpid,
+                                                            String storageType,
+                                                            Map<String, String> ttlMap) {
+
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
+        sweeperEventRequestDTO.setLensVisibility(lensVisibility);
+        sweeperEventRequestDTO.setPipeLineID(pipelineId);
+        sweeperEventRequestDTO.setSecuredPayload(securePayload);
+        sweeperEventRequestDTO.setContentType(contentType);
+        sweeperEventRequestDTO.setMailBoxId(mailboxGuid);
+        sweeperEventRequestDTO.setTtlMap(ttlMap);
+        sweeperEventRequestDTO.setGlobalProcessId(gpid);
+        sweeperEventRequestDTO.setStorageType(storageType);
+        return sweeperEventRequestDTO;
+    }
 }

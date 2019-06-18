@@ -10,41 +10,34 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBException;
-
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.util.client.sftp.G2SFTPClient;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.util.ISO8601Util;
+import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SweeperEventExecutionService implements Runnable {
 
@@ -65,9 +58,9 @@ public class SweeperEventExecutionService implements Runnable {
 
     private void doProcess() {
 
-        String globalProcessorId = null;
-        SweeperEventRequestDTO sweeperEventDTO = null;
-        WorkTicket workTicket = null;
+        String globalProcessorId;
+        SweeperEventRequestDTO sweeperEventDTO;
+        WorkTicket workTicket;
 
         try {
 
@@ -78,13 +71,16 @@ public class SweeperEventExecutionService implements Runnable {
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             try {
                 persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
-            } catch (MailBoxServicesException e) {
-                LOGGER.error("Failed to persist payload and workticket in storage utilities. So retrying again");
+            } catch (Exception e) {
+                //replacing the guid since sometimes payload can be persisted half and failed
+                sweeperEventDTO.setGlobalProcessId(UUIDGen.getCustomUUID());
+                //Increasing retry count
+                sweeperEventDTO.setRetryCount(sweeperEventDTO.getRetryCount()+1);
                 try {
-                    persistPayloadAndWorkticket(workTicket, sweeperEventDTO);
-                } catch (IOException | MailBoxServicesException e2) {
-                    LOGGER.error("Retrying Failed.  Cannot persist payload and workticket in storage utilities.");
-                    throw e2;
+                    SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO));
+                } catch (ClientUnavailableException cue) {
+                    //do not do anything
+                    LOGGER.error("Unable to post message to hornetq", cue);
                 }
             }
 
@@ -103,13 +99,12 @@ public class SweeperEventExecutionService implements Runnable {
      *
      * @param sweeperEventRequestDTO
      * @return workticket
-     * @throws IOException
      */
-    private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
+    private WorkTicket constructWorkticket(SweeperEventRequestDTO sweeperEventRequestDTO) {
         return getWorkTicket(sweeperEventRequestDTO, sweeperEventRequestDTO.getFile().getAbsolutePath(), sweeperEventRequestDTO.getFile().getParent());
     }
     
-    public WorkTicket getWorkTicket(SweeperEventRequestDTO sweeperEventRequestDTO, String filePath, String folderName) throws IOException {
+    public WorkTicket getWorkTicket(SweeperEventRequestDTO sweeperEventRequestDTO, String filePath, String folderName) {
         Map<String, Object> additionalContext = new HashMap<>();
         additionalContext.put(MailBoxConstants.KEY_FILE_PATH, filePath);
         additionalContext.put(MailBoxConstants.KEY_MAILBOX_ID, sweeperEventRequestDTO.getMailBoxId());
@@ -147,7 +142,7 @@ public class SweeperEventExecutionService implements Runnable {
      *
      * @param wrkTicket workticket contains payload uri
      */
-    public void verifyAndDeletePayload(WorkTicket wrkTicket) {
+    private void verifyAndDeletePayload(WorkTicket wrkTicket) {
 
         String payloadURI = wrkTicket.getPayloadURI();
         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
@@ -169,7 +164,7 @@ public class SweeperEventExecutionService implements Runnable {
      * @param workTicket workticket
      * @throws IOException
      */
-    public void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
+    private void persistPayloadAndWorkticket(WorkTicket workTicket, SweeperEventRequestDTO sweeperEventRequestDTO) throws IOException {
 
         File payloadFile = new File(workTicket.getPayloadURI());
         Map<String, String> properties = new HashMap<>();

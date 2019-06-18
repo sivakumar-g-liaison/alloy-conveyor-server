@@ -25,7 +25,6 @@ import com.liaison.mailbox.service.queue.kafka.Producer;
 
 public class SweeperEventSendQueue implements AutoCloseable {
 
-    private static final Logger LOG = LogManager.getLogger(ProcessorSendQueue.class);
     private static final String QUEUE_NAME = "sweeperEvent";
     private static SendClient sendClient = new QueueTextSendClient(QUEUE_NAME);
 
@@ -48,6 +47,14 @@ public class SweeperEventSendQueue implements AutoCloseable {
             Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, 0L);
         } else {
             getInstance().sendMessage(message);
+        }
+    }
+
+    public static void post(String message, long delay) throws ClientUnavailableException {
+        if (QUEUE_SERVICE_ENABLED) {
+            Producer.produceMessageToQS(message, DEPLOYMENT_APP_ID, TOPIC_SUFFIX, delay);
+        } else {
+            getInstance().sendMessage(message, delay);
         }
     }
 }

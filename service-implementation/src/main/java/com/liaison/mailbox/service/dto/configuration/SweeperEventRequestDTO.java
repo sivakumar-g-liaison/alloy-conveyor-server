@@ -27,6 +27,7 @@ public class SweeperEventRequestDTO {
     private String mailBoxId;
     private String storageType;
     private Map<String, String> ttlMap;
+    private int retryCount;
 
     public SweeperEventRequestDTO() {
         super();
@@ -108,4 +109,11 @@ public class SweeperEventRequestDTO {
         this.contentType = contentType;
     }
 
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
 }

@@ -61,7 +61,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     /*
      * Required for JS
      */
-	private G2SFTPClient sftpClient;
+    private G2SFTPClient sftpClient;
     private SFTPDownloaderPropertiesDTO staticProp;
 
 	@SuppressWarnings("unused")
@@ -330,15 +330,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(File file) {
 
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
-        sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
-        sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
-        sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
-        sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+		SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+				staticProp.isLensVisibility(),
+				staticProp.getPipeLineID(),
+				staticProp.isSecuredPayload(),
+				staticProp.getContentType(),
+				configurationInstance.getMailbox().getPguid(),
+				MailBoxUtil.getGUID(),
+				MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+				configurationInstance.getTTLUnitAndTTLNumber());
 
         try {
             String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
@@ -352,45 +352,29 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
-    /**
-     * Method to use list of downloaded files post into sweeper event queue
-     * 
-     * @param files downloaded files
-     * @param sweeperStaticPropertiesDTO
-     */
-    @Override
-    public String[] sweepFiles(File[] files) {
+	@Override
+	public String sweepFile(G2SFTPClient sftpClient, String fileName) {
 
-        List<String> globalProcessorIds = new ArrayList<>();
-        for (File file : files) {
-            // sweep each file and add global processorIds.
-            globalProcessorIds.add(sweepFile(file));
-        }
-        return globalProcessorIds.toArray(new String[0]);
-    }
+		SweeperEventExecutionService service = new SweeperEventExecutionService();
 
-    @Override
-    public String sweepFile(G2SFTPClient sftpClient, String fileName) {
+		SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(new File(fileName),
+				staticProp.isLensVisibility(),
+				staticProp.getPipeLineID(),
+				staticProp.isSecuredPayload(),
+				staticProp.getContentType(),
+				configurationInstance.getMailbox().getPguid(),
+				MailBoxUtil.getGUID(),
+				MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+				configurationInstance.getTTLUnitAndTTLNumber());
 
-    	SweeperEventExecutionService service = new SweeperEventExecutionService();
-
-		SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(new File(fileName));
-		sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
-		sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
-		sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
-		sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-		sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-		sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-		sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
 
 		try {
 			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
 			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient, sweeperEventRequestDTO.getFile().getName());
-			
+
 			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-            SweeperQueueSendClient.post(workTicketToSb, false);
+			LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+			SweeperQueueSendClient.post(workTicketToSb, false);
 			return sweeperEventRequestDTO.getGlobalProcessId();
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);

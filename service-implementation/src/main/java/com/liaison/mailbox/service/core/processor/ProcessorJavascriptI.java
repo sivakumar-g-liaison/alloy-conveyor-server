@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -317,6 +318,13 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @return gpid
      */
     String sweepFile(G2SFTPClient sftpClient, String fileName);
+
+    /**
+     * Sweep the file
+     * @param sftpClient
+     * @return gpid
+     */
+    String sweepFile(G2FTPSClient sftpClient, String fileName);
 
     /**
      * Method to sweep files after downloading files in payload location

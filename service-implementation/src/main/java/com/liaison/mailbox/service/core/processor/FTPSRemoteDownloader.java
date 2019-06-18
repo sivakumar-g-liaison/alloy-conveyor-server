@@ -320,28 +320,28 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     /**
      * Method to use single file post into Sweeper event queue for store file into BOSS
-     * 
+     *
      * @param file downloaded File
      * @return Globalprocessid.
      */
     @Override
     public String sweepFile(File file) {
 
-        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
-        sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
-        sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
-        sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
-        sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                staticProp.isLensVisibility(),
+                staticProp.getPipeLineID(),
+                staticProp.isSecuredPayload(),
+                staticProp.getContentType(),
+                configurationInstance.getMailbox().getPguid(),
+                MailBoxUtil.getGUID(),
+                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                configurationInstance.getTTLUnitAndTTLNumber());
 
         try {
             String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
             SweeperEventSendQueue.post(message);
         } catch (Throwable e) {
-            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
+            String msg = "Failed to sweeper the file " + file.getName() + " and the error message is " + e.getMessage();
             LOGGER.error(msg, e);
             throw new RuntimeException(msg);
         }
@@ -349,49 +349,31 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
         return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
-    /**
-     * Method to use list of downloaded files post into sweeper event queue
-     * 
-     * @param files  downloaded files
-     * @return globalProcessorIds    
-     */
-    @Override
-    public String[] sweepFiles(File[] files) {
-
-        List<String> globalProcessorIds = new ArrayList<String>();
-        for (File file:files) {
-            // sweep each file and add global processorIds.
-            globalProcessorIds.add(sweepFile(file));
-        }
-        return globalProcessorIds.toArray(new String[globalProcessorIds.size()]);
-    }
-    
-
     @Override
     public String sweepFile(G2SFTPClient ftpsClient, String fileName) {
 
-    	SweeperEventExecutionService service = new SweeperEventExecutionService();
+        SweeperEventExecutionService service = new SweeperEventExecutionService();
 
-		SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(new File(fileName));
-		sweeperEventRequestDTO.setLensVisibility(staticProp.isLensVisibility());
-		sweeperEventRequestDTO.setPipeLineID(staticProp.getPipeLineID());
-		sweeperEventRequestDTO.setSecuredPayload(staticProp.isSecuredPayload());
-		sweeperEventRequestDTO.setContentType(staticProp.getContentType());
-		sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
-		sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
-		sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
-		sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(new File(fileName),
+                staticProp.isLensVisibility(),
+                staticProp.getPipeLineID(),
+                staticProp.isSecuredPayload(),
+                staticProp.getContentType(),
+                configurationInstance.getMailbox().getPguid(),
+                MailBoxUtil.getGUID(),
+                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                configurationInstance.getTTLUnitAndTTLNumber());
 
-		try {
-			WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
-			new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, ftpsClient, sweeperEventRequestDTO.getFile().getName());
-			
-			String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+        try {
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");
+            new SweeperEventExecutionService().persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, ftpsClient, sweeperEventRequestDTO.getFile().getName());
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
-			return sweeperEventRequestDTO.getGlobalProcessId();
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-	}
+            return sweeperEventRequestDTO.getGlobalProcessId();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }
