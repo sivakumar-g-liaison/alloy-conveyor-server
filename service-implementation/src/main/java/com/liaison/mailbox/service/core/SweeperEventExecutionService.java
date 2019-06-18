@@ -92,6 +92,7 @@ public class SweeperEventExecutionService implements Runnable {
                     if (sweeperEventDTO.getRetryCount() <=  SWEEPER_EVENT_MAX_RETRY_COUNT) {
                         LOGGER.info("Retry count calculated --------------------------------- > {}", sweeperEventDTO.getRetryCount());
                         SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO), SWEEPER_EVENT_DELAY);
+                        return;
                     } else {
                         LOGGER.info("Retry count calculated and reached--------------------------------- > {}", sweeperEventDTO.getRetryCount());
                         throw new ClientUnavailableException("Unable to post retry messages due to maximum retry count is exceed the limit. ");
@@ -99,7 +100,7 @@ public class SweeperEventExecutionService implements Runnable {
                 } catch (ClientUnavailableException cue) {
                     //do not do anything
                     LOGGER.error("Unable to post message to hornetq", cue);
-                    throw cue;
+                    return;
                 }
             }
 
@@ -108,7 +109,7 @@ public class SweeperEventExecutionService implements Runnable {
             SweeperQueueSendClient.post(workTicketToSb, false);
             verifyAndDeletePayload(workTicket);
 
-        } catch (JAXBException | IOException | JSONException | ClientUnavailableException e) {
+        } catch (JAXBException | IOException | JSONException e) {
             LOGGER.error("Failed to persist payload and workticket or Cannot marshal workticket into JSON.");
         }
     }
