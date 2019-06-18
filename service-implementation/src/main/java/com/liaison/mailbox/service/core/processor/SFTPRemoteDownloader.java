@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -43,7 +42,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDo
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -335,7 +333,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                 MailBoxUtil.getGUID(),
                 MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
                 configurationInstance.getTTLUnitAndTTLNumber());
-
 
         try {
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO, fileName, "");

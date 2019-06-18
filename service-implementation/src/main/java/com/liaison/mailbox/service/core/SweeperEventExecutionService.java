@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.service.core;
 
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_DELAY;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_MAX_COUNT;
+
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
@@ -24,6 +27,7 @@ import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
@@ -31,6 +35,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +48,9 @@ public class SweeperEventExecutionService implements Runnable {
 
     private String message;
     private static final Logger LOGGER = LogManager.getLogger(SweeperEventExecutionService.class);
+
+    private static final Long SWEEPER_EVENT_DELAY = MailBoxUtil.getEnvironmentProperties().getLong(SWEEPER_EVENT_RETRY_DELAY, 60000);
+    private static final int SWEEPER_EVENT_MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getInt(SWEEPER_EVENT_RETRY_MAX_COUNT, 10);
 
     public SweeperEventExecutionService() {
     }
@@ -81,7 +89,13 @@ public class SweeperEventExecutionService implements Runnable {
                     sweeperEventDTO.setGlobalProcessId(UUIDGen.getCustomUUID());
                     //Increasing retry count
                     sweeperEventDTO.setRetryCount(sweeperEventDTO.getRetryCount()+1);
-                    SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO), 60000);
+                    if (sweeperEventDTO.getRetryCount() <=  SWEEPER_EVENT_MAX_RETRY_COUNT) {
+                        LOGGER.info("Retry count calculated --------------------------------- > {}", sweeperEventDTO.getRetryCount());
+                        SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventDTO), SWEEPER_EVENT_DELAY);
+                    } else {
+                        LOGGER.info("Retry count calculated and reached--------------------------------- > {}", sweeperEventDTO.getRetryCount());
+                        throw new ClientUnavailableException("Unable to post retry messages due to maximum retry count is exceed the limit. ");
+                    }
                 } catch (ClientUnavailableException cue) {
                     //do not do anything
                     LOGGER.error("Unable to post message to hornetq", cue);
@@ -224,7 +238,6 @@ public class SweeperEventExecutionService implements Runnable {
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
-
 
         OutputStream outputStream = null;
         try {

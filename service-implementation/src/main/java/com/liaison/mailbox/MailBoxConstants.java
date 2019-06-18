@@ -528,6 +528,8 @@ public interface MailBoxConstants {
     String FILE_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.file.stage.replication.max.retry.count";
     String DIRECTORY_STAGE_REPLICATION_RETRY_DELAY = "com.liaison.mailbox.directory.stage.replication.retry.delay";
     String DIRECTORY_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.directory.stage.replication.max.retry.count";
+    String SWEEPER_EVENT_RETRY_DELAY = "com.liaison.sweeper.event.retry.delay";
+    String SWEEPER_EVENT_RETRY_MAX_COUNT = "com.liaison.sweeper.event.retry.count";
 
     String URI = "uri";
     String RETRY_COUNT = "retry";
