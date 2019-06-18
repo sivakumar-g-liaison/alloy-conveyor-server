@@ -43,8 +43,11 @@ import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -53,6 +56,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -1252,7 +1256,55 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      */
     @Override
     public String sweepFile(File file) {
-        throw new RuntimeException("Not Implemented");
+        //throw new RuntimeException("Not Implemented");
+
+
+        SweeperEventRequestDTO sweeperEventRequestDTO = null;
+        try {
+            StaticProcessorPropertiesDTO dto = getProperties();
+            if (dto instanceof SFTPDownloaderPropertiesDTO) {
+                SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType(),
+                        configurationInstance.getMailbox().getPguid(),
+                        MailBoxUtil.getGUID(),
+                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                        configurationInstance.getTTLUnitAndTTLNumber());
+            } else if (dto instanceof FTPDownloaderPropertiesDTO) {
+                FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType(),
+                        configurationInstance.getMailbox().getPguid(),
+                        MailBoxUtil.getGUID(),
+                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                        configurationInstance.getTTLUnitAndTTLNumber());
+            } else if (dto instanceof HTTPDownloaderPropertiesDTO) {
+                HTTPDownloaderPropertiesDTO staticProp = (HTTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType(),
+                        configurationInstance.getMailbox().getPguid(),
+                        MailBoxUtil.getGUID(),
+                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
+                        configurationInstance.getTTLUnitAndTTLNumber());
+            } else {
+                throw new RuntimeException("Invalid property type");
+            }
+
+            SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventRequestDTO));
+        } catch (Throwable e) {
+            String msg = "Failed to sweeper the file " + file.getName() + " and the error message is " + e.getMessage();
+            throw new RuntimeException(msg);
+        }
+        return sweeperEventRequestDTO.getGlobalProcessId();
     }
 
     /**
@@ -1281,14 +1333,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     }
 
     protected SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
-                                                            boolean lensVisibility,
-                                                            String pipelineId,
-                                                            boolean securePayload,
-                                                            String contentType,
-                                                            String mailboxGuid,
-                                                            String gpid,
-                                                            String storageType,
-                                                            Map<String, String> ttlMap) {
+                                                     boolean lensVisibility,
+                                                     String pipelineId,
+                                                     boolean securePayload,
+                                                     String contentType,
+                                                     String mailboxGuid,
+                                                     String gpid,
+                                                     String storageType,
+                                                     Map<String, String> ttlMap) {
 
         SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO(file);
         sweeperEventRequestDTO.setLensVisibility(lensVisibility);

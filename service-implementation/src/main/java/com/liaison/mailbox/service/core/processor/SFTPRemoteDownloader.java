@@ -321,37 +321,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	}
 
-    /**
-     * Method to use single file post into Sweeper event queue for store file into BOSS
-     * 
-     * @param file downloaded File
-     * @return Globalprocessid.
-     */
-    @Override
-    public String sweepFile(File file) {
-
-        SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
-                staticProp.isLensVisibility(),
-                staticProp.getPipeLineID(),
-                staticProp.isSecuredPayload(),
-                staticProp.getContentType(),
-                configurationInstance.getMailbox().getPguid(),
-                MailBoxUtil.getGUID(),
-                MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                configurationInstance.getTTLUnitAndTTLNumber());
-
-        try {
-            String message = JAXBUtility.marshalToJSON(sweeperEventRequestDTO);
-            SweeperEventSendQueue.post(message);
-        } catch (Throwable e) {
-            String msg = "Failed to sweeper the file "+ file.getName() + " and the error message is " + e.getMessage();
-            LOGGER.error(msg, e);
-            throw new RuntimeException(msg);
-        }
-
-        return sweeperEventRequestDTO.getGlobalProcessId();
-    }
-
     @Override
     public String sweepFile(G2SFTPClient sftpClient, String fileName) {
 
