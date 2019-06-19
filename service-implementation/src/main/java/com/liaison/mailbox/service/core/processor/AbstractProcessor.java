@@ -1122,7 +1122,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param state Execution Status
      */
     protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
-         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message;
         if (ExecutionState.VALIDATION_ERROR.equals(state)) {
             message = new StringBuilder().append("File size is empty ").append(filePath).append(", and empty files are not allowed");
@@ -1257,6 +1257,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(File file) {
 
+        LOGGER.info("Post the file to Sweeper Event Queue");
         SweeperEventRequestDTO sweeperEventRequestDTO;
         try {
             StaticProcessorPropertiesDTO dto = getProperties();
@@ -1357,6 +1358,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         sweeperEventRequestDTO.setFilePath(filePath);
         sweeperEventRequestDTO.setSize(size);
         sweeperEventRequestDTO.setModifiedTime(new ISO8601Util().fromDate(new Date(modifiedTime)));
+        sweeperEventRequestDTO.setProcessorType(configurationInstance.getProcessorType().name());
+        sweeperEventRequestDTO.setProtocol(configurationInstance.getProcsrProtocol());
+        sweeperEventRequestDTO.setCategory(getCategory());
         return sweeperEventRequestDTO;
     }
 }

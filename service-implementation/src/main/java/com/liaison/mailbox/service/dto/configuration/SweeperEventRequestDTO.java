@@ -28,6 +28,9 @@ public class SweeperEventRequestDTO {
     private String contentType;
     private String mailBoxId;
     private String processorId;
+    private String processorType;
+    private String protocol;
+    private String category;
     private String storageType;
     private Map<String, String> ttlMap;
     private int retryCount;
@@ -146,5 +149,29 @@ public class SweeperEventRequestDTO {
 
     public void setProcessorId(String processorId) {
         this.processorId = processorId;
+    }
+
+    public String getProcessorType() {
+        return processorType;
+    }
+
+    public void setProcessorType(String processorType) {
+        this.processorType = processorType;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

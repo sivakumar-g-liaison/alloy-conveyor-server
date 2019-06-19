@@ -21,7 +21,13 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
+import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
+import com.liaison.mailbox.service.glass.util.GlassMessage;
+import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
@@ -31,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.jdbc.Work;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -39,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +76,8 @@ public class SweeperEventExecutionService implements Runnable {
 
     private void doProcess() {
 
+        //first corner timestamp
+        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
         String globalProcessorId;
         SweeperEventRequestDTO sweeperEventDTO;
         WorkTicket workTicket;
@@ -113,9 +123,11 @@ public class SweeperEventExecutionService implements Runnable {
             }
 
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
+            LOGGER.debug("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
             verifyAndDeletePayload(workTicket);
+            logToLens(workTicket, sweeperEventDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
 
         } catch (JAXBException | IOException | JSONException e) {
             LOGGER.error("Failed to persist payload and workticket or Cannot marshal workticket into JSON.");
@@ -229,6 +241,23 @@ public class SweeperEventExecutionService implements Runnable {
         properties.put(MailBoxConstants.CONTENT_TYPE, contentType);
         workTicket.addHeader(MailBoxConstants.CONTENT_TYPE.toLowerCase(), contentType);
         return properties;
+    }
+
+    public void logToLens(WorkTicket workTicket,
+                          SweeperEventRequestDTO dto) {
+        GlassMessageDTO glassMessageDTO = new GlassMessageDTO();
+        glassMessageDTO.setGlobalProcessId(workTicket.getGlobalProcessId());
+        glassMessageDTO.setProcessorType(ProcessorType.findByName(dto.getProcessorType()), dto.getCategory());
+        glassMessageDTO.setProcessProtocol(dto.getProtocol());
+        glassMessageDTO.setFileName(workTicket.getFileName());
+        glassMessageDTO.setFilePath(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString());
+        glassMessageDTO.setFileLength(workTicket.getPayloadSize());
+        glassMessageDTO.setStatus(ExecutionState.PROCESSING);
+        glassMessageDTO.setMessage("File " + workTicket.getFileName() + " posted successfully to service broker");
+        glassMessageDTO.setPipelineId(workTicket.getPipelineId());
+        glassMessageDTO.setFirstCornerTimeStamp(ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME));
+        glassMessageDTO.setStatusDate(new Date());
+        MailboxGlassMessageUtil.logGlassMessage(glassMessageDTO);
     }
 
     /**

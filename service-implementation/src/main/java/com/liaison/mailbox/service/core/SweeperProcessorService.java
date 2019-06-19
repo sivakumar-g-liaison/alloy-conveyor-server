@@ -174,7 +174,7 @@ public class SweeperProcessorService implements Callable<String> {
      * @param firstCornerTimeStamp first corner timestamp
      * @param state Execution Status
      */
-    protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
+    public void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
 
         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message;

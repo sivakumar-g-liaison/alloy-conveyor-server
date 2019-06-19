@@ -31,7 +31,6 @@ import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import java.io.BufferedOutputStream;
@@ -324,7 +323,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     public String sweepFile(G2SFTPClient sftpClient, String fileName) {
 
         SweeperEventExecutionService service = new SweeperEventExecutionService();
-        LOGGER.info("Sweep and Post the file to Service Broker using Event Queue");
+        LOGGER.info("Sweep and Post the file to Service Broker");
         try {
 
             SftpATTRS fileAttribute = sftpClient.getNative().stat(fileName);
@@ -342,15 +341,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (statusCode != MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }
-            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
-            SweeperQueueSendClient.post(workTicketToSb, false);
-
+            SweeperQueueSendClient.post(JAXBUtility.marshalToJSON(workTicket), false);
             // Delete the remote files after successful download if user optioned for it
             if (staticProp.getDeleteFiles()) {
                 sftpClient.deleteFile(sweeperEventRequestDTO.getFileName());
                 LOGGER.info("File {} deleted successfully in the remote location", sweeperEventRequestDTO.getFileName());
             }
+            service.logToLens(workTicket, sweeperEventRequestDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
+
             return sweeperEventRequestDTO.getGlobalProcessId();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

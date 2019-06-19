@@ -30,7 +30,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
 import java.io.BufferedOutputStream;
@@ -343,13 +342,15 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             }
 
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
-            LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
             // Delete the remote files after successful download if user optioned for it
             if (staticProp.getDeleteFiles()) {
                 ftpsClient.deleteFile(fileName);
                 LOGGER.info("File {} deleted successfully in the remote location", fileName);
             }
+
+            service.logToLens(workTicket, sweeperEventRequestDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
             return sweeperEventRequestDTO.getGlobalProcessId();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

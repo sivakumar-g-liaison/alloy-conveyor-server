@@ -75,7 +75,8 @@ public class MailboxGlassMessageUtil {
         } else if (ExecutionState.FAILED.equals(status)) {
 
             if (ProcessorType.SWEEPER.equals(processorType)
-                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)
+                    || ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
                 glassMessage.setSenderOrganizationDetails(pipelineId);
             }
             glassMessage.setAdminErrorDetails(glassMessageDTO.getTechDescription());
@@ -93,6 +94,9 @@ public class MailboxGlassMessageUtil {
                 glassMessage.setInAgent(glassMessageDTO.getFilePath() != null ? glassMessageDTO.getFilePath() : "");
                 glassMessage.setSenderOrganizationDetails(pipelineId);
                 glassMessage.setRelatedTransactionId(glassMessageDTO.getRelatedTransactionId());
+            } else if (ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
+                glassMessage.setInAgent(glassMessageDTO.getFilePath());
+                glassMessage.setSenderOrganizationDetails(pipelineId);
             } else {
                 glassMessage.setInAgent(processProtocol);
             }
@@ -109,7 +113,8 @@ public class MailboxGlassMessageUtil {
             // Queued message for async inbound
             if (ProcessorType.HTTPASYNCPROCESSOR.equals(processorType)
                     || ProcessorType.SWEEPER.equals(processorType)
-                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)) {
+                    || ProcessorType.CONDITIONALSWEEPER.equals(processorType)
+                    || ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
                 logProcessingStatus(glassMessage, StatusType.QUEUED, "Workticket queued for file " + fileName);
             }
 
