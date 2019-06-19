@@ -185,11 +185,13 @@ public class SweeperEventExecutionService implements Runnable {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
                 statusCode = g2FTPSClient.getFile(fileName, outputStream);
             } else {
+            	LOGGER.info("Entered into persist payload entry >>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 //payloadToPersist is closed in the StorageUtilities
                 File payloadFile = new File(sweeperEventRequestDTO.getFilePath() + File.separatorChar + sweeperEventRequestDTO.getFileName());
                 InputStream payloadToPersist = new FileInputStream(payloadFile);
                 FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
                 workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+                LOGGER.info("persist payload entry Successfully completed >>>>>>>>>>>>>>>>>>>>>>>>>> {}", workTicket.getPayloadURI());
             }
         } finally {
             if (null != outputStream) {
@@ -199,6 +201,7 @@ public class SweeperEventExecutionService implements Runnable {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
+        LOGGER.info("persist Workticket entry Successfully completed $$$$$$$$$$$$$$$$$$$$$$$$$$ {}", workTicket.getGlobalProcessId());
         return statusCode;
     }
 
