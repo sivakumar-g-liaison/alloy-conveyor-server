@@ -206,6 +206,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         LOGGER.info("Sweep and Post the file to Service Broker using stream without placing the file in NFS");
                         globalProcessorId = sweepFile(ftpClient, downloadingFileName);
                         LOGGER.info("File posted to service broker and the Global Process Id {}", globalProcessorId);
+                        totalNumberOfProcessedFiles++;
                         continue;
                     }
                     createResponseDirectory(localDir);
@@ -336,20 +337,19 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, fileName);
-            if (statusCode == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK
-                    || statusCode == MailBoxConstants.CLOSING_DATA_CONNECTION) {
-                // Delete the remote files after successful download if user optioned for it
-                if (staticProp.getDeleteFiles()) {
-                    ftpsClient.deleteFile(fileName);
-                    LOGGER.info("File {} deleted successfully in the remote location", fileName);
-                }
-            } else {
+            if (statusCode != MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK
+                    && statusCode != MailBoxConstants.CLOSING_DATA_CONNECTION) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }
 
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
+            // Delete the remote files after successful download if user optioned for it
+            if (staticProp.getDeleteFiles()) {
+                ftpsClient.deleteFile(fileName);
+                LOGGER.info("File {} deleted successfully in the remote location", fileName);
+            }
             return sweeperEventRequestDTO.getGlobalProcessId();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

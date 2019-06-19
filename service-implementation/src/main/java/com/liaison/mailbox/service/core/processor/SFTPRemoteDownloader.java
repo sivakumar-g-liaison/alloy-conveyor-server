@@ -31,11 +31,9 @@ import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -207,6 +205,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         LOGGER.info("Sweep and Post the file to Service Broker using stream without placing the file in NFS");
                         globalProcessorId = sweepFile(sftpRequest, downloadingFileName);
                         LOGGER.info("File posted to service broker and the Global Process Id {}", globalProcessorId);
+                        totalNumberOfProcessedFiles++;
                         continue;
                     }
 
@@ -340,19 +339,18 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, fileName);
-
-            if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
-                // Delete the remote files after successful download if user optioned for it
-                if (staticProp.getDeleteFiles()) {
-                    sftpClient.deleteFile(sweeperEventRequestDTO.getFileName());
-                    LOGGER.info("File {} deleted successfully in the remote location", sweeperEventRequestDTO.getFileName());
-                }
-            } else {
+            if (statusCode != MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }
             String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
             LOGGER.info("Workticket posted to SB queue.{}", new JSONObject(workTicketToSb).toString(2));
             SweeperQueueSendClient.post(workTicketToSb, false);
+
+            // Delete the remote files after successful download if user optioned for it
+            if (staticProp.getDeleteFiles()) {
+                sftpClient.deleteFile(sweeperEventRequestDTO.getFileName());
+                LOGGER.info("File {} deleted successfully in the remote location", sweeperEventRequestDTO.getFileName());
+            }
             return sweeperEventRequestDTO.getGlobalProcessId();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
