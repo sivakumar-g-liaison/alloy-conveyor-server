@@ -150,6 +150,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         //variable to hold the status of file download request execution
         int statusCode = 0;
         String dirToList = "";
+        String globalProcessorId = "";
 
         if (!currentDir.equals("")) {
             dirToList += currentDir;
@@ -210,51 +211,54 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             + statusIndicator : aFile;
                     String localDir = localFileDir + File.separatorChar + downloadingFileName;
                     sftpRequest.changeDirectory(dirToList);
-                    createResponseDirectory(localDir);
+                    //downlaod and sweep the file use stream
+                    if (staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
+                        globalProcessorId = sweepFile(sftpRequest, downloadingFileName);
+                    } else {
+                    	createResponseDirectory(localDir);
+                        try {// GSB-1337,GSB-1336
 
-                    try {// GSB-1337,GSB-1336
+                            fos = new FileOutputStream(localDir);
+                            bos = new BufferedOutputStream(fos);
+                            LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
+                                    aFile, currentDir, localFileDir);
+                            statusCode = sftpRequest.getFile(aFile, bos);
+                            // Check whether the file downloaded successfully if so rename it.
+                            if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 
-                        fos = new FileOutputStream(localDir);
-                        bos = new BufferedOutputStream(fos);
-                        LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
-                                aFile, currentDir, localFileDir);
-                        statusCode = sftpRequest.getFile(aFile, bos);
-                        // Check whether the file downloaded successfully if so rename it.
-                        if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+                                totalNumberOfProcessedFiles++;
+                                LOGGER.info(constructMessage("File {} downloaded successfully"), aFile);
+                                if (fos != null) fos.close();
+                                if (bos != null) bos.close();
 
-                            totalNumberOfProcessedFiles++;
-                            LOGGER.info(constructMessage("File {} downloaded successfully"), aFile);
-                            if (fos != null) fos.close();
-                            if (bos != null) bos.close();
-
-                            // Renames the downloaded file to original extension once the fileStatusIndicator is given by User
-                            if (!MailBoxUtil.isEmpty(statusIndicator)) {
-                                File downloadedFile = new File(localDir);
-                                File currentFile = new File(localFileDir + File.separatorChar + aFile);
-                                boolean renameStatus = downloadedFile.renameTo(currentFile);
-                                if (renameStatus) {
-                                    LOGGER.info(constructMessage("File {} renamed successfully"), aFile);
-                                } else {
-                                    LOGGER.info(constructMessage("File {} renaming failed"), aFile);
+                                // Renames the downloaded file to original extension once the fileStatusIndicator is given by User
+                                if (!MailBoxUtil.isEmpty(statusIndicator)) {
+                                    File downloadedFile = new File(localDir);
+                                    File currentFile = new File(localFileDir + File.separatorChar + aFile);
+                                    boolean renameStatus = downloadedFile.renameTo(currentFile);
+                                    if (renameStatus) {
+                                        LOGGER.info(constructMessage("File {} renamed successfully"), aFile);
+                                    } else {
+                                        LOGGER.info(constructMessage("File {} renaming failed"), aFile);
+                                    }
+                                }
+                                // Delete the remote files after successful download if user optioned for it
+                                if (staticProp.getDeleteFiles()) {
+                                    sftpRequest.deleteFile(aFile);
+                                    LOGGER.info("File {} deleted successfully in the remote location", aFile);
+                                }
+                                // async sweeper process if direct submit is true.
+                                if (staticProp.isDirectSubmit()) {
+                                    // sweep single file process to SB queue
+                                    globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + aFile));
                                 }
                             }
-                            // Delete the remote files after successful download if user optioned for it
-                            if (staticProp.getDeleteFiles()) {
-                                sftpRequest.deleteFile(aFile);
-                                LOGGER.info("File {} deleted successfully in the remote location", aFile);
-                            }
-                            // async sweeper process if direct submit is true.
-                            if (staticProp.isDirectSubmit()) {
-                                // sweep single file process to SB queue
-                                String globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + aFile));
-                                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
-                            }
+                        } finally {
+                            if (bos != null) bos.close();
+                            if (fos != null) fos.close();
                         }
-                    } finally {
-                        if (bos != null) bos.close();
-                        if (fos != null) fos.close();
                     }
-
+                    LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
                 }
             }
         }

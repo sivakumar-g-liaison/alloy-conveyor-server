@@ -230,7 +230,7 @@
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
-            "defaultValue":"",
+            "defaultValue":"true",
             "validationRules":null,
             "options":[
                 "false",
@@ -250,6 +250,21 @@
             "options":[
                 "Invisible",
                 "Visible"
+            ]
+          },
+          {
+            "name": "useFileSystem",
+            "displayName":"Use File System",
+            "type":"select",
+            "value":"true",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules":null,
+            "options":[
+                "false",
+                "true"
             ]
           }
       ],
