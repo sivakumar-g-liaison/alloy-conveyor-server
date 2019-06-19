@@ -250,7 +250,7 @@ public class SweeperEventExecutionService implements Runnable {
         glassMessageDTO.setProcessorType(ProcessorType.findByName(dto.getProcessorType()), dto.getCategory());
         glassMessageDTO.setProcessProtocol(dto.getProtocol());
         glassMessageDTO.setFileName(workTicket.getFileName());
-        glassMessageDTO.setFilePath(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString());
+        glassMessageDTO.setFilePath(dto.getProtocol());
         glassMessageDTO.setFileLength(workTicket.getPayloadSize());
         glassMessageDTO.setStatus(ExecutionState.PROCESSING);
         glassMessageDTO.setMessage("File " + workTicket.getFileName() + " posted successfully to service broker");
