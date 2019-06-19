@@ -1262,46 +1262,25 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             StaticProcessorPropertiesDTO dto = getProperties();
             if (dto instanceof SFTPDownloaderPropertiesDTO) {
                 SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getParent(),
-                        file.length(),
-                        file.lastModified(),
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
-                        staticProp.getContentType(),
-                        configurationInstance.getMailbox().getPguid(),
-                        MailBoxUtil.getGUID(),
-                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                        configurationInstance.getTTLUnitAndTTLNumber());
+                        staticProp.getContentType());
             } else if (dto instanceof FTPDownloaderPropertiesDTO) {
                 FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getParent(),
-                        file.length(),
-                        file.lastModified(),
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
-                        staticProp.getContentType(),
-                        configurationInstance.getMailbox().getPguid(),
-                        MailBoxUtil.getGUID(),
-                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                        configurationInstance.getTTLUnitAndTTLNumber());
+                        staticProp.getContentType());
             } else if (dto instanceof HTTPDownloaderPropertiesDTO) {
                 HTTPDownloaderPropertiesDTO staticProp = (HTTPDownloaderPropertiesDTO) dto;
-                sweeperEventRequestDTO = getSweeperEventRequestDTO(file.getName(),
-                        file.getParent(),
-                        file.length(),
-                        file.lastModified(),
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
                         staticProp.isLensVisibility(),
                         staticProp.getPipeLineID(),
                         staticProp.isSecuredPayload(),
-                        staticProp.getContentType(),
-                        configurationInstance.getMailbox().getPguid(),
-                        MailBoxUtil.getGUID(),
-                        MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                        configurationInstance.getTTLUnitAndTTLNumber());
+                        staticProp.getContentType());
             } else {
                 throw new RuntimeException("Invalid property type");
             }
@@ -1339,28 +1318,41 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
         throw new RuntimeException("Not Implemented");
     }
 
-    protected SweeperEventRequestDTO getSweeperEventRequestDTO(String fileName,
-                                                     String filePath,
-                                                     long size,
-                                                     long modifiedTime,
+    private SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
                                                      boolean lensVisibility,
                                                      String pipelineId,
                                                      boolean securePayload,
-                                                     String contentType,
-                                                     String mailboxGuid,
-                                                     String gpid,
-                                                     String storageType,
-                                                     Map<String, String> ttlMap) {
+                                                     String contentType) {
+
+        return getSweeperEventRequestDTO(file.getName(),
+                file.getParent(),
+                file.length(),
+                file.lastModified(),
+                lensVisibility,
+                pipelineId,
+                securePayload,
+                contentType);
+    }
+
+    protected SweeperEventRequestDTO getSweeperEventRequestDTO(String fileName,
+                                                               String filePath,
+                                                               long size,
+                                                               long modifiedTime,
+                                                               boolean lensVisibility,
+                                                               String pipelineId,
+                                                               boolean securePayload,
+                                                               String contentType) {
 
         SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO();
         sweeperEventRequestDTO.setLensVisibility(lensVisibility);
         sweeperEventRequestDTO.setPipeLineID(pipelineId);
         sweeperEventRequestDTO.setSecuredPayload(securePayload);
         sweeperEventRequestDTO.setContentType(contentType);
-        sweeperEventRequestDTO.setMailBoxId(mailboxGuid);
-        sweeperEventRequestDTO.setTtlMap(ttlMap);
-        sweeperEventRequestDTO.setGlobalProcessId(gpid);
-        sweeperEventRequestDTO.setStorageType(storageType);
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setProcessorId(configurationInstance.getPguid());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
         sweeperEventRequestDTO.setFileName(fileName);
         sweeperEventRequestDTO.setFilePath(filePath);
         sweeperEventRequestDTO.setSize(size);

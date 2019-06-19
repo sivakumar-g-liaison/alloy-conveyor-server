@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
@@ -27,6 +28,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -40,6 +42,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
 import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_DELAY;
 import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_MAX_COUNT;
 
@@ -72,6 +75,11 @@ public class SweeperEventExecutionService implements Runnable {
         try {
 
             sweeperEventDTO = JAXBUtility.unmarshalFromJSON(message, SweeperEventRequestDTO.class);
+
+            //Fish tag global process id
+            ThreadContext.clearMap(); //set new context after clearing
+            ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, sweeperEventDTO.getGlobalProcessId());
+            ThreadContext.put(KEY_PROCESSOR_ID, sweeperEventDTO.getProcessorId());
             //construct workticket for downloaded file.
             workTicket = getWorkTicket(sweeperEventDTO);
             globalProcessorId = workTicket.getGlobalProcessId();
@@ -98,7 +106,7 @@ public class SweeperEventExecutionService implements Runnable {
                                 sweeperEventDTO.getFilePath());
                     }
                 } catch (ClientUnavailableException cue) {
-                    //do not do anything
+                    //do not do anything and hope we don't reach here
                     LOGGER.error("Unable to post message to hornetq", cue);
                     return;
                 }
@@ -111,14 +119,16 @@ public class SweeperEventExecutionService implements Runnable {
 
         } catch (JAXBException | IOException | JSONException e) {
             LOGGER.error("Failed to persist payload and workticket or Cannot marshal workticket into JSON.");
+        } finally {
+            ThreadContext.clearMap();
         }
     }
 
     /**
      * construct workticket from the sweeperEventRequest dto
      *
-     * @param sweeperEventRequestDTO
-     * @return
+     * @param sweeperEventRequestDTO sweeper event request dto
+     * @return workticket
      */
     public WorkTicket getWorkTicket(SweeperEventRequestDTO sweeperEventRequestDTO) {
         Map<String, Object> additionalContext = new HashMap<>();
@@ -164,7 +174,6 @@ public class SweeperEventExecutionService implements Runnable {
      *
      * @param sweeperEventRequestDTO staic properties
      * @param workTicket workticket
-     * @throws IOException
      */
     public int persistPayloadAndWorkticket(WorkTicket workTicket,
                                              SweeperEventRequestDTO sweeperEventRequestDTO,
@@ -185,13 +194,12 @@ public class SweeperEventExecutionService implements Runnable {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
                 statusCode = g2FTPSClient.getFile(fileName, outputStream);
             } else {
-            	LOGGER.info("Entered into persist payload entry >>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 //payloadToPersist is closed in the StorageUtilities
                 File payloadFile = new File(sweeperEventRequestDTO.getFilePath() + File.separatorChar + sweeperEventRequestDTO.getFileName());
                 InputStream payloadToPersist = new FileInputStream(payloadFile);
                 FS2MetaSnapshot metaSnapshot = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
                 workTicket.setPayloadURI(metaSnapshot.getURI().toString());
-                LOGGER.info("persist payload entry Successfully completed >>>>>>>>>>>>>>>>>>>>>>>>>> {}", workTicket.getPayloadURI());
+                LOGGER.info("Payload persisted successfully  - {}", workTicket.getPayloadURI());
             }
         } finally {
             if (null != outputStream) {
@@ -201,7 +209,6 @@ public class SweeperEventExecutionService implements Runnable {
 
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-        LOGGER.info("persist Workticket entry Successfully completed $$$$$$$$$$$$$$$$$$$$$$$$$$ {}", workTicket.getGlobalProcessId());
         return statusCode;
     }
 

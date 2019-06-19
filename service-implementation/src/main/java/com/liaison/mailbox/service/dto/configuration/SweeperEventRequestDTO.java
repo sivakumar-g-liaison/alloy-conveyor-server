@@ -27,6 +27,7 @@ public class SweeperEventRequestDTO {
     private String pipeLineID;
     private String contentType;
     private String mailBoxId;
+    private String processorId;
     private String storageType;
     private Map<String, String> ttlMap;
     private int retryCount;
@@ -137,5 +138,13 @@ public class SweeperEventRequestDTO {
 
     public void setModifiedTime(String modifiedTime) {
         this.modifiedTime = modifiedTime;
+    }
+
+    public String getProcessorId() {
+        return processorId;
+    }
+
+    public void setProcessorId(String processorId) {
+        this.processorId = processorId;
     }
 }

@@ -13,10 +13,8 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
@@ -36,15 +34,11 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -115,9 +109,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-        } catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
-                | SftpException | NoSuchFieldException | SecurityException
-                | IllegalArgumentException | IllegalAccessException | JAXBException e) {
+        } catch (Exception e) {
             LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
             throw new RuntimeException(e);
         } finally {
@@ -132,20 +124,16 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
      *
      * @throws IOException
      * @throws LiaisonException
-     * @throws URISyntaxException
-     * @throws FS2Exception
      * @throws MailBoxServicesException
      * @throws SftpException
      * @throws com.liaison.commons.exception.LiaisonException
-     * @throws JAXBException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws SecurityException
-     * @throws NoSuchFieldException
      *
      */
     public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
-            LiaisonException, URISyntaxException, MailBoxServicesException, SftpException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+            LiaisonException, MailBoxServicesException, SftpException, SecurityException, IllegalArgumentException {
 
         //variable to hold the status of file download request execution
         int statusCode = 0;
@@ -211,11 +199,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             + statusIndicator : aFile;
                     String localDir = localFileDir + File.separatorChar + downloadingFileName;
                     sftpRequest.changeDirectory(dirToList);
-                    //downlaod and sweep the file use stream
-                    if (staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
+
+                    //download and sweep the file use stream when filesystem set as false and direct submit is true
+                    if (!staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
                         globalProcessorId = sweepFile(sftpRequest, downloadingFileName);
                     } else {
-                    	createResponseDirectory(localDir);
+                        createResponseDirectory(localDir);
                         try {// GSB-1337,GSB-1336
 
                             fos = new FileOutputStream(localDir);
@@ -248,6 +237,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                                     LOGGER.info("File {} deleted successfully in the remote location", aFile);
                                 }
                                 // async sweeper process if direct submit is true.
+                                //sweep the file using event queue when direct submit is true & filesystem is true
                                 if (staticProp.isDirectSubmit()) {
                                     // sweep single file process to SB queue
                                     globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + aFile));
@@ -340,11 +330,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     staticProp.isLensVisibility(),
                     staticProp.getPipeLineID(),
                     staticProp.isSecuredPayload(),
-                    staticProp.getContentType(),
-                    configurationInstance.getMailbox().getPguid(),
-                    MailBoxUtil.getGUID(),
-                    MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()),
-                    configurationInstance.getTTLUnitAndTTLNumber());
+                    staticProp.getContentType());
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, fileName);
