@@ -13,7 +13,6 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.exceptions.FS2Exception;
@@ -43,8 +42,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -212,7 +209,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     String localDir = localFileDir + File.separatorChar + downloadingFileName;
                     sftpRequest.changeDirectory(dirToList);
                     //downlaod and sweep the file use stream
-                    if (staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
+                    if (!staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
+                    	LOGGER.info("Strem api used {}---------------------", staticProp.isUseFileSystem());
                         globalProcessorId = sweepFile(sftpRequest, downloadingFileName);
                     } else {
                     	createResponseDirectory(localDir);
