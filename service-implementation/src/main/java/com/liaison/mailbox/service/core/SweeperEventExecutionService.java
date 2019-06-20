@@ -158,6 +158,7 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, sweeperEventRequestDTO.getFileName());
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFilePath());
         workTicket.setAdditionalContext(additionalContext);
+        LOGGER.info("Completed Get Workticket Process ------------------XXXXXX");
         return workTicket;
     }
 
@@ -219,8 +220,10 @@ public class SweeperEventExecutionService implements Runnable {
             }
         }
 
+        LOGGER.info("Persisted Paylod __________---------------- XXXXXXXXXXXXX");
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
+        LOGGER.info("Persisted Workticket __________---------------- XXXXXXXXXXXXX");
         return statusCode;
     }
 

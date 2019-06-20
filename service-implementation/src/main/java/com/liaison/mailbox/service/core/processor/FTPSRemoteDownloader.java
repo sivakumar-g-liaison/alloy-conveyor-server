@@ -334,6 +334,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     staticProp.isSecuredPayload(),
                     staticProp.getContentType());
 
+            LOGGER.info("SweepEventRequestDTO property added................... {}", ftpsClient.getNative().printWorkingDirectory());
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, fileName);
             if (statusCode != MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK
