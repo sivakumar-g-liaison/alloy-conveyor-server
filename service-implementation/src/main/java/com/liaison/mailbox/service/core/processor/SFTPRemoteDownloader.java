@@ -330,7 +330,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
                     sftpClient.getNative().pwd(),
                     fileAttribute.getSize(),
-                    TimeUnit.SECONDS.convert(fileAttribute.getMTime(), TimeUnit.MILLISECONDS),
+                    TimeUnit.SECONDS.toMillis(fileAttribute.getMTime()),
                     staticProp.isLensVisibility(),
                     staticProp.getPipeLineID(),
                     staticProp.isSecuredPayload(),

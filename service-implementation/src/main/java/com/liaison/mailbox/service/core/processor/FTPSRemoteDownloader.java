@@ -27,6 +27,7 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -323,11 +324,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
         try {
 
-            FTPFile ftpFile = ftpsClient.getNative().mlistFile(fileName);
+            FTPFile ftpFile = getFTPFile(ftpsClient, fileName);
+            long fileModifiedTime = (ftpFile != null && ftpFile.getTimestamp() != null) ? ftpFile.getTimestamp().getTimeInMillis() : 0;
+            long fileSize = (ftpFile != null) ? ftpFile.getSize() : -1;
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
                     ftpsClient.getNative().printWorkingDirectory(),
-                    ftpFile.getSize(),
-                    ftpFile.getTimestamp().getTimeInMillis(),
+                    fileSize,
+                    fileModifiedTime,
                     staticProp.isLensVisibility(),
                     staticProp.getPipeLineID(),
                     staticProp.isSecuredPayload(),
@@ -355,5 +358,25 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             throw new RuntimeException(e.getMessage(), e);
         }
 
+    }
+
+    /**
+     *  Hack to get file size and modification time in the single ftp command
+     * @param client
+     * @param fileName
+     * @return
+     */
+    private FTPFile getFTPFile(G2FTPSClient client, String fileName) {
+
+        try {
+
+            FTPClient ftpClient = client.getNative();
+            //Assumption there would be only one file
+            FTPFile[] files = ftpClient.listFiles(fileName);
+            return files[0];
+        } catch (IOException e) {
+            LOGGER.error("Unable to get modified time", e);
+            return null;
+        }
     }
 }
