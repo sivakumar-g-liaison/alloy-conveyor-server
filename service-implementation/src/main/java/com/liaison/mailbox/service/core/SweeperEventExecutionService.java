@@ -220,10 +220,8 @@ public class SweeperEventExecutionService implements Runnable {
             }
         }
 
-        LOGGER.info("Persisted Paylod __________---------------- XXXXXXXXXXXXX");
         // persist the workticket
         StorageUtilities.persistWorkTicket(workTicket, properties);
-        LOGGER.info("Persisted Workticket __________---------------- XXXXXXXXXXXXX");
         return statusCode;
     }
 
