@@ -532,7 +532,6 @@ public class ProcessorDTO {
                     } else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
                         throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
                     } else {
-                    	LOGGER.info("Check password for sftp server: {} --- {}  ", credentialDTO.getUserId(), credentialDTO.getPassword());
                         validateSecret(credentialDTO.getPassword());
                     }
                     break;

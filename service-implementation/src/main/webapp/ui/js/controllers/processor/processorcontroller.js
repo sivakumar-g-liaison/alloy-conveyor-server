@@ -484,7 +484,7 @@ var rest = myApp.controller(
                 for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
                     if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
-                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit" ||  property.name === "useFileSystem") {
                             $scope.propertiesAddedToProcessor.splice(i, 1);
                             i--;
                         }
@@ -556,7 +556,7 @@ var rest = myApp.controller(
                 for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
                     if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
-                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit") {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit" || property.name === "useFileSystem") {
                             $scope.propertiesAddedToProcessor.splice(i, 1);
                             i--;
                         }
