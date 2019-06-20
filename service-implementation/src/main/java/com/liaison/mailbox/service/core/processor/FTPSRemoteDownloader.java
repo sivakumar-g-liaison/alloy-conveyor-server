@@ -324,7 +324,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
         try {
 
             FTPFile ftpFile = ftpsClient.getNative().mlistFile(fileName);
-
+            LOGGER.info("SweepEventRequestDTO ftp file property added................... {}, {}, {}", ftpFile, ftpsClient.getNative(), ftpsClient.getNative());
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
                     ftpsClient.getNative().printWorkingDirectory(),
                     ftpFile.getSize(),
