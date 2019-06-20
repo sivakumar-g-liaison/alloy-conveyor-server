@@ -37,7 +37,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.hibernate.jdbc.Work;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -77,7 +76,6 @@ public class SweeperEventExecutionService implements Runnable {
     private void doProcess() {
 
         //first corner timestamp
-        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
         String globalProcessorId;
         SweeperEventRequestDTO sweeperEventDTO;
         WorkTicket workTicket;
@@ -158,7 +156,6 @@ public class SweeperEventExecutionService implements Runnable {
         workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, sweeperEventRequestDTO.getFileName());
         workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, sweeperEventRequestDTO.getFilePath());
         workTicket.setAdditionalContext(additionalContext);
-        LOGGER.info("Completed Get Workticket Process ------------------XXXXXX");
         return workTicket;
     }
 
@@ -221,7 +218,8 @@ public class SweeperEventExecutionService implements Runnable {
         }
 
         // persist the workticket
-        StorageUtilities.persistWorkTicket(workTicket, properties);
+        String workticketUri = StorageUtilities.persistWorkTicket(workTicket, properties);
+        LOGGER.info("Workticket persisted successfully  - {}", workticketUri);
         return statusCode;
     }
 

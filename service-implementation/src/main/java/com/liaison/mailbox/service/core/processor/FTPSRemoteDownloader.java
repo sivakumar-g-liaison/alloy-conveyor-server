@@ -319,7 +319,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
     @Override
     public String sweepFile(G2FTPSClient ftpsClient, String fileName) {
 
-        LOGGER.info("Sweep and Post the file to Service Broker using Event Queue");
+        LOGGER.info("Sweep and Post the file to Service Broker");
         SweeperEventExecutionService service = new SweeperEventExecutionService();
 
         try {

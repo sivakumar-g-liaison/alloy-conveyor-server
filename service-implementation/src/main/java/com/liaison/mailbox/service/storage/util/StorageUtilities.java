@@ -294,7 +294,7 @@ public class StorageUtilities {
      * @param workTicket workticket
      * @param properties properties
      */
-    public static void persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
+    public static String persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
 
         try {
 
@@ -328,6 +328,7 @@ public class StorageUtilities {
             }
 
             LOGGER.debug("Successfully persisted the workticket in spectrum to url {} ", requestUri);
+            return metaSnapshot.getPayloadUri().toString();
 
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
