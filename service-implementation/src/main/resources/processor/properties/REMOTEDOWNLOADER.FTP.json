@@ -307,7 +307,7 @@
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
-            "defaultValue":"false",
+            "defaultValue":"",
             "validationRules":null,
             "options":[
                 "false",

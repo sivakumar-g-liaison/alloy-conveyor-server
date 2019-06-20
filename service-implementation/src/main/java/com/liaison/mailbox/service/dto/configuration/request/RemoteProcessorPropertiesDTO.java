@@ -81,6 +81,7 @@ public class RemoteProcessorPropertiesDTO {
     private String execution;
     private String category;
     private boolean removeEmptyDirectoryAfterSwept = false;
+    private boolean directSubmit;
 
 	public boolean isDeleteFileAfterSweep() {
 		return deleteFileAfterSweep;
@@ -481,6 +482,14 @@ public class RemoteProcessorPropertiesDTO {
 
     public void setRemoveEmptyDirectoryAfterSwept(boolean removeEmptyDirectoryAfterSwept) {
         this.removeEmptyDirectoryAfterSwept = removeEmptyDirectoryAfterSwept;
+    }
+
+    public boolean isDirectSubmit() {
+        return directSubmit;
+    }
+
+    public void setDirectSubmit(boolean directSubmit) {
+        this.directSubmit = directSubmit;
     }
 
 }
