@@ -1,7 +1,7 @@
 5.7.0-SNAPSHOT
 ---------------
 * GGT-1670 - Active-Active FILE_DELETE replication issue in EU
-* Added SSO properties for qa-stage, at4s/u/p, px1s/u/p
+* Added SSO properties for qa-stage, at4s/u/p, px1s/u/p, ld1/u/p, he2/u/p
 * GMB-1228 - Sweeper is pulling the same file at least twice
 * GMB-1226 - Provision to search the processor using KeyGroupGuid
 * GMB-1217 - Add direct submit from remote downloader
