@@ -328,7 +328,7 @@ public class StorageUtilities {
             }
 
             LOGGER.debug("Successfully persisted the workticket in spectrum to url {} ", requestUri);
-            return metaSnapshot.getPayloadUri().toString();
+            return metaSnapshot.getURI().toString();
 
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
