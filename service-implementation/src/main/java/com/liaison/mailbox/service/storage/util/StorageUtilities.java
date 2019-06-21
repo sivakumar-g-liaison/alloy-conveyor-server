@@ -318,9 +318,7 @@ public class StorageUtilities {
             InputStream is = null;
             try {
                 is = new ByteArrayInputStream(JAXBUtility.marshalToJSON(workTicket).getBytes());
-                LOGGER.info("Persist Workticket before create object ENtry --- {}, {} ", workTicket.getGlobalProcessId(), is);
                 metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, is);
-                LOGGER.info("Persist Workticket before create object Metasnapshot --- {} ", metaSnapshot);
                 LOGGER.debug("Time spent on uploading workticket {} of size {} to spectrum only is {} ms",
                         workTicket.getFileName(), metaSnapshot.getPayloadSize(), endTime - startTime);
             } finally {
