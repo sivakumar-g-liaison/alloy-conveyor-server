@@ -176,6 +176,7 @@ public class SweeperEventExecutionService implements Runnable {
             deleteFile(filePath);
         } else {
             LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
+            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {}, ---> warning message {}", payloadURI, filePath.getName(), filePath);
         }
         LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
      }
