@@ -172,7 +172,7 @@ public class SweeperEventExecutionService implements Runnable {
 
         // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
         if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-            LOGGER.debug("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath.getName());
+            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {}, ---> {}", payloadURI, filePath.getName(), filePath);
             deleteFile(filePath);
         } else {
             LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
