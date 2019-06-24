@@ -169,7 +169,7 @@ public class SweeperEventExecutionService implements Runnable {
     	LOGGER.info("Entered into verifyAndDeletePayload method            {},  --->{} ", wrkTicket.getPayloadURI(), wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
         String payloadURI = wrkTicket.getPayloadURI();
         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
-
+        LOGGER.info("Entered into verifyAndDeletePayload method    After        {},  --->{} ", wrkTicket.getPayloadURI(), wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
         // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
         if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
             LOGGER.info("Payload {} exists in storage utilities. so deleting the file {}, ---> {}", payloadURI, filePath.getName(), filePath);
