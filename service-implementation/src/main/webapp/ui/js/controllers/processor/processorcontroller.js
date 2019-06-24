@@ -368,7 +368,8 @@ var rest = myApp.controller(
 				if (blockuiFlag === true) {
 					$scope.block.unblockUI();
 				}
-				
+
+                $scope.showDirectSubmit = false;				
 				$scope.processorData = $scope.editProcessorData;
 				$scope.allProfiles = profData.getProfileResponse.profiles;
 				$scope.clearProps();
@@ -444,7 +445,11 @@ var rest = myApp.controller(
                 } else {
                     $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
-                
+
+                if ($scope.procsrType.value === 'REMOTEDOWNLOADER') {
+                    $scope.showDirectSubmit = true;
+                }
+
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 					$scope.showTruststoreSection = true;	
