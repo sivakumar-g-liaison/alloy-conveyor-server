@@ -45,6 +45,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -164,17 +167,17 @@ public class SweeperEventExecutionService implements Runnable {
      *
      * @param wrkTicket workticket contains payload uri
      */
-    private void verifyAndDeletePayload(WorkTicket wrkTicket) {
+    private void verifyAndDeletePayload(WorkTicket wrkTicket) throws IOException {
 
         String payloadURI = wrkTicket.getPayloadURI();
-        File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
         // Delete the file if it exists in storage utilities and it should be successfully posted to SB Queue.
         if (StorageUtilities.isPayloadExists(wrkTicket.getPayloadURI())) {
-            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {},", payloadURI, filePath.getName(), filePath);
+            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {},", payloadURI, filePath);
             deleteFile(filePath);
         } else {
-            LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath.getName());
-            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath.getName(), filePath);
+            LOGGER.warn("Payload {} does not exist in storage utilities. so file {} is not deleted.", payloadURI, filePath);
+            LOGGER.info("Payload {} exists in storage utilities. so deleting the file {}", payloadURI, filePath);
         }
         LOGGER.info("Global PID : {} deleted the file {}", wrkTicket.getGlobalProcessId(), wrkTicket.getFileName());
      }
@@ -263,11 +266,12 @@ public class SweeperEventExecutionService implements Runnable {
      * Deletes the given file
      * @param file file obj
      */
-    protected void deleteFile(File file) {
+    protected void deleteFile(String file) throws IOException {
 
         // Delete the local files after successful upload if user opt for it
-        if (file.exists()) {
-            file.delete();
+        Path path = Paths.get(file);
+        if (Files.exists(path)) {
+            Files.delete(path);
         }
     }
 }
