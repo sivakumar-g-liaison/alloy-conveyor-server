@@ -166,7 +166,7 @@ public class SweeperEventExecutionService implements Runnable {
      */
     private void verifyAndDeletePayload(WorkTicket wrkTicket) {
 
-    	LOGGER.info("Entered into verifyAndDeletePayload method            {} ", wrkTicket.getPayloadURI());
+    	LOGGER.info("Entered into verifyAndDeletePayload method            {},  --->{} ", wrkTicket.getPayloadURI(), wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH));
         String payloadURI = wrkTicket.getPayloadURI();
         File filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FILE_PATH);
 
