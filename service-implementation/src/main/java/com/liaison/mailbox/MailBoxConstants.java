@@ -618,7 +618,8 @@ public interface MailBoxConstants {
     Charset URL_ENCODING = StandardCharsets.UTF_8;
 
     //Referred to hazelcast Cache
-    String HAZELCAST_CACHE_CLUSTER_NODES = "hazelcast.cache.cluster.nodes";
+    String HAZELCAST_CACHE_RELAY_CLUSTER_NODES = "hazelcast.cache.relay.cluster.nodes";
+    String HAZELCAST_CACHE_LEGACY_RELAY_CLUSTER_NODES = "hazelcast.cache.legacy.relay.cluster.nodes";
     String HAZELCAST_CACHE_BACKUP_COUNT = "hazelcast.cache.backupCount";
     String HAZELCAST_CACHE_SIZE = "hazelcast.cache.size";
     String HAZELCAST_CACHE_TTL_IN_SECONDS = "hazelcast.cache.ttl.seconds";
