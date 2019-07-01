@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.enums.DeploymentType;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Contains the static variables which we can use globally.
@@ -23,6 +24,8 @@ import com.liaison.mailbox.enums.DeploymentType;
  * @author OFS
  */
 public interface MailBoxConstants {
+
+    DecryptableConfiguration configuration = MailBoxUtil.getEnvironmentProperties();
 
     int RETRY_ATTEMPTS_MIN_VALUE = 0;
     int RETRY_ATTEMPTS_MAX_VALUE = 5;
@@ -393,6 +396,23 @@ public interface MailBoxConstants {
     String DROPBOXPROCESSOR = "DROPBOXPROCESSOR";
     String FILEWRITER = "FILEWRITER";
 
+    String SKIP_QUEUE_INITIALIZER = "com.liaison.skip.queue";
+    String PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = "com.liaison.queue.process.pool.availability.min.headroom";
+    
+    int DEFAULT_THREAD_COUNT = configuration.getInt("com.liaison.queue.processor.default.thread.count", 10);
+    int DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = DEFAULT_THREAD_COUNT;
+    int availabilityMinHeadRoom = configuration.getInt(PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM, DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM);
+
+    String DROPBOX_QUEUE = "dropboxQueue";
+    String MAILBOX_PROCESSOR_QUEUE = "processor";
+    String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
+    String TOPIC_POOL_NAME = "mailboxProcessorTopic";
+    String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
+    String FILE_STAGE_REPLICATON_RETRY = "fileStage";
+    String INBOUND_FILE_QUEUE = "inboundFile";
+    String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
+    String SWEEPER_EVENT_QUEUE = "sweeperEvent";
+
     // Added for read resource for migrator services
     String TYPE_MAILBOX = "mailbox";
     String TYPE_PROCESSOR = "processor";
@@ -530,6 +550,9 @@ public interface MailBoxConstants {
     String DIRECTORY_STAGE_REPLICATION_RETRY_MAX_COUNT = "com.liaison.mailbox.directory.stage.replication.max.retry.count";
     String SWEEPER_EVENT_RETRY_DELAY = "com.liaison.sweeper.event.retry.delay";
     String SWEEPER_EVENT_RETRY_MAX_COUNT = "com.liaison.sweeper.event.retry.count";
+
+    Long SWEEPER_EVENT_DELAY = MailBoxUtil.getEnvironmentProperties().getLong(SWEEPER_EVENT_RETRY_DELAY, 60000);
+    int SWEEPER_EVENT_MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getInt(SWEEPER_EVENT_RETRY_MAX_COUNT, 10);
 
     String URI = "uri";
     String RETRY_COUNT = "retry";

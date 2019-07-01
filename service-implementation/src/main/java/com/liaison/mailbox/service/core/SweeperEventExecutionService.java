@@ -57,16 +57,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
-import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_DELAY;
-import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_MAX_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_DELAY;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_MAX_RETRY_COUNT;
 
 public class SweeperEventExecutionService implements Runnable {
 
     private String message;
     private static final Logger LOGGER = LogManager.getLogger(SweeperEventExecutionService.class);
-
-    private static final Long SWEEPER_EVENT_DELAY = MailBoxUtil.getEnvironmentProperties().getLong(SWEEPER_EVENT_RETRY_DELAY, 60000);
-    private static final int SWEEPER_EVENT_MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getInt(SWEEPER_EVENT_RETRY_MAX_COUNT, 10);
 
     public SweeperEventExecutionService() {
     }
