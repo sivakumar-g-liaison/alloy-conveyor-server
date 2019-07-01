@@ -10,12 +10,10 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import com.jcraft.jsch.SftpATTRS;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -47,9 +45,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.UNDER_SCORE;
+import static com.liaison.mailbox.MailBoxConstants.TEXT_FILE_EXTENSION;
+
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods
@@ -156,7 +156,8 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                 }
             } else {
                 if (!httpDownloaderStaticProperties.isUseFileSystem() && httpDownloaderStaticProperties.isDirectSubmit()) {
-                    sweepFile(request, MailBoxConstants.PROCESSOR + System.nanoTime());
+                    String processorName = configurationInstance.getProcsrName().replaceAll(" ", "") + UNDER_SCORE + System.nanoTime() + TEXT_FILE_EXTENSION;
+                    sweepFile(request, processorName);
                 } else {
                     response = request.execute();
                     writeResponseToMailBox(responseStream);
@@ -343,8 +344,9 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
     public String sweepFile(HTTPRequest httpRequest, String fileName) {
 
         SweeperEventExecutionService service = new SweeperEventExecutionService();
-        LOGGER.info("Sweep and Post the file to Service Broker");
+
         try {
+
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
                     getWriteResponseURI(),
                     -1L,
@@ -353,10 +355,9 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     httpDownloaderStaticProperties.getPipeLineID(),
                     httpDownloaderStaticProperties.isSecuredPayload(),
                     httpDownloaderStaticProperties.getContentType());
-            LOGGER.info("Added sweeperEvent Properties");
+
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,null, httpRequest, fileName);
-            LOGGER.info("After persist check statusCode ->{}",  Response.Status.fromStatusCode(statusCode).getFamily());
             if (Response.Status.fromStatusCode(statusCode).getFamily() != Response.Status.Family.SUCCESSFUL) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }

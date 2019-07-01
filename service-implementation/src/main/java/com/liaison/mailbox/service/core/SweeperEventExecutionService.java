@@ -212,10 +212,8 @@ public class SweeperEventExecutionService implements Runnable {
                 statusCode = g2FTPSClient.getFile(fileName, outputStream);
             } else if (null != httpRequest) {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
-                LOGGER.info("Completed store payload in boss {}", outputStream);
                 httpRequest.setOutputStream(outputStream);
                 HTTPResponse response = httpRequest.execute();
-                LOGGER.info("Status of response {}", response.getStatusCode());
                 statusCode = response.getStatusCode();
             } else {
                 //payloadToPersist is closed in the StorageUtilities
