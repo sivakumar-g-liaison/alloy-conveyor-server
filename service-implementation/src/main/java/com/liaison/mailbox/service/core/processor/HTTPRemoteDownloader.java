@@ -356,7 +356,8 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info("Added sweeperEvent Properties");
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
             int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,null, httpRequest, fileName);
-            if (statusCode != MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+            LOGGER.info("After persist check statusCode ->{}",  Response.Status.fromStatusCode(statusCode).getFamily());
+            if (Response.Status.fromStatusCode(statusCode).getFamily() != Response.Status.Family.SUCCESSFUL) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }
             SweeperQueueSendClient.post(JAXBUtility.marshalToJSON(workTicket), false);
