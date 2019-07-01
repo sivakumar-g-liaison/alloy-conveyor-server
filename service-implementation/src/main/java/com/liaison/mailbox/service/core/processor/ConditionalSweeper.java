@@ -206,15 +206,24 @@ public class ConditionalSweeper extends AbstractSweeper implements MailBoxProces
             String[] wildcards = {triggerFileName, !MailBoxUtil.isEmpty(includeFileName) ? includeFileName : MailBoxConstants.WILD_CARD_PATTERN};
             FileFilter triggerFileFilter = new RelayWildcardFileFilter(wildcards);
             List<File> triggerFileList;
-            
+
+            Stream<Path> pathStream = null;
             try {
-                triggerFileList = Files.list(Paths.get(inputLocation))
+
+                //Files.list needs the special attention since it is using DirectoryStream in the back
+                //So, we have use try with resources or close the stream manually to avoid the leak in FileDescriptor
+                pathStream = Files.list(Paths.get(inputLocation));
+                triggerFileList = pathStream
                         .map(Path::toFile)
                         .filter(triggerFileFilter::accept)
                         .sorted(LastModifiedFileComparator.LASTMODIFIED_REVERSE)
                         .collect(Collectors.toList());
             } catch (IOException ex) {
                 throw new RuntimeException("Error listing files in " +inputLocation, ex);
+            } finally {
+                if (null != pathStream) {
+                    pathStream.close();
+                }
             }
             return !triggerFileList.isEmpty() ? triggerFileList.get(0).getName() : null;
         } 

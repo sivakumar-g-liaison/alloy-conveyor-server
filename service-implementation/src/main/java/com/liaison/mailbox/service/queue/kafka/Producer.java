@@ -310,11 +310,12 @@ public class Producer {
      * @param deleteMessage
      * @param datacenter
      */
-    public static void produce(KafkaMessageType kafkaMessageType, String deleteMessage, String datacenter) {
+    public static void produce(KafkaMessageType kafkaMessageType, String deleteMessage, String datacenter, String gpid) {
         KafkaMessage kafkaMessage = new KafkaMessage();
         kafkaMessage.setMessageType(kafkaMessageType);
         kafkaMessage.setFileDeleteMessage(deleteMessage);
         kafkaMessage.setDatacenter(datacenter);
+        kafkaMessage.setGpid(gpid);
         produce(marshalToJSON(kafkaMessage), TOPIC_NAME_DELETE);
     }
 

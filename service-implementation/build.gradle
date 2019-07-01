@@ -229,6 +229,8 @@ dependencies {
 	//METRICS
 	compile 'com.liaison.commons:lib_metrics:1.+'
 
+    // hazelcast dependency
+    compile "com.hazelcast:hazelcast:3.12.1"
 }
 
 idea {
@@ -333,6 +335,7 @@ cargo {
 		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
 		jvmArgs += " -Dhttps.protocols=TLSv1.2"
 		jvmArgs += " -Dlog4j.configurationFile=log4j2-local.xml"
+		jvmArgs += " -Dhazelcast.jmx=true"
 
 		// if containerDebug, append tomcat debug args to jvm args
 		if(project.hasProperty('containerDebug')) {

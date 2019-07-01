@@ -10,13 +10,13 @@
 
 package com.liaison.mailbox;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Contains the static variables which we can use globally.
@@ -641,5 +641,12 @@ public interface MailBoxConstants {
     String INITIAL_PIPELINE_ID = "INITIAL_PIPELINE_ID";
     
     Charset URL_ENCODING = StandardCharsets.UTF_8;
+
+    //Referred to hazelcast Cache
+    String HAZELCAST_CACHE_RELAY_CLUSTER_NODES = "hazelcast.cache.relay.cluster.nodes";
+    String HAZELCAST_CACHE_LEGACY_RELAY_CLUSTER_NODES = "hazelcast.cache.legacy.relay.cluster.nodes";
+    String HAZELCAST_CACHE_BACKUP_COUNT = "hazelcast.cache.backupCount";
+    String HAZELCAST_CACHE_SIZE = "hazelcast.cache.size";
+    String HAZELCAST_CACHE_TTL_IN_SECONDS = "hazelcast.cache.ttl.seconds";
     
 }

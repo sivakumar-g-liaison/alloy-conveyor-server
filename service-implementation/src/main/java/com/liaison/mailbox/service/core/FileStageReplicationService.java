@@ -18,6 +18,7 @@ import com.liaison.mailbox.enums.FailoverMessageType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.core.hazelcast.HazelcastProvider;
 import com.liaison.mailbox.service.directory.DirectoryService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.FileStageReplicationSendQueue;
@@ -28,6 +29,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ShellScriptEngineUtil;
 import com.liaison.usermanagement.service.dto.DirectoryMessageDTO;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -174,10 +176,20 @@ public class FileStageReplicationService implements Runnable {
                         persistFile(payload, file);
                     }
 
+                    //Another check for the staged file status to handle concurrent case
                     stagedFile = stagedFileDAO.findStagedFilesByGlobalProcessIdWithoutProcessDc(globalProcessId);
                     if (EntityStatus.INACTIVE.value().equalsIgnoreCase(stagedFile.getStagedFileStatus()) && file.exists()) {
                         file.delete();
+                    } else {
+                        //another check on the cache if the status is not replicated
+                        //if it is not blank, then there is a chance that file delete replication happened before the DB updates
+                        //delete the file in this case
+                        String entry = HazelcastProvider.get(stagedFile.getGPID());
+                        if (StringUtils.isNotBlank(entry) && file.exists()) {
+                            file.delete();
+                        }
                     }
+
                 } catch (MailBoxServicesException | IllegalArgumentException e) {
                     // Payload doesn't exist in BOSS so adding back to queue with delay
                     LOGGER.warn("Posting back to queue since payload isn't replicated - datacenter - gpid {}", globalProcessId);
