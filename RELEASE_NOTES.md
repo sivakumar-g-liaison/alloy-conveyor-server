@@ -5,7 +5,7 @@
 * GMB-1226 - Provision to search the processor using KeyGroupGuid
 * GMB-1217 - Add direct submit from remote downloader
 * GGT-1670 - Active-Active FILE_DELETE replication issue in EU
-    * Added caching the delete events during concurrent invocation of file create/delete
+    * Added cache the delete events during concurrent invocation of file create/delete
 
 5.6.6
 ---------------
