@@ -25,8 +25,8 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
+import static com.liaison.mailbox.MailBoxConstants.SKIP_QUEUE_INITIALIZER;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer.SKIP_QUEUE_INITIALIZER;
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
 import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
@@ -37,7 +37,6 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED
  */
 public class SweeperQueueSendClient implements AutoCloseable {
 
-    private static final Logger LOG = LogManager.getLogger(SweeperQueueSendClient.class);
     private static final String QUEUE_NAME = "sweeper";
     private static final Logger LOGGER = LogManager.getLogger(SweeperQueueSendClient.class);
 
