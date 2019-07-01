@@ -327,7 +327,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
         try {
 
             SftpATTRS fileAttribute = sftpClient.getNative().stat(fileName);
-            LOGGER.info("", sftpClient.getNative().pwd(), fileName, fileAttribute.getSize(), TimeUnit.SECONDS.toMillis(fileAttribute.getMTime()));
+            LOGGER.info("Check fileName ->>> {} and filepath -->> {}, size -->> {}, time --> {}", sftpClient.getNative().pwd(), fileName, fileAttribute.getSize(), TimeUnit.SECONDS.toMillis(fileAttribute.getMTime()));
             SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
                     sftpClient.getNative().pwd(),
                     fileAttribute.getSize(),
