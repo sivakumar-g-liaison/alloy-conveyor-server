@@ -20,6 +20,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.core.hazelcast.HazelcastProvider;
 import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
 import com.liaison.mailbox.service.queue.kafka.KafkaMessage;
@@ -49,8 +50,6 @@ import static com.liaison.mailbox.service.util.MailBoxUtil.DATACENTER_NAME;
 public class FileDeleteReplicationService {
 
     private static final Logger LOGGER = LogManager.getLogger(FileDeleteReplicationService.class);
-    private static final String PATH = "object_path";
-    private static final String USER_SID = "user_sid";
 
     /**
      * Method to in-activate staged file entry and update lens status.
@@ -63,7 +62,7 @@ public class FileDeleteReplicationService {
 
             //Just delete the file if it comes from other datacenter
             if (StringUtils.isNotBlank(message.getDatacenter())) {
-                deleteReplicatedFile(message.getFileDeleteMessage());
+                deleteReplicatedFile(message);
                 return;
             }
 
@@ -132,7 +131,7 @@ public class FileDeleteReplicationService {
         LOGGER.info("Updated LENS status for the file " + stagedFile.getFileName() + " and location is " + stagedFile.getFilePath());
 
         //Post the deleted message to other datacenter
-        Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+        Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME, stagedFile.getGPID());
     }
 
     private void handleRemoteUploader(KafkaMessage message, StagedFileDAO stagedFileDAO, StagedFile stagedFile) {
@@ -140,7 +139,7 @@ public class FileDeleteReplicationService {
         if (EntityStatus.INACTIVE.value().equals(stagedFile.getStagedFileStatus())) {
             //Post the deleted message to other datacenter
             if (MailBoxUtil.DATACENTER_NAME.equals(stagedFile.getProcessDc())) {
-                Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+                Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME, stagedFile.getGPID());
                 LOGGER.info("File {} may be deleted by WatchDogService", message.getFileDeleteMessage());
             }
         } else {
@@ -148,7 +147,7 @@ public class FileDeleteReplicationService {
             stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
             stagedFile.setModifiedDate(MailBoxUtil.getTimestamp());
             stagedFileDAO.merge(stagedFile);
-            Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME);
+            Producer.produce(FILE_DELETE, message.getFileDeleteMessage(), DATACENTER_NAME, stagedFile.getGPID());
         }
 
     }
@@ -156,20 +155,24 @@ public class FileDeleteReplicationService {
     /**
      * Method to delete file 
      *
-     * @param path
+     * @param message
      */
-    private void deleteReplicatedFile(String path) {
+    private void deleteReplicatedFile(KafkaMessage message) {
 
+        String path = message.getFileDeleteMessage();
         String filePath = path.substring(0, path.lastIndexOf("/"));
         String fileName = path.substring(path.lastIndexOf("/") + 1);
         Path file = Paths.get(filePath + File.separatorChar + fileName);
         if (Files.exists(file)) {
             try {
                 Files.delete(file);
+                HazelcastProvider.put(message.getGpid(), message.getFileDeleteMessage());
                 LOGGER.warn("File " + fileName + " is deleted in the filePath " + filePath);
             } catch (IOException e) {
                 LOGGER.error("Unable to delete file " + fileName + " in the filePath " + filePath);
             }
+        } else {
+            HazelcastProvider.put(message.getGpid(), message.getFileDeleteMessage());
         }
 
     }

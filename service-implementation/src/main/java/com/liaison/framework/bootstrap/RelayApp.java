@@ -29,6 +29,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
+import com.liaison.mailbox.service.core.hazelcast.HazelcastProvider;
 import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZValidationFilterFactory;
 import com.liaison.mailbox.service.module.GuiceInjector;
 import com.liaison.mailbox.service.queue.kafka.Consumer;
@@ -118,6 +119,9 @@ public class RelayApp extends ResourceConfig {
                             new FileReadDeleteCheck(mount));
                 }
             }
+
+            //Initialize the hazelcast cache for Relay and Legacy Relay
+            HazelcastProvider.init();
         }
 
         logger.info(new DefaultAuditStatement(AuditStatement.Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));

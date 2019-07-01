@@ -25,6 +25,7 @@ public class KafkaMessage {
     private String dirAbsolutePath;
     private String datacenter;
     private String fileCreateMessage;
+    private String gpid;
 
     public DirectoryMessageDTO getDirectoryMessageDTO() {
         return directoryMessageDTO;
@@ -80,5 +81,13 @@ public class KafkaMessage {
 
     public void setFileCreateMessage(String fileCreateMessage) {
         this.fileCreateMessage = fileCreateMessage;
+    }
+
+    public String getGpid() {
+        return gpid;
+    }
+
+    public void setGpid(String gpid) {
+        this.gpid = gpid;
     }
 }
