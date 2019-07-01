@@ -570,7 +570,7 @@ public interface MailBoxConstants {
 
     String FILE_COUNT_SEPARATOR = "/";
     String DOT_OPERATOR = ".";
-    String UNDER_SCORE = "_";
+    String UNDERSCORE = "_";
     String TEXT_FILE_EXTENSION = ".txt";
 
     String FAILOVER_MSG_TYPE="failoverMessageType";
