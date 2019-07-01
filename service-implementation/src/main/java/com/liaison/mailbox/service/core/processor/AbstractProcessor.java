@@ -14,6 +14,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
@@ -61,6 +62,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -71,6 +73,7 @@ import org.apache.logging.log4j.Logger;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -1317,6 +1320,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
     @Override
     public String sweepFile(G2FTPSClient sftpClient, String fileName) {
         throw new RuntimeException("Not Implemented");
+    }
+    
+    @Override
+    public String sweepFile(HTTPRequest httpRequest, String fileName) {
+    	throw new RuntimeException("Not Implemented");
     }
 
     private SweeperEventRequestDTO getSweeperEventRequestDTO(File file,

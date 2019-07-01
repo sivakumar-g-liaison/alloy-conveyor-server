@@ -10,26 +10,35 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.jcraft.jsch.SftpATTRS;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.SweeperEventExecutionService;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +47,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
 
@@ -145,9 +155,13 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     LOGGER.info(constructMessage("The given HTTP downloader payload URI is Empty."));
                 }
             } else {
-                response = request.execute();
-                writeResponseToMailBox(responseStream);
-                totalNumberOfProcessedFiles++;
+                if (!httpDownloaderStaticProperties.isUseFileSystem() && httpDownloaderStaticProperties.isDirectSubmit()) {
+                    sweepFile(request, MailBoxConstants.PROCESSOR + System.nanoTime());
+                } else {
+                    response = request.execute();
+                    writeResponseToMailBox(responseStream);
+                    totalNumberOfProcessedFiles++;
+                }
             }
             // to calculate the elapsed time for processing files
             long endTime = System.currentTimeMillis();
@@ -322,6 +336,36 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (response != null) {
                 response.close();
             }
+        }
+    }
+
+    @Override
+    public String sweepFile(HTTPRequest httpRequest, String fileName) {
+
+        SweeperEventExecutionService service = new SweeperEventExecutionService();
+        LOGGER.info("Sweep and Post the file to Service Broker");
+        try {
+            SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
+                    getWriteResponseURI(),
+                    -1L,
+                    -1L,
+                    httpDownloaderStaticProperties.isLensVisibility(),
+                    httpDownloaderStaticProperties.getPipeLineID(),
+                    httpDownloaderStaticProperties.isSecuredPayload(),
+                    httpDownloaderStaticProperties.getContentType());
+            LOGGER.info("Added sweeperEvent Properties");
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,null, httpRequest, fileName);
+            if (statusCode != MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
+                throw new RuntimeException("File download status is not successful - " + statusCode);
+            }
+            SweeperQueueSendClient.post(JAXBUtility.marshalToJSON(workTicket), false);
+            service.logToLens(workTicket, sweeperEventRequestDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
+
+            return sweeperEventRequestDTO.getGlobalProcessId();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

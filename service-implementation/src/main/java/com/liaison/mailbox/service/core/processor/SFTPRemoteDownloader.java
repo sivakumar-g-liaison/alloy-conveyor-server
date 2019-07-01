@@ -338,7 +338,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     staticProp.getContentType());
 
             WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
-            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, fileName);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, sftpClient,null, null, fileName);
             if (statusCode != MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
                 throw new RuntimeException("File download status is not successful - " + statusCode);
             }
