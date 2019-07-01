@@ -24,6 +24,7 @@ import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueue
 import com.liaison.mailbox.service.queue.consumer.InboundFileQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
+import com.liaison.mailbox.service.queue.consumer.SweeperEventQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.RunningProcessorRetryQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
@@ -64,6 +65,21 @@ import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILB
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.DROPBOX_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_PROCESSOR_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.MAILBOX_PROCESSED_PAYLOAD_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.TOPIC_POOL_NAME;
+import static com.liaison.mailbox.MailBoxConstants.USERMANAGEMENT_RELAY_DIRECTORY_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATON_RETRY;
+import static com.liaison.mailbox.MailBoxConstants.INBOUND_FILE_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.RUNNING_PROCESSOR_RETRY_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.SKIP_QUEUE_INITIALIZER;
+import static com.liaison.mailbox.MailBoxConstants.DEFAULT_THREAD_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM;
+import static com.liaison.mailbox.MailBoxConstants.DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM;
+import static com.liaison.mailbox.MailBoxConstants.availabilityMinHeadRoom;
+
 
 /**
  * Initializes all queue pollers.
@@ -86,36 +102,6 @@ public class QueueAndTopicProcessInitializer {
 
     private static final Logger logger = LogManager.getLogger(QueueAndTopicProcessInitializer.class);
     private static DecryptableConfiguration configuration = MailBoxUtil.getEnvironmentProperties();
-
-    /**
-     * Property to decide whether to initialize queue processors or not
-     */
-    public static final String SKIP_QUEUE_INITIALIZER = "com.liaison.skip.queue";
-
-    /**
-     * Queue Processor default thread count
-     */
-    private static final int DEFAULT_THREAD_COUNT = configuration.getInt("com.liaison.queue.processor.default.thread.count", 10);
-
-    /**
-     * Properties required for Minimum headroom
-     */
-    private static final String PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = "com.liaison.queue.process.pool.availability.min.headroom";
-    private static final int DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM = DEFAULT_THREAD_COUNT;
-    private static int availabilityMinHeadRoom = configuration.getInt(PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM,
-            DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM);
-
-    /**
-     * Monikers for the queues to be initialize
-     */
-    private static final String DROPBOX_QUEUE = "dropboxQueue";
-    private static final String MAILBOX_PROCESSOR_QUEUE = "processor";
-    private static final String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
-    private static final String TOPIC_POOL_NAME = "mailboxProcessorTopic";
-    private static final String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
-    private static final String FILE_STAGE_REPLICATON_RETRY = "fileStage";
-    private static final String INBOUND_FILE_QUEUE = "inboundFile";
-    private static final String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
 
     public static void initialize() {
 
@@ -181,6 +167,16 @@ public class QueueAndTopicProcessInitializer {
             case LOW_SECURE_RELAY:
 
                 // Initialize processor queue and processedPayload queue
+                try {
+
+                    logger.info("Starting SWEEPER_EVENT_QUEUE Listener");
+                    QueuePooledListenerContainer sweeperEvent = new MailboxQueuePooledListenerContainer(SweeperEventQueueConsumer.class, SWEEPER_EVENT_QUEUE);
+                    sweeperEvent.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                    logger.info("Started SWEEPER_EVENT_QUEUE Listener");
+                } catch (Exception e) {
+                    logger.error("Queue listener for Sweeper Event Queue could not be initialized.", e);
+                }
+                
                 try {
 
                     logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
@@ -376,7 +372,6 @@ public class QueueAndTopicProcessInitializer {
                                 getKafkaTextMessageProcessor(injector, RunningProcessorRetry.class));
 
                         logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
-
                     } catch (Exception e) {
                         logger.error("Error when initializing LiaisonKafkaConsumer.", e);
                         //There's no sense to keep app up and running if a consumer doesn't start

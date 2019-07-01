@@ -7,6 +7,8 @@ var rest = myApp.controller(
     		$scope.showCredentialInvalid = false;    
     		$scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
+            $scope.isDirectSubmit = false;
+            $scope.showDirectSubmit = false;
             //check JavaScriptExecutor
             $scope.onChangeJavaScriptExecutor = function () {            	
             	if ($scope.isJavaScriptExecution) {            		
@@ -14,8 +16,22 @@ var rest = myApp.controller(
             	} else {            		
             		$scope.isJavaScriptExecution = true;
             	} 	            	
-            } 
-                 
+            }
+            //check Direct Submit
+            $scope.onChangeDirectSubmit = function() {
+                if ($scope.isDirectSubmit) {
+                    $scope.isDirectSubmit = false;
+                } else {
+                    $scope.isDirectSubmit = true;
+                }
+
+                if ($scope.isEdit) {
+                    $scope.editProcAfterDirectSubmit($scope.downloaderData,  $scope.profileData, $scope.processor.guid, true);
+                } else {
+                    $scope.resetProtocol($scope.processor.protocol);
+                }
+            }
+
             // variable to show or hide ssh keys section
             $scope.showSSHKeysSection = false;
             // variable to determine enable or disable add ssh keypair button
@@ -88,6 +104,7 @@ var rest = myApp.controller(
 				$scope.script = '';
 			    $scope.scriptIsEdit = false; 
 				$scope.isJavaScriptExecution = false;
+				$scope.isDirectSubmit = false;
 				$scope.isCreateConfiguredLocation = true;
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
@@ -134,6 +151,20 @@ var rest = myApp.controller(
 						credentialProperties:[]
                     }
                 };
+                
+                $scope.directSubmit = {
+                    "name":"directSubmit",
+                    "displayName" : "Direct Submit",
+                    "value":false,
+                    "type":"select",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": null,
+                	"options":[false,true]
+            	};
+                
                 $scope.modal = {
                     "roleList": '',
                     "uri": ''
@@ -171,7 +202,6 @@ var rest = myApp.controller(
                 		password:"",
                 		passwordPguidInKMS:""
                 }
-                
             };
             
             $scope.supportedProtocols = angular.copy($scope.initialProcessorData.supportedProtocols.options);
@@ -338,7 +368,8 @@ var rest = myApp.controller(
 				if (blockuiFlag === true) {
 					$scope.block.unblockUI();
 				}
-				
+
+                $scope.showDirectSubmit = false;				
 				$scope.processorData = $scope.editProcessorData;
 				$scope.allProfiles = profData.getProfileResponse.profiles;
 				$scope.clearProps();
@@ -414,7 +445,11 @@ var rest = myApp.controller(
                 } else {
                     $scope.supportedJavaScriptCheckBox = $scope.javaScriptCheckBox.supportedJavaScriptCheckBox;
                 }
-                
+
+                if ($scope.procsrType.value === 'REMOTEDOWNLOADER') {
+                    $scope.showDirectSubmit = true;
+                }
+
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 					$scope.showTruststoreSection = true;	
@@ -434,16 +469,36 @@ var rest = myApp.controller(
                 $scope.processorCredProperties = [];
                 $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
                 $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
-                
-                for (var i = 0; i < $scope.staticProperties.length; i++) {				     
-					 var property = $scope.staticProperties[i];
-					 if (property.mandatory === true || property.valueProvided === true) {
+
+                for (var i = 0; i < $scope.staticProperties.length; i++) {
+                    var property = $scope.staticProperties[i];
+                    if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
+                        if (property.value === "true") {
+                            $scope.isDirectSubmit = true;
+                        } else {
+                            $scope.isDirectSubmit = false;
+                        }
+                    }
+                    if (property.mandatory === true || property.valueProvided === true) {
                         $scope.propertiesAddedToProcessor.push(property);
-                     } else {
+                    } else {
                         $scope.availableProperties.push(property);
                     }
-				}
-				
+                }
+
+                for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
+                    var property = $scope.propertiesAddedToProcessor[i];
+                    if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit" ||  property.name === "useFileSystem") {
+                            $scope.propertiesAddedToProcessor.splice(i, 1);
+                            i--;
+                        }
+                    } else if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER") {
+                        $scope.propertiesAddedToProcessor.splice(i, 1);
+                        i--;
+                    }
+                }
+
             	$scope.propertiesAddedToProcessor.push({
                 	
                     "name":"",
@@ -455,36 +510,80 @@ var rest = myApp.controller(
                     "dynamic":false,
                     "valueProvided":false,
                     "validationRules": {}
-                 });               	
-                
-                for (var i = 0; i < $scope.folderProperties.length; i++) {				     
-					 var property = $scope.folderProperties[i];
-					 if (property.mandatory === true || property.valueProvided === true) {
-                       $scope.folderAddedToProcessor.push(property);
-                   } else {
-                       $scope.folderAvailableProperties.push(property);
-                   }
-				}
-				
-				if ($scope.folderProperties.length > 1) {
-				   $scope.folderAddedToProcessor.push({
-				   
-						  "folderURI": "",
-						  "folderDisplayType": "",
-						  "folderType": "",
-						  "folderDesc": "",
-						  "mandatory": false,
-						  "readOnly":false,
-						  "valueProvided":false,
-						  "validationRules":{}
-					  
-					 });      
-				}
-				$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
+                 });
+                for (var i = 0; i < $scope.folderProperties.length; i++) {
+                    var property = $scope.folderProperties[i];
+                    if (property.mandatory === true || property.valueProvided === true) {
+                        $scope.folderAddedToProcessor.push(property);
+                    } else {
+                        $scope.folderAvailableProperties.push(property);
+                    }
+                }
+            	
+            	if ($scope.folderProperties.length > 1) {
+                    $scope.folderAddedToProcessor.push({
+                        "folderURI": "",
+                        "folderDisplayType": "",
+                        "folderType": "",
+                        "folderDesc": "",
+                        "mandatory": false,
+                        "readOnly":false,
+                        "valueProvided":false,
+                        "validationRules":{}
+                    });
+                }
+                $scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 };
-			}
+            }
+
+            $scope.editProcAfterDirectSubmit = function(data, profData, processorId, blockuiFlag) {
+
+                $scope.processorData = $scope.editProcessorData;
+
+                $scope.propertiesAddedToProcessor = [];
+                $scope.availableProperties = [];
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
+
+                for (var i = 0; i < $scope.staticProperties.length; i++) {
+                    var property = $scope.staticProperties[i];
+                    if (property.mandatory === true || property.valueProvided === true) {
+                        if (property.name === "pipeLineID") {
+                            property.value = $rootScope.pipelineId;
+                        }
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else {
+                        $scope.availableProperties.push(property);
+                    }
+                }
+
+                for (var i=0; i < $scope.propertiesAddedToProcessor.length; i++) {
+                    var property = $scope.propertiesAddedToProcessor[i];
+                    if ($scope.procsrType.value === "REMOTEDOWNLOADER" && !$scope.isDirectSubmit) {
+                        if (property.name === "pipeLineID" || property.name === "securedPayload" || property.name === "lensVisibility" || property.name === "directSubmit" || property.name === "useFileSystem") {
+                            $scope.propertiesAddedToProcessor.splice(i, 1);
+                            i--;
+                        }
+                    } else if (property.name === "directSubmit" && $scope.procsrType.value === "REMOTEDOWNLOADER" ) {
+                        $scope.propertiesAddedToProcessor.splice(i, 1);
+                        i--;
+                    }
+                }
+
+                $scope.propertiesAddedToProcessor.push({
+
+                    "name":"",
+                    "displayName" : "",
+                    "value":"",
+                    "type":"textarea",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": {}
+                 });
+            }
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
 				$scope.restService.get(url,
@@ -539,18 +638,20 @@ var rest = myApp.controller(
                         $scope.block.unblockUI();
                         if (status === 200) {
     						$scope.scriptIsEdit = false;
+                            $scope.downloaderData = data;
     						if (data.getProcessorResponse.processor.javaScriptURI != null && 
     						data.getProcessorResponse.processor.javaScriptURI != "") {
     						$scope.scriptIsEdit = true;
     						}
     						//To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
     						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type, data.getProcessorResponse.processor.clusterType);
-    						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
+    						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
     						
                             //Fix: Reading profile in procsr callback
                             $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                                 function (profData) {
                                     
+                                        $scope.profileData = profData;
     									var editProcessor = false;
     									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
     										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
@@ -680,7 +781,13 @@ var rest = myApp.controller(
 					     && (property.valueProvided === true || property.mandatory === true)) {
 				    	 $scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				    	 
 				    }					
-                }				
+                }
+                
+            	if ($scope.procsrType.value === "REMOTEDOWNLOADER") {
+                    $scope.directSubmit.value = $scope.isDirectSubmit;
+                    $scope.processor.processorPropertiesInTemplateJson.staticProperties.push($scope.directSubmit);
+                }
+                
 				//add folder properties
 				for (var i = 0; i < $scope.folderAddedToProcessor.length; i++) {
 				     var property = $scope.folderAddedToProcessor[i];
@@ -1190,6 +1297,8 @@ var rest = myApp.controller(
 			};
 			
 			$scope.resetProcessorType = function(proceesorType) {
+
+                $scope.showDirectSubmit = false;
 			    $scope.selectedProcessorType = proceesorType.value;
 			    $scope.initialSetUp();
 			    $scope.clearOldLoginDetails();
@@ -1347,35 +1456,69 @@ var rest = myApp.controller(
 				 }
               	 switch ($scope.selectedProcessorType) {
 				   case "REMOTEDOWNLOADER":
+                       $scope.showDirectSubmit = true;
 				       switch (protocalName) {
 							case "SFTP":
-								$rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
-								  $scope.separateProperties(data.processorDefinition.staticProperties);
-								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-								});
+								if ($scope.isDirectSubmit) {
+									$rootScope.restService.get('data/processor/properties/sftpdownloaderwithsweeper.json', function (data) {					
+										$scope.separateProperties(data.processorDefinition.staticProperties);
+										$scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										$scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								} else {
+									$rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
+										$scope.separateProperties(data.processorDefinition.staticProperties);
+										$scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										$scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								}	
 								break;
-							case "FTP":					  
-								$rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
-								  $scope.separateProperties(data.processorDefinition.staticProperties);
-								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-								});
+							case "FTP":
+								if ($scope.isDirectSubmit) {
+									$rootScope.restService.get('data/processor/properties/ftpdownloaderwithsweeper.json', function (data) {						
+										$scope.separateProperties(data.processorDefinition.staticProperties);
+										$scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										$scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								} else {
+									$rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
+										$scope.separateProperties(data.processorDefinition.staticProperties);
+										$scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										$scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								}								
 								break;
-							case "FTPS":				
-								$rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
-								  $scope.separateProperties(data.processorDefinition.staticProperties);
-								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-								});
+							case "FTPS":
+								if ($scope.isDirectSubmit) {
+									$rootScope.restService.get('data/processor/properties/ftpsdownloaderwithsweeper.json', function (data) {							
+										  $scope.separateProperties(data.processorDefinition.staticProperties);
+										  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+										});
+								} else {
+									$rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
+										  $scope.separateProperties(data.processorDefinition.staticProperties);
+										  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								}
 								break;
 							case "HTTP":
 							case "HTTPS":
-								 $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {
-								  $scope.separateProperties(data.processorDefinition.staticProperties);
-								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-								});
+								if ($scope.isDirectSubmit) {
+									$rootScope.restService.get('data/processor/properties/httpdownloaderwithsweeper.json', function (data) {
+										  $scope.separateProperties(data.processorDefinition.staticProperties);
+										  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+										});
+								} else {
+									$rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {
+										  $scope.separateProperties(data.processorDefinition.staticProperties);
+										  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+										  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+									});
+								}
+								 
 								break;
 							default:	
 							   break;
@@ -1424,15 +1567,14 @@ var rest = myApp.controller(
                 $scope.showTruststoreSection = (protocalName === "FTPS" || protocalName === "HTTPS") ? true : false;
                 $scope.showSSHKeysSection = (protocalName === "SFTP") ? true : false; 
                 $scope.$broadcast("resetCredentialSection");				
-			};			
+			};
 			
             $scope.separateProperties = function(jsonProperties) {
-            	
                 for (var i = 0; i < jsonProperties.length; i++) {
                     var property = jsonProperties[i];
-                   if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
+                    if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
                         $scope.propertiesAddedToProcessor.push(property);
-                    } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)){
+                    } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)) {
                         $scope.availableProperties.push(property);
                     }
                 }

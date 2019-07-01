@@ -10,6 +10,9 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
@@ -301,4 +304,41 @@ public interface ProcessorJavascriptI extends MailBoxProcessorI {
      * @Param e      Exception
      */
     void logToLens(String msg, RelayFile file, ExecutionState status, Exception e);
+
+    /**
+     * Method to sweep file after downloading file in payload location.
+     * 
+     * @param file        Downloaded file 
+     * @return GlobalprocessorId
+     */
+    String sweepFile(File file);
+
+    /**
+     * Sweep the file
+     * @param sftpClient
+     * @return gpid
+     */
+    String sweepFile(G2SFTPClient sftpClient, String fileName);
+
+    /**
+     * Sweep the file
+     * @param sftpClient
+     * @return gpid
+     */
+    String sweepFile(G2FTPSClient sftpClient, String fileName);
+
+    /**
+     * Method to sweep files after downloading files in payload location
+     * 
+     * @param fileList   Downloaded Files
+     * @return GlobalprocessorIds
+     */
+    String[] sweepFiles(File[] fileList);
+
+    /**
+     * Sweep the file
+     * @param httpRequest
+     * @return gpid
+     */
+    String sweepFile(HTTPRequest httpRequest, String fileName);
 }

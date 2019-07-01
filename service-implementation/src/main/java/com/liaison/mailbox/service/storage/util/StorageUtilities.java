@@ -201,6 +201,7 @@ public class StorageUtilities {
      * @param httpListenerProperties additional properties
      * @param isDropbox              boolean to denote the use case
      * @return meta snapshot
+     * @throws IOException 
      */
     public static FS2MetaSnapshot persistPayload(InputStream payload, WorkTicket workTicket,
                                                  Map<String, String> httpListenerProperties, boolean isDropbox) {
@@ -231,7 +232,7 @@ public class StorageUtilities {
             URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
 
             // fetch the metdata includes payload size
-            FS2MetaSnapshot metaSnapshot;
+            FS2MetaSnapshot metaSnapshot = null;
             try {
                 metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, payload);
                 LOGGER.debug("Time spent on uploading file {} of size {} to fs2 storage only is {} ms",
@@ -255,12 +256,45 @@ public class StorageUtilities {
     }
 
     /**
+     * A helper method to persist the payload into spectrum(secure/unsecure)/boss(secure/unsecure) and file system.
+     *
+     * @param workTicket             wokticket
+     * @param httpListenerProperties additional properties
+     * @return meta snapshot
+     */
+    public static OutputStream getPayloadOutputStream(WorkTicket workTicket, Map<String, String> httpListenerProperties) {
+
+        try {
+
+            String globalProcessorId = workTicket.getGlobalProcessId();
+            boolean isSecure = Boolean.parseBoolean(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
+
+            FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+
+            String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
+            // persists the message in spectrum.
+            LOGGER.debug("Persist the payload **");
+            URI requestUri = createPayloadURI(uri, isSecure, httpListenerProperties.get(MailBoxConstants.STORAGE_IDENTIFIER_TYPE));
+            // fetch the metdata includes payload size
+            FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, generateFS2Options(workTicket), fs2Header, null);;
+            workTicket.setPayloadURI(metaSnapshot.getURI().toString());
+            return FS2.getFS2PayloadOutputStream(metaSnapshot.getURI(), false);
+        } catch (FS2ObjectAlreadyExistsException e) {
+            LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
+        } catch (FS2Exception e) {
+            LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+            throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
      *
      * @param workTicket workticket
      * @param properties properties
      */
-    public static void persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
+    public static String persistWorkTicket(WorkTicket workTicket, Map<String, String> properties) {
 
         try {
 
@@ -294,6 +328,7 @@ public class StorageUtilities {
             }
 
             LOGGER.debug("Successfully persisted the workticket in spectrum to url {} ", requestUri);
+            return metaSnapshot.getURI().toString();
 
         } catch (FS2ObjectAlreadyExistsException e) {
             LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);

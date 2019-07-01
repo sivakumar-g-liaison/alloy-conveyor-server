@@ -12,8 +12,10 @@ package com.liaison.mailbox.service.core.processor;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.scripting.javascript.ScriptExecutionEnvironment;
-import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.mailbox.MailBoxConstants;
@@ -40,9 +42,13 @@ import com.liaison.mailbox.service.dto.GlassMessageDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
@@ -51,10 +57,12 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.glass.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.glass.util.MailboxGlassMessageUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -62,9 +70,10 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -74,14 +83,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.Comparator;
-import java.util.Date;
 
 import static com.liaison.mailbox.MailBoxConstants.FTP;
 import static com.liaison.mailbox.MailBoxConstants.FTPS;
@@ -408,16 +417,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws IOException
      */
     public void writeResponseToMailBox(ByteArrayOutputStream response) throws IOException, MailBoxServicesException {
-
-        LOGGER.debug("Started writing response");
-        String processorName = MailBoxConstants.PROCESSOR;
-        if (configurationInstance.getProcsrName() != null) {
-            processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
-        }
-        String fileName = processorName + System.nanoTime();
-
-        writeResponseToMailBox(response, fileName);
-
+        throw new RuntimeException("Not Implemented");
     }
 
     /**
@@ -426,27 +426,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @throws MailBoxServicesException
      * @throws IOException
      */
-    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename)
-            throws IOException, MailBoxServicesException {
-
-        LOGGER.debug("Started writing response");
-        String responseLocation = getWriteResponseURI();
-
-        if (MailBoxUtil.isEmpty(responseLocation)) {
-            throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
-        }
-
-        File directory = new File(responseLocation);
-        if (!directory.exists()) {
-            Files.createDirectories(directory.toPath());
-        }
-
-        File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-        Files.write(file.toPath(), response.toByteArray());
-        LOGGER.info("Response is successfully written" + file.getAbsolutePath());
-        if (response != null) {
-            response.close();
-        }
+    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException, MailBoxServicesException {
+    	throw new RuntimeException("Not Implemented");
     }
 
     /**
@@ -1144,7 +1125,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
      * @param state Execution Status
      */
     protected void logToLens(WorkTicket wrkTicket, ExecutionTimestamp firstCornerTimeStamp, ExecutionState state, Date date) {
-         String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
+        String filePath = wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_FOLDER_NAME).toString();
         StringBuilder message;
         if (ExecutionState.VALIDATION_ERROR.equals(state)) {
             message = new StringBuilder().append("File size is empty ").append(filePath).append(", and empty files are not allowed");
@@ -1173,9 +1154,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
 
     /**
      * This Method create local folders if not available and returns the path.
-     *
-     * @param processorDTO it have details of processor
-     *
      */
     @Override
     public String createLocalPath() {
@@ -1272,5 +1250,125 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI, ScriptE
             this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
         }
         return pipelineId;
+    }
+
+    /**
+     * Method to use single file sweeps to storage utilities and also post workticket to service broker queue
+     * 
+     * @param file downloaded File
+     */
+    @Override
+    public String sweepFile(File file) {
+
+        LOGGER.info("Post the file to Sweeper Event Queue");
+        SweeperEventRequestDTO sweeperEventRequestDTO;
+        try {
+            StaticProcessorPropertiesDTO dto = getProperties();
+            if (dto instanceof SFTPDownloaderPropertiesDTO) {
+                SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType());
+            } else if (dto instanceof FTPDownloaderPropertiesDTO) {
+                FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType());
+            } else if (dto instanceof HTTPDownloaderPropertiesDTO) {
+                HTTPDownloaderPropertiesDTO staticProp = (HTTPDownloaderPropertiesDTO) dto;
+                sweeperEventRequestDTO = getSweeperEventRequestDTO(file,
+                        staticProp.isLensVisibility(),
+                        staticProp.getPipeLineID(),
+                        staticProp.isSecuredPayload(),
+                        staticProp.getContentType());
+            } else {
+                throw new RuntimeException("Invalid property type");
+            }
+
+            SweeperEventSendQueue.post(JAXBUtility.marshalToJSON(sweeperEventRequestDTO));
+        } catch (Throwable e) {
+            String msg = "Failed to sweeper the file " + file.getName() + " and the error message is " + e.getMessage();
+            throw new RuntimeException(msg);
+        }
+        return sweeperEventRequestDTO.getGlobalProcessId();
+    }
+
+    /**
+     * Method to use list of downloaded files sweeps to storage Utilities and also post the worktickets to service broker queue
+     * 
+     * @param files  downloaded files
+     */
+    @Override
+    public String[] sweepFiles(File[] files) {
+        List<String> globalProcessorIds = new ArrayList<>();
+        for (File file : files) {
+            // sweep each file and add global processorIds.
+            globalProcessorIds.add(sweepFile(file));
+        }
+        return globalProcessorIds.toArray(new String[0]);
+    }
+
+    @Override
+    public String sweepFile(G2SFTPClient sftpClient, String fileName) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    @Override
+    public String sweepFile(G2FTPSClient sftpClient, String fileName) {
+        throw new RuntimeException("Not Implemented");
+    }
+    
+    @Override
+    public String sweepFile(HTTPRequest httpRequest, String fileName) {
+    	throw new RuntimeException("Not Implemented");
+    }
+
+    private SweeperEventRequestDTO getSweeperEventRequestDTO(File file,
+                                                     boolean lensVisibility,
+                                                     String pipelineId,
+                                                     boolean securePayload,
+                                                     String contentType) {
+
+        return getSweeperEventRequestDTO(file.getName(),
+                file.getParent(),
+                file.length(),
+                file.lastModified(),
+                lensVisibility,
+                pipelineId,
+                securePayload,
+                contentType);
+    }
+
+    protected SweeperEventRequestDTO getSweeperEventRequestDTO(String fileName,
+                                                               String filePath,
+                                                               long size,
+                                                               long modifiedTime,
+                                                               boolean lensVisibility,
+                                                               String pipelineId,
+                                                               boolean securePayload,
+                                                               String contentType) {
+
+        SweeperEventRequestDTO sweeperEventRequestDTO = new SweeperEventRequestDTO();
+        sweeperEventRequestDTO.setLensVisibility(lensVisibility);
+        sweeperEventRequestDTO.setPipeLineID(pipelineId);
+        sweeperEventRequestDTO.setSecuredPayload(securePayload);
+        sweeperEventRequestDTO.setContentType(contentType);
+        sweeperEventRequestDTO.setMailBoxId(configurationInstance.getMailbox().getPguid());
+        sweeperEventRequestDTO.setProcessorId(configurationInstance.getPguid());
+        sweeperEventRequestDTO.setTtlMap(configurationInstance.getTTLUnitAndTTLNumber());
+        sweeperEventRequestDTO.setGlobalProcessId(MailBoxUtil.getGUID());
+        sweeperEventRequestDTO.setStorageType(MailBoxUtil.getStorageType(configurationInstance.getDynamicProperties()));
+        sweeperEventRequestDTO.setFileName(fileName);
+        sweeperEventRequestDTO.setFilePath(filePath);
+        sweeperEventRequestDTO.setSize(size);
+        sweeperEventRequestDTO.setModifiedTime(new ISO8601Util().fromDate(new Date(modifiedTime)));
+        sweeperEventRequestDTO.setProcessorType(configurationInstance.getProcessorType().name());
+        sweeperEventRequestDTO.setProtocol(configurationInstance.getProcsrProtocol());
+        sweeperEventRequestDTO.setCategory(getCategory());
+        return sweeperEventRequestDTO;
     }
 }

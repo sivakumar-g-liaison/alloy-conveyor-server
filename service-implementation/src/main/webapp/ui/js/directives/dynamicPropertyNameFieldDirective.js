@@ -55,6 +55,9 @@ angular.module(
                     if (property === null || typeof property === 'undefined') {
                         return;
                     }
+                    if (property.name === "pipeLineID") {
+                        property.value = $rootScope.pipelineId;
+                    }
                     if (property.name === "add new -->") {
                         scope.showAddNewComponent.value = true;
                         document.getElementById("addNewText").value = "";

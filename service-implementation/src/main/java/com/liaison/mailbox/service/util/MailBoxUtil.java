@@ -21,13 +21,17 @@ import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.LiteHTTPPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import com.netflix.config.ConfigurationManager;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -40,6 +44,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -612,7 +617,8 @@ public class MailBoxUtil {
                     DROPBOXPROCESSOR.equals(processorType)) {
                 pipelineId = propertiesDTO.getHttpListenerPipeLineId();
             } else if (SWEEPER.equals(processorType) ||
-                    CONDITIONALSWEEPER.equals(processorType)) {
+                    CONDITIONALSWEEPER.equals(processorType) ||
+                    REMOTEDOWNLOADER.equals(processorType) && propertiesDTO.isDirectSubmit()) {
                 pipelineId = propertiesDTO.getPipeLineID();
             } else {
                 return;
@@ -629,7 +635,29 @@ public class MailBoxUtil {
         } else if (obj instanceof SweeperPropertiesDTO) {
             SweeperPropertiesDTO sweeperPropDTO = (SweeperPropertiesDTO) obj;
             pipelineId = sweeperPropDTO.getPipeLineID();
-        } else {
+        } else if (obj instanceof SFTPDownloaderPropertiesDTO) {
+            SFTPDownloaderPropertiesDTO sftpDownloaderDTO = (SFTPDownloaderPropertiesDTO) obj;
+            if (sftpDownloaderDTO.isDirectSubmit()) { 
+                pipelineId = sftpDownloaderDTO.getPipeLineID(); 
+            } else {
+                return; 
+            }
+        } else if (obj instanceof FTPDownloaderPropertiesDTO) {
+            FTPDownloaderPropertiesDTO ftpDownloaderPropertiesDTO = (FTPDownloaderPropertiesDTO) obj;
+            if (ftpDownloaderPropertiesDTO.isDirectSubmit()) {
+                pipelineId = ftpDownloaderPropertiesDTO.getPipeLineID();	
+            } else {
+                return;
+            }
+        } else if (obj instanceof HTTPDownloaderPropertiesDTO) {
+            HTTPDownloaderPropertiesDTO httpDownloaderPropertiesDTO = (HTTPDownloaderPropertiesDTO) obj;
+       	    if (httpDownloaderPropertiesDTO.isDirectSubmit()) {
+                pipelineId = httpDownloaderPropertiesDTO.getPipeLineID();
+            } else {
+                return;
+            }
+        }
+        else {
             return;
         }
 

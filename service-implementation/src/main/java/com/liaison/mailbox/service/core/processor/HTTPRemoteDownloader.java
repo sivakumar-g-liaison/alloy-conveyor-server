@@ -11,18 +11,23 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.SweeperEventExecutionService;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -36,12 +41,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
+import static com.liaison.mailbox.MailBoxConstants.UNDERSCORE;
+import static com.liaison.mailbox.MailBoxConstants.TEXT_FILE_EXTENSION;
+
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods
@@ -53,6 +61,8 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     private static final Logger LOGGER = LogManager.getLogger(HTTPRemoteDownloader.class);
 
+    private HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties;
+
     @SuppressWarnings("unused")
     private HTTPRemoteDownloader() {
         // to force creation of instance only by passing the processor entity
@@ -60,6 +70,11 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     public HTTPRemoteDownloader(Processor processor) {
         super(processor);
+        try {
+            httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
         // this.configurationInstance = processor;
     }
 
@@ -108,8 +123,6 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             if (MailBoxConstants.POST.equals(request.getMethod())
                     || MailBoxConstants.PUT.equals(request.getMethod())) {
 
-                HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
-
                 files = getFilesToUpload(false);
                 if (null != files) {
 
@@ -142,9 +155,14 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     LOGGER.info(constructMessage("The given HTTP downloader payload URI is Empty."));
                 }
             } else {
-                response = request.execute();
-                writeResponseToMailBox(responseStream);
-                totalNumberOfProcessedFiles++;
+                if (!httpDownloaderStaticProperties.isUseFileSystem() && httpDownloaderStaticProperties.isDirectSubmit()) {
+                    String processorName = configurationInstance.getProcsrName().replaceAll(" ", "") + UNDERSCORE + System.nanoTime() + TEXT_FILE_EXTENSION;
+                    sweepFile(request, processorName);
+                } else {
+                    response = request.execute();
+                    writeResponseToMailBox(responseStream);
+                    totalNumberOfProcessedFiles++;
+                }
             }
             // to calculate the elapsed time for processing files
             long endTime = System.currentTimeMillis();
@@ -152,8 +170,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-        } catch (MailBoxServicesException | IOException | LiaisonException |
-                IllegalAccessException e) {
+        } catch (MailBoxServicesException | IOException | LiaisonException e) {
             LOGGER.error(constructMessage("Error occurred during http(s) download", seperator, e.getMessage()), e);
             throw new RuntimeException(e);
         }
@@ -263,6 +280,94 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * call back method to write the response back to MailBox from JS
+     *
+     * @throws MailBoxServicesException
+     * @throws IOException
+     */
+    public void writeResponseToMailBox(ByteArrayOutputStream response) throws IOException, MailBoxServicesException {
+
+        LOGGER.debug("Started writing response");
+        String processorName = MailBoxConstants.PROCESSOR;
+        if (configurationInstance.getProcsrName() != null) {
+            processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
+        }
+        String fileName = processorName + System.nanoTime();
+
+        writeResponseToMailBox(response, fileName);
+    }
+
+    /**
+     * call back method to write the file response back to MailBox from JS
+     *
+     * @throws MailBoxServicesException
+     * @throws IOException
+     */
+    public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws IOException {
+
+        try {
+
+            LOGGER.debug("Started writing response");
+            String responseLocation = getWriteResponseURI();
+
+            if (MailBoxUtil.isEmpty(responseLocation)) {
+                throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
+            }
+
+            File directory = new File(responseLocation);
+            if (!directory.exists()) {
+                Files.createDirectories(directory.toPath());
+            }
+
+            File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
+            Files.write(file.toPath(), response.toByteArray());
+            LOGGER.info("Response is successfully written" + file.getAbsolutePath());
+
+            // async sweeper process if direct submit is true.
+            if (httpDownloaderStaticProperties.isDirectSubmit()) {
+                // sweep single file process to SB queue
+                String globalProcessorId = sweepFile(file);
+                LOGGER.info("File posted to sweeper event queue and the Global Process Id {}", globalProcessorId);
+            }
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+    }
+
+    @Override
+    public String sweepFile(HTTPRequest httpRequest, String fileName) {
+
+        SweeperEventExecutionService service = new SweeperEventExecutionService();
+
+        try {
+
+            SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
+                    getWriteResponseURI(),
+                    -1L,
+                    -1L,
+                    httpDownloaderStaticProperties.isLensVisibility(),
+                    httpDownloaderStaticProperties.getPipeLineID(),
+                    httpDownloaderStaticProperties.isSecuredPayload(),
+                    httpDownloaderStaticProperties.getContentType());
+
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,null, httpRequest, fileName);
+            if (Response.Status.fromStatusCode(statusCode).getFamily() != Response.Status.Family.SUCCESSFUL) {
+                throw new RuntimeException("File download status is not successful - " + statusCode);
+            }
+            SweeperQueueSendClient.post(JAXBUtility.marshalToJSON(workTicket), false);
+            service.logToLens(workTicket, sweeperEventRequestDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
+
+            return sweeperEventRequestDTO.getGlobalProcessId();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

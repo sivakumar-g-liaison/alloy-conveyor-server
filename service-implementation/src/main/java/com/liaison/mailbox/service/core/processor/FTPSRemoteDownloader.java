@@ -9,34 +9,35 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.SweeperEventExecutionService;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.SweeperEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.util.DirectoryCreationUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.core.Response;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * FTPS remote downloader to perform pull operation, also it has support methods
@@ -52,6 +53,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * Required for JS
      */
     private G2FTPSClient ftpsClient;
+    private FTPDownloaderPropertiesDTO staticProp;
 
     @SuppressWarnings("unused")
     private FTPSRemoteDownloader() {
@@ -59,6 +61,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
     public FTPSRemoteDownloader(Processor processor) {
         super(processor);
+        try {
+            staticProp = (FTPDownloaderPropertiesDTO) getProperties();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
@@ -128,8 +135,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-        } catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
-                | URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
+        } catch (LiaisonException | IOException | MailBoxServicesException
+                | IllegalAccessException e) {
 
             LOGGER.error(constructMessage("Error occurred during ftp(s) download", seperator, e.getMessage()), e);
             throw new RuntimeException(e);
@@ -145,22 +152,18 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
      * @throws IOException
      * @throws LiaisonException
      * @throws com.liaison.commons.exception.LiaisonException
-     * @throws JAXBException
-     * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws SftpException
      *
      */
     public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-            LiaisonException, URISyntaxException, MailBoxServicesException, NoSuchFieldException,
-            SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+            LiaisonException, MailBoxServicesException,
+            SecurityException, IllegalArgumentException {
 
         //variable to hold the status of file download request execution
         int statusCode = 0;
         String dirToList = "";
-        FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) getProperties();
+        String globalProcessorId;
 
         if (!currentDir.equals("")) {
             dirToList += currentDir;
@@ -197,6 +200,15 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                             + statusIndicator : currentFileName;
                     String localDir = localFileDir + File.separatorChar + downloadingFileName;
                     ftpClient.changeDirectory(dirToList);
+
+                    //download and sweep the file use stream when filesystem set as false and direct submit is true
+                    if (!staticProp.isUseFileSystem() && staticProp.isDirectSubmit()) {
+                        LOGGER.info("Sweep and Post the file to Service Broker using stream without placing the file in NFS");
+                        globalProcessorId = sweepFile(ftpClient, downloadingFileName);
+                        LOGGER.info("File posted to service broker and the Global Process Id {}", globalProcessorId);
+                        totalNumberOfProcessedFiles++;
+                        continue;
+                    }
                     createResponseDirectory(localDir);
 
                     try {// GSB-1337,GSB-1336
@@ -239,6 +251,12 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                         if (staticProp.getDeleteFiles()) {
                             ftpClient.deleteFile(file.getName());
                             LOGGER.info(constructMessage("File {} deleted successfully in the remote location"), currentFileName);
+                        }
+                        if (staticProp.isDirectSubmit()) {
+                            // async sweeper process if direct submit is true.
+                            // sweep the file using event queue when direct submit is true & filesystem is true
+                            globalProcessorId = sweepFile(new File(localFileDir + File.separatorChar + currentFileName));
+                            LOGGER.info("File posted to sweeper event queue and the Global Process Id {}",globalProcessorId);
                         }
                     }
 
@@ -296,5 +314,69 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
         }
 
+    }
+
+    @Override
+    public String sweepFile(G2FTPSClient ftpsClient, String fileName) {
+
+        LOGGER.info("Sweep and Post the file to Service Broker");
+        SweeperEventExecutionService service = new SweeperEventExecutionService();
+
+        try {
+
+            FTPFile ftpFile = getFTPFile(ftpsClient, fileName);
+            long fileModifiedTime = (ftpFile != null && ftpFile.getTimestamp() != null) ? ftpFile.getTimestamp().getTimeInMillis() : 0;
+            long fileSize = (ftpFile != null) ? ftpFile.getSize() : -1;
+            SweeperEventRequestDTO sweeperEventRequestDTO = getSweeperEventRequestDTO(fileName,
+                    ftpsClient.getNative().printWorkingDirectory(),
+                    fileSize,
+                    fileModifiedTime,
+                    staticProp.isLensVisibility(),
+                    staticProp.getPipeLineID(),
+                    staticProp.isSecuredPayload(),
+                    staticProp.getContentType());
+
+            WorkTicket workTicket = service.getWorkTicket(sweeperEventRequestDTO);
+            int statusCode = service.persistPayloadAndWorkticket(workTicket, sweeperEventRequestDTO, null,ftpsClient, null, fileName);
+            if (statusCode != MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK
+                    && statusCode != MailBoxConstants.CLOSING_DATA_CONNECTION) {
+                throw new RuntimeException("File download status is not successful - " + statusCode);
+            }
+
+            String workTicketToSb = JAXBUtility.marshalToJSON(workTicket);
+            SweeperQueueSendClient.post(workTicketToSb, false);
+            // Delete the remote files after successful download if user optioned for it
+            if (staticProp.getDeleteFiles()) {
+                ftpsClient.deleteFile(fileName);
+                LOGGER.info("File {} deleted successfully in the remote location", fileName);
+            }
+
+            service.logToLens(workTicket, sweeperEventRequestDTO);
+            LOGGER.info("Global PID : {} submitted for file {}", workTicket.getGlobalProcessId(), workTicket.getFileName());
+            return sweeperEventRequestDTO.getGlobalProcessId();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+    }
+
+    /**
+     *  Hack to get file size and modification time in the single ftp command
+     * @param client
+     * @param fileName
+     * @return
+     */
+    private FTPFile getFTPFile(G2FTPSClient client, String fileName) {
+
+        try {
+
+            FTPClient ftpClient = client.getNative();
+            //Assumption there would be only one file
+            FTPFile[] files = ftpClient.listFiles(fileName);
+            return files[0];
+        } catch (IOException e) {
+            LOGGER.error("Unable to get modified time", e);
+            return null;
+        }
     }
 }
