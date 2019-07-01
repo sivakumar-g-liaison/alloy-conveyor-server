@@ -16,6 +16,8 @@ import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableException;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
@@ -32,6 +34,7 @@ import com.liaison.mailbox.service.queue.sender.SweeperEventSendQueue;
 import com.liaison.mailbox.service.queue.sender.SweeperQueueSendClient;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -40,6 +43,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,16 +57,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.KEY_PROCESSOR_ID;
-import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_DELAY;
-import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_RETRY_MAX_COUNT;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_DELAY;
+import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_MAX_RETRY_COUNT;
 
 public class SweeperEventExecutionService implements Runnable {
 
     private String message;
     private static final Logger LOGGER = LogManager.getLogger(SweeperEventExecutionService.class);
-
-    private static final Long SWEEPER_EVENT_DELAY = MailBoxUtil.getEnvironmentProperties().getLong(SWEEPER_EVENT_RETRY_DELAY, 60000);
-    private static final int SWEEPER_EVENT_MAX_RETRY_COUNT = MailBoxUtil.getEnvironmentProperties().getInt(SWEEPER_EVENT_RETRY_MAX_COUNT, 10);
 
     public SweeperEventExecutionService() {
     }
@@ -96,7 +97,7 @@ public class SweeperEventExecutionService implements Runnable {
             globalProcessorId = workTicket.getGlobalProcessId();
             LOGGER.info("Workticket Constructed and Global Processor ID is {}" , globalProcessorId);
             try {
-                persistPayloadAndWorkticket(workTicket, sweeperEventDTO, null, null, null);
+                persistPayloadAndWorkticket(workTicket, sweeperEventDTO, null, null, null, null);
             } catch (Exception e) {
                 try {
                     //replacing the guid since sometimes payload can be persisted half and failed
@@ -191,6 +192,7 @@ public class SweeperEventExecutionService implements Runnable {
                                              SweeperEventRequestDTO sweeperEventRequestDTO,
                                              G2SFTPClient sftpClient,
                                              G2FTPSClient g2FTPSClient,
+                                             HTTPRequest httpRequest,
                                              String fileName) throws IOException, LiaisonException {
 
         Map<String, String> properties = getProperties(workTicket, sweeperEventRequestDTO);
@@ -205,6 +207,11 @@ public class SweeperEventExecutionService implements Runnable {
             } else if (null != g2FTPSClient) {
                 outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
                 statusCode = g2FTPSClient.getFile(fileName, outputStream);
+            } else if (null != httpRequest) {
+                outputStream = StorageUtilities.getPayloadOutputStream(workTicket, properties);
+                httpRequest.setOutputStream(outputStream);
+                HTTPResponse response = httpRequest.execute();
+                statusCode = response.getStatusCode();
             } else {
                 //payloadToPersist is closed in the StorageUtilities
                 File payloadFile = new File(sweeperEventRequestDTO.getFilePath() + File.separatorChar + sweeperEventRequestDTO.getFileName());
