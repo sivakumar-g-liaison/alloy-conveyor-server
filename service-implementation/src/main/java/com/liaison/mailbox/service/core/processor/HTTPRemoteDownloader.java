@@ -47,7 +47,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.liaison.mailbox.MailBoxConstants.BYTE_ARRAY_INITIAL_SIZE;
-import static com.liaison.mailbox.MailBoxConstants.UNDER_SCORE;
+import static com.liaison.mailbox.MailBoxConstants.UNDERSCORE;
 import static com.liaison.mailbox.MailBoxConstants.TEXT_FILE_EXTENSION;
 
 
@@ -156,7 +156,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
                 }
             } else {
                 if (!httpDownloaderStaticProperties.isUseFileSystem() && httpDownloaderStaticProperties.isDirectSubmit()) {
-                    String processorName = configurationInstance.getProcsrName().replaceAll(" ", "") + UNDER_SCORE + System.nanoTime() + TEXT_FILE_EXTENSION;
+                    String processorName = configurationInstance.getProcsrName().replaceAll(" ", "") + UNDERSCORE + System.nanoTime() + TEXT_FILE_EXTENSION;
                     sweepFile(request, processorName);
                 } else {
                     response = request.execute();
