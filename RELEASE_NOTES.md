@@ -1,4 +1,8 @@
-5.7.0-SNAPSHOT
+5.7.1
+---------------
+* GMB-1217 - Add direct submit from remote downloader - Legacy Relay Queue
+
+5.7.0
 ---------------
 * Added SSO properties for qa-stage, at4s/u/p, px1s/u/p, ld1/u/p, he2/u/p
 * GMB-1228 - Sweeper is pulling the same file at least twice
