@@ -1,6 +1,7 @@
 5.7.1
 ---------------
 * GMB-1217 - Add direct submit from remote downloader - Legacy Relay Queue
+* GMB-1231 - Mailbox name does not allow underscore but no error will alert you about it
 
 5.7.0
 ---------------
