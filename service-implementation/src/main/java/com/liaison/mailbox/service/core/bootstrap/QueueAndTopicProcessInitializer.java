@@ -15,30 +15,14 @@ import com.liaison.commons.messagebus.kafka.BroadcastConsumer;
 import com.liaison.commons.messagebus.kafka.LiaisonConsumerManager;
 import com.liaison.commons.messagebus.queue.LiaisonConsumer;
 import com.liaison.commons.messagebus.queue.QueuePooledListenerContainer;
-import com.liaison.commons.messagebus.topic.TopicPooledListenerContainer;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
 import com.liaison.mailbox.service.module.GuiceInjector;
-import com.liaison.mailbox.service.queue.consumer.FileStageReplicationRetryQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.InboundFileQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.MailboxProcessorQueueProcessor;
 import com.liaison.mailbox.service.queue.consumer.MailboxQueuePooledListenerContainer;
-import com.liaison.mailbox.service.queue.consumer.SweeperEventQueueConsumer;
-import com.liaison.mailbox.service.queue.consumer.RunningProcessorRetryQueueConsumer;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxQueueProcessor;
-import com.liaison.mailbox.service.queue.consumer.UserManagementToRelayDirectoryQueueProcessor;
-import com.liaison.mailbox.service.queue.kafka.processor.FileStageReplicationRetry;
-import com.liaison.mailbox.service.queue.kafka.processor.InboundFile;
-import com.liaison.mailbox.service.queue.kafka.processor.Mailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.RunningProcessorRetry;
 import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToDropbox;
-import com.liaison.mailbox.service.queue.kafka.processor.ServiceBrokerToMailbox;
-import com.liaison.mailbox.service.queue.kafka.processor.UserManagementToRelayDirectory;
 import com.liaison.mailbox.service.thread.pool.AsyncProcessThreadPool;
-import com.liaison.mailbox.service.topic.MailBoxTopicPooledListenerContainer;
-import com.liaison.mailbox.service.topic.consumer.MailBoxTopicMessageConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,34 +34,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.liaison.mailbox.MailBoxConstants.DEPLOYMENT_APP_ID;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX;
+import static com.liaison.mailbox.MailBoxConstants.DROPBOX_QUEUE;
+import static com.liaison.mailbox.MailBoxConstants.SKIP_QUEUE_INITIALIZER;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX;
-import static com.liaison.mailbox.MailBoxConstants.DROPBOX_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.MAILBOX_PROCESSOR_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.MAILBOX_PROCESSED_PAYLOAD_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.TOPIC_POOL_NAME;
-import static com.liaison.mailbox.MailBoxConstants.USERMANAGEMENT_RELAY_DIRECTORY_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.FILE_STAGE_REPLICATON_RETRY;
-import static com.liaison.mailbox.MailBoxConstants.INBOUND_FILE_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.RUNNING_PROCESSOR_RETRY_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.SWEEPER_EVENT_QUEUE;
-import static com.liaison.mailbox.MailBoxConstants.SKIP_QUEUE_INITIALIZER;
-import static com.liaison.mailbox.MailBoxConstants.DEFAULT_THREAD_COUNT;
-import static com.liaison.mailbox.MailBoxConstants.PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM;
-import static com.liaison.mailbox.MailBoxConstants.DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM;
 import static com.liaison.mailbox.MailBoxConstants.availabilityMinHeadRoom;
 
 
@@ -116,268 +76,47 @@ public class QueueAndTopicProcessInitializer {
         }
 
         String deploymentType = configuration.getString(MailBoxConstants.DEPLOYMENT_TYPE, DeploymentType.RELAY.getValue());
-        switch (DeploymentType.valueOf(deploymentType)) {
+        if (DeploymentType.valueOf(deploymentType) == DeploymentType.CONVEYOR) {// Initialize the dropbox queue
+            try {
 
-            case CONVEYOR:
-                // Initialize the dropbox queue
+                logger.info("Starting Dropbox Queue Listener");
+                QueuePooledListenerContainer dropboxQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
+                dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
+                logger.info("Started Dropbox Queue Listener");
+            } catch (Exception e) {
+                logger.warn("Queue listener for Conveyor Server could not be initialized.", e);
+            }
+
+            // Start consuming from Queue Service for different processor types
+            if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
                 try {
+                    Injector injector = GuiceInjector.getInjector();
 
-                    logger.info("Starting Dropbox Queue Listener");
-                    QueuePooledListenerContainer dropboxQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToDropboxQueueProcessor.class, DROPBOX_QUEUE);
-                    dropboxQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started Dropbox Queue Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for Conveyor Server could not be initialized.", e);
-                }
+                    // Service-Broker -> DropBox Worktickets
+                    logger.info("Starting Dropbox Queue Listener with QS integration");
+                    //KafkaTextMessageProcessor serviceBrokerToDropboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToDropbox.class));
 
-                // Start consuming from Queue Service for different processor types
-                if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                    try {
-                        Injector injector = GuiceInjector.getInjector();
+                    // Read topics info from properties
+                    Map<String, List<String>> serviceBrokerToDropboxConsumerTopics = getConsumerTopics(
+                            TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX,
+                            TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES);
 
-                        // Service-Broker -> DropBox Worktickets
-                        logger.info("Starting Dropbox Queue Listener with QS integration");
-                        //KafkaTextMessageProcessor serviceBrokerToDropboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToDropbox.class));
-
-                        // Read topics info from properties
-                        Map<String, List<String>> serviceBrokerToDropboxConsumerTopics = getConsumerTopics(
-                                TOPIC_SERVICE_BROKER_TO_DROPBOX_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_SERVICE_BROKER_TO_DROPBOX_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        //Create a consumer instance, add ProcessorAvailabilityMonitor and start a consumer
+                    //Create a consumer instance, add ProcessorAvailabilityMonitor and start a consumer
                         /*LiaisonKafkaConsumer serviceBrokerToDropboxConsumer = liaisonKafkaConsumerFactory.create(serviceBrokerToDropboxProcessor);
                         serviceBrokerToDropboxConsumer.startConsumer(serviceBrokerToDropboxConsumerTopics);
                         serviceBrokerToDropboxConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                serviceBrokerToDropboxConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, ServiceBrokerToDropbox.class));
+                    startConsumer(asyncProcessThreadPoolProcessorAvailability,
+                            serviceBrokerToDropboxConsumerTopics,
+                            getKafkaTextMessageProcessor(injector, ServiceBrokerToDropbox.class));
 
-                        logger.info("Started Dropbox Queue Listener with QS integration");
+                    logger.info("Started Dropbox Queue Listener with QS integration");
 
-                    } catch (Exception e) {
-                        logger.error("Error when initializing LiaisonKafkaConsumer.", e);
-                        //There's no sense to keep app up and running if a consumer doesn't start
-                        System.exit(1);
-                    }
-                }
-
-                break;
-
-            case RELAY:
-            case LOW_SECURE_RELAY:
-
-                // Initialize processor queue and processedPayload queue
-                try {
-
-                    logger.info("Starting SWEEPER_EVENT_QUEUE Listener");
-                    QueuePooledListenerContainer sweeperEvent = new MailboxQueuePooledListenerContainer(SweeperEventQueueConsumer.class, SWEEPER_EVENT_QUEUE);
-                    sweeperEvent.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started SWEEPER_EVENT_QUEUE Listener");
                 } catch (Exception e) {
-                    logger.error("Queue listener for Sweeper Event Queue could not be initialized.", e);
+                    logger.error("Error when initializing LiaisonKafkaConsumer.", e);
+                    //There's no sense to keep app up and running if a consumer doesn't start
+                    System.exit(1);
                 }
-                
-                try {
-
-                    logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener");
-                    QueuePooledListenerContainer mailboxProcessorQueue = new MailboxQueuePooledListenerContainer(MailboxProcessorQueueProcessor.class, MAILBOX_PROCESSOR_QUEUE);
-                    mailboxProcessorQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for Processor could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-                    QueuePooledListenerContainer mailboxProcessedPayloadQueue = new MailboxQueuePooledListenerContainer(ServiceBrokerToMailboxQueueProcessor.class, MAILBOX_PROCESSED_PAYLOAD_QUEUE);
-                    mailboxProcessedPayloadQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for SB to Relay Server could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-                    TopicPooledListenerContainer mailBoxTopicPooledListenerContainer = new MailBoxTopicPooledListenerContainer(MailBoxTopicMessageConsumer.class, TOPIC_POOL_NAME);
-                    mailBoxTopicPooledListenerContainer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener");
-                } catch (Exception e) {
-                    logger.warn("Topic listener for Relay Server could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-                    QueuePooledListenerContainer umDirOprsQueue = new MailboxQueuePooledListenerContainer(UserManagementToRelayDirectoryQueueProcessor.class, USERMANAGEMENT_RELAY_DIRECTORY_QUEUE);
-                    umDirOprsQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for UserManagement Directory Creation could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting FILE_STAGE_REPLICATION_RETRY Listener");
-                    QueuePooledListenerContainer fileStageReplicationQueue = new QueuePooledListenerContainer(FileStageReplicationRetryQueueProcessor.class, FILE_STAGE_REPLICATON_RETRY);
-                    fileStageReplicationQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started FILE_STAGE_REPLICATON_RETRY Listener");
-                }  catch (Exception e) {
-                    logger.warn("Queue listener for FILE_STAGE_REPLICATION_RETRY could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting INBOUND_FILE_QUEUE Listener");
-                    QueuePooledListenerContainer inboundFileQueue = new MailboxQueuePooledListenerContainer(InboundFileQueueProcessor.class, INBOUND_FILE_QUEUE);
-                    inboundFileQueue.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started INBOUND_FILE_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for inbound file could not be initialized.", e);
-                }
-
-                try {
-
-                    logger.info("Starting RUNNING_PROCESSOR_RETRY_QUEUE Listener");
-                    QueuePooledListenerContainer runningProcessor = new MailboxQueuePooledListenerContainer(RunningProcessorRetryQueueConsumer.class, RUNNING_PROCESSOR_RETRY_QUEUE);
-                    runningProcessor.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);
-                    logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener");
-                } catch (Exception e) {
-                    logger.warn("Queue listener for inbound file could not be initialized.", e);
-                }
-
-                // Start consuming from Queue Service for different processor types
-                if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-                    try {
-                        Injector injector = GuiceInjector.getInjector();
-
-                        // Relay -> Relay file stage replication retry
-                        logger.info("Starting FILE_STAGE_REPLICATION_RETRY Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> fileStageReplicationRetryConsumerTopics = getConsumerTopics(
-                                TOPIC_REPLICATION_FAILOVER_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_REPLICATION_FAILOVER_ADDITIONAL_TOPIC_SUFFIXES);
-
-               /*         KafkaTextMessageProcessor fileStageReplicationRetryProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, FileStageReplicationRetry.class));
-                        LiaisonKafkaConsumer fileStageReplicationRetryConsumer = liaisonKafkaConsumerFactory.create(fileStageReplicationRetryProcessor);
-                        fileStageReplicationRetryConsumer.startConsumer(fileStageReplicationRetryConsumerTopics);
-                        fileStageReplicationRetryConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                fileStageReplicationRetryConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, FileStageReplicationRetry.class));
-
-                        logger.info("Started FILE_STAGE_REPLICATION_RETRY Listener with QS integration");
-
-                        // Relay -> Relay profile trigger
-                        logger.info("Starting MAILBOX_PROCESSOR_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> mailboxProcessorConsumerTopics = getConsumerTopics(
-                                TOPIC_MAILBOX_PROCESSOR_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_MAILBOX_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        /*KafkaTextMessageProcessor mailboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, Mailbox.class));
-                        LiaisonKafkaConsumer mailboxProcessorConsumer = liaisonKafkaConsumerFactory.create(mailboxProcessor);
-                        mailboxProcessorConsumer.startConsumer(mailboxProcessorConsumerTopics);
-                        mailboxProcessorConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                mailboxProcessorConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, Mailbox.class));
-
-                        logger.info("Started MAILBOX_PROCESSOR_QUEUE Listener with QS integration");
-
-
-                        // Service-Broker -> Relay
-                        logger.info("Starting MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> serviceBrokerToMailboxConsumerTopics = getConsumerTopics(
-                                TOPIC_SERVICE_BROKER_TO_MAILBOX_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_SERVICE_BROKER_TO_MAILBOX_ADDITIONAL_TOPIC_SUFFIXES);
-                        
-                        /*KafkaTextMessageProcessor serviceBrokerToMailboxProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToMailbox.class));
-                        LiaisonKafkaConsumer serviceBrokerToMailboxConsumer = liaisonKafkaConsumerFactory.create(serviceBrokerToMailboxProcessor);
-                        serviceBrokerToMailboxConsumer.startConsumer(serviceBrokerToMailboxConsumerTopics);
-                        serviceBrokerToMailboxConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                serviceBrokerToMailboxConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, ServiceBrokerToMailbox.class));
-
-                        logger.info("Started MAILBOX_PROCESSED_PAYLOAD_QUEUE Listener with QS integration");
-
-                        logger.info("Starting MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener with QS integration");
-
-                        // Read topics info from properties
-                        /*Map<String, List<String>> mailboxTopicMessageConsumerTopics = new HashMap<>();
-                        List<String> mailboxTopicMessageTopicSuffixes = new ArrayList<>();
-                        mailboxTopicMessageTopicSuffixes.add(configuration.getString(TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX));
-                        mailboxTopicMessageConsumerTopics.put(configuration.getString(TOPIC_MAILBOX_TOPIC_MESSAGE_RECEIVER_ID), mailboxTopicMessageTopicSuffixes);*/
-
-                        Map<String, List<String>> mailboxTopicMessageConsumerTopics = getConsumerTopics(
-                                TOPIC_MAILBOX_TOPIC_MESSAGE_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        /*LiaisonConsumer broadcastConsumer = injector.getInstance(Key.get(LiaisonConsumer.class, BroadcastConsumer.class));
-                        broadcastConsumer.startConsumer(mailboxTopicMessageConsumerTopics);
-                        broadcastConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                mailboxTopicMessageConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, BroadcastConsumer.class), true);
-
-                        logger.info("Started MAILBOX_TOPIC_POOLED_LISTENER_CONTAINER Listener with QS integration");
-
-                        // User Management -> Relay directory
-                        logger.info("Starting USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> userManagementToRelayDirectoryConsumerTopics = getConsumerTopics(
-                                TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_USER_MANAGEMENT_TO_RELAY_DIRECTORY_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        /*KafkaTextMessageProcessor userManagementToRelayDirectoryProcessor = injector.getInstance(Key.get(KafkaTextMessageProcessor.class, UserManagementToRelayDirectory.class));
-                        LiaisonKafkaConsumer userManagementToRelayDirectoryConsumer = liaisonKafkaConsumerFactory.create(userManagementToRelayDirectoryProcessor);
-                        userManagementToRelayDirectoryConsumer.startConsumer(userManagementToRelayDirectoryConsumerTopics);
-                        userManagementToRelayDirectoryConsumer.initializeProcessorAvailabilityMonitor(asyncProcessThreadPoolProcessorAvailability);*/
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                userManagementToRelayDirectoryConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, UserManagementToRelayDirectory.class));
-
-                        logger.info("Started USERMANAGEMENT_RELAY_DIRECTORY_OPERATIONS_QUEUE Listener with QS integration");
-
-                        logger.info("Starting INBOUND_FILE_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> inboundFileConsumerTopics = getConsumerTopics(
-                                TOPIC_INBOUND_FILE_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_INBOUND_FILE_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                inboundFileConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, InboundFile.class));
-
-                        logger.info("Started INBOUND_FILE_QUEUE Listener with QS integration");
-
-                        logger.info("Starting RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
-
-                        // Read topics info from properties
-                        Map<String, List<String>> runningProcessorRetryConsumerTopics = getConsumerTopics(
-                                TOPIC_RUNNING_PROCESSOR_DEFAULT_TOPIC_SUFFIX,
-                                TOPIC_RUNNING_PROCESSOR_ADDITIONAL_TOPIC_SUFFIXES);
-
-                        startConsumer(asyncProcessThreadPoolProcessorAvailability,
-                                runningProcessorRetryConsumerTopics,
-                                getKafkaTextMessageProcessor(injector, RunningProcessorRetry.class));
-
-                        logger.info("Started RUNNING_PROCESSOR_RETRY_QUEUE Listener with QS integration");
-                    } catch (Exception e) {
-                        logger.error("Error when initializing LiaisonKafkaConsumer.", e);
-                        //There's no sense to keep app up and running if a consumer doesn't start
-                        System.exit(1);
-                    }
-                }
+            }
         }
     }
 
@@ -405,20 +144,8 @@ public class QueueAndTopicProcessInitializer {
 
     private static KafkaTextMessageProcessor getKafkaTextMessageProcessor(Injector injector, Class clazz) {
 
-        if (FileStageReplicationRetry.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, FileStageReplicationRetry.class));
-        } else if (Mailbox.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, Mailbox.class));
-        } else if (ServiceBrokerToDropbox.class == clazz) {
+        if (ServiceBrokerToDropbox.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToDropbox.class));
-        } else if (ServiceBrokerToMailbox.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, ServiceBrokerToMailbox.class));
-        } else if (UserManagementToRelayDirectory.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, UserManagementToRelayDirectory.class));
-        } else if (InboundFile.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, InboundFile.class));
-        } else if (RunningProcessorRetry.class == clazz) {
-            return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, RunningProcessorRetry.class));
         } else  if (BroadcastConsumer.class == clazz) {
             return injector.getInstance(Key.get(KafkaTextMessageProcessor.class, BroadcastConsumer.class));
         } else {

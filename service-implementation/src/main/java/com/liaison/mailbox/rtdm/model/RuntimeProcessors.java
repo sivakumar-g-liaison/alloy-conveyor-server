@@ -10,16 +10,11 @@
 
 package com.liaison.mailbox.rtdm.model;
 
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -31,13 +26,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "PROCESSORS")
-@NamedQueries({
-        @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID,
-                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID
-                        + " AND processors.clusterType =:" + MailBoxConstants.CLUSTER_TYPE),
-        @NamedQuery(name = RuntimeProcessorsDAO.FIND_BY_PROCESSOR_ID_WITHOUT_CLUSTER_TYPE,
-                query = "SELECT processors FROM RuntimeProcessors processors WHERE processors.processorId = :" + RuntimeProcessorsDAO.PROCESSOR_ID)
-})
 public class RuntimeProcessors {
 
     private String pguid;

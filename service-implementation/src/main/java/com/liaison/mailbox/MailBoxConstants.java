@@ -404,14 +404,6 @@ public interface MailBoxConstants {
     int availabilityMinHeadRoom = configuration.getInt(PROPERTY_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM, DEFAULT_QUEUE_PROCESSOR_POOL_AVAILABILITY_MIN_HEADROOM);
 
     String DROPBOX_QUEUE = "dropboxQueue";
-    String MAILBOX_PROCESSOR_QUEUE = "processor";
-    String MAILBOX_PROCESSED_PAYLOAD_QUEUE = "processedPayload";
-    String TOPIC_POOL_NAME = "mailboxProcessorTopic";
-    String USERMANAGEMENT_RELAY_DIRECTORY_QUEUE = "userManagementRelayDirectoryQueue";
-    String FILE_STAGE_REPLICATON_RETRY = "fileStage";
-    String INBOUND_FILE_QUEUE = "inboundFile";
-    String RUNNING_PROCESSOR_RETRY_QUEUE = "runningProcessorRetry";
-    String SWEEPER_EVENT_QUEUE = "sweeperEvent";
 
     // Added for read resource for migrator services
     String TYPE_MAILBOX = "mailbox";

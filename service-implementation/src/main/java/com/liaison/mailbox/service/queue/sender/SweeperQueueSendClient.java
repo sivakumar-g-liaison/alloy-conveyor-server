@@ -16,7 +16,6 @@ import com.liaison.commons.messagebus.client.exceptions.ClientUnavailableExcepti
 import com.liaison.commons.messagebus.queue.QueueTextSendClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,11 +23,9 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
-import static com.liaison.mailbox.MailBoxConstants.SERVICE_BROKER_APP_ID;
 import static com.liaison.mailbox.MailBoxConstants.SKIP_QUEUE_INITIALIZER;
 import static com.liaison.mailbox.MailBoxConstants.TOPIC_SWEEPER_DEFAULT_TOPIC_SUFFIX;
 import static com.liaison.mailbox.service.util.MailBoxUtil.CONFIGURATION;
-import static com.liaison.mailbox.service.util.MailBoxUtil.QUEUE_SERVICE_ENABLED;
 
 /**
  * Owner of singleton SendClient
@@ -80,35 +77,12 @@ public class SweeperQueueSendClient implements AutoCloseable {
         }
     }
 
-    public static void post(String message, boolean isWorkTicketGroup) {
-
-        if (QUEUE_SERVICE_ENABLED) {
-            if (isWorkTicketGroup) {
-                Producer.produceWorkTicketGroupToQS(getWorkTicketGroupFromMessageText(message),
-                        SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
-            } else {
-                Producer.produceWorkTicketToQS(getWorkTicketFromMessageText(message),
-                        SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
-            }
-        } else {
-            try {
-                getInstance().sendMessage(message);
-            } catch(ClientUnavailableException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     public static void post(WorkTicket workticket) {
 
-        if (QUEUE_SERVICE_ENABLED) {
-            Producer.produceWorkTicketToQS(workticket, SERVICE_BROKER_APP_ID, TOPIC_SUFFIX);
-        } else {
-            try {
-                getInstance().sendMessage(JAXBUtility.marshalToJSON(workticket));
-            } catch(ClientUnavailableException | JAXBException | IOException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            getInstance().sendMessage(JAXBUtility.marshalToJSON(workticket));
+        } catch(ClientUnavailableException | JAXBException | IOException e) {
+            throw new RuntimeException(e);
         }
 
     }

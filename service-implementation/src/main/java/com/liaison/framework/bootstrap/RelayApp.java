@@ -16,7 +16,6 @@ import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.messagebus.kafka.LiaisonKafkaConsumer;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
@@ -27,13 +26,10 @@ import com.liaison.health.core.management.ThreadBlockedHealthCheck;
 import com.liaison.health.core.management.ThreadDeadlockHealthCheck;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.DeploymentType;
-import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
 import com.liaison.mailbox.service.core.bootstrap.QueueAndTopicProcessInitializer;
 import com.liaison.mailbox.service.core.hazelcast.HazelcastProvider;
 import com.liaison.mailbox.service.dropbox.filter.ConveyorAuthZValidationFilterFactory;
 import com.liaison.mailbox.service.module.GuiceInjector;
-import com.liaison.mailbox.service.queue.kafka.Consumer;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.wordnik.swagger.jaxrs.config.BeanConfig;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +50,6 @@ import java.security.Security;
 
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_ASYNC_URI;
 import static com.liaison.mailbox.MailBoxConstants.CONFIGURATION_SERVICE_BROKER_URI;
-import static com.liaison.mailbox.MailBoxConstants.PROPERTY_SKIP_KAFKA_QUEUE;
 
 @Singleton
 @ApplicationPath("/*")
@@ -68,12 +63,6 @@ public class RelayApp extends ResourceConfig {
     private static final String PROPERTY_RELAY_CONTEXT_PATH = "/g2mailboxservice";
 
     public static Injector injector;
-
-    private LiaisonKafkaConsumer serviceBrokerToDropboxConsumer;
-    private LiaisonKafkaConsumer fileStageReplicationRetryConsumer;
-    private LiaisonKafkaConsumer mailboxProcessorConsumer;
-    private LiaisonKafkaConsumer serviceBrokerToMailboxConsumer;
-    private LiaisonKafkaConsumer userManagementToRelayDirectoryConsumer;
 
     @Inject
     public RelayApp(final ServiceLocator serviceLocator) {
@@ -124,23 +113,9 @@ public class RelayApp extends ResourceConfig {
             HazelcastProvider.init();
         }
 
-        logger.info(new DefaultAuditStatement(AuditStatement.Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+        logger.info(new DefaultAuditStatement(AuditStatement.Status.SUCCEED, "initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
         DAOUtil.init();
-        // Check stuck processors (ie., processorExecutionState is "PROCESSING") during the application startup.
-        // Update the status from "PROCESSING" to "FAILED" for the current node.
-        ProcessorExecutionConfigurationService.updateExecutionStateOnInit();
-
-        //Initialize the Kafka Producer and Consumer before the Queue
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)
-                && !DeploymentType.CONVEYOR.getValue().equals(deploymentType)) {
-            new Consumer().consume();
-            try {
-                Class.forName(Producer.class.getName());
-            } catch (ClassNotFoundException e) {
-                logger.error("Unable to load Producer class", e);
-            }
-        }
 
         //QUEUE and TOPIC consumers initialization
         QueueAndTopicProcessInitializer.initialize();
@@ -197,7 +172,7 @@ public class RelayApp extends ResourceConfig {
             logger.error("Could not retrieve the ip from this node", e);
         }
 
-        logger.info("Swagger Configuration IP:"+ ip);
+        logger.info("Swagger Configuration IP:" + ip);
 
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Relay API");
@@ -210,18 +185,5 @@ public class RelayApp extends ResourceConfig {
 
     // TODO: Does this really work?
     public void destroy() {
-
-        //Shutdown the kafka producer gracefully
-        if (!configuration.getBoolean(PROPERTY_SKIP_KAFKA_QUEUE, true)) {
-            Producer.stop();
-        }
-
-        if (configuration.getBoolean(MailBoxConstants.CONFIGURATION_QUEUE_SERVICE_ENABLED, false)) {
-            serviceBrokerToDropboxConsumer.shutdown();
-            fileStageReplicationRetryConsumer.shutdown();
-            mailboxProcessorConsumer.shutdown();
-            serviceBrokerToMailboxConsumer.shutdown();
-            userManagementToRelayDirectoryConsumer.shutdown();
-        }
     }
 }

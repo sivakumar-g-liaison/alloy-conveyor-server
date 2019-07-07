@@ -138,7 +138,7 @@ public class ServiceBrokerUtil {
      * @param pipelineId pipeline id configured in the processor
      * @return organization dto
      */
-    public static OrganizationDTO getOrganizationDetails(String pipelineId) {
+    private static OrganizationDTO getOrganizationDetails(String pipelineId) {
 
         String response = getEntity(PIPELINE, pipelineId);
 

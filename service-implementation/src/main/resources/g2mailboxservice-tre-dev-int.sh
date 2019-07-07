@@ -27,8 +27,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,addre
 # log overrides
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$ENVIRONMENT.xml"
-# Shortcode for APP_NAME:
 
+# Shortcode for APP_NAME:
 export SYSLOG_APPNAME="g2mailboxservice"
 export SYSLOG_HOST="audit-syslog-server"
 export SYSLOG_PORT="514"
@@ -41,12 +41,14 @@ export SYSLOG_ROLLING_SIZE="250 MB"
 export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=262144
 
+export GLASS_SPECTRUM_SOURCE_NAME=$APP_ID-$ENVIRONMENT
+
 export GLASS_SPECTRUM_PORT=10010
 export GLASS_SPECTRUM_IP=192.168.0.67
 export GLASS_SPECTRUM_USER=g2tampere
 export GLASS_SPECTRUM_PASSWORD=g2tampere
 export GLASS_SPECTRUM_DATASPACE=g2-lens-spectrum
-export GLASS_SPECTRUM_SOURCE_NAME=$APP_ID-$ENVIRONMENT
+export GLASS_SPECTRUM_SOURCE_NAME=G2_Lab
 export GLASS_SPECTRUM_MESSAGE_TTL=36288000
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"
@@ -65,10 +67,10 @@ export LOGSTASHPORT=4560
 export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
 export LOGSTASH_RING_BUFFER_SIZE=262144
 export LOGSTASH_ROLLING_SIZE="250 MB"
-
 # ==================================================================
 # log overrides
 # ==================================================================
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
+export MAPR_TICKETFILE_LOCATION=/var/mapr/longlivedticket

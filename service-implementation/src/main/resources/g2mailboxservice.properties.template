@@ -27,23 +27,6 @@ java.naming.provider.url=jnp://localhost:1199,jnp://localhost:1199
 #\\\###########################///#
 #\\\###########################///#
 
-# Properties to read JS file from git lab for script execution through commons-scripting library
-com.liaison.gitlab.script.server.host=at4d-vpgitlab.liaison.dev
-com.liaison.gitlab.script.project.name=g2/mailbox-scripts
-com.liaison.gitlab.script.server.password=gex5e6V_LZJj1SpPaye2
-
-# Activity GitLab properties
-com.liaison.gitlab.mailbox.script.server.host=https://at4d-vpgitlab.liaison.dev
-com.liaison.gitlab.mailbox.script.project.id=g2%2Fmailbox-scripts
-com.liaison.gitlab.mailbox.script.folder=gitlab:/processor-scripts
-com.liaison.gitlab.mailbox.script.private_token=gex5e6V_LZJj1SpPaye2
-
-# Generic Mount Location - FOR CONFIGURATION PATTERN REPLACEMENT
-MOUNT_POINT=/app/mailbox/
-
-# Directory sweeper configuration to check files are modified within the given time limit in SECONDS
-last.modified.tolerance=3
-
 # Service Broker Sync interface info
 com.liaison.servicebroker.sync.uri=https://at4d-vpsbrt.liaison.dev/service-broker/process/workticket
 com.liaison.servicebroker.async.uri=https://at4d-vpsbasy.liaison.dev/service-broker/process/workticket
@@ -168,13 +151,6 @@ ftps.group.name=ext_ftps_users
 
 # location of shell script to delete the created Home Directory for machine accounts
 deletion.script.path=/secure/tomcat/dev-int/deleteHomeFolders.sh
-
-# Home Directory Creation for Machine Accounts
-ftp.user.home.path=/data/ftp
-ftps.user.home.path=/data/ftps
-sftp.user.home.path=/data/sftp
-http.user.home.path=/data/http
-https.user.home.path=/data/https
 
 # service broker base url
 com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/service-broker/

@@ -79,7 +79,7 @@ public class TenancyKeyUtil {
     }
 
     /**
-     *  Gets tenancy keys from the manifest
+     * Gets tenancy keys from the manifest
      *
      * @param aclManifestJson manifest details
      * @return list of tenancy key
@@ -102,7 +102,7 @@ public class TenancyKeyUtil {
      * This Method will retrieve the TenancyKey Name from the given guid
      *
      * @param aclManifestJson manifest details
-     * @param tenancyKeyGuid tenancy key guid
+     * @param tenancyKeyGuid  tenancy key guid
      * @return tenancy key name(org name)
      * @throws IOException
      */
@@ -130,25 +130,25 @@ public class TenancyKeyUtil {
 
     /**
      * This method will validate TenancyKey name with given guid
-     * 
+     *
      * @param tenancyKeyGuid tenancy key guid
      * @return boolean
-     * @throws IOException 
-     * @throws LiaisonException 
-     * @throws JSONException 
+     * @throws IOException
+     * @throws LiaisonException
+     * @throws JSONException
      */
     public static boolean isValidTenancyKeyByGuid(String tenancyKeyGuid) throws IOException, LiaisonException, JSONException {
 
-    	String url = MailBoxUtil.constructUrl(PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL, URLEncoder.encode(tenancyKeyGuid, StandardCharsets.UTF_8.name()));
-    	
-    	GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
-    	Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
+        String url = MailBoxUtil.constructUrl(PROPERTY_GEM_TENANCY_KEY_VALIDATION_URL, URLEncoder.encode(tenancyKeyGuid, StandardCharsets.UTF_8.name()));
 
-    	LOGGER.debug("The GEM URL TO VALIDATE TENANCY KEY " + url);
-    	String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
-    	JSONObject obj = new JSONObject(jsonResponse);
+        GEMManifestResponse gemManifestFromGEM = GEMHelper.getACLManifest();
+        Map<String, String> headerMap = GEMHelper.getRequestHeaders(gemManifestFromGEM, "application/json");
+
+        LOGGER.debug("The GEM URL TO VALIDATE TENANCY KEY " + url);
+        String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+        JSONObject obj = new JSONObject(jsonResponse);
 
         return obj.getBoolean(JSON_KEY_BOOLEAN);
     }
-    
+
 }

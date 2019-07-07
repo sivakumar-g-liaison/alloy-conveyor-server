@@ -16,6 +16,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.includeLocation=true"
 # log4j will look for updates to log4j xml every 5 minutes
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.interval.sec=300"
 
+
 # ==================================================================
 # log overrides
 # ==================================================================
@@ -52,6 +53,4 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
-
-# MAPR Service Ticket
-export MAPR_TICKETFILE_LOCATION="/var/mapr/g2app-mapr-service-ticket"
+export MAPR_TICKETFILE_LOCATION=/var/mapr/longlivedticket

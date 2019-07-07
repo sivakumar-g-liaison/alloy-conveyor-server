@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.core;
 
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.LiaisonArchaiusConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -33,27 +32,17 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.EntityStatus;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAO;
-import com.liaison.mailbox.rtdm.dao.RuntimeProcessorsDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
-import com.liaison.mailbox.rtdm.model.RuntimeProcessors;
-import com.liaison.mailbox.service.core.fsm.ProcessorExecutionStateDTO;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
-import com.liaison.mailbox.service.dto.HTTPListenerHelperDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorDCRequestDTO;
@@ -67,11 +56,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseD
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.kafka.KafkaMessageService.KafkaMessageType;
-import com.liaison.mailbox.service.queue.kafka.Producer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,13 +65,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -196,15 +177,6 @@ public class ProcessorConfigurationService {
             Processor processor = Processor.processorInstanceFactory(foundProcessorType);
             processorDTO.copyToEntity(processor, true, validateProcessDc(processorDTO.getProcessorDC()));
 
-            // create local folders if not available
-            if (processorDTO.isCreateConfiguredLocation()) {
-                MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-                if (processorService != null) {
-                    String createdLocalPath = processorService.createLocalPath();
-                    Producer.produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
-                }
-            }
-
             //Creates link between mailbox and processor.
             processor.setMailbox(mailBox);
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
@@ -215,15 +187,6 @@ public class ProcessorConfigurationService {
             processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			// persist the processor.
 			configDAO.persist(processor);
-
-			// persist the processor execution state with status READY
-            ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
-            executionDTO.setPguid(UUIDGen.getCustomUUID());
-            executionDTO.setProcessorId(processor.getPguid());
-            executionDTO.setExecutionStatus(ExecutionState.READY.value());
-            executionDTO.setModifiedDate(new Date());
-            executionDTO.setModifiedBy(userId);
-            new RuntimeProcessorsDAOBase().addProcessor(executionDTO, processor.getClusterType());
 
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
@@ -432,9 +395,6 @@ public class ProcessorConfigurationService {
             //Updating the stagedFile Status as INACTIVE during deleting the corresponding processor
             new StagedFileDAOBase().updateStagedFileStatusByProcessorId(processorGuid, EntityStatus.INACTIVE.name());
             
-            //Updating the ProcessorExecutionState status as COMPLETED during deleting the corresponding processor
-            new ProcessorExecutionStateDAOBase().updateProcessorExecutionStateStatusByProcessorId(processorGuid, ExecutionState.COMPLETED.name());
-            
             // Changing the processor status
             retrievedProcessor.setProcsrName(MailBoxUtil.generateName(retrievedProcessor.getProcsrName(), 512));
             retrievedProcessor.setProcsrStatus(EntityStatus.DELETED.value());
@@ -572,40 +532,12 @@ public class ProcessorConfigurationService {
             // Copying the new details of the processor and merging.
             processorDTO.copyToEntity(processor, false, processDC);
 
-			// create local folders if not available
-			if (processorDTO.isCreateConfiguredLocation()) {
-				MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-				if (processorService != null) {
-					String createdLocalPath = processorService.createLocalPath();
-					Producer.produce(KafkaMessageType.DIRECTORY_CREATION, createdLocalPath);
-				}
-			}
-
             processor.setModifiedBy(userId);
             processor.setModifiedDate(new Timestamp(System.currentTimeMillis()));
 			//Merge the changes and commit the transaction
 			em.merge(processor);
 		    tx.commit();
 
-            // Validate the processor guid is in the runtime processor table
-            // Add if it is not available
-            RuntimeProcessorsDAO runtimeProcessorsDAO = new RuntimeProcessorsDAOBase();
-            RuntimeProcessors runtimeProcessor = runtimeProcessorsDAO.findByProcessorIdWithoutClusterType(processor.getPguid());
-            if (null == runtimeProcessor) {
-
-                ProcessorExecutionStateDTO executionDTO = new ProcessorExecutionStateDTO();
-                executionDTO.setPguid(UUIDGen.getCustomUUID());
-                executionDTO.setProcessorId(processor.getPguid());
-                executionDTO.setExecutionStatus(ExecutionState.READY.value());
-                executionDTO.setModifiedDate(new Date());
-                executionDTO.setModifiedBy(userId);
-                runtimeProcessorsDAO.addProcessor(executionDTO, processor.getClusterType());
-            }
-
-		    //updates processor cluster type in the runtime processors table
-            if (!inputClusterType.equals(clusterType)) {
-                runtimeProcessorsDAO.updateClusterType(inputClusterType, processorId);
-            }
             // response message construction
             ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
             serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
@@ -782,180 +714,6 @@ public class ProcessorConfigurationService {
 		return procsrProperty;
 	}
 	
-	/**
-	 * Method to map received results from DB to corresponding httpListnerHelperDTO
-	 * 
-	 * @param receivedResults
-	 * 					actual resutlSet from DB
-	 * @return Map of HTTPListnerHelperDTO with processorID as key
-	 */
-	private Map<String, HTTPListenerHelperDTO> mapResultSet(List<Object[]> receivedResults) {
-		
-		Map<String, HTTPListenerHelperDTO> httpListenerDetails = new HashMap<>();
-		for (Object[] obj : receivedResults) {
-			
-			String processorId = (String) obj[0];
-			String procsrType = (String) obj[1];
-			String protocol = (String) obj[2];
-			String propertiesJson = (String) obj[3];
-			String procsrStatus = (String) obj[4];
-			String procsrPropName = (String) obj[5];
-			String procsrPropValue = (String) obj[6];
-			String serviceInstanceId = (String) obj[7];
-			String mbxId = (String) obj[8];
-			String mbxName = (String) obj[9];
-			String tenancyKey = (String) obj[10];
-			String mbxStatus = (String) obj[11];
-			String mbxPropName = (String) obj[12];
-			String mbxPropValue = (String) obj[13];
-			
-			// if the details are already available handle the processorProperty and mbx property alone
-			HTTPListenerHelperDTO helperDTO = httpListenerDetails.get(processorId);
-			if (null != helperDTO) {
-				
-				// handle dynamic properties of a processor
-				if (!MailBoxUtil.isEmpty(procsrPropName) && !MailBoxUtil.isEmpty(procsrPropValue)) {
-					ProcessorProperty procsrProperty = constructProcessorProperty(procsrPropName, procsrPropValue);
-					helperDTO.getDynamicProperties().add(procsrProperty);
-				}
-				// handle only ttl value and ttl unit in mbx properties
-				if (!MailBoxUtil.isEmpty(mbxPropName) 
-								&& !MailBoxUtil.isEmpty(mbxPropValue)
-								&& MailBoxUtil.isEmpty(helperDTO.getTtlValue()) 
-								&& (mbxPropName.equals(MailBoxConstants.TTL))) {
-					helperDTO.setTtlValue(mbxPropValue);
-				}
-				if (!MailBoxUtil.isEmpty(mbxPropName) 
-								&& !MailBoxUtil.isEmpty(mbxPropValue)
-								&& MailBoxUtil.isEmpty(helperDTO.getTtlUnit()) 
-								&& (mbxPropName.equals(MailBoxConstants.TTL_UNIT))) {
-					helperDTO.setTtlUnit(mbxPropValue);
-				}
-
-			} else {
-				String ttlValue = null;
-				String ttlUnit = null;
-				// if the details are not already available construct helperDTO
-				if (!MailBoxUtil.isEmpty(mbxPropName) 
-							&& !MailBoxUtil.isEmpty(mbxPropValue)
-							&& mbxPropName.equals(MailBoxConstants.TTL)) {
-					ttlValue = mbxPropValue;
-				}
-				if (!MailBoxUtil.isEmpty(mbxPropName)
-							&& !MailBoxUtil.isEmpty(mbxPropValue)
-							&& mbxPropName.equals(MailBoxConstants.TTL_UNIT)) {
-					ttlUnit = mbxPropValue;
-				}
-				Set<ProcessorProperty> dynamicProperties = new HashSet<>();
-				if (!MailBoxUtil.isEmpty(procsrPropName) && !MailBoxUtil.isEmpty(procsrPropValue)) {
-					ProcessorProperty procsrProperty = constructProcessorProperty(procsrPropName, procsrPropValue);
-					dynamicProperties.add(procsrProperty);
-				}
-				// if the details are not already available construct a new helperDTO
-				helperDTO = new HTTPListenerHelperDTO(processorId, protocol,
-				                    procsrType, propertiesJson, procsrStatus,
-				                    serviceInstanceId, mbxId, mbxName, mbxStatus,
-				                    tenancyKey, ttlValue, ttlUnit, dynamicProperties);
-				httpListenerDetails.put(processorId, helperDTO);
-			}
-		}
-		return httpListenerDetails;
-	}
-	
-	/**
-	 * @param httpListnerDetailsDTOs
-	 * @return
-	 * @throws IOException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 */
-	private Map<String, String> buildHTTPListenerProperties(Collection<HTTPListenerHelperDTO> httpListnerDetailsDTOs) 
-									throws IllegalArgumentException, IllegalAccessException, IOException { 
-		
-		Map<String, String> httpListenerProperties = new HashMap<String, String>();
-        for (HTTPListenerHelperDTO httpListenerDetail : httpListnerDetailsDTOs) {
-
-            if (httpListenerDetail.getProcsrStatus().equals(EntityStatus.ACTIVE.value())) {
-                Protocol protocol = Protocol.findByCode(httpListenerDetail.getProcsrProtocol());
-                ProcessorType procsrType = ProcessorType.findByCode(httpListenerDetail.getProcsrType());
-                // retrieve required properties
-                HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(httpListenerDetail.getProcsrPropertyJson(), protocol, procsrType, httpListenerDetail.getDynamicProperties());
-                String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
-                boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
-                boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
-                boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
-                int connectionTimeout = httpListenerStaticProperties.getConnectionTimeout();
-                int socketTimeout = httpListenerStaticProperties.getSocketTimeout();
-
-                httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerDetail.getServiceInstanceId());
-                httpListenerProperties.put(MailBoxConstants.PROPERTY_TENANCY_KEY, httpListenerDetail.getTenancyKey());
-                httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
-                httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
-                httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_ID, httpListenerDetail.getMbxId());
-                httpListenerProperties.put(MailBoxConstants.KEY_MAILBOX_NAME, httpListenerDetail.getMbxName());
-                httpListenerProperties.put(MailBoxConstants.STORAGE_IDENTIFIER_TYPE, MailBoxUtil.getStorageType(httpListenerDetail.getDynamicProperties()));
-                httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
-                httpListenerProperties.put(MailBoxConstants.CONNECTION_TIMEOUT, String.valueOf(connectionTimeout));
-                httpListenerProperties.put(MailBoxConstants.SOCKET_TIMEOUT, String.valueOf(socketTimeout));
-                httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
-                httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
-                if (!MailBoxUtil.isEmpty(httpListenerDetail.getTtlUnit()) && !MailBoxUtil.isEmpty(httpListenerDetail.getTtlValue())) {
-                    Integer ttlNumber = Integer.parseInt(httpListenerDetail.getTtlValue());
-                    httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(httpListenerDetail.getTtlUnit(), ttlNumber)));
-                }
-                if (!MailBoxUtil.isEmpty(pipeLineId)) {
-                    httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
-                }
-                break;
-            } else if (httpListenerDetail.getProcsrStatus().equals(EntityStatus.INACTIVE.value())) {
-                httpListenerProperties.put(MailBoxConstants.PROCSR_STATUS, httpListenerDetail.getProcsrStatus());
-                httpListenerProperties.put(MailBoxConstants.MAILBOX_STATUS, httpListenerDetail.getMbxStatus());
-            }
-        }
-        return httpListenerProperties;
-    }
-
-	/**
-	 * Method to retrieve the properties of HTTPListner of type Sync/Async
-	 *
-	 * @param mailboxInfo - can be mailbox pguid or mailbox Name
-	 * @param httpListenerType
-	 * @param isMailboxIdAvailable - specify whether the mailbox info is id or not
-	 * @return a Map containing the HttpListenerSpecific Properties
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	public Map<String, String> getHttpListenerProperties(String mailboxInfo, ProcessorType httpListenerType, boolean isMailboxIdAvailable)
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
-		long startTime = System.currentTimeMillis();
-		long endTime = 0;
-		Map<String, String> httpListenerProperties = null;
-
-		// retrieve the list of processors of specific type
-		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		String processorType = httpListenerType.getCode();
-		List<Object[]> receivedResults = (isMailboxIdAvailable)
-										? config.findProcessorsByMailboxIdAndProcessorType(mailboxInfo, processorType)
-										: config.findProcessorsByMailboxNameAndProcessorType(mailboxInfo, processorType);
-
-		if (null == receivedResults || receivedResults.isEmpty()) {
-			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(),
-					Response.Status.NOT_FOUND);
-		}
-		try {
-
-			Map<String, HTTPListenerHelperDTO> httpListenerDetails = mapResultSet(receivedResults);
-			httpListenerProperties = buildHTTPListenerProperties(httpListenerDetails.values());
-		} catch (IOException e) {
-            throw new RuntimeException(String.format("unable to retrieve processor of type %s of mailbox %s", httpListenerType, mailboxInfo), e);
-        }
-		endTime = System.currentTimeMillis();
-		MailBoxUtil.calculateElapsedTime(startTime, endTime);
-		return httpListenerProperties;
-	}
 
 	/**
 	 * Get the Processor details of the mailbox using guid.

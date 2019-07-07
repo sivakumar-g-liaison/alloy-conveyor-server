@@ -37,7 +37,6 @@ export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=128
  
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
-
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
 
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
@@ -59,10 +58,8 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 
 # NOT FOR PRODUCTION:
 # enable remote debugging
-# export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
+export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
 # Https.protocols parameter for JVM
 export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
-
-# MAPR Service Ticket
-export MAPR_TICKETFILE_LOCATION="/var/mapr/g2app-mapr-service-ticket"
+export MAPR_TICKETFILE_LOCATION=/var/mapr/longlivedticket

@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -18,7 +17,6 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
-import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -29,8 +27,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
@@ -84,10 +80,6 @@ public class ProcessorDTO {
 	private String modifiedDate;
     private String clusterType;
     private String processorDC;
-    private static final String TRUSTSTORE_CERT_NOT_PROVIDED = "Trust store Certificate cannot be Empty.";
-	private static final String SSH_KEYPAIR_NOT_PROVIDED= "SSH Key Pair cannot be Empty.";
-	private static final String SSH_KEYPAIR_INVALID= "The given SSH key pair group guid does not exist in key management system.";
-	private static final String TRUSTSTORE_CERT_INVALID= "The given trust store group guid does not exist in key management system.";
 
 
 	public ProcessorDTO() {
@@ -354,7 +346,6 @@ public class ProcessorDTO {
             for (CredentialDTO credentialDTO : credentialDTOList) {
 
                 validator.validate(credentialDTO);
-                validateCredentials(processor.getProcessorType(), processor.getProcsrProtocol(), credentialDTO, credentialDTOList);
                 credential = new Credential();
                 credentialDTO.copyToEntity(credential);
                 credential.setPguid(MailBoxUtil.getGUID());
@@ -466,134 +457,6 @@ public class ProcessorDTO {
         }
         if (propertyDTO.isDynamic() && MailBoxUtil.isEmpty(propertyDTO.getValue())) {
             throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, "Property Value", Response.Status.BAD_REQUEST);
-        }
-    }
-
-    /**
-     * Method to validate credentials
-     *
-     * @param procType      processor type
-     * @param protocol      processor protocol
-     * @param credentialDTO credential Details
-     * @param credentials
-     */
-    public void validateCredentials(ProcessorType procType, String protocol, CredentialDTO credentialDTO, List<CredentialDTO> credentials) {
-
-        CredentialType credentialType = CredentialType.findByName(credentialDTO.getCredentialType());
-        switch (credentialType) {
-
-            case LOGIN_CREDENTIAL:
-                validateLoginCredentials(procType, protocol, credentialDTO, credentials);
-                break;
-            case SSH_KEYPAIR:
-                validateSSHKeypair(credentialDTO.getIdpURI());
-                break;
-            case TRUSTSTORE_CERT:
-                validateTruststoreCertificate(credentialDTO.getIdpURI());
-                break;
-        }
-    }
-
-    /**
-     * Method is used to Validate the credentials given
-     *
-     * @param procType      The processor type
-     * @param procProtocol  processor protocol
-     * @param credentialDTO Login Credential Details
-     * @param credentials
-     */
-    public void validateLoginCredentials(ProcessorType procType, String procProtocol, CredentialDTO credentialDTO, List<CredentialDTO> credentials) {
-
-        if (ProcessorType.REMOTEUPLOADER.equals(procType) ||
-                ProcessorType.REMOTEDOWNLOADER.equals(procType)) {
-
-            Protocol protocol = Protocol.findByName(procProtocol.toUpperCase());
-
-            switch (protocol) {
-
-                case FTP:
-                case FTPS:
-                case HTTPS:
-                    if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-                        throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-                    } else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-                        throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-                    } else {
-                        validateSecret(credentialDTO.getPassword());
-                    }
-                    break;
-                case SFTP:
-                    if (!MailBoxUtil.isEmpty(credentialDTO.getUserId()) && MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-                        if (!isSSHKeyPairAvailable(credentials)) {
-                            throw new MailBoxConfigurationServicesException(Messages.PASSWORD_OR_SSH_KEYPAIR_EMPTY, Response.Status.BAD_REQUEST);
-                        }
-                    } else if (MailBoxUtil.isEmpty(credentialDTO.getUserId())) {
-                        throw new MailBoxConfigurationServicesException(Messages.USERNAME_EMPTY, Response.Status.BAD_REQUEST);
-                    } else if (MailBoxUtil.isEmpty(credentialDTO.getPassword())) {
-                        throw new MailBoxConfigurationServicesException(Messages.PWD_EMPTY, Response.Status.BAD_REQUEST);
-                    } else {
-                        validateSecret(credentialDTO.getPassword());
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Method to validate ssh keypair
-     *
-     * @param sshKeypairGroupId
-     */
-    public void validateSSHKeypair(String sshKeypairGroupId) {
-
-        try {
-
-            if (MailBoxUtil.isEmpty(sshKeypairGroupId)) {
-                throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_NOT_PROVIDED, Response.Status.BAD_REQUEST);
-            } else if (null == KMSUtil.fetchSSHPrivateKey(sshKeypairGroupId)) {
-                throw new MailBoxConfigurationServicesException(SSH_KEYPAIR_INVALID, Response.Status.BAD_REQUEST);
-            }
-        } catch (LiaisonException | IOException | JAXBException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    /**
-     * Method to validate trust store
-     *
-     * @param trustStoreGroupId
-     */
-    public void validateTruststoreCertificate(String trustStoreGroupId) {
-
-        try {
-            if (MailBoxUtil.isEmpty(trustStoreGroupId)) {
-                throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_NOT_PROVIDED, Response.Status.BAD_REQUEST);
-            }
-            KMSUtil.fetchTrustStore(trustStoreGroupId);
-        } catch (LiaisonException | IOException | JAXBException | MailBoxServicesException exception) {
-            if (Messages.CERTIFICATE_RETRIEVE_FAILED.value().equals(exception.getMessage())) {
-                throw new MailBoxConfigurationServicesException(TRUSTSTORE_CERT_INVALID, Response.Status.BAD_REQUEST);
-            }
-            throw new RuntimeException(exception);
-        }
-    }
-
-    /**
-     * Method to validate the password
-     *
-     * @param password
-     */
-    private void validateSecret(String password) {
-
-        try {
-            KMSUtil.getSecretFromKMS(password);
-        } catch (LiaisonException | IOException | MailBoxServicesException exception) {
-            if (Messages.READ_SECRET_FAILED.value().equals(exception.getMessage())) {
-                throw new MailBoxConfigurationServicesException(Messages.PWD_INVALID, Response.Status.BAD_REQUEST);
-            }
-            throw new RuntimeException(exception);
         }
     }
 

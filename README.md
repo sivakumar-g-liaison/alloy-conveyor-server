@@ -1,9 +1,7 @@
-<<<<<<< HEAD
 # alloy-conveyor-server
-=======
 
 ## Introduction
-g2-mailbox code base is common for three different micro services called Relay, Legacy Relay and Conveyor Server. The deployment needs to done on all the three nodes to maintain the common version.
+g2-mailbox code base for Conveyor Server.
 
 ## Prerequisites
 ### Getting Started (Developers)
@@ -47,20 +45,9 @@ Will build the project, deploy it into Tomcat with the "tre-dev-int"
 
 ### Service Users
 
-The application user should be g2_env_app_svc not the regular tomcat user and the user should have permisison to access the NFS locations and execute shell scripts for machine account directory creations.
-
-Conveyor Server would run with tomcat user and there is not need of special user
+The application user would be default tomcat user and there is no special permissions required for conveyor server
 
 ### Network Shares
-
-NFS Mounts for Relay
-* /data/http
-* /data/ftp (secured one and customers won't use it due to complicance)
-* /data/ftps
-* /data/sftp
-
-NFS Mounts for Legacy Relay
-* /data/ftp (unsecured one and customers would use it)
 
 LUKS Mounted Share
 * /secure/tomcat
@@ -85,7 +72,7 @@ Bouncy Castle Provider needs to be set in the position #5. This is handled in th
 ### Location
 * Tier - Web Tier
 * F5 VIP - Required
-* External Public URL - Required
+* External Public URL - Not Required
 
 ### Bootstrapping
 
@@ -119,13 +106,10 @@ The DB Migration is not required for Legacy Relay since it is using the same DB 
 * Key Management
 * Database (Oracle)
 * HornetQ
-* MapR Streams in Active Active Environment
-* Bootstrap server
 
 ### Special Requirements
 
-* Need the shellscripts to create and delete the machine account directories
-* The shell scripts should be placed under /secure/tomcat/env directory
+No special requirements.
 
 ### Miscellaneous Settings
 
@@ -145,30 +129,6 @@ No special requirements.
 4. g2-java, g2-cacerts-<env> and g2-tomcat RPM packages installed
 
 Example content of deployment-context.sh from UAT environment
-Relay:
-```
-APP_ID=g2mailboxservice
-ENVIRONMENT=uat
-STACK=default
-REGION=us
-DATACENTER=at4-uat-pres
-SERVER_ID=at4u-lvmbox01
-TOMCAT_USER=g2_uat_app_svc
-TOMCAT_GROUP=g2_uat_app_svc
-```
-
-Legacy Relay:
-```
-APP_ID=g2mailboxservice
-ENVIRONMENT=uat
-STACK=lowsecure
-REGION=us
-DATACENTER=at4-uat-pres
-SERVER_ID=at4u-lvmbox01
-TOMCAT_USER=g2_uat_app_svc
-TOMCAT_GROUP=g2_uat_app_svc
-```
-
 Conveyor Server:
 ```
 APP_ID=g2mailboxservice
@@ -176,7 +136,7 @@ ENVIRONMENT=uat
 STACK=default
 REGION=us
 DATACENTER=at4-uat-pres
-SERVER_ID=at4u-lvmbox01
+SERVER_ID=at4u-lvdbox01
 TOMCAT_USER=tomcat
 TOMCAT_GROUP=tomcat
 ```
@@ -252,4 +212,3 @@ g2-listener-pool-container-dropboxqueue not registered with com.liaison.threadma
 g2-listener-pool-container-processedpayload not registered with com.liaison.threadmanagement.LiaisonExecutorServiceManager
 ```
 Since it is common code base for three different micro service, we will not initialize Conveyor Server/Dropbox related pools in Relay and Legacy. Same thing applicable for Conveyor Server where we don't initialize javascript or processor pools.
->>>>>>> upstream/develop
