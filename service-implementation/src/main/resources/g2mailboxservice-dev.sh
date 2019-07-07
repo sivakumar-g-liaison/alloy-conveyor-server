@@ -4,6 +4,7 @@
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$ENVIRONMENT"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_ID"
+
 # Make all loggers ASYNC
 export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
 
@@ -17,16 +18,20 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 # ==================================================================
 # log overrides
 # ==================================================================
-export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ID.xml"
+export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-default.xml"
 # Shortcode for APP_NAME:
-export SYSLOG_APPNAME="g2mailboxservice"
-export SYSLOG_HOST="audit-syslog-server"
+export SYSLOG_APPNAME="GDB"
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
 export SYSLOG_ID="App"
 export SYSLOG_MESSAGE_ID="AUDIT"
 export SYSLOG_FACILITY="Local0"
+export SYSLOG_ROLLING_SIZE="250 MB"
+export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
+export SYSLOG_RING_BUFFER_SIZE=128
+
+export GLASS_LOG_DIR="/data/logs/tomcat/glass_failover"
 
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
@@ -35,7 +40,8 @@ export LOGIN_USER=$(who am i | awk '{print $1}')
 
 export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/tmp
+export LOGSTASH_ROLLING_SIZE="250 MB"
+export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
 export LOGSTASH_RING_BUFFER_SIZE=262144
 # ==================================================================
 # log overrides

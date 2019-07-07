@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<configuration status="INFO"
+               packages="com.liaison.common.log4j2.plugins,com.liaison.commons.log4j2,net.logstash.logging.log4j2.core.layout,com.liaison.commons.audit.log4j2"
+               verbose="false"
+               monitorInterval="${sys:com.liaison.log4j2.configuration.refresh.interval.sec}">
+
+    <appenders>
+
+
+        <!-- ############################################################## -->
+        <!-- #########    Logstash, General Application Logs   ############ -->
+        <!-- ############################################################## -->
+
+        <!-- LogStashFile disk appender to LogShipper -->
+        <File name="LogStashFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
+              append="true" ignoreExceptions="false">
+            <!-- exclude redundant log element -->
+            <LogStashJSONLayout excludeLog="true">
+
+                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
+                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
+                <!-- produce a valid and escaped json element -->
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg"/>
+
+                <!-- helpful sort filter -->
+                <KeyValuePair key="layout" value="log4j2_event_json"/>
+
+
+                <!-- Archaius Properties -->
+                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
+                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
+                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
+                <KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}"/>
+                <KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}"/>
+                <KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}"/>
+
+                <!-- AppEnv set properties -->
+                <KeyValuePair key="host_ips" value="${env:HOST_IPS}"/>
+                <KeyValuePair key="hostname" value="${env:LOCAL_HOSTNAME}"/>
+                <KeyValuePair key="environment_user" value="${env:DAEMON_USER}"/>
+                <KeyValuePair key="login_user" value="${env:LOGIN_USER}"/>
+
+                <!-- jre properties -->
+                <KeyValuePair key="java_version" value="${sys:java.version}"/>
+
+            </LogStashJSONLayout>
+            <filters>
+                <!-- remove some noise-->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </filters>
+        </File>
+
+        <!-- ############################################################## -->
+        <!-- #########          Glass Message General         ############ -->
+        <!-- ############################################################## -->
+        <!-- failover destination -->
+        <File name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
+               append="true" ignoreExceptions="false">
+            <GlassMessageJSONLayout compact="true"/>
+            <filters>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
+                              onMismatch="DENY"/>
+            </filters>
+        </File>
+
+		<!-- ############################################################## -->
+        <!-- #########             Audit - Syslog              ############ -->
+        <!-- ############################################################## -->
+
+        <File name="FileSyslogLogFile" fileName="/var/log/tomcat/syslog/filesyslog.log" append="true" >
+            <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
+            <filters>
+                <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+        </File>
+
+        <!-- failover destination  -->
+        <File name="FileSyslogFailoverFile" fileName="${env:SYSLOG_LOG_DIR}/filesyslog.failover.log"
+              append="true" ignoreExceptions="false">
+            <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
+            <filters>
+                <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+        </File>
+
+ 
+
+        <!-- Failover when either FileSyslogLogFile appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncFileSyslogWithFailover"
+               blocking="false"
+               bufferSize="${env:SYSLOG_RING_BUFFER_SIZE}"
+               errorRef="FileSyslogFailoverFile"
+               ignoreExceptions="false">
+
+            <AppenderRef ref="FileSyslogLogFile"/>
+        </Async>
+
+         <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncFileSyslogWithFailoverFailover" primary="AsyncFileSyslogWithFailover">
+            <Failovers>
+                <AppenderRef ref="FinalFailoverLocalFile"/>
+            </Failovers>
+        </Failover>
+
+
+
+        <!-- ############################################################## -->
+        <!-- ######### Instead of Console Use LocalLog File ############ -->
+        <!-- ############################################################## -->
+        <File name="LocalLog" fileName="/var/log/tomcat/local.log" append="true" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}"/>
+            <filters>
+                <!-- remove some noise -->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </filters>
+        </File>
+
+        <!-- Replaces "Console" with final_failover_console.log -->
+        <File name="FinalFailoverLocalFile" fileName="/var/log/tomcat/final_failover_console.log" append="true" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}"/>
+            <filters>
+                <!-- remove some noise -->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </filters>
+        </File>
+
+    </appenders>
+
+    <loggers>
+        <root level="INFO">
+            <appender-ref ref="LogStashFile"/>
+            <appender-ref ref="GlassMessageSpectrumFile" />
+			<appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
+
+            <appender-ref ref="LocalLog"/>
+
+        </root>
+    </loggers>
+</configuration>
