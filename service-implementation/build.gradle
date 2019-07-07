@@ -229,8 +229,6 @@ dependencies {
 	//METRICS
 	compile 'com.liaison.commons:lib_metrics:1.+'
 
-    // hazelcast dependency
-    compile "com.hazelcast:hazelcast:3.12.1"
 }
 
 idea {

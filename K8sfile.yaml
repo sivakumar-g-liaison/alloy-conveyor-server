@@ -1,0 +1,249 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloy-conveyor-server
+spec:
+  selector:
+    run: alloy-conveyor-server
+  ports:
+    - name: app-http
+      port: 8989
+    - name: admin-http
+      port: 8990
+    - name: app-https
+      port: 9443
+    - name: admin-https
+      port: 9444
+    - name: jmx
+      port: 6000
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alloy-conveyor-server
+  labels:
+    app: alloy-conveyor-server
+spec:
+  minReadySeconds: 20
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      run: alloy-conveyor-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: alloy-conveyor-server
+        zone: bb-hsec
+    spec:
+      volumes:
+        - name: alloy-conveyor-server
+          configMap:
+            name: alloy-conveyor-server
+        - name: alloy-integration-common
+          configMap:
+            name: alloy-integration-common
+        - name: alloy-truststore
+          secret:
+            secretName: alloy-truststore
+        - name: alloy-common-secrets
+          secret:
+            secretName: alloy-common-secrets
+            items:
+              - key: star.liaison.jks
+                path: private.jks
+              - key: STAR_LIAISON_JKS_PASSWORD
+                path: password
+        - name: alloy-integration-common-secrets
+          secret:
+            secretName: alloy-integration-common-secrets
+            items:
+              - key: bootstrap.passphrase
+                path: passphrase
+              - key: bootstrap.privatekey
+                path: csbootstrapkey.pem
+              - key: bootstrap.signandverifykeystore.jks
+                path: signandverifyserviceacl.jks
+              - key: bootstrap.signkeypwd
+                path: cssignkeypwd.file
+        - name: alloy-conveyor-server-secrets
+          secret:
+            secretName: alloy-conveyor-server-secrets
+        - name: alloy-core-logshipper
+          configMap:
+            defaultMode: 0555
+            name: alloy-core-logshipper
+        - name: alloy-core-logshipper-secrets
+          secret:
+            defaultMode: 0555
+            secretName: alloy-core-logshipper-secrets
+        - name: logshipper-logs
+          emptyDir: {}
+        - name: glass-log-data
+          emptyDir: {}
+      imagePullSecrets:
+        - name: alloy-imagepullsecret
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: alloy-conveyor-server
+          env:
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: alloy-integration-common
+                  key: ENVIRONMENT
+            - name: DATACENTER
+              valueFrom:
+                configMapKeyRef:
+                  name: alloy-integration-common
+                  key: DATACENTER
+            - name: STACK
+              valueFrom:
+                configMapKeyRef:
+                  name: alloy-integration-common
+                  key: STACK
+            - name: REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: alloy-integration-common
+                  key: REGION
+            - name: TOMCAT_USER
+              value: alloy
+            - name: TOMCAT_GROUP
+              value: alloy
+            - name: SERVER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          image: alloy/conveyor-server:latest
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/opt/liaison/lifecycle/bleed-stop.sh"]
+          ports:
+            - containerPort: 8989
+              name: app-http
+            - containerPort: 8990
+              name: admin-http
+            - containerPort: 9443
+              name: app-https
+            - containerPort: 9444
+              name: admin-https
+            - containerPort: 6000
+              name: jmx
+          # livenessProbe triggers restart of pod on failure
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /g2mailboxservice/metrics/healthcheck
+              port: 8989
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 30
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /g2mailboxservice/metrics/healthcheck
+              port: 8989
+              scheme: HTTP
+            periodSeconds: 10
+            timeoutSeconds: 30
+            successThreshold: 1
+            initialDelaySeconds: 120
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: 2Gi
+            requests:
+              cpu: "500m"
+              memory: 2Gi
+          volumeMounts:
+            - name: alloy-truststore
+              mountPath: /secret/truststore
+            - name: alloy-common-secrets
+              mountPath: /secret/tls
+            - name: alloy-integration-common-secrets
+              mountPath: /secure/tomcat/bootstrap/passphrase
+              subPath: passphrase
+              readOnly: true
+            - name: alloy-integration-common-secrets
+              mountPath: /secure/tomcat/bootstrap/csbootstrapkey.pem
+              subPath: csbootstrapkey.pem
+              readOnly: true
+            - name: alloy-integration-common-secrets
+              mountPath: /secure/tomcat/bootstrap/signandverifyserviceacl.jks
+              subPath: signandverifyserviceacl.jks
+              readOnly: true
+            - name: alloy-integration-common-secrets
+              mountPath: /secure/tomcat/bootstrap/cssignkeypwd.file
+              subPath: cssignkeypwd.file
+              readOnly: true
+            - name: alloy-conveyor-server-secrets
+              mountPath: /secure/tomcat/secure.properties
+              subPath: secure.properties
+            - name: alloy-conveyor-server
+              mountPath: /opt/liaison/service-conf/properties/g2mailboxservice-default.properties
+              subPath: g2mailboxservice-default.properties
+              readOnly: true
+            - name: alloy-conveyor-server
+              mountPath: /opt/liaison/service-conf/properties/g2mailboxservice-default.sh
+              subPath: g2mailboxservice-default.sh
+              readOnly: true
+            - name: alloy-conveyor-server
+              mountPath: /opt/liaison/service-conf/properties/log4j2-default.xml
+              subPath: log4j2-default.xml
+              readOnly: true
+            - mountPath: /data/logs/logshipper
+              name: logshipper-logs
+            - mountPath: /data/logs/glass_failover
+              name: glass-log-data
+        - name: logshipper
+          image: core/logshipper:1.6.3
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "touch /data/logs/glass_failover/GlassMessageSpectrumREST.failover.log"]
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sh /opt/liaison/service-conf/local/container_pre_stop.sh"]
+          resources:
+            limits:
+              cpu: "200m"
+              memory: 1Gi
+            requests:
+              cpu: "100m"
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /opt/liaison/service-conf/local/config.json
+              name: alloy-core-logshipper-secrets
+              subPath: config.json
+            - mountPath: /opt/liaison/service-conf/local/container_pre_stop.sh
+              name: alloy-core-logshipper
+              subPath: container_pre_stop.sh
+            - mountPath: /data/logs/logshipper
+              name: logshipper-logs
+            - mountPath: /data/logs/glass_failover
+              name: glass-log-data
+          env:
+            - name: PARENT_APPLICATION_ID
+              value: conveyor-server
+        - name: glass-logrotate
+          image: core/glass-logrotate:1.0.1
+          resources:
+            limits:
+              cpu: "100m"
+              memory: 100Mi
+            requests:
+              cpu: "50m"
+              memory: 50Mi
+          volumeMounts:
+            - mountPath: /data/logs/logshipper
+              name: logshipper-logs
+            - mountPath: /data/logs/glass_failover
+              name: glass-log-data
