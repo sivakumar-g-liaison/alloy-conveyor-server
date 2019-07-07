@@ -1,0 +1,20 @@
+// The preferred way to make local modifications to your build environment is through the use of Gradle init scripts.
+//    * http://www.gradle.org/docs/current/userguide/init_scripts.html
+
+allprojects {
+// These are all overrides for properties that are found in usermanagement/gradle.properties
+ext.dbServerNameDtdm='lsildb24q.liaison.dev'
+ext.dbServerServiceDtdm='G2QA.liaison.dev'
+ext.dbServerPortDtdm='1521'
+ext.dbSchemaNameDtdm='GATEWAY_DTDM'
+ext.dbSchemaNamePrefixDtdm='QA'
+ext.dbaPasswordDtdm='12345678'
+
+ext.dbServerNameRtdm='lsildb24q.liaison.dev'
+ext.dbServerServiceRtdm='G2QA.liaison.dev'
+ext.dbServerPortRtdm='1521'
+ext.dbSchemaNameRtdm='GATEWAY_RTDM'
+ext.dbSchemaNamePrefixRtdm='QA'
+ext.dbaPasswordRtdm='12345678'
+
+}

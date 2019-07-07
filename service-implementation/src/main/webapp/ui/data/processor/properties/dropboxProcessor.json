@@ -1,0 +1,64 @@
+{
+  "processorDefinition": {
+    "type":"DROPBOXPROCESSOR",
+    "displayName":"DROPBOXPROCESSOR",
+    "protocol":"",
+    "handOverExecutionToJavaScript":false,
+    "staticProperties": [
+       {
+            "name":"httpListenerPipeLineId",
+            "displayName" : "PipelineId",
+            "value":"",
+            "type":"textarea",
+            "readOnly":false,
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			  "maxLength": "2048"
+            }
+         },
+         {
+            "name":"securedPayload",
+            "displayName" : "Encrypt Payload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]           
+        },
+        {
+            "name":"lensVisibility",
+            "displayName" : "LENS Visibility",
+            "value":"Invisible",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"Invisible",
+            "validationRules": null,
+            "options":["Invisible","Visible"]           
+ 		 },
+        {
+        "name":"add new -->",
+        "displayName" : "add new -->",
+        "value":"",
+        "type":"textarea",
+        "readOnly":false,
+        "mandatory":false,
+        "dynamic": true,
+        "valueProvided":false,
+        "defaultValue":"",
+        "validationRules": null            
+      }
+    ],
+    "folderProperties":[],
+    "credentialProperties":[]
+  }
+}

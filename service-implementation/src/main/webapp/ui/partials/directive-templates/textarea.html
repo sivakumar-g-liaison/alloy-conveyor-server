@@ -1,0 +1,43 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<ng-form id="formTextArea" name="formTextArea">
+<div ng-switch on="currentRowObject.name">
+  <div ng-switch-when="url">
+  <textarea class="form-control textArea_Editor" dynamic-validation-directive="currentRowObject.name" ng-model="currentRowObject.value" ng-input="{{currentRowObject.value}}" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "currentRowObject.readOnly" ng-change = "OnChangeUrl(currentRowObject)" ng-pattern = "{{currentRowObject.validationRules.pattern}}"  ng-required="currentRowObject.mandatory || currentRowObject.valueProvided"/> 
+  </div>
+  <div ng-switch-default>
+  <textarea class="form-control textArea_Editor" dynamic-validation-directive="currentRowObject.name" ng-model="currentRowObject.value" ng-input="{{currentRowObject.value}}" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "currentRowObject.readOnly" ng-pattern = "{{currentRowObject.validationRules.pattern}}"  ng-required="currentRowObject.mandatory || currentRowObject.valueProvided"/> 
+  </div>
+</div>
+<div ng-show="formTextArea[currentRowObject.name].$dirty && formTextArea[currentRowObject.name].$invalid">
+	<span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formTextArea[currentRowObject.name].$error.pattern}" ng-show="formTextArea[currentRowObject.name].$error.pattern">Invalid {{currentRowObject.displayName}}.</span>
+	<span id="mbx-procsr-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom': formTextArea[currentRowObject.name].$error.required}" ng-show="formTextArea[currentRowObject.name].$error.required">{{currentRowObject.displayName}} is mandatory.</span>
+	<span id="mbx-procsr-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formTextArea[currentRowObject.name].$error.minlength }" ng-show="formTextArea[currentRowObject.name].$error.minlength">
+	<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>{{currentRowObject.displayName}} cannot be shorter than {{currentRowObject.validationRules.minLength}} characters.</span>
+	<span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formTextArea[currentRowObject.name].$error.maxlength}" ng-show="formTextArea[currentRowObject.name].$error.maxlength">
+	<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>{{currentRowObject.displayName}} cannot be longer than {{currentRowObject.validationRules.maxLength}} characters.</span>
+ </div>
+<div ng-show="!currentRowObject.readOnly">
+  <a ng-click="isModal(currentRowObject)" data-toggle="modal" data-target="#{{currentRowObject.name}}"  class="processor_right">
+    <i class="glyphicon glyphicon-new-window"></i></a>  
+  <div class="modal-custom fade textarea_exactCenter" id="{{currentRowObject.name}}" role="dialog" aria-hidden="true">
+   <div class="modal-dialog">
+	<div class="modal-content">
+		<div class="modal-header">
+			<button id="mbx-procsr-properties-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h4 class="modal-title">Edit Value</h4>
+		</div>
+		<div class="modal-body">
+		 <div ui-ace="{onLoad : loadValueData,
+					  theme : 'monokai',					  
+					  mode: 'json'
+					}" class="textarea_ace_editor">
+		  </div>
+			<div class="modal-footer">
+				<button id="mbx-procsr-properties-close" type="button" class="btn btn-default" data-dismiss="modal" ng-click="close()">Close</button>
+			</div>
+		</div>
+	  </div>
+    </div>
+  </div>
+</div>
+</ng-form> 

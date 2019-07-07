@@ -1,0 +1,417 @@
+<div class="container fade-in">
+
+    <div class="form-row">
+        <h2 id="mbx-procsr-mailboxName">
+      Processors of Mailbox {{mailboxName}}
+    </h2>
+
+        <div class="gridStyle" ng-grid="gridOptionsForProcessorList" ng-if="gridLoaded">
+
+        </div>
+        <br/>
+
+        <button id="mbx-procsr-addNew" class="btn btn-primary" data-toggle="modal" data-target="#addNewModal" ng-show="gridLoaded">
+            Add New
+        </button>
+        
+    <div class="modal-custom" id="addNewModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button id="mbx-procsr-addNewmodal-confirm" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <h4 class="modal-title">Confirmation</h4>
+					</button>
+				</div>
+                <div class="modal-body">
+                    Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
+				<div class="modal-footer">
+					<button id="mbx-procsr-modal-addNew" class="btn btn-primary" data-dismiss="modal" ng-click="addNew()">Confirm</button>
+					<button id="mbx-procsr-modal-cancel" class="btn btn-primary cancel" data-dismiss="modal" ng-click="closeDelete()">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+        
+        <form name="formAddPrcsr" novalidate="">
+
+            <br>
+
+            <h3>
+        Processors Details
+      </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Name *
+                        </label>
+                        <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-minLength="{{minimumLength}}" ng-maxLength="{{maximumLengthAllowedInProcessorDescription}}" class="form-control" valid-number />
+						
+                        <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
+                            <span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.name.$error.pattern}" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
+                            <span id="mbx-procsr-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.name.$error.required}" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
+                            <span id="mbx-procsr-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formAddPrcsr.name.$error.minlength }" ng-show="formAddPrcsr.name.$error.minlength">
+                            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be shorter than {{minimumLength}} characters.</span>
+                            <span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.name.$error.maxlength}" ng-show="formAddPrcsr.name.$error.maxlength">
+                            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
+
+                        </div>
+                    </div>
+					<div class="form-group processor_adjustMarginBottom">
+                        <label>
+                            {{processorData.supportedStatus.displayName}}
+                        </label>
+                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.key for e in processorData.supportedStatus.options" class="form-control">
+                        </select>
+
+                    </div>					
+                </div>
+				<div class="col-md-6">
+                    <div class="form-group" ng-show = "!isEdit">
+                        <label>
+                            Description
+                        </label>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength="{{maximumLengthAllowedInProcessorDescription}}" class="form-control processor_textArea_Editor"></textarea>
+                        <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
+                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
+                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
+                        </div>
+					</div>	
+					<div class="form-group" ng-show = "isEdit">
+                        <label>
+                            Description
+                        </label>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="editDescription" ng-pattern="userInputPattern" ng-maxlength={{maximumLengthAllowedInProcessorDescription}} rows="1" class="form-control"></textarea>
+                        <div ng-show="formAddPrcsr.editDescription.$dirty && formAddPrcsr.editDescription.$invalid">
+                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.editDescription.$error.pattern}" ng-show="formAddPrcsr.editDescription.$error.pattern">Invalid Description</span>
+                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.editDescription.$error.maxlength}" ng-show="formAddPrcsr.editDescription.$error.maxlength">
+                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
+                        </div>
+                    </div>
+					<div class="form-group proc_id_margin" ng-show = "isEdit">
+							<label> ProcessorId </label>
+							<textarea class="form-control" readonly="readonly"
+								ng-model="processor.guid" ng-show="isEdit" id="processor_pguid"
+								rows="1" name="processorpguid"></textarea>
+					</div>
+                </div>
+            </div>
+			<div class="row">
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<br>
+                        <label>
+                         {{processorData.supportedProcessors.displayName}}
+                        </label>
+                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.key group by type.type for type in processorData.supportedProcessors.options | orderBy:'key'" class="form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<br>
+                        <label>
+                            {{processorData.supportedProtocols.displayName}}
+                        </label>
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeConditionalSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in processorData.supportedProtocols.options" class="form-control">
+                        </select>
+                    </div>
+                </div>
+            </div>            			
+            <div class="row form-group">
+			    <div class="col-sm-6 col-md-6 processor_adjustPaddingTop">
+				 <span>{{supportedJavaScriptCheckBox.displayName}}
+				 <input type="checkbox" ng-model="isJavaScriptExecution" id="mbx_procsr_javascript" ng-click="onChangeJavaScriptExecutor()">
+				</span>
+				</div>
+				<div class="col-sm-6 col-md-6">
+				<div class="form-group">
+				<label>Script URL<span ng-show="isJavaScriptExecution"> *</span></label>
+				</div>
+				<div class="form-group">
+				  <div class="col-sm-5 col-md-5 processor_adjustgitPaddingRight">
+				      <div ng-switch on="isJavaScriptExecution">
+						 <div ng-switch-when="true">
+						  <input id="mbx-procsr-scriptFilePath" type="text" name="scriptName" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" url-validation required />
+						  <div ng-show="formAddPrcsr.$error.allowed">
+				          <span id="mbx-procsr-JavaScript-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.$error.allowed}" 
+						  ng-show="formAddPrcsr.$error.allowed">URL is invalid. (gitlab:/{path} is allowed.)</span>					   
+						  </div>
+                          <div ng-show="!formAddPrcsr.$error.allowed && formAddPrcsr.scriptName.$dirty && formAddPrcsr.scriptName.$invalid">
+	                     <span id="mbx-procsr-JavaScriptName-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.scriptName.$error.required}" 
+	                     ng-show="formAddPrcsr.scriptName.$error.required">URL is invalid. (gitlab:/{path} is allowed.)</span>	  
+	                     </div>						  
+					     </div>
+						 <div ng-switch-when="false">
+						 <input id="scriptFileUrl" type="text" name="scriptName" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" url-validation />
+						 <div ng-show="formAddPrcsr.$error.allowed">
+				          <span id="mbx-procsr-scriptFilePath" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.$error.allowed}" 
+						  ng-show="formAddPrcsr.$error.allowed">URL is invalid. (gitlab:/{path} is allowed.)</span>					   
+						  </div>						 
+						 </div>
+					  </div>					      							     				
+				  </div>
+					 <div class="col-sm-1 col-md-1 processor_adjustPaddingRightForScript">
+							<div ng-controller="ScriptCreateFileController">
+								<div ng-switch on="scriptIsEdit">
+									<div ng-switch-when="true">
+						     <button id="createNewScriptFileToEdit"  class="btn btn-primary" ng-click="onScriptTypeSelected()">EditScript</button>
+									</div>
+									<div ng-switch-when="false">
+						     <button id="createNewScriptFileToAdd" class="btn btn-primary" ng-disabled="formAddPrcsr.scriptName.$invalid  || !scriptUrlIsValid" ng-click="onScriptTypeSelected()">AddScript</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+			  </div>
+							
+			</div>
+		    <div class="row form-group" ng-show="!javaProperties.deployAsDropbox">
+              <div class="col-sm-6 col-md-6">
+                  <label for="clusterType">
+                   Cluster Type
+                  </label>
+                  <select class="form-control" ng-change="onClusterChange()" ng-model="processor.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+                  </select>
+              </div>
+              <div class="col-sm-6 col-md-6 processor_adjustPaddingTop" ng-show = "showDirectSubmit">
+            	    <span>Direct Submit
+                        <input type="checkbox" ng-model="isDirectSubmit" id="mbx_procsr_directSubmit" ng-click="onChangeDirectSubmit()">
+                    </span>
+            	</div>
+            </div>
+			</br>
+			<div class="row form-group" ng-show = "isEdit && processor.modifiedDate">
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<label for="modifiedBy">
+							Last Modified By
+						</label>
+						<input class="form-control" type="text" id="modifiedById" ng-model="processor.modifiedBy" name="modifiedByName" ng-show = "true" ng-disabled = "true"/>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
+                    <div class="form-group">
+						<label for="modifiedDate">
+							Last Modified Date
+						</label>
+						<input class="form-control" type="text" id="modifiedDateId" ng-model="processor.modifiedDate" name="modifiedDateName" ng-show = "true" ng-disabled = "true"/>
+                    </div>
+                </div>
+            </div>            
+
+            <!-- Modal -->
+            <div class="modal-custom fade" id="myModal" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button id="mbx-procsr-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <h4 class="modal-title">Choose your file</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="mbx-procsr-modal-roleList" data-angular-treeview="true" data-tree-model="modal.roleList" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button id="mbx-procsr-modal-choose" type="button" ng-disabled = "isDirectoryPath" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">Choose</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div>
+                    <h4>Properties</h4>
+
+                    <div class="gridStyle" ng-grid="gridOptionsForProcessor">
+                    </div>
+                </div>
+            </div>           
+            <div class="form-group" ng-hide="isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeHTTPRemoteUploader">
+                <div>
+                    <h4>Folders</h4>
+                    <span>Create folders if not available <input type="checkbox" ng-model="isCreateConfiguredLocation" id="mbx_procsr_configuredlocation" ng-init="isCreateConfiguredLocation=true">
+					</span>
+					<br/><br/>
+                    <div class="gridStyle" ng-grid="gridOptionsForProcessorFolder">
+                    </div>
+                </div>
+                <br>
+            </div>
+
+            <div ng-controller = "CredentialHanlderCntrlr" class="form-group" ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeSweeper || isProcessorTypeConditionalSweeper">
+			 	<h4>Credentials</h4>
+	            <div class ="row" ng-show="showTruststoreSection">
+	                    <div class="col-sm-4 col-md-4 adjustPaddingRight">
+	                            <label>
+	                                Truststore Group ID
+	                            </label>
+	                            <input id="mbx-procsr-truststoregroupid" name="trustStoreGroupId" type="text" ng-pattern="trustStore_SshKeypair_Pattern" ng-model="truststoreModal.trustStoreGroupId" ng-blur="trustoreAdditonEnabler()" class="form-control">
+	                            	<div ng-show="formAddPrcsr.trustStoreGroupId.$dirty && formAddPrcsr.trustStoreGroupId.$invalid">
+										<span class = "help-block-custom" ng-show="formAddPrcsr.trustStoreGroupId.$error.pattern">Invalid TrustStore Group Id</span>
+									</div>
+	                    </div>
+	                    <div class="col-sm-2 col-md-2">
+	                            <button id="mbx-procsr-truststoreadd" ng-disabled="disableTrustoreAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addTruststoreDetails()">Add Truststore</button>
+	                    </div>
+	                </div>
+	                <div class ="row" ng-show="showSSHKeysSection">
+	                    <div class="col-sm-4 col-md-4 adjustPaddingRight">
+	                            <label>
+	                                SSH KeyPair Group ID 
+	                            </label>
+	                            <input id="mbx-procsr-sshkeypairgroupid" name="sshKeyPairGroupId" type="text" ng-pattern="trustStore_SshKeypair_Pattern" ng-model="sshkeyModal.sshKeyPairGroupId" ng-blur="sshKeysAdditonEnabler()" class="form-control">
+	                            <div ng-show="formAddPrcsr.sshKeyPairGroupId.$dirty && formAddPrcsr.sshKeyPairGroupId.$invalid">
+									<span class = "help-block-custom" ng-show="formAddPrcsr.sshKeyPairGroupId.$error.pattern">Invalid SSH Keypair Group Id</span>
+								</div>
+	                    </div>
+	                    <div class="col-sm-2 col-md-2">
+	                            <button id="mbx-procsr-sshkeypairadd" ng-disabled="disableSSHKeysAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addSSHKeyDetails()">Add SSH KeyPair</button>
+	                    </div>
+	                </div>
+	                <br/>
+	                <div class="gridStyle" ng-grid="gridOptionsForProcessorCredential">
+	                </div>
+            </div>
+            <h3 ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter ">
+                Scheduling
+            </h3>
+			<h3 ng-show="isProcessorTypeDropbox">
+                Transfer Profiles
+            </h3>
+
+            <div class="row well processor_multipleSelectionListBoundary"  ng-hide ="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" >
+                <div class="col-sm-6 col-md-6">
+                    <label ng-show="!isProcessorTypeDropbox">
+                        <i>
+                        all available schedules
+                        </i>
+                    </label>
+					<label ng-show="isProcessorTypeDropbox">
+                        <i>
+                        all available transfer profiles
+                        </i>
+                    </label>
+                    <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles | orderBy : 'name'" class="form-control">
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <div>
+                        <br>
+                        <button id="mbx-procsr-chooseProfile" class="btn btn-primary processor_multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-click="chooseProfile()">
+                            &gt;&gt;
+                        </button>
+                    </div>
+                    <div>
+                        <br>
+                        <button id="mbx-procsr-removeProfile" class="btn btn-primary processor_multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-click="removeProfile()">
+                            &lt;&lt;
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-5 col-md-5">
+                    <label ng-show="!isProcessorTypeDropbox">
+                        <i>
+                        linked schedules
+                        </i>
+                    </label>
+					<label ng-show="isProcessorTypeDropbox">
+                        <i>
+                        linked transfer profiles
+                        </i>
+                    </label>
+                    <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-options="selected.name for selected in selectedProfiles" class="form-control">
+                    </select>
+                </div>
+              
+            </div>
+            <div class = "form-group" ng-show = "isEdit && isProcessorTypeHTTPListener && urlType">
+       			<label>
+               		<h4>{{urlType}}</h4>
+           		</label>
+				<div class="input-group">
+					<input type="text" class="form-control" ng-model="processorUrlDisplayContentById" ng-show = "isEdit && isProcessorTypeHTTPListener" readonly = "readonly" id="Processor_url" rows="2" name="processorurl"/>
+						<span class="input-group-btn">
+							<button class="btn" copy-to-clipboard="{{processorUrlDisplayContentById}}"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
+						</span>
+				</div>
+				</br>
+				<div class="input-group">
+					<input type="text" class="form-control" ng-model="processorUrlDisplayContentByName" ng-show = "isEdit && isProcessorTypeHTTPListener" readonly = "readonly" id="Processor_url" rows="2" name="processorurl"/>
+						<span class="input-group-btn">
+							<button class="btn" copy-to-clipboard="{{processorUrlDisplayContentByName}}"><span class="glyphicon glyphicon-file" tooltip="copy to clipboard"></span></button>
+						</span>
+				</div>
+			</div>       
+        </form>
+        <div>
+            <button id="mbx-procsr-backtoMailbox" class="btn btn-primary" data-toggle="modal" data-target="#backToMailboxAction">
+                Back to Mailbox
+            </button>
+            <button id="mbx-procsr-save" class="btn btn-primary" ng-click="save()" ng-disabled="formAddPrcsr.$invalid || showCredentialInvalid">
+                Save
+            </button>
+            <button id="mbx-procsr-cancel" class="btn btn-primary" data-toggle="modal" data-target="#cancelAction">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Model for Cancel Action -->
+<div class="modal-custom" id="cancelAction" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="doCancel()">Confirm</button>
+				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Model for BackToMailboxAction Action -->
+<div class="modal-custom" id="backToMailboxAction" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you  sure you want to leave this page? All unsaved changes will be lost.</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="backToMailbox()">Confirm</button>
+				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Model for delete processor -->
+<div class="modal-custom" id="confirmProcessorDelete" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirm Processor Delete</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Do you really want to delete the processor?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-danger" data-dismiss="modal" ng-click="confirmProcessorSave()">Delete</button>
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="closeConfirmProcessorDelete()">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>

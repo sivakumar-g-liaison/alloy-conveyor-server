@@ -1,0 +1,38 @@
+{
+  "addProcessorToMailBoxRequest": {
+    "processor": {
+      "guid": "",
+      "name": "google testremote downloader",
+      "type": "REMOTEDOWNLOADER",
+      "javaScriptURI": "",
+      "description": "",
+      "status": "ACTIVE",
+      "protocol": "HTTP",
+      "linkedMailboxId": "A7E007C90A0A01C80ABA010F2155EBF7",
+      "linkedProfiles": [
+        "294sftpdownloader"
+      ],
+      "folders": [
+        {
+          "folderURI": "//temp",
+          "folderType": "RESPONSE_LOCATION",
+          "folderDesc": "test"
+        }
+      ],
+      "credentials": [],
+      "dynamicProperties": [],
+      "remoteProcessorProperties": {
+        "otherRequestHeader": [],
+        "url": "http://soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response",
+        "port": "",
+        "httpVersion": "1.1",
+        "httpVerb": "GET",
+        "contentType": "application/atom+xml",
+        "chunkedEncoding": true,
+        "retryAttempts": "1",
+        "socketTimeout": "60000",
+        "connectionTimeout": "60000"
+      }
+    }
+  }
+} 

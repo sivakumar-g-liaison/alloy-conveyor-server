@@ -1,0 +1,202 @@
+<div class="container fade-in">
+  
+  <div class="addmailboxform-row">
+    <h3>
+      Mailbox Definition
+    </h3>
+    <hr>
+  </div>
+  
+  <form name="formAddMbx" novalidate="" >
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="name">
+            Name *
+          </label>
+            <input type="text" class="form-control" id="name" ng-model="mailBox.name" required="" name="name"
+                   ng-pattern="mailboxInputPattern" ng-minLength=5 ng-maxLength=80 ng-change="toggleWarningEnabler(true)" ng-blur="toggleWarningEnabler(false)"/>
+            <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
+                <span id="mbx-add-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom': formAddMbx.name.$error.pattern}" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
+                <span id="mbx-add-nameInvalid-required" class="customHide" ng-class= "{'help-block-custom': formAddMbx.name.$error.required}" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
+                <span id="mbx-add-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formAddMbx.name.$error.minlength}"ng-show="formAddMbx.name.$error.minlength">
+                <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be shorter than {{minimumLength}} characters.</span>
+		        <span id="mbx-add-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block': formAddMbx.name.$error.maxlength}" ng-show="formAddMbx.name.$error.maxlength">
+		       <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+            </div>
+			<div ng-show = "(isMailBoxEdit && isMailboxNameChanged)">
+				<span id="mbx-edit-warning" class="customHide" ng-class = "{'custom-info-block': true}">
+				<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Changing the Mailbox Name will affect the related sync and async transactions.</span>
+			</div>
+		</div>
+        
+        
+        <div class="form-group">
+          <label for="status">
+            Status
+          </label>
+          
+          <select class="form-control" ng-model="status" id="status" ng-options="e.name for e in enumstats">
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="tenancykey">
+            Tenancy key*
+          </label>
+		  <select class="form-control" ng-model="tenancyKey" id="tenancykey" ng-options="tenancykeyObj as tenancykeyObj.name for tenancykeyObj in tenancyKeys" ng-change="onTenancyKeySelected(tenancyKey)" ng-hide= "isMailBoxEdit">
+          <option value="" ng-hide = isEnable>-- Select --</option>
+		  </select>
+            <input class="form-control" type="text" id="tenancykey" ng-model="tenancyKey.name" name="tenancykey" ng-show = "isMailBoxEdit" ng-disabled = "isMailBoxEdit"/>
+         </div>
+         
+         <div class="form-group" ng-show = "isMailBoxEdit && mailBox.modifiedBy">
+	          <label for="modifiedBy">
+	            Last Modified By
+	          </label>
+	          <input class="form-control" type="text" id="modifiedById" ng-model="mailBox.modifiedBy" name="modifiedByName" ng-disabled = "true"/>
+         </div>
+         
+         <div class="form-group" ng-show="!javaProperties.deployAsDropbox">
+              <label for="clusterType">
+               Cluster Type
+              </label>        
+              <select class="form-control" ng-model="mailBox.clusterType" id="clusterType" ng-options="clusterType for clusterType in javaProperties.clusterTypes">
+              </select>
+         </div>
+        
+   </div>
+      
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="key">
+            Shard key
+          </label>
+
+            <input class="form-control" type="text" id="key" ng-model="mailBox.shardKey" name="key" ng-pattern="userInputPattern"
+                   ng-minLength=5 ng-maxLength=80 />
+            <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
+                <span id="mbx-add-keyInvalid-pattern" class="customHide" ng-class="{'help-block-custom' : formAddMbx.key.$error.pattern }" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
+            <span id="mbx-add-keyInvalid-minlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.minlength }" ng-show="formAddMbx.key.$error.minlength">
+            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be shorter than {{minimumLength}} characters.</span>
+		    <span id="mbx-add-keyInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.maxlength }" ng-show="formAddMbx.key.$error.maxlength">
+		    <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+            </div>
+          
+          
+        </div>
+
+
+          <div class="form-group">
+              <label for="description">
+                  Description
+              </label>
+
+              <textarea class="form-control" ng-model="mailBox.description" id="description" rows="1" name="description"
+                        ng-pattern="userInputPattern" ng-maxLength=1024>          </textarea>
+              <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
+                  <span id="mbx-add-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.description.$error.pattern}" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
+          		  <span id="mbx-add-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.description.$error.maxlength}" ng-show="formAddMbx.description.$error.maxlength">
+          		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
+              </div>
+          </div>
+			<div class="form-group">
+			<label for="mailboxId">
+				MailboxId
+			</label>
+			<textarea class="form-control" ng-readonly="isMailBoxEdit" ng-model="mailBox.guid" id="mailbox_pguid" rows="1" name="mailboxpguid" ng-pattern="mailBoxIdPattern" 
+             ng-minLength=32 ng-maxLength=32 />
+			<div ng-show="formAddMbx.mailboxpguid.$dirty && formAddMbx.mailboxpguid.$invalid">
+                  <span id="mbx-id-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.mailboxpguid.$error.pattern}" ng-show="formAddMbx.mailboxpguid.$error.pattern">Invalid MailboxId.</span>
+				  <span id="mbx-id-descInvalid-minlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.mailboxpguid.$error.minlength }" ng-show="formAddMbx.mailboxpguid.$error.minlength">
+          		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>MailboxId cannot be shorter than {{mailBoxIdMaxLength}} characters.</span>
+          		  <span id="mbx-id-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.mailboxpguid.$error.maxlength}" ng-show="formAddMbx.mailboxpguid.$error.maxlength">
+          		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>MailboxId cannot be longer than {{mailBoxIdMaxLength}} characters.</span>
+              </div>
+		  </div>
+		  
+         <div class="form-group" ng-show = "isMailBoxEdit && mailBox.modifiedDate">
+			  <label for="modifiedDate">
+				Last Modified Date
+			  </label>
+				<input class="form-control" type="text" id="modifiedDateId" ng-model="mailBox.modifiedDate" name="modifiedDateName" ng-disabled = "true"/>
+         </div>
+          </div>
+       </div>
+   
+	<div class="form-group">
+    <div>
+      <div class="gridStyle addMailBox_gridStyle" ng-grid="gridOptionsForMailbox">
+      </div>
+      <br>
+   </div>
+  </div>
+  </form>
+  
+  <div>
+    <button id="mbx-add-cancel" class="btn btn-primary" data-toggle="modal" data-target="#cancelAction">
+      Cancel
+    </button>
+    <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid || !isEnable">
+      Save
+    </button>
+    <button id="mbx-add-procsr" class="btn btn-primary" ng-click="navigateToProcessorScreen()" ng-disabled="(!isProcessorsAvailable && !isMailBoxSaved && !isMailBoxEdit) || (formAddMbx.$invalid)">
+      {{addProcessorBtnValue}}
+    </button>
+  </div></div>
+  <!-- Model for Cancel Action -->
+<div class="modal-custom" id="cancelAction" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="doCancel()">Confirm</button>
+				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal-custom" id="saveMailboxConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Any unsaved changes will be lost. Do you want to proceed without saving your changes?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="closeMailboxConfirmationModal()">ok</button>
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="addProcessor()">Save Changes</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Model for delete mailbox -->
+<div class="modal-custom" id="confirmMailboxDelete" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirm Mailbox Delete</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Do you really want to delete the mailbox?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-danger" data-dismiss="modal" ng-click="confirmMailboxSave()">Delete</button>
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="closeconfirmMailboxDelete()">cancel</button>
+			</div>
+		</div>
+	</div>
+</div>

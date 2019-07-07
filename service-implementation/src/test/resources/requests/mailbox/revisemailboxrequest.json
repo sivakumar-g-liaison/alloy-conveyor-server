@@ -1,0 +1,21 @@
+{
+    "reviseMailBoxRequest": {
+        "mailBox": {
+            "guid": "40288bc340cf19460140cf1947e00003",
+            "name": "MCCWebAnalytics",
+            "description": "Updatedmydescription",
+			"shardKey":"key_12345",
+            "status": "ACTIVE",
+            "properties": [
+                {
+                    "name": "filerenameformat",
+                    "value": "*.queued"
+                },
+                {
+                    "name": "newproperty",
+                    "value": "newvalue"
+                }
+            ]
+        }
+    }
+}

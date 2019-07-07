@@ -1,0 +1,40 @@
+<div class="container fade-in">
+   <div class="form-row">
+      <h3 id="title" class="ng-binding">Update Processor DC</h3>
+      <hr />
+      <br />
+   </div>
+   <div class="form-inline">
+      <form name="updateProcessorDcForm" novalidate="">
+         <div class="row">
+            <div class="col-md-5">
+               <label for="processorGuid"> Processor Id </label>
+               <input id="processorGuid" type="text" ng-model="processorGuid" class="form-control" name="processorGuid"/>
+            </div>
+            <div class="col-md-1">
+               <button id="getProcessorDC" class="btn btn-primary processordc" ng-click="getProcessorToUpdateDC()">Get Processor</button>
+            </div>
+         </div>
+         </br>
+         <div class="row" ng-show="showDc">
+            <div class="col-md-5">
+               <label for="processorName"> Processor Name </label>
+               <input id="processorName" type="text" ng-model="processorName" class="form-control" name="processorName" readonly/>
+            </div>
+            <div class="col-md-5">
+               <label for="processorDC"> Processor DC</label></br>
+               <select name="dc" class="form-control"
+                  ng-model="selectedProcessorDC"
+                  required
+                  ng-options="name for name in processorDCs"
+                  ng-change="disableDcUpdate()">
+               </select>
+            </div>
+            <div class="col-md-1">
+               <button id="submit" ng-disabled="disableDcUpdateBtn" class="btn btn-primary processordc" ng-click="updateProcessorDC()">Update Processor DC</button>
+            </div>
+         </div>
+      </form>
+      <br />
+   </div>
+</div>

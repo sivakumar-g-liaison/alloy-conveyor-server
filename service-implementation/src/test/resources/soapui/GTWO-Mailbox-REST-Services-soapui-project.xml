@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<con:soapui-project activeEnvironment="Default" name="GTWO Mailbox REST Services" resourceRoot="" soapui-version="4.6.0" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" wadlVersion="http://wadl.dev.java.net/2009/02" name="GTWO Mailbox REST Services" type="rest" basePath="/g2mailboxservice/rest/" definitionUrl="file:/C:/Documents%20and%20Settings/neelimad/Desktop/ss/GTWO%20Mailbox%20REST%20services.wadl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache/><con:endpoints><con:endpoint>http://10.0.24.76:8080</con:endpoint></con:endpoints><con:resource name="v1/mailbox" path="v1/mailbox"><con:settings/><con:parameters/><con:resource name="/{mailboxid}/processor/{processorid}" path="/{mailboxid}/processor/{processorid}"><con:settings/><con:parameters><con:parameter><con:name>processorid</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>mailboxid</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:method name="DELETE - deleteProcessor" method="DELETE"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters>
+  <con:entry key="processorid" value="E61B09167F005FAF0001C1A69A16F8AA"/>
+  <con:entry key="mailboxid" value="E611DB227F005FAF0001C1A63DA2F37A"/>
+</con:parameters></con:request></con:method><con:method name="GET - getProcessor" method="GET"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters>
+  <con:entry key="processorid" value="E61B09167F005FAF0001C1A69A16F8AA"/>
+  <con:entry key="mailboxid" value="E611DB227F005FAF0001C1A63DA2F37A"/>
+</con:parameters></con:request></con:method><con:method name="PUT - reviseProcessor" method="PUT"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "reviseProcessorRequest": {
+        "processor": {
+            "guid": "E61B09167F005FAF0001C1A69A16F8AA",
+            "protocol":"HTTP",
+            "name": "HTTPRemoteDownloader",
+            "type": "REMOTEDOWNLOADER",
+            "status": "ACTIVE",
+            "description":"Processor for wikipedia in G2 Mailbox Web analytics project",
+            "remoteProcessorProperties": {
+                "httpVersion":"1.1",
+                "httpVerb":"GET",	
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url":"http://en.wikipedia.org/wiki/Software_testing",
+                "port": "",
+                "chunkedEncoding": "true",
+                "contentType": "",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
+            "folders": [
+                {
+                    "folderURI": "/opt/apps/mailbox/remotefiles",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "Download the content in configured response location"
+                }
+            ],
+            "dynamicProperties": [
+                {
+                    "name": "filename",
+                    "value": "test"
+                }
+            ],
+            "linkedMailboxId":"E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles":[
+			"ProfileDownload"
+			]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters>
+  <con:entry key="processorid" value="E61B09167F005FAF0001C1A69A16F8AA"/>
+  <con:entry key="mailboxid" value="E611DB227F005FAF0001C1A63DA2F37A"/>
+</con:parameters></con:request></con:method></con:resource><con:resource name="/listFile" path="/listFile"><con:settings/><con:parameters/><con:method name="GET - getFileList" method="GET"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:parameters/></con:request></con:method></con:resource><con:resource name="/serverlistener" path="/serverlistener"><con:settings/><con:parameters/><con:method name="POST - httpServerListener" method="POST"><con:settings/><con:parameters><con:parameter><con:name>folderlocation</con:name><con:value xsi:nil="true"/><con:style>HEADER</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>filename</con:name><con:value xsi:nil="true"/><con:style>HEADER</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:parameters/></con:request></con:method></con:resource><con:resource name="/sweeper" path="/sweeper"><con:settings/><con:parameters/><con:method name="POST - testSweeper" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="/{id}" path="/{id}"><con:settings/><con:parameters><con:parameter><con:name>id</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:method name="PUT - reviseMailBox" method="PUT"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "reviseMailBoxRequest": {
+        "mailBox": {
+            "guid":"E611DB227F005FAF0001C1A63DA2F37A",
+            "name": "GTWOMailboxWebAnalytic",
+            "description":"GTWOMailbox for web analytics project",
+            "status": "ACTIVE",
+            "serviceInstId":"123456789",
+            "shardKey":"key_123457",
+            "properties": [
+                {
+                    "name": "filerenameformat",
+                    "value": ".renamed"
+                },
+                {
+                    "name": "emailnotificationids",
+                    "value": "neelimad@object-frontier.com"
+                },
+                {
+                    "name": "payloadsizethreshold",
+                    "value": "10485760"
+                },
+                 {
+                    "name": "sweepedfilelocation",
+                    "value": "/opt/apps/mailbox/remotefiles/sweeped_archive"
+                },
+		     {
+                    "name": "numoffilesthreshold",
+                    "value": "2"
+                }
+            ]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="DELETE - deactivateMailBox" method="DELETE"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="GET - readMailBox" method="GET"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method></con:resource><con:resource name="/profile" path="/profile"><con:settings/><con:parameters/><con:method name="POST - createProfile" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+ "addProfileRequest":{
+    "profile":{
+      "name":"ProfileDownload"
+    }
+  }
+}
+</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method><con:method name="GET - readProfiles" method="GET"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="/{id}/processor" path="/{id}/processor"><con:settings/><con:parameters><con:parameter><con:name>id</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:method name="POST - createProcessor" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="HTTPRemoteDownloader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "guid": "",
+            "protocol":"HTTP",
+            "name": "HTTPRemoteDownloader",
+            "type": "REMOTEDOWNLOADER",
+            "status": "ACTIVE",
+            "description":"Processor for wikipedia in G2 Mailbox Web analytics project",
+            "remoteProcessorProperties": {
+                "httpVersion":"1.1",
+                "httpVerb":"GET",
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url":"http://en.wikipedia.org/wiki/Software_testing",
+                "port": "",
+                "chunkedEncoding": "true",
+                "contentType": "",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
+            "folders": [
+                {
+                    "folderURI": "/opt/apps/mailbox/remotefiles",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "Download the content in configured response location"
+                }
+            ],
+            "dynamicProperties": [
+                {
+                    "name": "filename",
+                    "value": "test"
+                }
+            ],
+            "linkedMailboxId":"E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles":[
+			"ProfileDownload"
+			]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="HTTPSRemoteDownloader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "guid": "",
+            "protocol":"HTTPS",
+            "name": "HTTPS RemoteDownloader",
+            "type": "REMOTEDOWNLOADER",
+            "status": "ACTIVE",
+            "description":"Processor for Apache tomcat",
+            "remoteProcessorProperties": {
+                "httpVersion":"1.1",
+                "httpVerb":"GET",
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url":"https://10.0.24.76:19443/",
+                "port": "",
+                "chunkedEncoding": "true",
+                "contentType": "application/json",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
+            "folders": [
+                {
+                    "folderURI": "/opt/apps/mailbox/demotest/https",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "Download the content in configured response location"
+                }
+            ],
+
+            "credentials": [
+                {
+                    "credentialType": "TRUST_STORE",
+                    "credentialURI": "/home/spctmadm/.keystore",
+                    "userId": "",
+                    "password": "liaison",
+                    "idpType": "",
+                    "idpURI": ""
+                }
+            ],
+           
+            "linkedMailboxId":"E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles":[
+			"DownloadProfile"
+			]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="SFTPRemoteDownloader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "guid": "",
+            "name": "SFTPRemotedownloader",
+            "type": "REMOTEDOWNLOADER",
+            "remoteProcessorProperties": {
+                "httpVersion": null,
+                "httpVerb": null,
+                "retryAttempts": 1,
+                "socketTimeout": 59999,
+                "connectionTimeout": 59999,
+                "url": "sftp://10.0.24.40:2022/",
+                "port": 0,
+                "chunkedEncoding": false,
+                "contentType": null,
+                "encodingFormat": null,
+                "passive": false,
+                "binary": false,
+                "retryInterval": 59999,
+                "otherRequestHeader": null
+            },
+
+            "javaScriptURI": null,
+            "description": "test",
+            "status": "ACTIVE",
+            "protocol": "SFTP",
+            "linkedMailboxId": "E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles": ["ProfileDownload"],
+            "folders": [
+                {        
+                    "folderURI": "/PayLoad",
+                    "folderType": "PAYLOAD_LOCATION",
+                    "folderDesc": "Remote server configured file location"
+                },
+
+                {                 
+                    "folderURI": "/opt/apps/mailbox/demotest/sftp",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "File downloaded in to configured response location"
+                }
+
+            ],
+
+            "credentials": [
+                {               
+
+                    "credentialType": "LOGIN_CREDENTIAL",
+                    "credentialURI": "",
+                    "userId": "g2testusr",
+                    "password": "mpxEukvePd4V",
+                    "idpType": "",
+                    "idpURI": ""
+                }
+
+            ],
+
+            "dynamicProperties": [
+                {
+
+                    "name": "filename",
+                    "value": "test"
+
+                }
+
+            ]
+
+        }
+
+    }
+
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="FTPRemoteDownloader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+
+        "processor": {
+
+            "guid": "",
+
+            "name": "FTPRemotedownloader",
+
+            "type": "REMOTEDOWNLOADER",
+
+            "remoteProcessorProperties": {
+
+                "httpVersion": null,
+
+                "httpVerb": null,
+
+                "retryAttempts": 1,
+
+                "socketTimeout": 59999,
+
+                "connectionTimeout": 59999,
+
+                "url": "ftp://10.0.24.40:21/",
+
+                "port": 0,
+
+                "chunkedEncoding": false,
+
+                "contentType": null,
+
+                "encodingFormat": null,
+
+                "passive": false,
+
+                "binary": false,
+
+                "retryInterval": 59999,
+
+                "otherRequestHeader": null
+
+            },
+
+            "javaScriptURI": null,
+
+            "description": "test",
+
+            "status": "ACTIVE",
+
+            "protocol": "FTP",
+
+            "linkedMailboxId": "E611DB227F005FAF0001C1A63DA2F37A",
+
+            "linkedProfiles": ["ProfileDownload"],
+
+            "folders": [
+
+                {
+        
+
+                    "folderURI": "/PayLoad",
+
+                    "folderType": "PAYLOAD_LOCATION",
+
+                    "folderDesc": "Remote server configured file location"
+
+                },
+
+                {
+
+                   
+
+                    "folderURI": "/opt/apps/mailbox/demotest/ftp",
+
+                    "folderType": "RESPONSE_LOCATION",
+
+                    "folderDesc": "File downloaded in to configured response location"
+
+                }
+
+            ],
+
+            "credentials": [
+
+                {                 
+
+                    "credentialType": "LOGIN_CREDENTIAL",
+
+                    "credentialURI": "",
+
+                    "userId": "g2testusr",
+
+                    "password": "mpxEukvePd4V",
+
+                    "idpType": "",
+
+                    "idpURI": ""
+
+                }
+
+            ],
+
+            "dynamicProperties": [
+
+                {
+
+                    "name": "filename",
+
+                    "value": "test"
+
+                }
+
+            ]
+
+        }
+
+    }
+
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="HTTPRemoteUploader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "guid": "",
+            "protocol":"HTTP",
+            "name": "TestingHTTPRemoteuploader ",
+            "type": "REMOTEUPLOADER",
+            "status": "ACTIVE",
+            "description":"Processor for HTTP Remoteuploader",
+            "remoteProcessorProperties": {
+                "httpVersion":"1.1",
+                "httpVerb":"POST",
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url":"http://10.0.24.76:8080/g2mailboxservice/rest/v1/mailbox",
+                "port": "",
+                "chunkedEncoding": "",
+                "contentType": "application/json",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
+            "folders": [
+                {
+                    "folderURI": "/opt/apps/mailbox/remotefiles/httppayload",
+                    "folderType": "PAYLOAD_LOCATION",
+                    "folderDesc": "Create a mailbox through HTTP Uploader"
+                }
+            ],
+            "dynamicProperties": [
+                {
+                    "name": "filename",
+                    "value": "test"
+                }
+            ],
+            "linkedMailboxId":"E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles":[
+			"ProfileUpload"
+			]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="SFTPRemoteUploader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+
+    "addProcessorToMailBoxRequest": {
+
+        "processor": {
+
+            "guid": "",
+
+            "name": "SFTPRemoteuploader",
+
+            "type": "REMOTEUPLOADER",
+
+            "remoteProcessorProperties": {
+
+                "httpVersion": "1.1",
+
+                "httpVerb": "GET",
+
+                "retryAttempts": 1,
+
+                "socketTimeout": 59999,
+
+                "connectionTimeout": 59999,
+
+                "url": "sftp://10.0.24.40:2022/",
+
+                "port": 0,
+
+                "chunkedEncoding": false,
+
+                "contentType": null,
+
+                "encodingFormat": null,
+
+                "passive": false,
+
+                "binary": false,
+
+                "retryInterval": 59999,
+
+                "otherRequestHeader": null
+
+            },
+
+            "javaScriptURI": null,
+
+            "description": "test",
+
+            "status": "ACTIVE",
+
+            "protocol": "SFTP",
+
+            "linkedMailboxId": "E611DB227F005FAF0001C1A63DA2F37A",
+
+            "linkedProfiles": ["ProfileUpload"],
+
+            "folders": [
+
+                {      
+
+                    "folderURI": "/opt/apps/mailbox/remotefiles/sftpupload",
+
+                    "folderType": "PAYLOAD_LOCATION",
+
+                    "folderDesc": "Local server configured file location"
+
+                },
+
+                {
+
+                   
+
+                    "folderURI": "/SFTPUp",
+
+                    "folderType": "TARGET_LOCATION",
+
+                    "folderDesc": "File downloaded in to configured response location"
+
+                }
+
+            ],
+
+            "credentials": [
+
+                {                 
+
+                    "credentialType": "LOGIN_CREDENTIAL",
+
+                    "credentialURI": "",
+
+                    "userId": "g2testusr",
+
+                    "password": "mpxEukvePd4V",
+
+                    "idpType": "SFTP",
+
+                    "idpURI": ""
+
+                }
+
+            ],
+
+            "dynamicProperties": [
+
+                {
+
+                    "name": "filename",
+
+                    "value": "test"
+
+                }
+
+            ]
+
+        }
+
+    }
+
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="FTPRemoteUploader" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+
+        "processor": {
+
+            "guid": "",
+
+            "name": "FTPRemoteuploader",
+
+            "type": "REMOTEUPLOADER",
+
+            "remoteProcessorProperties": {
+
+                "httpVersion": null,
+
+                "httpVerb": null,
+
+                "retryAttempts": 1,
+
+                "socketTimeout":"" ,
+
+                "connectionTimeout": "",
+
+                "url": "ftp://10.0.24.40:21/",
+
+                "port": 0,
+
+                "chunkedEncoding": false,
+
+                "contentType": null,
+
+                "encodingFormat": null,
+
+                "passive": false,
+
+                "binary": false,
+
+                "retryInterval": 59999,
+
+                "otherRequestHeader": null
+
+            },
+
+            "javaScriptURI": null,
+
+            "description": "test",
+
+            "status": "ACTIVE",
+
+            "protocol": "FTP",
+
+            "linkedMailboxId": "E611DB227F005FAF0001C1A63DA2F37A",
+
+            "linkedProfiles": ["ProfileUpload"],
+
+            "folders": [
+
+                {
+      
+
+                    "folderURI": "/opt/apps/mailbox/remotefiles/ftpupload",
+
+                    "folderType": "PAYLOAD_LOCATION",
+
+                    "folderDesc": "Remote server configured file location"
+
+                },
+
+                {
+
+                   
+
+                    "folderURI": "/FTPUp",
+
+                    "folderType": "RESPONSE_LOCATION",
+
+                    "folderDesc": "File downloaded in to configured response location"
+
+                }
+
+            ],
+
+            "credentials": [
+
+                {                 
+
+                    "credentialType": "LOGIN_CREDENTIAL",
+
+                    "credentialURI": "",
+
+                    "userId": "g2testusr",
+
+                    "password": "mpxEukvePd4V",
+
+                    "idpType": "",
+
+                    "idpURI": ""
+
+                }
+
+            ],
+
+            "dynamicProperties": [
+
+                {
+
+                    "name": "filename",
+
+                    "value": "test"
+
+                }
+
+            ]
+
+        }
+
+    }
+
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request><con:request name="Sweeper" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "name": "Sweeper",
+            "type": "SWEEPER",
+            "protocol" :"SWEEPER",
+            "status": "ACTIVE",
+            "description": "Sample directory sweeper",            
+            "folders": [
+                {
+                    "folderURI": "/opt/apps/mailbox/remotefiles/Sweep",
+                    "folderType": "PAYLOAD_LOCATION", 
+                    "folderDesc": "Sweep the files in configured location"
+                }
+            ],
+            "linkedMailboxId": "E611DB227F005FAF0001C1A63DA2F37A",
+            "linkedProfiles": ["ProfileUpload"]
+        }
+    }
+}</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="id" value="E611DB227F005FAF0001C1A63DA2F37A" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method></con:resource><con:method name="GET - searchMailBox" method="GET"><con:settings/><con:parameters><con:parameter><con:name>name</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>profile</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>hitCounter</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="name" value="GTWOMailboxWebAnalytics" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method><con:method name="POST - createMailBox" method="POST"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request>{
+    "addMailBoxRequest": {
+        "mailBox": {
+            "name": "GTWOMailboxWebAnalytics",
+            "description": "This is to collect access metrics.",
+            "status": "ACTIVE",
+            "serviceInstId":"123456789",
+            "shardKey":"key_123457",
+            "properties": [
+                {
+                    "name": "filerenameformat",
+                    "value": ".renamed"
+                },
+                {
+                    "name": "emailnotificationids",
+                    "value": "neelimad@object-frontier.com"
+                },
+                {
+                    "name": "payloadsizethreshold",
+                    "value": "10485760"
+                },
+                {
+                    "name": "sweepedfilelocation",
+                    "value": "/opt/apps/mailbox/remotefiles/sweeped_archive"
+                },
+	      	{
+                    "name": "numoffilesthreshold",
+                    "value": "2"
+                }
+            ]
+        }
+    }
+}
+</con:request><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource><con:resource name="v1/mailbox/triggerProfile" path="v1/mailbox/triggerProfile"><con:settings/><con:parameters/><con:method name="POST - triggerProfile" method="POST"><con:settings/><con:parameters><con:parameter><con:name>name</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>excludeMailbox</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>shardKey</con:name><con:value xsi:nil="true"/><con:style>QUERY</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="name" value="UploadProfile" xmlns="http://eviware.com/soapui/config"/></con:parameters></con:request></con:method></con:resource></con:interface><con:properties/><con:wssContainer/></con:soapui-project>

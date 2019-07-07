@@ -1,0 +1,30 @@
+# Create a build bundle
+# 
+# need to deal with auth
+# shut down/startup
+# push bundle
+# SNAPSHOT is a tag but buildBundle.sh only knows how to get bt branch
+# Jenkins can tag but not branch on success
+# Param #1 is a branch or tag
+# Param #2 is a tag (#1 must be a branch is #2 is supplied)
+
+export _PROJECT=g2/mailbox
+export _GIT_HOST=gitlab-g2.liaison.tech
+
+. ./setenv
+
+if [[ ! -d "$_ROOT/build" ]]; then
+    mkdir "$_ROOT/build" -p
+fi
+
+cp -r "$_ROOT/tools/buildbundle" "$_ROOT/build/buildbundle"
+
+cd "$_ROOT/build/buildbundle"
+				 
+./buildBundle.sh git@${_GIT_HOST}:${_PROJECT}.git $1 $2
+
+md5sum deployable*.tgz > md5sum.txt
+ 
+cd "$_ROOT"
+
+

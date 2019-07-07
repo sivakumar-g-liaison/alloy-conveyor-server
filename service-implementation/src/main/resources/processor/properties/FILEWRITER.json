@@ -1,0 +1,69 @@
+{
+  "processorDefinition": {
+    "type":"FILEWRITER",
+    "displayName":"FILEWRITER",
+    "protocol":"",
+    "handOverExecutionToJavaScript":false,
+    "staticProperties": [   
+    	 {
+	      	"name": "staleFileTTL",
+	      	"displayName": "Stale File TTL",
+	      	"type": "textarea",
+	      	"value": "",
+	      	"readOnly": false,
+	      	"mandatory": false,
+	      	"dynamic": false,
+	      	"valueProvided":false,
+	      	"defaultValue":"15",
+	      	"validationRules": {
+	      		"pattern": "\/^(1[5-9]|[2-8][0-9]|90)$\/",
+	      		"minLength": "",
+	      		"maxLength": ""
+	      	}
+	      },
+	      {
+            "name":"fileTransferStatusIndicator",
+            "displayName":"File Transfer Status Indicator",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"png",
+            "validationRules":null
+          },
+          {
+            "name":"category",
+            "displayName":"Category",
+            "type":"select",
+            "value":"default",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"default",
+            "validationRules":null,
+            "options":["disabled", "default"]
+          }
+    ],
+    "folderProperties":[
+		  {
+			  "folderURI": "",
+			  "folderDisplayType": "File Write Location",
+			  "folderType": "FILE_WRITE_LOCATION",
+			  "folderDesc": "",			  
+			  "mandatory": true,
+			  "readOnly":true,
+			  "valueProvided":true,
+			  "validationRules":{
+				   "folderURIPattern":"",
+				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+				   "minLength": "",
+				   "maxLength": "250"
+			  }
+		  }
+	],
+	"credentialProperties":[]
+  }
+}

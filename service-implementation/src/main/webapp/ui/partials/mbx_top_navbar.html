@@ -1,0 +1,70 @@
+<div class="container pad-bottom pad-top" fade-in>
+
+    <div class="btn-group pad-bottom">
+        <a href="#/" class="btn-default btn btn-lg">
+            <span><i class="glyphicon glyphicon-home glyphicon-white"></i>&nbsp;Home</span>
+        </a>
+    </div>
+
+    <div class="btn-group pad-bottom nested">
+        <button id="mbx-top-navbar-mailbox" class="btn-default btn dropdown-toggle btn-lg" data-toggle="dropdown">Relay
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="#/">Mailbox</a>
+                <ul class="dropdown-menu">
+                    <li><a id="mbx-top-navbar-addmailbox" ng-href= {{appendQueryParamAddMBox()}}>Add Mailbox</a></li>
+                    <li><a id="mbx-top-navbar-searchmailbox" onClick="window.location.href='#';window.location.href='#/mailbox/getMailBox';">Search Mailbox</a></li>
+                </ul>
+            </li>
+            
+            <li>
+                <a href="#/">Processor</a>
+                <ul class="dropdown-menu">
+                    <li><a id="mbx-top-navbar-searchprocessor" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessor';">Search Processor</a></li>
+                    <li><a id="mbx-top-navbar-executingprocessors" onClick="window.location.href='#';window.location.href='#/mailbox/getexecutingprocessors';">Running Processors</a></li>
+                    <li><a id="mbx-top-navbar-updateprocessordc" ng-show="!javaProperties.deployAsDropbox" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessorDc';">Update Processor DC</a></li>
+                    <li><a id="mbx-top-navbar-processorscripts" ng-show="!javaProperties.deployAsDropbox" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessorScript';">Processor Scripts</a></li>
+                </ul>
+            </li>
+            
+            <li>
+                <a href="#/">Files</a>
+                <ul class="dropdown-menu">
+                    <li><a id="mbx-top-navbar-relayconveyor" onClick="window.location.href='#';window.location.href='#/mailbox/getStagedFiles';">Staged Files</a></li>
+                    <li><a id="mbx-top-navbar-inboundfiles" onClick="window.location.href='#';window.location.href='#/mailbox/getInboundFiles';">Inbound Files</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+   <!-- <div class="btn-group pad-bottom">
+        <a id="mbx-top-navbar-manageprofiles" onClick="window.location.href='#';window.location.href='#/profiles/addProfiles';" class="btn-default btn btn-lg">
+            <span>Manage Profiles</span>
+        </a>
+    </div>
+    
+    <div class="btn-group pad-bottom">
+       <a id="mbx-top-navbar-triggerprofile" onClick="window.location.href='#';window.location.href='#/profiles/trigger?spiie={{';" class="btn-default btn btn-lg">		
+            <span>Trigger Profile</span>
+        </a>
+    </div>
+	-->
+	
+	<div class="btn-group pad-bottom">
+        <a id="mbx-top-navbar-manageprofiles" 
+			ng-href= {{appendQueryParamManage()}}
+			class   = "btn-default btn btn-lg">
+            <span>Manage Profiles</span>
+        </a>
+    </div>
+    
+    <div class="btn-group pad-bottom">
+       <a id="mbx-top-navbar-triggerprofile" 
+		ng-href= {{appendQueryParamTrigger()}}
+		class="btn-default btn btn-lg">		
+            <span>Trigger Profile</span>
+        </a>
+    </div>
+</div>

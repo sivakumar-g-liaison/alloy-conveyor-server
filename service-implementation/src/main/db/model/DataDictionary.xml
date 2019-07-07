@@ -1,0 +1,353 @@
+<?xml version="1.0" ?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<?xml-stylesheet type="text/xsl" href="D:\Program Files (x86)\ModelRight\ModelRight 4.0 Professional (site)\Report Files\DataDictionary.xsl"?>
+<!DOCTYPE model SYSTEM "D:\Program Files (x86)\ModelRight\ModelRight 4.0 Professional (site)\Report Files\DataDictionary.dtd">
+<model id="ID1" display-name="Model" timestamp="Mon Nov 11 15:39:03 2013">
+	<model-properties>
+	</model-properties>
+	<model-children>
+		<table id="ID7883" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">CREDENTIAL</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7885" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8026" display-name="Column" inherits-from="ID7965">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">foreign key refrence to PROCESSORS</column.comment>
+						<column.name datatype="string" display-name="Name">PROCESSOR_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7965" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7888" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">TYPE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7891" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">URI</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7893" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">USERNAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7895" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PASSWORD</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7897" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">IDP_TYPE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7899" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">IDP_URI</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7904" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">FOLDER</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7906" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8029" display-name="Column" inherits-from="ID7965">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">foreign key refrence to PROCESSORS</column.comment>
+						<column.name datatype="string" display-name="Name">PROCESSOR_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7965" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7914" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">DESCRIPTION</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(250)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7909" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">TYPE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(50)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7912" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">URI</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(50)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7919" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">MAILBOX_PROPERTY</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7921" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8036" display-name="Column" inherits-from="ID7933">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">MAILBOX_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7933" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7924" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">NAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7926" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">VALUE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7931" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">MAILBOX</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7933" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7938" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">name of the mailbox</column.comment>
+						<column.name datatype="string" display-name="Name">NAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7941" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">DESCRIPTION</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(1024)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7943" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">STATUS</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7936" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">SERVICE_INST_ID</column.name>
+						<column.datatype datatype="reference" reference-id="ID587" display-name="Datatype">NUMBER</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7946" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">SHARD_KEY</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7951" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">PROCESSOR_PROPERTY</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7953" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8041" display-name="Column" inherits-from="ID7965">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PROCESSOR_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7965" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7956" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">NAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7958" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">VALUE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7963" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">PROCESSOR</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7965" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8015" display-name="Column" inherits-from="ID7933">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">MAILBOX_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7933" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7968" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">processor description</column.comment>
+						<column.name datatype="string" display-name="Name">DESCRIPTION</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7975" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">STATUS</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7970" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">discriminator column</column.comment>
+						<column.name datatype="string" display-name="Name">TYPE</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7973" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">JSON </column.comment>
+						<column.name datatype="string" display-name="Name">PROPERTIES</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(2048)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7978" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">refrence to filesystem, js pulled from git.</column.comment>
+						<column.name datatype="string" display-name="Name">JAVASCRIPT_URI</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7980" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">NAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(512)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7982" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">processor protocol</column.comment>
+						<column.name datatype="string" display-name="Name">PROTOCOL</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID7985" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">processor execution status</column.comment>
+						<column.name datatype="string" display-name="Name">EXEC_STATUS</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID7991" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">SCHED_PROCESSOR</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID7993" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8046" display-name="Column" inherits-from="ID8002">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">SCHED_PROFILE_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID8002" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8020" display-name="Column" inherits-from="ID7965">
+					<column-properties>
+						<column.name datatype="string" display-name="Name">PROCESSOR_GUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" inherited-from="ID7965" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<table id="ID8000" display-name="Table" inherits-from="ID967">
+			<table-properties>
+				<table.name datatype="string" display-name="Name">SCHED_PROFILE</table.name>
+			</table-properties>
+			<table-children>
+				<column id="ID8002" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">primary key</column.comment>
+						<column.name datatype="string" display-name="Name">PGUID</column.name>
+						<column.datatype datatype="reference" reference-id="ID3161" display-name="Datatype" property-as-string="CHAR(32)">G2_PGUID</column.datatype>
+					</column-properties>
+				</column>
+				<column id="ID8005" display-name="Column" inherits-from="ID966">
+					<column-properties>
+						<column.comment datatype="string" display-name="Comment">onceinaday,onceinaweek</column.comment>
+						<column.name datatype="string" display-name="Name">NAME</column.name>
+						<column.datatype datatype="reference" reference-id="ID585" display-name="Datatype" inherited-from="ID966" property-as-string="VARCHAR2(128)">VARCHAR2</column.datatype>
+					</column-properties>
+				</column>
+			</table-children>
+		</table>
+		<schema id="ID1378" display-name="Schema">
+			<schema-properties>
+				<schema.name datatype="string" display-name="Name">GATEWAY_OWNR</schema.name>
+			</schema-properties>
+		</schema>
+		<schema id="ID3095" display-name="Schema">
+			<schema-properties>
+				<schema.name datatype="string" display-name="Name">GATEWAY_APPL</schema.name>
+			</schema-properties>
+		</schema>
+	</model-children>
+</model>

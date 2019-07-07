@@ -1,0 +1,143 @@
+<div class="container fade-in">
+
+	<div class="form-row">
+		<h3 id="title" class="ng-binding">Running Processors</h3>
+		<hr />		
+	</div>
+	<!-- Loading image will be shown until grid is loaded -->
+	<div  class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">
+        <h4>Loading Processors...</h4>
+        <img height="96px" src="img/spinner.gif" />
+	</div>
+	<div>
+		<div class="gridStyle" ng-grid="gridOptions"></div>
+		<br>
+	</div>
+	<div class="pull-right">
+	    <button id="executingProcessorID" class="btn btn-primary" ng-click="getExecutingProcessors()">
+	        Refresh
+	    </button>
+        <button id="updateStuckProcessorsId" class="btn btn-primary" data-toggle="collapse" data-target="#updateStuckProcessors">
+            Update Stuck Processors
+        </button>
+	</div>
+	<div id="updateStuckProcessors" class="collapse">
+	    <div class="form-row">
+            <br>
+            <br>
+            <hr />
+            <h3 id="title" class="ng-binding">Update Stuck Processors</h3>
+            <hr />
+        </div>
+        <div id="aceEditor" readonly="false" ui-ace="{onLoad : loadValueData,
+                theme : 'monokai',
+                useWrapMode : true,
+                showGutter: true,
+                mode: 'json'
+                }" class="updateProcessorsStatusReqJson_ace_editor" ng-model="updateProcessorsStatusRequestJson">
+        </div>
+        <div class="pull-right">
+            <br>
+            <button id="executingProcessorID" class="btn btn-primary" data-toggle="modal" data-target="#interruptAndUpdateConfirmationModal" 
+                ng-click="updateRunningProcessorStatus(false)">
+                Interrupt & Update Status
+            </button>
+            <button id="executingProcessorID" class="btn btn-primary" data-toggle="modal" data-target="#updateonlyConfirmationModal" 
+                ng-click="updateRunningProcessorStatus(true)">
+                Update Status
+            </button>
+        </div>
+    </div>
+	
+    <div class="modal-custom" id="updateonlyConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   Are you sure you want to update the running processors status?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" ng-click="updateStuckProcessorsConfirmation()">Confirm
+                    </button>
+                    <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-custom" id="interruptAndUpdateConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   Are you sure you want to interrupt the running processors and update its status?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" ng-click="updateStuckProcessorsConfirmation()">Confirm
+                    </button>
+                    <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-custom" id="executingProcessorsConfirmationModal" data-keyboard="false" data-backdrop="static"
+         role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The stop processor will interrupt the running processor. Are you sure to stop this processor?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal"
+                            ng-click="hideConfirmDialog(executionEntity)">Confirm
+                    </button>
+                    <button class="btn btn-default cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form id="executingProcessorInfoModalForm" name="form.executingProcessorInfoModalForm" novalidate>
+        <div class="modal-custom fade" id="executingProcessorInfoModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" data-dismiss="modal" aria-hidden="true" id="close-btn-update-modal" ng-click="cancelExecutingProcessorInfo()">&times;</button>
+                        <h4 class="modal-title" id="executingProcessorInfoModalHeaderText">Executing Processor Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <b>Processor Name:</b> {{currentEntity.name}}
+                            <br>
+                            <br>
+                            <b>Processor Type:</b> {{currentEntity.type}}
+                            <br>
+                            <br>
+                            <b>Processor Guid:</b> {{currentEntity.guid}}
+                            <br>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-default" id="executingProcessorInfoModalCancelBtn" ng-click="cancelExecutingProcessorInfo()" data-dismiss="modal" tabindex=3>Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>

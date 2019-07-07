@@ -1,0 +1,11 @@
+<div ng-switch on ="isAdditionAllowed()">
+    <div ng-switch-when="true" class = "marginalign"> 
+        <button ng-click="addGridProperty()"><i class="glyphicon glyphicon-plus-sign"></i></button>
+    </div>
+    <div ng-switch-when="false">
+        <div ng-switch on="currentRowObject.readOnly">
+            <div ng-switch-when="true">-NA-</div>
+            <div ng-switch-when="false"><button ng-click="removeGridProperty()"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>
+        </div>
+    </div>
+</div>

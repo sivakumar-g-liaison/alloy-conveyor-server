@@ -1,0 +1,100 @@
+{  
+    "supportedProcessors":{  
+        "name":"processors",
+        "displayName":"Type",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+            {  
+                "key":"Remote Downloader",
+                "value":"REMOTEDOWNLOADER",
+                "type":"Client"
+            },
+            {  
+                "key":"Remote Uploader",
+                "value":"REMOTEUPLOADER",
+                "type":"Client"
+            },
+            {  
+                "key":"Directory Sweeper",
+                "value":"SWEEPER",
+                "type":"Other"
+            },
+            {  
+                "key":"Conditional Sweeper",
+                "value":"CONDITIONALSWEEPER",
+                "type":"Other"
+            },
+            {  
+                "key":"HTTP Async Processor",
+                "value":"HTTPASYNCPROCESSOR",
+                "type":"Server"
+            },
+            {
+                "key":"HTTP Sync Processor",
+                "value":"HTTPSYNCPROCESSOR",
+                "type":"Server"
+            },
+            {
+                "key":"Lite HTTP Sync Processor",
+                "value":"LITEHTTPSYNCPROCESSOR",
+                "type":"Server"
+            },
+            {
+                "key":"File Writer",
+                "value":"FILEWRITER",
+                "type":"Other"
+            }
+        ]
+    },
+    "supportedProtocols":{  
+        "name":"protocols",
+        "displayName":"Protocol",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+            {  
+                "key":"FTP",
+                "value":"FTP"
+            },
+            {  
+                "key":"FTPS",
+                "value":"FTPS"
+            },
+            {  
+                "key":"SFTP",
+                "value":"SFTP"
+            },
+            {
+                "key":"HTTP",
+                "value":"HTTP"
+            },
+            {
+                "key":"HTTPS",
+                "value":"HTTPS"
+            }
+        ]
+    },
+    "supportedJavaScriptCheckBox":{  
+        "name":"handOverExecutionToJavaScript",
+        "displayName":"HandOverExecutionToJavaScript",
+        "uiFiledtype":"checkbox",
+        "value":""
+    },
+    "supportedStatus":{  
+        "name":"status",
+        "displayName":"Status",
+        "uiFiledtype":"select",
+        "value":"",
+        "options":[  
+            {  
+                "key":"Active",
+                "value":"ACTIVE"
+            },
+            {  
+                "key":"Inactive",
+                "value":"INACTIVE"
+            }
+        ]
+    }
+}

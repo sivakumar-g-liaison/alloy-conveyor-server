@@ -1,0 +1,185 @@
+##################################### DATABASE CONFIGURATIONS #########################################
+# config time database connectivity properties
+com.liaison.dtdm.DB_DRIVER=oracle.jdbc.OracleDriver
+com.liaison.dtdm.DB_URL=jdbc:oracle:thin:@(description=(address=(protocol=TCP)(host=lsildb23d.liaison.dev)(port=1521))(connect_data=(service_name=G2DEV1.liaison.dev)))
+com.liaison.dtdm.DB_USER=JEN_GATEWAY_DTDM_APPL
+com.liaison.dtdm.DB_PASSWORD=12345678
+com.liaison.dtdm.DB_MINPOOLSIZE=30
+com.liaison.dtdm.DB_MAXPOOLSIZE=100
+com.liaison.dtdm.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
+com.liaison.dtdm.DB_DESCRIPTION=G2 Mailbox DTDM UI UCP in Tomcat (DEV)
+com.liaison.dtdm.DB_VALIDATECONNECTIONONBORROW=true
+
+# runtime database connectivity properties
+com.liaison.rtdm.DB_DRIVER=oracle.jdbc.OracleDriver
+com.liaison.rtdm.DB_URL=jdbc:oracle:thin:@(description=(address=(protocol=TCP)(host=lsildb23d.liaison.dev)(port=1521))(connect_data=(service_name=G2DEV1.liaison.dev)))
+com.liaison.rtdm.DB_USER=JEN_GATEWAY_RTDM_APPL
+com.liaison.rtdm.DB_PASSWORD=12345678
+com.liaison.rtdm.DB_MINPOOLSIZE=30
+com.liaison.rtdm.DB_MAXPOOLSIZE=100
+com.liaison.rtdm.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
+com.liaison.rtdm.DB_DESCRIPTION=G2 Mailbox RTDM UI UCP in Tomcat (DEV)
+com.liaison.rtdm.DB_VALIDATECONNECTIONONBORROW=true
+
+#///###########################\\\#
+######## QUEUE Properties #########
+java.naming.provider.url=jnp://localhost:1199,jnp://localhost:1199
+#\\\###########################///#
+#\\\###########################///#
+
+# Properties to read JS file from git lab for script execution through commons-scripting library
+com.liaison.gitlab.script.server.host=at4d-vpgitlab.liaison.dev
+com.liaison.gitlab.script.project.name=g2/mailbox-scripts
+com.liaison.gitlab.script.server.password=gex5e6V_LZJj1SpPaye2
+
+# Activity GitLab properties
+com.liaison.gitlab.mailbox.script.server.host=https://at4d-vpgitlab.liaison.dev
+com.liaison.gitlab.mailbox.script.project.id=g2%2Fmailbox-scripts
+com.liaison.gitlab.mailbox.script.folder=gitlab:/processor-scripts
+com.liaison.gitlab.mailbox.script.private_token=gex5e6V_LZJj1SpPaye2
+
+# Generic Mount Location - FOR CONFIGURATION PATTERN REPLACEMENT
+MOUNT_POINT=/app/mailbox/
+
+# Directory sweeper configuration to check files are modified within the given time limit in SECONDS
+last.modified.tolerance=3
+
+# Service Broker Sync interface info
+com.liaison.servicebroker.sync.uri=https://at4d-vpsbrt.liaison.dev/service-broker/process/workticket
+com.liaison.servicebroker.async.uri=https://at4d-vpsbasy.liaison.dev/service-broker/process/workticket
+
+######################################### KMS Configurations #########################################
+# G2 service client properties
+client.key-management.baseUrl=https://at4d-vpkms.liaison.dev/key-management/
+
+# BOOTSTRAP PROPERTIES
+bootstrap.keypair.location=local
+bootstrap.client.privatekey.classpath.url=bootstrap/mbxbootstrapprikey.pem
+bootstrap.client.privatekey.passphrase.classpath.url=bootstrap/passphrase
+bootstrap.client.keypair.passphrase.classpath.url=bootstrap/mbxsignkeypwd.file
+bootstrap.client.keypair.classpath.url=bootstrap/signandverifykeystore.jks
+
+# Processor HTTP sync/async URL
+processor.sync.url.display.prefix.default=https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/sync?
+processor.async.url.display.prefix.default=https://at4d-vpmbox.liaison.dev/g2mailboxservice/process/async?
+processor.sync.url.display.prefix.lowsecure=https://at4d-vplsrly.liaison.dev/g2mailboxservice/process/sync?
+processor.async.url.display.prefix.lowsecure=https://at4d-vplsrly.liaison.dev/g2mailboxservice/process/async?
+
+###################################### ACL FILTER Configurations #####################################
+# Override ACL filter check
+liaison.acl.filter.skipACLFilter=true
+liaison.acl.filter.skipACLSignatureCheck=true
+
+# ACL Filter uses mock verifier
+com.liaison.acl.use.mock.verifier=false
+
+signatureverifier.publickey.url=https://at4d-vpkms.liaison.dev/key-management/export/public/
+
+# Bug in ACLResourceMap related to dto level ACL. DO NOT CHANGE THIS
+liaison.acl.packages=com.liaison.mailbox.service.rest
+
+# acl-manifest json string
+# use.dummy.manifest.as.backup=true
+# Latest manifest with domain internal name
+# dummy.acl.manifest.json=H4sIAAAAAAAAAFVQbWvCMBD+L/dxqNiCsPXTqu1cmWtHLdtQRGJzk0CalCQWRfzvS9uoG4XC3fN2ec6AokEua4TgDKVCYpBG9gcB+GNvMhx7Q98vvKdgMg688ejRm6xgAHsud4QnFAJx4HwANVEozJ9ZyRK1vi8OGlU7AVWy3skjoRUTz5wRpqUYUWyg57wwpU1KKvwrXJD/O3fm9BTWNWclMUyKHrvYaE7Mj1QVBOvzbejVMPdtjJIcp0QjDcv2xpkUxq46OpUVYcKRs3y+jfLsY5p9W1UPFafaQWGarMIiydIblgiDShDu5Ms4/0xm8XaaZ29x7nJtCjjPbRi9Jyls2rJYwzjusbtBoZYHVbYWD63KjS45R23yK+OOto/Ao7GEvW9v4bZh21vDOlKNqmJadyXZgIbww9X9Djn/r9ekiBfJsoDLpv0GIGwi0mXvFmGNgqIoT11t9tU2c90yfwH1cOu+SQIAAA==
+# UserManagement authentication URL
+usermanagement.url.authenticate=https://at4d-vpusrmg.liaison.dev/usermanagement/rest/usermanagement/authenticate
+
+# GEM Integration
+com.liaison.acl.manifest.url=https://at4d-vpacl.liaison.dev/globalenterprisemanager/rest/v1/gem/verifyAndGetManifest
+#Tenancy key validation url
+com.liaison.mailbox.tenancy.validation.url=https://at4d-vpacl.liaison.dev/globalenterprisemanager/rest/gem/validate?type=MONIKER&value=
+
+# Properties required for Manifest request generation
+com.liaison.acl.request.runtime.platform.name=G2
+com.liaison.acl.request.runtime.domain.type=SOA_SERVICE
+com.liaison.acl.request.runtime.domain.name=G2_DEV_INT_ORG
+com.liaison.acl.request.runtime.domain.internalName=G2_DEV_INT_MONIKER
+com.liaison.acl.request.runtime.domain.roles=G2ADMIN
+com.liaison.acl.request.runtime.service.name=Mailbox
+com.liaison.acl.request.runtime.created.by=Mailbox
+
+# ACL Integration
+#acl_signer_public_key_guid=BA34E4B3F6444B198CF7783BF9AF13AC
+com.liaison.acl.signer.public.key.group.guid=57B07C1651134F4AAED8527FF0C7922C
+
+# SLA Properties
+# Never Change this configuration, the only unit supported is MINUTES
+mailbox.sla.time.configuration.unit=MINUTES
+
+#############################################################
+# START STORAGE SERVICE PROPERTIES FOR PAYLOADS
+#
+# Mailbox supports at least two types and at least
+# one location.  The types must be:
+#   secure
+#   unsecure
+#
+# There is only one Storage Service available at the moment:
+#    dev-int-boss - This is for BOSS
+#############################################################
+
+# Storage Identifiers
+fs2.storage.identifiers=secure@dev-int-boss,unsecure@dev-int-boss
+
+# The default location has to be one of the locations above
+# The default should always be the closest instance
+fs2.storage.location.default=dev-int-boss
+
+# properties for secure@dev-int-boss
+fs2.storage.secure@dev-int-boss.type=BOSS
+fs2.storage.secure@dev-int-boss.url=https://at4d-vpkvgw.liaison.dev
+fs2.storage.secure@dev-int-boss.username=bosstestg2@liaison.dev
+fs2.storage.secure@dev-int-boss.password=Pi=3.14159
+fs2.storage.secure@dev-int-boss.tenancy=g2_tenancy
+
+# properties for unsecure@dev-int-boss
+fs2.storage.unsecure@dev-int-boss.type=BOSS
+fs2.storage.unsecure@dev-int-boss.url=https://at4d-vpkvgw.liaison.dev
+fs2.storage.unsecure@dev-int-boss.username=bosstestg2@liaison.dev
+fs2.storage.unsecure@dev-int-boss.password=Pi=3.14159
+fs2.storage.unsecure@dev-int-boss.tenancy=g2_tenancy
+#############################################################
+# END STORAGE SERVICE PROPERTIES FOR PAYLOADS
+#############################################################
+
+# default script template name
+mailbox.script.default.template=defaultScriptTemplate.js
+
+# Hub identifies used to identify the originating hub in
+# GSA/LENS messages when publishing new organizations to LENS
+com.liaison.lens.hub=LSG2-DEV
+
+# For Dropbox
+com.liaison.dropbox.payload.ttl.days=30
+
+com.liaison.dropbox.conveyorUrl=https://at4d-vpdboxc.liaison.dev/alloy-conveyor/web-app/ui/index.html
+
+# skips the queue initializer and works as standalone server
+com.liaison.skip.queue=true
+
+# location of shell script which assign permissions to the created Home Directory for machine accounts
+permission.script.path=/secure/tomcat/dev-int/createFolderAndAssignPermissions.sh
+
+sftp.user.group.name=ext_sftp_users
+sftp.group.name=ext_sftp_users
+ftp.group.name=ext_ftp_users
+ftps.group.name=ext_ftps_users
+
+# location of shell script to delete the created Home Directory for machine accounts
+deletion.script.path=/secure/tomcat/dev-int/deleteHomeFolders.sh
+
+# Home Directory Creation for Machine Accounts
+ftp.user.home.path=/data/ftp
+ftps.user.home.path=/data/ftps
+sftp.user.home.path=/data/sftp
+http.user.home.path=/data/http
+https.user.home.path=/data/https
+
+# service broker base url
+com.liaison.servicebroker.api.baseUrl=http://lsvlsbrt01d.liaison.dev:8989/service-broker/
+
+# skips the kafka queue initializer and works as standalone server
+com.liaison.skip.kafka.queue=true
+
+com.liaison.mailbox.processdc.list=at4-dev-pres,at4

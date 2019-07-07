@@ -1,0 +1,68 @@
+{
+  "addProcessorToMailBoxRequest": {
+    "processor": {
+      "guid": "",
+      "name": "google testremote downloader",
+      "type": "REMOTEDOWNLOADER",
+      "javaScriptURI": "",
+      "description": "",
+      "status": "ACTIVE",
+      "protocol": "HTTP",
+      "linkedMailboxId": "A7E007C90A0A01C80ABA010F2155EBF7",
+      "linkedProfiles": [
+      ]
+    }
+    ,"processorLegacy": {
+      "guid": "",
+      "name": "google testremote downloader",
+      "type": "REMOTEDOWNLOADER",
+      "status": "ACTIVE",
+      "description": "",
+      "protocol": "HTTP",
+      "remoteProcessorProperties": {
+        "httpVersion": "1.1",
+        "httpVerb": "GET",
+        "retryAttempts": "1",
+        "socketTimeout": "60000",
+        "connectionTimeout": "60000",
+        "url": "http://soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response",
+        "port": "",
+        "chunkedEncoding": "true",
+        "otherRequestHeader": [
+          {
+            "name": "",
+            "value": ""
+          }
+        ],
+        "contentType": "",
+        "encodingFormat": ""
+      },
+      "javaScriptURI": null,
+      "folders": [
+        {
+          "folderURI": "/trigger",
+          "folderType": "RESPONSE_LOCATION",
+          "folderDesc": "test"
+        }
+      ],
+      "credentials": [
+        {
+          "credentialType": "LOGIN_CREDENTIAL",
+          "credentialURI": "",
+          "userId": "test",
+          "password": "test",
+          "idpType": "test",
+          "idpURI": "test"
+        }
+      ],
+      "dynamicProperties": [
+        {
+          "name": "filename",
+          "value": "test"
+        }
+      ],
+      "linkedMailboxId": "2CA5B1B6C0A801AD0B4385E4060808F5",
+      "linkedProfiles": []
+    }
+  }
+}

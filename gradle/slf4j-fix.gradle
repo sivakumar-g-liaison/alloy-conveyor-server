@@ -1,0 +1,12 @@
+allprojects {
+	configurations {
+		all {
+			// force the version of transient dependencies for the entire project
+			resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+				if(details.requested.group == 'org.apache.logging.log4j'){
+					details.useVersion '2.11+'
+				}
+			}
+		}
+	}
+}

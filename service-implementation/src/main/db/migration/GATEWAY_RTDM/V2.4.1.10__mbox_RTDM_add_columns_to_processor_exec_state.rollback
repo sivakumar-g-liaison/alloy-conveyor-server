@@ -1,0 +1,120 @@
+--
+-- Copyright 2016 Liaison Technologies, Inc.
+-- This software is the confidential and proprietary information of
+-- Liaison Technologies, Inc. ("Confidential Information").  You shall
+-- not disclose such Confidential Information and shall use it only in
+-- accordance with the terms of the license agreement you entered into
+-- with Liaison Technologies.
+--
+
+/**
+ * Rollback script for V2.4.2.10__mbox_RTDM_add_columns_to_processor_exec_state.sql
+ */
+
+/**
+ * Drop column "LAST_EXEC_STATE" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'LAST_EXEC_STATE'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN LAST_EXEC_STATE';
+  end if;
+end;
+/
+
+/**
+ * Drop column "NODE_IN_USE" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'NODE_IN_USE'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN NODE_IN_USE';
+  end if;
+end;
+/
+
+/**
+ * Drop column "MODIFIED_BY" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'MODIFIED_BY'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN MODIFIED_BY';
+  end if;
+end;
+/
+
+/**
+ * Drop column "MODIFIED_DATE" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'MODIFIED_DATE'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN MODIFIED_DATE';
+  end if;
+end;
+/
+
+/**
+ * Drop column "LAST_EXEC_DATE" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'LAST_EXEC_DATE'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN LAST_EXEC_DATE';
+  end if;
+end;
+/
+
+/**
+ * Drop column "THREAD_NAME" in the table "PROCESSOR_EXEC_STATE" 
+ */
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  Select count(*) into v_column_exists
+    from all_tab_cols
+    where column_name = 'THREAD_NAME'
+      and table_name = 'PROCESSOR_EXEC_STATE'
+      and owner = 'GATEWAY_OWNR';
+
+  if (v_column_exists = 1) then
+      execute immediate 'ALTER TABLE GATEWAY_OWNR.PROCESSOR_EXEC_STATE DROP COLUMN THREAD_NAME';
+  end if;
+end;
+/

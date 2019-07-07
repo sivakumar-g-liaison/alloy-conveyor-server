@@ -1,0 +1,658 @@
+/** TODO this can be cleaned up, LESSified, and minimized **/
+
+/* Pad for navbars */
+body {
+    padding-top: 55px;
+    padding-bottom: 75px;
+}
+
+/* just commit to showing the scroll on the right.  otherwise looks funny when
+   navbar is resized horizonally when vertical scroll appears */
+html {
+    overflow-y: scroll;
+}
+
+/* anchor tags should use pointer like buttons */
+a {
+    cursor: pointer;
+}
+
+/** this allows us to display nothing until angular has applied changes to the dom
+    without this we see what the dom wants to display first, and then get an update
+    within milliseconds once angular is finished. -- it's the "funny flicker effect"
+ **/
+[ng\:cloak], [ng-cloak], .ng-cloak {
+    display: none !important;
+}
+
+/** **
+supports grid feature
+**/
+
+/******** Grid Global ********/
+
+.ngPagerControl .ngPagerButton {
+    /** pagination buttons are pushed down 10px... fix that here... **/
+    margin-top: 0px;
+
+    /** and a little space in between  **/
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.loadingSpinner {
+    height: 450px;
+    text-align: center;
+    padding-top: 150px;
+}
+.nglabel {
+    display: block;
+    float: left;
+    font-weight: bold;
+    padding-right: 5px;
+}
+
+.ngNoSelect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/** better position ngGrid cell contents**/
+.ngCell div {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+/******** Grid ********/
+
+.gridStyle {
+    border: 1px solid rgb(212, 212, 212);
+    /* width: none !important; */
+    height: 420px;
+}
+
+.ngGrid {
+    background-color: rgb(253, 253, 253);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/*Aligning text area in grid*/
+div .alignDiv{
+	margin-left: -5px;
+  }
+/*This css is applied to align dynamic textarea used for add new option*/
+.alignDynamicTextarea {
+	display: inline ;
+}
+/******** Header ********/
+
+.ngGroupPanel {
+    background-color: rgb(234, 234, 234);
+    overflow: hidden;
+    border-bottom: 1px solid rgb(212, 212, 212);
+}
+
+.ngGroupPanelDescription {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.ngGroupList {
+    list-style-type: none;
+}
+
+/***
+   modal / login / password
+**/
+
+
+.textboxingrid {
+  display: block;
+  width: 90%;
+  height: 35px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.428571429;
+  color: #666666;
+  vertical-align: middle;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+          transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.glyphicon-red {
+    color: red;
+}
+textarea {
+	resize: none;
+}
+
+.help-block-custom {
+    display: block !important;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #FF0000;
+}
+
+.custom-info-block {
+    display: block !important;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #3a87ad;
+}    
+
+.infoiconimg {
+     height: 15px; width: 15px; overflow: hidden;
+     margin-top: -4px; 	     
+}  
+  
+.adjustPaddingRight {
+      padding-right: 5px;
+}
+
+.modal-body {
+    display: block;
+    margin: 0 auto;
+
+    width: 80%;
+}
+
+.modal-section {
+    display: block;
+    width: 95%;
+    margin-bottom: 1em;
+}
+
+#password {
+    display: inline;
+    float: left;
+    max-width: 69%;
+    min-width: 63px;
+
+}
+/* TO Disable the display of scrollbar in modal*/
+.modal-custom {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1040;
+  display: none;
+  overflow: auto;
+  overflow-y: auto;
+}
+
+
+/*--- file[addmailbox.css] --- */
+
+.form-row {
+  padding-bottom: .5em;
+}
+
+.css-form input.ng-invalid.ng-dirty {
+  background-color: #fa787e;
+}
+
+.css-form input.ng-valid.ng-dirty {
+  background-color: #78fa89;
+}
+
+.addMailBox_gridStyle {
+  height: 300px;
+}
+
+/*--- file[404.css] --- */
+
+::-moz-selection {
+  background: #b3d4fc;
+  text-shadow: none;
+}
+
+::selection {
+  background: #b3d4fc;
+  text-shadow: none;
+}
+
+.404_html {
+  padding: 30px 10px;
+  font-size: 20px;
+  line-height: 1.4;
+  color: #737373;
+  background: #f0f0f0;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+html,input {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+.404_h1 {
+  margin: 0 10px;
+  font-size: 50px;
+  text-align: center;
+}
+
+.404_h1 span {
+  color: #bbb;
+}
+
+.404_h3 {
+  margin: 1.5em 0 .5em;
+}
+
+.404_p {
+  margin: 1em 0;
+}
+
+.404_ul {
+  padding: 0 0 0 40px;
+  margin: 1em 0;
+}
+
+.404_container {
+  max-width: 380px;
+  _width: 380px;
+  margin: 0 auto;
+}
+
+#goog-fixurl ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#goog-fixurl form {
+  margin: 0;
+}
+
+#goog-wm-qt,#goog-wm-sb {
+  border: 1px solid #bbb;
+  font-size: 16px;
+  line-height: normal;
+  vertical-align: top;
+  color: #444;
+  border-radius: 2px;
+}
+
+#goog-wm-qt {
+  width: 220px;
+  height: 20px;
+  padding: 5px;
+  margin: 5px 10px 0 0;
+  box-shadow: inset 0 1px 1px #ccc;
+}
+
+#goog-wm-qt:hover,#goog-wm-qt:focus {
+  border-color: #105cb6;
+  outline: 0;
+  color: #222;
+}
+
+/*--- file[createScriptFileModal.css] --- */
+
+.createScriptFileModal_ace_editor {
+  height: 440px;
+  width: 430px;
+}
+
+/*--- file[editScriptFileModal.css] --- */
+
+.editScriptFileModal_ace_editor {
+  height: 440px;
+  width: 1140px;
+}
+
+/*--- file[index.css] --- */
+
+.index_body {
+  padding-top: 55px;
+  padding-bottom: 75px;
+}
+
+/*--- file[mbx_top_navbar.css] --- */
+
+.nested ul li {
+  display: block;
+  position: relative;
+}
+
+.nested ul li:hover {
+  display: block;
+}
+
+.nested ul li ul {
+  display: none;
+}
+
+.nested ul li:hover ul {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  display: block;
+}
+
+.nested ul li:hover li {
+  float: none;
+}
+
+/*--- file[textarea.css] --- */
+
+.textarea_ace_editor {
+  height: 200px;
+  width: 500px;
+}
+
+.textarea_exactCenter {
+  position: fixed;
+  left: 27%;
+}
+
+/*--- file[footer.css] --- */
+
+.footer {
+  margin-top: 200px;
+  height: 100%;
+  background-color: #EEE;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -border-radius: 6px;
+}
+
+/*--- file[processor.css] --- */
+
+.processor_right {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  width: 30px;
+}
+
+.processor_multipleSelectionListButton {
+  margin-left: 8px;
+}
+
+.processor_multipleSelectionListBoundary {
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.processor_fileUpload {
+  position: relative;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.processor_fileUpload input.upload {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.processor_adjustPaddingTop {
+  margin-top: 2.5%;
+}
+
+.processor_adjustScriptLabelPaddingTop {
+  margin-top: 2.5%;
+}
+
+.processor_adjustUploadPaddingTop {
+  margin-top: -2.5%;
+}
+
+.processor_adjustPaddingRightForScript {
+  padding-left: 4px;
+  margin-top: -2.5%;
+}
+
+.processor_removePaddingLeft {
+  padding-left: 0;
+}
+
+div .processor_alignButton {
+  margin-left: 15px;
+}
+
+div[data-tree-model] li .processor_selected {
+  background-color: #adf;
+  font-weight: bold;
+  padding: 1px 5px;
+}
+
+div[data-tree-model] li .processor_collapsed {
+  padding: 1px 10px;
+  background-repeat: no-repeat;
+}
+
+div[data-tree-model] li .processor_expanded {
+  padding: 1px 10px;
+  background-repeat: no-repeat;
+}
+
+.customHide {
+  display: none;
+}
+
+.processor_adjustMarginBottom {
+  margin-top: -1.5%;
+}
+
+.processor_adjustgitPaddingRight {
+  width: 465px;
+  height: 20px;
+  padding: 2px;
+  margin-top: -15px;
+}
+
+.404_body {
+  max-width: 500px;
+  _width: 500px;
+  padding: 30px 20px 50px;
+  border: 1px solid #b3b3b3;
+  border-radius: 4px;
+  margin: 0 auto;
+  box-shadow: 0 1px 10px #a7a7a7,inset 0 1px 0 #fff;
+  background: #fcfcfc;
+}
+
+.addmailboxform-row {
+  padding-bottom: .5em;
+}
+
+.contact_about-img {
+  width: 50%;
+  margin-left: 25%;
+  margin-right: 25%;
+}
+
+#goog-wm-sb {
+  display: inline-block;
+  height: 32px;
+  padding: 0 10px;
+  margin: 5px 0 0;
+  white-space: nowrap;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  background-image: -webkit-linear-gradient(rgba(255,255,255,0),#f1f1f1);
+  background-image: -moz-linear-gradient(rgba(255,255,255,0),#f1f1f1);
+  background-image: -ms-linear-gradient(rgba(255,255,255,0),#f1f1f1);
+  background-image: -o-linear-gradient(rgba(255,255,255,0),#f1f1f1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  *overflow: visible;
+  *display: inline;
+  *zoom: 1;
+}
+
+#goog-wm-sb:hover,#goog-wm-sb:focus {
+  border-color: #aaa;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  background-color: #f8f8f8;
+}
+
+
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+/*--- folderDescription.html---*/
+.folderDescriptionStyle{
+	width:95%;
+	height: 45px !important;
+}
+
+/*--- folderUri.html---*/
+.textArea_Editor{
+	width:90%;
+	height: 45px !important;
+}
+
+/*--- propertyNameDirectiveTemplate.html---*/
+.propertyNameDirectiveStyle{
+	width:47%;
+	height:45px !important;	
+}
+
+/*--- processor.html---*/
+.processor_textArea_Editor{
+	height:108px !important;
+}
+
+.processor_buttonMargin_Top{
+	margin-top:25px;
+}
+
+.processor_buttonMargin_Left{
+	margin-left:-31px;
+}
+
+.processor_inputMargin_Left{
+	margin-left:5px;
+}
+
+/*--- addprofile.html---*/
+.addprofile_Width{
+	width:100%
+}
+
+/*--- about.html---*/
+.marginTop{	
+	margin-top:1em;
+}
+
+.paddingTop{	
+	padding-top:1em;
+}
+
+.marginBottom{
+	margin-bottom: 1em;
+}
+
+.textAlign{
+	text-align: center;
+}
+
+.inputStyle{
+	position: absolute;
+	top: 30px; 
+	bottom: 30px;
+	left: 5px; 
+	bottom:0px;
+}
+
+.paddingTop_Home{
+	padding-top: 2em;
+}
+
+.paddingBottomFive{
+	padding-bottom:.5em;
+}
+
+.img_Width{
+	width: 70%;
+}
+.buttonalign {
+	margin-top: 5px;
+}
+.marginalign{
+	margin-left: 15px!important;
+}
+.proc_id_margin{
+	margin-top: -8px!important;
+}
+
+/*--- searchProcessor.html---*/
+.button_width {
+	width: 165px;
+}
+
+.search-padding-left {
+	padding-left: 4px;
+}
+
+.search-form-bottom {
+	margin-bottom: 10px;
+}
+.button_width_2 {
+	width: 131px;
+}
+
+.error_msg_color {
+	color: #FF0000;
+	
+}
+
+.ttl_alignment{
+    margin-left: -13px !important;
+}
+
+#mbx-procsr-name {
+	text-overflow: ellipsis;
+}
+
+.modal-body p {
+	word-wrap: break-word;
+}
+
+.status_select_style {
+  	position: absolute;
+  	top: 30px;
+  	bottom: 30px;
+  	left: 5px;
+  	bottom: 0;
+}
+
+.updateProcessorsStatusReqJson_ace_editor {
+	height: 200px;
+    width: 1140px;
+}
+
+.tooltip {
+    word-break: break-all;
+}
+.processordc {
+	margin-top:23px;
+}

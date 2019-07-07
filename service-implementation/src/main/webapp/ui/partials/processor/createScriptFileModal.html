@@ -1,0 +1,44 @@
+<div class="modal-header"> 
+	<button id="mbx-script-closeFile" type="button" class="close" ng-click="cancel()">&times;</button>
+	<h4 class="modal-title">Script File</h4>
+</div>
+<div class="row">
+<form name="saveScriptFileForm">
+ <div class="modal-body">
+  <img ng-show="loader && !scriptIsEdit" height="20px" width="20px" src="img/spinner.gif"/>
+	<div class="row" ng-show="scriptIsEdit">
+	 <div class="col-sm-3 col-md-3">
+	 <label>Script URL *</label>
+	 </div>
+	 <div class="col-sm-8 col-md-8">	 
+	  <input id="modelscriptUrlName" type="text" ng-model="modal.uri" name="scriptName" class="form-control" url-validation required />
+	  <img ng-show="loader" height="20px" width="20px" src="img/spinner.gif" />
+	  <div ng-show="saveScriptFileForm.$error.allowed">
+	  <span id="mbx-procsr-JavaScript-required" class="customHide" ng-class = "{'help-block-custom': saveScriptFileForm.$error.allowed}" 
+	  ng-show="saveScriptFileForm.$error.allowed">URL is invalid. (gitlab:/{path} is allowed.)</span>					   
+	  </div>
+	  <div ng-show="!saveScriptFileForm.$error.allowed && saveScriptFileForm.scriptName.$dirty && saveScriptFileForm.scriptName.$invalid">
+	  <span id="mbx-procsr-JavaScriptName-required" class="customHide" ng-class = "{'help-block-custom': saveScriptFileForm.scriptName.$error.required}" 
+	      ng-show="saveScriptFileForm.scriptName.$error.required">URL is invalid. (gitlab:/{path} is allowed.)</span>	  
+	  </div>
+	 </div>	
+	</div>
+     </br> 
+		<div id="aceEditor" readonly="{{disable}}" ui-ace="{onLoad : loadValueData,
+			  theme : 'monokai',
+			  useWrapMode : true,
+			  showGutter: true,
+			  mode: 'json'
+			}" class="createScriptFileModal_ace_editor">
+	   </div>	   
+      <div class="modal-footer">
+	    <button id="btnLoadDefScrpt" class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="saveScriptFileForm.scriptName.$invalid">Load default template</button>
+		<button id="btnSaveFltr" class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid || loader">
+			<span class="glyphicon glyphicon-save glyphicon-white"></span> Save
+		</button>
+		<button id="btnCancel" class="btn btn-primary" type="button" ng-click="cancel()">Cancel
+		</button>
+	</div>
+   </div>  	
+ </form>
+</div>	

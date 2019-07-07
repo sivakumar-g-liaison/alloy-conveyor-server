@@ -1,0 +1,855 @@
+import com.googlecode.flyway.core.Flyway
+import com.googlecode.flyway.core.util.StringUtils
+import com.googlecode.flyway.core.util.jdbc.DriverDataSource
+import com.googlecode.flyway.gradle.task.AbstractFlywayTask
+import org.gradle.api.plugins.jetty.internal.Monitor
+import java.text.SimpleDateFormat
+
+// flyway
+apply plugin: 'jetty'
+apply plugin: 'com.bmuschko.cargo'
+apply plugin: 'flyway'
+apply plugin: 'rebel'
+apply plugin: 'license'
+apply plugin: 'war'
+apply plugin: 'com.kageiit.url-cache'
+apply from: file("../gradle/tomcat.gradle")
+
+license {
+	header rootProject.file('codequality/HEADER')
+	ext.year = Calendar.getInstance().get(Calendar.YEAR)
+	skipExistingHeaders true
+	strictCheck true
+	includes(['**/*.java'])
+}
+
+test {
+	// TODO temp exclusion of j2ep
+	exclude 'org/sf/j2ep/*'
+	ignoreFailures true }
+
+
+buildscript {
+
+	repositories {
+        maven { url 'http://nexus.liaison.dev/content/repositories/g2-third-party' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/soapui' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/oracle' } // oracle 12c upgrade
+	}
+	apply from: file("../gradle/buildscript.gradle"), to: buildscript
+	dependencies {
+		// Cargo Plugin
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.2.3'
+
+		// Flyway Plugin
+		// License: Apache v2
+        classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
+		classpath "com.oracle.jdbc:ojdbc8:${oracleVersion}"
+
+		// SOAP UI
+		// See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
+		classpath ('eviware:maven-soapui-plugin:4.5.1') {
+			exclude group: "jtidy", module: "jtidy"
+			exclude group: "javax.jms", module: "jms"
+		}
+		classpath 'net.sf.jtidy:jtidy:r938'                    //override the java 1.5 transient dependency
+		classpath 'org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1'     // override javax.jms
+		classpath 'commons-io:commons-io:2.4'                // for NullOutputStream on SoapUI plugin
+
+		// https://github.com/zeroturnaround/gradle-jrebel-plugin
+		classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
+		
+	}
+}
+
+configurations {
+	swaggerDoclet
+	jdbc
+	workTicket
+	compile.extendsFrom workTicket ;
+}
+
+allprojects {
+	repositories { 
+        maven { url 'http://nexus.liaison.dev/content/repositories/jboss' }
+        maven { url 'http://nexus.liaison.dev/content/repositories/central' }
+	 }
+}
+
+// reference remote url
+def gradleConfBase = 'http://nexus.liaison.dev/content/repositories/g2-releases/com/liaison/g2/gradle'
+def gradleConfVers = '3.1.0'
+apply from: "${gradleConfBase}/publish-service/${gradleConfVers}/publish-service-${gradleConfVers}.gradle"
+apply from: "${gradleConfBase}/war/${gradleConfVers}/war-${gradleConfVers}.gradle"
+apply from: "${gradleConfBase}/consolidate-testresults/${gradleConfVers}/consolidate-testresults-${gradleConfVers}.gradle"
+
+war {
+    baseName = rootProject.name
+	//archiveName="g2mailboxservice.war"
+
+	// TODO
+	// Resources used for the Dynamic Services landing page are intentionally kept in the
+	// service-framework module (where dynamic services framework is also defined), and
+	// outside of the service-implementation.  Eventually the service-framework will be an
+	// artifact, and we will be unable to pull in resources like this.
+	from("${rootDir}/service-framework/src/main/resources") {
+		include 'dyn/**/*.*';
+		into 'WEB-INF/classes/'
+	}
+
+	// copy webapp
+	from('src/main/webapp/ui') {
+		include 'WEB-INF/**','META-INF/**'
+		into '/'
+	}
+    
+	// copy webapp
+	from('src/main/webapp/ui') {
+		exclude 'WEB-INF/**','META-INF/**','swagger-ui/**'
+		into '/config/ui'
+	}
+	
+	// copy swagger
+	from('src/main/webapp/ui/swagger-ui') {
+		into '/api-docs/swagger-ui'
+	}
+	
+	// exclude the JPA configs, handled above
+	//rootSpec.exclude 'META-INF/**'
+	// exclude the servlet configs, handled above
+	// rootSpec.exclude 'WEB-INF/**'
+	// exclude the database build scripting from the war
+	rootSpec.exclude 'db/**'
+	// exclude the archaius properties, they are external
+	rootSpec.exclude 'g2mailboxservice*.properties'
+	// exclude the logging config, it is external
+	rootSpec.exclude "log4j2*.xml"
+	// exclude the WADL tools, they are build time
+	rootSpec.exclude "*wadl*"
+	//exclude webapp/ui
+	rootSpec.exclude 'ui/**'
+
+	// copy error html files
+	/*from('src/main/webapp/ui/') {
+		include 'error-403.html', 'error-404.html', 'error-500.html'
+		into '/ui'
+	}*/
+}
+
+war.dependsOn('configureTomcat')
+processResources.dependsOn('setDevProperties')
+
+dependencies {
+
+
+	//common gitlab service
+	compile 'com.liaison:lib_gitlab:3.+'
+
+	compile group: "com.liaison", name: "fs2", version: "13.+", changing: true
+
+	// currently not used during runtime (inherited dependency from NetFlix)
+	compile 'com.netflix.eureka:eureka-client:1.1.97'
+
+	// for http mime
+	compile "org.apache.httpcomponents:httpmime:4.3.1"
+	compile 'javax.mail:mail:1.4.6'
+
+	// for G2Javascript engine
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '9.+'
+
+	//Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
+	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
+	//compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
+	//exclude group: "commons-net",  module: "commons-net"
+	//}
+
+	// hibernate orm dependency
+	compile 'org.hibernate:hibernate-entitymanager:4.2.8.Final'
+
+	// geronimo jpa spec
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+
+	// Oracle OJDBC
+	// (This dependency is stored in the Liaison Nexus server.)
+	// def oracleVersion = '11g-11.2.0.3.0'
+	runtime "com.oracle.jdbc:ojdbc8:${oracleVersion}"
+	compile "com.oracle.jdbc:ucp:${oracleVersion}"
+
+	compile 'com.github.majikthys:log4j2-logstash-jsonevent-layout:4.+'
+	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
+
+	compile ('com.liaison.commons:lib_message_bus:17.+') {
+        exclude group: 'org.sonatype.sisu'
+    }
+
+	compile "com.liaison.commons:lib_health_monitor_core:6.+"
+	compile "com.liaison.commons:lib_health_monitor_file:6.+"
+	compile "com.liaison.commons:lib_health_monitor_jdbc:6.+"
+	compile "com.liaison.commons:lib_health_monitor_fs2:6.+"
+	compile "com.liaison.commons:lib_health_monitor_threadpool:6.+"
+	
+	// reusable utilities / framework components
+	compile project(':service-framework')
+
+	// ************************************* beg cargo *********************************************
+	def cargoVersion = "1.6.4"
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
+			"org.codehaus.cargo:cargo-ant:$cargoVersion"
+	// ************************************* end cargo *********************************************
+	jdbc "com.oracle.jdbc:ojdbc8:${oracleVersion}"
+
+	//Dependency for UM integration
+	compile "com.liaison.commons.usermanagement:usermanagement-client:5.+"
+
+	// Dependency for KeyManager
+	compile('com.liaison.key.management:key-management:3.2.0:grammar') {
+		exclude module:'service-framework'
+	}
+
+	//Dependency for GEM client Integration
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'5.+', changing: true
+
+	//dependency for testng
+	testCompile group: 'org.testng', name: 'testng', version: '6.11'
+
+	workTicket 'com.liaison.dto:dto:5.+'
+	
+	compile ("com.liaison.commons.message.glass:glass-message-lib:7.+")
+
+	//Required for integration test case
+	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.79'
+
+	//Dependency for Encryption
+	compile "com.liaison.commons.lib:crypto:6.+"
+	
+	//Required for URL validations
+	compile "commons-validator:commons-validator:1.5.0"
+	
+	//METRICS
+	compile 'com.liaison.commons:lib_metrics:1.+'
+
+    // hazelcast dependency
+    compile "com.hazelcast:hazelcast:3.12.1"
+}
+
+idea {
+	module {
+		//if you prefer different output folders
+		inheritOutputDirs = false
+		outputDir = file('build/classes/main')
+		testOutputDir = file('build/classes/test')
+
+		//if you prefer different SDK than that inherited from IDEA project
+		jdkName = '1.7'
+
+		//if you love browsing Javadoc
+		downloadJavadoc = true
+
+		//and hate reading sources :)
+		downloadSources = true
+	}
+}
+
+def installRootPath = "${rootDir}/install"
+def tomcatInstallPath = "${installRootPath}/tomcat"
+// https://github.com/zeroturnaround/gradle-jrebel-plugin
+rebel {
+	alwaysGenerate = true
+	rebelXmlDirectory = "${projectDir}/src/main/resources"
+	if (project.hasProperty('showRebel')) {
+		showGenerated = true
+	}
+	classpath {
+		omitDefaultClassesDir = true
+		omitDefaultResourcesDir = true
+		resource {
+			directory = "build/classes/main"
+			excludes = [
+				"com/liaison/mailbox/dtdm/model/*"
+			]
+		}
+		resource {
+			directory = "build/classes/main"
+			excludes = [
+				"com/liaison/mailbox/rtdm/model/*"
+			]
+		}
+		resource {
+			directory = "build/resources/main"
+			excludes = ["META-INF/*"]
+		}
+	}
+	web {
+		omitDefault = true
+		resource {
+			directory = "src/main/webapp/ui"
+			target = "/config/ui"
+		}
+	}
+}
+
+// Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
+// http://cargo.codehaus.org/
+// https://github.com/bmuschko/gradle-cargo-plugin
+def tomcatEnvironmentsInstallPath = "${installRootPath}/tomcat-environments"
+cargo {
+	containerId = 'tomcat7x'
+	port = new Integer(tomcatHttpPort)
+
+	deployable{
+		// NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
+		// file = file('target/contivo-conversion-service-0.0.1.war')
+		// URL application context is set in src/main/resources/META-INF/context.xml
+		context = project.war.baseName + "-${versionName}"
+
+		// wait on this URL before continuing
+		def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}-${versionName}/application.wadl"
+		def pingTimeout = 600000
+	}
+
+	local {
+        homeDir = file(tomcatInstallPath)
+        configHomeDir = file("${buildDir}/cargoLocal")
+        logFile = file("${buildDir}/tomcat-out.log")
+        outputFile = file("${buildDir}/cargo.log")
+        logLevel = 'low'
+        //timeout = 300000
+
+        rmiPort = new Integer(tomcatRmiPort)
+
+        containerProperties {
+            property 'cargo.tomcat.ajp.port', new Integer(tomcatAjpPort)
+        }
+
+        // set the initial value
+		// MUST HAVE leading spaces for cargo JVM args
+		if(containerJVMArgs) {
+			jvmArgs = " $containerJVMArgs"
+		}
+
+		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
+		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+		jvmArgs += " -Darchaius.deployment.stack=${deployStack}"
+		jvmArgs += " -Darchaius.deployment.region=${deployRegion}"
+		jvmArgs += " -Darchaius.deployment.datacenter=${deployDatacenter}"
+		jvmArgs += " -Dhttps.protocols=TLSv1.2"
+		jvmArgs += " -Dlog4j.configurationFile=log4j2-local.xml"
+		jvmArgs += " -Dhazelcast.jmx=true"
+
+		// if containerDebug, append tomcat debug args to jvm args
+		if(project.hasProperty('containerDebug')) {
+			jvmArgs += ' -Xdebug'
+			if (project.hasProperty('debugSuspend')) {
+				jvmArgs += " -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=y"
+			} else {
+				jvmArgs += " -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=n"
+			}
+		}
+
+		logger.info "=====Cargo jvmArgs===="
+		logger.info "$jvmArgs"
+	}
+}
+project.afterEvaluate {
+	cargoRunLocal.dependsOn('cargoDirectories')
+	cargoRunLocal.dependsOn('configureTomcat')
+	cargoRunLocal.dependsOn('setDevProperties')
+	cargoRunLocal.dependsOn('devConfigLogging')
+	cargoStartLocal.dependsOn('cargoDirectories')
+	cargoStartLocal.dependsOn('configureTomcat')
+	cargoStartLocal.dependsOn('setDevProperties')
+	cargoStartLocal.dependsOn('devConfigLogging')
+}
+
+task devConfigLogging(description: 'configures log4j2 for build local log files', group:'DEV/CI Deployment') << {
+	ant.copy( file:"${projectDir}/src/main/resources/log4j2.xml", toFile:"${projectDir}/build/resources/main/log4j2.xml", overwrite:true ) {
+		filterchain {
+			tokenfilter {
+				replaceregex(pattern:'fileName="/opt/liaison/releases/current/tomcat/logs/([^"]*)"',
+				replace:'fileName="logs/\\1"')
+			}
+		}
+	}
+}
+
+task stampCurrentVersion << {
+    def buildId = (null == System.env.TAG) ? 'DEV' : "${System.env.tag}".toString()
+    def formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    def timestamp = formatter.format(new Date())
+    ant.copy( file:'src/main/java/com/liaison/mailbox/Version.java.template', toFile:'src/main/java/com/liaison/mailbox/Version.java', overwrite:true )
+            {
+                filterchain {
+                    tokenfilter { replaceregex(pattern:'SERVICE_VERSION_ID', replace:"${project.version}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_ID', replace:"${buildId}") }
+                    tokenfilter { replaceregex(pattern:'SERVICE_BUILD_DATE', replace:"${timestamp}") }
+                }
+            }
+}
+
+gradle.projectsEvaluated {
+    compileJava.dependsOn(stampCurrentVersion)
+}
+
+task setDevProperties << {
+    ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+    {
+        filterchain {
+
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerNameDtdm})(port=${dbServerPortDtdm}))(connect_data=(service_name=${dbServerServiceDtdm})))" ) }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPasswordDtdm}") }
+
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerNameRtdm})(port=${dbServerPortRtdm}))(connect_data=(service_name=${dbServerServiceRtdm})))" ) }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPasswordRtdm}") }
+
+        }
+    }
+
+}
+
+// This is for default config of Tomcat
+task configureTomcat(dependsOn: [
+	'stageTomcat',
+	'setDevProperties'
+], group:'DEV/CI Deployment', description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
+	//TODO replace tokens would be a nicer but heavier weight way of doing this.
+	logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
+	copy {
+		from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
+		into tomcatInstallPath
+	}
+	copy {
+		from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
+		into tomcatInstallPath
+	}
+	// using ANT copy task to be able to force overwrite
+	ant.copy(toDir: "${tomcatInstallPath}/lib", overwrite:true) {
+		fileset(dir: "${projectDir}/build/resources/main") {
+			include (name: '*.json')
+			include (name: '*.properties')
+			include (name: 'log4j2*.xml')
+		}
+	}
+}
+
+// set properties before starting Jetty (via jettyRun or jettyRunWar)
+task jettyRunSetProperties {
+	logger.info "Setting jettyRun system properties"
+	// use the default port of the ws-backend-simulation module
+	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
+	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+	System.setProperty('archaius.deployment.stack', "${deployStack}")
+	System.setProperty('archaius.deployment.region', "${deployRegion}")
+	System.setProperty('archaius.deployment.datacenter', "${deployDatacenter}")
+	// we only use jettyRun in dev... might as well output log4j debug
+	System.setProperty('log4j.debug', 'true')
+
+}
+
+project.ext {
+	mergedSuiteName = "G2 Relay Test Results"
+}
+
+test.doFirst {
+    logger.info 'Unit Tests'
+    description = 'Just unit tests, out of container'
+
+    useTestNG () {
+        if (testIncludeGroups) {
+            includeGroups "$testIncludeGroups".split()
+        }
+
+        if (testExcludeGroups) {
+            excludeGroups "$testExcludeGroups".split()
+        }
+    }
+    exclude '**/DropboxIntegrationServiceTest.class'
+    exclude '**/KeyManagerIntegrationServiceTest.class'
+    exclude '**/MailBoxProcessorServiceTest.class'
+    exclude '**/StorageUtilitiesTest.class'
+    exclude '**/JavaScriptEngineUtilTest.class'
+    exclude '**/MailBoxSLAWatchDogServiceTest.class'
+    exclude '**/MailBoxServiceTest.class'
+    exclude '**/MailBoxProfileServiceTest.class'
+    exclude '**/MailBoxAdminServiceTest.class'
+    exclude '**/RemoteProcessorTest.class'
+    include '**/*Test.class'
+}
+
+test.finalizedBy(consolidateTestResults)
+
+task pingTest {
+	dependsOn 'clean'
+	dependsOn 'jettyRunWar'
+	dependsOn 'test'
+}
+
+task integrationTest(type: Test, dependsOn: ['assemble', 'setDevProperties'], group:'Verification') {
+    description = 'Integration tests, out of container (with database dependency)'
+    logger.info 'Integration Tests'
+    useTestNG()
+    include '**/*IT.class'
+
+    jvmArgs += "-Darchaius.deployment.applicationId=${project.war.baseName}"
+    jvmArgs += "-Darchaius.deployment.environment=${deployEnvironment}"
+
+    // if containerDebug, append tomcat debug args to jvm args
+    if(project.hasProperty('containerDebug')) {
+        jvmArgs += '-Xdebug'
+        if (project.hasProperty('debugSuspend')) {
+            jvmArgs += "-Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=y"
+        } else {
+            jvmArgs += "-Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=n"
+        }
+    }
+
+    sourceSets.test.runtimeClasspath += files("${projectDir}/src/main/resources")
+
+    ignoreFailures true
+
+}
+
+def isTomcatRunning = false
+gradle.taskGraph.beforeTask { Task task ->
+	if (task.name.equals('integrationTest')) {
+		if (!isTomcatRunning) {
+			println('Configuring and starting Tomcat...')
+			// The "cargoRunLocal.dependsOn('configureTomcat')" gets skipped here because it is inside "project.afterEvaluate"
+			// so we are explicitly configuring Tomcat for in container testing
+			configureTomcat.execute()
+			cargoStartLocal.execute()
+			isTomcatRunning = true
+		}
+	}
+}
+
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if (task.name.equals('integrationTest')) {
+		// if containerTestSuite is in the task graph, then
+		if (isTomcatRunning && (task.name.equals('containerTestSuite'))) {
+			logger.info 'Stopping Tomcat server'
+			try {
+				cargoStopLocal.execute()
+				isTomcatRunning = false
+			} catch (Throwable t) {
+				println('Tomcat Stop failure...continuing...')
+			}
+		}
+	}
+}
+
+def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"
+def dtoArchiveDestRoot = "${projectDir}/build/libs/"
+def dtoArchiveName = "dropbox-client.jar"
+task jarDto(type: Jar) {
+    baseName = 'dropbox-client'
+    includeEmptyDirs false
+
+    from ("${projectDir}/build/classes/main")  {
+        include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+                'com/liaison/mailbox/service/dto/*',
+                'com/liaison/mailbox/enums/Messages.class'
+    }
+
+    from ("${projectDir}/src/main/java")  {
+        include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+                'com/liaison/mailbox/service/dto/*',
+                'com/liaison/mailbox/enums/Messages.java'
+    }
+}
+
+war.dependsOn('jarDto')
+
+publishing {
+    publications {
+        client(MavenPublication) {
+            groupId 'com.liaison.commons.mailbox'
+            artifact(jarDto) {
+                artifactId = 'dropbox-client'
+            }
+        }
+    }
+}
+
+// jettyRun configuration properties
+jettyRun {
+
+	dependsOn 'jettyRunSetProperties'
+	logger.info "Running jetty"
+	httpPort = new Integer(jettyHttpPort)
+	reload = 'automatic'
+	scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
+	daemon = false
+
+}
+
+// jettyRun configuration properties
+jettyRunWar {
+	dependsOn 'jettyRunSetProperties'
+	logger.info "Running jetty"
+	httpPort = new Integer(jettyHttpPort)
+	daemon = true
+	stopKey='stopJetty'
+	stopPort=9999
+
+}
+
+jettyStop{
+
+	stopKey='stopJetty'
+	stopPort=9999
+}
+
+[jettyRun, jettyRunWar]*.doLast {
+	/**
+	 * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+	 *
+	 * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+	 * When that happens, we shouldn't need the custom task any more
+	 *
+	 * Copied From: AbstractJettyRunTask
+	 */
+	if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+		Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+		monitor.start();
+	}
+}
+
+// override flywayClean
+flywayClean.doFirst() {
+	flywayCleanDtdm.execute()
+	flywayCleanRtdm.execute()
+	throw new StopExecutionException() // end here, do not execute the default flywayClean
+}
+
+// override flywayMigrate
+flywayMigrate.doFirst() {
+	flywayMigrateDtdm.execute()
+	flywayMigrateRtdm.execute()
+	throw new StopExecutionException() // end here, do not execute the default flywayMigrate
+}
+
+// drop database objects
+task flywayCleanDtdm(type: OracleFlywayCleanTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameDtdm}:${dbServerPortDtdm}/${dbServerServiceDtdm}"
+	flywayUser = "${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_OWNR"
+	flywayPassword = dbaPasswordDtdm
+}
+
+task flywayCleanRtdm(type: OracleFlywayCleanTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameRtdm}:${dbServerPortRtdm}/${dbServerServiceRtdm}"
+	flywayUser = "${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_OWNR"
+	flywayPassword = dbaPasswordRtdm
+}
+
+
+
+def flywaySourceRoot = "${projectDir}/src/main/db"
+def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
+
+// upgrade database objects
+task flywayMigrateDtdm(type: OracleFlywayMigrateTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameDtdm}:${dbServerPortDtdm}/${dbServerServiceDtdm}"
+	flywayUser = "${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_OWNR"
+	flywayPassword = dbaPasswordDtdm
+	flywayLocations = [
+		'filesystem:' + file("${flywayWorkingRoot}/migration/${dbSchemaNameDtdm}").getCanonicalPath()
+	]
+	flywayTableSql = "${flywayWorkingRoot}/provision/${dbSchemaNameDtdm}/flyway/schema_version_table.sql"
+	classLoader = gradle.class.classLoader
+	jdbcDrivers = configurations.jdbc
+
+	doFirst {
+		ant.copy( toDir: "${flywayWorkingRoot}/provision/${dbSchemaNameDtdm}/flyway", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/provision/flyway", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+				tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+				tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+				tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+				tokenfilter { replaceregex(pattern:"AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)", replace:'') }
+				tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+		ant.copy( toDir: "${flywayWorkingRoot}/migration/${dbSchemaNameDtdm}", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/migration/${dbSchemaNameDtdm}", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+	}
+}
+
+task flywayMigrateRtdm(type: OracleFlywayMigrateTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameRtdm}:${dbServerPortRtdm}/${dbServerServiceRtdm}"
+	flywayUser = "${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_OWNR"
+	flywayPassword = dbaPasswordRtdm
+	flywayLocations = [
+		'filesystem:' + file("${flywayWorkingRoot}/migration/${dbSchemaNameRtdm}").getCanonicalPath()
+	]
+	flywayTableSql = "${flywayWorkingRoot}/provision/${dbSchemaNameRtdm}/flyway/schema_version_table.sql"
+	classLoader = gradle.class.classLoader
+	jdbcDrivers = configurations.jdbc
+
+	doFirst {
+		ant.copy( toDir: "${flywayWorkingRoot}/provision/${dbSchemaNameRtdm}/flyway", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/provision/flyway", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+				tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+				tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+				tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+				tokenfilter { replaceregex(pattern:"AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)", replace:'') }
+				tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+		ant.copy( toDir: "${flywayWorkingRoot}/migration/${dbSchemaNameRtdm}", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/migration/${dbSchemaNameRtdm}", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+	}
+}
+
+class OracleFlywayCleanTask extends AbstractOracleTask {
+	OracleFlywayCleanTask() {
+		super()
+		description = 'Drops all objects in the configured schemas.'
+	}
+
+	@Override
+	def run(Flyway flyway) {
+		flyway.clean()
+	}
+}
+
+class OracleFlywayMigrateTask extends AbstractOracleTask {
+	public String flywayTableSql
+	def jdbcDrivers
+	def classLoader
+
+
+	OracleFlywayMigrateTask() {
+		super()
+		description = 'RUN THIS: Migrates the schema to the latest version (IGNORE vanilla flywayMigrate task)'
+	}
+
+	// This is a workaround for https://github.com/flyway/flyway/issues/98
+	// TODO - remove/refactor when the above issue is fixed
+	void buildSchemaVersionTable() {
+		println("Building flyway schema_version table...");
+		this.jdbcDrivers.each { file ->
+			this.classLoader.addURL(file.toURI().toURL())
+		}
+		def sql = groovy.sql.Sql.newInstance(url: this.flywayUrl, user: this.flywayUser, password: this.flywayPassword, driver: this.flywayDriver)
+		def ddl = new File(flywayTableSql).text
+		println("Executing ${flywayTableSql}")
+		sql.execute (ddl)
+	}
+
+	@Override
+	java.lang.Object run(Flyway flyway) {
+		buildSchemaVersionTable()
+		didWork = flyway.migrate() > 0
+	}
+}
+
+class AbstractOracleTask extends AbstractFlywayTask {
+	/**
+	 * Property name prefix for placeholders that are configured through System properties.
+	 */
+	protected static final String PLACEHOLDERS_PROPERTY_PREFIX = "flyway.placeholders."
+
+	public String flywayDriver = 'oracle.jdbc.OracleDriver'
+	public String flywayTable = 'schema_version'
+	public String flywayUrl
+	public String flywayUser
+	public String flywayPassword
+	public String[] flywayLocations
+	public String[] flywaySchemas
+
+	AbstractOracleTask() {
+		super()
+	}
+
+	def run(Flyway flyway) {
+		flyway.clean()
+	}
+
+	@Override
+	protected def createFlyway() {
+		def flyway = new Flyway()
+		flyway.setDataSource(new DriverDataSource(this.flywayDriver, this.flywayUrl, this.flywayUser, this.flywayPassword))
+
+		println('flyway.url  = ' + this.flywayUrl)
+		println('flyway.user = ' + this.flywayUser)
+        println('flyway.password = ' +this.flywayPassword)
+
+		if (this.flywayTable != null) {
+			// use method call instead of property as it does not work nice with overload GROOVY-6084
+			flyway.setTable(this.flywayTable)
+		}
+		super.propSet(flyway, 'initVersion')
+		super.propSet(flyway, 'initDescription')
+		super.propSet(flyway, 'sqlMigrationPrefix')
+		super.propSet(flyway, 'sqlMigrationSuffix')
+		super.propSet(flyway, 'encoding')
+		super.propSet(flyway, 'placeholderPrefix')
+		super.propSet(flyway, 'placeholderSuffix')
+		super.propSet(flyway, 'target')
+		super.propSetAsBoolean(flyway, 'outOfOrder')
+		super.propSetAsBoolean(flyway, 'validateOnMigrate')
+		super.propSetAsBoolean(flyway, 'cleanOnValidationError')
+		super.propSetAsBoolean(flyway, 'initOnMigrate')
+
+		def sysSchemas = System.getProperty("flyway.schemas")
+		if (sysSchemas != null) {
+			flyway.schemas = StringUtils.tokenizeToStringArray(sysSchemas, ",")
+		} else if (project.hasProperty("flyway.schemas")) {
+			flyway.schemas = StringUtils.tokenizeToStringArray(project["flyway.schemas"].toString(), ",")
+		} else if (this.flywaySchemas != null) {
+			flyway.schemas = this.flywaySchemas
+		}
+
+		def sysLocations = System.getProperty("flyway.locations")
+		if (sysLocations != null) {
+			flyway.locations = StringUtils.tokenizeToStringArray(sysLocations, ",")
+		} else if (this.flywayLocations != null) {
+			flyway.locations = this.flywayLocations
+		}
+
+		Map<String, String> placeholders = [:]
+		System.getProperties().each { String key, String value ->
+			if (key.startsWith(PLACEHOLDERS_PROPERTY_PREFIX)) {
+				placeholders.put(key.substring(PLACEHOLDERS_PROPERTY_PREFIX.length()), value)
+			}
+		}
+		if (placeholders.isEmpty()) {
+			project.properties.keySet().each { String key ->
+				if (key.startsWith(PLACEHOLDERS_PROPERTY_PREFIX)) {
+					placeholders.put(key.substring(PLACEHOLDERS_PROPERTY_PREFIX.length()), project.properties[key])
+				}
+			}
+		}
+
+		flyway.placeholders = placeholders
+
+		flyway
+	}
+
+}

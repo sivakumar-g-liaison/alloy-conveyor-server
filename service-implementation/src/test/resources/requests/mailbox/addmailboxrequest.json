@@ -1,0 +1,16 @@
+{
+  "addMailBoxRequest": {
+    "mailBox": {
+      "name": "TestData_001",
+      "description": "This is to collect access metrics",
+      "status": "ACTIVE",
+      "shardKey": "key_12345",
+      "properties": [
+        {
+          "name": "filerenameformat",
+          "value": "*.processed"
+        }
+      ]
+    }
+  }
+} 

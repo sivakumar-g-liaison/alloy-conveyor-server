@@ -1,0 +1,189 @@
+
+Keystore type: JKS
+Keystore provider: SUN
+
+Your keystore contains 1 entry
+
+Alias name: server
+Creation date: May 12, 2015
+Entry type: PrivateKeyEntry
+Certificate chain length: 2
+Certificate[1]:
+-----BEGIN CERTIFICATE-----
+MIIFvDCCBKSgAwIBAgIKEYZrGQAAAAAAFzANBgkqhkiG9w0BAQUFADBQMRMwEQYKCZImiZPyLGQB
+GRYDZGV2MRcwFQYKCZImiZPyLGQBGRYHbGlhaXNvbjEgMB4GA1UEAxMXbGlhaXNvbmRldi1MU1ZX
+Q0EwMUQtQ0EwHhcNMTUwNTEyMjMxNTEzWhcNMTcwNTEyMjMyNTEzWjB8MQswCQYDVQQGEwJVUzEL
+MAkGA1UECBMCR0ExEDAOBgNVBAcTB0F0bGFudGExHTAbBgNVBAoTFExpYWlzb24gVGVjaG5vbG9n
+aWVzMRcwFQYDVQQLEw5HMiBEZXZlbG9wbWVudDEWMBQGA1UEAwwNKi5saWFpc29uLmRldjCCASIw
+DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALnIcgYsh4HmKLPiHkjoDiI6TBWynxsPmKh5YqqA
+hx6dp50dEQKtWIyVmFzp+8bl/85b2mpI1ZTWs+vsBRmHxKfu4L+5JmGN7QziSF4unEN5PWeZmplY
+l/sdemZfd2adKomflElhhpi2LAUcELb34n+ccT4o3tZcARITz8tvxMlSicaXgafWWSzlpvS3Om7B
+dpiqshn7EdKBnIkPaOcxcj3blP6rv8pNPDIQt4G023y/TgHNT6+OLnmlN1oakJcn2wRZZvYkMtAj
+qVeQwfTdVHKRE4G6laYsKmsDEi5ZUro8/Mn/MiLG+tX21tXZHxfRbU5G+fyBadTS99kvuVE+K20C
+AwEAAaOCAmowggJmMB0GA1UdDgQWBBSpH1XmmEAQ5vWq53y5nuPI9lBQmDAfBgNVHSMEGDAWgBRt
+oPkwMyTbSVcUCzd4jwuZR/PnxTCB1wYDVR0fBIHPMIHMMIHJoIHGoIHDhoHAbGRhcDovLy9DTj1s
+aWFpc29uZGV2LUxTVldDQTAxRC1DQSxDTj1sc3Z3Y2EwMWQsQ049Q0RQLENOPVB1YmxpYyUyMEtl
+eSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENOPUNvbmZpZ3VyYXRpb24sREM9bGlhaXNvbixEQz1k
+ZXY/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1
+dGlvblBvaW50MIHJBggrBgEFBQcBAQSBvDCBuTCBtgYIKwYBBQUHMAKGgalsZGFwOi8vL0NOPWxp
+YWlzb25kZXYtTFNWV0NBMDFELUNBLENOPUFJQSxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxD
+Tj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPWxpYWlzb24sREM9ZGV2P2NBQ2VydGlmaWNh
+dGU/YmFzZT9vYmplY3RDbGFzcz1jZXJ0aWZpY2F0aW9uQXV0aG9yaXR5MA4GA1UdDwEB/wQEAwIF
+oDA8BgkrBgEEAYI3FQcELzAtBiUrBgEEAYI3FQjzkiODlrlgg5GBBoTAmjCC2st4XIPSx2KB3PE7
+AgFkAgECMBMGA1UdJQQMMAoGCCsGAQUFBwMBMBsGCSsGAQQBgjcVCgQOMAwwCgYIKwYBBQUHAwEw
+DQYJKoZIhvcNAQEFBQADggEBAEuwqb+MXaJ92LWSWzLVmID0+q4dwjTkds8SRH11DzprwJrLBPuA
+yLWSs1HWSwXeKL9QMsHNo/zx3NbvBHmr6weo9N9bLSSkuUOyQMonB8s2cs+L5G9ukpE8991Io72N
+wOFCXepQsI4RouQoPeR390haifJYiRi+uyMUlo7gHACF5NENidjSMTKCVJc8VNuA/i5v43ocmIpG
+6XvhLmoh1TQARP14/GJwtuafhfeZ+XPLaUN8CFR008RvWvaLSUR4wDjOstN5vEKVbjEMsAVRT1KY
+6LpZ1muypv8MtgNKZMidAmWGc0c08QGuKIwM0OSUHELcpIg0nVOz9gJvHPPkUbo=
+-----END CERTIFICATE-----
+Certificate[2]:
+-----BEGIN CERTIFICATE-----
+MIIDkzCCAnugAwIBAgIQBPMpzEtX86NF34mNyQqKmjANBgkqhkiG9w0BAQUFADBQMRMwEQYKCZIm
+iZPyLGQBGRYDZGV2MRcwFQYKCZImiZPyLGQBGRYHbGlhaXNvbjEgMB4GA1UEAxMXbGlhaXNvbmRl
+di1MU1ZXQ0EwMUQtQ0EwHhcNMTQwNDA3MDIzODAxWhcNMjQwNDA3MDI0NzU5WjBQMRMwEQYKCZIm
+iZPyLGQBGRYDZGV2MRcwFQYKCZImiZPyLGQBGRYHbGlhaXNvbjEgMB4GA1UEAxMXbGlhaXNvbmRl
+di1MU1ZXQ0EwMUQtQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCzeIOwNS8+6Y1h
+vUCryNH7zQCwUL4Ed+373vR/CRJs5BKUBBjrc5bsqm38R3aCB2YmzpAssyc0HrfmBhwRENp+pRIH
+IHOvh2TYIMuv+JAy6g1q3KdLnInHjxFVFa5xEzjyETK4YHWm66Mm1BloOXKJya32OGp5/e8EaTF3
+pM4njoSu+BZUAM3oEm7chQqtf8P96egyuautVoLHnfr58ZkfThq7sNMCG6xGU1+iMl+nsl8T75CJ
+xlLDmZ+kEKmHNqCD9eKxvPFmphCfskHaPFWelPiddTT+9SUKozsfkXJk5aqD5IW5f1uKbKVl+1bl
++KSgWnAuaog9J2a8p3zzfuCpAgMBAAGjaTBnMBMGCSsGAQQBgjcUAgQGHgQAQwBBMA4GA1UdDwEB
+/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBRtoPkwMyTbSVcUCzd4jwuZR/PnxTAQ
+BgkrBgEEAYI3FQEEAwIBADANBgkqhkiG9w0BAQUFAAOCAQEAL5eEP1mdfk5Qt7DMxHzQi9m5xqeM
+sKsUnqNInOQfnQF07tL1F2H5Ca1TZtMTGnLFwD7RRxncIt3mdE9N96mzt/K2hq4oaj7ii/TwkRHj
+IGJiGwfoOV0AvKn/aR2pLxGtOrEE78qcIWipkZ5saoHwvPhDdPLKEhwzp7ukop1Bk4nyFkNH+b6Z
+Bu7gzaYUCAxPqqghfZsO4ASXkRJdSUtU3zONOaIsz+ZAW9R0ODwziP1Q6r6RDEOInvMpLL4VVPIV
+hOqh8cCYWQLvwEYqDgByOEtlx8TXedqCwqRXteqwG2gC5J3sPUaRjsYOIsTy0HcioQQ7fntXkZ2H
+n7OJrSH+eA==
+-----END CERTIFICATE-----
+
+
+*******************************************
+*******************************************
+
+
+
+Keystore type: JKS
+Keystore provider: SUN
+
+Your keystore contains 1 entry
+
+Alias name: server
+Creation date: May 12, 2015
+Entry type: PrivateKeyEntry
+Certificate chain length: 2
+Certificate[1]:
+Owner: CN=*.liaison.dev, OU=G2 Development, O=Liaison Technologies, L=Atlanta, ST=GA, C=US
+Issuer: CN=liaisondev-LSVWCA01D-CA, DC=liaison, DC=dev
+Serial number: 11866b19000000000017
+Valid from: Tue May 12 16:15:13 PDT 2015 until: Fri May 12 16:25:13 PDT 2017
+Certificate fingerprints:
+	 MD5:  C2:DF:5D:1C:99:26:80:2E:33:39:84:C5:43:1B:78:49
+	 SHA1: E0:C9:4F:98:A1:83:FF:B9:3A:A7:48:1A:66:17:D5:A5:15:58:87:BB
+	 SHA256: EE:F3:1F:64:2A:BC:94:1F:30:08:07:DD:FC:4E:0B:6D:86:CD:3A:29:E3:93:B6:AB:5D:91:BC:0F:EC:52:DF:BB
+	 Signature algorithm name: SHA1withRSA
+	 Version: 3
+
+Extensions: 
+
+#1: ObjectId: 1.3.6.1.4.1.311.21.10 Criticality=false
+0000: 30 0C 30 0A 06 08 2B 06   01 05 05 07 03 01        0.0...+.......
+
+
+#2: ObjectId: 1.3.6.1.4.1.311.21.7 Criticality=false
+0000: 30 2D 06 25 2B 06 01 04   01 82 37 15 08 F3 92 23  0-.%+.....7....#
+0010: 83 96 B9 60 83 91 81 06   84 C0 9A 30 82 DA CB 78  ...`.......0...x
+0020: 5C 83 D2 C7 62 81 DC F1   3B 02 01 64 02 01 02     \...b...;..d...
+
+
+#3: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+AuthorityInfoAccess [
+  [
+   accessMethod: caIssuers
+   accessLocation: URIName: ldap:///CN=liaisondev-LSVWCA01D-CA,CN=AIA,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=liaison,DC=dev?cACertificate?base?objectClass=certificationAuthority
+]
+]
+
+#4: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+KeyIdentifier [
+0000: 6D A0 F9 30 33 24 DB 49   57 14 0B 37 78 8F 0B 99  m..03$.IW..7x...
+0010: 47 F3 E7 C5                                        G...
+]
+]
+
+#5: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: ldap:///CN=liaisondev-LSVWCA01D-CA,CN=lsvwca01d,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=liaison,DC=dev?certificateRevocationList?base?objectClass=cRLDistributionPoint]
+]]
+
+#6: ObjectId: 2.5.29.37 Criticality=false
+ExtendedKeyUsages [
+  serverAuth
+]
+
+#7: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  DigitalSignature
+  Key_Encipherment
+]
+
+#8: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: A9 1F 55 E6 98 40 10 E6   F5 AA E7 7C B9 9E E3 C8  ..U..@..........
+0010: F6 50 50 98                                        .PP.
+]
+]
+
+Certificate[2]:
+Owner: CN=liaisondev-LSVWCA01D-CA, DC=liaison, DC=dev
+Issuer: CN=liaisondev-LSVWCA01D-CA, DC=liaison, DC=dev
+Serial number: 4f329cc4b57f3a345df898dc90a8a9a
+Valid from: Sun Apr 06 19:38:01 PDT 2014 until: Sat Apr 06 19:47:59 PDT 2024
+Certificate fingerprints:
+	 MD5:  80:3E:04:4D:B3:B0:B8:4F:FB:19:69:E8:44:CA:5C:48
+	 SHA1: 96:CA:94:44:9F:B8:80:6C:0F:58:66:11:48:AA:AE:3D:4A:DD:D3:A1
+	 SHA256: 45:DF:F3:37:23:8C:74:55:EB:A5:44:8D:14:84:C2:74:29:5B:AE:5B:56:46:74:0B:39:53:9A:CB:B5:5B:28:68
+	 Signature algorithm name: SHA1withRSA
+	 Version: 3
+
+Extensions: 
+
+#1: ObjectId: 1.3.6.1.4.1.311.20.2 Criticality=false
+0000: 1E 04 00 43 00 41                                  ...C.A
+
+
+#2: ObjectId: 1.3.6.1.4.1.311.21.1 Criticality=false
+0000: 02 01 00                                           ...
+
+
+#3: ObjectId: 2.5.29.19 Criticality=true
+BasicConstraints:[
+  CA:true
+  PathLen:2147483647
+]
+
+#4: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  DigitalSignature
+  Key_CertSign
+  Crl_Sign
+]
+
+#5: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 6D A0 F9 30 33 24 DB 49   57 14 0B 37 78 8F 0B 99  m..03$.IW..7x...
+0010: 47 F3 E7 C5                                        G...
+]
+]
+
+
+
+*******************************************
+*******************************************
+
+

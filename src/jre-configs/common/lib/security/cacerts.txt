@@ -1,0 +1,7 @@
+# This is the default cacerts password.
+#
+# Change this for production by supplying a 
+# production specific cacerts to override this one!!!
+# ===========================================
+
+password=ch@ng3d1t

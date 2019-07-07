@@ -1,0 +1,4 @@
+/bin
+test-output/
+login.properties
+datanucleus.log
