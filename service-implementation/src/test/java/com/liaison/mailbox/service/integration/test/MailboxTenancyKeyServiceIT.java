@@ -15,16 +15,16 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
 import com.liaison.mailbox.service.dto.configuration.response.GetTenancyKeysResponseDTO;
 
-public class MailboxTenancyKeyServiceIT extends BaseServiceTest{
-    
+public class MailboxTenancyKeyServiceIT extends BaseServiceTest {
+
     @Test
     public void testGetAllTenancyKeysFromACLManifest() throws Exception {
         // Retrieve all tenancy keys present in acl manifest
-        MailboxTenancyKeyService service = new MailboxTenancyKeyService(); 
-        GetTenancyKeysResponseDTO serviceResponse = service.getAllTenancyKeysFromACLManifest(aclManifest); 
-        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus()); 
+        MailboxTenancyKeyService service = new MailboxTenancyKeyService();
+        GetTenancyKeysResponseDTO serviceResponse = service.getAllTenancyKeysFromACLManifest(aclManifest);
+        Assert.assertEquals(SUCCESS, serviceResponse.getResponse().getStatus());
     }
-	
+
     @Test
     public void testGetAllTenancyKeysWithACLManifestIsNULL() throws Exception {
         // Retrieve all tenancy keys present in acl manifest

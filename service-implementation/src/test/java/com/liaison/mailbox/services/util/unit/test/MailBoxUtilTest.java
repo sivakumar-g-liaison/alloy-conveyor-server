@@ -9,19 +9,17 @@
  */
 package com.liaison.mailbox.services.util.unit.test;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.service.core.processor.FileWriter;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 /**
  * Class to test the MailBoxUtil
