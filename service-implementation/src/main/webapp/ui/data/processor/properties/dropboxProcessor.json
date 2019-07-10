@@ -3,7 +3,6 @@
     "type":"DROPBOXPROCESSOR",
     "displayName":"DROPBOXPROCESSOR",
     "protocol":"",
-    "handOverExecutionToJavaScript":false,
     "staticProperties": [
        {
             "name":"httpListenerPipeLineId",

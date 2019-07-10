@@ -23,7 +23,6 @@
                 <a href="#/">Processor</a>
                 <ul class="dropdown-menu">
                     <li><a id="mbx-top-navbar-searchprocessor" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessor';">Search Processor</a></li>
-                    <li><a id="mbx-top-navbar-executingprocessors" onClick="window.location.href='#';window.location.href='#/mailbox/getexecutingprocessors';">Running Processors</a></li>
                     <li><a id="mbx-top-navbar-updateprocessordc" ng-show="!javaProperties.deployAsDropbox" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessorDc';">Update Processor DC</a></li>
                     <li><a id="mbx-top-navbar-processorscripts" ng-show="!javaProperties.deployAsDropbox" onClick="window.location.href='#';window.location.href='#/mailbox/getProcessorScript';">Processor Scripts</a></li>
                 </ul>
@@ -33,7 +32,6 @@
                 <a href="#/">Files</a>
                 <ul class="dropdown-menu">
                     <li><a id="mbx-top-navbar-relayconveyor" onClick="window.location.href='#';window.location.href='#/mailbox/getStagedFiles';">Staged Files</a></li>
-                    <li><a id="mbx-top-navbar-inboundfiles" onClick="window.location.href='#';window.location.href='#/mailbox/getInboundFiles';">Inbound Files</a></li>
                 </ul>
             </li>
         </ul>
@@ -60,11 +58,4 @@
         </a>
     </div>
     
-    <div class="btn-group pad-bottom">
-       <a id="mbx-top-navbar-triggerprofile" 
-		ng-href= {{appendQueryParamTrigger()}}
-		class="btn-default btn btn-lg">		
-            <span>Trigger Profile</span>
-        </a>
-    </div>
 </div>

@@ -1,8 +1,0 @@
-{
-   "supportedJavaScriptCheckBox":{
-      "name":"handOverExecutionToJavaScript",
-      "displayName":"HandOverExecutionToJavaScript",
-      "uiFiledtype":"checkbox",
-      "value":""
-   }
-}

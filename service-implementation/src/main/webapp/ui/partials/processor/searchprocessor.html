@@ -26,10 +26,21 @@
                        name="pipeline"/>
             </div>
             <div class="col-md-3">
-                <label for="idpURI"> KeyGroup Id </label>
-                <input id="idpURI" type="text" ng-model="idpURI"
+                <label for="mbxname"> Mailbox Name </label>
+                <input id="mbxname" type="text" ng-model="mailBoxName"
+                       placeholder="Mailbox Name"
+                       typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
                        class="form-control"
-                       name="credsIdpUri"/>
+                       name="mbxname"
+                       ng-required=false ng-minlength= "3" ng-maxlength = "80"/>
+                    <span id="prcsr-search-mbxNameInvalid-pattern" class="error"
+                          ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
+                    <span id="prcsr-search-mbxNameInvalid-minlength" class="error"
+                          ng-show="formSearchPrcsr.mbxname.$error.minlength">
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of 3 characters to enable search.</span>
+                    <span id="mbx-search-mbxNameInvalid-maxlength" class="error"
+                          ng-show="formSearchPrcsr.mbxname.$error.maxlength">
+                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than 80 characters.</span>
             </div>
         </div>
         <div class="row search-form-bottom">
@@ -68,36 +79,6 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label for="folderpath"> Folder Path </label>
-                <input id="folderpath" type="text" ng-model="folderPath" ng-pattern="folderPathPattern"
-                       class="form-control"
-                       name="folderpath"/>
-                <div ng-show="formSearchPrcsr.folderpath.$dirty && formSearchPrcsr.folderpath.$invalid">
-                    <span id="prcsr-search-folderPathInvalid-pattern" class="customHide"
-                          ng-class="{ 'help-block-custom' : formSearchPrcsr.folderpath.$error.pattern}"
-                          ng-show="formSearchPrcsr.folderpath.$error.pattern">Invalid folder path.</span>
-                </div>
-            </div>
-        </div>
-        <div class="row search-form-bottom">
-            <div class="col-md-3">
-                <label for="mbxname"> Mailbox Name </label>
-                <input id="mbxname" type="text" ng-model="mailBoxName"
-                       placeholder="Mailbox Name"
-                       typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
-                       class="form-control"
-                       name="mbxname"
-                       ng-required=false ng-minlength= "3" ng-maxlength = "80"/>
-                    <span id="prcsr-search-mbxNameInvalid-pattern" class="error"
-                          ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
-                    <span id="prcsr-search-mbxNameInvalid-minlength" class="error"
-                          ng-show="formSearchPrcsr.mbxname.$error.minlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of 3 characters to enable search.</span>
-                    <span id="mbx-search-mbxNameInvalid-maxlength" class="error"
-                          ng-show="formSearchPrcsr.mbxname.$error.maxlength">
-                        <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than 80 characters.</span>
-            </div>
-            <div class="col-md-3">
                 <label for="profilename"> Profile </label>
                 <input id="profilename" type="text" ng-model="profileName"
                        placeholder="Profile"
@@ -113,21 +94,6 @@
                     <span id="prcsr-search-profileNameInvalid-maxlength" class="error"
                           ng-show="formSearchPrcsr.profilename.$error.maxlength">
                         <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than 80 characters.</span>
-            </div>
-            <div class="col-md-3">
-                <label for="scriptname"> Script Name </label>
-                <input id="scriptname" type="text" ng-model="scriptName"
-                       class="form-control"
-                       name="scriptname"/>
-            </div>
-            <div class="col-md-3">
-                <label for="clusterType">
-                    Cluster Type
-                </label>
-                <select id="clusterType" ng-model="clusterType" class="form-control textPattern_width_1"
-                        ng-options="clusterType for clusterType in javaProperties.clusterTypes">
-                    <option value="">-- select--</option>
-                </select>
             </div>
         </div>
         <div class="row search-form-bottom">

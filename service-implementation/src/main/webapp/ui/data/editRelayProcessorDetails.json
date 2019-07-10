@@ -75,12 +75,6 @@
             }
         ]
     },
-    "supportedJavaScriptCheckBox":{  
-        "name":"handOverExecutionToJavaScript",
-        "displayName":"HandOverExecutionToJavaScript",
-        "uiFiledtype":"checkbox",
-        "value":""
-    },
     "supportedStatus":{  
         "name":"status",
         "displayName":"Status",

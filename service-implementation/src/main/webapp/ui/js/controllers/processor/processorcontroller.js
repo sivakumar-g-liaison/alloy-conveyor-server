@@ -145,7 +145,6 @@ var rest = myApp.controller(
                     	type: "",
                     	displayName: "",
 						protocol: "",
-                    	handOverExecutionToJavaScript: false,
                     	staticProperties: [],
 						folderProperties: [],
 						credentialProperties:[]
@@ -384,8 +383,6 @@ var rest = myApp.controller(
 						$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
 				}	
 							
-				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
-				
 				$scope.processor.description = data.getProcessorResponse.processor.description;
 				$scope.processor.clusterType = data.getProcessorResponse.processor.clusterType;
                 if (data.getProcessorResponse.processor.status === 'ACTIVE') {
@@ -645,7 +642,6 @@ var rest = myApp.controller(
     						}
     						//To display the posting HTTP Sync/Async URL for end user if they select HTTP Listener
     						$scope.handleDisplayOfHTTPListenerURL(data.getProcessorResponse.processor.type, data.getProcessorResponse.processor.clusterType);
-    						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
     						
                             //Fix: Reading profile in procsr callback
                             $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
@@ -797,7 +793,6 @@ var rest = myApp.controller(
 				    }                   					
 				}			
 				
-                $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
 				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
 				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
 				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;
